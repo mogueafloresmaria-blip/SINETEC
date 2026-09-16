@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Panel de Instructor - SINETEC{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="p-4 mb-4 bg-white rounded-4 shadow-sm border-start border-4 border-primary">
+        <h2 class="fw-bold text-dark"><i class="bi bi-person-badge text-primary me-2"></i> Panel de Instructor</h2>
+        <p class="text-muted mb-0">Espacio de trabajo para el registro de calificaciones, evidencias y seguimiento de aprendices.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-3 rounded-4">
+                <div class="card-body">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-award text-primary me-2"></i> Registro de Calificaciones</h5>
+                    <p class="text-muted small">Evaluar evidencias de aprendizaje y calificar actividades del trimestre.</p>
+                    <a href="{% url 'calificaciones' %}" class="btn btn-outline-primary btn-sm">Ir a Calificaciones</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-3 rounded-4">
+                <div class="card-body">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clipboard-check text-success me-2"></i> Seguimiento y Asistencia</h5>
+                    <p class="text-muted small">Control de asistencia diaria y anotaciones de los procesos formativos.</p>
+                    <a href="{% url 'seguimiento' %}" class="btn btn-outline-success btn-sm">Ver Seguimiento</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

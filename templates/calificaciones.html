@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Calificaciones - SINETEC{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="p-4 mb-4 bg-white rounded-4 shadow-sm border-start border-4 border-danger d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-award text-danger me-2"></i> Módulo de Calificaciones</h2>
+            <p class="text-muted mb-0 small">Sabana de notas y evaluación por resultados de aprendizaje de la media técnica.</p>
+        </div>
+        <div>
+            <span class="badge bg-danger fs-6 px-3 py-2 shadow-sm">Periodo: 2026-1</span>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 text-success p-3 rounded-4 me-3 fs-4">
+                        <i class="bi bi-check2-all"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Aprobados (A)</span>
+                        <h4 class="fw-bold mb-0">28</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-4 me-3 fs-4">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Por Evaluar (D)</span>
+                        <h4 class="fw-bold mb-0">2</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex align-items-center">
+                    <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-4 me-3 fs-4">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Total Evaluaciones</span>
+                        <h4 class="fw-bold mb-0">30</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-dark mb-0">Evaluaciones y Calificaciones Registradas en el Sistema</h5>
+            <span class="text-muted small">Gestión Administrativa</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Documento</th>
+                        <th>Aprendiz</th>
+                        <th>Ficha</th>
+                        <th>RAP 1: Procesos de Oficina</th>
+                        <th>RAP 2: Atención al Cliente</th>
+                        <th>Juicio Evaluativo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-muted">1</td>
+                        <td class="fw-bold">1082938471</td>
+                        <td>Juan Camilo Torres</td>
+                        <td>2834112</td>
+                        <td><span class="badge bg-success bg-opacity-10 text-success fw-bold px-2 py-1">Aprobado (A)</span></td>
+                        <td><span class="badge bg-success bg-opacity-10 text-success fw-bold px-2 py-1">Aprobado (A)</span></td>
+                        <td><span class="badge bg-success">Aprobado</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">2</td>
+                        <td class="fw-bold">1082945123</td>
+                        <td>María Alejandra Pérez</td>
+                        <td>2834112</td>
+                        <td><span class="badge bg-success bg-opacity-10 text-success fw-bold px-2 py-1">Aprobado (A)</span></td>
+                        <td><span class="badge bg-success bg-opacity-10 text-success fw-bold px-2 py-1">Aprobado (A)</span></td>
+                        <td><span class="badge bg-success">Aprobado</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">3</td>
+                        <td class="fw-bold">1082912345</td>
+                        <td>Carlos Andrés Ruiz</td>
+                        <td>2834112</td>
+                        <td><span class="badge bg-warning bg-opacity-10 text-warning text-dark fw-bold px-2 py-1">Por Evaluar (D)</span></td>
+                        <td><span class="badge bg-success bg-opacity-10 text-success fw-bold px-2 py-1">Aprobado (A)</span></td>
+                        <td><span class="badge bg-warning text-dark">En Proceso</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

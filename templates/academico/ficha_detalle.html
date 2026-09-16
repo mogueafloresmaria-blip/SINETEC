@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Ficha {{ ficha.codigo_ficha }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'fichas_lista' %}" class="btn btn-outline-secondary btn-sm mb-3">
+        <i class="bi bi-arrow-left me-1"></i> Volver a Fichas
+    </a>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary fs-6">Ficha {{ ficha.codigo_ficha }}</span>
+                {% if ficha.periodo_cerrado %}
+                    <span class="badge bg-danger"><i class="bi bi-lock-fill me-1"></i>Periodo Cerrado (RN-004)</span>
+                {% else %}
+                    <span class="badge bg-success"><i class="bi bi-unlock-fill me-1"></i>Periodo Abierto</span>
+                {% endif %}
+            </div>
+            <h1 class="h3 fw-bold mb-1 text-dark">{{ ficha.programa.denominacion }}</h1>
+            <p class="text-muted small mb-0">
+                <i class="bi bi-building me-1"></i>{{ ficha.institucion.nombre }} ({{ ficha.institucion.municipio }}) · 
+                <i class="bi bi-person me-1"></i>Líder: {{ ficha.instructor_lider.get_full_name|default:ficha.instructor_lider.username }}
+            </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'evaluaciones_calificar' %}?ficha={{ ficha.id }}" class="btn btn-warning fw-semibold">
+                <i class="bi bi-award me-1"></i> Calificar Notas
+            </a>
+            <a href="{% url 'seguimiento_nuevo' %}?ficha={{ ficha.id }}" class="btn btn-outline-primary">
+                <i class="bi bi-journal-plus me-1"></i> Registrar Seguimiento
+            </a>
+            <a href="{% url 'seguimiento_asistencia' %}?ficha={{ ficha.id }}" class="btn btn-outline-success">
+                <i class="bi bi-check2-square me-1"></i> Tomar Asistencia
+            </a>
+            <a href="{% url 'fichas_matricular' ficha.id %}" class="btn btn-sinetec-primary">
+                <i class="bi bi-person-plus-fill me-1"></i> Matricular Aprendiz
+            </a>
+            <form method="post" action="{% url 'evaluaciones_cerrar_periodo' ficha.id %}" onsubmit="return confirm('¿Seguro que desea cambiar el estado del periodo formal?');">
+                {% csrf_token %}
+                <button type="submit" class="btn {% if ficha.periodo_cerrado %}btn-outline-success{% else %}btn-outline-danger{% endif %}">
+                    {% if ficha.periodo_cerrado %}
+                        <i class="bi bi-unlock me-1"></i> Reabrir Periodo
+                    {% else %}
+                        <i class="bi bi-lock me-1"></i> Cerrar Periodo Oficial
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Pestañas de Aprendices, Seguimientos y Estructura Curricular -->
+<div class="sinetec-card p-4 mb-4">
+    <ul class="nav nav-tabs nav-fill mb-4" id="fichaTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active fw-semibold" id="aprendices-tab" data-bs-toggle="tab" data-bs-target="#aprendicesTab">
+                <i class="bi bi-people me-1"></i> Aprendices Matriculados ({{ matriculas.count }})
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="seguimientos-tab" data-bs-toggle="tab" data-bs-target="#seguimientosTab">
+                <i class="bi bi-journal-check me-1"></i> Bitácoras de Visita Recientes
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="curricular-tab" data-bs-toggle="tab" data-bs-target="#curricularTab">
+                <i class="bi bi-diagram-3 me-1"></i> Competencias y Resultados (RAP)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="fichaTabsContent">
+        <!-- Pestaña: Aprendices -->
+        <div class="tab-pane fade show active" id="aprendicesTab">
+            <div class="table-responsive">
+                <table class="table table-sinetec table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Documento</th>
+                            <th>Nombres y Apellidos</th>
+                            <th>Grado Escolar</th>
+                            <th>Estado</th>
+                            <th>Contacto / Acudiente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in matriculas %}
+                            <tr>
+                                <td class="fw-bold">{{ m.aprendiz.perfil.tipo_documento }} {{ m.aprendiz.perfil.numero_documento }}</td>
+                                <td class="fw-semibold">{{ m.aprendiz.last_name }}, {{ m.aprendiz.first_name }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ m.get_grado_escolar_display }}</span></td>
+                                <td><span class="badge bg-success bg-opacity-10 text-success">{{ m.get_estado_formacion_display }}</span></td>
+                                <td>
+                                    <small>Tel: {{ m.aprendiz.perfil.telefono|default:"-" }}</small><br>
+                                    <small class="text-muted">Acudiente: {{ m.acudiente_nombre|default:"-" }} ({{ m.acudiente_telefono|default:"-" }})</small>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    No hay aprendices matriculados en esta ficha técnica aún.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pestaña: Seguimientos -->
+        <div class="tab-pane fade" id="seguimientosTab">
+            <div class="table-responsive">
+                <table class="table table-sinetec table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo Visita</th>
+                            <th>Instructor</th>
+                            <th>Observaciones Técnicas</th>
+                            <th>Compromisos</th>
+                            <th class="text-end">Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in seguimientos %}
+                            <tr>
+                                <td class="fw-semibold text-nowrap">{{ s.fecha_visita|date:"d/m/Y" }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ s.tipo_seguimiento }}</span></td>
+                                <td>{{ s.instructor.get_full_name|default:s.instructor.username }}</td>
+                                <td>{{ s.observaciones|truncatechars:60 }}</td>
+                                <td>
+                                    {% if s.compromisos %}
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Hasta {{ s.fecha_verificacion|date:"d/m/Y" }}</span>
+                                    {% else %}
+                                        <span class="text-muted small">Sin novedades</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'seguimiento_detalle' s.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    No hay visitas de seguimiento registradas para esta ficha.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pestaña: Competencias y RAP -->
+        <div class="tab-pane fade" id="curricularTab">
+            {% for comp in competencias %}
+                <div class="card mb-3 border">
+                    <div class="card-header bg-light fw-bold text-dark">
+                        <i class="bi bi-bookmark-fill text-primary me-2"></i>{{ comp.codigo }} — {{ comp.descripcion }}
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for rap in comp.resultados.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong class="text-primary">{{ rap.codigo }}:</strong> {{ rap.descripcion }}
+                                </div>
+                                <a href="{% url 'evaluaciones_calificar' %}?ficha={{ ficha.id }}&rap={{ rap.id }}" class="btn btn-sm btn-outline-warning text-dark fw-medium text-nowrap ms-2">
+                                    <i class="bi bi-award me-1"></i> Calificar Este RAP
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted small">No hay resultados de aprendizaje asociados a esta competencia.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% empty %}
+                <p class="text-muted text-center py-4">No hay competencias curriculares cargadas para este programa.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

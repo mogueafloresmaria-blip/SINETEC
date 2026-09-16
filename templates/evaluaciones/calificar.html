@@ -1,0 +1,535 @@
+{% extends 'base.html' %}
+
+{% block title %}Calificación de Resultados de Aprendizaje - SINETEC{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --pink-primary: #f8ceec;
+    --pink-light: #fff5f7;
+    --pink-dark: #4a2e35;
+    --pink-accent: #e91e63;
+    --pink-card-bg: #ffffff;
+  }
+
+  body {
+    background-color: var(--pink-light) !important;
+  }
+
+  .sinetec-card-pink {
+    background: var(--pink-card-bg);
+    border: 1px solid rgba(248, 206, 236, 0.6);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  }
+
+  .tarjeta-evaluacion-interactiva {
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: 2px dashed var(--pink-primary) !important;
+  }
+
+  .tarjeta-evaluacion-interactiva:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(240, 98, 146, 0.15) !important;
+  }
+
+  .btn-pink-primary {
+    background-color: var(--pink-primary);
+    color: var(--pink-dark);
+    font-weight: 600;
+    border: none;
+  }
+
+  .btn-pink-primary:hover {
+    background-color: #f5bade;
+    color: var(--pink-dark);
+  }
+
+  .asistente-panel {
+    display: none;
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 25px;
+    border: 2px solid var(--pink-primary);
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<div class="container my-3">
+
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+      <h4 class="fw-bold mb-0" style="color: var(--pink-dark);">Evaluación de Resultados de Aprendizaje (RAP)</h4>
+      <p class="text-muted small mb-0">Gestión de juicios evaluativos cualitativos ('A' / 'D') y control de periodos</p>
+    </div>
+  </div>
+
+  <div class="sinetec-card-pink p-4 mb-4">
+    {% if juicio_filtro == 'A' %}
+        <div class="alert alert-success py-2 small mb-3" role="status">
+            <i class="bi bi-funnel me-1"></i> Filtro activo: mostrando juicios <strong>A (Aprobado)</strong> cuando seleccione ficha y RAP.
+        </div>
+    {% elif juicio_filtro == 'D' %}
+        <div class="alert alert-danger py-2 small mb-3" role="status">
+            <i class="bi bi-funnel me-1"></i> Filtro activo: mostrando juicios <strong>D (Por Mejorar)</strong> cuando seleccione ficha y RAP.
+        </div>
+    {% endif %}
+
+    <form method="get" id="filtros-evaluacion" class="row g-3 align-items-end" data-aprendices-url="{% url 'evaluaciones_aprendices' %}">
+        {% if juicio_filtro %}<input type="hidden" name="juicio" value="{{ juicio_filtro }}">{% endif %}
+        
+        <div class="col-md-5">
+            <label class="form-label small fw-semibold" style="color: var(--pink-dark);">1. Seleccione la Ficha Técnica:</label>
+            <select name="ficha" id="ficha-select" class="form-select" data-raps-url="{% url 'evaluaciones_raps' %}">
+                <option value="">-- Seleccionar Ficha --</option>
+                {% for f in fichas %}
+                    <option value="{{ f.id }}" {% if ficha_actual and ficha_actual.id == f.id %}selected{% endif %}>
+                        Ficha {{ f.codigo_ficha }} — {{ f.programa.denominacion }} ({{ f.institucion.nombre }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-5">
+            <label class="form-label small fw-semibold" style="color: var(--pink-dark);">2. Seleccione el Resultado de Aprendizaje (RAP):</label>
+            <select name="rap" id="rap-select" class="form-select" {% if not ficha_actual %}disabled{% endif %}>
+                <option value="">-- Seleccionar Resultado a Evaluar --</option>
+                {% for r in raps %}
+                    <option value="{{ r.id }}" {% if rap_actual and rap_actual.id == r.id %}selected{% endif %}>
+                        {{ r.codigo }} — {{ r.descripcion|truncatechars:55 }}
+                    </option>
+                {% endfor %}
+            </select>
+            <div id="rap-loading" class="form-text d-none" aria-live="polite">Cargando resultados asociados...</div>
+        </div>
+
+        <div class="col-md-4">
+            <label for="periodo-select" class="form-label small fw-semibold text-secondary">3. Periodo Académico:</label>
+            <select name="periodo" id="periodo-select" class="form-select">
+                <option value="">-- Todos los periodos --</option>
+                {% for periodo in periodos_academicos %}
+                    <option value="{{ periodo }}" {% if periodo_academico == periodo %}selected{% endif %}>{{ periodo }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="trimestre-select" class="form-label small fw-semibold text-secondary">4. Trimestre:</label>
+            <select name="trimestre" id="trimestre-select" class="form-select">
+                <option value="">-- Todos los trimestres --</option>
+                {% for valor, nombre in trimestres %}
+                    <option value="{{ valor }}" {% if trimestre == valor %}selected{% endif %}>{{ nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <button type="submit" id="cargar-lista-btn" class="btn btn-pink-primary w-100 py-2" {% if not ficha_actual %}disabled{% endif %}>
+                <i class="bi bi-filter me-1"></i> Cargar Lista
+            </button>
+        </div>
+    </form>
+  </div>
+
+  <div id="ajax-list-panel" class="sinetec-card-pink p-4 mb-4 d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3 flex-wrap gap-2">
+          <div>
+              <span class="badge" style="background-color: var(--pink-accent);" id="ajax-rap-code"></span>
+              <h5 class="fw-bold mb-0 mt-1" style="color: var(--pink-dark);" id="ajax-rap-description"></h5>
+          </div>
+          <button type="button" id="aprobar-todos-btn" class="btn btn-success fw-semibold btn-sm">
+              <i class="bi bi-check2-all me-1"></i> Aprobar Todos ('A')
+          </button>
+      </div>
+      <form method="post" id="ajax-calificaciones-form">
+          {% csrf_token %}
+          <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                  <thead>
+                      <tr>
+                          <th>No.</th><th>Documento</th><th>Apellidos y Nombres</th>
+                          <th>Juicio Evaluativo (RN-003)</th><th>Retroalimentación Pedagógica</th>
+                      </tr>
+                  </thead>
+                  <tbody id="ajax-aprendices-body"></tbody>
+              </table>
+          </div>
+          <div class="d-flex justify-content-end pt-3 mt-3 border-top">
+              <button type="submit" class="btn btn-pink-primary px-4">
+                  <i class="bi bi-floppy-fill me-1"></i> Guardar Sábana de Calificaciones
+              </button>
+          </div>
+      </form>
+  </div>
+
+  {% if ficha_actual and rap_actual %}
+      {% if ficha_actual.periodo_cerrado %}
+          <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+              <i class="bi bi-lock-fill fs-3 me-3"></i>
+              <div>
+                  <strong>PERIODO EVALUATIVO CERRADO (Regla RN-004):</strong><br>
+                  La Coordinación ha formalizado el cierre de este periodo para la Ficha {{ ficha_actual.codigo_ficha }}. 
+                  Las notas no pueden ser modificadas.
+              </div>
+          </div>
+      {% endif %}
+
+      <div class="row g-3 mb-4" id="progress-summary" aria-live="polite">
+          <div class="col-sm-6 col-xl-3">
+              <div class="sinetec-card-pink p-3 h-100 border-start border-primary border-4">
+                  <div class="text-muted small text-uppercase fw-semibold">Total Aprendices</div>
+                  <div class="h3 fw-bold mb-0" id="total-aprendices">{{ total_aprendices }}</div>
+              </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+              <div class="sinetec-card-pink p-3 h-100 border-start border-success border-4">
+                  <div class="text-muted small text-uppercase fw-semibold">Total Aprobados (A)</div>
+                  <div class="h3 fw-bold text-success mb-0" id="total-aprobados">{{ total_aprobados }}</div>
+              </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+              <div class="sinetec-card-pink p-3 h-100 border-start border-danger border-4">
+                  <div class="text-muted small text-uppercase fw-semibold">Total Deficientes (D)</div>
+                  <div class="h3 fw-bold text-danger mb-0" id="total-deficientes">{{ total_deficientes }}</div>
+              </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+              <div class="sinetec-card-pink p-3 h-100 border-start border-warning border-4">
+                  <div class="text-muted small text-uppercase fw-semibold">Aprobación general</div>
+                  <div class="h3 fw-bold mb-2" id="porcentaje-aprobacion">{{ porcentaje_aprobacion|floatformat:1 }}%</div>
+                  <div class="progress" role="progressbar">
+                      <div class="progress-bar bg-warning" id="barra-aprobacion" style="width: {{ porcentaje_aprobacion }}%"></div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <div class="sinetec-card-pink p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 border-bottom pb-3">
+              <div>
+                  <span class="badge" style="background-color: var(--pink-accent);">{{ rap_actual.codigo }}</span>
+                  <h5 class="fw-bold mb-0 mt-1" style="color: var(--pink-dark);">{{ rap_actual.descripcion }}</h5>
+                  <small class="text-muted">Competencia: {{ rap_actual.competencia.codigo }} - {{ rap_actual.competencia.descripcion }}</small>
+              </div>
+              <div class="text-end d-flex gap-2 align-items-center">
+                  <span class="badge bg-light text-dark border">{{ aprendices_datos|length }} Aprendices</span>
+                  
+                  <a href="{% url 'evaluaciones_exportar_pdf' %}?ficha={{ ficha_actual.id }}&rap={{ rap_actual.id }}&periodo={{ periodo_academico }}&trimestre={{ trimestre }}" 
+                     target="_blank" 
+                     class="btn btn-sm text-white fw-semibold" 
+                     style="background-color: var(--pink-accent);">
+                      <i class="bi bi-file-earmark-pdf me-1"></i> Generar Reporte RAP (PDF)
+                  </a>
+
+                  {% if hay_notas %}
+                      <a href="{% url 'evaluaciones_exportar_excel' %}?ficha={{ ficha_actual.id }}&rap={{ rap_actual.id }}&periodo={{ periodo_academico }}&trimestre={{ trimestre }}" class="btn btn-sm btn-outline-success">
+                          <i class="bi bi-file-earmark-excel me-1"></i> Exportar a Excel
+                      </a>
+                  {% endif %}
+              </div>
+          </div>
+
+          <form method="post">
+              {% csrf_token %}
+              <div class="table-responsive mb-4">
+                  <table class="table table-hover align-middle mb-0">
+                      <thead>
+                          <tr>
+                              <th style="width: 50px;">No.</th>
+                              <th>Documento</th>
+                              <th>Apellidos y Nombres</th>
+                              <th style="width: 280px;">
+                                  Juicio Evaluativo (RN-003)
+                                  <button type="button" class="btn btn-sm btn-outline-success ms-2 aprobar-todos-visible">
+                                      <i class="bi bi-check2-all me-1"></i>Aprobar Todos
+                                  </button>
+                              </th>
+                              <th>Retroalimentación Pedagógica</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for item in aprendices_datos %}
+                              <tr>
+                                  <td class="fw-bold text-muted">{{ forloop.counter }}</td>
+                                  <td>{{ item.matricula.aprendiz.perfil.tipo_documento }} {{ item.matricula.aprendiz.perfil.numero_documento }}</td>
+                                  <td class="fw-semibold">{{ item.matricula.aprendiz.last_name }}, {{ item.matricula.aprendiz.first_name }}</td>
+                                  <td>
+                                      <div class="d-flex gap-3">
+                                          <div class="form-check">
+                                              <input class="form-check-input" type="radio" 
+                                                     name="juicio_{{ item.matricula.id }}" 
+                                                     id="juicio_a_{{ item.matricula.id }}" 
+                                                     value="A" 
+                                                     {% if item.juicio_actual == 'A' %}checked{% endif %}
+                                                     {% if ficha_actual.periodo_cerrado %}disabled{% endif %}>
+                                              <label class="form-check-label text-success fw-bold" for="juicio_a_{{ item.matricula.id }}">
+                                                  A (Aprobado)
+                                              </label>
+                                          </div>
+                                          <div class="form-check">
+                                              <input class="form-check-input" type="radio" 
+                                                     name="juicio_{{ item.matricula.id }}" 
+                                                     id="juicio_d_{{ item.matricula.id }}" 
+                                                     value="D" 
+                                                     {% if item.juicio_actual == 'D' %}checked{% endif %}
+                                                     {% if ficha_actual.periodo_cerrado %}disabled{% endif %}>
+                                              <label class="form-check-label text-danger fw-bold" for="juicio_d_{{ item.matricula.id }}">
+                                                  D (Por Mejorar)
+                                              </label>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  <td>
+                                      <input type="text" 
+                                             name="obs_{{ item.matricula.id }}" 
+                                             value="{{ item.observacion_actual }}" 
+                                             class="form-control form-control-sm" 
+                                             placeholder="Observación u orientación al aprendiz..."
+                                             {% if ficha_actual.periodo_cerrado %}disabled{% endif %}>
+                                  </td>
+                              </tr>
+                          {% empty %}
+                              <tr>
+                                  <td colspan="5" class="text-center py-4 text-muted">
+                                      No hay aprendices matriculados en esta ficha.
+                                  </td>
+                              </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              </div>
+
+              {% if not ficha_actual.periodo_cerrado and aprendices_datos %}
+                  <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                      <button type="submit" class="btn btn-pink-primary px-4 fw-semibold">
+                          <i class="bi bi-floppy-fill me-1"></i> Guardar Sábana de Calificaciones
+                      </button>
+                  </div>
+              {% endif %}
+          </form>
+      </div>
+
+  {% elif ficha_actual %}
+      <div class="sinetec-card-pink p-5 text-center text-muted">
+          <i class="bi bi-arrow-up-circle fs-1 text-secondary d-block mb-2"></i>
+          <h5 style="color: var(--pink-dark);">Seleccione un Resultado de Aprendizaje (RAP) arriba para desplegar la sábana de notas.</h5>
+      </div>
+  {% else %}
+      <div id="card-inicial" class="sinetec-card-pink p-5 text-center tarjeta-evaluacion-interactiva">
+          <div class="my-2">
+              <i class="bi bi-journal-check fs-1" style="color: var(--pink-dark);"></i>
+          </div>
+          <h5 class="fw-bold" style="color: var(--pink-dark);">Seleccione una Ficha Técnica para comenzar la evaluación</h5>
+          <p class="text-muted small mb-0">O haz clic sobre esta tarjeta para desplegar el Asistente de Evaluación Rápida</p>
+      </div>
+
+      <div id="panel-asistente" class="asistente-panel text-center">
+          <h5 class="fw-bold mb-2" style="color: var(--pink-dark);">✨ Asistente de Evaluación</h5>
+          <p class="text-muted small mb-3">Acceso directo a operaciones rápidas:</p>
+          <div class="d-flex justify-content-center gap-2 flex-wrap">
+              <button type="button" onclick="document.getElementById('ficha-select').focus();" class="btn btn-pink-primary btn-sm px-3">
+                  <i class="bi bi-search me-1"></i> Buscar Ficha
+              </button>
+              <button id="btn-cerrar-asistente" type="button" class="btn btn-outline-secondary btn-sm px-3">
+                  Cerrar
+              </button>
+          </div>
+      </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (() => {
+        const cardInicial = document.getElementById('card-inicial');
+        const panelAsistente = document.getElementById('panel-asistente');
+        const btnCerrarAsistente = document.getElementById('btn-cerrar-asistente');
+
+        if (cardInicial && panelAsistente && btnCerrarAsistente) {
+            cardInicial.addEventListener('click', () => {
+                cardInicial.style.display = 'none';
+                panelAsistente.style.display = 'block';
+            });
+            btnCerrarAsistente.addEventListener('click', () => {
+                panelAsistente.style.display = 'none';
+                cardInicial.style.display = 'block';
+            });
+        }
+
+        const fichaSelect = document.getElementById('ficha-select');
+        const rapSelect = document.getElementById('rap-select');
+        const loadingMessage = document.getElementById('rap-loading');
+        const totalAprendices = document.getElementById('total-aprendices');
+        const totalAprobados = document.getElementById('total-aprobados');
+        const totalDeficientes = document.getElementById('total-deficientes');
+        const porcentajeAprobacion = document.getElementById('porcentaje-aprobacion');
+        const barraAprobacion = document.getElementById('barra-aprobacion');
+        const filtrosForm = document.getElementById('filtros-evaluacion');
+        const cargarListaBtn = document.getElementById('cargar-lista-btn');
+        const ajaxPanel = document.getElementById('ajax-list-panel');
+        const ajaxBody = document.getElementById('ajax-aprendices-body');
+        const ajaxForm = document.getElementById('ajax-calificaciones-form');
+        const aprobarTodosBtn = document.getElementById('aprobar-todos-btn');
+
+        if (!fichaSelect || !rapSelect) {
+            return;
+        }
+
+        const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, (character) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[character]));
+
+        function aprobarTodos(selector = '#ajax-aprendices-body') {
+            document.querySelectorAll(`${selector} input[value="A"]`).forEach((input) => {
+                if (!input.disabled) {
+                    input.checked = true;
+                }
+            });
+            updateProgress();
+        }
+
+        function renderAjaxAprendices(data) {
+            document.getElementById('ajax-rap-code').textContent = data.rap.codigo;
+            document.getElementById('ajax-rap-description').textContent = data.rap.descripcion;
+            ajaxBody.replaceChildren();
+            data.aprendices.forEach((aprendiz, index) => {
+                const disabled = data.periodo_cerrado ? 'disabled' : '';
+                const checkedA = aprendiz.juicio === 'A' ? 'checked' : '';
+                const checkedD = aprendiz.juicio === 'D' ? 'checked' : '';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="fw-bold text-muted">${index + 1}</td>
+                    <td>${escapeHtml(aprendiz.tipo_documento)} ${escapeHtml(aprendiz.numero_documento)}</td>
+                    <td class="fw-semibold">${escapeHtml(aprendiz.nombre)}</td>
+                    <td><div class="d-flex gap-3">
+                        <div class="form-check"><input class="form-check-input ajax-juicio" type="radio" name="juicio_${aprendiz.matricula_id}" value="A" ${checkedA} ${disabled}><label class="form-check-label text-success fw-bold">A (Aprobado)</label></div>
+                        <div class="form-check"><input class="form-check-input ajax-juicio" type="radio" name="juicio_${aprendiz.matricula_id}" value="D" ${checkedD} ${disabled}><label class="form-check-label text-danger fw-bold">D (Por Mejorar)</label></div>
+                    </div></td>
+                    <td><input type="text" name="obs_${aprendiz.matricula_id}" value="${escapeHtml(aprendiz.observacion)}" class="form-control form-control-sm" ${disabled}></td>`;
+                ajaxBody.appendChild(row);
+            });
+            ajaxPanel.classList.remove('d-none');
+            ajaxForm.action = `?ficha=${encodeURIComponent(fichaSelect.value)}&rap=${encodeURIComponent(rapSelect.value)}&periodo=${encodeURIComponent(document.getElementById('periodo-select').value)}&trimestre=${encodeURIComponent(document.getElementById('trimestre-select').value)}`;
+            ajaxBody.querySelectorAll('.ajax-juicio').forEach((input) => input.addEventListener('change', updateProgress));
+            updateProgress();
+        }
+
+        async function cargarListaAjax(event) {
+            event.preventDefault();
+            if (!fichaSelect.value || !rapSelect.value) {
+                rapSelect.focus();
+                return;
+            }
+            cargarListaBtn.disabled = true;
+            cargarListaBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Cargando...';
+            const params = new URLSearchParams({
+                ficha_id: fichaSelect.value,
+                rap_id: rapSelect.value,
+                periodo: document.getElementById('periodo-select').value,
+                trimestre: document.getElementById('trimestre-select').value,
+                juicio: '{{ juicio_filtro }}',
+            });
+            try {
+                const response = await fetch(`${filtrosForm.dataset.aprendicesUrl}?${params}`, {
+                    headers: {'X-Requested-With': 'XMLHttpRequest'},
+                });
+                if (!response.ok) throw new Error('No fue posible cargar la lista.');
+                renderAjaxAprendices(await response.json());
+            } catch (error) {
+                window.alert(error.message);
+            } finally {
+                cargarListaBtn.disabled = !fichaSelect.value || !rapSelect.value;
+                cargarListaBtn.innerHTML = '<i class="bi bi-filter me-1"></i> Cargar Lista';
+            }
+        }
+
+        filtrosForm.addEventListener('submit', cargarListaAjax);
+        rapSelect.addEventListener('change', () => {
+            cargarListaBtn.disabled = !fichaSelect.value || !rapSelect.value;
+        });
+        cargarListaBtn.disabled = !fichaSelect.value || !rapSelect.value;
+        if (aprobarTodosBtn) aprobarTodosBtn.addEventListener('click', () => aprobarTodos());
+        document.querySelectorAll('.aprobar-todos-visible').forEach((button) => {
+            button.addEventListener('click', () => aprobarTodos('body'));
+        });
+
+        function updateProgress() {
+            if (!totalAprendices || !totalAprobados || !totalDeficientes || !porcentajeAprobacion || !barraAprobacion) {
+                return;
+            }
+            const juicios = [...document.querySelectorAll('input[name^="juicio_"]:checked')];
+            const total = document.querySelectorAll('input[name^="juicio_"][value="A"]').length;
+            const aprobados = juicios.filter((input) => input.value === 'A').length;
+            const deficientes = juicios.filter((input) => input.value === 'D').length;
+            const porcentaje = total ? (aprobados / total) * 100 : 0;
+
+            totalAprendices.textContent = total;
+            totalAprobados.textContent = aprobados;
+            totalDeficientes.textContent = deficientes;
+            porcentajeAprobacion.textContent = `${porcentaje.toFixed(1)}%`;
+            barraAprobacion.style.width = `${porcentaje}%`;
+            barraAprobacion.setAttribute('aria-valuenow', porcentaje.toFixed(1));
+        }
+
+        document.querySelectorAll('input[name^="juicio_"]').forEach((input) => {
+            input.addEventListener('change', updateProgress);
+        });
+        updateProgress();
+
+        const placeholder = '-- Seleccionar Resultado a Evaluar --';
+
+        function resetRapSelect(message = placeholder) {
+            rapSelect.replaceChildren(new Option(message, ''));
+            rapSelect.disabled = true;
+        }
+
+        function renderRaps(raps) {
+            rapSelect.replaceChildren(new Option(placeholder, ''));
+            raps.forEach((rap) => {
+                const option = new Option(
+                    `${rap.codigo} — ${rap.descripcion}`,
+                    rap.id
+                );
+                rapSelect.add(option);
+            });
+            rapSelect.disabled = raps.length === 0;
+            if (raps.length === 0) {
+                rapSelect.replaceChildren(new Option('No hay RAP asociados a esta ficha', ''));
+            }
+        }
+
+        fichaSelect.addEventListener('change', async () => {
+            const fichaId = fichaSelect.value;
+            resetRapSelect();
+
+            if (!fichaId) {
+                return;
+            }
+
+            loadingMessage.classList.remove('d-none');
+            try {
+                const response = await fetch(`${fichaSelect.dataset.rapsUrl}?ficha_id=${encodeURIComponent(fichaId)}`, {
+                    headers: {'X-Requested-With': 'XMLHttpRequest'},
+                });
+                if (!response.ok) {
+                    throw new Error('No fue posible cargar los RAP.');
+                }
+                const data = await response.json();
+                renderRaps(data.raps);
+            } catch (error) {
+                resetRapSelect('No se pudieron cargar los RAP');
+            } finally {
+                loadingMessage.classList.add('d-none');
+            }
+        });
+    })();
+</script>
+{% endblock %}

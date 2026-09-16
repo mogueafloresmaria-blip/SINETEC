@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Evidencia o Taller - SINETEC{% endblock %}
+
+{% block content %}
+<div class="container my-4" style="max-width: 700px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: #4a2e35;">📝 Nueva Guía / Taller SENA</h2>
+        <a href="{% url 'redirect_dashboard' %}" class="btn btn-outline-secondary fw-semibold">← Volver al Panel</a>
+    </div>
+
+    <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-header text-white py-3" style="background-color: #e91e63;">
+            <h5 class="mb-0 fw-bold">Asignar Evidencia a un RAP</h5>
+        </div>
+        <div class="card-body p-4" style="background-color: #fff9fb;">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="color: #4a2e35;">Resultado de Aprendizaje (RAP):</label>
+                    <select name="rap_id" class="form-select" required>
+                        <option value="">Seleccione un RAP...</option>
+                        {% for rap in raps %}
+                            <option value="{{ rap.id }}">RAP {{ rap.codigo }} - Ficha {{ rap.ficha.numero_ficha }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="color: #4a2e35;">Título del Taller / Evidencia:</label>
+                    <input type="text" name="titulo" class="form-control" placeholder="Ej: Taller práctico de Python básico" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="color: #4a2e35;">Instrucciones de la Guía:</label>
+                    <textarea name="descripcion" class="form-control" rows="4" placeholder="Describa los puntos a desarrollar por el aprendiz..."></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold" style="color: #4a2e35;">Fecha y Hora Límite de Entrega:</label>
+                    <input type="datetime-local" name="fecha_limite" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 fw-bold py-2">Guardar y Publicar Evidencia</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

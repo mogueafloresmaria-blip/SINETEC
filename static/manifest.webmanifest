@@ -1,0 +1,10 @@
+{
+  "name": "SINETEC - Media Técnica",
+  "short_name": "SINETEC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF7F8",
+  "theme_color": "#8F5360",
+  "lang": "es-CO",
+  "description": "Sistema de seguimiento de la integración con la Media Técnica"
+}

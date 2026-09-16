@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ institucion.nombre }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'instituciones_lista' %}" class="btn btn-outline-secondary btn-sm mb-3">
+        <i class="bi bi-arrow-left me-1"></i> Volver al Directorio
+    </a>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary mb-1">DANE: {{ institucion.codigo_dane }}</span>
+            <h1 class="h3 fw-bold mb-1 text-dark">{{ institucion.nombre }}</h1>
+            <p class="text-muted small mb-0">
+                <i class="bi bi-geo-alt me-1"></i>{{ institucion.municipio }}, Magdalena · Dirección: {{ institucion.direccion|default:"No registrada" }}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'instituciones_editar' institucion.id %}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-pencil me-1"></i> Editar Datos
+            </a>
+            <a href="{% url 'fichas_crear' %}" class="btn btn-sinetec-primary">
+                <i class="bi bi-plus-lg me-1"></i> Abrir Ficha Técnica
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Tarjeta de Contactos -->
+    <div class="col-md-4">
+        <div class="sinetec-card p-4 h-100">
+            <h6 class="fw-bold mb-3 border-bottom pb-2 text-primary">Información Institucional</h6>
+            <div class="mb-3">
+                <small class="text-muted d-block">Rector(a):</small>
+                <strong>{{ institucion.rector_nombre|default:"No registrado" }}</strong>
+                {% if institucion.rector_email %}<br><a href="mailto:{{ institucion.rector_email }}" class="small">{{ institucion.rector_email }}</a>{% endif %}
+            </div>
+            <div class="mb-3">
+                <small class="text-muted d-block">Docente Enlace / Coordinador:</small>
+                <strong>{{ institucion.enlace_nombre|default:"No registrado" }}</strong>
+                {% if institucion.enlace_email %}<br><a href="mailto:{{ institucion.enlace_email }}" class="small">{{ institucion.enlace_email }}</a>{% endif %}
+            </div>
+            <div class="mb-3">
+                <small class="text-muted d-block">Teléfono de Enlace:</small>
+                <span>{{ institucion.enlace_telefono|default:"No registrado" }}</span>
+            </div>
+            <div>
+                <small class="text-muted d-block">Estado del Convenio:</small>
+                {% if institucion.activa %}
+                    <span class="badge bg-success">Convenio Vigente</span>
+                {% else %}
+                    <span class="badge bg-danger">Inactivo</span>
+                {% endif %}
+            </div>
+            {% if institucion.enlace_telefono %}
+                <a href="https://wa.me/{{ institucion.enlace_telefono|cut:' '|cut:'-' }}?text=Reporte%20de%20avance%20SINETEC%20-%20{{ institucion.nombre|urlencode }}" target="_blank" rel="noopener" class="btn btn-success btn-sm mt-3">
+                    <i class="bi bi-whatsapp me-1"></i> Contactar por WhatsApp
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Fichas Técnicas del Colegio -->
+    <div class="col-md-8">
+        <div class="sinetec-card h-100">
+            <div class="sinetec-card-header d-flex justify-content-between align-items-center">
+                <span class="h6 mb-0 fw-bold"><i class="bi bi-collection text-primary me-2"></i>Fichas Técnicas Articuladas</span>
+                <span class="badge bg-light text-dark border">{{ fichas.count }} Fichas</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sinetec table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ficha</th>
+                            <th>Programa Técnico</th>
+                            <th>Instructor Líder</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in fichas %}
+                            <tr>
+                                <td class="fw-bold text-primary">Ficha {{ f.codigo_ficha }}</td>
+                                <td>{{ f.programa.denominacion }}</td>
+                                <td>{{ f.instructor_lider.get_full_name|default:f.instructor_lider.username }}</td>
+                                <td>
+                                    <span class="badge {% if f.estado == 'En Ejecucion' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ f.estado }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'fichas_detalle' f.id %}" class="btn btn-sm btn-outline-primary">
+                                        Gestionar &rarr;
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    Este colegio no tiene fichas técnicas abiertas actualmente.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

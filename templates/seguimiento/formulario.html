@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="mb-3">
+            <a href="{% url 'seguimiento_lista' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Cancelar y Volver
+            </a>
+        </div>
+
+        <div class="sinetec-card p-4 p-md-5">
+            <h2 class="h4 fw-bold mb-1 text-dark">{{ titulo }}</h2>
+            <p class="text-muted small mb-4">
+                Diligencie el diagnóstico pedagógico de la visita o sesión. Si detecta bajo rendimiento o novedades de asistencia, registre los compromisos obligatorios conforme a la regla <strong>RN-006</strong>.
+            </p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="latitud_gps" id="latitud-gps">
+                <input type="hidden" name="longitud_gps" id="longitud-gps">
+                <input type="hidden" name="precision_gps" id="precision-gps">
+
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label class="form-label small fw-semibold">Ficha Técnica Objeto de Visita *</label>
+                        {{ form.ficha }}
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label small fw-semibold">Aprendiz Específico (Opcional si fue grupal)</label>
+                        {{ form.matricula }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Fecha de la Visita Presencial *</label>
+                        {{ form.fecha_visita }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Ubicación GPS de la visita *</label>
+                        <div id="gps-status" class="alert alert-warning py-2 mb-0 small" role="status">
+                            <i class="bi bi-geo-alt me-1"></i> Solicitando ubicación del dispositivo...
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Tipo de Sesión / Seguimiento *</label>
+                        {{ form.tipo_seguimiento }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Diagnóstico Pedagógico y Observaciones Técnicas *</label>
+                        {{ form.observaciones }}
+                        {% if form.observaciones.errors %}
+                            <div class="text-danger small mt-1">{{ form.observaciones.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Sección de Compromisos (RN-006) -->
+                    <div class="col-12 p-3 bg-light rounded-3 border">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-shield-exclamation text-warning fs-5"></i>
+                            <h6 class="mb-0 fw-bold">Compromisos Formativos y Plan de Mejora (Regla RN-006)</h6>
+                        </div>
+                        <p class="small text-muted mb-2">
+                            Si se detectó bajo rendimiento o fallas reiteradas, registre los acuerdos acordados y la fecha límite de cumplimiento.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Plan de Acción / Compromisos:</label>
+                            {{ form.compromisos }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Fecha Límite de Verificación (Obligatoria si hay compromisos):</label>
+                            {{ form.fecha_verificacion }}
+                            {% if form.fecha_verificacion.errors %}
+                                <div class="text-danger small mt-1">{{ form.fecha_verificacion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Adjuntar Acta Firmada o Soporte Escaneado (PDF / Imagen):</label>
+                        {{ form.archivo_adjunto }}
+                    </div>
+
+                    <div class="col-12">
+                        <div class="border rounded-3 p-3 bg-light">
+                            <h6 class="fw-bold mb-1"><i class="bi bi-pen me-2 text-primary"></i>Firmas para el acta oficial</h6>
+                            <p class="small text-muted mb-3">Dibuje cada firma dentro del recuadro. Ambas firmas se incorporarán al PDF generado.</p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold">Firma del instructor SENA *</label>
+                                    <canvas id="firma-instructor-canvas" class="signature-canvas" width="600" height="180"></canvas>
+                                    <input type="hidden" name="firma_instructor" id="firma-instructor-input">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2 limpiar-firma" data-canvas="firma-instructor-canvas" data-input="firma-instructor-input">Limpiar firma</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold">Firma del docente enlace *</label>
+                                    <canvas id="firma-docente-canvas" class="signature-canvas" width="600" height="180"></canvas>
+                                    <input type="hidden" name="firma_docente_enlace" id="firma-docente-input">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2 limpiar-firma" data-canvas="firma-docente-canvas" data-input="firma-docente-input">Limpiar firma</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                    <a href="{% url 'seguimiento_lista' %}" class="btn btn-light px-4">Cancelar</a>
+                    <button type="submit" class="btn btn-sinetec-primary px-4 fw-semibold">
+                        <i class="bi bi-check-circle-fill me-1"></i> Guardar Bitácora
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .signature-canvas {
+        display: block;
+        width: 100%;
+        height: 150px;
+        background: #FFFFFF;
+        border: 1px dashed #C98291;
+        border-radius: 6px;
+        cursor: crosshair;
+        touch-action: none;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (() => {
+        function prepararFirma(canvasId, inputId) {
+            const canvas = document.getElementById(canvasId);
+            const input = document.getElementById(inputId);
+            const contexto = canvas.getContext('2d');
+            contexto.strokeStyle = '#432F35';
+            contexto.lineWidth = 2;
+            contexto.lineCap = 'round';
+            let dibujando = false;
+
+            function punto(evento) {
+                const rect = canvas.getBoundingClientRect();
+                const escalaX = canvas.width / rect.width;
+                const escalaY = canvas.height / rect.height;
+                return {
+                    x: (evento.clientX - rect.left) * escalaX,
+                    y: (evento.clientY - rect.top) * escalaY,
+                };
+            }
+
+            canvas.addEventListener('pointerdown', (evento) => {
+                dibujando = true;
+                canvas.setPointerCapture(evento.pointerId);
+                const inicio = punto(evento);
+                contexto.beginPath();
+                contexto.moveTo(inicio.x, inicio.y);
+            });
+            canvas.addEventListener('pointermove', (evento) => {
+                if (!dibujando) return;
+                const actual = punto(evento);
+                contexto.lineTo(actual.x, actual.y);
+                contexto.stroke();
+                input.value = canvas.toDataURL('image/png');
+            });
+            canvas.addEventListener('pointerup', () => { dibujando = false; });
+            canvas.addEventListener('pointercancel', () => { dibujando = false; });
+        }
+
+        prepararFirma('firma-instructor-canvas', 'firma-instructor-input');
+        prepararFirma('firma-docente-canvas', 'firma-docente-input');
+        const formulario = document.querySelector('form');
+        const gpsStatus = document.getElementById('gps-status');
+        const latitudGps = document.getElementById('latitud-gps');
+        const longitudGps = document.getElementById('longitud-gps');
+        const precisionGps = document.getElementById('precision-gps');
+        let gpsCapturado = false;
+
+        function capturarUbicacion() {
+            if (!navigator.geolocation) {
+                gpsStatus.className = 'alert alert-danger py-2 mb-0 small';
+                gpsStatus.textContent = 'Este navegador no soporta geolocalización.';
+                return;
+            }
+            navigator.geolocation.getCurrentPosition((posicion) => {
+                latitudGps.value = posicion.coords.latitude.toFixed(6);
+                longitudGps.value = posicion.coords.longitude.toFixed(6);
+                precisionGps.value = Number(posicion.coords.accuracy || 0).toFixed(2);
+                gpsCapturado = true;
+                gpsStatus.className = 'alert alert-success py-2 mb-0 small';
+                gpsStatus.innerHTML = `<i class="bi bi-geo-alt-fill me-1"></i> Ubicación capturada (${latitudGps.value}, ${longitudGps.value}) · precisión ${precisionGps.value} m`;
+            }, (error) => {
+                gpsStatus.className = 'alert alert-danger py-2 mb-0 small';
+                gpsStatus.textContent = 'No se pudo obtener la ubicación. Active el GPS y permita el acceso para registrar la visita.';
+            }, {enableHighAccuracy: true, timeout: 15000, maximumAge: 0});
+        }
+
+        capturarUbicacion();
+        document.querySelectorAll('.limpiar-firma').forEach((boton) => {
+            boton.addEventListener('click', () => {
+                const canvas = document.getElementById(boton.dataset.canvas);
+                const input = document.getElementById(boton.dataset.input);
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                input.value = '';
+            });
+        });
+        formulario.addEventListener('submit', (evento) => {
+            const instructor = document.getElementById('firma-instructor-input').value;
+            const docente = document.getElementById('firma-docente-input').value;
+            if (!instructor || !docente || !gpsCapturado) {
+                evento.preventDefault();
+                window.alert('Debe permitir la ubicación GPS y registrar ambas firmas antes de guardar el acta.');
+            }
+        });
+    })();
+</script>
+{% endblock %}

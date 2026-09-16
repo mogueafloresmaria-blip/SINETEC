@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Panel de Coordinador - SINETEC{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="p-4 mb-4 bg-white rounded-4 shadow-sm border-start border-4 border-danger">
+        <h2 class="fw-bold text-dark"><i class="bi bi-shield-shaded text-danger me-2"></i> Panel de Coordinación</h2>
+        <p class="text-muted mb-0">Gestión institucional, supervisión de fichas y control de procesos de integración con la media técnica.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-3 rounded-4">
+                <div class="card-body">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-people-fill text-danger me-2"></i> Gestión de Instructores y Fichas</h5>
+                    <p class="text-muted small">Asignación de docentes a los diferentes colegios y programas articulados.</p>
+                    <a href="{% url 'fichas' %}" class="btn btn-outline-danger btn-sm">Ver Fichas Activas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-3 rounded-4">
+                <div class="card-body">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Alertas y Seguimiento</h5>
+                    <p class="text-muted small">Supervisión de reportes de asistencia, rendimiento académico y alertas tempranas.</p>
+                    <a href="{% url 'alertas_tempranas' %}" class="btn btn-outline-warning text-dark btn-sm">Ver Alertas</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

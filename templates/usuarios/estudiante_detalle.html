@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Estudiante - SINETEC{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1 text-dark">Detalle del Estudiante</h1>
+        <p class="text-muted small mb-0">{{ estudiante.usuario.get_full_name|default:estudiante.usuario.username }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Volver</a>
+        <a href="{% url 'estudiantes_boletin_pdf' estudiante.pk %}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf me-1"></i> Descargar boletín PDF</a>
+        {% if puede_gestionar %}
+            <a href="{% url 'estudiantes_editar' estudiante.pk %}" class="btn btn-sinetec-primary"><i class="bi bi-pencil me-1"></i> Editar</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="sinetec-card p-4 h-100">
+            <h2 class="h5 fw-bold mb-3">Información personal</h2>
+            <dl class="row mb-0">
+                <dt class="col-sm-5">Nombre completo</dt>
+                <dd class="col-sm-7">{{ estudiante.usuario.get_full_name|default:estudiante.usuario.username }}</dd>
+                <dt class="col-sm-5">Documento</dt>
+                <dd class="col-sm-7">{{ estudiante.get_tipo_documento_display }} {{ estudiante.numero_documento }}</dd>
+                <dt class="col-sm-5">Correo</dt>
+                <dd class="col-sm-7">{{ estudiante.usuario.email|default:"-" }}</dd>
+                <dt class="col-sm-5">Teléfono</dt>
+                <dd class="col-sm-7">{{ estudiante.telefono|default:"-" }}</dd>
+                <dt class="col-sm-5">Estado</dt>
+                <dd class="col-sm-7">
+                    {% if estudiante.esta_activo and estudiante.usuario.is_active %}Activo{% else %}Inactivo{% endif %}
+                </dd>
+            </dl>
+            {% if estudiante.qr_code %}
+                <div class="border-top pt-3 mt-3 text-center">
+                    <h3 class="h6 fw-bold">Carnet digital QR</h3>
+                    <img src="{{ estudiante.qr_code.url }}" alt="Código QR del carnet digital" width="150" height="150" class="border rounded p-2">
+                    <p class="small text-muted mb-0 mt-2">Escaneable desde SINETEC para abrir este expediente.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="sinetec-card p-4 h-100">
+            <h2 class="h5 fw-bold mb-3">Datos del acudiente y matrículas</h2>
+            <div class="table-responsive">
+                <table class="table table-sinetec mb-0">
+                    <thead><tr><th>Programa</th><th>Institución</th><th>Acudiente</th><th>Estado</th></tr></thead>
+                    <tbody>
+                        {% for matricula in matriculas %}
+                            <tr>
+                                <td>{{ matricula.ficha.programa.denominacion }}</td>
+                                <td>{{ matricula.ficha.institucion.nombre }}</td>
+                                <td>
+                                    {{ matricula.acudiente_nombre|default:"-" }}<br>
+                                    <small class="text-muted">{{ matricula.acudiente_telefono|default:"Sin teléfono" }}</small>
+                                </td>
+                                <td>{{ matricula.get_estado_formacion_display }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4" class="text-muted">Sin matrículas registradas.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if alertas_desercion %}
+    <div class="sinetec-card p-4 mt-4 border-start border-danger border-4">
+        <h2 class="h5 fw-bold mb-3"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Alertas de deserción</h2>
+        <div class="row g-3">
+            {% for alerta in alertas_desercion %}
+                <div class="col-md-6">
+                    <div class="alert alert-{{ alerta.nivel }} mb-0">
+                        <strong>{{ alerta.titulo }}</strong>
+                        <div class="small mt-1">{{ alerta.detalle }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<div class="row g-4 mt-1">
+    <div class="col-lg-7">
+        <div class="sinetec-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Historial de calificaciones</h2>
+                <span class="badge bg-light text-dark border">{{ calificaciones|length }} registros</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sinetec table-hover mb-0">
+                    <thead><tr><th>Fecha</th><th>RAP</th><th>Ficha</th><th>Juicio</th><th>Observaciones</th></tr></thead>
+                    <tbody>
+                        {% for calificacion in calificaciones %}
+                            <tr>
+                                <td>{{ calificacion.fecha_evaluacion|date:"d/m/Y" }}</td>
+                                <td>
+                                    <strong>{{ calificacion.resultado_aprendizaje.codigo }}</strong><br>
+                                    <small class="text-muted">{{ calificacion.resultado_aprendizaje.descripcion|truncatechars:55 }}</small>
+                                </td>
+                                <td>{{ calificacion.matricula.ficha.codigo_ficha }}</td>
+                                <td>
+                                    {% if calificacion.juicio_valor == 'A' %}
+                                        <span class="badge bg-success">Aprobado</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Deficiente</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ calificacion.observaciones|default:"-" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="5" class="text-center py-4 text-muted">No hay calificaciones registradas.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="sinetec-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Asistencia y seguimiento</h2>
+                <span class="badge bg-light text-dark border">{{ seguimientos|length }} registros</span>
+            </div>
+            <p class="text-muted small">Sesiones individuales registradas en las bitácoras de seguimiento.</p>
+            <div class="list-group list-group-flush">
+                {% for seguimiento in seguimientos %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between gap-2">
+                            <strong>{{ seguimiento.fecha_visita|date:"d/m/Y" }}</strong>
+                            <span class="badge bg-success bg-opacity-10 text-success">Registrado</span>
+                        </div>
+                        <div class="small text-muted">{{ seguimiento.get_tipo_seguimiento_display }}</div>
+                        <div class="small mt-1">{{ seguimiento.observaciones|truncatechars:120 }}</div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-4 text-muted">No hay registros individuales de asistencia o seguimiento.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

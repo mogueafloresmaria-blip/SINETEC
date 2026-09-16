@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="mb-3">
+            <a href="{% url 'fichas_lista' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Cancelar y Volver
+            </a>
+        </div>
+
+        <div class="sinetec-card p-4 p-md-5">
+            <h2 class="h4 fw-bold mb-1 text-dark">{{ titulo }}</h2>
+            <p class="text-muted small mb-4">Apertura formal de grupo de articulación de Media Técnica con institución educativa.</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Número Oficial de Ficha *</label>
+                        {{ form.codigo_ficha }}
+                        {% if form.codigo_ficha.errors %}
+                            <div class="text-danger small mt-1">{{ form.codigo_ficha.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Estado de la Ficha</label>
+                        {{ form.estado }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Programa Técnico de Formación *</label>
+                        {{ form.programa }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Institución Educativa en Convenio *</label>
+                        {{ form.institucion }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Instructor Líder Asignado *</label>
+                        {{ form.instructor_lider }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Fecha de Inicio Lectivo *</label>
+                        {{ form.fecha_inicio }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Fecha de Finalización *</label>
+                        {{ form.fecha_fin }}
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                    <a href="{% url 'fichas_lista' %}" class="btn btn-light px-4">Cancelar</a>
+                    <button type="submit" class="btn btn-sinetec-primary px-4 fw-semibold">
+                        <i class="bi bi-check-lg me-1"></i> Abrir Ficha Técnica
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

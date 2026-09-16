@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Estudiantes - SINETEC{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Tarjeta Superior Institucional -->
+    <div class="hero-card-verde p-4 mb-4 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #1b4d3e 0%, #11382c 100%); color: white;">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-people-fill fs-3 me-2 text-success bg-white p-2 rounded-3"></i>
+                    <h2 class="h3 fw-bold mb-0">Listado de Estudiantes</h2>
+                </div>
+                <p class="text-light small mb-0">Directorio completo de aprendices matriculados clasificados por programa de formación y colegio aliado.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <button class="btn btn-light text-success fw-bold shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAgregarEstudiante">
+                    <i class="bi bi-person-plus-fill me-1"></i> Agregar Nuevo Aprendiz
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secciones Separadas por Columnas (Programas / Niveles) -->
+    <div class="row g-4">
+        
+        <!-- Columna 1: Tecnólogo ADSI -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-header bg-success text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background-color: #39A900 !important;">
+                    <span><i class="bi bi-code-slash me-2"></i> Tecnólogo ADSI</span>
+                    <span class="badge bg-white text-success">2 Aprendices</span>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0 py-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-success">1082938471</span>
+                                <span class="badge bg-success bg-opacity-10 text-success">Ficha 3173430</span>
+                            </div>
+                            <h6 class="mb-1 fw-semibold text-dark">Juan Camilo Torres</h6>
+                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. Normal María Auxiliadora</p>
+                        </div>
+                        <div class="list-group-item px-0 py-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-success">1082945123</span>
+                                <span class="badge bg-success bg-opacity-10 text-success">Ficha 3173430</span>
+                            </div>
+                            <h6 class="mb-1 fw-semibold text-dark">María Alejandra Pérez</h6>
+                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. Normal María Auxiliadora</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna 2: Técnico en Sistemas -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-header text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background-color: #11382c !important;">
+                    <span><i class="bi bi-laptop me-2"></i> Técnico en Sistemas</span>
+                    <span class="badge bg-light text-dark">2 Aprendices</span>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0 py-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-dark">1082912345</span>
+                                <span class="badge bg-secondary bg-opacity-10 text-dark">Ficha 2654102</span>
+                            </div>
+                            <h6 class="mb-1 fw-semibold text-dark">Carlos Andrés Ruiz</h6>
+                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. San Juan Bautista</p>
+                        </div>
+                        <div class="list-group-item px-0 py-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-dark">1082956789</span>
+                                <span class="badge bg-secondary bg-opacity-10 text-dark">Ficha 2654102</span>
+                            </div>
+                            <h6 class="mb-1 fw-semibold text-dark">Laura Sofía Meza</h6>
+                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. San Juan Bautista</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna 3: Gestión Administrativa -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-header bg-secondary text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-briefcase-fill me-2"></i> Gestión Administrativa</span>
+                    <span class="badge bg-light text-dark">1 Aprendiz</span>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0 py-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-secondary">1082998765</span>
+                                <span class="badge bg-warning bg-opacity-10 text-warning">Ficha 2789123</span>
+                            </div>
+                            <h6 class="mb-1 fw-semibold text-dark">Andrés Felipe Castro</h6>
+                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. Liceo Ciénaga</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal para Registrar Nuevo Aprendiz -->
+<div class="modal fade" id="modalAgregarEstudiante" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-success text-white" style="background-color: #39A900 !important;">
+                <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i> Registrar Nuevo Aprendiz</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Documento de Identidad</label>
+                        <input type="text" class="form-control" placeholder="Ej. 1082938471">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Nombre Completo del Aprendiz</label>
+                        <input type="text" class="form-control" placeholder="Ej. Ana Sofía Martínez">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Número de Ficha / Programa</label>
+                        <select class="form-select">
+                            <option value="3173430">3173430 - Tecnólogo ADSI</option>
+                            <option value="2654102">2654102 - Técnico en Sistemas</option>
+                            <option value="2789123">2789123 - Gestión Administrativa</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Colegio Aliado</label>
+                        <input type="text" class="form-control" placeholder="Ej. I.E.D. Normal María Auxiliadora">
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-success btn-sm px-4" onclick="alert('¡Aprendiz registrado exitosamente!'); window.location.reload();">Guardar Aprendiz</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

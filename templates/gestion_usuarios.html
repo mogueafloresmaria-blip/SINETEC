@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Usuarios - SINETEC{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Encabezado Estilizado -->
+    <div class="hero-card-verde p-4 mb-4 text-center rounded-4 shadow-sm">
+        <span class="badge bg-success bg-opacity-75 text-white px-3 py-2 rounded-pill mb-2 fw-semibold">
+            <i class="bi bi-people-fill me-1"></i> Administración del Sistema
+        </span>
+        <h1 class="h3 fw-bold text-white mb-2">Creación y Gestión de Docentes, Aprendices y Fichas</h1>
+        <p class="text-light small mb-0">Panel centralizado para el control de usuarios y registros académicos en SINETEC.</p>
+    </div>
+
+    <!-- Opciones de Gestión -->
+    <div class="row g-4">
+        <!-- Tarjeta Docentes -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 border-top border-success border-4 text-center">
+                <div class="mb-3">
+                    <i class="bi bi-person-badge-fill text-success fs-1"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Gestión de Docentes</h5>
+                <p class="text-muted small mb-4">Administra los instructores y sus asignaciones formativas.</p>
+                <a href="/admin/auth/user/" target="_blank" class="btn btn-success btn-sm mt-auto fw-bold py-2 rounded-pill">
+                    <i class="bi bi-plus-circle me-1"></i> Administrar Docentes
+                </a>
+            </div>
+        </div>
+
+        <!-- Tarjeta Aprendices -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 border-top border-success border-4 text-center">
+                <div class="mb-3">
+                    <i class="bi bi-mortarboard-fill text-success fs-1"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Gestión de Aprendices</h5>
+                <p class="text-muted small mb-4">Controla el registro y perfil de los aprendices de la media técnica.</p>
+                <a href="/admin/" target="_blank" class="btn btn-success btn-sm mt-auto fw-bold py-2 rounded-pill">
+                    <i class="bi bi-plus-circle me-1"></i> Administrar Aprendices
+                </a>
+            </div>
+        </div>
+
+        <!-- Tarjeta Fichas -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 border-top border-success border-4 text-center">
+                <div class="mb-3">
+                    <i class="bi bi-journal-bookmark-fill text-success fs-1"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Gestión de Fichas</h5>
+                <p class="text-muted small mb-4">Crea y actualiza los códigos de fichas y programas activos.</p>
+                <a href="/admin/" target="_blank" class="btn btn-success btn-sm mt-auto fw-bold py-2 rounded-pill">
+                    <i class="bi bi-plus-circle me-1"></i> Administrar Fichas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

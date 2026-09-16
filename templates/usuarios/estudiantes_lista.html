@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Listado de Aprendices - SINETEC | Regional Magdalena{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    
+    <!-- Encabezado de la Sección -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-people-fill text-danger me-2"></i> Control y Seguimiento de Aprendices SENA
+            </h2>
+            <p class="text-muted mb-0">
+                Programa de Integración con la Educación Media · Regional Magdalena · Centro de Logística y Promoción Ecoturística
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary fw-semibold bg-white">
+                <i class="bi bi-arrow-left me-1"></i> Volver al Panel
+            </a>
+            <a href="#" class="btn btn-primary fw-semibold shadow-sm text-white" style="background-color: #D96C9D; border-color: #D96C9D;">
+                <i class="bi bi-person-plus-fill me-1"></i> Registrar Nuevo Aprendiz
+            </a>
+        </div>
+    </div>
+
+    <!-- Fila de Resumen Rápido -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-4 col-md-6">
+            <div class="card shadow-sm p-3 bg-white border-start border-4 border-danger">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-uppercase text-muted fw-semibold small">Total Aprendices</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">4</h3>
+                        <span class="text-success small fw-semibold"><i class="bi bi-check-circle"></i> Sincronizado con Fichas</span>
+                    </div>
+                    <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-people fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card shadow-sm p-3 bg-white border-start border-4 border-success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-uppercase text-muted fw-semibold small">En Etapa Lectiva</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">3 Activos</h3>
+                        <span class="text-success small fw-semibold">Rendimiento óptimo</span>
+                    </div>
+                    <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-journal-check fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-12">
+            <div class="card shadow-sm p-3 bg-white border-start border-4 border-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-uppercase text-muted fw-semibold small">Por Mejorar / Alertas</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">1 Caso</h3>
+                        <span class="text-warning text-dark small fw-semibold">Requiere seguimiento</span>
+                    </div>
+                    <div class="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de Búsqueda y Filtros -->
+    <div class="card shadow-sm border-0 rounded-3 mb-4">
+        <div class="card-body py-3">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" placeholder="Filtrar por documento, nombre, colegio o ficha SENA...">
+                    </div>
+                </div>
+                <div class="col-lg-6 d-flex justify-content-lg-end gap-2">
+                    <select class="form-select form-select-sm w-auto">
+                        <option selected>Todos los Estados</option>
+                        <option value="1">Lectiva - Aprobado</option>
+                        <option value="2">Por Mejorar / Alerta</option>
+                    </select>
+                    <button class="btn btn-outline-secondary btn-sm bg-white">
+                        <i class="bi bi-file-earmark-excel text-success me-1"></i> Exportar Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matriz de Aprendices (Tabla con Datos Reales Simulados) -->
+    <div class="card shadow-sm border-0 rounded-3 mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0 fs-6">
+                <i class="bi bi-table text-primary me-2"></i> Matriz de Aprendices y Programas de Formación
+            </h5>
+            <span class="badge bg-light text-secondary border">Media Técnica SENA</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-secondary small">
+                    <thead class="table-light text-uppercase fs-7">
+                        <tr>
+                            <th class="py-3 ps-3">Documento</th>
+                            <th class="py-3">Nombres y Apellidos</th>
+                            <th class="py-3">Contacto Institucional</th>
+                            <th class="py-3">Ficha / Programa SENA</th>
+                            <th class="py-3">Colegio / Aliado</th>
+                            <th class="py-3">Jornada</th>
+                            <th class="py-3">Estado</th>
+                            <th class="py-3 pe-3 text-end">Acciones de Seguimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="ps-3 fw-semibold text-dark">T.I. 1085293410</td>
+                            <td class="fw-bold text-dark">Juan Camilo Torres</td>
+                            <td>jc.torres@misena.edu.co</td>
+                            <td><span class="badge bg-secondary">Ficha 2654102</span><br><small class="text-muted">Técnico en Sistemas</small></td>
+                            <td>I.E.D. Normal María Auxiliadora</td>
+                            <td><span class="badge bg-light text-dark border">Mañana</span></td>
+                            <td><span class="badge bg-success">Lectiva - Aprobado</span></td>
+                            <td class="pe-3 text-end">
+                                <a href="#" class="btn btn-sm btn-outline-primary py-1 px-2" title="Ver Seguimiento"><i class="bi bi-eye"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-success py-1 px-2" title="Juicios Evaluativos"><i class="bi bi-journal-check"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="ps-3 fw-semibold text-dark">T.I. 1085422198</td>
+                            <td class="fw-bold text-dark">Luisa Fernanda Daza</td>
+                            <td>lf.daza@misena.edu.co</td>
+                            <td><span class="badge bg-secondary">Ficha 2654102</span><br><small class="text-muted">Técnico en Sistemas</small></td>
+                            <td>I.E.D. Normal María Auxiliadora</td>
+                            <td><span class="badge bg-light text-dark border">Mañana</span></td>
+                            <td><span class="badge bg-success">Lectiva - Aprobado</span></td>
+                            <td class="pe-3 text-end">
+                                <a href="#" class="btn btn-sm btn-outline-primary py-1 px-2" title="Ver Seguimiento"><i class="bi bi-eye"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-success py-1 px-2" title="Juicios Evaluativos"><i class="bi bi-journal-check"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="ps-3 fw-semibold text-dark">T.I. 1085114256</td>
+                            <td class="fw-bold text-dark">Carlos Andrés Pérez</td>
+                            <td>ca.perez@misena.edu.co</td>
+                            <td><span class="badge bg-warning text-dark">Ficha 2654105</span><br><small class="text-muted">Técnico en Agroindustria</small></td>
+                            <td>I.E.D. Simón Bolívar</td>
+                            <td><span class="badge bg-light text-dark border">Tarde</span></td>
+                            <td><span class="badge bg-danger">Por Mejorar / Alerta</span></td>
+                            <td class="pe-3 text-end">
+                                <a href="#" class="btn btn-sm btn-outline-primary py-1 px-2" title="Ver Seguimiento"><i class="bi bi-eye"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-warning py-1 px-2" title="Revisar Alerta"><i class="bi bi-exclamation-triangle"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="ps-3 fw-semibold text-dark">T.I. 1085339871</td>
+                            <td class="fw-bold text-dark">María Alejandra Rhenals</td>
+                            <td>ma.rhenals@misena.edu.co</td>
+                            <td><span class="badge bg-warning text-dark">Ficha 2654105</span><br><small class="text-muted">Técnico en Agroindustria</small></td>
+                            <td>I.E.D. Simón Bolívar</td>
+                            <td><span class="badge bg-light text-dark border">Tarde</span></td>
+                            <td><span class="badge bg-success">Lectiva - Aprobado</span></td>
+                            <td class="pe-3 text-end">
+                                <a href="#" class="btn btn-sm btn-outline-primary py-1 px-2" title="Ver Seguimiento"><i class="bi bi-eye"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-success py-1 px-2" title="Juicios Evaluativos"><i class="bi bi-journal-check"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
+            <span class="text-muted small">Mostrando 4 de 4 registros oficiales del Centro de Logística y Promoción Ecoturística</span>
+            <span class="text-muted small">SINETEC v2.0 - SENA</span>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Panel de Aprendiz - SINETEC{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="p-4 mb-4 bg-white rounded-4 shadow-sm border-start border-4 border-success">
+        <h2 class="fw-bold text-dark"><i class="bi bi-mortarboard text-success me-2"></i> Panel del Aprendiz</h2>
+        <p class="text-muted mb-0">Consulta tus calificaciones, avances académicos y estado en el programa de formación.</p>
+    </div>
+    <div class="card shadow-sm border-0 p-4 rounded-4">
+        <h5 class="fw-bold text-secondary mb-3">Mi Información Académica</h5>
+        <p class="text-muted">Aquí puedes visualizar el reporte de tus notas y el seguimiento de tus instructores asignados.</p>
+        <a href="{% url 'calificaciones' %}" class="btn btn-success btn-sm w-25">Ver mis Notas</a>
+    </div>
+</div>
+{% endblock %}

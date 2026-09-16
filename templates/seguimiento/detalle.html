@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Bitácora {{ bitacora.fecha_visita }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="mb-3">
+            <a href="{% url 'seguimiento_lista' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Volver al Listado de Bitácoras
+            </a>
+        </div>
+
+        <div class="sinetec-card p-4 p-md-5">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 border-bottom pb-3">
+                <div>
+                    <span class="badge bg-primary mb-1">Ficha {{ bitacora.ficha.codigo_ficha }}</span>
+                    <h1 class="h4 fw-bold mb-0 text-dark">Acta de Bitácora de Seguimiento</h1>
+                    <small class="text-muted">{{ bitacora.ficha.institucion.nombre }} ({{ bitacora.ficha.institucion.municipio }})</small>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-light text-dark border fs-6">{{ bitacora.tipo_seguimiento }}</span><br>
+                    <small class="text-muted">Fecha de Visita: <strong>{{ bitacora.fecha_visita|date:"d/m/Y" }}</strong></small>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mb-4">
+                <a href="{% url 'seguimiento_acta_pdf' bitacora.pk %}" class="btn btn-danger">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar Acta de Visita en PDF
+                </a>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <small class="text-muted d-block">Instructor Responsable:</small>
+                    <strong>{{ bitacora.instructor.get_full_name|default:bitacora.instructor.username }}</strong>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted d-block">Destinatario de la Observación:</small>
+                    {% if bitacora.matricula %}
+                        <span class="badge bg-info text-dark">Individual: {{ bitacora.matricula.aprendiz.get_full_name }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Acompañamiento General de Toda la Ficha</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if mapa_url %}
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-primary mb-0"><i class="bi bi-geo-alt-fill me-1"></i>Ubicación verificada de la visita</h6>
+                        <a href="{{ google_maps_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">Abrir en Google Maps</a>
+                    </div>
+                    <iframe src="{{ mapa_url }}" title="Mapa de ubicación de la visita" class="w-100 rounded border" style="height: 300px;" loading="lazy"></iframe>
+                    <small class="text-muted">Coordenadas: {{ bitacora.latitud }}, {{ bitacora.longitud }}{% if bitacora.precision_gps %} · Precisión: {{ bitacora.precision_gps }} m{% endif %}</small>
+                </div>
+            {% else %}
+                <div class="alert alert-secondary small"><i class="bi bi-geo-alt me-1"></i>Esta visita no tiene coordenadas GPS registradas.</div>
+            {% endif %}
+
+            <div class="mb-4">
+                <h6 class="fw-bold text-primary">Diagnóstico Pedagógico y Observaciones:</h6>
+                <div class="p-3 bg-light rounded-3 border">
+                    {{ bitacora.observaciones|linebreaks }}
+                </div>
+            </div>
+
+            {% if bitacora.compromisos %}
+                <div class="mb-4 p-3 {% if estado_compromiso == 'vencido' %}bg-danger bg-opacity-10 border-danger{% else %}bg-warning bg-opacity-10 border-warning{% endif %} rounded-3 border">
+                    <h6 class="fw-bold text-dark">
+                        <i class="bi {% if estado_compromiso == 'vencido' %}bi-exclamation-octagon text-danger{% else %}bi-exclamation-triangle-fill text-warning{% endif %} me-2"></i>
+                        Compromisos y Plan de Mejora (RN-006)
+                    </h6>
+                    <p class="mb-2">{{ bitacora.compromisos|linebreaks }}</p>
+                    <small class="fw-bold text-dark">
+                        {% if estado_compromiso == 'vencido' %}
+                            <i class="bi bi-calendar-x me-1 text-danger"></i>Compromiso vencido el {{ bitacora.fecha_verificacion|date:"d/m/Y" }}
+                        {% else %}
+                            <i class="bi bi-calendar-check me-1"></i>Fecha Límite de Verificación: {{ bitacora.fecha_verificacion|date:"d/m/Y" }}
+                        {% endif %}
+                    </small>
+                </div>
+            {% endif %}
+
+            {% if bitacora.archivo_adjunto %}
+                <div class="mb-4 p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-2"></i>
+                        <strong>Soporte o Acta Escaneada Adjunta</strong>
+                    </div>
+                    <a href="{{ bitacora.archivo_adjunto.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-download me-1"></i> Ver / Descargar Documento
+                    </a>
+                </div>
+            {% endif %}
+
+            <div class="text-muted small pt-3 border-top d-flex justify-content-between">
+                <span>Registrado en SINETEC: {{ bitacora.fecha_registro|date:"d/m/Y H:i" }}</span>
+                <span>Trazabilidad e Inmutabilidad Institucional</span>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- SECCIÓN DE COMUNICACIÓN INTERNA Y MENSAJES (SENA) -->
+<div class="card shadow-sm border-0 my-4" style="border-radius: 12px; overflow: hidden;">
+    <div class="card-header py-3 text-white d-flex justify-content-between align-items-center" style="background-color: #e91e63;">
+        <h5 class="mb-0 fw-bold">💬 Comunicación Interna y Mensajes (SENA)</h5>
+        <span class="badge bg-white text-dark">Activo</span>
+    </div>
+    <div class="card-body" style="background-color: #fafafa;">
+        
+        <!-- Historial de Conversación / Mensajes Dinámicos -->
+        <div class="chat-history mb-3 p-3 bg-white border rounded shadow-sm" style="max-height: 250px; overflow-y: auto;">
+            {% for msg in bitacora.mensajes.all %}
+                <div class="mb-3 border-bottom pb-2">
+                    <div class="d-flex justify-content-between">
+                        <small class="fw-bold text-dark">{{ msg.remitente.get_full_name|default:msg.remitente.username }}</small>
+                        <small class="text-muted">{{ msg.fecha_envio|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    <p class="mb-0 text-secondary small mt-1">{{ msg.mensaje }}</p>
+                </div>
+            {% empty %}
+                <div class="text-center py-3 text-muted">
+                    <i class="bi bi-chat-square-text fs-4 d-block mb-1"></i>
+                    <small>No hay mensajes en esta comunicación interna todavía. ¡Escribe el primero abajo!</small>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Formulario para enviar nuevo mensaje -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" name="mensaje" class="form-control border-0 shadow-sm py-2" placeholder="Escribir mensaje interno o aviso para la ficha..." required autocomplete="off">
+                <button class="btn text-white fw-semibold px-4" type="submit" style="background-color: #4a2e35;">Enviar</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
