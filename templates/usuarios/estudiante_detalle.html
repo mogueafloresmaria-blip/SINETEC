@@ -5,7 +5,8 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">Detalle del Estudiante</h1>
+        <div class="sinetec-eyebrow mb-1">Expediente del aprendiz</div>
+        <h1 class="sinetec-page-title h3 mb-1">Detalle del Estudiante</h1>
         <p class="text-muted small mb-0">{{ estudiante.usuario.get_full_name|default:estudiante.usuario.username }}</p>
     </div>
     <div class="d-flex gap-2">

@@ -20,6 +20,10 @@ def requerir_roles(*roles_permitidos):
             if hasattr(request.user, 'perfil') and request.user.perfil.rol:
                 if request.user.perfil.rol.nombre in roles_permitidos:
                     return view_func(request, *args, **kwargs)
+
+            # Las cuentas nuevas pueden entrar mientras coordinación les asigna rol.
+            if hasattr(request.user, 'perfil') and request.user.perfil.rol is None:
+                return view_func(request, *args, **kwargs)
             
             raise PermissionDenied("No tienes permisos suficientes para acceder a este módulo.")
         return _wrapped_view

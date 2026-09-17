@@ -4,6 +4,40 @@
 
 {% block content %}
 <div class="container-fluid py-3">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+        <div>
+            <div class="sinetec-eyebrow mb-2">Centro de control · Regional Magdalena</div>
+            <h1 class="sinetec-page-title display-6 mb-2">Bienvenido a SINETEC</h1>
+            <p class="text-muted mb-0">Una vista clara del avance académico, el acompañamiento y la operación diaria.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'seguimiento_nuevo' %}" class="btn sinetec-btn sinetec-btn-primary"><i class="bi bi-plus-lg me-1"></i> Nuevo seguimiento</a>
+            <a href="{% url 'seguimiento_asistencia' %}" class="btn sinetec-btn btn-outline-dark bg-white"><i class="bi bi-calendar2-check me-1"></i> Control diario</a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Aprendices activos</div><div class="sinetec-metric-value">{{ total_aprendices|default:0 }}</div><small class="text-success fw-semibold"><i class="bi bi-arrow-up-right"></i> Matrículas en formación</small></div></div>
+        <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Instructores</div><div class="sinetec-metric-value">{{ total_instructores|default:0 }}</div><small class="text-muted">Equipo responsable</small></div></div>
+        <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Fichas activas</div><div class="sinetec-metric-value">{{ fichas_activas|default:0 }}</div><small class="text-muted">De {{ total_fichas|default:0 }} registradas</small></div></div>
+        <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Pendientes de seguimiento</div><div class="sinetec-metric-value">{{ seguimientos_pendientes|default:0 }}</div><small class="text-warning fw-semibold"><i class="bi bi-clock"></i> Requieren atención</small></div></div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-8">
+            <section class="sinetec-card h-100">
+                <div class="sinetec-card-header d-flex justify-content-between align-items-center"><div><h2 class="h5 fw-bold mb-1">Actividad reciente</h2><p class="text-muted small mb-0">Últimos acompañamientos registrados en el sistema</p></div><a href="{% url 'seguimiento_lista' %}" class="btn btn-sm btn-light">Ver historial <i class="bi bi-arrow-right"></i></a></div>
+                <div class="table-responsive"><table class="table sinetec-table mb-0"><thead><tr><th>Fecha</th><th>Ficha / institución</th><th>Responsable</th><th>Estado</th></tr></thead><tbody>
+                    {% for seguimiento in seguimientos_recientes %}<tr><td class="fw-semibold">{{ seguimiento.fecha_visita|date:'d M Y' }}</td><td><strong class="d-block">Ficha {{ seguimiento.ficha.codigo_ficha }}</strong><small class="text-muted">{{ seguimiento.ficha.institucion.nombre|truncatechars:34 }}</small></td><td>{{ seguimiento.instructor.get_full_name|default:seguimiento.instructor.username|truncatechars:22 }}</td><td><span class="sinetec-status sinetec-status-success">Registrado</span></td></tr>{% empty %}<tr><td colspan="4" class="text-center text-muted py-5">Aún no hay seguimientos registrados.</td></tr>{% endfor %}
+                </tbody></table></div>
+            </section>
+        </div>
+        <div class="col-xl-4">
+            <section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h5 fw-bold mb-1">Próximos compromisos</h2><p class="text-muted small mb-0">Fechas que requieren seguimiento</p></div><div class="p-3">
+                {% for seguimiento in proximos_seguimientos %}<div class="d-flex gap-3 align-items-start py-2 border-bottom"><div class="text-center"><strong class="d-block text-success">{{ seguimiento.fecha_verificacion|date:'d' }}</strong><small class="text-muted">{{ seguimiento.fecha_verificacion|date:'M'|upper }}</small></div><div><strong class="d-block small">Ficha {{ seguimiento.ficha.codigo_ficha }}</strong><span class="text-muted small">{{ seguimiento.compromisos|truncatechars:58 }}</span></div></div>{% empty %}<div class="text-center text-muted py-4"><i class="bi bi-calendar2-check fs-3 d-block mb-2"></i>No hay compromisos próximos.</div>{% endfor %}
+            </div></section>
+        </div>
+    </div>
     
     <!-- Alerta Dinámica del Módulo Activo -->
     {% if titulo_modulo %}
@@ -41,8 +75,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <span class="text-uppercase text-muted fw-semibold small">Colegios Activos</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">12</h3>
-                        <span class="text-success small fw-semibold"><i class="bi bi-arrow-up-short"></i> +2 este año</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_instituciones|default:0 }}</h3>
+                        <span class="text-success small fw-semibold"><i class="bi bi-check-circle"></i> Convenios activos</span>
                     </div>
                     <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
                         <i class="bi bi-buildings fs-4"></i>
@@ -57,8 +91,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <span class="text-uppercase text-muted fw-semibold small">Fichas Técnicas</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">24</h3>
-                        <span class="text-muted small">Programas articulados</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_fichas|default:0 }}</h3>
+                        <span class="text-muted small">Fichas registradas</span>
                     </div>
                     <div class="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
                         <i class="bi bi-journal-text fs-4"></i>
@@ -73,8 +107,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <span class="text-uppercase text-muted fw-semibold small">Aprendices</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">680</h3>
-                        <span class="text-success small fw-semibold">Programas Articulados</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_aprendices|default:0 }}</h3>
+                        <span class="text-success small fw-semibold">Matrículas activas</span>
                     </div>
                     <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success">
                         <i class="bi bi-people fs-4"></i>
@@ -89,8 +123,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <span class="text-uppercase text-muted fw-semibold small">Tasa de Aprobación</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">94%</h3>
-                        <span class="text-primary small fw-semibold">Aprobados / Por Mejorar</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ fichas_activas|default:0 }}</h3>
+                        <span class="text-primary small fw-semibold">Fichas en ejecución</span>
                     </div>
                     <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-pie-chart fs-4"></i>

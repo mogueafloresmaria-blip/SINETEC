@@ -1,137 +1,53 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SINETEC{% endblock %}</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-        :root {
-            --sena-green: #39A900;
-            --sena-dark-green: #287a00;
-        }
-        body {
-            background-color: #f4f9f4;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        /* Navbar institucional verde oscuro profesional */
-        .navbar-sinetec {
-            background-color: #111827 !important;
-            border-bottom: 3px solid var(--sena-green);
-        }
-        .navbar-dark .navbar-nav .nav-link.active {
-            color: var(--sena-green) !important;
-            font-weight: 600;
-        }
-        .navbar-dark .navbar-nav .nav-link:hover {
-            color: #58d68d !important;
-        }
-        
-        /* Estilos generales en Verde SENA / Esmeralda */
-        .bg-danger, .bg-primary, .bg-secondary {
-            background-color: var(--sena-green) !important;
-        }
-        .text-danger, .text-primary {
-            color: var(--sena-green) !important;
-        }
-        .border-danger, .border-primary {
-            border-color: var(--sena-green) !important;
-        }
-        .btn-danger, .btn-primary {
-            background-color: var(--sena-green) !important;
-            border-color: var(--sena-green) !important;
-        }
-        .btn-danger:hover, .btn-primary:hover {
-            background-color: var(--sena-dark-green) !important;
-            border-color: var(--sena-dark-green) !important;
-        }
-
-        /* Tarjeta principal con tonos verdes elegantes */
-        .hero-card-verde {
-            background: linear-gradient(135deg, #1b4d3e 0%, #11382c 100%) !important;
-            color: white;
-            border-radius: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(27, 77, 62, 0.2);
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/sinetec.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-    <!-- Barra de Navegación -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-sinetec shadow-sm px-3">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
-                <i class="bi bi-mortarboard-fill fs-4 me-2 text-success"></i> SINETEC
+    <div class="sinetec-shell">
+        <aside class="sinetec-sidebar" id="sinetecSidebar">
+            <a class="sinetec-brand" href="{% url 'dashboard' %}">
+                <span class="sinetec-brand-mark"><i class="bi bi-grid-1x2-fill"></i></span>
+                <span><strong>SINETEC</strong><small>Gestión Media Técnica</small></span>
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <nav class="sinetec-nav">
+                <div class="sinetec-nav-label">Espacio de trabajo</div>
+                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="bi bi-bar-chart-line-fill"></i> Panel general</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'fichas' or request.resolver_match.url_name == 'fichas_lista' %}active{% endif %}" href="{% url 'fichas' %}"><i class="bi bi-layers-fill"></i> Fichas y programas</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'estudiantes_lista' %}active{% endif %}" href="{% url 'estudiantes_lista' %}"><i class="bi bi-people-fill"></i> Aprendices</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento_lista' %}active{% endif %}" href="{% url 'seguimiento_lista' %}"><i class="bi bi-clipboard2-pulse-fill"></i> Seguimiento</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'evaluaciones_calificar' or request.resolver_match.url_name == 'calificaciones' %}active{% endif %}" href="{% url 'calificaciones' %}"><i class="bi bi-award-fill"></i> Evaluación RAP</a>
+                <div class="sinetec-nav-label">Administración</div>
+                <a class="nav-link {% if request.resolver_match.url_name == 'instituciones_lista' %}active{% endif %}" href="{% url 'instituciones_lista' %}"><i class="bi bi-building-fill"></i> Instituciones</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'alertas_tempranas' %}active{% endif %}" href="{% url 'alertas_tempranas' %}"><i class="bi bi-bell-fill"></i> Alertas</a>
+                <a class="nav-link" href="{% url 'mensajeria' %}"><i class="bi bi-chat-left-text-fill"></i> Mensajería</a>
+            </nav>
+            <div class="sinetec-sidebar-footer"><strong><i class="bi bi-shield-check me-1"></i> Regional Magdalena</strong> Plataforma institucional SINETEC</div>
+        </aside>
+        <div class="sinetec-main">
+            <header class="sinetec-topbar">
+                <button class="sinetec-icon-btn sinetec-mobile-toggle" type="button" onclick="document.getElementById('sinetecSidebar').classList.toggle('is-open')"><i class="bi bi-list"></i></button>
+                <form class="sinetec-search" action="{% url 'busqueda_global' %}" method="get">
+                    <i class="bi bi-search"></i><input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Buscar aprendices, fichas o documentos..." aria-label="Buscar en SINETEC">
+                </form>
+                <div class="d-flex align-items-center gap-2">
+                    <a class="sinetec-icon-btn" href="{% url 'alertas_tempranas' %}" title="Notificaciones"><i class="bi bi-bell"></i></a>
+                    <a class="sinetec-user" href="{% url 'dashboard' %}"><span class="sinetec-avatar">{{ user.username|default:'S'|slice:':1'|upper }}</span><span class="sinetec-user-meta"><strong class="d-block small">{{ user.get_full_name|default:user.username|default:'Sesión demo' }}</strong><small class="text-muted">Panel institucional</small></span></a>
+                </div>
+            </header>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
-                            <i class="bi bi-house-door me-1"></i> Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
-                            <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'fichas' %}active{% endif %}" href="{% url 'fichas' %}">
-                            <i class="bi bi-journal-text me-1"></i> Fichas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'estudiantes_lista' %}active{% endif %}" href="{% url 'estudiantes_lista' %}">
-                            <i class="bi bi-people me-1"></i> Estudiantes
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento' %}active{% endif %}" href="{% url 'seguimiento' %}">
-                            <i class="bi bi-clipboard-check me-1"></i> Seguimiento
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'calificaciones' %}active{% endif %}" href="{% url 'calificaciones' %}">
-                            <i class="bi bi-award me-1"></i> Calificaciones
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'alertas_tempranas' %}active{% endif %}" href="{% url 'alertas_tempranas' %}">
-                            <i class="bi bi-exclamation-triangle me-1"></i> Alertas
-                        </a>
-                    </li>
-                </ul>
-
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1 text-success"></i> {{ user.username|default:"laura" }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                            <li><a class="dropdown-item" href="{% url 'dashboard' %}">Mi Panel</a></li>
-                            <li><a class="dropdown-item" href="/admin/" target="_blank">Panel Admin Django</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Cerrar Sesión</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Contenido Principal -->
-    <main>
+    <main class="sinetec-content">
         {% if messages %}
             <div class="container mt-3">
                 {% for message in messages %}
@@ -228,5 +144,7 @@
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
+        </div>
+    </div>
 </body>
 </html>

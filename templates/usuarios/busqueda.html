@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Búsqueda global - SINETEC{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <div class="sinetec-eyebrow mb-2">Explorador institucional</div>
+    <h1 class="sinetec-page-title h3 mb-1">Búsqueda global</h1>
+    <p class="text-muted mb-0">Consulta aprendices, fichas, instituciones y registros de seguimiento desde un solo lugar.</p>
+</div>
+<form class="sinetec-card p-3 mb-4 d-flex gap-2" method="get">
+    <input class="form-control" name="q" value="{{ query }}" placeholder="Escribe un nombre, ficha, colegio o palabra clave..." autofocus>
+    <button class="btn sinetec-btn sinetec-btn-primary px-4" type="submit"><i class="bi bi-search me-1"></i> Buscar</button>
+</form>
+{% if query %}
+<div class="row g-4">
+    <div class="col-xl-6"><section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h6 fw-bold mb-0"><i class="bi bi-people me-2 text-success"></i>Aprendices</h2></div><div class="list-group list-group-flush">{% for item in aprendices %}<a class="list-group-item list-group-item-action" href="{% url 'estudiante_detalle' item.aprendiz.perfil.pk %}"><strong>{{ item.aprendiz.get_full_name|default:item.aprendiz.username }}</strong><small class="d-block text-muted">Ficha {{ item.ficha.codigo_ficha }} · {{ item.aprendiz.perfil.numero_documento }}</small></a>{% empty %}<div class="p-4 text-muted small">Sin resultados de aprendices.</div>{% endfor %}</div></section></div>
+    <div class="col-xl-6"><section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h6 fw-bold mb-0"><i class="bi bi-layers me-2 text-success"></i>Fichas</h2></div><div class="list-group list-group-flush">{% for item in fichas %}<a class="list-group-item list-group-item-action" href="{% url 'fichas_detalle' item.pk %}"><strong>Ficha {{ item.codigo_ficha }}</strong><small class="d-block text-muted">{{ item.programa.denominacion }} · {{ item.institucion.nombre }}</small></a>{% empty %}<div class="p-4 text-muted small">Sin resultados de fichas.</div>{% endfor %}</div></section></div>
+    <div class="col-xl-6"><section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h6 fw-bold mb-0"><i class="bi bi-building me-2 text-success"></i>Instituciones</h2></div><div class="list-group list-group-flush">{% for item in instituciones %}<a class="list-group-item list-group-item-action" href="{% url 'instituciones_detalle' item.pk %}"><strong>{{ item.nombre }}</strong><small class="d-block text-muted">{{ item.municipio }} · DANE {{ item.codigo_dane }}</small></a>{% empty %}<div class="p-4 text-muted small">Sin resultados de instituciones.</div>{% endfor %}</div></section></div>
+    <div class="col-xl-6"><section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h6 fw-bold mb-0"><i class="bi bi-clipboard2-pulse me-2 text-success"></i>Seguimientos</h2></div><div class="list-group list-group-flush">{% for item in seguimientos %}<a class="list-group-item list-group-item-action" href="{% url 'seguimiento_detalle' item.pk %}"><strong>Ficha {{ item.ficha.codigo_ficha }} · {{ item.fecha_visita|date:'d/m/Y' }}</strong><small class="d-block text-muted">{{ item.observaciones|truncatechars:100 }}</small></a>{% empty %}<div class="p-4 text-muted small">Sin resultados de seguimiento.</div>{% endfor %}</div></section></div>
+</div>
+{% else %}
+<div class="sinetec-card text-center p-5"><i class="bi bi-search fs-1 text-success d-block mb-3"></i><h2 class="h5 fw-bold">Empieza una búsqueda</h2><p class="text-muted mb-0">Usa la barra superior o escribe una palabra clave para consultar todo SINETEC.</p></div>
+{% endif %}
+{% endblock %}

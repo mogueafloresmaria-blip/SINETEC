@@ -1,8 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Listado de Aprendices - SINETEC | Regional Magdalena{% endblock %}
 
 {% block content %}
+<div class="alert alert-info"><i class="bi bi-qr-code-scan me-1"></i> Escanear carnet QR · html5-qrcode · <a href="{% static 'manifest.webmanifest' %}">manifest.webmanifest</a></div>
+{% if error_importacion %}<div class="alert alert-danger">{{ error_importacion }}</div>{% endif %}
 <div class="container-fluid py-3">
     
     <!-- Encabezado de la Sección -->
