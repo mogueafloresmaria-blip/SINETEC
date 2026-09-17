@@ -44,6 +44,8 @@ def alertas_desercion_para_matricula(matricula):
     return alertas
 
 def home(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     return render(request, 'home.html')
 
 @login_required
@@ -52,6 +54,28 @@ def dashboard(request):
     seguimientos = BitacoraSeguimiento.objects.select_related(
         'ficha', 'ficha__institucion', 'matricula__aprendiz', 'instructor'
     )
+    rol_usuario = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+    rol_nombre = rol_usuario.nombre if rol_usuario else 'Usuario'
+    modulos_disponibles = [
+        {'titulo': 'Fichas y programas', 'descripcion': 'Gestión de cohortes, horarios y rutas formativas.', 'icono': 'bi-layers', 'activo': True},
+        {'titulo': 'Evaluación RAP', 'descripcion': 'Juicios, evidencias, seguimiento académico y retroalimentación.', 'icono': 'bi-award', 'activo': True},
+        {'titulo': 'Control de asistencia', 'descripcion': 'Asistencias diarias, alertas y acompañamiento académico.', 'icono': 'bi-calendar2-check', 'activo': rol_nombre in ['Administrador', 'Coordinador', 'Instructor SENA']},
+        {'titulo': 'Extranet / familias', 'descripcion': 'Acceso a horarios, seguimientos, materiales y comunicación.', 'icono': 'bi-people', 'activo': rol_nombre in ['Administrador', 'Coordinador', 'Instructor SENA', 'Estudiante']},
+        {'titulo': 'Google Classroom', 'descripcion': 'Integración con actividades, contenidos y tareas externas.', 'icono': 'bi-google', 'activo': rol_nombre in ['Administrador', 'Coordinador', 'Instructor SENA']},
+        {'titulo': 'Carnet QR', 'descripcion': 'Control de ingreso con renovación diaria y acceso a información.', 'icono': 'bi-qr-code-scan', 'activo': rol_nombre in ['Administrador', 'Coordinador', 'Estudiante']},
+    ]
+    tablero_fichas = []
+    for ficha in Ficha.objects.select_related('programa', 'institucion', 'instructor_lider')[:6]:
+        tablero_fichas.append({
+            'codigo': ficha.codigo_ficha,
+            'programa': ficha.programa.denominacion,
+            'institucion': ficha.institucion.nombre,
+            'instructor': ficha.instructor_lider.get_full_name() or ficha.instructor_lider.username,
+            'jornada': 'Diurna',
+            'estado': ficha.estado,
+            'aprendices': Matricula.objects.filter(ficha=ficha).count(),
+            'modulos': ['RAP', 'Asistencia', 'Documentos', 'Mensajería'],
+        })
     context = {
         'total_fichas': Ficha.objects.count(),
         'fichas_activas': Ficha.objects.filter(estado='En Ejecucion').count(),
@@ -65,6 +89,9 @@ def dashboard(request):
         'proximos_seguimientos': seguimientos.filter(fecha_verificacion__gte=hoy).order_by('fecha_verificacion')[:4],
         'mensajes_recientes': MensajeSeguimiento.objects.select_related('remitente').order_by('-fecha_envio')[:4],
         'actividades_pendientes': EvidenciaTaller.objects.filter(fecha_limite__gte=timezone.now()).count(),
+        'rol_usuario': rol_nombre,
+        'modulos_disponibles': modulos_disponibles,
+        'tablero_fichas': tablero_fichas,
     }
     return render(request, 'dashboard.html', context)
 

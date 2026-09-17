@@ -6,18 +6,18 @@
 ============================================================================== */
 
 :root {
-  --sinetec-primary: #D96C9D;
-  --sinetec-primary-dark: #E98FB3;
-  --sinetec-secondary: #F4A6C1;
-  --sinetec-accent: #F8C8DC;
+  --sinetec-primary: #39A900;
+  --sinetec-primary-dark: #1F5E2D;
+  --sinetec-secondary: #8CCB65;
+  --sinetec-accent: #DCEFD1;
   --sinetec-success: #059669;
   --sinetec-warning: #D97706;
   --sinetec-danger: #DC2626;
-  --sinetec-bg-light: #FFF0F5;
+  --sinetec-bg-light: #F3F7F0;
   --sinetec-card-bg: #FFFFFF;
-  --sinetec-border: #FADADD;
-  --sinetec-text-main: #4A3A40;
-  --sinetec-text-muted: #806A70;
+  --sinetec-border: #E2EDE0;
+  --sinetec-text-main: #1E2D26;
+  --sinetec-text-muted: #5B6E64;
   --sinetec-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -32,7 +32,7 @@ body {
 
 a { color: var(--sinetec-primary); }
 a:hover { color: var(--sinetec-primary-dark); }
-:root { --bs-link-color: #D96C9D; --bs-link-hover-color: #E98FB3; }
+:root { --bs-link-color: #39A900; --bs-link-hover-color: #1F5E2D; }
 
 /* Barra de navegación superior */
 .navbar-sinetec {
@@ -159,7 +159,7 @@ a:hover { color: var(--sinetec-primary-dark); }
   border-radius: 50%;
   background: var(--sinetec-primary);
   color: #FFFFFF;
-  box-shadow: 0 8px 24px rgba(217, 108, 157, 0.35);
+  box-shadow: 0 8px 24px rgba(57, 169, 0, 0.35);
 }
 
 .chatbot-panel {

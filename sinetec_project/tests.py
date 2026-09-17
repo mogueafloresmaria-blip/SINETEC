@@ -31,6 +31,14 @@ class InicioViewTest(TestCase):
         self.assertEqual(respuesta.status_code, 302)
         self.assertIn('/login/', respuesta.url)
 
+    def test_dashboard_sin_perfil_no_falla(self):
+        """Verifica que el dashboard renderiza sin asumir que el usuario tiene perfil completo."""
+        user_sin_perfil = User.objects.create_user(username='sinperfil', password='Password123*')
+        self.client.force_login(user_sin_perfil)
+        respuesta = self.client.get('/dashboard/')
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTemplateUsed(respuesta, 'dashboard.html')
+
     def test_vistas_autenticadas_responden_ok(self):
         """Verifica que un usuario autenticado pueda acceder a todos los módulos web"""
         self.client.login(username='instructor_test', password='Password123*')

@@ -11,13 +11,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/sinetec.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sinetec_custom.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
     <div class="sinetec-shell">
         <aside class="sinetec-sidebar" id="sinetecSidebar">
-            <a class="sinetec-brand" href="{% url 'dashboard' %}">
+            <a class="sinetec-brand" href="{% url 'home' %}">
                 <span class="sinetec-brand-mark"><i class="bi bi-grid-1x2-fill"></i></span>
                 <span><strong>SINETEC</strong><small>Gestión Media Técnica</small></span>
             </a>
@@ -29,14 +30,18 @@
                 <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento_lista' %}active{% endif %}" href="{% url 'seguimiento_lista' %}"><i class="bi bi-clipboard2-pulse-fill"></i> Seguimiento</a>
                 <a class="nav-link {% if request.resolver_match.url_name == 'evaluaciones_calificar' or request.resolver_match.url_name == 'calificaciones' %}active{% endif %}" href="{% url 'calificaciones' %}"><i class="bi bi-award-fill"></i> Evaluación RAP</a>
                 <a class="nav-link {% if request.resolver_match.url_name == 'biblioteca_formacion' %}active{% endif %}" href="{% url 'biblioteca_formacion' %}"><i class="bi bi-book-half"></i> Biblioteca de formación</a>
-                {% if user.is_superuser or not user.perfil.rol or user.perfil.rol.nombre in 'Administrador Coordinador Instructor SENA' %}<a class="nav-link {% if request.resolver_match.url_name == 'horarios_tablero' %}active{% endif %}" href="{% url 'horarios_tablero' %}"><i class="bi bi-calendar3"></i> Horarios de fichas</a>{% endif %}
+                {% with perfil=user.perfil %}
+                    {% if user.is_superuser or not perfil or not perfil.rol or perfil.rol.nombre == 'Administrador' or perfil.rol.nombre == 'Coordinador' or perfil.rol.nombre == 'Instructor SENA' %}
+                        <a class="nav-link {% if request.resolver_match.url_name == 'horarios_tablero' %}active{% endif %}" href="{% url 'horarios_tablero' %}"><i class="bi bi-calendar3"></i> Horarios de fichas</a>
+                    {% endif %}
+                {% endwith %}
                 <div class="sinetec-nav-label">Gestión SENA</div>
                 <a class="nav-link {% if request.resolver_match.url_name == 'alertas_tempranas' %}active{% endif %}" href="{% url 'alertas_tempranas' %}"><i class="bi bi-bell-fill"></i> Alertas</a>
                 <a class="nav-link" href="{% url 'mensajeria' %}"><i class="bi bi-chat-left-text-fill"></i> Mensajería</a>
                 <a class="nav-link {% if request.resolver_match.url_name == 'coordinador_dashboard' %}active{% endif %}" href="{% url 'coordinador_dashboard' %}"><i class="bi bi-kanban-fill"></i> Coordinación</a>
                 <div class="sinetec-nav-label">Aulas</div>
-                <a class="nav-link {% if request.resolver_match.url_name == 'instructor_dashboard' %}active{% endif %}" href="{% url 'instructor_dashboard' %}"><i class="bi bi-person-workspace"></i> Aula del instructor</a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'aprendiz_dashboard' %}active{% endif %}" href="{% url 'aprendiz_dashboard' %}"><i class="bi bi-mortarboard-fill"></i> Aula del aprendiz</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'aula_instructor' or request.resolver_match.url_name == 'instructor_dashboard' %}active{% endif %}" href="{% url 'aula_instructor' %}"><i class="bi bi-person-workspace"></i> Aula del instructor</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'aula_aprendiz' or request.resolver_match.url_name == 'aprendiz_dashboard' %}active{% endif %}" href="{% url 'aula_aprendiz' %}"><i class="bi bi-mortarboard-fill"></i> Aula del aprendiz</a>
             </nav>
             <div class="sinetec-sidebar-footer"><strong><i class="bi bi-shield-check me-1"></i> Regional Magdalena</strong> Plataforma institucional SINETEC</div>
         </aside>

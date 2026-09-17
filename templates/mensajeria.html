@@ -27,7 +27,7 @@
             <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary fw-semibold bg-white">
                 <i class="bi bi-arrow-left me-1"></i> Volver al Panel
             </a>
-            <button class="btn btn-primary fw-semibold shadow-sm text-white" style="background-color: #D96C9D; border-color: #D96C9D;" data-bs-toggle="modal" data-bs-target="#nuevoMensajeModal">
+            <button class="btn btn-primary fw-semibold shadow-sm text-white" style="background-color: #39A900; border-color: #39A900;" data-bs-toggle="modal" data-bs-target="#nuevoMensajeModal">
                 <i class="bi bi-send-fill me-1"></i> Redactar Nuevo Mensaje
             </button>
         </div>
@@ -154,7 +154,7 @@
         <div class="modal-content border-0 shadow">
             <form method="POST" action="{% url 'mensajeria' %}">
                 {% csrf_token %}
-                <div class="modal-header text-white" style="background-color: #D96C9D;">
+                <div class="modal-header text-white" style="background-color: #39A900;">
                     <h5 class="modal-title fw-bold" id="nuevoMensajeModalLabel">
                         <i class="bi bi-send-fill me-2"></i> Enviar Mensaje o Alerta Institucional (SINETEC)
                     </h5>
@@ -222,7 +222,7 @@
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary btn-sm text-white px-4" style="background-color: #D96C9D; border-color: #D96C9D;">
+                    <button type="submit" class="btn btn-primary btn-sm text-white px-4" style="background-color: #39A900; border-color: #39A900;">
                         <i class="bi bi-send me-1"></i> Enviar Mensaje
                     </button>
                 </div>

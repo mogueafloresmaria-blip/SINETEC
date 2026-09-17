@@ -4,15 +4,17 @@
 
 {% block content %}
 <div class="container-fluid py-3">
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
-        <div>
-            <div class="sinetec-eyebrow mb-2">Centro de control · Regional Magdalena</div>
-            <h1 class="sinetec-page-title display-6 mb-2">Bienvenido a SINETEC</h1>
-            <p class="text-muted mb-0">Una vista clara del avance académico, el acompañamiento y la operación diaria.</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{% url 'seguimiento_nuevo' %}" class="btn sinetec-btn sinetec-btn-primary"><i class="bi bi-plus-lg me-1"></i> Nuevo seguimiento</a>
-            <a href="{% url 'seguimiento_asistencia' %}" class="btn sinetec-btn btn-outline-dark bg-white"><i class="bi bi-calendar2-check me-1"></i> Control diario</a>
+    <div class="sinetec-dashboard-hero mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3">
+            <div>
+                <div class="sinetec-eyebrow mb-2">Centro de control · Regional Magdalena</div>
+                <h1 class="sinetec-page-title display-6 mb-2">Bienvenido a SINETEC</h1>
+                <p class="text-muted mb-0">Una vista clara del avance académico, el acompañamiento y la operación diaria.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'seguimiento_nuevo' %}" class="btn sinetec-btn sinetec-btn-primary"><i class="bi bi-plus-lg me-1"></i> Nuevo seguimiento</a>
+                <a href="{% url 'seguimiento_asistencia' %}" class="btn sinetec-btn btn-outline-dark bg-white"><i class="bi bi-calendar2-check me-1"></i> Control diario</a>
+            </div>
         </div>
     </div>
 
@@ -21,6 +23,79 @@
         <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Instructores</div><div class="sinetec-metric-value">{{ total_instructores|default:0 }}</div><small class="text-muted">Equipo responsable</small></div></div>
         <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Fichas activas</div><div class="sinetec-metric-value">{{ fichas_activas|default:0 }}</div><small class="text-muted">De {{ total_fichas|default:0 }} registradas</small></div></div>
         <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Pendientes de seguimiento</div><div class="sinetec-metric-value">{{ seguimientos_pendientes|default:0 }}</div><small class="text-warning fw-semibold"><i class="bi bi-clock"></i> Requieren atención</small></div></div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="sinetec-card p-4">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+                    <div>
+                        <div class="sinetec-eyebrow">Tablero por rol</div>
+                        <h2 class="sinetec-page-title h3 mb-1">Módulos disponibles para {{ rol_usuario }}</h2>
+                    </div>
+                    <span class="badge bg-success-subtle text-success-emphasis px-3 py-2 rounded-pill">Sistema operativo institucional</span>
+                </div>
+                <div class="row g-3">
+                    {% for modulo in modulos_disponibles %}
+                        {% if modulo.activo %}
+                            <div class="col-md-6 col-xl-4">
+                                <div class="border border-success-subtle rounded-4 p-3 h-100 bg-gradient" style="background: linear-gradient(135deg, rgba(57,169,0,.08), rgba(255,255,255,1));">
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <span class="rounded-3 p-2 bg-white border" style="color:#1f5e2d"><i class="bi {{ modulo.icono }} fs-5"></i></span>
+                                        <strong>{{ modulo.titulo }}</strong>
+                                    </div>
+                                    <p class="text-muted small mb-0">{{ modulo.descripcion }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="col-12 text-muted">No hay módulos disponibles para este rol.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <section class="sinetec-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <div class="sinetec-eyebrow">Horario digital</div>
+                        <h2 class="sinetec-page-title h3 mb-0">Tablero de fichas y rutas formativas</h2>
+                    </div>
+                    <span class="badge bg-light text-dark border">Actualización diaria</span>
+                </div>
+                <div class="row g-3">
+                    {% for ficha in tablero_fichas %}
+                        <div class="col-md-6 col-xl-4">
+                            <div class="border rounded-4 p-3 h-100 shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="small text-uppercase text-muted">Ficha</div>
+                                        <strong class="fs-5">{{ ficha.codigo }}</strong>
+                                    </div>
+                                    <span class="badge {% if ficha.estado == 'En Ejecucion' %}bg-success-subtle text-success-emphasis{% else %}bg-secondary-subtle text-secondary-emphasis{% endif %} rounded-pill">{{ ficha.estado }}</span>
+                                </div>
+                                <p class="mb-2 fw-semibold">{{ ficha.programa }}</p>
+                                <p class="text-muted small mb-3">{{ ficha.institucion }} · Instructor: {{ ficha.instructor }}</p>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    {% for modulo in ficha.modulos %}
+                                        <span class="badge rounded-pill bg-light text-dark border">{{ modulo }}</span>
+                                    {% endfor %}
+                                </div>
+                                <div class="d-flex justify-content-between small text-muted">
+                                    <span>Aprendices: {{ ficha.aprendices }}</span>
+                                    <span>{{ ficha.jornada }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-muted">No hay fichas para mostrar.</div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
     </div>
 
     <div class="row g-4 mb-4">
@@ -59,7 +134,7 @@
             </p>
         </div>
         <div class="d-flex gap-2">
-            <a href="#" class="btn btn-primary fw-semibold shadow-sm" style="background-color: #D96C9D; border-color: #D96C9D;">
+            <a href="#" class="btn btn-primary fw-semibold shadow-sm" style="background-color: #39A900; border-color: #39A900;">
                 <i class="bi bi-plus-circle me-1"></i> Nueva Visita
             </a>
             <a href="#" class="btn btn-outline-secondary fw-semibold bg-white">
@@ -257,7 +332,7 @@
 
                         <!-- Botón para abrir la cámara -->
                         <div class="d-grid w-100 gap-2 mb-2">
-                            <a href="{% url 'estudiantes_lista' %}" class="btn btn-danger btn-sm py-2 fw-semibold shadow-sm text-white" style="background-color: #D96C9D; border-color: #D96C9D;">
+                            <a href="{% url 'estudiantes_lista' %}" class="btn btn-danger btn-sm py-2 fw-semibold shadow-sm text-white" style="background-color: #39A900; border-color: #39A900;">
                                 <i class="bi bi-camera-fill me-1"></i> Abrir control QR
                             </a>
                         </div>
@@ -308,7 +383,7 @@
                         </div>
                         <h5 class="fw-bold text-dark">Mensajería Institucional</h5>
                         <p class="text-muted small">Comunícate entre Coordinadores, Instructores, Secretaría y Aprendices.</p>
-                        <a href="{% url 'mensajeria' %}" class="btn btn-primary btn-sm text-white px-4" style="background-color: #D96C9D; border-color: #D96C9D;">
+                        <a href="{% url 'mensajeria' %}" class="btn btn-primary btn-sm text-white px-4" style="background-color: #39A900; border-color: #39A900;">
                             Ir al Centro de Mensajes
                         </a>
                     </div>
@@ -323,7 +398,7 @@
     {% endcomment %}
 
     <div class="row g-4">
-        <div class="col-xl-8"><section class="sinetec-card p-4 h-100"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2 class="h5 fw-bold mb-1">Ruta operativa SENA</h2><p class="text-muted small mb-0">Accede al siguiente paso de tu proceso sin salir del panel.</p></div><i class="bi bi-signpost-2 text-success fs-3"></i></div><div class="row g-2"><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'fichas' %}"><i class="bi bi-layers text-success fs-4 d-block mb-2"></i><strong>Fichas</strong><small class="d-block text-muted">Consulta expedientes y aprendices.</small></a></div><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'instructor_dashboard' %}"><i class="bi bi-person-workspace text-success fs-4 d-block mb-2"></i><strong>Aula instructor</strong><small class="d-block text-muted">Publica y califica evidencias.</small></a></div><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'coordinador_dashboard' %}"><i class="bi bi-kanban text-success fs-4 d-block mb-2"></i><strong>Coordinación</strong><small class="d-block text-muted">Supervisa avances y alertas.</small></a></div></div></section></div>
+        <div class="col-xl-8"><section class="sinetec-card p-4 h-100"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2 class="h5 fw-bold mb-1">Ruta operativa SENA</h2><p class="text-muted small mb-0">Accede al siguiente paso de tu proceso sin salir del panel.</p></div><i class="bi bi-signpost-2 text-success fs-3"></i></div><div class="row g-2"><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'fichas' %}"><i class="bi bi-layers text-success fs-4 d-block mb-2"></i><strong>Fichas</strong><small class="d-block text-muted">Consulta expedientes y aprendices.</small></a></div><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'aula_instructor' %}"><i class="bi bi-person-workspace text-success fs-4 d-block mb-2"></i><strong>Aula instructor</strong><small class="d-block text-muted">Publica y califica evidencias.</small></a></div><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'coordinador_dashboard' %}"><i class="bi bi-kanban text-success fs-4 d-block mb-2"></i><strong>Coordinación</strong><small class="d-block text-muted">Supervisa avances y alertas.</small></a></div></div></section></div>
         <div class="col-xl-4"><section class="sinetec-card p-4 h-100"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2 class="h5 fw-bold mb-1">Centro de ayuda</h2><p class="text-muted small mb-0">Atajos para trabajar en SINETEC.</p></div><i class="bi bi-life-preserver text-success fs-3"></i></div><a href="{% url 'mensajeria' %}" class="btn btn-outline-success w-100 mb-2"><i class="bi bi-chat-left-text me-1"></i> Contactar equipo</a><a href="{% url 'alertas_tempranas' %}" class="btn btn-outline-warning w-100"><i class="bi bi-bell me-1"></i> Revisar alertas</a></section></div>
     </div>
 {% endblock %}
