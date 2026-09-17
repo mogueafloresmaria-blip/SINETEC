@@ -206,7 +206,21 @@
                   <div class="progress" role="progressbar">
                       <div class="progress-bar bg-warning" id="barra-aprobacion" style="width: {{ porcentaje_aprobacion }}%"></div>
                   </div>
+                  <div id="avance-calificacion" class="small text-muted mt-2">0% del grupo calificado</div>
               </div>
+          </div>
+      </div>
+
+      <div class="sinetec-card-pink p-3 mb-4" id="rubrica-panel">
+          <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+              <div><h2 class="h6 fw-bold mb-1" style="color:var(--pink-dark)"><i class="bi bi-sliders2-vertical me-1"></i>Rúbrica multidimensional</h2><p class="text-muted small mb-0">Ajusta el foco de la retroalimentación antes de cerrar la sábana.</p></div>
+              <span class="badge bg-light text-dark border">Promedio: <strong id="rubrica-promedio">0.0</strong>/5</span>
+          </div>
+          <div class="row g-3 mt-1">
+              <div class="col-md-3"><label class="form-label small fw-semibold">Dominio técnico</label><input class="form-range rubrica-range" type="range" min="0" max="5" value="0"><div class="small text-muted text-center rubrica-value">0</div></div>
+              <div class="col-md-3"><label class="form-label small fw-semibold">Aplicación práctica</label><input class="form-range rubrica-range" type="range" min="0" max="5" value="0"><div class="small text-muted text-center rubrica-value">0</div></div>
+              <div class="col-md-3"><label class="form-label small fw-semibold">Autonomía</label><input class="form-range rubrica-range" type="range" min="0" max="5" value="0"><div class="small text-muted text-center rubrica-value">0</div></div>
+              <div class="col-md-3"><label class="form-label small fw-semibold">Comunicación</label><input class="form-range rubrica-range" type="range" min="0" max="5" value="0"><div class="small text-muted text-center rubrica-value">0</div></div>
           </div>
       </div>
 
@@ -230,6 +244,9 @@
                   {% if hay_notas %}
                       <a href="{% url 'evaluaciones_exportar_excel' %}?ficha={{ ficha_actual.id }}&rap={{ rap_actual.id }}&periodo={{ periodo_academico }}&trimestre={{ trimestre }}" class="btn btn-sm btn-outline-success">
                           <i class="bi bi-file-earmark-excel me-1"></i> Exportar a Excel
+                      </a>
+                      <a href="{% url 'evaluaciones_exportar_csv' %}?ficha={{ ficha_actual.id }}&rap={{ rap_actual.id }}" class="btn btn-sm btn-outline-secondary">
+                          <i class="bi bi-filetype-csv me-1"></i> CSV
                       </a>
                   {% endif %}
               </div>
@@ -372,6 +389,7 @@
         const totalDeficientes = document.getElementById('total-deficientes');
         const porcentajeAprobacion = document.getElementById('porcentaje-aprobacion');
         const barraAprobacion = document.getElementById('barra-aprobacion');
+        const avanceCalificacion = document.getElementById('avance-calificacion');
         const filtrosForm = document.getElementById('filtros-evaluacion');
         const cargarListaBtn = document.getElementById('cargar-lista-btn');
         const ajaxPanel = document.getElementById('ajax-list-panel');
@@ -477,7 +495,37 @@
             porcentajeAprobacion.textContent = `${porcentaje.toFixed(1)}%`;
             barraAprobacion.style.width = `${porcentaje}%`;
             barraAprobacion.setAttribute('aria-valuenow', porcentaje.toFixed(1));
+            const avance = total ? ((juicios.length / total) * 100) : 0;
+            if (avanceCalificacion) {
+                avanceCalificacion.textContent = avance >= 100
+                    ? '¡Calificación completa! El grupo está listo para guardar.'
+                    : `${avance.toFixed(0)}% del grupo calificado`;
+                avanceCalificacion.className = avance >= 100 ? 'small text-success fw-bold mt-2' : 'small text-muted mt-2';
+            }
+            if (avance >= 100 && total && !document.body.dataset.confetiMostrado) {
+                document.body.dataset.confetiMostrado = 'true';
+                lanzarConfeti();
+            }
         }
+
+        function lanzarConfeti() {
+            const colores = ['#39a900', '#b9d950', '#f5c542', '#2f7e27', '#ffffff'];
+            for (let indice = 0; indice < 34; indice += 1) {
+                const pieza = document.createElement('span');
+                pieza.style.cssText = `position:fixed;z-index:2000;top:18%;left:${45 + Math.random() * 10}%;width:8px;height:12px;background:${colores[indice % colores.length]};transform:rotate(${Math.random() * 180}deg);pointer-events:none;`;
+                document.body.appendChild(pieza);
+                pieza.animate([{transform: 'translate(0,0) rotate(0deg)', opacity: 1}, {transform: `translate(${(Math.random() - .5) * 420}px, ${260 + Math.random() * 260}px) rotate(640deg)`, opacity: 0}], {duration: 1300 + Math.random() * 700, easing: 'cubic-bezier(.2,.7,.3,1)'}).onfinish = () => pieza.remove();
+            }
+        }
+
+        document.querySelectorAll('.rubrica-range').forEach((range) => {
+            range.addEventListener('input', () => {
+                const ranges = [...document.querySelectorAll('.rubrica-range')];
+                const promedio = ranges.reduce((total, item) => total + Number(item.value), 0) / ranges.length;
+                document.getElementById('rubrica-promedio').textContent = promedio.toFixed(1);
+                ranges.forEach((item) => item.nextElementSibling.textContent = item.value);
+            });
+        });
 
         document.querySelectorAll('input[name^="juicio_"]').forEach((input) => {
             input.addEventListener('change', updateProgress);

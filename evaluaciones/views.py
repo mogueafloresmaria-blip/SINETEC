@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from datetime import date
+import csv
 from openpyxl import Workbook
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -206,6 +207,33 @@ def exportar_sabana_excel(request):
     )
     respuesta['Content-Disposition'] = f'attachment; filename="sabana_{ficha.codigo_ficha}_{rap.codigo}.xlsx"'
     libro.save(respuesta)
+    return respuesta
+
+
+@login_required
+@requerir_roles('Administrador', 'Coordinador', 'Instructor SENA', 'Docente I.E.')
+def exportar_sabana_csv(request):
+    ficha = get_object_or_404(Ficha, pk=request.GET.get('ficha'))
+    rap = get_object_or_404(ResultadoAprendizaje, pk=request.GET.get('rap'))
+    juicios = JuicioEvaluativo.objects.filter(
+        matricula__ficha=ficha, resultado_aprendizaje=rap
+    ).select_related('matricula__aprendiz').order_by('matricula__aprendiz__last_name')
+    respuesta = HttpResponse(content_type='text/csv; charset=utf-8')
+    respuesta['Content-Disposition'] = f'attachment; filename="sabana_{ficha.codigo_ficha}_{rap.codigo}.csv"'
+    respuesta.write('\ufeff')
+    escritor = csv.writer(respuesta)
+    escritor.writerow(['Ficha', 'RAP', 'Documento', 'Aprendiz', 'Juicio', 'Observaciones', 'Fecha'])
+    for juicio in juicios:
+        aprendiz = juicio.matricula.aprendiz
+        escritor.writerow([
+            ficha.codigo_ficha,
+            rap.codigo,
+            aprendiz.perfil.numero_documento,
+            aprendiz.get_full_name() or aprendiz.username,
+            juicio.get_juicio_valor_display(),
+            juicio.observaciones or '',
+            juicio.fecha_evaluacion.isoformat(),
+        ])
     return respuesta
 
 

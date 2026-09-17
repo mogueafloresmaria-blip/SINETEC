@@ -12,10 +12,14 @@ from evaluaciones.models import JuicioEvaluativo
 from django.utils import timezone
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.db import transaction
+from datetime import timedelta
 from openpyxl import load_workbook
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from .models import PerfilUsuario, EvidenciaTaller
+from .models import PerfilUsuario, EvidenciaTaller, CalificacionEvidencia, ResultadoAprendizaje, Rol
 
 
 def alertas_desercion_para_matricula(matricula):
@@ -66,6 +70,80 @@ def dashboard(request):
 
 
 @login_required
+def alertas_tempranas(request):
+    """Centro operativo de alertas, actividades, documentos y rendimiento SENA."""
+    hoy = timezone.localdate()
+    limite = hoy + timedelta(days=7)
+    matriculas = Matricula.objects.select_related(
+        'aprendiz', 'aprendiz__perfil', 'ficha', 'ficha__programa', 'ficha__institucion'
+    ).filter(estado_formacion='En Formacion')
+    alertas = []
+    for matricula in matriculas:
+        motivos = alertas_desercion_para_matricula(matricula)
+        if motivos:
+            nivel = 'danger' if len(motivos) > 1 else 'warning'
+            alertas.append({
+                'matricula': matricula,
+                'motivos': [{'detalle': motivo['mensaje']} for motivo in motivos],
+                'nivel': nivel,
+                'nivel_texto': 'Riesgo alto' if nivel == 'danger' else 'Atención requerida',
+            })
+
+    compromisos = BitacoraSeguimiento.objects.select_related(
+        'ficha', 'matricula__aprendiz', 'instructor'
+    ).filter(fecha_verificacion__isnull=False, fecha_verificacion__lte=limite).order_by('fecha_verificacion')
+    fichas_por_finalizar = Ficha.objects.select_related('programa').filter(
+        estado='En Ejecucion', fecha_fin__gte=hoy, fecha_fin__lte=hoy + timedelta(days=30)
+    ).order_by('fecha_fin')
+    actividades = EvidenciaTaller.objects.select_related('rap').prefetch_related('calificaciones').filter(
+        fecha_limite__gte=timezone.now()
+    ).order_by('fecha_limite')
+    entregas_pendientes = CalificacionEvidencia.objects.select_related(
+        'evidencia', 'aprendiz'
+    ).filter(juicio_evaluativo='PENDIENTE').order_by('-fecha_entrega')
+    seguimientos = BitacoraSeguimiento.objects.select_related(
+        'ficha', 'matricula__aprendiz', 'instructor'
+    ).order_by('-fecha_visita')
+    documentos = [
+        {'nombre': seguimiento.archivo_adjunto.name.rsplit('/', 1)[-1], 'url': seguimiento.archivo_adjunto.url,
+         'tipo': 'Soporte de seguimiento', 'fecha': seguimiento.fecha_registro, 'ficha': seguimiento.ficha.codigo_ficha}
+        for seguimiento in seguimientos if seguimiento.archivo_adjunto
+    ][:10]
+    documentos += [
+        {'nombre': entrega.archivo_entregado.name.rsplit('/', 1)[-1], 'url': entrega.archivo_entregado.url,
+         'tipo': 'Evidencia de aprendiz', 'fecha': entrega.fecha_entrega, 'ficha': entrega.evidencia.rap.codigo}
+        for entrega in entregas_pendientes if entrega.archivo_entregado
+    ][:10]
+    juicios = JuicioEvaluativo.objects.select_related('resultado_aprendizaje').all()
+    total_juicios = juicios.count()
+    aprobados = juicios.filter(juicio_valor='A').count()
+    no_aprobados = juicios.filter(juicio_valor='D').count()
+    dificultad = list(juicios.filter(juicio_valor='D').values(
+        'resultado_aprendizaje__codigo', 'resultado_aprendizaje__descripcion'
+    ).annotate(total=models.Count('id')).order_by('-total')[:5])
+    rol = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+    return render(request, 'usuarios/alertas_tempranas.html', {
+        'alertas': alertas,
+        'compromisos': compromisos[:8],
+        'fichas_por_finalizar': fichas_por_finalizar[:8],
+        'actividades': actividades[:8],
+        'entregas_pendientes': entregas_pendientes[:8],
+        'documentos': documentos[:12],
+        'seguimientos_fotograficos': [s for s in seguimientos if s.archivo_adjunto and s.archivo_adjunto.name.lower().endswith(('.jpg', '.jpeg', '.png', '.webp'))][:8],
+        'total_alertas': len(alertas),
+        'total_urgentes': sum(a['nivel'] == 'danger' for a in alertas),
+        'total_compromisos': compromisos.count(),
+        'total_actividades': actividades.count(),
+        'porcentaje_aprobados': round(aprobados * 100 / total_juicios) if total_juicios else 0,
+        'porcentaje_no_aprobados': round(no_aprobados * 100 / total_juicios) if total_juicios else 0,
+        'dificultad': dificultad,
+        'rol_actual': rol.nombre if rol else 'Usuario SINETEC',
+        'puede_gestionar': request.user.is_superuser or not rol or rol.nombre in {'Administrador', 'Coordinador', 'Instructor SENA'},
+        'hoy': hoy,
+    })
+
+
+@login_required
 def estudiantes_lista(request):
     query = request.GET.get('q', '').strip()
     matriculas = Matricula.objects.select_related(
@@ -92,6 +170,11 @@ def estudiantes_lista(request):
                 return render(request, 'usuarios/estudiantes_lista.html', {'matriculas': matriculas, 'query': query, 'error_importacion': f'no existe la ficha {codigo}'})
             documento = str(fila[indices['numero_documento']])
             user = User.objects.create_user(username=f'ap_{documento}', email=str(fila[indices['correo']]), first_name=str(fila[indices['nombres']]), last_name=str(fila[indices['apellidos']]), password=f'Sena{documento[:4]}*')
+            rol_estudiante, _ = Rol.objects.get_or_create(
+                nombre='Estudiante',
+                defaults={'descripcion': 'Aprendiz SENA en formación'},
+            )
+            user.perfil.rol = rol_estudiante
             user.perfil.numero_documento = documento
             user.perfil.save()
             Matricula.objects.create(ficha=ficha, aprendiz=user, grado_escolar=str(fila[indices['grado_escolar']]))
@@ -101,6 +184,65 @@ def estudiantes_lista(request):
         'query': query,
         'total_aprendices': matriculas.count(),
     })
+
+
+@login_required
+def registrar_aprendiz(request):
+    fichas = Ficha.objects.select_related('programa', 'institucion').filter(estado='En Ejecucion').order_by('codigo_ficha')
+    return render(request, 'usuarios/registrar_aprendiz.html', {'fichas': fichas})
+
+
+@login_required
+def biblioteca_formacion(request):
+    query = request.GET.get('q', '').strip()
+    tipo = request.GET.get('tipo', '').strip()
+    fichas = Ficha.objects.select_related('programa').filter(estado='En Ejecucion')
+    evidencias = EvidenciaTaller.objects.select_related('rap', 'rap__ficha').filter(
+        fecha_limite__gte=timezone.now()
+    ).order_by('fecha_limite')
+    if query:
+        fichas = fichas.filter(
+            models.Q(codigo_ficha__icontains=query)
+            | models.Q(programa__denominacion__icontains=query)
+        )
+        evidencias = evidencias.filter(
+            models.Q(titulo__icontains=query)
+            | models.Q(descripcion__icontains=query)
+            | models.Q(rap__codigo__icontains=query)
+        )
+    if tipo == 'fichas':
+        evidencias = evidencias.none()
+    elif tipo == 'guias':
+        fichas = fichas.none()
+    return render(request, 'usuarios/biblioteca.html', {
+        'fichas': fichas[:20],
+        'evidencias': evidencias[:20],
+        'query': query,
+        'tipo': tipo,
+        'total_fichas': fichas.count(),
+        'total_guias': evidencias.count(),
+    })
+
+
+@login_required
+def mensajeria(request):
+    if request.method == 'POST':
+        destinatario = request.POST.get('destinatario', '').strip()
+        asunto = request.POST.get('asunto', 'Comunicación SINETEC').strip()
+        contenido = request.POST.get('contenido', '').strip()
+        if destinatario and contenido:
+            send_mail(
+                subject=asunto,
+                message=f'{contenido}\n\nRemitente: {request.user.get_full_name() or request.user.username}',
+                from_email=None,
+                recipient_list=[destinatario] if '@' in destinatario else ['coordinacion@sena.edu.co'],
+                fail_silently=True,
+            )
+            messages.success(request, 'La comunicación fue enviada al canal de coordinación.')
+        else:
+            messages.error(request, 'Indica un destinatario y escribe el mensaje antes de enviarlo.')
+        return redirect('mensajeria')
+    return render(request, 'mensajeria.html')
 
 
 @login_required
@@ -138,6 +280,8 @@ def busqueda_global(request):
 @login_required
 def detalle_estudiante(request, pk):
     perfil = get_object_or_404(PerfilUsuario, pk=pk)
+    if perfil.rol and perfil.rol.nombre == 'Estudiante' and perfil.qr_rotacion != timezone.localdate():
+        perfil.save()
     matriculas = Matricula.objects.filter(aprendiz=perfil.usuario).select_related('ficha', 'ficha__programa')
     juicios = JuicioEvaluativo.objects.filter(matricula__in=matriculas).select_related('resultado_aprendizaje')
     seguimientos = BitacoraSeguimiento.objects.filter(matricula__in=matriculas)
@@ -147,6 +291,8 @@ def detalle_estudiante(request, pk):
 @login_required
 def qr_estudiante(request, token):
     perfil = get_object_or_404(PerfilUsuario, qr_token=token)
+    if request.GET.get('dia') != str(timezone.localdate()) or perfil.qr_rotacion != timezone.localdate():
+        return render(request, 'usuarios/qr_invalido.html', status=410)
     return redirect('estudiante_detalle', pk=perfil.pk)
 
 
@@ -170,6 +316,7 @@ def modulo_simple(request, template_name):
     return render(request, template_name)
 
 
+@login_required
 def fichas(request):
     return redirect('fichas_lista')
 
@@ -180,3 +327,87 @@ def seguimiento(request):
 
 def calificaciones(request):
     return redirect('evaluaciones_calificar')
+
+
+@login_required
+def instructor_dashboard(request):
+    evidencias = EvidenciaTaller.objects.select_related('rap', 'rap__ficha').prefetch_related('calificaciones').order_by('fecha_limite')
+    entregas = CalificacionEvidencia.objects.select_related('evidencia', 'aprendiz').order_by('-fecha_entrega')
+    return render(request, 'instructor.html', {
+        'evidencias': evidencias,
+        'entregas': entregas[:8],
+        'total_evidencias': evidencias.count(),
+        'total_entregas': entregas.count(),
+        'pendientes_calificar': entregas.filter(juicio_evaluativo='PENDIENTE').count(),
+        'raps': ResultadoAprendizaje.objects.all().order_by('codigo'),
+    })
+
+
+@login_required
+def crear_evidencia(request):
+    raps = ResultadoAprendizaje.objects.all().order_by('codigo')
+    if request.method == 'POST':
+        rap = get_object_or_404(raps, pk=request.POST.get('rap_id'))
+        evidencia = EvidenciaTaller.objects.create(
+            rap=rap,
+            titulo=request.POST.get('titulo', '').strip(),
+            descripcion=request.POST.get('descripcion', '').strip(),
+            fecha_limite=request.POST.get('fecha_limite'),
+        )
+        messages.success(request, f'La evidencia “{evidencia.titulo}” fue publicada.')
+        return redirect('instructor_dashboard')
+    return render(request, 'usuarios/crear_evidencia.html', {'raps': raps})
+
+
+@login_required
+def entregar_evidencia(request, pk):
+    evidencia = get_object_or_404(EvidenciaTaller.objects.select_related('rap'), pk=pk)
+    if request.method == 'POST' and request.FILES.get('archivo_entregado'):
+        CalificacionEvidencia.objects.update_or_create(
+            evidencia=evidencia,
+            aprendiz=request.user,
+            defaults={'archivo_entregado': request.FILES['archivo_entregado'], 'juicio_evaluativo': 'PENDIENTE'},
+        )
+        messages.success(request, 'Tu evidencia fue entregada correctamente.')
+        return redirect('aprendiz_dashboard')
+    return render(request, 'usuarios/entregar_evidencia.html', {'evidencia': evidencia})
+
+
+@login_required
+def revisar_evidencia(request, pk):
+    entrega = get_object_or_404(CalificacionEvidencia.objects.select_related('evidencia', 'aprendiz'), pk=pk)
+    if request.method == 'POST':
+        juicio = request.POST.get('juicio_evaluativo')
+        if juicio in {'A', 'D'}:
+            entrega.juicio_evaluativo = juicio
+            entrega.observaciones = request.POST.get('observaciones', '').strip()
+            entrega.save(update_fields=['juicio_evaluativo', 'observaciones'])
+            messages.success(request, 'La retroalimentación fue guardada.')
+            return redirect('instructor_dashboard')
+    return render(request, 'usuarios/revisar_evidencia.html', {'entrega': entrega})
+
+
+@login_required
+def aprendiz_dashboard(request):
+    entregas = CalificacionEvidencia.objects.filter(aprendiz=request.user).select_related('evidencia', 'evidencia__rap').order_by('-fecha_entrega')
+    pendientes = EvidenciaTaller.objects.exclude(calificaciones__aprendiz=request.user).order_by('fecha_limite')
+    return render(request, 'aprendiz.html', {'entregas': entregas, 'pendientes': pendientes})
+
+
+@login_required
+def coordinador_dashboard(request):
+    fichas = Ficha.objects.select_related('programa', 'instructor_lider').order_by('-fecha_inicio')
+    matriculas = Matricula.objects.filter(estado_formacion='En Formacion')
+    seguimientos = BitacoraSeguimiento.objects.select_related('ficha', 'instructor').order_by('-fecha_visita')
+    juicios = JuicioEvaluativo.objects.all()
+    return render(request, 'coordinador.html', {
+        'fichas': fichas[:8],
+        'total_fichas': fichas.count(),
+        'fichas_activas': fichas.filter(estado='En Ejecucion').count(),
+        'total_aprendices': matriculas.count(),
+        'seguimientos_pendientes': seguimientos.filter(fecha_verificacion__gte=timezone.localdate()).count(),
+        'juicios_aprobados': juicios.filter(juicio_valor='A').count(),
+        'juicios_por_mejorar': juicios.filter(juicio_valor='D').count(),
+        'alertas_activas': sum(bool(alertas_desercion_para_matricula(m)) for m in matriculas.select_related('aprendiz')),
+        'seguimientos_recientes': seguimientos[:6],
+    })

@@ -39,6 +39,7 @@
         </div>
     </div>
     
+    {% comment "legacy_dashboard" %}
     <!-- Alerta Dinámica del Módulo Activo -->
     {% if titulo_modulo %}
         <div class="alert py-3 mb-4 fw-bold text-center shadow-sm d-flex align-items-center justify-content-center gap-2" style="background-color: #fce4ec; color: #880e4f; border: 1px solid #f8bbd0; border-radius: 12px;">
@@ -256,8 +257,8 @@
 
                         <!-- Botón para abrir la cámara -->
                         <div class="d-grid w-100 gap-2 mb-2">
-                            <a href="#" class="btn btn-danger btn-sm py-2 fw-semibold shadow-sm text-white" style="background-color: #D96C9D; border-color: #D96C9D;" onclick="alert('Abriendo cámara de escaneo QR para Vigilantes, Aseo, Secretaría y Aprendices...'); return false;">
-                                <i class="bi bi-camera-fill me-1"></i> Abrir Lector de Ingreso
+                            <a href="{% url 'estudiantes_lista' %}" class="btn btn-danger btn-sm py-2 fw-semibold shadow-sm text-white" style="background-color: #D96C9D; border-color: #D96C9D;">
+                                <i class="bi bi-camera-fill me-1"></i> Abrir control QR
                             </a>
                         </div>
                         
@@ -319,4 +320,10 @@
     </div>
 
 </div>
+    {% endcomment %}
+
+    <div class="row g-4">
+        <div class="col-xl-8"><section class="sinetec-card p-4 h-100"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2 class="h5 fw-bold mb-1">Ruta operativa SENA</h2><p class="text-muted small mb-0">Accede al siguiente paso de tu proceso sin salir del panel.</p></div><i class="bi bi-signpost-2 text-success fs-3"></i></div><div class="row g-2"><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'fichas' %}"><i class="bi bi-layers text-success fs-4 d-block mb-2"></i><strong>Fichas</strong><small class="d-block text-muted">Consulta expedientes y aprendices.</small></a></div><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'instructor_dashboard' %}"><i class="bi bi-person-workspace text-success fs-4 d-block mb-2"></i><strong>Aula instructor</strong><small class="d-block text-muted">Publica y califica evidencias.</small></a></div><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'coordinador_dashboard' %}"><i class="bi bi-kanban text-success fs-4 d-block mb-2"></i><strong>Coordinación</strong><small class="d-block text-muted">Supervisa avances y alertas.</small></a></div></div></section></div>
+        <div class="col-xl-4"><section class="sinetec-card p-4 h-100"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2 class="h5 fw-bold mb-1">Centro de ayuda</h2><p class="text-muted small mb-0">Atajos para trabajar en SINETEC.</p></div><i class="bi bi-life-preserver text-success fs-3"></i></div><a href="{% url 'mensajeria' %}" class="btn btn-outline-success w-100 mb-2"><i class="bi bi-chat-left-text me-1"></i> Contactar equipo</a><a href="{% url 'alertas_tempranas' %}" class="btn btn-outline-warning w-100"><i class="bi bi-bell me-1"></i> Revisar alertas</a></section></div>
+    </div>
 {% endblock %}

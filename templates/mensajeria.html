@@ -152,7 +152,7 @@
 <div class="modal fade" id="nuevoMensajeModal" tabindex="-1" aria-labelledby="nuevoMensajeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow">
-            <form method="POST" action="">
+            <form method="POST" action="{% url 'mensajeria' %}">
                 {% csrf_token %}
                 <div class="modal-header text-white" style="background-color: #D96C9D;">
                     <h5 class="modal-title fw-bold" id="nuevoMensajeModalLabel">

@@ -8,10 +8,10 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q
 from django.db import transaction
-from .models import Ficha, Matricula, ProgramaFormacion
+from .models import Ficha, Matricula, ProgramaFormacion, HorarioFicha
 from openpyxl import load_workbook
 
-from .forms import FichaForm, MatriculaRapidaForm, ImportarAprendicesForm
+from .forms import FichaForm, MatriculaRapidaForm, ImportarAprendicesForm, HorarioFichaForm
 from usuarios.models import PerfilUsuario, Rol
 
 
@@ -217,6 +217,38 @@ def crear_ficha(request):
         form = FichaForm()
 
     return render(request, 'academico/ficha_formulario.html', {'form': form, 'titulo': 'Apertura de Ficha Técnica'})
+
+
+@login_required
+def tablero_horarios(request):
+    horarios = HorarioFicha.objects.select_related('ficha', 'ficha__programa', 'instructor').filter(activo=True)
+    ficha_id = request.GET.get('ficha', '').strip()
+    if ficha_id:
+        horarios = horarios.filter(ficha_id=ficha_id)
+    fichas = Ficha.objects.filter(estado='En Ejecucion').order_by('codigo_ficha')
+    return render(request, 'academico/horarios.html', {'horarios': horarios, 'fichas': fichas, 'ficha_id': ficha_id})
+
+
+@login_required
+def crear_horario(request):
+    if request.method == 'POST':
+        form = HorarioFichaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Bloque agregado al horario de la ficha.')
+            return redirect('horarios_tablero')
+    else:
+        form = HorarioFichaForm()
+    return render(request, 'academico/horario_formulario.html', {'form': form})
+
+
+@login_required
+def eliminar_horario(request, pk):
+    horario = get_object_or_404(HorarioFicha, pk=pk)
+    if request.method == 'POST':
+        horario.delete()
+        messages.success(request, 'Bloque retirado del horario.')
+    return redirect('horarios_tablero')
 
 
 @login_required

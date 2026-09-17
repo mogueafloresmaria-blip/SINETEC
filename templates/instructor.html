@@ -1,30 +1,17 @@
 {% extends 'base.html' %}
 {% block title %}Panel de Instructor - SINETEC{% endblock %}
 {% block content %}
-<div class="container py-4">
-    <div class="p-4 mb-4 bg-white rounded-4 shadow-sm border-start border-4 border-primary">
-        <h2 class="fw-bold text-dark"><i class="bi bi-person-badge text-primary me-2"></i> Panel de Instructor</h2>
-        <p class="text-muted mb-0">Espacio de trabajo para el registro de calificaciones, evidencias y seguimiento de aprendices.</p>
-    </div>
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 p-3 rounded-4">
-                <div class="card-body">
-                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-award text-primary me-2"></i> Registro de Calificaciones</h5>
-                    <p class="text-muted small">Evaluar evidencias de aprendizaje y calificar actividades del trimestre.</p>
-                    <a href="{% url 'calificaciones' %}" class="btn btn-outline-primary btn-sm">Ir a Calificaciones</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 p-3 rounded-4">
-                <div class="card-body">
-                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clipboard-check text-success me-2"></i> Seguimiento y Asistencia</h5>
-                    <p class="text-muted small">Control de asistencia diaria y anotaciones de los procesos formativos.</p>
-                    <a href="{% url 'seguimiento' %}" class="btn btn-outline-success btn-sm">Ver Seguimiento</a>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="mb-4 d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3">
+    <div><div class="sinetec-eyebrow mb-2">Espacio del instructor</div><h1 class="sinetec-page-title h3 mb-1">Aula de formación</h1><p class="text-muted mb-0">Publica actividades, revisa evidencias y acompaña el avance de tus aprendices desde un solo lugar.</p></div>
+    <a href="{% url 'crear_evidencia' %}" class="btn sinetec-btn sinetec-btn-primary"><i class="bi bi-plus-lg me-1"></i> Publicar evidencia</a>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Evidencias publicadas</div><div class="sinetec-metric-value">{{ total_evidencias }}</div><small class="text-muted">Guías y talleres activos</small></div></div>
+    <div class="col-6 col-lg-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Entregas recibidas</div><div class="sinetec-metric-value">{{ total_entregas }}</div><small class="text-success">Archivos de aprendices</small></div></div>
+    <div class="col-6 col-lg-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Por calificar</div><div class="sinetec-metric-value">{{ pendientes_calificar }}</div><small class="text-warning">Requieren retroalimentación</small></div></div>
+</div>
+<div class="row g-4">
+    <div class="col-xl-7"><section class="sinetec-card"><div class="sinetec-card-header d-flex justify-content-between align-items-center"><div><h2 class="h5 fw-bold mb-1">Actividades de aprendizaje</h2><p class="text-muted small mb-0">Publicadas por resultado de aprendizaje</p></div><span class="sinetec-status sinetec-status-success">Aula activa</span></div><div class="table-responsive"><table class="table sinetec-table mb-0"><thead><tr><th>Actividad</th><th>RAP</th><th>Fecha límite</th><th>Entregas</th></tr></thead><tbody>{% for evidencia in evidencias %}<tr><td><strong>{{ evidencia.titulo }}</strong><small class="d-block text-muted">{{ evidencia.descripcion|truncatechars:48 }}</small></td><td>{{ evidencia.rap.codigo }}</td><td>{{ evidencia.fecha_limite|date:'d/m/Y H:i' }}</td><td><span class="sinetec-status sinetec-status-success">{{ evidencia.calificaciones.count }}</span></td></tr>{% empty %}<tr><td colspan="4" class="text-center py-5 text-muted">Aún no hay evidencias. Publica la primera actividad.</td></tr>{% endfor %}</tbody></table></div></section></div>
+    <div class="col-xl-5"><section class="sinetec-card"><div class="sinetec-card-header"><h2 class="h5 fw-bold mb-1">Últimas entregas</h2><p class="text-muted small mb-0">Revisión y retroalimentación</p></div><div class="list-group list-group-flush">{% for entrega in entregas %}<div class="list-group-item px-3 py-3"><div class="d-flex justify-content-between gap-2"><strong>{{ entrega.aprendiz.get_full_name|default:entrega.aprendiz.username }}</strong><span class="sinetec-status {% if entrega.juicio_evaluativo == 'PENDIENTE' %}sinetec-status-warning{% elif entrega.juicio_evaluativo == 'A' %}sinetec-status-success{% else %}sinetec-status-danger{% endif %}">{{ entrega.get_juicio_evaluativo_display }}</span></div><small class="text-muted d-block mb-2">{{ entrega.evidencia.titulo }} · {{ entrega.fecha_entrega|date:'d/m/Y H:i' }}</small>{% if entrega.archivo_entregado %}<a href="{{ entrega.archivo_entregado.url }}" target="_blank" class="btn btn-sm btn-light me-1"><i class="bi bi-download me-1"></i> Ver archivo</a>{% endif %}<a href="{% url 'revisar_evidencia' entrega.pk %}" class="btn btn-sm btn-outline-success">Revisar</a></div>{% empty %}<div class="p-4 text-center text-muted">No hay entregas todavía.</div>{% endfor %}</div></section></div>
 </div>
 {% endblock %}

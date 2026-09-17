@@ -11,8 +11,8 @@ urlpatterns = [
     path('academico/', include('academico.urls')),
     path('seguimiento/', include('seguimiento.urls')),
     path('evaluaciones/', include('evaluaciones.urls')),
-    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login_short'),
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='login.html', redirect_authenticated_user=True), name='login_short'),
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='login.html', redirect_authenticated_user=True), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]
 

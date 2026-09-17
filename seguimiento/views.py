@@ -18,7 +18,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import Image as PDFImage, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-from .models import AsistenciaAprendiz, BitacoraSeguimiento
+from .models import AsistenciaAprendiz, BitacoraSeguimiento, MensajeSeguimiento
 from .forms import BitacoraSeguimientoForm
 from academico.models import Ficha
 
@@ -175,6 +175,16 @@ def detalle_seguimiento(request, pk):
     Vista detallada de una bitácora de seguimiento, compromisos y acta adjunta.
     """
     bitacora = get_object_or_404(BitacoraSeguimiento.objects.select_related('ficha', 'ficha__institucion', 'instructor', 'matricula__aprendiz'), pk=pk)
+    if request.method == 'POST':
+        mensaje = request.POST.get('mensaje', '').strip()
+        if mensaje:
+            MensajeSeguimiento.objects.create(
+                bitacora=bitacora,
+                remitente=request.user,
+                mensaje=mensaje,
+            )
+            messages.success(request, 'Mensaje agregado al seguimiento.')
+        return redirect('seguimiento_detalle', pk=bitacora.pk)
     hoy = timezone.localdate()
     estado_compromiso = (
         'vencido' if bitacora.compromisos and bitacora.fecha_verificacion and bitacora.fecha_verificacion < hoy

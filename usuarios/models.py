@@ -108,6 +108,7 @@ class PerfilUsuario(models.Model):
         null=True,
         verbose_name='Código QR del carnet',
     )
+    qr_rotacion = models.DateField(blank=True, null=True, editable=False, verbose_name='Día de rotación QR')
 
     class Meta:
         verbose_name = "Perfil de Usuario"
@@ -121,13 +122,15 @@ class PerfilUsuario(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if self.rol and self.rol.nombre == 'Estudiante' and not self.qr_code:
+        from django.utils import timezone
+        if self.rol and self.rol.nombre == 'Estudiante' and (not self.qr_code or self.qr_rotacion != timezone.localdate()):
+            self.qr_rotacion = timezone.localdate()
             self.generar_qr()
-            super().save(update_fields=['qr_code'])
+            super().save(update_fields=['qr_code', 'qr_rotacion'])
 
     def generar_qr(self):
         base_url = getattr(settings, 'QR_BASE_URL', 'http://127.0.0.1:8000').rstrip('/')
-        payload = f'{base_url}/estudiantes/qr/{self.qr_token}/'
+        payload = f'{base_url}/estudiantes/qr/{self.qr_token}/?dia={self.qr_rotacion}'
         imagen = qrcode.make(payload)
         buffer = BytesIO()
         imagen.save(buffer, format='PNG')

@@ -28,10 +28,15 @@
                 <a class="nav-link {% if request.resolver_match.url_name == 'estudiantes_lista' %}active{% endif %}" href="{% url 'estudiantes_lista' %}"><i class="bi bi-people-fill"></i> Aprendices</a>
                 <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento_lista' %}active{% endif %}" href="{% url 'seguimiento_lista' %}"><i class="bi bi-clipboard2-pulse-fill"></i> Seguimiento</a>
                 <a class="nav-link {% if request.resolver_match.url_name == 'evaluaciones_calificar' or request.resolver_match.url_name == 'calificaciones' %}active{% endif %}" href="{% url 'calificaciones' %}"><i class="bi bi-award-fill"></i> Evaluación RAP</a>
-                <div class="sinetec-nav-label">Administración</div>
-                <a class="nav-link {% if request.resolver_match.url_name == 'instituciones_lista' %}active{% endif %}" href="{% url 'instituciones_lista' %}"><i class="bi bi-building-fill"></i> Instituciones</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'biblioteca_formacion' %}active{% endif %}" href="{% url 'biblioteca_formacion' %}"><i class="bi bi-book-half"></i> Biblioteca de formación</a>
+                {% if user.is_superuser or not user.perfil.rol or user.perfil.rol.nombre in 'Administrador Coordinador Instructor SENA' %}<a class="nav-link {% if request.resolver_match.url_name == 'horarios_tablero' %}active{% endif %}" href="{% url 'horarios_tablero' %}"><i class="bi bi-calendar3"></i> Horarios de fichas</a>{% endif %}
+                <div class="sinetec-nav-label">Gestión SENA</div>
                 <a class="nav-link {% if request.resolver_match.url_name == 'alertas_tempranas' %}active{% endif %}" href="{% url 'alertas_tempranas' %}"><i class="bi bi-bell-fill"></i> Alertas</a>
                 <a class="nav-link" href="{% url 'mensajeria' %}"><i class="bi bi-chat-left-text-fill"></i> Mensajería</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'coordinador_dashboard' %}active{% endif %}" href="{% url 'coordinador_dashboard' %}"><i class="bi bi-kanban-fill"></i> Coordinación</a>
+                <div class="sinetec-nav-label">Aulas</div>
+                <a class="nav-link {% if request.resolver_match.url_name == 'instructor_dashboard' %}active{% endif %}" href="{% url 'instructor_dashboard' %}"><i class="bi bi-person-workspace"></i> Aula del instructor</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'aprendiz_dashboard' %}active{% endif %}" href="{% url 'aprendiz_dashboard' %}"><i class="bi bi-mortarboard-fill"></i> Aula del aprendiz</a>
             </nav>
             <div class="sinetec-sidebar-footer"><strong><i class="bi bi-shield-check me-1"></i> Regional Magdalena</strong> Plataforma institucional SINETEC</div>
         </aside>
@@ -76,10 +81,16 @@
                 </div>
                 
                 <!-- Caja de mensajes del chat -->
-                <div id="chat-messages" class="mb-3" style="height: 200px; overflow-y: auto; font-size: 0.85rem; background-color: #f8f9fa; padding: 10px; border-radius: 8px;">
+                <div id="chat-messages" class="mb-2" style="height: 200px; overflow-y: auto; font-size: 0.85rem; background-color: #f8f9fa; padding: 10px; border-radius: 8px;">
                     <div class="text-muted bg-white p-2 rounded shadow-sm mb-2">
-                        <strong>Asistente:</strong> ¡Hola! ¿En qué puedo ayudarte hoy con tu proceso en SINETEC?
+                        <strong>Asistente SENA:</strong> Puedo orientarte con fichas, evidencias, calificaciones, seguimiento y alertas.
                     </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-1 mb-2" aria-label="Consultas rápidas">
+                    <button type="button" class="btn btn-sm btn-light border chat-suggestion" data-question="¿Dónde subo una evidencia?">Subir evidencia</button>
+                    <button type="button" class="btn btn-sm btn-light border chat-suggestion" data-question="¿Cómo califico una entrega?">Calificar</button>
+                    <button type="button" class="btn btn-sm btn-light border chat-suggestion" data-question="¿Cómo registro un seguimiento?">Seguimiento</button>
                 </div>
 
                 <!-- Input y botón de envío -->
@@ -100,12 +111,14 @@
 
             if (texto === "") return;
 
-            // 1. Mostrar mensaje del usuario
-            messagesContainer.innerHTML += `
-                <div class="text-end mb-2">
-                    <span class="badge bg-success p-2 text-wrap" style="max-width: 80%; text-align: left;">${texto}</span>
-                </div>
-            `;
+            const mensajeUsuario = document.createElement('div');
+            mensajeUsuario.className = 'text-end mb-2';
+            const burbujaUsuario = document.createElement('span');
+            burbujaUsuario.className = 'badge bg-success p-2 text-wrap';
+            burbujaUsuario.style.maxWidth = '80%';
+            burbujaUsuario.textContent = texto;
+            mensajeUsuario.appendChild(burbujaUsuario);
+            messagesContainer.appendChild(mensajeUsuario);
             
             input.value = "";
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -115,8 +128,16 @@
                 let respuesta = "Entiendo tu consulta sobre SINETEC. Como asistente virtual, te recomiendo revisar el módulo correspondiente en el menú superior o consultar con coordinación académica.";
                 
                 const t = texto.toLowerCase();
-                if (t.includes('ficha') || t.includes('fichas')) {
-                    respuesta = "Para gestionar fichas, dirígete a la sección 'Fichas' en la barra de navegación superior. Allí puedes ver los tecnólogos, técnicos y plantas.";
+                if (t.includes('evidencia') || t.includes('tarea') || t.includes('archivo')) {
+                    respuesta = "Aprendiz: entra a 'Aula del aprendiz' para entregar un archivo. Instructor: entra a 'Aula del instructor' para publicar, revisar y calificar evidencias.";
+                } else if (t.includes('calific') || t.includes('nota') || t.includes('juicio')) {
+                    respuesta = "El instructor puede revisar entregas desde 'Aula del instructor' o registrar juicios oficiales A/D en 'Evaluación RAP'.";
+                } else if (t.includes('seguimiento') || t.includes('asistencia')) {
+                    respuesta = "Usa 'Seguimiento' para registrar bitácoras, compromisos y GPS; usa 'Control diario' para marcar asistencia por fecha y ficha.";
+                } else if (t.includes('coordin') || t.includes('alerta')) {
+                    respuesta = "Coordinación tiene un panel para supervisar fichas, alertas, resultados y seguimientos pendientes.";
+                } else if (t.includes('ficha') || t.includes('fichas')) {
+                    respuesta = "En 'Fichas y programas' puedes abrir el expediente completo: aprendices, RAP, seguimientos, asistencia y calificaciones.";
                 } else if (t.includes('estudiante') || t.includes('aprendiz') || t.includes('alumno')) {
                     respuesta = "Puedes consultar los aprendices ingresando a la sección 'Estudiantes' en el menú principal.";
                 } else if (t.includes('hola') || t.includes('buenos dias') || t.includes('buenas')) {
@@ -125,11 +146,12 @@
                     respuesta = "SINETEC te permite administrar fichas articuladas, estudiantes y seguimientos de manera rápida y eficiente.";
                 }
 
-                messagesContainer.innerHTML += `
-                    <div class="text-muted bg-white p-2 rounded shadow-sm mb-2">
-                        <strong>Asistente:</strong> ${respuesta}
-                    </div>
-                `;
+                const mensajeAsistente = document.createElement('div');
+                mensajeAsistente.className = 'text-muted bg-white p-2 rounded shadow-sm mb-2';
+                const textoAsistente = document.createElement('span');
+                textoAsistente.innerHTML = '<strong>Asistente:</strong> ' + respuesta;
+                mensajeAsistente.appendChild(textoAsistente);
+                messagesContainer.appendChild(mensajeAsistente);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }, 600);
         }
@@ -139,6 +161,13 @@
                 enviarMensajeChat();
             }
         }
+
+        document.querySelectorAll('.chat-suggestion').forEach((button) => {
+            button.addEventListener('click', () => {
+                document.getElementById('chat-input').value = button.dataset.question;
+                enviarMensajeChat();
+            });
+        });
     </script>
 
     <!-- Bootstrap 5 JS Bundle -->

@@ -2,11 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SINETEC - Login</title>
+    <title>SINETEC · Acceso institucional</title>
+    <style>body{margin:0;min-height:100vh;background:#e8f0e3;font-family:'Segoe UI',sans-serif;color:#14251b;display:grid;place-items:center}.login-wrap{width:min(980px,92vw);display:grid;grid-template-columns:1.1fr .9fr;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 24px 70px rgba(20,45,32,.16)}.login-aside{padding:52px;background:#142d20;color:#fff;position:relative;overflow:hidden}.login-aside:after{content:'SENA';position:absolute;right:-20px;bottom:-40px;font:bold 9rem/1 Georgia;color:rgba(255,255,255,.07)}.login-form{padding:52px}.login-mark{width:48px;height:48px;display:grid;place-items:center;background:#39a900;border-radius:14px;font-size:1.5rem}.login-title{font:800 2.5rem/1.05 Georgia,serif}.form-control{border-radius:10px;padding:12px}.btn-login{background:#39a900;color:#fff;border:0;border-radius:10px;padding:12px;font-weight:700;width:100%}@media(max-width:700px){.login-wrap{grid-template-columns:1fr}.login-aside{padding:30px}.login-form{padding:30px}}
+    </style>
 </head>
 <body>
-    <h2>Iniciar Sesión - SINETEC</h2>
-    <form method="POST">
+<div class="login-wrap"><section class="login-aside"><div class="login-mark">✦</div><p style="color:#cde88e;text-transform:uppercase;font-size:.72rem;font-weight:700;letter-spacing:.1em;margin-top:34px">Centro de formación · Regional Magdalena</p><h1 class="login-title">Tu ruta de formación empieza aquí.</h1><p style="color:#dbe8dc">Accede a fichas, aulas, evidencias, horarios y seguimiento académico en un espacio seguro.</p><div style="margin-top:50px;color:#a9c5ad;font-size:.85rem">SINETEC · Plataforma de Media Técnica SENA</div></section><section class="login-form"><h2 style="font-weight:800">Acceso institucional</h2><p style="color:#6b7870">Ingresa con tus credenciales para continuar al panel correspondiente a tu rol.</p><form method="POST">
         {% csrf_token %}
         <label>Usuario:</label><br>
         <input type="text" name="username"><br><br>
@@ -14,10 +15,9 @@
         <label>Contraseña:</label><br>
         <input type="password" name="password"><br><br>
         
-        <button type="submit">Entrar</button>
-    </form>
-    {% if error %}
+        <button class="btn-login" type="submit">Ingresar a SINETEC <span>→</span></button>
+    {% if form.errors %}
         <p style="color: red;">{{ error }}</p>
     {% endif %}
-</body>
+</form></section></div></body>
 </html>

@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block title %}Registrar aprendiz - SINETEC{% endblock %}
+{% block content %}
+<div class="mb-4"><div class="sinetec-eyebrow mb-2">Gestión de aprendices</div><h1 class="sinetec-page-title h3 mb-1">Registrar nuevo aprendiz</h1><p class="text-muted mb-0">Selecciona la ficha SENA donde se realizará la matrícula.</p></div>
+<div class="row g-3">{% for ficha in fichas %}<div class="col-md-6 col-xl-4"><a href="{% url 'fichas_matricular' ficha.pk %}" class="sinetec-card sinetec-route d-block p-4 text-decoration-none"><span class="sinetec-status sinetec-status-success">Ficha {{ ficha.codigo_ficha }}</span><h2 class="h6 fw-bold text-dark mt-3">{{ ficha.programa.denominacion }}</h2><p class="small text-muted mb-3">{{ ficha.institucion.nombre }}</p><span class="text-success small fw-bold">Abrir matrícula <i class="bi bi-arrow-right"></i></span></a></div>{% empty %}<div class="col-12"><div class="sinetec-card p-5 text-center text-muted">No hay fichas en ejecución. Primero debes crear o activar una ficha.</div></div>{% endfor %}</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Ficha, Matricula
+from .models import Ficha, Matricula, HorarioFicha
 from usuarios.models import PerfilUsuario
 
 
@@ -67,3 +67,25 @@ class ImportarAprendicesForm(forms.Form):
         if archivo.size > 5 * 1024 * 1024:
             raise forms.ValidationError('El archivo no puede superar los 5 MB.')
         return archivo
+
+
+class HorarioFichaForm(forms.ModelForm):
+    class Meta:
+        model = HorarioFicha
+        fields = ['ficha', 'instructor', 'dia', 'hora_inicio', 'hora_fin', 'ambiente', 'modalidad', 'tema']
+        widgets = {
+            'ficha': forms.Select(attrs={'class': 'form-select'}),
+            'instructor': forms.Select(attrs={'class': 'form-select'}),
+            'dia': forms.Select(attrs={'class': 'form-select'}),
+            'hora_inicio': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'hora_fin': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'ambiente': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ambiente 302 o enlace virtual'}),
+            'modalidad': forms.Select(attrs={'class': 'form-select'}),
+            'tema': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tema o competencia'}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('hora_inicio') and cleaned.get('hora_fin') and cleaned['hora_fin'] <= cleaned['hora_inicio']:
+            raise forms.ValidationError('La hora final debe ser posterior a la hora inicial.')
+        return cleaned

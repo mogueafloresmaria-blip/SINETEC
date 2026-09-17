@@ -34,6 +34,9 @@
             <a href="{% url 'seguimiento_asistencia' %}?ficha={{ ficha.id }}" class="btn btn-outline-success">
                 <i class="bi bi-check2-square me-1"></i> Tomar Asistencia
             </a>
+            <a href="{% url 'horarios_tablero' %}?ficha={{ ficha.id }}" class="btn btn-outline-dark">
+                <i class="bi bi-calendar3 me-1"></i> Ver Horario
+            </a>
             <a href="{% url 'fichas_matricular' ficha.id %}" class="btn btn-sinetec-primary">
                 <i class="bi bi-person-plus-fill me-1"></i> Matricular Aprendiz
             </a>

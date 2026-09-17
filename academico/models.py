@@ -230,3 +230,27 @@ class Matricula(models.Model):
     def __str__(self):
         nombre_aprendiz = self.aprendiz.get_full_name() or self.aprendiz.username
         return f"{nombre_aprendiz} - {self.ficha.codigo_ficha} ({self.get_grado_escolar_display()})"
+
+
+class HorarioFicha(models.Model):
+    """Bloque editable del horario formativo de una ficha SENA."""
+    DIAS = [(str(indice), nombre) for indice, nombre in enumerate(
+        ('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'), start=1
+    )]
+    MODALIDADES = [('Presencial', 'Presencial'), ('Virtual', 'Virtual'), ('Mixta', 'Mixta')]
+
+    ficha = models.ForeignKey(Ficha, on_delete=models.CASCADE, related_name='horarios')
+    instructor = models.ForeignKey(User, on_delete=models.PROTECT, related_name='horarios_formativos')
+    dia = models.CharField(max_length=1, choices=DIAS)
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+    ambiente = models.CharField(max_length=120, blank=True)
+    modalidad = models.CharField(max_length=20, choices=MODALIDADES, default='Presencial')
+    tema = models.CharField(max_length=180, blank=True)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['dia', 'hora_inicio']
+
+    def __str__(self):
+        return f'{self.ficha.codigo_ficha} · {self.get_dia_display()} {self.hora_inicio:%H:%M}'
