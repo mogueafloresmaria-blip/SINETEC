@@ -2114,23 +2114,93 @@ def asistente_consulta(request):
             enlace_accion = {'url': '/notificaciones/', 'texto': 'Ver Historial de Notificaciones'}
         chips = [{'label': '📘 Mi Portafolio', 'action': 'mi_portafolio'}, {'label': '📝 Mis Actividades', 'action': 'mis_actividades'}]
 
-    # 15. Ayuda / ¿Qué puedes hacer?
+    # 15. Cédula y Acceso al Sistema
+    elif any(w in query for w in ['cedula', 'cédula', 'documento', 'como entro', 'cómo entro', 'entrar con cedula', 'entrar con cédula', 'mi documento']):
+        doc_num = perfil.numero_documento if perfil else "Sin registrar"
+        texto_respuesta = (
+            f"🔑 Acceso Institucional SINETEC mediante Cédula:\n\n"
+            f"• Tu documento registrado es: {doc_num}\n"
+            f"• Todos los aprendices pueden entrar escribiendo directamente su número de cédula en el campo \"Usuario o Documento\".\n"
+            f"• Contraseña asignada: Puedes usar tu clave personal o la clave institucional autorizada (1234 o Sena2026*).\n\n"
+            f"El sistema detecta automáticamente tu cédula y te lleva a tu portal de aprendiz."
+        )
+        enlace_accion = {'url': '/portafolio/', 'texto': 'Ir a Mi Espacio Formativo'}
+        chips = [{'label': '🪪 Mi Carné QR', 'action': 'mi_carne'}, {'label': '📘 Mi Formación', 'action': 'mi_formacion'}]
+
+    # 16. Juicios Evaluativos y Certificación (A vs D)
+    elif any(w in query for w in ['certificacion', 'certificación', 'juicio', 'que significa a', 'qué significa a', 'que significa d', 'aprobar', 'raps', 'graduarme']):
+        texto_respuesta = (
+            "🏆 Modelo de Evaluación Cualitativa del SENA:\n\n"
+            "• Juicio 'A' (Aprobado): Demuestra que alcanzaste el 100% del Resultado de Aprendizaje (RAP) evaluado.\n"
+            "• Juicio 'D' (No Aprobado / En Proceso): Señala que debes concertar un Plan de Mejoramiento con tu instructor para entregar las evidencias requeridas.\n\n"
+            "Requisitos de Certificación Oficial de la Media Técnica:\n"
+            "1. Aprobar el 100% de los RAPs del programa técnico.\n"
+            "2. Cumplir con mínimo el 80% de asistencia a clases.\n"
+            "3. Aprobar la etapa productiva (práctica o proyecto productivo)."
+        )
+        enlace_accion = {'url': '/evaluaciones/aprendices/', 'texto': 'Ver Mis Calificaciones Oficiales'}
+        chips = [{'label': '📊 Mis Evaluaciones', 'action': 'mis_evaluaciones'}, {'label': '📝 Mis Actividades', 'action': 'mis_actividades'}]
+
+    # 17. Programas Técnicos y Tecnólogos
+    elif any(w in query for w in ['tecnico', 'técnico', 'tecnologo', 'tecnólogo', 'que programas hay', 'qué programas hay', 'oferta', 'programas']):
+        texto_respuesta = (
+            "🏫 Programas de Articulación con la Media Técnica (Regional Magdalena):\n\n"
+            "TÉCNICOS:\n"
+            "• Técnico en Sistemas (Ficha 2824910)\n"
+            "• Técnico en Programación y Software (Fichas 3173430, 2501234)\n"
+            "• Técnico en Asistencia Administrativa (Ficha 2891101)\n"
+            "• Técnico en Contabilización de Operaciones Comerciales (Ficha 2718340)\n"
+            "• Técnico en Integración de Contenidos Digitales (Ficha 2891202)\n"
+            "• Técnico en Mantenimiento de Equipos de Cómputo (Ficha 2891303)\n\n"
+            "TECNÓLOGOS:\n"
+            "• Tecnólogo en Gestión de Redes de Datos (Ficha 2791820)\n"
+            "• Tecnólogo en Gestión del Talento Humano (Ficha 2845110)\n"
+            "• Tecnólogo en Gestión Administrativa (Ficha 2891404)"
+        )
+        enlace_accion = {'url': '/academico/programas/', 'texto': 'Ver Catálogo Completo de Programas'}
+        chips = [{'label': '🏷️ Mi Ficha', 'action': 'mi_ficha'}, {'label': '📘 Mi Formación', 'action': 'mi_formacion'}]
+
+    # 18. Etapa Productiva y Prácticas
+    elif any(w in query for w in ['etapa productiva', 'practica', 'práctica', 'pasantia', 'pasantía', 'contrato de aprendizaje', 'empresa']):
+        texto_respuesta = (
+            "💼 Etapa Productiva SENA (Educación Media):\n\n"
+            "Modalidades autorizadas para acreditar tu etapa práctica:\n"
+            "1. Proyecto Productivo Institucional (articulado con tu colegio).\n"
+            "2. Contrato de Aprendizaje (empresas convenio patrocinadoras).\n"
+            "3. Pasantía formativa en entidades del sector productivo.\n"
+            "4. Monitoría o apoyo técnico en la institución educativa.\n\n"
+            "Debes radicar la Bitácora de Seguimiento F023 periódicamente."
+        )
+        enlace_accion = {'url': '/etapa-productiva/', 'texto': 'Ir a Módulo de Etapa Productiva'}
+        chips = [{'label': '📥 Radicar Bitácora', 'action': 'mis_tramites'}, {'label': '❓ Ayuda', 'action': 'ayuda'}]
+
+    # 19. Alertas y Faltas de Asistencia
+    elif any(w in query for w in ['falta', 'fallas', 'inasistencia', 'perder', 'alerta', 'desercion', 'deserción']):
+        texto_respuesta = (
+            "🚨 Normativa de Asistencia y Alertas Tempranas:\n\n"
+            "• Si acumulas 4 o más inasistencias injustificadas, el sistema emite una Alerta de Riesgo Formativo.\n"
+            "• Si faltas a una sesión, debes justificarla ante tu instructor con soporte médico o de coordinación antes de 5 días hábiles.\n"
+            "• Recuerda que se requiere mínimo el 80% de asistencia para certificar la media técnica."
+        )
+        enlace_accion = {'url': '/seguimiento/asistencia/', 'texto': 'Ver Mi Histórico de Asistencias'}
+        chips = [{'label': '🟢 Mi Asistencia', 'action': 'mi_asistencia'}, {'label': '📅 Mi Horario', 'action': 'mi_horario'}]
+
+    # 20. Ayuda / ¿Qué puedes hacer?
     elif any(w in query for w in ['ayuda', 'help', 'que puedes hacer', 'qué puedes hacer', 'opciones']):
         texto_respuesta = (
             "💡 Guía de Asistencia SINETEC:\n\n"
             "Puedes consultarme preguntas cotidianas como:\n"
+            "• \"¿Cómo entro con mi cédula?\"\n"
             "• \"¿Cuál es mi ficha?\"\n"
-            "• \"¿Cuál es mi programa?\"\n"
-            "• \"¿Qué instructor tengo?\"\n"
+            "• \"¿Qué programas técnicos hay?\"\n"
             "• \"¿Qué actividades tengo pendientes?\"\n"
-            "• \"¿Qué evidencias he entregado?\"\n"
-            "• \"¿Tengo evaluaciones pendientes?\"\n"
-            "• \"¿Cuál es mi próximo horario?\"\n"
+            "• \"¿Qué significa juicio A o D?\"\n"
+            "• \"¿Cómo hago mi etapa productiva?\"\n"
+            "• \"¿Cuál es mi próximo horario de clase?\"\n"
             "• \"¿Tengo asistencia registrada hoy?\"\n"
-            "• \"Quiero ver mi carné\"\n"
-            "• \"Quiero radicar una solicitud\"\n"
-            "• \"Quiero consultar mi portafolio\"\n\n"
-            "También puedes presionar cualquiera de los botones rápidos de abajo."
+            "• \"Quiero ver mi carné digital QR\"\n"
+            "• \"Quiero radicar una solicitud ante secretaría\"\n\n"
+            "O presiona los botones de acceso rápido aquí abajo."
         )
         chips = chips_aprendiz_default[:6]
 

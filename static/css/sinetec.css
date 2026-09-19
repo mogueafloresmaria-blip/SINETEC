@@ -117,7 +117,7 @@ body {
 .sinetec-icon-btn:hover { color: var(--sinetec-green-dark); border-color: #b8d29a; box-shadow: 0 8px 18px rgba(57,169,0,.08); }
 .sinetec-user { display: flex; align-items: center; gap: 10px; color: var(--sinetec-ink); text-decoration: none; }
 .sinetec-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #dceccf, #eef7e6); color: var(--sinetec-green-dark); display: grid; place-items: center; font-weight: 800; box-shadow: 0 8px 18px rgba(57,169,0,.12); }
-.sinetec-content { padding: 34px; max-width: 1680px; margin: auto; }
+.sinetec-content { padding: 24px 32px; width: 100%; max-width: 100%; }
 .sinetec-eyebrow { color: var(--sinetec-green-dark); text-transform: uppercase; font-size: .7rem; font-weight: 800; letter-spacing: .1em; }
 .sinetec-page-title { font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; font-weight: 800; letter-spacing: -.03em; }
 .sinetec-dashboard-hero {

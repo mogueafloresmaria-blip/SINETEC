@@ -94,31 +94,67 @@
     <div class="row g-4">
         {% for p in proyectos %}
             <div class="col-md-6 col-xl-4">
-                <div class="project-card shadow-sm">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">
-                                {{ p.get_categoria_display }}
+                <div class="project-card shadow-sm overflow-hidden p-0">
+                    <!-- Banner Visual Temático con Ilustración SVG e Icono de Línea Tecnológica -->
+                    <div class="project-banner p-3 text-white position-relative" style="min-height: 120px; 
+                        {% if p.categoria == 'Agroecologia' %}
+                            background: linear-gradient(135deg, #166534 0%, #15803d 50%, #22c55e 100%);
+                        {% elif p.categoria == 'Software TIC' %}
+                            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0284c7 100%);
+                        {% elif p.categoria == 'Ecoturismo' %}
+                            background: linear-gradient(135deg, #065f46 0%, #0d9488 50%, #14b8a6 100%);
+                        {% elif p.categoria == 'Logistica' %}
+                            background: linear-gradient(135deg, #78350f 0%, #b45309 50%, #f59e0b 100%);
+                        {% else %}
+                            background: linear-gradient(135deg, #581c87 0%, #7e22ce 50%, #a855f7 100%);
+                        {% endif %}">
+                        
+                        <!-- Marca de agua vectorial de fondo -->
+                        <div class="position-absolute end-0 bottom-0 opacity-25 p-2" style="pointer-events: none;">
+                            {% if p.categoria == 'Agroecologia' %}
+                                <i class="bi bi-flower1" style="font-size: 5rem; line-height: 1;"></i>
+                            {% elif p.categoria == 'Software TIC' %}
+                                <i class="bi bi-cpu-fill" style="font-size: 5rem; line-height: 1;"></i>
+                            {% elif p.categoria == 'Ecoturismo' %}
+                                <i class="bi bi-compass-fill" style="font-size: 5rem; line-height: 1;"></i>
+                            {% elif p.categoria == 'Logistica' %}
+                                <i class="bi bi-truck-front-fill" style="font-size: 5rem; line-height: 1;"></i>
+                            {% else %}
+                                <i class="bi bi-rocket-takeoff-fill" style="font-size: 5rem; line-height: 1;"></i>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 align-items-center mb-2 position-relative" style="z-index: 2;">
+                            <span class="badge bg-black bg-opacity-40 text-white border border-white border-opacity-25" style="backdrop-filter: blur(4px);">
+                                <i class="bi bi-tag-fill me-1"></i>{{ p.get_categoria_display }}
                             </span>
-                            <span class="badge {% if p.estado == 'FINALIZADO' %}bg-success{% elif p.estado == 'DESARROLLO' or p.estado == 'PROTOTIPO_VALIDADO' %}bg-primary{% else %}bg-secondary{% endif %}">
-                                {{ p.get_estado_display }}
+                            <span class="badge {% if p.estado == 'FINALIZADO' %}bg-success text-white border border-success{% elif p.estado == 'DESARROLLO' or p.estado == 'PROTOTIPO_VALIDADO' %}bg-primary text-white border border-primary{% else %}bg-secondary text-white{% endif %}">
+                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>{{ p.get_estado_display }}
                             </span>
                         </div>
-                        <h5 class="fw-bold text-dark mb-2">{{ p.titulo }}</h5>
-                        <p class="text-muted small mb-3">{{ p.descripcion|truncatechars:140 }}</p>
+                        <div class="text-white opacity-75 small position-relative" style="z-index: 2;">
+                            <i class="bi bi-patch-check-fill me-1 text-warning"></i> Semillero SENNOVA · Regional Magdalena
+                        </div>
                     </div>
-                    <div class="pt-3 border-top">
-                        <div class="small text-muted mb-2">
-                            <i class="bi bi-person-badge me-1"></i> Asesor: <strong>{{ p.instructor_asesor.get_full_name|default:p.instructor_asesor.username|default:'Sin asignar' }}</strong>
+
+                    <div class="p-3 d-flex flex-column justify-content-between flex-grow-1">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-2">{{ p.titulo }}</h5>
+                            <p class="text-muted small mb-3">{{ p.descripcion|truncatechars:140 }}</p>
                         </div>
-                        <div class="small text-muted mb-3">
-                            <i class="bi bi-layers me-1"></i> Ficha: <strong>{{ p.ficha.codigo_ficha }}</strong> ({{ p.ficha.programa.denominacion|truncatechars:28 }})
+                        <div class="pt-3 border-top">
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-person-badge me-1"></i> Asesor: <strong>{{ p.instructor_asesor.get_full_name|default:p.instructor_asesor.username|default:'Sin asignar' }}</strong>
+                            </div>
+                            <div class="small text-muted mb-3">
+                                <i class="bi bi-layers me-1"></i> Ficha: <strong>{{ p.ficha.codigo_ficha }}</strong> ({{ p.ficha.programa.denominacion }})
+                            </div>
+                            {% if p.archivo_soporte %}
+                                <a href="{{ p.archivo_soporte.url }}" target="_blank" class="btn btn-sm btn-outline-dark w-100">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Ver Ficha Técnica
+                                </a>
+                            {% endif %}
                         </div>
-                        {% if p.archivo_soporte %}
-                            <a href="{{ p.archivo_soporte.url }}" target="_blank" class="btn btn-sm btn-outline-dark w-100">
-                                <i class="bi bi-file-earmark-pdf me-1"></i> Ver Ficha Técnica
-                            </a>
-                        {% endif %}
                     </div>
                 </div>
             </div>

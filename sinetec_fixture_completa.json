@@ -1,9 +1,1378 @@
 [
 {
-  "model": "auth.user",
+  "model": "auth.permission",
+  "pk": 1,
   "fields": {
-    "password": "pbkdf2_sha256$720000$3Vps4M1XsqayyB2clW9RF5$5al1EqMJqtxOSNYQLDkEZdwLv2UuRSOMco9yAibO16k=",
-    "last_login": "2026-09-19T21:03:32.982Z",
+    "name": "Can add log entry",
+    "content_type": 1,
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 2,
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": 1,
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 3,
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": 1,
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 4,
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": 1,
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 5,
+  "fields": {
+    "name": "Can add permission",
+    "content_type": 2,
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 6,
+  "fields": {
+    "name": "Can change permission",
+    "content_type": 2,
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 7,
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": 2,
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 8,
+  "fields": {
+    "name": "Can view permission",
+    "content_type": 2,
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 9,
+  "fields": {
+    "name": "Can add group",
+    "content_type": 3,
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 10,
+  "fields": {
+    "name": "Can change group",
+    "content_type": 3,
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 11,
+  "fields": {
+    "name": "Can delete group",
+    "content_type": 3,
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 12,
+  "fields": {
+    "name": "Can view group",
+    "content_type": 3,
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 13,
+  "fields": {
+    "name": "Can add user",
+    "content_type": 4,
+    "codename": "add_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 14,
+  "fields": {
+    "name": "Can change user",
+    "content_type": 4,
+    "codename": "change_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 15,
+  "fields": {
+    "name": "Can delete user",
+    "content_type": 4,
+    "codename": "delete_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 16,
+  "fields": {
+    "name": "Can view user",
+    "content_type": 4,
+    "codename": "view_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 17,
+  "fields": {
+    "name": "Can add content type",
+    "content_type": 5,
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 18,
+  "fields": {
+    "name": "Can change content type",
+    "content_type": 5,
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 19,
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": 5,
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 20,
+  "fields": {
+    "name": "Can view content type",
+    "content_type": 5,
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 21,
+  "fields": {
+    "name": "Can add session",
+    "content_type": 6,
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 22,
+  "fields": {
+    "name": "Can change session",
+    "content_type": 6,
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 23,
+  "fields": {
+    "name": "Can delete session",
+    "content_type": 6,
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 24,
+  "fields": {
+    "name": "Can view session",
+    "content_type": 6,
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 25,
+  "fields": {
+    "name": "Can add Rol de Usuario",
+    "content_type": 7,
+    "codename": "add_rol"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 26,
+  "fields": {
+    "name": "Can change Rol de Usuario",
+    "content_type": 7,
+    "codename": "change_rol"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 27,
+  "fields": {
+    "name": "Can delete Rol de Usuario",
+    "content_type": 7,
+    "codename": "delete_rol"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 28,
+  "fields": {
+    "name": "Can view Rol de Usuario",
+    "content_type": 7,
+    "codename": "view_rol"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 29,
+  "fields": {
+    "name": "Can add Perfil de Usuario",
+    "content_type": 8,
+    "codename": "add_perfilusuario"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 30,
+  "fields": {
+    "name": "Can change Perfil de Usuario",
+    "content_type": 8,
+    "codename": "change_perfilusuario"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 31,
+  "fields": {
+    "name": "Can delete Perfil de Usuario",
+    "content_type": 8,
+    "codename": "delete_perfilusuario"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 32,
+  "fields": {
+    "name": "Can view Perfil de Usuario",
+    "content_type": 8,
+    "codename": "view_perfilusuario"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 33,
+  "fields": {
+    "name": "Can add ficha sena",
+    "content_type": 9,
+    "codename": "add_fichasena"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 34,
+  "fields": {
+    "name": "Can change ficha sena",
+    "content_type": 9,
+    "codename": "change_fichasena"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 35,
+  "fields": {
+    "name": "Can delete ficha sena",
+    "content_type": 9,
+    "codename": "delete_fichasena"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 36,
+  "fields": {
+    "name": "Can view ficha sena",
+    "content_type": 9,
+    "codename": "view_fichasena"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 37,
+  "fields": {
+    "name": "Can add resultado aprendizaje",
+    "content_type": 10,
+    "codename": "add_resultadoaprendizaje"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 38,
+  "fields": {
+    "name": "Can change resultado aprendizaje",
+    "content_type": 10,
+    "codename": "change_resultadoaprendizaje"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 39,
+  "fields": {
+    "name": "Can delete resultado aprendizaje",
+    "content_type": 10,
+    "codename": "delete_resultadoaprendizaje"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 40,
+  "fields": {
+    "name": "Can view resultado aprendizaje",
+    "content_type": 10,
+    "codename": "view_resultadoaprendizaje"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 41,
+  "fields": {
+    "name": "Can add evidencia taller",
+    "content_type": 11,
+    "codename": "add_evidenciataller"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 42,
+  "fields": {
+    "name": "Can change evidencia taller",
+    "content_type": 11,
+    "codename": "change_evidenciataller"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 43,
+  "fields": {
+    "name": "Can delete evidencia taller",
+    "content_type": 11,
+    "codename": "delete_evidenciataller"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 44,
+  "fields": {
+    "name": "Can view evidencia taller",
+    "content_type": 11,
+    "codename": "view_evidenciataller"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 45,
+  "fields": {
+    "name": "Can add calificacion evidencia",
+    "content_type": 12,
+    "codename": "add_calificacionevidencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 46,
+  "fields": {
+    "name": "Can change calificacion evidencia",
+    "content_type": 12,
+    "codename": "change_calificacionevidencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 47,
+  "fields": {
+    "name": "Can delete calificacion evidencia",
+    "content_type": 12,
+    "codename": "delete_calificacionevidencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 48,
+  "fields": {
+    "name": "Can view calificacion evidencia",
+    "content_type": 12,
+    "codename": "view_calificacionevidencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 49,
+  "fields": {
+    "name": "Can add Institución Educativa",
+    "content_type": 13,
+    "codename": "add_institucioneducativa"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 50,
+  "fields": {
+    "name": "Can change Institución Educativa",
+    "content_type": 13,
+    "codename": "change_institucioneducativa"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 51,
+  "fields": {
+    "name": "Can delete Institución Educativa",
+    "content_type": 13,
+    "codename": "delete_institucioneducativa"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 52,
+  "fields": {
+    "name": "Can view Institución Educativa",
+    "content_type": 13,
+    "codename": "view_institucioneducativa"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 53,
+  "fields": {
+    "name": "Can add Programa de Formación",
+    "content_type": 14,
+    "codename": "add_programaformacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 54,
+  "fields": {
+    "name": "Can change Programa de Formación",
+    "content_type": 14,
+    "codename": "change_programaformacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 55,
+  "fields": {
+    "name": "Can delete Programa de Formación",
+    "content_type": 14,
+    "codename": "delete_programaformacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 56,
+  "fields": {
+    "name": "Can view Programa de Formación",
+    "content_type": 14,
+    "codename": "view_programaformacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 57,
+  "fields": {
+    "name": "Can add Ficha de Media Técnica",
+    "content_type": 15,
+    "codename": "add_ficha"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 58,
+  "fields": {
+    "name": "Can change Ficha de Media Técnica",
+    "content_type": 15,
+    "codename": "change_ficha"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 59,
+  "fields": {
+    "name": "Can delete Ficha de Media Técnica",
+    "content_type": 15,
+    "codename": "delete_ficha"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 60,
+  "fields": {
+    "name": "Can view Ficha de Media Técnica",
+    "content_type": 15,
+    "codename": "view_ficha"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 61,
+  "fields": {
+    "name": "Can add Competencia Laboral",
+    "content_type": 16,
+    "codename": "add_competencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 62,
+  "fields": {
+    "name": "Can change Competencia Laboral",
+    "content_type": 16,
+    "codename": "change_competencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 63,
+  "fields": {
+    "name": "Can delete Competencia Laboral",
+    "content_type": 16,
+    "codename": "delete_competencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 64,
+  "fields": {
+    "name": "Can view Competencia Laboral",
+    "content_type": 16,
+    "codename": "view_competencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 65,
+  "fields": {
+    "name": "Can add Resultado de Aprendizaje",
+    "content_type": 17,
+    "codename": "add_resultadoaprendizaje"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 66,
+  "fields": {
+    "name": "Can change Resultado de Aprendizaje",
+    "content_type": 17,
+    "codename": "change_resultadoaprendizaje"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 67,
+  "fields": {
+    "name": "Can delete Resultado de Aprendizaje",
+    "content_type": 17,
+    "codename": "delete_resultadoaprendizaje"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 68,
+  "fields": {
+    "name": "Can view Resultado de Aprendizaje",
+    "content_type": 17,
+    "codename": "view_resultadoaprendizaje"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 69,
+  "fields": {
+    "name": "Can add Matrícula de Aprendiz",
+    "content_type": 18,
+    "codename": "add_matricula"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 70,
+  "fields": {
+    "name": "Can change Matrícula de Aprendiz",
+    "content_type": 18,
+    "codename": "change_matricula"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 71,
+  "fields": {
+    "name": "Can delete Matrícula de Aprendiz",
+    "content_type": 18,
+    "codename": "delete_matricula"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 72,
+  "fields": {
+    "name": "Can view Matrícula de Aprendiz",
+    "content_type": 18,
+    "codename": "view_matricula"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 73,
+  "fields": {
+    "name": "Can add horario ficha",
+    "content_type": 19,
+    "codename": "add_horarioficha"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 74,
+  "fields": {
+    "name": "Can change horario ficha",
+    "content_type": 19,
+    "codename": "change_horarioficha"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 75,
+  "fields": {
+    "name": "Can delete horario ficha",
+    "content_type": 19,
+    "codename": "delete_horarioficha"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 76,
+  "fields": {
+    "name": "Can view horario ficha",
+    "content_type": 19,
+    "codename": "view_horarioficha"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 77,
+  "fields": {
+    "name": "Can add Bitácora de Seguimiento",
+    "content_type": 20,
+    "codename": "add_bitacoraseguimiento"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 78,
+  "fields": {
+    "name": "Can change Bitácora de Seguimiento",
+    "content_type": 20,
+    "codename": "change_bitacoraseguimiento"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 79,
+  "fields": {
+    "name": "Can delete Bitácora de Seguimiento",
+    "content_type": 20,
+    "codename": "delete_bitacoraseguimiento"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 80,
+  "fields": {
+    "name": "Can view Bitácora de Seguimiento",
+    "content_type": 20,
+    "codename": "view_bitacoraseguimiento"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 81,
+  "fields": {
+    "name": "Can add Asistencia de aprendiz",
+    "content_type": 21,
+    "codename": "add_asistenciaaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 82,
+  "fields": {
+    "name": "Can change Asistencia de aprendiz",
+    "content_type": 21,
+    "codename": "change_asistenciaaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 83,
+  "fields": {
+    "name": "Can delete Asistencia de aprendiz",
+    "content_type": 21,
+    "codename": "delete_asistenciaaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 84,
+  "fields": {
+    "name": "Can view Asistencia de aprendiz",
+    "content_type": 21,
+    "codename": "view_asistenciaaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 85,
+  "fields": {
+    "name": "Can add Mensaje de Seguimiento",
+    "content_type": 22,
+    "codename": "add_mensajeseguimiento"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 86,
+  "fields": {
+    "name": "Can change Mensaje de Seguimiento",
+    "content_type": 22,
+    "codename": "change_mensajeseguimiento"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 87,
+  "fields": {
+    "name": "Can delete Mensaje de Seguimiento",
+    "content_type": 22,
+    "codename": "delete_mensajeseguimiento"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 88,
+  "fields": {
+    "name": "Can view Mensaje de Seguimiento",
+    "content_type": 22,
+    "codename": "view_mensajeseguimiento"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 89,
+  "fields": {
+    "name": "Can add Juicio Evaluativo",
+    "content_type": 23,
+    "codename": "add_juicioevaluativo"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 90,
+  "fields": {
+    "name": "Can change Juicio Evaluativo",
+    "content_type": 23,
+    "codename": "change_juicioevaluativo"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 91,
+  "fields": {
+    "name": "Can delete Juicio Evaluativo",
+    "content_type": 23,
+    "codename": "delete_juicioevaluativo"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 92,
+  "fields": {
+    "name": "Can view Juicio Evaluativo",
+    "content_type": 23,
+    "codename": "view_juicioevaluativo"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 93,
+  "fields": {
+    "name": "Can add Notificación Institucional",
+    "content_type": 24,
+    "codename": "add_notificacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 94,
+  "fields": {
+    "name": "Can change Notificación Institucional",
+    "content_type": 24,
+    "codename": "change_notificacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 95,
+  "fields": {
+    "name": "Can delete Notificación Institucional",
+    "content_type": 24,
+    "codename": "delete_notificacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 96,
+  "fields": {
+    "name": "Can view Notificación Institucional",
+    "content_type": 24,
+    "codename": "view_notificacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 97,
+  "fields": {
+    "name": "Can add Registro de Auditoría",
+    "content_type": 25,
+    "codename": "add_registroauditoria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 98,
+  "fields": {
+    "name": "Can change Registro de Auditoría",
+    "content_type": 25,
+    "codename": "change_registroauditoria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 99,
+  "fields": {
+    "name": "Can delete Registro de Auditoría",
+    "content_type": 25,
+    "codename": "delete_registroauditoria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 100,
+  "fields": {
+    "name": "Can view Registro de Auditoría",
+    "content_type": 25,
+    "codename": "view_registroauditoria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 101,
+  "fields": {
+    "name": "Can add Solicitud a Secretaría",
+    "content_type": 26,
+    "codename": "add_solicitudsecretaria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 102,
+  "fields": {
+    "name": "Can change Solicitud a Secretaría",
+    "content_type": 26,
+    "codename": "change_solicitudsecretaria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 103,
+  "fields": {
+    "name": "Can delete Solicitud a Secretaría",
+    "content_type": 26,
+    "codename": "delete_solicitudsecretaria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 104,
+  "fields": {
+    "name": "Can view Solicitud a Secretaría",
+    "content_type": 26,
+    "codename": "view_solicitudsecretaria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 105,
+  "fields": {
+    "name": "Can add Respuesta a Solicitud",
+    "content_type": 27,
+    "codename": "add_respuestasolicitud"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 106,
+  "fields": {
+    "name": "Can change Respuesta a Solicitud",
+    "content_type": 27,
+    "codename": "change_respuestasolicitud"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 107,
+  "fields": {
+    "name": "Can delete Respuesta a Solicitud",
+    "content_type": 27,
+    "codename": "delete_respuestasolicitud"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 108,
+  "fields": {
+    "name": "Can view Respuesta a Solicitud",
+    "content_type": 27,
+    "codename": "view_respuestasolicitud"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 109,
+  "fields": {
+    "name": "Can add Recurso de Biblioteca",
+    "content_type": 28,
+    "codename": "add_recursobiblioteca"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 110,
+  "fields": {
+    "name": "Can change Recurso de Biblioteca",
+    "content_type": 28,
+    "codename": "change_recursobiblioteca"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 111,
+  "fields": {
+    "name": "Can delete Recurso de Biblioteca",
+    "content_type": 28,
+    "codename": "delete_recursobiblioteca"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 112,
+  "fields": {
+    "name": "Can view Recurso de Biblioteca",
+    "content_type": 28,
+    "codename": "view_recursobiblioteca"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 113,
+  "fields": {
+    "name": "Can add Recurso Guardado por Aprendiz",
+    "content_type": 29,
+    "codename": "add_recursoguardadoaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 114,
+  "fields": {
+    "name": "Can change Recurso Guardado por Aprendiz",
+    "content_type": 29,
+    "codename": "change_recursoguardadoaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 115,
+  "fields": {
+    "name": "Can delete Recurso Guardado por Aprendiz",
+    "content_type": 29,
+    "codename": "delete_recursoguardadoaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 116,
+  "fields": {
+    "name": "Can view Recurso Guardado por Aprendiz",
+    "content_type": 29,
+    "codename": "view_recursoguardadoaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 117,
+  "fields": {
+    "name": "Can add Proyecto de Innovación",
+    "content_type": 30,
+    "codename": "add_proyectoinnovacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 118,
+  "fields": {
+    "name": "Can change Proyecto de Innovación",
+    "content_type": 30,
+    "codename": "change_proyectoinnovacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 119,
+  "fields": {
+    "name": "Can delete Proyecto de Innovación",
+    "content_type": 30,
+    "codename": "delete_proyectoinnovacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 120,
+  "fields": {
+    "name": "Can view Proyecto de Innovación",
+    "content_type": 30,
+    "codename": "view_proyectoinnovacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 121,
+  "fields": {
+    "name": "Can add Logro / Insignia Formativa",
+    "content_type": 31,
+    "codename": "add_logroaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 122,
+  "fields": {
+    "name": "Can change Logro / Insignia Formativa",
+    "content_type": 31,
+    "codename": "change_logroaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 123,
+  "fields": {
+    "name": "Can delete Logro / Insignia Formativa",
+    "content_type": 31,
+    "codename": "delete_logroaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 124,
+  "fields": {
+    "name": "Can view Logro / Insignia Formativa",
+    "content_type": 31,
+    "codename": "view_logroaprendiz"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 125,
+  "fields": {
+    "name": "Can add Documento Institucional",
+    "content_type": 32,
+    "codename": "add_documentoinstitucional"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 126,
+  "fields": {
+    "name": "Can change Documento Institucional",
+    "content_type": 32,
+    "codename": "change_documentoinstitucional"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 127,
+  "fields": {
+    "name": "Can delete Documento Institucional",
+    "content_type": 32,
+    "codename": "delete_documentoinstitucional"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 128,
+  "fields": {
+    "name": "Can view Documento Institucional",
+    "content_type": 32,
+    "codename": "view_documentoinstitucional"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 129,
+  "fields": {
+    "name": "Can add Configuración de Alertas Tempranas",
+    "content_type": 33,
+    "codename": "add_configuracionalertas"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 130,
+  "fields": {
+    "name": "Can change Configuración de Alertas Tempranas",
+    "content_type": 33,
+    "codename": "change_configuracionalertas"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 131,
+  "fields": {
+    "name": "Can delete Configuración de Alertas Tempranas",
+    "content_type": 33,
+    "codename": "delete_configuracionalertas"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 132,
+  "fields": {
+    "name": "Can view Configuración de Alertas Tempranas",
+    "content_type": 33,
+    "codename": "view_configuracionalertas"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 133,
+  "fields": {
+    "name": "Can add Caso de Alerta Temprana",
+    "content_type": 34,
+    "codename": "add_casoalertatemprana"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 134,
+  "fields": {
+    "name": "Can change Caso de Alerta Temprana",
+    "content_type": 34,
+    "codename": "change_casoalertatemprana"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 135,
+  "fields": {
+    "name": "Can delete Caso de Alerta Temprana",
+    "content_type": 34,
+    "codename": "delete_casoalertatemprana"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 136,
+  "fields": {
+    "name": "Can view Caso de Alerta Temprana",
+    "content_type": 34,
+    "codename": "view_casoalertatemprana"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 137,
+  "fields": {
+    "name": "Can add Compromiso Formativo",
+    "content_type": 35,
+    "codename": "add_compromisoformativo"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 138,
+  "fields": {
+    "name": "Can change Compromiso Formativo",
+    "content_type": 35,
+    "codename": "change_compromisoformativo"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 139,
+  "fields": {
+    "name": "Can delete Compromiso Formativo",
+    "content_type": 35,
+    "codename": "delete_compromisoformativo"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 140,
+  "fields": {
+    "name": "Can view Compromiso Formativo",
+    "content_type": 35,
+    "codename": "view_compromisoformativo"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 141,
+  "fields": {
+    "name": "Can add Etapa Productiva de Aprendiz",
+    "content_type": 36,
+    "codename": "add_etapaproductiva"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 142,
+  "fields": {
+    "name": "Can change Etapa Productiva de Aprendiz",
+    "content_type": 36,
+    "codename": "change_etapaproductiva"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 143,
+  "fields": {
+    "name": "Can delete Etapa Productiva de Aprendiz",
+    "content_type": 36,
+    "codename": "delete_etapaproductiva"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 144,
+  "fields": {
+    "name": "Can view Etapa Productiva de Aprendiz",
+    "content_type": 36,
+    "codename": "view_etapaproductiva"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 145,
+  "fields": {
+    "name": "Can add Empresa en Convenio",
+    "content_type": 37,
+    "codename": "add_empresaconvenio"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 146,
+  "fields": {
+    "name": "Can change Empresa en Convenio",
+    "content_type": 37,
+    "codename": "change_empresaconvenio"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 147,
+  "fields": {
+    "name": "Can delete Empresa en Convenio",
+    "content_type": 37,
+    "codename": "delete_empresaconvenio"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 148,
+  "fields": {
+    "name": "Can view Empresa en Convenio",
+    "content_type": 37,
+    "codename": "view_empresaconvenio"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 149,
+  "fields": {
+    "name": "Can add Bitácora de Etapa Productiva",
+    "content_type": 38,
+    "codename": "add_bitacoraetapaproductiva"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 150,
+  "fields": {
+    "name": "Can change Bitácora de Etapa Productiva",
+    "content_type": 38,
+    "codename": "change_bitacoraetapaproductiva"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 151,
+  "fields": {
+    "name": "Can delete Bitácora de Etapa Productiva",
+    "content_type": 38,
+    "codename": "delete_bitacoraetapaproductiva"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 152,
+  "fields": {
+    "name": "Can view Bitácora de Etapa Productiva",
+    "content_type": 38,
+    "codename": "view_bitacoraetapaproductiva"
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
+    "last_login": "2026-09-19T22:39:28.878Z",
     "is_superuser": true,
     "username": "admin",
     "first_name": "Administrador",
@@ -18,8 +1387,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 2,
   "fields": {
-    "password": "pbkdf2_sha256$720000$XGPAu7FeRjE3NpEpIM8JAb$kK//6V02EjwG1ELCtVNIl+Y2/e5dIL7GQ5zYaxdnOgs=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": "2026-09-19T06:55:48.755Z",
     "is_superuser": false,
     "username": "instructor_carlos",
@@ -35,9 +1405,10 @@
 },
 {
   "model": "auth.user",
+  "pk": 3,
   "fields": {
-    "password": "pbkdf2_sha256$720000$oGXx43nrMv5HnORWs8c3uq$OM00BHUaNVJQlTpa1BG+U+ks6SLuxSfa77vrc3Qvyr0=",
-    "last_login": "2026-09-19T06:55:48.182Z",
+    "password": "pbkdf2_sha256$720000$xmG5fqEzTkyzw5UcSuVgAY$Qg95VLgAY9Znu7mWnBF9vq/JJuRsc8myGRSKAsfEbto=",
+    "last_login": "2026-09-19T23:38:55.857Z",
     "is_superuser": false,
     "username": "ap_1082987123",
     "first_name": "Juan David",
@@ -52,8 +1423,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 4,
   "fields": {
-    "password": "pbkdf2_sha256$720000$3qbTTVSSHpfE4qumpQR0Ge$Xw2us57xUqfFo21q46bIUWQKTWbwbEXBOGQxHMTLhzE=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1082544991",
@@ -69,8 +1441,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 5,
   "fields": {
-    "password": "pbkdf2_sha256$720000$fx4qW8zp2aaXv2tqPyh7UW$Au0ELsoGtNOK7CXn3KZUaESjHFErfVYjz1i2jdjs8yU=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1082112344",
@@ -86,8 +1459,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 6,
   "fields": {
-    "password": "pbkdf2_sha256$720000$mWcJJ53EykAMGsDjkSIobn$xC4TWrevY2DFEHPezvf6eBrmXeLzTWjI4m9dXqOGy0U=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1082776510",
@@ -103,8 +1477,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 7,
   "fields": {
-    "password": "pbkdf2_sha256$720000$At3qLwX2svEFLnkfBvnGYs$+hp7uSId1JUTm3mHqlsGd8yK/FoOj1bJ4l5am1TP2F0=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": "2026-09-19T06:55:49.045Z",
     "is_superuser": true,
     "username": "laura",
@@ -120,8 +1495,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 8,
   "fields": {
-    "password": "pbkdf2_sha256$720000$BC67KJAv8u3a5dYfi1glm5$gTq2nmySti+pKEkKilFiNCBesmeuCYf68WBZEkvREFQ=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "profesor_mendoza",
@@ -137,8 +1513,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 9,
   "fields": {
-    "password": "pbkdf2_sha256$720000$eOIWtJe6zh7lyMF4tYyxsq$Ss0joWVWf+nDZ5foNm/wcWHVp3Aj0SS+jTn4yyrU6dM=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "instructora_andrea",
@@ -154,8 +1531,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 10,
   "fields": {
-    "password": "pbkdf2_sha256$720000$ARDnJ5V0cLH1xEcvdDUZ9t$iHR1WijL0zzEtZ0lHgAXGmKnDRI/PLmZg9/SHwLF1lE=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": true,
     "username": "mary",
@@ -171,8 +1549,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 11,
   "fields": {
-    "password": "pbkdf2_sha256$720000$O1p5USl7wagB6qxYCVNeeS$4JEYM1q7YCz5rvD+OvCihbSfNDyBaPAvw5u3vAHs3Ug=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001001",
@@ -188,8 +1567,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 12,
   "fields": {
-    "password": "pbkdf2_sha256$720000$kMce3HaxBa35QaUfA6sqK3$E5aKqCGRtibJ2YQWjx4BNicglcY3XAuSEBwkT9AI6mM=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001002",
@@ -205,8 +1585,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 13,
   "fields": {
-    "password": "pbkdf2_sha256$720000$hiTMwGvZchM5DSWSX2EuYO$Ray0JIplTWwdsXTbP6QdYB1z1cEUPxboSZlBaWPdk34=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001003",
@@ -222,8 +1603,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 14,
   "fields": {
-    "password": "pbkdf2_sha256$720000$wPIsOlHVASBuvBswrdWyMb$yUBKcKssz6WCmEQPU0cec3EIOgIOcUr0QfcDGQ2A6f4=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001004",
@@ -239,8 +1621,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 15,
   "fields": {
-    "password": "pbkdf2_sha256$720000$qShccFnQuaDXP5ABlmEQZv$aNVWwf1mTZxM/Egl/b1GfosNgs9aIhq5NPQEF+MNhuY=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001005",
@@ -256,8 +1639,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 16,
   "fields": {
-    "password": "pbkdf2_sha256$720000$mfYmLtZCjsYO5kZREEoLR6$pA7J3IiqZ1Zk86x0iG0PweY74a0jYY7hkBUN9lZ1sqo=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001006",
@@ -273,8 +1657,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 17,
   "fields": {
-    "password": "pbkdf2_sha256$720000$v3HaW9VqnRjPyE9gnWJ78J$epuW9W3BoV82yRjhnno2WNWvQYWli7JpxQFa8ktIVTo=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001007",
@@ -290,8 +1675,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 18,
   "fields": {
-    "password": "pbkdf2_sha256$720000$ZjKX5f4xX28LV7uV4TDTWo$jFIWnzCKkgfbLDncQU43HjzIdyPfAqA/ffVJdhtclIw=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001008",
@@ -307,8 +1693,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 19,
   "fields": {
-    "password": "pbkdf2_sha256$720000$3hg6mVelYOeo1PFBq4hIFm$9T90z1IolSKAjCtMKsSgDPii/cGGLU7ft0OI3UYHoxY=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001009",
@@ -324,8 +1711,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 20,
   "fields": {
-    "password": "pbkdf2_sha256$720000$2Tf4bSGILOS7IG032zdiqu$rHbRWeuZVViJoKRQVtlwmkpo4PdCEuCQ8nQ3qvUMLnA=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001010",
@@ -341,8 +1729,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 21,
   "fields": {
-    "password": "pbkdf2_sha256$720000$56BCM2xwUYdR14k9YSbmte$8FMWOpEJPA1TQbaNhGq5TMZSl2CL6WooZWqUBQIXOR8=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001011",
@@ -358,8 +1747,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 22,
   "fields": {
-    "password": "pbkdf2_sha256$720000$cJq309EzHJsPJMbndooUt5$bIW57SQynpeUOI7dS1UBnE0FSMlfkl2mLeH7PXVAltU=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001012",
@@ -375,8 +1765,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 23,
   "fields": {
-    "password": "pbkdf2_sha256$720000$w4U6j2IDhEVqk3nKoH6V3A$L7UyYFuUfinEm7gmVLwpsMCsxtd99RKXD5NvIGyi0sE=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": "2026-09-19T06:55:49.317Z",
     "is_superuser": false,
     "username": "sec_martha",
@@ -392,9 +1783,10 @@
 },
 {
   "model": "auth.user",
+  "pk": 24,
   "fields": {
-    "password": "pbkdf2_sha256$720000$UWn8ftjt3Vs6inkjrtvDQw$x5cjaoCusxE7SF1rgt0CF0bt//47VBpjJG8ZY/WUEY0=",
-    "last_login": "2026-09-19T05:35:12.563Z",
+    "password": "pbkdf2_sha256$720000$4z6jg3V028SMttMrZkDBd0$gk8aarg/vdiDd62rPVdsqRFjo87Y5s3Z4YTTpR3EW2M=",
+    "last_login": "2026-09-19T23:43:50.387Z",
     "is_superuser": true,
     "username": "maria",
     "first_name": "",
@@ -409,8 +1801,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 25,
   "fields": {
-    "password": "pbkdf2_sha256$720000$58OQAtfRQni4b6DQVlKLXn$pE58m1m9qeKvIjuC5g8VrpMgWh1NVrdhSzJ31j5KO/o=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": "2026-09-19T20:17:14.803Z",
     "is_superuser": false,
     "username": "coordinador_demo",
@@ -426,8 +1819,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 26,
   "fields": {
-    "password": "pbkdf2_sha256$720000$nfyCXpEQarc92ZRPEHuZEF$iWkPmRQ9D6Vwfc5q2sHAfP5dID5V+s29w07Kg52Pa1s=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": "2026-09-19T20:17:13.366Z",
     "is_superuser": false,
     "username": "instructor_demo",
@@ -443,8 +1837,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 27,
   "fields": {
-    "password": "pbkdf2_sha256$720000$TMlFB59MCQScKWlz1sCVze$ACdHiwcwuUwGbTFDkz6BqztDpksYWTdLHyT578xjua4=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": "2026-09-19T20:17:14.117Z",
     "is_superuser": false,
     "username": "secretaria_demo",
@@ -460,8 +1855,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 28,
   "fields": {
-    "password": "pbkdf2_sha256$720000$sFn3BWO2LoZ41uvQvMTbWT$UP83H8PHCkQ2xCtVM+JidmlLSMo/AfpYkOuzWB8a+20=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": "2026-09-19T20:17:12.585Z",
     "is_superuser": false,
     "username": "aprendiz_demo",
@@ -477,8 +1873,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 29,
   "fields": {
-    "password": "pbkdf2_sha256$720000$yODfrPHpeXKky17iALwl7S$GL0vtYDolC97EIkQa7Yztp2Xk9cfFtURsiiI6R3UWmA=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "instructor_adso",
@@ -494,8 +1891,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 30,
   "fields": {
-    "password": "pbkdf2_sha256$720000$FvSzQ34dXuMuXG8SeIJq8S$39iqo7YUR/DEh/c9wuqxz3TMywwYjuYgZNTmLGSMNaU=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "instructor_sistemas",
@@ -511,8 +1909,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 31,
   "fields": {
-    "password": "pbkdf2_sha256$720000$e9dD9CghkWTWnf8re6JTur$0C4rnqYrlhV2iZkv9LpLlZLUG1UwEjZYe8a917izsCo=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "instructor_contable",
@@ -528,8 +1927,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 32,
   "fields": {
-    "password": "pbkdf2_sha256$720000$6DOPzGJPHp59a18neg7HlF$t9JdPaIBJzp44L4fk/3Gwlg+P9+DsjDHk0FVkc4bq4k=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "instructor_admin",
@@ -545,8 +1945,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 33,
   "fields": {
-    "password": "pbkdf2_sha256$720000$oUNS9fmi00gxlTuVyibffp$rUQYCsZMPjKQRvrXtIc1muaX0P1VCO++C0EPeLVxRoI=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_3173430_1",
@@ -562,8 +1963,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 34,
   "fields": {
-    "password": "pbkdf2_sha256$720000$MsIYWkCsYooJPv95tO5ucg$JeSE6d5C/CO4iWRmiA0k0uhbM6dgXHRLcXppkUW1rj0=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_3173430_2",
@@ -579,8 +1981,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 35,
   "fields": {
-    "password": "pbkdf2_sha256$720000$I6jrkgNASQgR6tTABvdlpT$a0GoV8NT0jYbgOS1O1wDUVW65PCjKPSvTUvKWPyVep8=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_3173430_3",
@@ -596,8 +1999,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 36,
   "fields": {
-    "password": "pbkdf2_sha256$720000$1eae2oLBrzZPmdQCGWWZH8$l8SnoZYcBCphnMe54h7VLrEVzOUVzXAUnTcU1sFwAQI=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_3173430_4",
@@ -613,8 +2017,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 37,
   "fields": {
-    "password": "pbkdf2_sha256$720000$DmBf9hqUYgPzSX0qUBVpL0$yqmy0pBpzodjNJ7oVmw1ywdQHOQFI3TKTOC8WwMPcdw=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_3173430_5",
@@ -630,8 +2035,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 38,
   "fields": {
-    "password": "pbkdf2_sha256$720000$X8Ghh5jQDB3qcxNhS3SVe2$ra5a23zP5kmE998eeB0/DEyp62G+Om6yZt0PojWHrn4=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2824910_1",
@@ -647,8 +2053,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 39,
   "fields": {
-    "password": "pbkdf2_sha256$720000$1qYYrTTLu86ejlr1DTnfd0$S1JqoIehYDRpGKagJz3uAmIHxW6T8Wzom2PLxWaQ9to=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2824910_2",
@@ -664,8 +2071,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 40,
   "fields": {
-    "password": "pbkdf2_sha256$720000$LuBepLxAD54B7xzCcTHCCm$JqmJ8PhltnswJObPW58oek+XndZsWV+Kk3bZW3EAuIQ=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2824910_3",
@@ -681,8 +2089,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 41,
   "fields": {
-    "password": "pbkdf2_sha256$720000$aNnmsSBrVVOTouQPCw3XTE$r58nuHXjQGnTQAdq8FMBmwnSTXJg6Ytc9MrCGkZew9U=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2824910_4",
@@ -698,8 +2107,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 42,
   "fields": {
-    "password": "pbkdf2_sha256$720000$D82vzbsSIaZZ1dEkvo5DqE$tuWKe1dwJHpwf2jNedhj/B0dcevGNG7Zj3LC40M3tps=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2824910_5",
@@ -715,8 +2125,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 43,
   "fields": {
-    "password": "pbkdf2_sha256$720000$8rvFNbxFAROEoXFmNsxlIk$IFRcLownKH+yrQXoeAY2IJWcwgtxvbyd3GdvizjvQxY=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2694120_1",
@@ -732,8 +2143,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 44,
   "fields": {
-    "password": "pbkdf2_sha256$720000$lVIuR29kclXsKuM6uWCRXg$53hfCXml/6A9avRXWGKuhNYnfJ8oxvpvnwV3EH/A9MQ=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2694120_2",
@@ -749,8 +2161,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 45,
   "fields": {
-    "password": "pbkdf2_sha256$720000$YuVPmkbFMyjx9avlQu45Zh$pIq7VG+SoVG2BuE+Tude13K0wMmkOdGwTkNcMt5JrGU=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2694120_3",
@@ -766,8 +2179,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 46,
   "fields": {
-    "password": "pbkdf2_sha256$720000$QwLL5BfGmtbxMGijS1EtiE$IZUJPK17Se6DmYe2x9SyNPbmbwNSVtGiy5xwruRlHVg=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2694120_4",
@@ -783,8 +2197,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 47,
   "fields": {
-    "password": "pbkdf2_sha256$720000$P5q4mbyAXOG4Y1wxvAYtpi$GQO7/GivzPBBuWae4bcXmNczMW5LGgkAS2LlOchG170=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2694120_5",
@@ -800,8 +2215,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 48,
   "fields": {
-    "password": "pbkdf2_sha256$720000$MTl63ZVS27MuztReVz5WiH$cEQrJwjD88IXLKAShE5bsrucpfEvF9i+vFVxpC0hnDY=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2791820_1",
@@ -817,8 +2233,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 49,
   "fields": {
-    "password": "pbkdf2_sha256$720000$Jl53y92pDu7YcevxLSedkv$IogsOAAbyh8HyHhDzDuG33fsbgkx2s1UuGj2QC1aBQ4=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2791820_2",
@@ -834,8 +2251,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 50,
   "fields": {
-    "password": "pbkdf2_sha256$720000$WRxiQS00pLGFuGoQ9j7APa$H/SX2HhKc7bWKK0sLNZt9IdS7PXGDGCEkSti1F/L4yg=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2791820_3",
@@ -851,8 +2269,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 51,
   "fields": {
-    "password": "pbkdf2_sha256$720000$EgAlbnlF0T6C5K32bjuNFi$84cLJ0Qry9LUwE5FZcHbGMv6ewYQwwPT83nbzcFmrR4=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2791820_4",
@@ -868,8 +2287,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 52,
   "fields": {
-    "password": "pbkdf2_sha256$720000$wC121K3B7CBZ6jLPbMnw8j$PIdEY/o0O67pHVnJgU6A91zn1BzLmUdCz4Rk23CL0H0=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2791820_5",
@@ -885,9 +2305,10 @@
 },
 {
   "model": "auth.user",
+  "pk": 53,
   "fields": {
-    "password": "pbkdf2_sha256$720000$FONvGJIt3gMTQ7x0nhIK85$l/LtfZIWS8wDp9mtqQf+BqD1yEcsajkNlNhjdUjWM80=",
-    "last_login": null,
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
+    "last_login": "2026-09-19T22:39:00.126Z",
     "is_superuser": false,
     "username": "apr_2718340_1",
     "first_name": "Andrés Felipe",
@@ -902,8 +2323,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 54,
   "fields": {
-    "password": "pbkdf2_sha256$720000$zP4zuXiWMM5qSka5Wi9dfV$aqRGATkrqV9i7Wp9N6bFO428e4iKWjBLK2Ex0steEdc=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2718340_2",
@@ -919,8 +2341,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 55,
   "fields": {
-    "password": "pbkdf2_sha256$720000$Rwirc6xdeRUJ94a0EtJGbG$OCeCvBiy36hgMDxDIbAXwig3W5be1TJ4BlXw02jA42Q=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2718340_3",
@@ -936,8 +2359,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 56,
   "fields": {
-    "password": "pbkdf2_sha256$720000$xwNHjlKecQ85KhweCOYm4C$GDFoqBkeg9ydrJwW8kkteSZtoFmAoiJ6nZ/5eHedvww=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2718340_4",
@@ -953,8 +2377,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 57,
   "fields": {
-    "password": "pbkdf2_sha256$720000$Yu81npYOk0ruo4PMI7V9H4$TigCopAc/i3AHqbgo2qYX93SyyO87fPRtMWmHL5Z54E=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2718340_5",
@@ -970,8 +2395,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 58,
   "fields": {
-    "password": "pbkdf2_sha256$720000$bc1KRCa5ZO6vvFDM5SWxzv$t1TwKEZXjm6YL5lu0PZY8jtCCmhszw4NwsqCB7sRE3Q=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2683900_1",
@@ -987,8 +2413,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 59,
   "fields": {
-    "password": "pbkdf2_sha256$720000$brRd3uFNxvOpwRT6buvRMl$pTeq6zdKKCi8lo7XnkfGb3UoWD4XGJtpKJmXs+jLNnE=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2683900_2",
@@ -1004,8 +2431,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 60,
   "fields": {
-    "password": "pbkdf2_sha256$720000$WQHd3YJS5DGwGadrw6ByDT$kue4n2eSvGO99QAZHZQ7RCuDSvd3RE22qF6oUB8fDiw=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2683900_3",
@@ -1021,8 +2449,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 61,
   "fields": {
-    "password": "pbkdf2_sha256$720000$AhUZoE8vUSQT4waMec5PmQ$k4xys/lp9CtSvdBPFtUbtbpuwe2QgdxOjr8dj7UlDig=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2683900_4",
@@ -1038,8 +2467,9 @@
 },
 {
   "model": "auth.user",
+  "pk": 62,
   "fields": {
-    "password": "pbkdf2_sha256$720000$IdW9LhprLrMsFVeJeHEkYo$RPyfE1oT86V1wIfN8JsOvSjis+6ZinYVUM2imSv6RNE=",
+    "password": "pbkdf2_sha256$720000$ZzUvePOjawiZhE1XxE3U5G$1oLfKu4bloMXbfQoigQCAABk5WxdtPLAY/AUylp3qTI=",
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2683900_5",
@@ -1051,6 +2481,526 @@
     "date_joined": "2026-09-19T20:55:50.361Z",
     "groups": [],
     "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 63,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$BIWkBDwCoS0P4bbgmRgiyF$65u+qK1Rb80KUsMfX8Ws8161/lOgwCb/53p1z34Pk7c=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082991001",
+    "first_name": "Valentina Sofia",
+    "last_name": "Mendoza Perez",
+    "email": "ap_1082991001@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.661Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 64,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$Fm4ASKB0TDNNSvqWZrpHjo$bEOxsUCkCuiFNkBPT4UbBEYcpiEmJBzmrIYNxZ/JwdQ=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082991002",
+    "first_name": "Mateo Jose",
+    "last_name": "Castillo Rangel",
+    "email": "ap_1082991002@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.683Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 65,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$YFZpGs5HAXcGBtFe6oIPEM$ggSVcZTKO1LPYbrn2FS3EsNOqS2s+C5kkegq0o2NSgY=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082991003",
+    "first_name": "Daniela Maria",
+    "last_name": "Vargas Polo",
+    "email": "ap_1082991003@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.697Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 66,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$6uIcgyqlBG8rtuVyHFRvvm$z3IGPzwLy0OUFXHQUif2crxUC8Df7Gca246gUgULKD4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082992001",
+    "first_name": "Santiago Andres",
+    "last_name": "Gomez Navarro",
+    "email": "ap_1082992001@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.719Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 67,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$AtyV1S2WEVExcMHIf60jg1$u7BXRL89GVeXyePZPnurjEHTwZsVS33ioPD32DH9bgw=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082992002",
+    "first_name": "Mariana Lucia",
+    "last_name": "Suarez Diaz",
+    "email": "ap_1082992002@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.735Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 68,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$Zhmz0EpACdsBlNkOgTZ1dW$BoohHnAtckAVNUnMKPBE299efcqBTu3Y8cth1+ikHHk=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082992003",
+    "first_name": "Carlos Eduardo",
+    "last_name": "Pineda Castro",
+    "email": "ap_1082992003@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.750Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 69,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$Hrr4vfJkF9CyMjU0GA10mV$s+Pk4KldaQrgXVzXOJp+2n4Pr1u5obiVlaHgbs5J1l4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082993001",
+    "first_name": "David Alejandro",
+    "last_name": "Romero Ruiz",
+    "email": "ap_1082993001@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.773Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 70,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$bh9NHrgtbqV9p6ycnwrZc7$4ljUkv2rcL9Ki4jyg8rAWCMW2tp4r4a8jz7C6SQ0C5g=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082993002",
+    "first_name": "Gabriela Elena",
+    "last_name": "Ortega Morales",
+    "email": "ap_1082993002@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.786Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 71,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$kDczqtZaJIvRdeI5CglLZq$v0AFYWiERmOkbeModaSOONSM56cx/DyysHKqjUCaRPg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082993003",
+    "first_name": "Andres Felipe",
+    "last_name": "Silva Cotes",
+    "email": "ap_1082993003@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.800Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 72,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$fJdn44AprV1z5gopyv3H3t$+KLk0dJaVXNEfoyeNumjEqkRxoxK5iDMY0mCJtkktG8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082994001",
+    "first_name": "Isabella Maria",
+    "last_name": "Torres Jimenez",
+    "email": "ap_1082994001@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.822Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 73,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$jjaccZoywpCUdMKU1AtjxL$XtZCD5Qadwc0R1u2ml6V1/7IlUTmhEI4sI5UgDUy7jU=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082994002",
+    "first_name": "Juan Camilo",
+    "last_name": "Herrera Santos",
+    "email": "ap_1082994002@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.837Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 74,
+  "fields": {
+    "password": "pbkdf2_sha256$720000$gwd0dLGoi10q2zCYteE2Bw$Kyq3sCfbwji5OVxLrko6a1+VoQkwWJYuYOJS7UdGv98=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ap_1082994003",
+    "first_name": "Laura Vanessa",
+    "last_name": "Peña Gutierrez",
+    "email": "ap_1082994003@soy.sena.edu.co",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T23:35:57.851Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 1,
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 2,
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 3,
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 4,
+  "fields": {
+    "app_label": "auth",
+    "model": "user"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 5,
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 6,
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 7,
+  "fields": {
+    "app_label": "usuarios",
+    "model": "rol"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 8,
+  "fields": {
+    "app_label": "usuarios",
+    "model": "perfilusuario"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 9,
+  "fields": {
+    "app_label": "usuarios",
+    "model": "fichasena"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 10,
+  "fields": {
+    "app_label": "usuarios",
+    "model": "resultadoaprendizaje"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 11,
+  "fields": {
+    "app_label": "usuarios",
+    "model": "evidenciataller"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 12,
+  "fields": {
+    "app_label": "usuarios",
+    "model": "calificacionevidencia"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 13,
+  "fields": {
+    "app_label": "instituciones",
+    "model": "institucioneducativa"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 14,
+  "fields": {
+    "app_label": "academico",
+    "model": "programaformacion"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 15,
+  "fields": {
+    "app_label": "academico",
+    "model": "ficha"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 16,
+  "fields": {
+    "app_label": "academico",
+    "model": "competencia"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 17,
+  "fields": {
+    "app_label": "academico",
+    "model": "resultadoaprendizaje"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 18,
+  "fields": {
+    "app_label": "academico",
+    "model": "matricula"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 19,
+  "fields": {
+    "app_label": "academico",
+    "model": "horarioficha"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 20,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "bitacoraseguimiento"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 21,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "asistenciaaprendiz"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 22,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "mensajeseguimiento"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 23,
+  "fields": {
+    "app_label": "evaluaciones",
+    "model": "juicioevaluativo"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 24,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "notificacion"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 25,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "registroauditoria"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 26,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "solicitudsecretaria"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 27,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "respuestasolicitud"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 28,
+  "fields": {
+    "app_label": "academico",
+    "model": "recursobiblioteca"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 29,
+  "fields": {
+    "app_label": "academico",
+    "model": "recursoguardadoaprendiz"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 30,
+  "fields": {
+    "app_label": "academico",
+    "model": "proyectoinnovacion"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 31,
+  "fields": {
+    "app_label": "academico",
+    "model": "logroaprendiz"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 32,
+  "fields": {
+    "app_label": "academico",
+    "model": "documentoinstitucional"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 33,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "configuracionalertas"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 34,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "casoalertatemprana"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 35,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "compromisoformativo"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 36,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "etapaproductiva"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 37,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "empresaconvenio"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 38,
+  "fields": {
+    "app_label": "seguimiento",
+    "model": "bitacoraetapaproductiva"
   }
 },
 {
@@ -1119,6 +3069,22 @@
 },
 {
   "model": "sessions.session",
+  "pk": "97ndzxmjbmal03sjjqmnvit1h0n9bvoy",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQAP_C2RDWhVI8eu8byMKCVA1NSnsy_l1JetDrzGRewtO-Fb-3tPqZxUWAOP2yQPGRahd8p3pbZFzqts5B9kQetslp4fS8Hu3foFArfZtVUBAMOmSntQ6MyjmkwbI11n4RGabRjS6aDMNZJY1IFoIFZMgs3h-6Kjbp:1x83iS:hSygxIy9Q6WF3Y9QDiuuxJNxIGOaD15RyLjBQkuNxLU",
+    "expire_date": "2026-10-03T22:39:28.903Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "9t85wbb83os33seicusy8ar8h8ebhsl9",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hAKWAaX7nsGMgyDVA0kpV0Z765NutDtf-_9lwi4rSVsnZcwJ3ER2orT7xiRHlx3ku5Yb01Sq-syR7kr8qBdTi3x83q4fwcFe_nWxoKOOY-JFMOICGdiR57I2MzoILFG41nFwQM6x8plo1A7M4DO3qN4fwAvTTip:1x84JT:UiuBd36BD-cEX-ry-wvteotvi0y6hiAwxMN4m9kHyD4",
+    "expire_date": "2026-10-03T23:17:43.813Z"
+  }
+},
+{
+  "model": "sessions.session",
   "pk": "9yy1rqttihvut3zkuui56xvz0xotha6d",
   "fields": {
     "session_data": ".eJxVjMsOwiAQRf-FtSFDCxRcuvcbyDAz2KqBpI-V8d-1SRe6veec-1IJt3VM2yJzmlidlVGn3y0jPaTugO9Yb01Tq-s8Zb0r-qCLvjaW5-Vw_w5GXMZvDX6QjpgcSOepZyQP2BWTMQcLiBBKNi7kMFiDDBJtH7H0DBSdFW_V-wP6EDhH:1x7nZy:V5hVLEJqCuUGBjid7TXruGv9Kqgf7Ppm4VDrJ36h7c4",
@@ -1131,6 +3097,14 @@
   "fields": {
     "session_data": ".eJxVjDsOwyAQRO9CHSHzMeCU6X0GtOxCcBKBZOwqyt2DJRdJN3rzZt7Mw75lv7e4-oXYlQl2-WUB8BnLUdADyr1yrGVbl8APhZ9t43Ol-Lqd7t9Bhpb7OkThKEnjhslZGRQKPdIkhUOj1ehS0kYDqdCjpGgHiugsWIMBCDthny_aqDhy:1x7nL7:mGFuSO2_e7sO7qv-MFXSobs-hgtQUYxNBAh--2Xjo6M",
     "expire_date": "2026-10-03T05:10:17.349Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "as9klccyl66oxvx2e0hel3tgdjsxmqcf",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hAKWAaX7nsGMgyDVA0kpV0Z765NutDtf-_9lwi4rSVsnZcwJ3ER2orT7xiRHlx3ku5Yb01Sq-syR7kr8qBdTi3x83q4fwcFe_nWxoKOOY-JFMOICGdiR57I2MzoILFG41nFwQM6x8plo1A7M4DO3qN4fwAvTTip:1x84K4:5M_n9GdMq_DwFI9W6M1cUu-m_6rm3N6u7mRFxLE2Vmw",
+    "expire_date": "2026-10-03T23:18:20.158Z"
   }
 },
 {
@@ -1163,6 +3137,14 @@
   "fields": {
     "session_data": ".eJxVjMsOwiAQRf-FtSFDCxRcuvcbyDAz2KqBpI-V8d-1SRe6veec-1IJt3VM2yJzmlidlVGn3y0jPaTugO9Yb01Tq-s8Zb0r-qCLvjaW5-Vw_w5GXMZvDX6QjpgcSOepZyQP2BWTMQcLiBBKNi7kMFiDDBJtH7H0DBSdFW_V-wP6EDhH:1x7ozn:AOhquwjMdEFlwWCmEOqZ-J7uVjsnznpBp3Vf7x_i1-k",
     "expire_date": "2026-10-03T06:56:23.485Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "ekd108dfhh0zcrjqhg754b2aqzoq722v",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2pAWOqO4dN8zEJgZpGogKe3KeHfbpAvd_vfefysf1iX7tcnsJ1ZXBVadfscY6CllJ_wI5V411bLMU9S7og_a9FhZXrfD_TvIoeWtFgF7obPtwBnmYNBAAkSKHAaSFMFxInRuQ2ITI4Dw0IM1HUKfMKrPFyObOKY:1x83i0:xgprhHC--LWFMM5JlZ0t0E0oSrvCmeQzWrjl-Amjgwc",
+    "expire_date": "2026-10-03T22:39:00.142Z"
   }
 },
 {
@@ -1215,6 +3197,14 @@
 },
 {
   "model": "sessions.session",
+  "pk": "i4segk3krlekp3pgmr748s4ygidmrzuu",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hAKWAaX7nsGMgyDVA0kpV0Z765NutDtf-_9lwi4rSVsnZcwJ3ER2orT7xiRHlx3ku5Yb01Sq-syR7kr8qBdTi3x83q4fwcFe_nWxoKOOY-JFMOICGdiR57I2MzoILFG41nFwQM6x8plo1A7M4DO3qN4fwAvTTip:1x84I4:0lYgO_PZ5yi0snOu0yZGkdKkAnJm7bek0TCSGeJHZEE",
+    "expire_date": "2026-10-03T23:16:16.873Z"
+  }
+},
+{
+  "model": "sessions.session",
   "pk": "ivsaq5l6nl5b6hik8778w76k0quejot9",
   "fields": {
     "session_data": ".eJxVjMsOwiAQRf-FtSHIG5fu-w1kgBmpGkhKuzL-uzbpQrf3nHNfLMK21rgNXOJc2IUpdvrdEuQHth2UO7Rb57m3dZkT3xV-0MGnXvB5Pdy_gwqjfuug3BldyhSAjNdkjAsyC_JaKJG0sxAkKe_JS1EM2oRWCEKfyAV0BOz9AdlhN_w:1x7oRY:ZqqEP3WhC3789m_CRP9vM8IV4Kh5N5L7J-nQXRtonhw",
@@ -1227,14 +3217,6 @@
   "fields": {
     "session_data": ".eJxVjMsOwiAQRf-FtSFDCxRcuvcbyDAz2KqBpI-V8d-1SRe6veec-1IJt3VM2yJzmlidlVGn3y0jPaTugO9Yb01Tq-s8Zb0r-qCLvjaW5-Vw_w5GXMZvDX6QjpgcSOepZyQP2BWTMQcLiBBKNi7kMFiDDBJtH7H0DBSdFW_V-wP6EDhH:1x82Cw:YAPAIDIFLVvsy6aIEnEXdM6cNR9OCNASf9HgxhaI7ic",
     "expire_date": "2026-10-03T21:02:50.257Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "kiww6h6awpefsm6hc7478n0cewpyl368",
-  "fields": {
-    "session_data": ".eJxVjEEOwiAUBe_C2hAKFKhL956BvP8BqZo2Ke3KeHdt0oVu38y8l4jY1hq3lpc4JnEW2orT70jgR552ku6YbrPkeVqXkeSuyIM2eZ1Tfl4O9--gotVv7WEoGGs4FNd750mhDB0lXRS6QfU0GBCDgaCCYgs4XbxH6G1iEzrx_gAPYThW:1x7njE:Wa70nC7orMi5W1jnYM3OvPAw1upiSQQWJ16oa9dbYks",
-    "expire_date": "2026-10-03T05:35:12.578Z"
   }
 },
 {
@@ -1287,10 +3269,26 @@
 },
 {
   "model": "sessions.session",
+  "pk": "o21vi55mwgk1foelep8oavtgd525z8l2",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hAKWAaX7nsGMgyDVA0kpV0Z765NutDtf-_9lwi4rSVsnZcwJ3ER2orT7xiRHlx3ku5Yb01Sq-syR7kr8qBdTi3x83q4fwcFe_nWxoKOOY-JFMOICGdiR57I2MzoILFG41nFwQM6x8plo1A7M4DO3qN4fwAvTTip:1x84ik:eQ-Ej9VmALhOkFEkhcwdDYKigNHLxErvpI2IuInyXsI",
+    "expire_date": "2026-10-03T23:43:50.401Z"
+  }
+},
+{
+  "model": "sessions.session",
   "pk": "oleqx10hana2dtdacg0b8rsvkmvovhpf",
   "fields": {
     "session_data": ".eJxVjMsOwiAQRf-FtSHIG5fu-w1kgBmpGkhKuzL-uzbpQrf3nHNfLMK21rgNXOJc2IUpdvrdEuQHth2UO7Rb57m3dZkT3xV-0MGnXvB5Pdy_gwqjfuug3BldyhSAjNdkjAsyC_JaKJG0sxAkKe_JS1EM2oRWCEKfyAV0BOz9AdlhN_w:1x7oVB:XROTyMdWMtSTKgmkEt1ONb9PEQTnNBxeD_6lXTBzZIo",
     "expire_date": "2026-10-03T06:24:45.165Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "p8byqicii2ifip22z6kuxcnlqgzreyw2",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hAKWAaX7nsGMgyDVA0kpV0Z765NutDtf-_9lwi4rSVsnZcwJ3ER2orT7xiRHlx3ku5Yb01Sq-syR7kr8qBdTi3x83q4fwcFe_nWxoKOOY-JFMOICGdiR57I2MzoILFG41nFwQM6x8plo1A7M4DO3qN4fwAvTTip:1x84iG:X18SApcQj-vP4Tm3ywluaN85x4_rvjSM12wLJK7Fqww",
+    "expire_date": "2026-10-03T23:43:20.121Z"
   }
 },
 {
@@ -1422,6 +3420,14 @@
   }
 },
 {
+  "model": "sessions.session",
+  "pk": "zwrrfkyyha45hvuyau52hfbqgc4vomd2",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQRf-FtSHKa6hL9_0GMgODVA0kpV0Z_92QdKHbe865bxFw30rYO69hSeIqtDj9boTxyXWA9MB6bzK2uq0LyaHIg3Y5t8Sv2-H-HRTsZdSkdVaaUyaIjqMy2Ss3gcvJwHkCzYowXwDZYwS01njjjGWrHLDLJD5fAH84UA:1x84dz:3Bn1QagRiepn6emT59Cq-qc3huC3mMe3Cgw8Et_lQyE",
+    "expire_date": "2026-10-03T23:38:55.874Z"
+  }
+},
+{
   "model": "usuarios.rol",
   "pk": 1,
   "fields": {
@@ -1481,9 +3487,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 1,
   "fields": {
-    "usuario": [
-      "admin"
-    ],
+    "usuario": 1,
     "rol": 1,
     "tipo_documento": "CC",
     "numero_documento": "CC-100000000",
@@ -1499,9 +3503,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 2,
   "fields": {
-    "usuario": [
-      "instructor_carlos"
-    ],
+    "usuario": 2,
     "rol": 3,
     "tipo_documento": "CC",
     "numero_documento": "CC-85472190",
@@ -1517,9 +3519,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 3,
   "fields": {
-    "usuario": [
-      "ap_1082987123"
-    ],
+    "usuario": 3,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1082987123",
@@ -1535,9 +3535,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 4,
   "fields": {
-    "usuario": [
-      "ap_1082544991"
-    ],
+    "usuario": 4,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1082544991",
@@ -1553,9 +3551,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 5,
   "fields": {
-    "usuario": [
-      "ap_1082112344"
-    ],
+    "usuario": 5,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1082112344",
@@ -1571,9 +3567,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 6,
   "fields": {
-    "usuario": [
-      "ap_1082776510"
-    ],
+    "usuario": 6,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1082776510",
@@ -1589,9 +3583,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 7,
   "fields": {
-    "usuario": [
-      "laura"
-    ],
+    "usuario": 7,
     "rol": 2,
     "tipo_documento": "CC",
     "numero_documento": "CC-108200001",
@@ -1607,9 +3599,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 8,
   "fields": {
-    "usuario": [
-      "profesor_mendoza"
-    ],
+    "usuario": 8,
     "rol": 4,
     "tipo_documento": "CC",
     "numero_documento": "CC-12589632",
@@ -1625,9 +3615,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 9,
   "fields": {
-    "usuario": [
-      "instructora_andrea"
-    ],
+    "usuario": 9,
     "rol": 3,
     "tipo_documento": "CC",
     "numero_documento": "CC-57894123",
@@ -1643,9 +3631,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 10,
   "fields": {
-    "usuario": [
-      "mary"
-    ],
+    "usuario": 10,
     "rol": 1,
     "tipo_documento": "CC",
     "numero_documento": "DOC-10-mary",
@@ -1661,9 +3647,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 11,
   "fields": {
-    "usuario": [
-      "ap_1001001001"
-    ],
+    "usuario": 11,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1001001001",
@@ -1679,9 +3663,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 12,
   "fields": {
-    "usuario": [
-      "ap_1001001002"
-    ],
+    "usuario": 12,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1001001002",
@@ -1697,9 +3679,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 13,
   "fields": {
-    "usuario": [
-      "ap_1001001003"
-    ],
+    "usuario": 13,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1001001003",
@@ -1715,9 +3695,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 14,
   "fields": {
-    "usuario": [
-      "ap_1001001004"
-    ],
+    "usuario": 14,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1001001004",
@@ -1733,9 +3711,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 15,
   "fields": {
-    "usuario": [
-      "ap_1001001005"
-    ],
+    "usuario": 15,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1001001005",
@@ -1751,9 +3727,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 16,
   "fields": {
-    "usuario": [
-      "ap_1001001006"
-    ],
+    "usuario": 16,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1001001006",
@@ -1769,9 +3743,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 17,
   "fields": {
-    "usuario": [
-      "ap_1001001007"
-    ],
+    "usuario": 17,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1001001007",
@@ -1787,9 +3759,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 18,
   "fields": {
-    "usuario": [
-      "ap_1001001008"
-    ],
+    "usuario": 18,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1001001008",
@@ -1805,9 +3775,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 19,
   "fields": {
-    "usuario": [
-      "ap_1001001009"
-    ],
+    "usuario": 19,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1001001009",
@@ -1823,9 +3791,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 20,
   "fields": {
-    "usuario": [
-      "ap_1001001010"
-    ],
+    "usuario": 20,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1001001010",
@@ -1841,9 +3807,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 21,
   "fields": {
-    "usuario": [
-      "ap_1001001011"
-    ],
+    "usuario": 21,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1001001011",
@@ -1859,9 +3823,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 22,
   "fields": {
-    "usuario": [
-      "ap_1001001012"
-    ],
+    "usuario": 22,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1001001012",
@@ -1877,9 +3839,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 23,
   "fields": {
-    "usuario": [
-      "sec_martha"
-    ],
+    "usuario": 23,
     "rol": 6,
     "tipo_documento": "CC",
     "numero_documento": "DOC-23-sec_martha",
@@ -1895,9 +3855,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 24,
   "fields": {
-    "usuario": [
-      "maria"
-    ],
+    "usuario": 24,
     "rol": 1,
     "tipo_documento": "CC",
     "numero_documento": "DOC-24-maria",
@@ -1913,9 +3871,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 25,
   "fields": {
-    "usuario": [
-      "coordinador_demo"
-    ],
+    "usuario": 25,
     "rol": 2,
     "tipo_documento": "CC",
     "numero_documento": "1082990001",
@@ -1931,9 +3887,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 26,
   "fields": {
-    "usuario": [
-      "instructor_demo"
-    ],
+    "usuario": 26,
     "rol": 3,
     "tipo_documento": "CC",
     "numero_documento": "1082990002",
@@ -1949,9 +3903,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 27,
   "fields": {
-    "usuario": [
-      "secretaria_demo"
-    ],
+    "usuario": 27,
     "rol": 6,
     "tipo_documento": "CC",
     "numero_documento": "1082990003",
@@ -1967,9 +3919,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 28,
   "fields": {
-    "usuario": [
-      "aprendiz_demo"
-    ],
+    "usuario": 28,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1082990004",
@@ -1985,9 +3935,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 29,
   "fields": {
-    "usuario": [
-      "instructor_adso"
-    ],
+    "usuario": 29,
     "rol": 7,
     "tipo_documento": "CC",
     "numero_documento": "85441230",
@@ -2003,9 +3951,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 30,
   "fields": {
-    "usuario": [
-      "instructor_sistemas"
-    ],
+    "usuario": 30,
     "rol": 7,
     "tipo_documento": "CC",
     "numero_documento": "57231450",
@@ -2021,9 +3967,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 31,
   "fields": {
-    "usuario": [
-      "instructor_contable"
-    ],
+    "usuario": 31,
     "rol": 7,
     "tipo_documento": "CC",
     "numero_documento": "12654320",
@@ -2039,9 +3983,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 32,
   "fields": {
-    "usuario": [
-      "instructor_admin"
-    ],
+    "usuario": 32,
     "rol": 7,
     "tipo_documento": "CC",
     "numero_documento": "36987120",
@@ -2057,9 +3999,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 33,
   "fields": {
-    "usuario": [
-      "apr_3173430_1"
-    ],
+    "usuario": 33,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1084300001",
@@ -2075,9 +4015,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 34,
   "fields": {
-    "usuario": [
-      "apr_3173430_2"
-    ],
+    "usuario": 34,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1084300002",
@@ -2093,9 +4031,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 35,
   "fields": {
-    "usuario": [
-      "apr_3173430_3"
-    ],
+    "usuario": 35,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1084300003",
@@ -2111,9 +4047,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 36,
   "fields": {
-    "usuario": [
-      "apr_3173430_4"
-    ],
+    "usuario": 36,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1084300004",
@@ -2129,9 +4063,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 37,
   "fields": {
-    "usuario": [
-      "apr_3173430_5"
-    ],
+    "usuario": 37,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1084300005",
@@ -2147,9 +4079,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 38,
   "fields": {
-    "usuario": [
-      "apr_2824910_1"
-    ],
+    "usuario": 38,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1089100001",
@@ -2165,9 +4095,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 39,
   "fields": {
-    "usuario": [
-      "apr_2824910_2"
-    ],
+    "usuario": 39,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1089100002",
@@ -2183,9 +4111,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 40,
   "fields": {
-    "usuario": [
-      "apr_2824910_3"
-    ],
+    "usuario": 40,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1089100003",
@@ -2201,9 +4127,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 41,
   "fields": {
-    "usuario": [
-      "apr_2824910_4"
-    ],
+    "usuario": 41,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1089100004",
@@ -2219,9 +4143,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 42,
   "fields": {
-    "usuario": [
-      "apr_2824910_5"
-    ],
+    "usuario": 42,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1089100005",
@@ -2237,9 +4159,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 43,
   "fields": {
-    "usuario": [
-      "apr_2694120_1"
-    ],
+    "usuario": 43,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1081200001",
@@ -2255,9 +4175,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 44,
   "fields": {
-    "usuario": [
-      "apr_2694120_2"
-    ],
+    "usuario": 44,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1081200002",
@@ -2273,9 +4191,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 45,
   "fields": {
-    "usuario": [
-      "apr_2694120_3"
-    ],
+    "usuario": 45,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1081200003",
@@ -2291,9 +4207,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 46,
   "fields": {
-    "usuario": [
-      "apr_2694120_4"
-    ],
+    "usuario": 46,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1081200004",
@@ -2309,9 +4223,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 47,
   "fields": {
-    "usuario": [
-      "apr_2694120_5"
-    ],
+    "usuario": 47,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1081200005",
@@ -2327,9 +4239,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 48,
   "fields": {
-    "usuario": [
-      "apr_2791820_1"
-    ],
+    "usuario": 48,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1088200001",
@@ -2345,9 +4255,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 49,
   "fields": {
-    "usuario": [
-      "apr_2791820_2"
-    ],
+    "usuario": 49,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1088200002",
@@ -2363,9 +4271,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 50,
   "fields": {
-    "usuario": [
-      "apr_2791820_3"
-    ],
+    "usuario": 50,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1088200003",
@@ -2381,9 +4287,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 51,
   "fields": {
-    "usuario": [
-      "apr_2791820_4"
-    ],
+    "usuario": 51,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1088200004",
@@ -2399,9 +4303,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 52,
   "fields": {
-    "usuario": [
-      "apr_2791820_5"
-    ],
+    "usuario": 52,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1088200005",
@@ -2417,9 +4319,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 53,
   "fields": {
-    "usuario": [
-      "apr_2718340_1"
-    ],
+    "usuario": 53,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1083400001",
@@ -2435,9 +4335,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 54,
   "fields": {
-    "usuario": [
-      "apr_2718340_2"
-    ],
+    "usuario": 54,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1083400002",
@@ -2453,9 +4351,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 55,
   "fields": {
-    "usuario": [
-      "apr_2718340_3"
-    ],
+    "usuario": 55,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1083400003",
@@ -2471,9 +4367,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 56,
   "fields": {
-    "usuario": [
-      "apr_2718340_4"
-    ],
+    "usuario": 56,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1083400004",
@@ -2489,9 +4383,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 57,
   "fields": {
-    "usuario": [
-      "apr_2718340_5"
-    ],
+    "usuario": 57,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1083400005",
@@ -2507,9 +4399,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 58,
   "fields": {
-    "usuario": [
-      "apr_2683900_1"
-    ],
+    "usuario": 58,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1089000001",
@@ -2525,9 +4415,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 59,
   "fields": {
-    "usuario": [
-      "apr_2683900_2"
-    ],
+    "usuario": 59,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1089000002",
@@ -2543,9 +4431,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 60,
   "fields": {
-    "usuario": [
-      "apr_2683900_3"
-    ],
+    "usuario": 60,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1089000003",
@@ -2561,9 +4447,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 61,
   "fields": {
-    "usuario": [
-      "apr_2683900_4"
-    ],
+    "usuario": 61,
     "rol": 5,
     "tipo_documento": "TI",
     "numero_documento": "1089000004",
@@ -2579,9 +4463,7 @@
   "model": "usuarios.perfilusuario",
   "pk": 62,
   "fields": {
-    "usuario": [
-      "apr_2683900_5"
-    ],
+    "usuario": 62,
     "rol": 5,
     "tipo_documento": "CC",
     "numero_documento": "1089000005",
@@ -2590,6 +4472,198 @@
     "fecha_creacion": "2026-09-19T20:55:50.364Z",
     "qr_token": "976881d6-73ba-48dd-9826-b59ba8f0b629",
     "qr_code": "carnets_qr/2026/09/a65924d0-a3ef-49a3-a904-68283c4cc203.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 63,
+  "fields": {
+    "usuario": 63,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082991001",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.669Z",
+    "qr_token": "96a3b07c-69cf-4b16-863f-f44eea0bfc92",
+    "qr_code": "carnets_qr/2026/09/96a3b07c-69cf-4b16-863f-f44eea0bfc92.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 64,
+  "fields": {
+    "usuario": 64,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082991002",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.684Z",
+    "qr_token": "8d4cb19c-092a-42a9-9300-ba6bf34b36ca",
+    "qr_code": "carnets_qr/2026/09/8d4cb19c-092a-42a9-9300-ba6bf34b36ca.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 65,
+  "fields": {
+    "usuario": 65,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082991003",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.701Z",
+    "qr_token": "4790d4d8-fa0f-4be3-b42c-1d4aa589edf2",
+    "qr_code": "carnets_qr/2026/09/4790d4d8-fa0f-4be3-b42c-1d4aa589edf2.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 66,
+  "fields": {
+    "usuario": 66,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082992001",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.723Z",
+    "qr_token": "fd443c99-2ed5-4c27-b86e-720c0033db24",
+    "qr_code": "carnets_qr/2026/09/fd443c99-2ed5-4c27-b86e-720c0033db24.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 67,
+  "fields": {
+    "usuario": 67,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082992002",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.739Z",
+    "qr_token": "789ebca2-cac3-4d0f-8b67-3d524698bb02",
+    "qr_code": "carnets_qr/2026/09/789ebca2-cac3-4d0f-8b67-3d524698bb02.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 68,
+  "fields": {
+    "usuario": 68,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082992003",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.754Z",
+    "qr_token": "dfa87733-78f8-411f-907d-529acf2e92fd",
+    "qr_code": "carnets_qr/2026/09/dfa87733-78f8-411f-907d-529acf2e92fd.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 69,
+  "fields": {
+    "usuario": 69,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082993001",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.775Z",
+    "qr_token": "40126407-9ebc-4d9a-84e3-d45470cf0d4c",
+    "qr_code": "carnets_qr/2026/09/40126407-9ebc-4d9a-84e3-d45470cf0d4c.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 70,
+  "fields": {
+    "usuario": 70,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082993002",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.789Z",
+    "qr_token": "4f3c9605-b5f9-4781-8a59-f6273462164a",
+    "qr_code": "carnets_qr/2026/09/4f3c9605-b5f9-4781-8a59-f6273462164a.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 71,
+  "fields": {
+    "usuario": 71,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082993003",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.804Z",
+    "qr_token": "1a7cf3ab-1fd4-4136-9bc1-38986ac66440",
+    "qr_code": "carnets_qr/2026/09/1a7cf3ab-1fd4-4136-9bc1-38986ac66440.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 72,
+  "fields": {
+    "usuario": 72,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082994001",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.825Z",
+    "qr_token": "7cf8a6ac-012d-4ce6-a303-49f97d69b6ce",
+    "qr_code": "carnets_qr/2026/09/7cf8a6ac-012d-4ce6-a303-49f97d69b6ce.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 73,
+  "fields": {
+    "usuario": 73,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082994002",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.839Z",
+    "qr_token": "6d7b489b-7f7f-4e1e-a8f4-c80f92b01213",
+    "qr_code": "carnets_qr/2026/09/6d7b489b-7f7f-4e1e-a8f4-c80f92b01213.png",
+    "qr_rotacion": "2026-09-19"
+  }
+},
+{
+  "model": "usuarios.perfilusuario",
+  "pk": 74,
+  "fields": {
+    "usuario": 74,
+    "rol": 5,
+    "tipo_documento": "CC",
+    "numero_documento": "1082994003",
+    "telefono": null,
+    "esta_activo": true,
+    "fecha_creacion": "2026-09-19T23:35:57.854Z",
+    "qr_token": "946a761f-c591-431a-887d-0bc70b9beae5",
+    "qr_code": "carnets_qr/2026/09/946a761f-c591-431a-887d-0bc70b9beae5.png",
     "qr_rotacion": "2026-09-19"
   }
 },
@@ -2771,9 +4845,7 @@
     "rap": null,
     "rap_curricular": 1,
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "titulo": "Taller 01: Especificación de Requisitos de Software (IEEE-830)",
     "descripcion": "Elaborar el documento de especificación formal de requerimientos funcionales y no funcionales para el sistema SINETEC utilizando el estándar IEEE-830.",
     "material_apoyo": "",
@@ -2788,9 +4860,7 @@
     "rap": null,
     "rap_curricular": 2,
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "titulo": "Taller 02: Modelado UML y Casos de Uso del Sistema SINETEC",
     "descripcion": "Diseñar el diagrama de casos de uso general, diagramas de secuencia para autenticación y especificación de actores clave.",
     "material_apoyo": "",
@@ -2805,9 +4875,7 @@
     "rap": null,
     "rap_curricular": 3,
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "titulo": "Taller 03: Diseño del Modelo Entidad-Relación y Esquema MySQL",
     "descripcion": "Definir el modelo relacional normalizado (3FN) con tablas para fichas, matriculas, RAPs y bitacoras de seguimiento.",
     "material_apoyo": "",
@@ -2822,9 +4890,7 @@
     "rap": null,
     "rap_curricular": 4,
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "titulo": "Taller 04: Implementación de Módulos Web en Django y REST API",
     "descripcion": "Codificar controladores en views.py, rutas en urls.py y formularios de captura validados en Django.",
     "material_apoyo": "",
@@ -2839,9 +4905,7 @@
     "rap": 8,
     "rap_curricular": null,
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "titulo": "Taller Práctico de Análisis y Desarrollo de Sistemas de Información",
     "descripcion": "Desarrollar el caso de estudio propuesto con documentación técnica completa.",
     "material_apoyo": "",
@@ -2856,9 +4920,7 @@
     "rap": 9,
     "rap_curricular": null,
     "ficha": 5,
-    "instructor": [
-      "instructor_adso"
-    ],
+    "instructor": 29,
     "titulo": "Taller Práctico de Técnico en Sistemas",
     "descripcion": "Desarrollar el caso de estudio propuesto con documentación técnica completa.",
     "material_apoyo": "",
@@ -2873,9 +4935,7 @@
     "rap": 10,
     "rap_curricular": null,
     "ficha": 6,
-    "instructor": [
-      "instructor_sistemas"
-    ],
+    "instructor": 30,
     "titulo": "Taller Práctico de Técnico en Sistemas",
     "descripcion": "Desarrollar el caso de estudio propuesto con documentación técnica completa.",
     "material_apoyo": "",
@@ -2890,9 +4950,7 @@
     "rap": 11,
     "rap_curricular": null,
     "ficha": 7,
-    "instructor": [
-      "instructor_sistemas"
-    ],
+    "instructor": 30,
     "titulo": "Taller Práctico de Tecnólogo en Gestión de Redes de Datos",
     "descripcion": "Desarrollar el caso de estudio propuesto con documentación técnica completa.",
     "material_apoyo": "",
@@ -2907,9 +4965,7 @@
     "rap": 12,
     "rap_curricular": null,
     "ficha": 8,
-    "instructor": [
-      "instructor_contable"
-    ],
+    "instructor": 31,
     "titulo": "Taller Práctico de Técnico en Contabilización de Operaciones Comerciales y Financieras",
     "descripcion": "Desarrollar el caso de estudio propuesto con documentación técnica completa.",
     "material_apoyo": "",
@@ -2924,9 +4980,7 @@
     "rap": 13,
     "rap_curricular": null,
     "ficha": 9,
-    "instructor": [
-      "instructor_admin"
-    ],
+    "instructor": 32,
     "titulo": "Taller Práctico de Tecnólogo en Gestión del Talento Humano",
     "descripcion": "Desarrollar el caso de estudio propuesto con documentación técnica completa.",
     "material_apoyo": "",
@@ -2939,9 +4993,7 @@
   "pk": 1,
   "fields": {
     "evidencia": 1,
-    "aprendiz": [
-      "ap_1082987123"
-    ],
+    "aprendiz": 3,
     "archivo_entregado": "",
     "comentarios_aprendiz": "Entrego documento final con matriz de trazabilidad y requisitos del cliente.",
     "fecha_entrega": "2026-09-19T06:09:49.349Z",
@@ -2955,9 +5007,7 @@
   "pk": 2,
   "fields": {
     "evidencia": 2,
-    "aprendiz": [
-      "ap_1082987123"
-    ],
+    "aprendiz": 3,
     "archivo_entregado": "",
     "comentarios_aprendiz": "Adjunto archivo con diagramas de casos de uso y documentación de actores en formato PDF.",
     "fecha_entrega": "2026-09-19T06:09:49.354Z",
@@ -2971,9 +5021,7 @@
   "pk": 3,
   "fields": {
     "evidencia": 5,
-    "aprendiz": [
-      "apr_3173430_1"
-    ],
+    "aprendiz": 33,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:11.006Z",
@@ -2987,9 +5035,7 @@
   "pk": 4,
   "fields": {
     "evidencia": 5,
-    "aprendiz": [
-      "apr_3173430_2"
-    ],
+    "aprendiz": 34,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:29.488Z",
@@ -3003,9 +5049,7 @@
   "pk": 5,
   "fields": {
     "evidencia": 5,
-    "aprendiz": [
-      "apr_3173430_3"
-    ],
+    "aprendiz": 35,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:30.433Z",
@@ -3019,9 +5063,7 @@
   "pk": 6,
   "fields": {
     "evidencia": 5,
-    "aprendiz": [
-      "apr_3173430_4"
-    ],
+    "aprendiz": 36,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:31.399Z",
@@ -3035,9 +5077,7 @@
   "pk": 7,
   "fields": {
     "evidencia": 5,
-    "aprendiz": [
-      "apr_3173430_5"
-    ],
+    "aprendiz": 37,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:32.332Z",
@@ -3051,9 +5091,7 @@
   "pk": 8,
   "fields": {
     "evidencia": 6,
-    "aprendiz": [
-      "apr_2824910_1"
-    ],
+    "aprendiz": 38,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:33.295Z",
@@ -3067,9 +5105,7 @@
   "pk": 9,
   "fields": {
     "evidencia": 6,
-    "aprendiz": [
-      "apr_2824910_2"
-    ],
+    "aprendiz": 39,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:34.224Z",
@@ -3083,9 +5119,7 @@
   "pk": 10,
   "fields": {
     "evidencia": 6,
-    "aprendiz": [
-      "apr_2824910_3"
-    ],
+    "aprendiz": 40,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:35.128Z",
@@ -3099,9 +5133,7 @@
   "pk": 11,
   "fields": {
     "evidencia": 6,
-    "aprendiz": [
-      "apr_2824910_4"
-    ],
+    "aprendiz": 41,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:36.079Z",
@@ -3115,9 +5147,7 @@
   "pk": 12,
   "fields": {
     "evidencia": 6,
-    "aprendiz": [
-      "apr_2824910_5"
-    ],
+    "aprendiz": 42,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:36.993Z",
@@ -3131,9 +5161,7 @@
   "pk": 13,
   "fields": {
     "evidencia": 7,
-    "aprendiz": [
-      "apr_2694120_1"
-    ],
+    "aprendiz": 43,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:37.961Z",
@@ -3147,9 +5175,7 @@
   "pk": 14,
   "fields": {
     "evidencia": 7,
-    "aprendiz": [
-      "apr_2694120_2"
-    ],
+    "aprendiz": 44,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:38.723Z",
@@ -3163,9 +5189,7 @@
   "pk": 15,
   "fields": {
     "evidencia": 7,
-    "aprendiz": [
-      "apr_2694120_3"
-    ],
+    "aprendiz": 45,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:39.415Z",
@@ -3179,9 +5203,7 @@
   "pk": 16,
   "fields": {
     "evidencia": 7,
-    "aprendiz": [
-      "apr_2694120_4"
-    ],
+    "aprendiz": 46,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:40.081Z",
@@ -3195,9 +5217,7 @@
   "pk": 17,
   "fields": {
     "evidencia": 7,
-    "aprendiz": [
-      "apr_2694120_5"
-    ],
+    "aprendiz": 47,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:40.770Z",
@@ -3211,9 +5231,7 @@
   "pk": 18,
   "fields": {
     "evidencia": 8,
-    "aprendiz": [
-      "apr_2791820_1"
-    ],
+    "aprendiz": 48,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:41.536Z",
@@ -3227,9 +5245,7 @@
   "pk": 19,
   "fields": {
     "evidencia": 8,
-    "aprendiz": [
-      "apr_2791820_2"
-    ],
+    "aprendiz": 49,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:42.191Z",
@@ -3243,9 +5259,7 @@
   "pk": 20,
   "fields": {
     "evidencia": 8,
-    "aprendiz": [
-      "apr_2791820_3"
-    ],
+    "aprendiz": 50,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:42.869Z",
@@ -3259,9 +5273,7 @@
   "pk": 21,
   "fields": {
     "evidencia": 8,
-    "aprendiz": [
-      "apr_2791820_4"
-    ],
+    "aprendiz": 51,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:43.524Z",
@@ -3275,9 +5287,7 @@
   "pk": 22,
   "fields": {
     "evidencia": 8,
-    "aprendiz": [
-      "apr_2791820_5"
-    ],
+    "aprendiz": 52,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:44.216Z",
@@ -3291,9 +5301,7 @@
   "pk": 23,
   "fields": {
     "evidencia": 9,
-    "aprendiz": [
-      "apr_2718340_1"
-    ],
+    "aprendiz": 53,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:44.903Z",
@@ -3307,9 +5315,7 @@
   "pk": 24,
   "fields": {
     "evidencia": 9,
-    "aprendiz": [
-      "apr_2718340_2"
-    ],
+    "aprendiz": 54,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:45.578Z",
@@ -3323,9 +5329,7 @@
   "pk": 25,
   "fields": {
     "evidencia": 9,
-    "aprendiz": [
-      "apr_2718340_3"
-    ],
+    "aprendiz": 55,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:46.275Z",
@@ -3339,9 +5343,7 @@
   "pk": 26,
   "fields": {
     "evidencia": 9,
-    "aprendiz": [
-      "apr_2718340_4"
-    ],
+    "aprendiz": 56,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:46.956Z",
@@ -3355,9 +5357,7 @@
   "pk": 27,
   "fields": {
     "evidencia": 9,
-    "aprendiz": [
-      "apr_2718340_5"
-    ],
+    "aprendiz": 57,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:47.619Z",
@@ -3371,9 +5371,7 @@
   "pk": 28,
   "fields": {
     "evidencia": 10,
-    "aprendiz": [
-      "apr_2683900_1"
-    ],
+    "aprendiz": 58,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:48.365Z",
@@ -3387,9 +5385,7 @@
   "pk": 29,
   "fields": {
     "evidencia": 10,
-    "aprendiz": [
-      "apr_2683900_2"
-    ],
+    "aprendiz": 59,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:49.007Z",
@@ -3403,9 +5399,7 @@
   "pk": 30,
   "fields": {
     "evidencia": 10,
-    "aprendiz": [
-      "apr_2683900_3"
-    ],
+    "aprendiz": 60,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:49.683Z",
@@ -3419,9 +5413,7 @@
   "pk": 31,
   "fields": {
     "evidencia": 10,
-    "aprendiz": [
-      "apr_2683900_4"
-    ],
+    "aprendiz": 61,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:50.335Z",
@@ -3435,9 +5427,7 @@
   "pk": 32,
   "fields": {
     "evidencia": 10,
-    "aprendiz": [
-      "apr_2683900_5"
-    ],
+    "aprendiz": 62,
     "archivo_entregado": "",
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:51.006Z",
@@ -3631,7 +5621,7 @@
   "pk": 1,
   "fields": {
     "codigo_programa": "228118",
-    "denominacion": "Análisis y Desarrollo de Sistemas de Información",
+    "denominacion": "Tecnólogo en Análisis y Desarrollo de Sistemas de Información",
     "version": "102",
     "activo": true
   }
@@ -4201,9 +6191,7 @@
     "codigo_ficha": "3173430",
     "programa": 1,
     "institucion": 4,
-    "instructor_lider": [
-      "instructor_carlos"
-    ],
+    "instructor_lider": 2,
     "fecha_inicio": "2024-02-05",
     "fecha_fin": "2025-11-28",
     "estado": "En Ejecucion",
@@ -4217,9 +6205,7 @@
     "codigo_ficha": "2501234",
     "programa": 1,
     "institucion": 1,
-    "instructor_lider": [
-      "instructor_demo"
-    ],
+    "instructor_lider": 26,
     "fecha_inicio": "2026-09-15",
     "fecha_fin": "2027-09-15",
     "estado": "En Ejecucion",
@@ -4233,9 +6219,7 @@
     "codigo_ficha": "2501890",
     "programa": 1,
     "institucion": 2,
-    "instructor_lider": [
-      "instructor_carlos"
-    ],
+    "instructor_lider": 2,
     "fecha_inicio": "2026-09-15",
     "fecha_fin": "2027-09-15",
     "estado": "En Ejecucion",
@@ -4249,9 +6233,7 @@
     "codigo_ficha": "347826385",
     "programa": 1,
     "institucion": 1,
-    "instructor_lider": [
-      "instructora_andrea"
-    ],
+    "instructor_lider": 9,
     "fecha_inicio": "2026-09-08",
     "fecha_fin": "2026-09-22",
     "estado": "Cancelada",
@@ -4265,9 +6247,7 @@
     "codigo_ficha": "2824910",
     "programa": 2,
     "institucion": 6,
-    "instructor_lider": [
-      "instructor_adso"
-    ],
+    "instructor_lider": 29,
     "fecha_inicio": "2026-03-03",
     "fecha_fin": "2027-03-03",
     "estado": "En Ejecucion",
@@ -4281,9 +6261,7 @@
     "codigo_ficha": "2694120",
     "programa": 3,
     "institucion": 7,
-    "instructor_lider": [
-      "instructor_sistemas"
-    ],
+    "instructor_lider": 30,
     "fecha_inicio": "2026-03-03",
     "fecha_fin": "2027-03-03",
     "estado": "En Ejecucion",
@@ -4297,9 +6275,7 @@
     "codigo_ficha": "2791820",
     "programa": 8,
     "institucion": 8,
-    "instructor_lider": [
-      "instructor_sistemas"
-    ],
+    "instructor_lider": 30,
     "fecha_inicio": "2026-03-03",
     "fecha_fin": "2027-03-03",
     "estado": "En Ejecucion",
@@ -4313,9 +6289,7 @@
     "codigo_ficha": "2718340",
     "programa": 4,
     "institucion": 9,
-    "instructor_lider": [
-      "instructor_contable"
-    ],
+    "instructor_lider": 31,
     "fecha_inicio": "2026-03-03",
     "fecha_fin": "2027-03-03",
     "estado": "En Ejecucion",
@@ -4329,11 +6303,65 @@
     "codigo_ficha": "2683900",
     "programa": 9,
     "institucion": 10,
-    "instructor_lider": [
-      "instructor_admin"
-    ],
+    "instructor_lider": 32,
     "fecha_inicio": "2026-03-03",
     "fecha_fin": "2027-03-03",
+    "estado": "En Ejecucion",
+    "periodo_cerrado": false
+  }
+},
+{
+  "model": "academico.ficha",
+  "pk": 10,
+  "fields": {
+    "codigo_ficha": "2891101",
+    "programa": 5,
+    "institucion": 3,
+    "instructor_lider": 2,
+    "fecha_inicio": "2026-02-01",
+    "fecha_fin": "2026-11-30",
+    "estado": "En Ejecucion",
+    "periodo_cerrado": false
+  }
+},
+{
+  "model": "academico.ficha",
+  "pk": 11,
+  "fields": {
+    "codigo_ficha": "2891202",
+    "programa": 7,
+    "institucion": 3,
+    "instructor_lider": 2,
+    "fecha_inicio": "2026-02-01",
+    "fecha_fin": "2026-11-30",
+    "estado": "En Ejecucion",
+    "periodo_cerrado": false
+  }
+},
+{
+  "model": "academico.ficha",
+  "pk": 12,
+  "fields": {
+    "codigo_ficha": "2891303",
+    "programa": 6,
+    "institucion": 3,
+    "instructor_lider": 2,
+    "fecha_inicio": "2026-02-01",
+    "fecha_fin": "2026-11-30",
+    "estado": "En Ejecucion",
+    "periodo_cerrado": false
+  }
+},
+{
+  "model": "academico.ficha",
+  "pk": 13,
+  "fields": {
+    "codigo_ficha": "2891404",
+    "programa": 10,
+    "institucion": 3,
+    "instructor_lider": 2,
+    "fecha_inicio": "2026-02-01",
+    "fecha_fin": "2026-11-30",
     "estado": "En Ejecucion",
     "periodo_cerrado": false
   }
@@ -4343,9 +6371,7 @@
   "pk": 1,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1082987123"
-    ],
+    "aprendiz": 3,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4358,9 +6384,7 @@
   "pk": 2,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1082544991"
-    ],
+    "aprendiz": 4,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4373,9 +6397,7 @@
   "pk": 3,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1082112344"
-    ],
+    "aprendiz": 5,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4388,9 +6410,7 @@
   "pk": 4,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1082776510"
-    ],
+    "aprendiz": 6,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4403,9 +6423,7 @@
   "pk": 5,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001001"
-    ],
+    "aprendiz": 11,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4418,9 +6436,7 @@
   "pk": 6,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001002"
-    ],
+    "aprendiz": 12,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4433,9 +6449,7 @@
   "pk": 7,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001003"
-    ],
+    "aprendiz": 13,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4448,9 +6462,7 @@
   "pk": 8,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001004"
-    ],
+    "aprendiz": 14,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4463,9 +6475,7 @@
   "pk": 9,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001005"
-    ],
+    "aprendiz": 15,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4478,9 +6488,7 @@
   "pk": 10,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001006"
-    ],
+    "aprendiz": 16,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4493,9 +6501,7 @@
   "pk": 11,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001007"
-    ],
+    "aprendiz": 17,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4508,9 +6514,7 @@
   "pk": 12,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001008"
-    ],
+    "aprendiz": 18,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4523,9 +6527,7 @@
   "pk": 13,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001009"
-    ],
+    "aprendiz": 19,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4538,9 +6540,7 @@
   "pk": 14,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001010"
-    ],
+    "aprendiz": 20,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4553,9 +6553,7 @@
   "pk": 15,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001011"
-    ],
+    "aprendiz": 21,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4568,9 +6566,7 @@
   "pk": 16,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "ap_1001001012"
-    ],
+    "aprendiz": 22,
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4583,9 +6579,7 @@
   "pk": 17,
   "fields": {
     "ficha": 2,
-    "aprendiz": [
-      "aprendiz_demo"
-    ],
+    "aprendiz": 28,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4598,9 +6592,7 @@
   "pk": 18,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "apr_3173430_1"
-    ],
+    "aprendiz": 33,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4613,9 +6605,7 @@
   "pk": 19,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "apr_3173430_2"
-    ],
+    "aprendiz": 34,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4628,9 +6618,7 @@
   "pk": 20,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "apr_3173430_3"
-    ],
+    "aprendiz": 35,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4643,9 +6631,7 @@
   "pk": 21,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "apr_3173430_4"
-    ],
+    "aprendiz": 36,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4658,9 +6644,7 @@
   "pk": 22,
   "fields": {
     "ficha": 1,
-    "aprendiz": [
-      "apr_3173430_5"
-    ],
+    "aprendiz": 37,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4673,9 +6657,7 @@
   "pk": 23,
   "fields": {
     "ficha": 5,
-    "aprendiz": [
-      "apr_2824910_1"
-    ],
+    "aprendiz": 38,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4688,9 +6670,7 @@
   "pk": 24,
   "fields": {
     "ficha": 5,
-    "aprendiz": [
-      "apr_2824910_2"
-    ],
+    "aprendiz": 39,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4703,9 +6683,7 @@
   "pk": 25,
   "fields": {
     "ficha": 5,
-    "aprendiz": [
-      "apr_2824910_3"
-    ],
+    "aprendiz": 40,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4718,9 +6696,7 @@
   "pk": 26,
   "fields": {
     "ficha": 5,
-    "aprendiz": [
-      "apr_2824910_4"
-    ],
+    "aprendiz": 41,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4733,9 +6709,7 @@
   "pk": 27,
   "fields": {
     "ficha": 5,
-    "aprendiz": [
-      "apr_2824910_5"
-    ],
+    "aprendiz": 42,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4748,9 +6722,7 @@
   "pk": 28,
   "fields": {
     "ficha": 6,
-    "aprendiz": [
-      "apr_2694120_1"
-    ],
+    "aprendiz": 43,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4763,9 +6735,7 @@
   "pk": 29,
   "fields": {
     "ficha": 6,
-    "aprendiz": [
-      "apr_2694120_2"
-    ],
+    "aprendiz": 44,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4778,9 +6748,7 @@
   "pk": 30,
   "fields": {
     "ficha": 6,
-    "aprendiz": [
-      "apr_2694120_3"
-    ],
+    "aprendiz": 45,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4793,9 +6761,7 @@
   "pk": 31,
   "fields": {
     "ficha": 6,
-    "aprendiz": [
-      "apr_2694120_4"
-    ],
+    "aprendiz": 46,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4808,9 +6774,7 @@
   "pk": 32,
   "fields": {
     "ficha": 6,
-    "aprendiz": [
-      "apr_2694120_5"
-    ],
+    "aprendiz": 47,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4823,9 +6787,7 @@
   "pk": 33,
   "fields": {
     "ficha": 7,
-    "aprendiz": [
-      "apr_2791820_1"
-    ],
+    "aprendiz": 48,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4838,9 +6800,7 @@
   "pk": 34,
   "fields": {
     "ficha": 7,
-    "aprendiz": [
-      "apr_2791820_2"
-    ],
+    "aprendiz": 49,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4853,9 +6813,7 @@
   "pk": 35,
   "fields": {
     "ficha": 7,
-    "aprendiz": [
-      "apr_2791820_3"
-    ],
+    "aprendiz": 50,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4868,9 +6826,7 @@
   "pk": 36,
   "fields": {
     "ficha": 7,
-    "aprendiz": [
-      "apr_2791820_4"
-    ],
+    "aprendiz": 51,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4883,9 +6839,7 @@
   "pk": 37,
   "fields": {
     "ficha": 7,
-    "aprendiz": [
-      "apr_2791820_5"
-    ],
+    "aprendiz": 52,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4898,9 +6852,7 @@
   "pk": 38,
   "fields": {
     "ficha": 8,
-    "aprendiz": [
-      "apr_2718340_1"
-    ],
+    "aprendiz": 53,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4913,9 +6865,7 @@
   "pk": 39,
   "fields": {
     "ficha": 8,
-    "aprendiz": [
-      "apr_2718340_2"
-    ],
+    "aprendiz": 54,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4928,9 +6878,7 @@
   "pk": 40,
   "fields": {
     "ficha": 8,
-    "aprendiz": [
-      "apr_2718340_3"
-    ],
+    "aprendiz": 55,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4943,9 +6891,7 @@
   "pk": 41,
   "fields": {
     "ficha": 8,
-    "aprendiz": [
-      "apr_2718340_4"
-    ],
+    "aprendiz": 56,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -4958,9 +6904,7 @@
   "pk": 42,
   "fields": {
     "ficha": 8,
-    "aprendiz": [
-      "apr_2718340_5"
-    ],
+    "aprendiz": 57,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4973,9 +6917,7 @@
   "pk": 43,
   "fields": {
     "ficha": 9,
-    "aprendiz": [
-      "apr_2683900_1"
-    ],
+    "aprendiz": 58,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -4988,9 +6930,7 @@
   "pk": 44,
   "fields": {
     "ficha": 9,
-    "aprendiz": [
-      "apr_2683900_2"
-    ],
+    "aprendiz": 59,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -5003,9 +6943,7 @@
   "pk": 45,
   "fields": {
     "ficha": 9,
-    "aprendiz": [
-      "apr_2683900_3"
-    ],
+    "aprendiz": 60,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -5018,9 +6956,7 @@
   "pk": 46,
   "fields": {
     "ficha": 9,
-    "aprendiz": [
-      "apr_2683900_4"
-    ],
+    "aprendiz": 61,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "11",
     "estado_formacion": "En Formacion",
@@ -5033,9 +6969,163 @@
   "pk": 47,
   "fields": {
     "ficha": 9,
-    "aprendiz": [
-      "apr_2683900_5"
-    ],
+    "aprendiz": 62,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 48,
+  "fields": {
+    "ficha": 10,
+    "aprendiz": 63,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 49,
+  "fields": {
+    "ficha": 10,
+    "aprendiz": 64,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 50,
+  "fields": {
+    "ficha": 10,
+    "aprendiz": 65,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 51,
+  "fields": {
+    "ficha": 11,
+    "aprendiz": 66,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 52,
+  "fields": {
+    "ficha": 11,
+    "aprendiz": 67,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 53,
+  "fields": {
+    "ficha": 11,
+    "aprendiz": 68,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 54,
+  "fields": {
+    "ficha": 12,
+    "aprendiz": 69,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 55,
+  "fields": {
+    "ficha": 12,
+    "aprendiz": 70,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 56,
+  "fields": {
+    "ficha": 12,
+    "aprendiz": 71,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 57,
+  "fields": {
+    "ficha": 13,
+    "aprendiz": 72,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 58,
+  "fields": {
+    "ficha": 13,
+    "aprendiz": 73,
+    "fecha_matricula": "2026-09-19",
+    "grado_escolar": "10",
+    "estado_formacion": "En Formacion",
+    "acudiente_nombre": null,
+    "acudiente_telefono": null
+  }
+},
+{
+  "model": "academico.matricula",
+  "pk": 59,
+  "fields": {
+    "ficha": 13,
+    "aprendiz": 74,
     "fecha_matricula": "2026-09-19",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
@@ -5048,9 +7138,7 @@
   "pk": 1,
   "fields": {
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "dia": "1",
     "hora_inicio": "07:00:00",
     "hora_fin": "11:00:00",
@@ -5065,9 +7153,7 @@
   "pk": 2,
   "fields": {
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "dia": "2",
     "hora_inicio": "07:00:00",
     "hora_fin": "10:00:00",
@@ -5082,9 +7168,7 @@
   "pk": 3,
   "fields": {
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "dia": "3",
     "hora_inicio": "08:00:00",
     "hora_fin": "12:00:00",
@@ -5099,9 +7183,7 @@
   "pk": 4,
   "fields": {
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "dia": "4",
     "hora_inicio": "07:00:00",
     "hora_fin": "11:00:00",
@@ -5116,9 +7198,7 @@
   "pk": 5,
   "fields": {
     "ficha": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "dia": "5",
     "hora_inicio": "09:00:00",
     "hora_fin": "12:00:00",
@@ -5133,9 +7213,7 @@
   "pk": 6,
   "fields": {
     "ficha": 2,
-    "instructor": [
-      "profesor_mendoza"
-    ],
+    "instructor": 8,
     "dia": "3",
     "hora_inicio": "03:44:00",
     "hora_fin": "03:45:00",
@@ -5285,9 +7363,7 @@
   "model": "academico.recursoguardadoaprendiz",
   "pk": 1,
   "fields": {
-    "aprendiz": [
-      "ap_1082987123"
-    ],
+    "aprendiz": 3,
     "recurso": 1,
     "fecha_guardado": "2026-09-19T06:09:49.381Z"
   }
@@ -5296,9 +7372,7 @@
   "model": "academico.recursoguardadoaprendiz",
   "pk": 2,
   "fields": {
-    "aprendiz": [
-      "ap_1082987123"
-    ],
+    "aprendiz": 3,
     "recurso": 2,
     "fecha_guardado": "2026-09-19T06:09:49.386Z"
   }
@@ -5309,13 +7383,9 @@
   "fields": {
     "titulo": "SINETEC: Ecosistema Digital de Seguimiento para la Media Técnica",
     "descripcion": "Plataforma de alta disponibilidad para la trazabilidad formativa, control criptográfico de carné QR y acompañamiento integral en colegios articulados del Magdalena.",
-    "lider": [
-      "aprendiz_demo"
-    ],
+    "lider": 28,
     "ficha": 2,
-    "instructor_asesor": [
-      "instructor_demo"
-    ],
+    "instructor_asesor": 26,
     "categoria": "Software TIC",
     "estado": "DESARROLLO",
     "archivo_soporte": "",
@@ -5329,13 +7399,9 @@
   "fields": {
     "titulo": "Sistema IoT de Monitoreo Agrometeorológico para Cultivos del Magdalena",
     "descripcion": "Red de sensores de bajo costo para medición de humedad de suelo, temperatura y pluviometría con telemetría LoRaWAN.",
-    "lider": [
-      "instructor_demo"
-    ],
+    "lider": 26,
     "ficha": 2,
-    "instructor_asesor": [
-      "instructor_demo"
-    ],
+    "instructor_asesor": 26,
     "categoria": "Agroecologia",
     "estado": "FINALIZADO",
     "archivo_soporte": "",
@@ -5349,13 +7415,9 @@
   "fields": {
     "titulo": "Sistema IoT para Monitoreo Ecoturístico de la Sierra Nevada",
     "descripcion": "Red de sensores IoT interconectados con Django y LoRaWAN para medición ambiental en senderos turísticos del Magdalena.",
-    "lider": [
-      "admin"
-    ],
+    "lider": 1,
     "ficha": 2,
-    "instructor_asesor": [
-      "instructor_adso"
-    ],
+    "instructor_asesor": 29,
     "categoria": "Software TIC",
     "estado": "EN_DESARROLLO",
     "archivo_soporte": "",
@@ -5369,13 +7431,9 @@
   "fields": {
     "titulo": "Plataforma Inteligente de Trazabilidad Agroindustrial para el Banano Magdalena",
     "descripcion": "Sistema de gestión integral para la trazabilidad de fincas bananeras en Zona Bananera articulado con aprendices ADSO.",
-    "lider": [
-      "admin"
-    ],
+    "lider": 1,
     "ficha": 2,
-    "instructor_asesor": [
-      "instructor_adso"
-    ],
+    "instructor_asesor": 29,
     "categoria": "Software TIC",
     "estado": "EN_DESARROLLO",
     "archivo_soporte": "",
@@ -5389,13 +7447,9 @@
   "fields": {
     "titulo": "Dron Autónomo con Visión Artificial para Levantamiento Topográfico Rural",
     "descripcion": "Prototipo de aeronave no tripulada con procesamiento de imágenes satelitales para colegios agropecuarios articulados.",
-    "lider": [
-      "admin"
-    ],
+    "lider": 1,
     "ficha": 2,
-    "instructor_asesor": [
-      "instructor_adso"
-    ],
+    "instructor_asesor": 29,
     "categoria": "Software TIC",
     "estado": "EN_DESARROLLO",
     "archivo_soporte": "",
@@ -5407,9 +7461,7 @@
   "model": "academico.logroaprendiz",
   "pk": 1,
   "fields": {
-    "aprendiz": [
-      "aprendiz_demo"
-    ],
+    "aprendiz": 28,
     "titulo": "Puntualidad Impecable",
     "descripcion": "Más de 30 sesiones consecutivas con asistencia puntual sin inasistencias injustificadas.",
     "icono": "bi-clock-check-fill",
@@ -5422,9 +7474,7 @@
   "model": "academico.logroaprendiz",
   "pk": 2,
   "fields": {
-    "aprendiz": [
-      "aprendiz_demo"
-    ],
+    "aprendiz": 28,
     "titulo": "Innovador SENNOVA",
     "descripcion": "Participación activa en el semillero de investigación institucional.",
     "icono": "bi-lightbulb-fill",
@@ -5442,9 +7492,7 @@
     "descripcion": "Plantilla oficial institucional para el registro y concertación de actividades en empresa o proyecto productivo.",
     "archivo": "",
     "version": "2.0",
-    "subido_por": [
-      "secretaria_demo"
-    ],
+    "subido_por": 27,
     "roles_permitidos": "Todos",
     "fecha_subida": "2026-09-19T20:14:11.925Z"
   }
@@ -5458,9 +7506,7 @@
     "descripcion": "Acto administrativo formal que avala las cohortes técnicas en instituciones educativas de Santa Marta y Magdalena.",
     "archivo": "",
     "version": "1.0",
-    "subido_por": [
-      "coordinador_demo"
-    ],
+    "subido_por": 25,
     "roles_permitidos": "Todos",
     "fecha_subida": "2026-09-19T20:14:11.931Z"
   }
@@ -5474,9 +7520,7 @@
     "descripcion": "Acuerdo oficial suscrito entre la Dirección Regional del SENA Magdalena y las Secretarías de Educación Departamental y Distrital de Santa Marta.",
     "archivo": "",
     "version": "1.0",
-    "subido_por": [
-      "admin"
-    ],
+    "subido_por": 1,
     "roles_permitidos": "Todos",
     "fecha_subida": "2026-09-19T20:57:51.170Z"
   }
@@ -5490,9 +7534,7 @@
     "descripcion": "Reglamento oficial vigente de deberes, derechos, comités de evaluación y régimen disciplinario de los aprendices.",
     "archivo": "",
     "version": "1.0",
-    "subido_por": [
-      "admin"
-    ],
+    "subido_por": 1,
     "roles_permitidos": "Todos",
     "fecha_subida": "2026-09-19T20:57:51.178Z"
   }
@@ -5506,9 +7548,7 @@
     "descripcion": "Orientación pedagógica oficial para el desarrollo del componente técnico en el Tecnólogo en ADSO.",
     "archivo": "",
     "version": "1.0",
-    "subido_por": [
-      "admin"
-    ],
+    "subido_por": 1,
     "roles_permitidos": "Todos",
     "fecha_subida": "2026-09-19T20:57:51.184Z"
   }
@@ -5522,9 +7562,7 @@
     "descripcion": "Plantilla oficial aprobada por el Sistema Integrado de Gestión para la formalización de acuerdos en colegios.",
     "archivo": "",
     "version": "1.0",
-    "subido_por": [
-      "admin"
-    ],
+    "subido_por": 1,
     "roles_permitidos": "Todos",
     "fecha_subida": "2026-09-19T20:57:51.190Z"
   }
@@ -5537,9 +7575,7 @@
     "fecha": "2026-09-18",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5550,9 +7586,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5563,9 +7597,7 @@
     "fecha": "2026-09-16",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5576,9 +7608,7 @@
     "fecha": "2026-09-15",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5589,9 +7619,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5602,9 +7630,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5615,9 +7641,7 @@
     "fecha": "2026-09-10",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5628,9 +7652,7 @@
     "fecha": "2026-09-09",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5641,9 +7663,7 @@
     "fecha": "2026-09-08",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5654,9 +7674,7 @@
     "fecha": "2026-09-07",
     "estado": "P",
     "observaciones": "Asistencia regular en aula",
-    "registrado_por": [
-      "instructor_demo"
-    ]
+    "registrado_por": 26
   }
 },
 {
@@ -5667,9 +7685,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Asistencia diaria registrada automáticamente por escaneo de Carnet Digital QR",
-    "registrado_por": [
-      "aprendiz_demo"
-    ]
+    "registrado_por": 28
   }
 },
 {
@@ -5680,9 +7696,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5693,9 +7707,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5706,9 +7718,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5719,9 +7729,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5732,9 +7740,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5745,9 +7751,7 @@
     "fecha": "2026-09-17",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5758,9 +7762,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5771,9 +7773,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5784,9 +7784,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5797,9 +7795,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5810,9 +7806,7 @@
     "fecha": "2026-09-14",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5823,9 +7817,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5836,9 +7828,7 @@
     "fecha": "2026-09-19",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5849,9 +7839,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5862,9 +7850,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5875,9 +7861,7 @@
     "fecha": "2026-09-11",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5888,9 +7872,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5901,9 +7883,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5914,9 +7894,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5927,9 +7905,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_carlos"
-    ]
+    "registrado_por": 2
   }
 },
 {
@@ -5940,9 +7916,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -5953,9 +7927,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -5966,9 +7938,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -5979,9 +7949,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -5992,9 +7960,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6005,9 +7971,7 @@
     "fecha": "2026-09-17",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6018,9 +7982,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6031,9 +7993,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6044,9 +8004,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6057,9 +8015,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6070,9 +8026,7 @@
     "fecha": "2026-09-14",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6083,9 +8037,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6096,9 +8048,7 @@
     "fecha": "2026-09-19",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6109,9 +8059,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6122,9 +8070,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6135,9 +8081,7 @@
     "fecha": "2026-09-11",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6148,9 +8092,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6161,9 +8103,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6174,9 +8114,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6187,9 +8125,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_adso"
-    ]
+    "registrado_por": 29
   }
 },
 {
@@ -6200,9 +8136,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6213,9 +8147,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6226,9 +8158,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6239,9 +8169,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6252,9 +8180,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6265,9 +8191,7 @@
     "fecha": "2026-09-17",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6278,9 +8202,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6291,9 +8213,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6304,9 +8224,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6317,9 +8235,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6330,9 +8246,7 @@
     "fecha": "2026-09-14",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6343,9 +8257,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6356,9 +8268,7 @@
     "fecha": "2026-09-19",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6369,9 +8279,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6382,9 +8290,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6395,9 +8301,7 @@
     "fecha": "2026-09-11",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6408,9 +8312,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6421,9 +8323,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6434,9 +8334,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6447,9 +8345,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6460,9 +8356,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6473,9 +8367,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6486,9 +8378,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6499,9 +8389,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6512,9 +8400,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6525,9 +8411,7 @@
     "fecha": "2026-09-17",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6538,9 +8422,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6551,9 +8433,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6564,9 +8444,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6577,9 +8455,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6590,9 +8466,7 @@
     "fecha": "2026-09-14",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6603,9 +8477,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6616,9 +8488,7 @@
     "fecha": "2026-09-19",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6629,9 +8499,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6642,9 +8510,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6655,9 +8521,7 @@
     "fecha": "2026-09-11",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6668,9 +8532,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6681,9 +8543,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6694,9 +8554,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6707,9 +8565,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_sistemas"
-    ]
+    "registrado_por": 30
   }
 },
 {
@@ -6720,9 +8576,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6733,9 +8587,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6746,9 +8598,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6759,9 +8609,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6772,9 +8620,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6785,9 +8631,7 @@
     "fecha": "2026-09-17",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6798,9 +8642,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6811,9 +8653,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6824,9 +8664,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6837,9 +8675,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6850,9 +8686,7 @@
     "fecha": "2026-09-14",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6863,9 +8697,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6876,9 +8708,7 @@
     "fecha": "2026-09-19",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6889,9 +8719,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6902,9 +8730,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6915,9 +8741,7 @@
     "fecha": "2026-09-11",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6928,9 +8752,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6941,9 +8763,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6954,9 +8774,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6967,9 +8785,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_contable"
-    ]
+    "registrado_por": 31
   }
 },
 {
@@ -6980,9 +8796,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -6993,9 +8807,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7006,9 +8818,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7019,9 +8829,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7032,9 +8840,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7045,9 +8851,7 @@
     "fecha": "2026-09-17",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7058,9 +8862,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7071,9 +8873,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7084,9 +8884,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7097,9 +8895,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7110,9 +8906,7 @@
     "fecha": "2026-09-14",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7123,9 +8917,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7136,9 +8928,7 @@
     "fecha": "2026-09-19",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7149,9 +8939,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7162,9 +8950,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7175,9 +8961,7 @@
     "fecha": "2026-09-11",
     "estado": "A",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7188,9 +8972,7 @@
     "fecha": "2026-09-19",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7201,9 +8983,7 @@
     "fecha": "2026-09-17",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7214,9 +8994,7 @@
     "fecha": "2026-09-14",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7227,9 +9005,7 @@
     "fecha": "2026-09-11",
     "estado": "P",
     "observaciones": "Sesión presencial normal en ambiente de aprendizaje.",
-    "registrado_por": [
-      "instructor_admin"
-    ]
+    "registrado_por": 32
   }
 },
 {
@@ -7238,9 +9014,7 @@
   "fields": {
     "ficha": 1,
     "matricula": null,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "fecha_visita": "2024-06-10",
     "tipo_seguimiento": "Presencial Aula",
     "observaciones": "Acompañamiento presencial al grupo de ADSI en el aula de informática de la I.E.D. Normal Superior María Auxiliadora. Se revisaron avances del proyecto formativo SINETEC y entrega de diagramas UML.",
@@ -7261,9 +9035,7 @@
   "fields": {
     "ficha": 1,
     "matricula": null,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
     "observaciones": "Acompañamiento presencial a la ficha 3173430. Verificación de equipos en sala de informática y avance en talleres.",
@@ -7284,9 +9056,7 @@
   "fields": {
     "ficha": 5,
     "matricula": null,
-    "instructor": [
-      "instructor_adso"
-    ],
+    "instructor": 29,
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
     "observaciones": "Acompañamiento presencial a la ficha 2824910. Verificación de equipos en sala de informática y avance en talleres.",
@@ -7307,9 +9077,7 @@
   "fields": {
     "ficha": 6,
     "matricula": null,
-    "instructor": [
-      "instructor_sistemas"
-    ],
+    "instructor": 30,
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
     "observaciones": "Acompañamiento presencial a la ficha 2694120. Verificación de equipos en sala de informática y avance en talleres.",
@@ -7330,9 +9098,7 @@
   "fields": {
     "ficha": 7,
     "matricula": null,
-    "instructor": [
-      "instructor_sistemas"
-    ],
+    "instructor": 30,
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
     "observaciones": "Acompañamiento presencial a la ficha 2791820. Verificación de equipos en sala de informática y avance en talleres.",
@@ -7353,9 +9119,7 @@
   "fields": {
     "ficha": 8,
     "matricula": null,
-    "instructor": [
-      "instructor_contable"
-    ],
+    "instructor": 31,
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
     "observaciones": "Acompañamiento presencial a la ficha 2718340. Verificación de equipos en sala de informática y avance en talleres.",
@@ -7376,9 +9140,7 @@
   "fields": {
     "ficha": 9,
     "matricula": null,
-    "instructor": [
-      "instructor_admin"
-    ],
+    "instructor": 32,
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
     "observaciones": "Acompañamiento presencial a la ficha 2683900. Verificación de equipos en sala de informática y avance en talleres.",
@@ -7398,9 +9160,7 @@
   "pk": 1,
   "fields": {
     "bitacora": 7,
-    "remitente": [
-      "admin"
-    ],
+    "remitente": 1,
     "mensaje": "Se informa que la evidencia de taller y avances de bitácora han sido verificados satisfactoriamente por el equipo de articulación SENA.",
     "fecha_envio": "2026-09-19T20:58:05.803Z"
   }
@@ -7409,9 +9169,7 @@
   "model": "seguimiento.solicitudsecretaria",
   "pk": 1,
   "fields": {
-    "aprendiz": [
-      "ap_1082987123"
-    ],
+    "aprendiz": 3,
     "ficha": 1,
     "asunto": "Solicitud de constancia de matrícula para transporte escolar",
     "categoria": "Certificacion",
@@ -7419,9 +9177,7 @@
     "mensaje": "Buenos días Secretaría SENA. Requiero una constancia de estudio y matrícula formal en el programa ADSI Ficha 3173430 para tramitar el subsidio de transporte escolar en la Alcaldía Distrital de Santa Marta.",
     "archivo_adjunto": "",
     "estado": "RESPONDIDA",
-    "responsable": [
-      "laura"
-    ],
+    "responsable": 7,
     "fecha_creacion": "2026-09-19T04:56:54.869Z",
     "fecha_actualizacion": "2026-09-19T04:56:54.869Z"
   }
@@ -7430,9 +9186,7 @@
   "model": "seguimiento.solicitudsecretaria",
   "pk": 2,
   "fields": {
-    "aprendiz": [
-      "ap_1082544991"
-    ],
+    "aprendiz": 4,
     "ficha": 1,
     "asunto": "Consulta sobre horario formativo en sala de cómputo los miércoles",
     "categoria": "Horario",
@@ -7440,9 +9194,7 @@
     "mensaje": "Cordial saludo. Quisiera confirmar si la jornada de desarrollo de software del día miércoles se mantendrá en el Ambiente 1 de la Escuela Normal Superior María Auxiliadora.",
     "archivo_adjunto": "",
     "estado": "EN_REVISION",
-    "responsable": [
-      "laura"
-    ],
+    "responsable": 7,
     "fecha_creacion": "2026-09-19T04:56:54.878Z",
     "fecha_actualizacion": "2026-09-19T04:56:54.878Z"
   }
@@ -7451,9 +9203,7 @@
   "model": "seguimiento.solicitudsecretaria",
   "pk": 3,
   "fields": {
-    "aprendiz": [
-      "aprendiz_demo"
-    ],
+    "aprendiz": 28,
     "ficha": 2,
     "asunto": "Solicitud de constancia de matrícula con promedio para subsidio",
     "categoria": "Certificacion",
@@ -7471,9 +9221,7 @@
   "pk": 1,
   "fields": {
     "solicitud": 1,
-    "usuario": [
-      "laura"
-    ],
+    "usuario": 7,
     "mensaje": "Estimado(a) aprendiz. Se adjunta constancia formal de matrícula activa con sello de la Coordinación de Formación del Centro de Logística y Promoción Ecoturística. Quedamos atentos.",
     "archivo_adjunto": "",
     "fecha_respuesta": "2026-09-19T04:56:54.872Z"
@@ -7483,9 +9231,7 @@
   "model": "seguimiento.notificacion",
   "pk": 1,
   "fields": {
-    "usuario": [
-      "ap_1082987123"
-    ],
+    "usuario": 3,
     "titulo": "Secretaría respondió tu solicitud de constancia",
     "mensaje": "Tu trámite de constancia de matrícula ha sido atendido por la Coordinación. Ya puedes revisar la respuesta y documento.",
     "enlace": "/seguimiento/secretaria/solicitud/1/",
@@ -7498,9 +9244,7 @@
   "model": "seguimiento.notificacion",
   "pk": 2,
   "fields": {
-    "usuario": [
-      "ap_1082987123"
-    ],
+    "usuario": 3,
     "titulo": "Nueva evidencia asignada en ADSI",
     "mensaje": "El instructor Carlos Martínez ha publicado una nueva actividad práctica en el Resultado de Aprendizaje RAP-01.",
     "enlace": "/aula/aprendiz/",
@@ -7513,9 +9257,7 @@
   "model": "seguimiento.notificacion",
   "pk": 3,
   "fields": {
-    "usuario": [
-      "instructor_carlos"
-    ],
+    "usuario": 2,
     "titulo": "Nueva solicitud de aprendiz radicada",
     "mensaje": "El aprendiz Camila Ortiz De la Rosa radicó una consulta sobre horarios de formación para la Ficha 3173430.",
     "enlace": "/seguimiento/secretaria/solicitud/2/",
@@ -7528,9 +9270,7 @@
   "model": "seguimiento.registroauditoria",
   "pk": 1,
   "fields": {
-    "usuario": [
-      "admin"
-    ],
+    "usuario": 1,
     "accion": "Sincronización y apertura de cohorte Ficha 3173430",
     "modulo": "Fichas Técnicas",
     "detalles": "Se validaron 16 aprendices matriculados en Análisis y Desarrollo de Sistemas de Información (ADSI) y se configuró instructor líder.",
@@ -7542,9 +9282,7 @@
   "model": "seguimiento.registroauditoria",
   "pk": 2,
   "fields": {
-    "usuario": [
-      "instructor_carlos"
-    ],
+    "usuario": 2,
     "accion": "Asentamiento de juicios evaluativos RAP",
     "modulo": "Evaluaciones",
     "detalles": "Registro de juicios cualitativos oficiales A y D para la Ficha 3173430 en el primer periodo lectivo.",
@@ -7558,9 +9296,7 @@
   "fields": {
     "bitacora": null,
     "matricula": 17,
-    "instructor": [
-      "instructor_demo"
-    ],
+    "instructor": 26,
     "titulo": "Nivelación en modelado entidad-relación",
     "descripcion": "El aprendiz presentará el diagrama ER normalizado hasta 3FN del proyecto formativo.",
     "fecha_limite": "2026-09-24",
@@ -7577,9 +9313,7 @@
   "fields": {
     "bitacora": null,
     "matricula": 18,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "titulo": "Ponerse al día con talleres prácticos pendientes",
     "descripcion": "El aprendiz se compromete a entregar las evidencias pendientes.",
     "fecha_limite": "2026-09-26",
@@ -7600,9 +9334,7 @@
     "puntuacion_riesgo": "45.0",
     "factores_detectados": "Ajuste de evidencias de taller de programación modular.",
     "estado": "INTERVENCION",
-    "responsable": [
-      "instructor_demo"
-    ],
+    "responsable": 26,
     "plan_accion": "Acompañamiento tutorial en el ambiente de formación y seguimiento de compromisos.",
     "resultado_final": "",
     "fecha_deteccion": "2026-09-19T20:13:26.713Z",
@@ -7619,9 +9351,7 @@
     "puntuacion_riesgo": "55.0",
     "factores_detectados": "El aprendiz acumuló inasistencias consecutivas en el periodo.",
     "estado": "SEGUIMIENTO",
-    "responsable": [
-      "instructor_carlos"
-    ],
+    "responsable": 2,
     "plan_accion": "Llamada al acudiente y citación a coordinación pedagógica.",
     "resultado_final": "",
     "fecha_deteccion": "2026-09-19T20:56:56.445Z",
@@ -7720,9 +9450,7 @@
     "matricula": 17,
     "empresa": 1,
     "modalidad": "Contrato de Aprendizaje",
-    "instructor_seguimiento": [
-      "instructor_demo"
-    ],
+    "instructor_seguimiento": 26,
     "tutor_empresarial": "Ing. Andrés Palomino",
     "tutor_cargo": "Líder de Desarrollo",
     "tutor_email": "andres@solucionescaribe.com",
@@ -7742,9 +9470,7 @@
     "matricula": 22,
     "empresa": 5,
     "modalidad": "Contrato de Aprendizaje",
-    "instructor_seguimiento": [
-      "instructor_carlos"
-    ],
+    "instructor_seguimiento": 2,
     "tutor_empresarial": "Ing. Carlos Restrepo",
     "tutor_cargo": "",
     "tutor_email": "",
@@ -7764,9 +9490,7 @@
     "etapa_productiva": 1,
     "numero_visita": 1,
     "fecha_visita": "2026-08-25",
-    "instructor": [
-      "instructor_demo"
-    ],
+    "instructor": 26,
     "actividades_desarrolladas": "Concertación del plan de trabajo, inducción al repositorio y configuración de ambientes de desarrollo.",
     "concepto_evaluativo": "SATISFACTORIO",
     "observaciones_tutor": "El aprendiz demuestra alto compromiso y conocimientos en bases de datos.",
@@ -7782,9 +9506,7 @@
     "etapa_productiva": 2,
     "numero_visita": 1,
     "fecha_visita": "2026-08-20",
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "actividades_desarrolladas": "Inducción técnica, configuración de ambientes y soporte a base de datos institucional.",
     "concepto_evaluativo": "SATISFACTORIO",
     "observaciones_tutor": "",
@@ -7799,9 +9521,7 @@
   "fields": {
     "matricula": 10,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7814,9 +9534,7 @@
   "fields": {
     "matricula": 10,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7829,9 +9547,7 @@
   "fields": {
     "matricula": 10,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "D",
     "observaciones": "Requiere plan de mejoramiento en normalización de bases de datos.",
     "fecha_evaluacion": "2024-05-20",
@@ -7844,9 +9560,7 @@
   "fields": {
     "matricula": 10,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7859,9 +9573,7 @@
   "fields": {
     "matricula": 9,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7874,9 +9586,7 @@
   "fields": {
     "matricula": 9,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7889,9 +9599,7 @@
   "fields": {
     "matricula": 9,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7904,9 +9612,7 @@
   "fields": {
     "matricula": 9,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7919,9 +9625,7 @@
   "fields": {
     "matricula": 8,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7934,9 +9638,7 @@
   "fields": {
     "matricula": 8,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7949,9 +9651,7 @@
   "fields": {
     "matricula": 8,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7964,9 +9664,7 @@
   "fields": {
     "matricula": 8,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7979,9 +9677,7 @@
   "fields": {
     "matricula": 12,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -7994,9 +9690,7 @@
   "fields": {
     "matricula": 12,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8009,9 +9703,7 @@
   "fields": {
     "matricula": 12,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8024,9 +9716,7 @@
   "fields": {
     "matricula": 12,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8039,9 +9729,7 @@
   "fields": {
     "matricula": 7,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8054,9 +9742,7 @@
   "fields": {
     "matricula": 7,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8069,9 +9755,7 @@
   "fields": {
     "matricula": 7,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8084,9 +9768,7 @@
   "fields": {
     "matricula": 7,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8099,9 +9781,7 @@
   "fields": {
     "matricula": 1,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8114,9 +9794,7 @@
   "fields": {
     "matricula": 1,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8129,9 +9807,7 @@
   "fields": {
     "matricula": 1,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "D",
     "observaciones": "Requiere plan de mejoramiento en normalización de bases de datos.",
     "fecha_evaluacion": "2024-05-20",
@@ -8144,9 +9820,7 @@
   "fields": {
     "matricula": 1,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8159,9 +9833,7 @@
   "fields": {
     "matricula": 5,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8174,9 +9846,7 @@
   "fields": {
     "matricula": 5,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8189,9 +9859,7 @@
   "fields": {
     "matricula": 5,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8204,9 +9872,7 @@
   "fields": {
     "matricula": 5,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8219,9 +9885,7 @@
   "fields": {
     "matricula": 13,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8234,9 +9898,7 @@
   "fields": {
     "matricula": 13,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8249,9 +9911,7 @@
   "fields": {
     "matricula": 13,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8264,9 +9924,7 @@
   "fields": {
     "matricula": 13,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8279,9 +9937,7 @@
   "fields": {
     "matricula": 15,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8294,9 +9950,7 @@
   "fields": {
     "matricula": 15,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8309,9 +9963,7 @@
   "fields": {
     "matricula": 15,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8324,9 +9976,7 @@
   "fields": {
     "matricula": 15,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8339,9 +9989,7 @@
   "fields": {
     "matricula": 2,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8354,9 +10002,7 @@
   "fields": {
     "matricula": 2,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8369,9 +10015,7 @@
   "fields": {
     "matricula": 2,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8384,9 +10028,7 @@
   "fields": {
     "matricula": 2,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8399,9 +10041,7 @@
   "fields": {
     "matricula": 3,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8414,9 +10054,7 @@
   "fields": {
     "matricula": 3,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8429,9 +10067,7 @@
   "fields": {
     "matricula": 3,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "D",
     "observaciones": "Requiere plan de mejoramiento en normalización de bases de datos.",
     "fecha_evaluacion": "2024-05-20",
@@ -8444,9 +10080,7 @@
   "fields": {
     "matricula": 3,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8459,9 +10093,7 @@
   "fields": {
     "matricula": 14,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8474,9 +10106,7 @@
   "fields": {
     "matricula": 14,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8489,9 +10119,7 @@
   "fields": {
     "matricula": 14,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8504,9 +10132,7 @@
   "fields": {
     "matricula": 14,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8519,9 +10145,7 @@
   "fields": {
     "matricula": 4,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8534,9 +10158,7 @@
   "fields": {
     "matricula": 4,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8549,9 +10171,7 @@
   "fields": {
     "matricula": 4,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8564,9 +10184,7 @@
   "fields": {
     "matricula": 4,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8579,9 +10197,7 @@
   "fields": {
     "matricula": 6,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8594,9 +10210,7 @@
   "fields": {
     "matricula": 6,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8609,9 +10223,7 @@
   "fields": {
     "matricula": 6,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8624,9 +10236,7 @@
   "fields": {
     "matricula": 6,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8639,9 +10249,7 @@
   "fields": {
     "matricula": 16,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8654,9 +10262,7 @@
   "fields": {
     "matricula": 16,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8669,9 +10275,7 @@
   "fields": {
     "matricula": 16,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8684,9 +10288,7 @@
   "fields": {
     "matricula": 16,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8699,9 +10301,7 @@
   "fields": {
     "matricula": 11,
     "resultado_aprendizaje": 1,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8714,9 +10314,7 @@
   "fields": {
     "matricula": 11,
     "resultado_aprendizaje": 2,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8729,9 +10327,7 @@
   "fields": {
     "matricula": 11,
     "resultado_aprendizaje": 3,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "D",
     "observaciones": "Requiere plan de mejoramiento en normalización de bases de datos.",
     "fecha_evaluacion": "2024-05-20",
@@ -8744,9 +10340,7 @@
   "fields": {
     "matricula": 11,
     "resultado_aprendizaje": 4,
-    "instructor": [
-      "instructor_carlos"
-    ],
+    "instructor": 2,
     "juicio_valor": "A",
     "observaciones": "Alcanzó satisfactoriamente los criterios de evaluación.",
     "fecha_evaluacion": "2024-05-20",
@@ -8759,9 +10353,7 @@
   "fields": {
     "matricula": 17,
     "resultado_aprendizaje": 8,
-    "instructor": [
-      "instructor_demo"
-    ],
+    "instructor": 26,
     "juicio_valor": "A",
     "observaciones": "Excelente desempeño técnico y entrega oportuna.",
     "fecha_evaluacion": "2026-09-14",

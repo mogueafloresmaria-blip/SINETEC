@@ -194,8 +194,8 @@
     <div class="row g-4 mb-4">
         
         <!-- Columna Izquierda: Fichas Técnicas Bajo Coordinación -->
-        <div class="col-xl-7">
-            <section class="sinetec-card p-4 h-100">
+        <div class="col-12 col-lg-7 col-xl-8">
+            <section class="sinetec-card p-4 h-100 shadow-sm">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                     <div>
                         <h2 class="h5 fw-bold mb-1">Fichas Formativas Bajo Coordinación</h2>
@@ -226,17 +226,17 @@
                     </div>
                 </form>
 
-                <!-- Tabla de Fichas -->
+                <!-- Tabla de Fichas con anchos proporcionales -->
                 <div class="table-responsive">
-                    <table class="table sinetec-table align-middle mb-0">
-                        <thead>
+                    <table class="table sinetec-table align-middle mb-0 w-100">
+                        <thead class="table-light">
                             <tr>
-                                <th>Ficha</th>
-                                <th>Programa / Institución</th>
-                                <th>Instructor Líder</th>
-                                <th class="text-center">Aprendices</th>
-                                <th>Estado</th>
-                                <th class="text-end">Acción</th>
+                                <th style="width: 14%;">Ficha</th>
+                                <th style="width: 38%;">Programa de Formación / Sede IED</th>
+                                <th style="width: 22%;">Instructor Líder</th>
+                                <th class="text-center" style="width: 10%;">Aprendices</th>
+                                <th style="width: 11%;">Estado</th>
+                                <th class="text-end" style="width: 5%;">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -249,9 +249,14 @@
                                         <small class="d-block text-muted">{{ f.modalidad }}</small>
                                     </td>
                                     <td>
-                                        <strong class="d-block text-dark small">{{ f.programa.denominacion|truncatechars:32 }}</strong>
-                                        <span class="text-muted" style="font-size: 0.75rem;">
-                                            <i class="bi bi-building me-1"></i>{{ f.institucion.nombre|default:"Sede SENA"|truncatechars:28 }}
+                                        <div class="d-flex align-items-center gap-1 mb-1">
+                                            <span class="badge {% if 'Tecnólogo' in f.programa.denominacion or 'Tecnologo' in f.programa.denominacion %}bg-info text-white{% else %}bg-success text-white{% endif %}" style="font-size: 0.65rem; padding: 2px 6px;">
+                                                {% if 'Tecnólogo' in f.programa.denominacion or 'Tecnologo' in f.programa.denominacion %}TECNÓLOGO{% else %}TÉCNICO{% endif %}
+                                            </span>
+                                        </div>
+                                        <strong class="d-block text-dark small">{{ f.programa.denominacion }}</strong>
+                                        <span class="text-muted" style="font-size: 0.78rem;">
+                                            <i class="bi bi-building me-1"></i>{{ f.institucion.nombre|default:"Sede SENA" }}
                                         </span>
                                     </td>
                                     <td>
@@ -291,14 +296,14 @@
         </div>
 
         <!-- Columna Derecha: Balance RAP, Trámites Radicados y Seguimientos -->
-        <div class="col-xl-5 d-flex flex-column gap-4">
+        <div class="col-12 col-lg-5 col-xl-4 d-flex flex-column gap-4">
             
             <!-- Balance Cualitativo de Evaluación RAP -->
-            <section class="sinetec-card p-4">
+            <section class="sinetec-card p-4 shadow-sm">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h2 class="h6 fw-bold mb-0">Balance de Juicios Evaluativos RAP</h2>
-                        <small class="text-muted">Resultados oficiales de la formación ADSI</small>
+                        <small class="text-muted">Resultados oficiales de la formación</small>
                     </div>
                     <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
                         Sábana RAP
@@ -334,7 +339,7 @@
             </section>
 
             <!-- Trámites Radicados en Secretaría Recientes -->
-            <section class="sinetec-card p-4 flex-grow-1">
+            <section class="sinetec-card p-4 flex-grow-1 shadow-sm">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h2 class="h6 fw-bold mb-0">Trámites Recientes en Secretaría</h2>
@@ -347,15 +352,15 @@
 
                 <div class="list-group list-group-flush">
                     {% for t in tramites_recientes %}
-                        <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between align-items-center">
-                            <div>
+                        <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between align-items-center gap-2">
+                            <div class="overflow-hidden" style="min-width: 0;">
                                 <span class="badge bg-light text-dark border me-1">#{{ t.id }}</span>
-                                <strong class="small text-dark">{{ t.asunto|truncatechars:28 }}</strong>
+                                <strong class="small text-dark text-truncate d-inline-block align-middle" style="max-width: 220px;" title="{{ t.asunto }}">{{ t.asunto }}</strong>
                                 <div class="text-muted" style="font-size: 0.75rem;">
                                     {{ t.aprendiz.get_full_name|default:t.aprendiz.username }} · {{ t.fecha_creacion|date:'d/m/Y' }}
                                 </div>
                             </div>
-                            <span class="badge 
+                            <span class="badge flex-shrink-0
                                 {% if t.estado == 'PENDIENTE' %}bg-warning text-dark
                                 {% elif t.estado == 'EN_TRAMITE' %}bg-info text-white
                                 {% elif t.estado == 'RESPONDIDA' or t.estado == 'CERRADA' %}bg-success
