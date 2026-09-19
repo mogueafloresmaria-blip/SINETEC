@@ -232,10 +232,21 @@
                         </div>
                         <input id="password" type="password" name="password" placeholder="••••••••" required>
                     </div>
-                    {% if form.errors %}
-                        <div class="error-box">
+                    {% if error_message %}
+                        <div class="error-box" style="background-color: #fde8e5; color: #a24034; border: 1px solid #f9c2bc; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88rem;">
+                            <strong>Acceso denegado:</strong> {{ error_message }}
+                        </div>
+                    {% elif form.errors %}
+                        <div class="error-box" style="background-color: #fde8e5; color: #a24034; border: 1px solid #f9c2bc; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88rem;">
                             <strong>Acceso denegado:</strong> Usuario o contraseña incorrectos. Verifica tus credenciales e intenta nuevamente.
                         </div>
+                    {% endif %}
+                    {% if messages %}
+                        {% for msg in messages %}
+                            <div class="error-box" style="background-color: #fde8e5; color: #a24034; border: 1px solid #f9c2bc; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88rem;">
+                                {{ msg }}
+                            </div>
+                        {% endfor %}
                     {% endif %}
                     <button class="login-button" type="submit">Ingresar a SINETEC</button>
                 </form>

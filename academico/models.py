@@ -242,7 +242,7 @@ class Matricula(models.Model):
 class HorarioFicha(models.Model):
     """Bloque editable del horario formativo de una ficha SENA."""
     DIAS = [(str(indice), nombre) for indice, nombre in enumerate(
-        ('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'), start=1
+        ('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'), start=1
     )]
     MODALIDADES = [('Presencial', 'Presencial'), ('Virtual', 'Virtual'), ('Mixta', 'Mixta')]
 
