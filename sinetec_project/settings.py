@@ -1,6 +1,12 @@
+import os
+import sys
 from pathlib import Path
 from decouple import config
-import dj_database_url
+
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -67,15 +73,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sinetec_project.wsgi.application'
 
-# Database: Soporte dual (Local MySQL / Cloud PostgreSQL vía DATABASE_URL en Render/Railway)
+# Database: Detección inteligente para despliegue Cloud (Render) y Desarrollo Local
 DATABASE_URL = config('DATABASE_URL', default=None)
-if DATABASE_URL:
+IS_CLOUD = os.environ.get('RENDER') == 'true' or bool(os.environ.get('DYNO')) or sys.platform != 'win32'
+
+if DATABASE_URL and dj_database_url:
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
         )
+    }
+elif IS_CLOUD:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
 else:
     DATABASES = {

@@ -24,7 +24,7 @@
     "is_superuser": false,
     "username": "instructor_carlos",
     "first_name": "Carlos",
-    "last_name": "MartÌnez",
+    "last_name": "Mart√≠nez",
     "email": "cmartinez@sena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -41,7 +41,7 @@
     "is_superuser": false,
     "username": "ap_1082987123",
     "first_name": "Juan David",
-    "last_name": "MartÌnez GÛmez",
+    "last_name": "Mart√≠nez G√≥mez",
     "email": "1082987123@sena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -74,8 +74,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1082112344",
-    "first_name": "AndrÈs Felipe",
-    "last_name": "PÈrez Varela",
+    "first_name": "Andr√©s Felipe",
+    "last_name": "P√©rez Varela",
     "email": "1082112344@sena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -143,7 +143,7 @@
     "is_superuser": false,
     "username": "instructora_andrea",
     "first_name": "Andrea",
-    "last_name": "GÛmez",
+    "last_name": "G√≥mez",
     "email": "andrea.gomez@sena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -177,7 +177,7 @@
     "is_superuser": false,
     "username": "ap_1001001001",
     "first_name": "Laura",
-    "last_name": "MartÌnez GÛmez",
+    "last_name": "Mart√≠nez G√≥mez",
     "email": "laura.martinez@example.com",
     "is_staff": false,
     "is_active": true,
@@ -193,8 +193,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "ap_1001001002",
-    "first_name": "SofÌa",
-    "last_name": "RodrÌguez PÈrez",
+    "first_name": "Sof√≠a",
+    "last_name": "Rodr√≠guez P√©rez",
     "email": "sofia.rodriguez@example.com",
     "is_staff": false,
     "is_active": true,
@@ -211,7 +211,7 @@
     "is_superuser": false,
     "username": "ap_1001001003",
     "first_name": "Valentina",
-    "last_name": "LÛpez Torres",
+    "last_name": "L√≥pez Torres",
     "email": "valentina.lopez@example.com",
     "is_staff": false,
     "is_active": true,
@@ -228,7 +228,7 @@
     "is_superuser": false,
     "username": "ap_1001001004",
     "first_name": "Mariana",
-    "last_name": "Hern·ndez DÌaz",
+    "last_name": "Hern√°ndez D√≠az",
     "email": "mariana.hernandez@example.com",
     "is_staff": false,
     "is_active": true,
@@ -245,7 +245,7 @@
     "is_superuser": false,
     "username": "ap_1001001005",
     "first_name": "Camila",
-    "last_name": "GarcÌa Rojas",
+    "last_name": "Garc√≠a Rojas",
     "email": "camila.garcia@example.com",
     "is_staff": false,
     "is_active": true,
@@ -296,7 +296,7 @@
     "is_superuser": false,
     "username": "ap_1001001008",
     "first_name": "Gabriela",
-    "last_name": "JimÈnez Silva",
+    "last_name": "Jim√©nez Silva",
     "email": "gabriela.jimenez@example.com",
     "is_staff": false,
     "is_active": true,
@@ -313,7 +313,7 @@
     "is_superuser": false,
     "username": "ap_1001001009",
     "first_name": "Sara",
-    "last_name": "Mendoza LeÛn",
+    "last_name": "Mendoza Le√≥n",
     "email": "sara.mendoza@example.com",
     "is_staff": false,
     "is_active": true,
@@ -347,7 +347,7 @@
     "is_superuser": false,
     "username": "ap_1001001011",
     "first_name": "Juliana",
-    "last_name": "Navarro PeÒa",
+    "last_name": "Navarro Pe√±a",
     "email": "juliana.navarro@example.com",
     "is_staff": false,
     "is_active": true,
@@ -381,7 +381,7 @@
     "is_superuser": false,
     "username": "sec_martha",
     "first_name": "Martha",
-    "last_name": "LÛpez PeÒaranda",
+    "last_name": "L√≥pez Pe√±aranda",
     "email": "secretaria.magdalena@sena.edu.co",
     "is_staff": true,
     "is_active": true,
@@ -415,7 +415,7 @@
     "is_superuser": false,
     "username": "coordinador_demo",
     "first_name": "Roberto",
-    "last_name": "CaÒas",
+    "last_name": "Ca√±as",
     "email": "coordinador@sena.edu.co",
     "is_staff": true,
     "is_active": true,
@@ -466,7 +466,7 @@
     "is_superuser": false,
     "username": "aprendiz_demo",
     "first_name": "Mateo",
-    "last_name": "GÛmez Silva",
+    "last_name": "G√≥mez Silva",
     "email": "aprendiz@sena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -516,8 +516,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "instructor_contable",
-    "first_name": "Hern·n",
-    "last_name": "GutiÈrrez DÌaz",
+    "first_name": "Hern√°n",
+    "last_name": "Guti√©rrez D√≠az",
     "email": "hgutierrez@sena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -534,7 +534,7 @@
     "is_superuser": false,
     "username": "instructor_admin",
     "first_name": "Luz Marina",
-    "last_name": "PÈrez Rivas",
+    "last_name": "P√©rez Rivas",
     "email": "lperez@sena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -550,7 +550,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_3173430_1",
-    "first_name": "AndrÈs Felipe",
+    "first_name": "Andr√©s Felipe",
     "last_name": "Caicedo Blanco",
     "email": "apr_3173430_1@misena.edu.co",
     "is_staff": false,
@@ -567,8 +567,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_3173430_2",
-    "first_name": "Valeria SofÌa",
-    "last_name": "Torres ManjarrÈs",
+    "first_name": "Valeria Sof√≠a",
+    "last_name": "Torres Manjarr√©s",
     "email": "apr_3173430_2@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -601,7 +601,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_3173430_4",
-    "first_name": "Mariana LucÌa",
+    "first_name": "Mariana Luc√≠a",
     "last_name": "Ospina Rangel",
     "email": "apr_3173430_4@misena.edu.co",
     "is_staff": false,
@@ -618,8 +618,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_3173430_5",
-    "first_name": "Santiago JosÈ",
-    "last_name": "MartÌnez Cantillo",
+    "first_name": "Santiago Jos√©",
+    "last_name": "Mart√≠nez Cantillo",
     "email": "apr_3173430_5@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -635,7 +635,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2824910_1",
-    "first_name": "AndrÈs Felipe",
+    "first_name": "Andr√©s Felipe",
     "last_name": "Caicedo Blanco",
     "email": "apr_2824910_1@misena.edu.co",
     "is_staff": false,
@@ -652,8 +652,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2824910_2",
-    "first_name": "Valeria SofÌa",
-    "last_name": "Torres ManjarrÈs",
+    "first_name": "Valeria Sof√≠a",
+    "last_name": "Torres Manjarr√©s",
     "email": "apr_2824910_2@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -686,7 +686,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2824910_4",
-    "first_name": "Mariana LucÌa",
+    "first_name": "Mariana Luc√≠a",
     "last_name": "Ospina Rangel",
     "email": "apr_2824910_4@misena.edu.co",
     "is_staff": false,
@@ -703,8 +703,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2824910_5",
-    "first_name": "Santiago JosÈ",
-    "last_name": "MartÌnez Cantillo",
+    "first_name": "Santiago Jos√©",
+    "last_name": "Mart√≠nez Cantillo",
     "email": "apr_2824910_5@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -720,7 +720,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2694120_1",
-    "first_name": "AndrÈs Felipe",
+    "first_name": "Andr√©s Felipe",
     "last_name": "Caicedo Blanco",
     "email": "apr_2694120_1@misena.edu.co",
     "is_staff": false,
@@ -737,8 +737,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2694120_2",
-    "first_name": "Valeria SofÌa",
-    "last_name": "Torres ManjarrÈs",
+    "first_name": "Valeria Sof√≠a",
+    "last_name": "Torres Manjarr√©s",
     "email": "apr_2694120_2@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -771,7 +771,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2694120_4",
-    "first_name": "Mariana LucÌa",
+    "first_name": "Mariana Luc√≠a",
     "last_name": "Ospina Rangel",
     "email": "apr_2694120_4@misena.edu.co",
     "is_staff": false,
@@ -788,8 +788,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2694120_5",
-    "first_name": "Santiago JosÈ",
-    "last_name": "MartÌnez Cantillo",
+    "first_name": "Santiago Jos√©",
+    "last_name": "Mart√≠nez Cantillo",
     "email": "apr_2694120_5@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -805,7 +805,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2791820_1",
-    "first_name": "AndrÈs Felipe",
+    "first_name": "Andr√©s Felipe",
     "last_name": "Caicedo Blanco",
     "email": "apr_2791820_1@misena.edu.co",
     "is_staff": false,
@@ -822,8 +822,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2791820_2",
-    "first_name": "Valeria SofÌa",
-    "last_name": "Torres ManjarrÈs",
+    "first_name": "Valeria Sof√≠a",
+    "last_name": "Torres Manjarr√©s",
     "email": "apr_2791820_2@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -856,7 +856,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2791820_4",
-    "first_name": "Mariana LucÌa",
+    "first_name": "Mariana Luc√≠a",
     "last_name": "Ospina Rangel",
     "email": "apr_2791820_4@misena.edu.co",
     "is_staff": false,
@@ -873,8 +873,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2791820_5",
-    "first_name": "Santiago JosÈ",
-    "last_name": "MartÌnez Cantillo",
+    "first_name": "Santiago Jos√©",
+    "last_name": "Mart√≠nez Cantillo",
     "email": "apr_2791820_5@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -890,7 +890,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2718340_1",
-    "first_name": "AndrÈs Felipe",
+    "first_name": "Andr√©s Felipe",
     "last_name": "Caicedo Blanco",
     "email": "apr_2718340_1@misena.edu.co",
     "is_staff": false,
@@ -907,8 +907,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2718340_2",
-    "first_name": "Valeria SofÌa",
-    "last_name": "Torres ManjarrÈs",
+    "first_name": "Valeria Sof√≠a",
+    "last_name": "Torres Manjarr√©s",
     "email": "apr_2718340_2@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -941,7 +941,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2718340_4",
-    "first_name": "Mariana LucÌa",
+    "first_name": "Mariana Luc√≠a",
     "last_name": "Ospina Rangel",
     "email": "apr_2718340_4@misena.edu.co",
     "is_staff": false,
@@ -958,8 +958,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2718340_5",
-    "first_name": "Santiago JosÈ",
-    "last_name": "MartÌnez Cantillo",
+    "first_name": "Santiago Jos√©",
+    "last_name": "Mart√≠nez Cantillo",
     "email": "apr_2718340_5@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -975,7 +975,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2683900_1",
-    "first_name": "AndrÈs Felipe",
+    "first_name": "Andr√©s Felipe",
     "last_name": "Caicedo Blanco",
     "email": "apr_2683900_1@misena.edu.co",
     "is_staff": false,
@@ -992,8 +992,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2683900_2",
-    "first_name": "Valeria SofÌa",
-    "last_name": "Torres ManjarrÈs",
+    "first_name": "Valeria Sof√≠a",
+    "last_name": "Torres Manjarr√©s",
     "email": "apr_2683900_2@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -1026,7 +1026,7 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2683900_4",
-    "first_name": "Mariana LucÌa",
+    "first_name": "Mariana Luc√≠a",
     "last_name": "Ospina Rangel",
     "email": "apr_2683900_4@misena.edu.co",
     "is_staff": false,
@@ -1043,8 +1043,8 @@
     "last_login": null,
     "is_superuser": false,
     "username": "apr_2683900_5",
-    "first_name": "Santiago JosÈ",
-    "last_name": "MartÌnez Cantillo",
+    "first_name": "Santiago Jos√©",
+    "last_name": "Mart√≠nez Cantillo",
     "email": "apr_2683900_5@misena.edu.co",
     "is_staff": false,
     "is_active": true,
@@ -1426,7 +1426,7 @@
   "pk": 1,
   "fields": {
     "nombre": "Administrador",
-    "descripcion": "Control total de seguridad, usuarios y auditorÌa"
+    "descripcion": "Control total de seguridad, usuarios y auditor√≠a"
   }
 },
 {
@@ -1434,7 +1434,7 @@
   "pk": 2,
   "fields": {
     "nombre": "Coordinador",
-    "descripcion": "LÌder de articulaciÛn con la Media TÈcnica"
+    "descripcion": "L√≠der de articulaci√≥n con la Media T√©cnica"
   }
 },
 {
@@ -1450,7 +1450,7 @@
   "pk": 4,
   "fields": {
     "nombre": "Docente I.E.",
-    "descripcion": "Docente enlace de la instituciÛn educativa articulada"
+    "descripcion": "Docente enlace de la instituci√≥n educativa articulada"
   }
 },
 {
@@ -1458,15 +1458,15 @@
   "pk": 5,
   "fields": {
     "nombre": "Estudiante",
-    "descripcion": "Aprendiz en formaciÛn tÈcnica laboral"
+    "descripcion": "Aprendiz en formaci√≥n t√©cnica laboral"
   }
 },
 {
   "model": "usuarios.rol",
   "pk": 6,
   "fields": {
-    "nombre": "SecretarÌa",
-    "descripcion": "GestiÛn documental y solicitudes institucionales"
+    "nombre": "Secretar√≠a",
+    "descripcion": "Gesti√≥n documental y solicitudes institucionales"
   }
 },
 {
@@ -1474,7 +1474,7 @@
   "pk": 7,
   "fields": {
     "nombre": "Instructor",
-    "descripcion": "Instructor SENA LÌder"
+    "descripcion": "Instructor SENA L√≠der"
   }
 },
 {
@@ -2598,7 +2598,7 @@
   "pk": 1,
   "fields": {
     "numero_ficha": "3173430",
-    "programa": "An·lisis y Desarrollo de Sistemas de InformaciÛn",
+    "programa": "An√°lisis y Desarrollo de Sistemas de Informaci√≥n",
     "jornada": "Diurna"
   }
 },
@@ -2607,7 +2607,7 @@
   "pk": 2,
   "fields": {
     "numero_ficha": "2824910",
-    "programa": "TÈcnico en Sistemas",
+    "programa": "T√©cnico en Sistemas",
     "jornada": "Diurna"
   }
 },
@@ -2616,7 +2616,7 @@
   "pk": 3,
   "fields": {
     "numero_ficha": "2694120",
-    "programa": "TÈcnico en Sistemas",
+    "programa": "T√©cnico en Sistemas",
     "jornada": "Diurna"
   }
 },
@@ -2625,7 +2625,7 @@
   "pk": 4,
   "fields": {
     "numero_ficha": "2791820",
-    "programa": "TecnÛlogo en GestiÛn de Redes de Datos",
+    "programa": "Tecn√≥logo en Gesti√≥n de Redes de Datos",
     "jornada": "Diurna"
   }
 },
@@ -2634,7 +2634,7 @@
   "pk": 5,
   "fields": {
     "numero_ficha": "2718340",
-    "programa": "TÈcnico en ContabilizaciÛn de Operaciones Comerciales y Financieras",
+    "programa": "T√©cnico en Contabilizaci√≥n de Operaciones Comerciales y Financieras",
     "jornada": "Diurna"
   }
 },
@@ -2643,7 +2643,7 @@
   "pk": 6,
   "fields": {
     "numero_ficha": "2683900",
-    "programa": "TecnÛlogo en GestiÛn del Talento Humano",
+    "programa": "Tecn√≥logo en Gesti√≥n del Talento Humano",
     "jornada": "Diurna"
   }
 },
@@ -2653,7 +2653,7 @@
   "fields": {
     "ficha": 1,
     "codigo": "RAP-01",
-    "descripcion": "Levantar los requerimientos del sistema aplicando tÈcnicas de recolecciÛn de informaciÛn y est·ndares SENA."
+    "descripcion": "Levantar los requerimientos del sistema aplicando t√©cnicas de recolecci√≥n de informaci√≥n y est√°ndares SENA."
   }
 },
 {
@@ -2671,7 +2671,7 @@
   "fields": {
     "ficha": 1,
     "codigo": "RAP-03",
-    "descripcion": "DiseÒar la arquitectura de base de datos relacional y modelo entidad-relaciÛn en MySQL."
+    "descripcion": "Dise√±ar la arquitectura de base de datos relacional y modelo entidad-relaci√≥n en MySQL."
   }
 },
 {
@@ -2680,7 +2680,7 @@
   "fields": {
     "ficha": 1,
     "codigo": "RAP-04",
-    "descripcion": "Codificar los mÛdulos de software en Python y Django aplicando principios de buenas pr·cticas y seguridad."
+    "descripcion": "Codificar los m√≥dulos de software en Python y Django aplicando principios de buenas pr√°cticas y seguridad."
   }
 },
 {
@@ -2716,7 +2716,7 @@
   "fields": {
     "ficha": 1,
     "codigo": "RAP-3173",
-    "descripcion": "Desarrollar productos del programa An·lisis y Desarrollo de Sistemas de InformaciÛn"
+    "descripcion": "Desarrollar productos del programa An√°lisis y Desarrollo de Sistemas de Informaci√≥n"
   }
 },
 {
@@ -2725,7 +2725,7 @@
   "fields": {
     "ficha": 2,
     "codigo": "RAP-2824",
-    "descripcion": "Desarrollar productos del programa TÈcnico en Sistemas"
+    "descripcion": "Desarrollar productos del programa T√©cnico en Sistemas"
   }
 },
 {
@@ -2734,7 +2734,7 @@
   "fields": {
     "ficha": 3,
     "codigo": "RAP-2694",
-    "descripcion": "Desarrollar productos del programa TÈcnico en Sistemas"
+    "descripcion": "Desarrollar productos del programa T√©cnico en Sistemas"
   }
 },
 {
@@ -2743,7 +2743,7 @@
   "fields": {
     "ficha": 4,
     "codigo": "RAP-2791",
-    "descripcion": "Desarrollar productos del programa TecnÛlogo en GestiÛn de Redes de Datos"
+    "descripcion": "Desarrollar productos del programa Tecn√≥logo en Gesti√≥n de Redes de Datos"
   }
 },
 {
@@ -2752,7 +2752,7 @@
   "fields": {
     "ficha": 5,
     "codigo": "RAP-2718",
-    "descripcion": "Desarrollar productos del programa TÈcnico en ContabilizaciÛn de Operaciones Comerciales y Financieras"
+    "descripcion": "Desarrollar productos del programa T√©cnico en Contabilizaci√≥n de Operaciones Comerciales y Financieras"
   }
 },
 {
@@ -2761,7 +2761,7 @@
   "fields": {
     "ficha": 6,
     "codigo": "RAP-2683",
-    "descripcion": "Desarrollar productos del programa TecnÛlogo en GestiÛn del Talento Humano"
+    "descripcion": "Desarrollar productos del programa Tecn√≥logo en Gesti√≥n del Talento Humano"
   }
 },
 {
@@ -2774,8 +2774,8 @@
     "instructor": [
       "instructor_carlos"
     ],
-    "titulo": "Taller 01: EspecificaciÛn de Requisitos de Software (IEEE-830)",
-    "descripcion": "Elaborar el documento de especificaciÛn formal de requerimientos funcionales y no funcionales para el sistema SINETEC utilizando el est·ndar IEEE-830.",
+    "titulo": "Taller 01: Especificaci√≥n de Requisitos de Software (IEEE-830)",
+    "descripcion": "Elaborar el documento de especificaci√≥n formal de requerimientos funcionales y no funcionales para el sistema SINETEC utilizando el est√°ndar IEEE-830.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T06:09:49.324Z",
     "fecha_limite": "2026-09-14T06:09:49.322Z"
@@ -2792,7 +2792,7 @@
       "instructor_carlos"
     ],
     "titulo": "Taller 02: Modelado UML y Casos de Uso del Sistema SINETEC",
-    "descripcion": "DiseÒar el diagrama de casos de uso general, diagramas de secuencia para autenticaciÛn y especificaciÛn de actores clave.",
+    "descripcion": "Dise√±ar el diagrama de casos de uso general, diagramas de secuencia para autenticaci√≥n y especificaci√≥n de actores clave.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T06:09:49.330Z",
     "fecha_limite": "2026-09-23T06:09:49.322Z"
@@ -2808,7 +2808,7 @@
     "instructor": [
       "instructor_carlos"
     ],
-    "titulo": "Taller 03: DiseÒo del Modelo Entidad-RelaciÛn y Esquema MySQL",
+    "titulo": "Taller 03: Dise√±o del Modelo Entidad-Relaci√≥n y Esquema MySQL",
     "descripcion": "Definir el modelo relacional normalizado (3FN) con tablas para fichas, matriculas, RAPs y bitacoras de seguimiento.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T06:09:49.335Z",
@@ -2825,7 +2825,7 @@
     "instructor": [
       "instructor_carlos"
     ],
-    "titulo": "Taller 04: ImplementaciÛn de MÛdulos Web en Django y REST API",
+    "titulo": "Taller 04: Implementaci√≥n de M√≥dulos Web en Django y REST API",
     "descripcion": "Codificar controladores en views.py, rutas en urls.py y formularios de captura validados en Django.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T06:09:49.340Z",
@@ -2842,8 +2842,8 @@
     "instructor": [
       "instructor_carlos"
     ],
-    "titulo": "Taller Pr·ctico de An·lisis y Desarrollo de Sistemas de InformaciÛn",
-    "descripcion": "Desarrollar el caso de estudio propuesto con documentaciÛn tÈcnica completa.",
+    "titulo": "Taller Pr√°ctico de An√°lisis y Desarrollo de Sistemas de Informaci√≥n",
+    "descripcion": "Desarrollar el caso de estudio propuesto con documentaci√≥n t√©cnica completa.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T20:54:51.810Z",
     "fecha_limite": "2026-10-04T20:54:51.805Z"
@@ -2859,8 +2859,8 @@
     "instructor": [
       "instructor_adso"
     ],
-    "titulo": "Taller Pr·ctico de TÈcnico en Sistemas",
-    "descripcion": "Desarrollar el caso de estudio propuesto con documentaciÛn tÈcnica completa.",
+    "titulo": "Taller Pr√°ctico de T√©cnico en Sistemas",
+    "descripcion": "Desarrollar el caso de estudio propuesto con documentaci√≥n t√©cnica completa.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T20:55:32.383Z",
     "fecha_limite": "2026-10-04T20:55:32.379Z"
@@ -2876,8 +2876,8 @@
     "instructor": [
       "instructor_sistemas"
     ],
-    "titulo": "Taller Pr·ctico de TÈcnico en Sistemas",
-    "descripcion": "Desarrollar el caso de estudio propuesto con documentaciÛn tÈcnica completa.",
+    "titulo": "Taller Pr√°ctico de T√©cnico en Sistemas",
+    "descripcion": "Desarrollar el caso de estudio propuesto con documentaci√≥n t√©cnica completa.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T20:55:37.042Z",
     "fecha_limite": "2026-10-04T20:55:37.040Z"
@@ -2893,8 +2893,8 @@
     "instructor": [
       "instructor_sistemas"
     ],
-    "titulo": "Taller Pr·ctico de TecnÛlogo en GestiÛn de Redes de Datos",
-    "descripcion": "Desarrollar el caso de estudio propuesto con documentaciÛn tÈcnica completa.",
+    "titulo": "Taller Pr√°ctico de Tecn√≥logo en Gesti√≥n de Redes de Datos",
+    "descripcion": "Desarrollar el caso de estudio propuesto con documentaci√≥n t√©cnica completa.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T20:55:40.807Z",
     "fecha_limite": "2026-10-04T20:55:40.805Z"
@@ -2910,8 +2910,8 @@
     "instructor": [
       "instructor_contable"
     ],
-    "titulo": "Taller Pr·ctico de TÈcnico en ContabilizaciÛn de Operaciones Comerciales y Financieras",
-    "descripcion": "Desarrollar el caso de estudio propuesto con documentaciÛn tÈcnica completa.",
+    "titulo": "Taller Pr√°ctico de T√©cnico en Contabilizaci√≥n de Operaciones Comerciales y Financieras",
+    "descripcion": "Desarrollar el caso de estudio propuesto con documentaci√≥n t√©cnica completa.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T20:55:44.257Z",
     "fecha_limite": "2026-10-04T20:55:44.255Z"
@@ -2927,8 +2927,8 @@
     "instructor": [
       "instructor_admin"
     ],
-    "titulo": "Taller Pr·ctico de TecnÛlogo en GestiÛn del Talento Humano",
-    "descripcion": "Desarrollar el caso de estudio propuesto con documentaciÛn tÈcnica completa.",
+    "titulo": "Taller Pr√°ctico de Tecn√≥logo en Gesti√≥n del Talento Humano",
+    "descripcion": "Desarrollar el caso de estudio propuesto con documentaci√≥n t√©cnica completa.",
     "material_apoyo": "",
     "fecha_asignacion": "2026-09-19T20:55:47.657Z",
     "fecha_limite": "2026-10-04T20:55:47.654Z"
@@ -2946,7 +2946,7 @@
     "comentarios_aprendiz": "Entrego documento final con matriz de trazabilidad y requisitos del cliente.",
     "fecha_entrega": "2026-09-19T06:09:49.349Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente estructuraciÛn de requisitos funcionales y no funcionales acorde a los lineamientos del SENA. Juicio Aprobado.",
+    "observaciones": "Excelente estructuraci√≥n de requisitos funcionales y no funcionales acorde a los lineamientos del SENA. Juicio Aprobado.",
     "fecha_revision": "2026-09-17T06:09:49.322Z"
   }
 },
@@ -2959,7 +2959,7 @@
       "ap_1082987123"
     ],
     "archivo_entregado": "",
-    "comentarios_aprendiz": "Adjunto archivo con diagramas de casos de uso y documentaciÛn de actores en formato PDF.",
+    "comentarios_aprendiz": "Adjunto archivo con diagramas de casos de uso y documentaci√≥n de actores en formato PDF.",
     "fecha_entrega": "2026-09-19T06:09:49.354Z",
     "juicio_evaluativo": "PENDIENTE",
     "observaciones": null,
@@ -2978,7 +2978,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:11.006Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -2994,7 +2994,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:29.488Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3010,7 +3010,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:30.433Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3026,7 +3026,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:31.399Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3042,7 +3042,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:32.332Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3058,7 +3058,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:33.295Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3074,7 +3074,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:34.224Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3090,7 +3090,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:35.128Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3106,7 +3106,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:36.079Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3122,7 +3122,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:36.993Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3138,7 +3138,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:37.961Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3154,7 +3154,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:38.723Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3170,7 +3170,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:39.415Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3186,7 +3186,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:40.081Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3202,7 +3202,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:40.770Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3218,7 +3218,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:41.536Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3234,7 +3234,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:42.191Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3250,7 +3250,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:42.869Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3266,7 +3266,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:43.524Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3282,7 +3282,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:44.216Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3298,7 +3298,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:44.903Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3314,7 +3314,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:45.578Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3330,7 +3330,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:46.275Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3346,7 +3346,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:46.956Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3362,7 +3362,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:47.619Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3378,7 +3378,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:48.365Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3394,7 +3394,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:49.007Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3410,7 +3410,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:49.683Z",
     "juicio_evaluativo": "A",
-    "observaciones": "Excelente trabajo, cumple con las normas tÈcnicas de calidad.",
+    "observaciones": "Excelente trabajo, cumple con las normas t√©cnicas de calidad.",
     "fecha_revision": null
   }
 },
@@ -3426,7 +3426,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:50.335Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3442,7 +3442,7 @@
     "comentarios_aprendiz": null,
     "fecha_entrega": "2026-09-19T20:55:51.006Z",
     "juicio_evaluativo": "PENDIENTE",
-    "observaciones": "Pendiente de revisiÛn final.",
+    "observaciones": "Pendiente de revisi√≥n final.",
     "fecha_revision": null
   }
 },
@@ -3451,13 +3451,13 @@
   "pk": 1,
   "fields": {
     "codigo_dane": "147189000123",
-    "nombre": "I.E. TÈcnica Departamental de CiÈnaga",
-    "municipio": "CiÈnaga",
+    "nombre": "I.E. T√©cnica Departamental de Ci√©naga",
+    "municipio": "Ci√©naga",
     "direccion": "Calle 12 No. 15-40",
     "telefono": "3157894561",
     "rector_nombre": "Lic. Alberto Castro",
     "rector_email": null,
-    "enlace_nombre": "Prof. Marta DomÌnguez",
+    "enlace_nombre": "Prof. Marta Dom√≠nguez",
     "enlace_telefono": "3014567890",
     "enlace_email": null,
     "activa": true,
@@ -3469,13 +3469,13 @@
   "pk": 2,
   "fields": {
     "codigo_dane": "147001002456",
-    "nombre": "I.E. Distrital SimÛn BolÌvar",
+    "nombre": "I.E. Distrital Sim√≥n Bol√≠var",
     "municipio": "Santa Marta",
     "direccion": "Avenida del Libertador No. 28-10",
     "telefono": "3009876543",
-    "rector_nombre": "Lic. MarÌa Consuelo Vega",
+    "rector_nombre": "Lic. Mar√≠a Consuelo Vega",
     "rector_email": null,
-    "enlace_nombre": "Prof. Jorge EliÈcer Ruiz",
+    "enlace_nombre": "Prof. Jorge Eli√©cer Ruiz",
     "enlace_telefono": "3123456789",
     "enlace_email": null,
     "activa": true,
@@ -3493,7 +3493,7 @@
     "telefono": "3206549871",
     "rector_nombre": "Lic. Gabriel Polo",
     "rector_email": null,
-    "enlace_nombre": "Prof. SofÌa Mercado",
+    "enlace_nombre": "Prof. Sof√≠a Mercado",
     "enlace_telefono": "3109876543",
     "enlace_email": null,
     "activa": true,
@@ -3505,11 +3505,11 @@
   "pk": 4,
   "fields": {
     "codigo_dane": "147001001122",
-    "nombre": "I.E.D. Escuela Normal Superior MarÌa Auxiliadora",
+    "nombre": "I.E.D. Escuela Normal Superior Mar√≠a Auxiliadora",
     "municipio": "Santa Marta",
     "direccion": "Avenida del Libertador No. 19-35",
     "telefono": "3012345678",
-    "rector_nombre": "Hna. MÛnica Trespalacios",
+    "rector_nombre": "Hna. M√≥nica Trespalacios",
     "rector_email": null,
     "enlace_nombre": "Lic. Patricia Caicedo",
     "enlace_telefono": "3109876543",
@@ -3541,7 +3541,7 @@
   "pk": 6,
   "fields": {
     "codigo_dane": "147001000456",
-    "nombre": "I.E.D. INEM SimÛn BolÌvar",
+    "nombre": "I.E.D. INEM Sim√≥n Bol√≠var",
     "municipio": "Santa Marta",
     "direccion": "Troncal del Caribe Km 3",
     "telefono": "3001234567",
@@ -3595,7 +3595,7 @@
   "pk": 9,
   "fields": {
     "codigo_dane": "147001001345",
-    "nombre": "I.E.D. TÈcnico Industrial de Santa Marta",
+    "nombre": "I.E.D. T√©cnico Industrial de Santa Marta",
     "municipio": "Santa Marta",
     "direccion": "Av. Libertador No. 25-10",
     "telefono": "3001234567",
@@ -3613,8 +3613,8 @@
   "pk": 10,
   "fields": {
     "codigo_dane": "147189000111",
-    "nombre": "I.E.T. Departamental de CiÈnaga",
-    "municipio": "CiÈnaga",
+    "nombre": "I.E.T. Departamental de Ci√©naga",
+    "municipio": "Ci√©naga",
     "direccion": "Calle 17 No. 12-30",
     "telefono": "3001234567",
     "rector_nombre": null,
@@ -3631,7 +3631,7 @@
   "pk": 1,
   "fields": {
     "codigo_programa": "228118",
-    "denominacion": "An·lisis y Desarrollo de Sistemas de InformaciÛn",
+    "denominacion": "An√°lisis y Desarrollo de Sistemas de Informaci√≥n",
     "version": "102",
     "activo": true
   }
@@ -3641,7 +3641,7 @@
   "pk": 2,
   "fields": {
     "codigo_programa": "228106",
-    "denominacion": "TÈcnico en Sistemas",
+    "denominacion": "T√©cnico en Sistemas",
     "version": "102",
     "activo": true
   }
@@ -3651,7 +3651,7 @@
   "pk": 3,
   "fields": {
     "codigo_programa": "233101",
-    "denominacion": "TÈcnico en Sistemas",
+    "denominacion": "T√©cnico en Sistemas",
     "version": "2",
     "activo": true
   }
@@ -3661,7 +3661,7 @@
   "pk": 4,
   "fields": {
     "codigo_programa": "133100",
-    "denominacion": "TÈcnico en ContabilizaciÛn de Operaciones Comerciales y Financieras",
+    "denominacion": "T√©cnico en Contabilizaci√≥n de Operaciones Comerciales y Financieras",
     "version": "1",
     "activo": true
   }
@@ -3671,7 +3671,7 @@
   "pk": 5,
   "fields": {
     "codigo_programa": "134101",
-    "denominacion": "TÈcnico en Asistencia Administrativa",
+    "denominacion": "T√©cnico en Asistencia Administrativa",
     "version": "2",
     "activo": true
   }
@@ -3681,7 +3681,7 @@
   "pk": 6,
   "fields": {
     "codigo_programa": "839312",
-    "denominacion": "TÈcnico en Mantenimiento de Equipos de CÛmputo",
+    "denominacion": "T√©cnico en Mantenimiento de Equipos de C√≥mputo",
     "version": "1",
     "activo": true
   }
@@ -3691,7 +3691,7 @@
   "pk": 7,
   "fields": {
     "codigo_programa": "524100",
-    "denominacion": "TÈcnico en IntegraciÛn de Contenidos Digitales",
+    "denominacion": "T√©cnico en Integraci√≥n de Contenidos Digitales",
     "version": "1",
     "activo": true
   }
@@ -3701,7 +3701,7 @@
   "pk": 8,
   "fields": {
     "codigo_programa": "228101",
-    "denominacion": "TecnÛlogo en GestiÛn de Redes de Datos",
+    "denominacion": "Tecn√≥logo en Gesti√≥n de Redes de Datos",
     "version": "1",
     "activo": true
   }
@@ -3711,7 +3711,7 @@
   "pk": 9,
   "fields": {
     "codigo_programa": "112005",
-    "denominacion": "TecnÛlogo en GestiÛn del Talento Humano",
+    "denominacion": "Tecn√≥logo en Gesti√≥n del Talento Humano",
     "version": "2",
     "activo": true
   }
@@ -3721,7 +3721,7 @@
   "pk": 10,
   "fields": {
     "codigo_programa": "122115",
-    "denominacion": "TecnÛlogo en GestiÛn Administrativa",
+    "denominacion": "Tecn√≥logo en Gesti√≥n Administrativa",
     "version": "1",
     "activo": true
   }
@@ -3732,7 +3732,7 @@
   "fields": {
     "programa": 1,
     "codigo": "220501006",
-    "descripcion": "Especificar los requisitos necesarios para desarrollar la soluciÛn de software de acuerdo con la necesidad del cliente."
+    "descripcion": "Especificar los requisitos necesarios para desarrollar la soluci√≥n de software de acuerdo con la necesidad del cliente."
   }
 },
 {
@@ -3741,7 +3741,7 @@
   "fields": {
     "programa": 1,
     "codigo": "220501007",
-    "descripcion": "Construir el sistema de informaciÛn que cumpla con los requerimientos de la soluciÛn inform·tica."
+    "descripcion": "Construir el sistema de informaci√≥n que cumpla con los requerimientos de la soluci√≥n inform√°tica."
   }
 },
 {
@@ -3750,7 +3750,7 @@
   "fields": {
     "programa": 1,
     "codigo": "220501008",
-    "descripcion": "Aplicar buenas pr·cticas de calidad en el proceso de desarrollo de software, de acuerdo con el referente adoptado en la empresa."
+    "descripcion": "Aplicar buenas pr√°cticas de calidad en el proceso de desarrollo de software, de acuerdo con el referente adoptado en la empresa."
   }
 },
 {
@@ -3759,7 +3759,7 @@
   "fields": {
     "programa": 1,
     "codigo": "240201500",
-    "descripcion": "Promover la interacciÛn idÛnea consigo mismo, con los dem·s y con la naturaleza en los contextos laboral y social."
+    "descripcion": "Promover la interacci√≥n id√≥nea consigo mismo, con los dem√°s y con la naturaleza en los contextos laboral y social."
   }
 },
 {
@@ -3768,7 +3768,7 @@
   "fields": {
     "programa": 1,
     "codigo": "COMP-2281",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de An·lisis y Desarrollo de Sistemas de InformaciÛn."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de An√°lisis y Desarrollo de Sistemas de Informaci√≥n."
   }
 },
 {
@@ -3777,7 +3777,7 @@
   "fields": {
     "programa": 3,
     "codigo": "COMP-2331",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de TÈcnico en Sistemas."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de T√©cnico en Sistemas."
   }
 },
 {
@@ -3786,7 +3786,7 @@
   "fields": {
     "programa": 4,
     "codigo": "COMP-1331",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de TÈcnico en ContabilizaciÛn de Operaciones Comerciales y Financieras."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de T√©cnico en Contabilizaci√≥n de Operaciones Comerciales y Financieras."
   }
 },
 {
@@ -3795,7 +3795,7 @@
   "fields": {
     "programa": 5,
     "codigo": "COMP-1341",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de TÈcnico en Asistencia Administrativa."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de T√©cnico en Asistencia Administrativa."
   }
 },
 {
@@ -3804,7 +3804,7 @@
   "fields": {
     "programa": 6,
     "codigo": "COMP-8393",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de TÈcnico en Mantenimiento de Equipos de CÛmputo."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de T√©cnico en Mantenimiento de Equipos de C√≥mputo."
   }
 },
 {
@@ -3813,7 +3813,7 @@
   "fields": {
     "programa": 7,
     "codigo": "COMP-5241",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de TÈcnico en IntegraciÛn de Contenidos Digitales."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de T√©cnico en Integraci√≥n de Contenidos Digitales."
   }
 },
 {
@@ -3822,7 +3822,7 @@
   "fields": {
     "programa": 2,
     "codigo": "COMP-2281",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de TÈcnico en Sistemas."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de T√©cnico en Sistemas."
   }
 },
 {
@@ -3831,7 +3831,7 @@
   "fields": {
     "programa": 8,
     "codigo": "COMP-2281",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de TecnÛlogo en GestiÛn de Redes de Datos."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de Tecn√≥logo en Gesti√≥n de Redes de Datos."
   }
 },
 {
@@ -3840,7 +3840,7 @@
   "fields": {
     "programa": 9,
     "codigo": "COMP-1120",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de TecnÛlogo en GestiÛn del Talento Humano."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de Tecn√≥logo en Gesti√≥n del Talento Humano."
   }
 },
 {
@@ -3849,7 +3849,7 @@
   "fields": {
     "programa": 10,
     "codigo": "COMP-1221",
-    "descripcion": "Desarrollar competencias tÈcnicas principales de TecnÛlogo en GestiÛn Administrativa."
+    "descripcion": "Desarrollar competencias t√©cnicas principales de Tecn√≥logo en Gesti√≥n Administrativa."
   }
 },
 {
@@ -3858,7 +3858,7 @@
   "fields": {
     "competencia": 1,
     "codigo": "RAP-01",
-    "descripcion": "Levantar los requerimientos del sistema aplicando tÈcnicas de recolecciÛn de informaciÛn y est·ndares SENA."
+    "descripcion": "Levantar los requerimientos del sistema aplicando t√©cnicas de recolecci√≥n de informaci√≥n y est√°ndares SENA."
   }
 },
 {
@@ -3876,7 +3876,7 @@
   "fields": {
     "competencia": 2,
     "codigo": "RAP-03",
-    "descripcion": "DiseÒar la arquitectura de base de datos relacional y modelo entidad-relaciÛn en MySQL."
+    "descripcion": "Dise√±ar la arquitectura de base de datos relacional y modelo entidad-relaci√≥n en MySQL."
   }
 },
 {
@@ -3885,7 +3885,7 @@
   "fields": {
     "competencia": 2,
     "codigo": "RAP-04",
-    "descripcion": "Codificar los mÛdulos de software en Python y Django aplicando principios de buenas pr·cticas y seguridad."
+    "descripcion": "Codificar los m√≥dulos de software en Python y Django aplicando principios de buenas pr√°cticas y seguridad."
   }
 },
 {
@@ -3921,7 +3921,7 @@
   "fields": {
     "competencia": 1,
     "codigo": "RAP-228106-01",
-    "descripcion": "Especificar requisitos del sistema seg˙n est·ndares pedagÛgicos SENA"
+    "descripcion": "Especificar requisitos del sistema seg√∫n est√°ndares pedag√≥gicos SENA"
   }
 },
 {
@@ -3930,7 +3930,7 @@
   "fields": {
     "competencia": 5,
     "codigo": "RAP-01-2281",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de An·lisis y Desarrollo de Sistemas de InformaciÛn."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de An√°lisis y Desarrollo de Sistemas de Informaci√≥n."
   }
 },
 {
@@ -3939,7 +3939,7 @@
   "fields": {
     "competencia": 5,
     "codigo": "RAP-02-2281",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en An·lisis y Desarrollo de Sistemas de InformaciÛn."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en An√°lisis y Desarrollo de Sistemas de Informaci√≥n."
   }
 },
 {
@@ -3948,7 +3948,7 @@
   "fields": {
     "competencia": 5,
     "codigo": "RAP-03-2281",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -3957,7 +3957,7 @@
   "fields": {
     "competencia": 6,
     "codigo": "RAP-01-2331",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de TÈcnico en Sistemas."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de T√©cnico en Sistemas."
   }
 },
 {
@@ -3966,7 +3966,7 @@
   "fields": {
     "competencia": 6,
     "codigo": "RAP-02-2331",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en TÈcnico en Sistemas."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en T√©cnico en Sistemas."
   }
 },
 {
@@ -3975,7 +3975,7 @@
   "fields": {
     "competencia": 6,
     "codigo": "RAP-03-2331",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -3984,7 +3984,7 @@
   "fields": {
     "competencia": 7,
     "codigo": "RAP-01-1331",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de TÈcnico en ContabilizaciÛn de Operaciones Comerciales y Financieras."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de T√©cnico en Contabilizaci√≥n de Operaciones Comerciales y Financieras."
   }
 },
 {
@@ -3993,7 +3993,7 @@
   "fields": {
     "competencia": 7,
     "codigo": "RAP-02-1331",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en TÈcnico en ContabilizaciÛn de Operaciones Comerciales y Financieras."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en T√©cnico en Contabilizaci√≥n de Operaciones Comerciales y Financieras."
   }
 },
 {
@@ -4002,7 +4002,7 @@
   "fields": {
     "competencia": 7,
     "codigo": "RAP-03-1331",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -4011,7 +4011,7 @@
   "fields": {
     "competencia": 8,
     "codigo": "RAP-01-1341",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de TÈcnico en Asistencia Administrativa."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de T√©cnico en Asistencia Administrativa."
   }
 },
 {
@@ -4020,7 +4020,7 @@
   "fields": {
     "competencia": 8,
     "codigo": "RAP-02-1341",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en TÈcnico en Asistencia Administrativa."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en T√©cnico en Asistencia Administrativa."
   }
 },
 {
@@ -4029,7 +4029,7 @@
   "fields": {
     "competencia": 8,
     "codigo": "RAP-03-1341",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -4038,7 +4038,7 @@
   "fields": {
     "competencia": 9,
     "codigo": "RAP-01-8393",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de TÈcnico en Mantenimiento de Equipos de CÛmputo."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de T√©cnico en Mantenimiento de Equipos de C√≥mputo."
   }
 },
 {
@@ -4047,7 +4047,7 @@
   "fields": {
     "competencia": 9,
     "codigo": "RAP-02-8393",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en TÈcnico en Mantenimiento de Equipos de CÛmputo."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en T√©cnico en Mantenimiento de Equipos de C√≥mputo."
   }
 },
 {
@@ -4056,7 +4056,7 @@
   "fields": {
     "competencia": 9,
     "codigo": "RAP-03-8393",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -4065,7 +4065,7 @@
   "fields": {
     "competencia": 10,
     "codigo": "RAP-01-5241",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de TÈcnico en IntegraciÛn de Contenidos Digitales."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de T√©cnico en Integraci√≥n de Contenidos Digitales."
   }
 },
 {
@@ -4074,7 +4074,7 @@
   "fields": {
     "competencia": 10,
     "codigo": "RAP-02-5241",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en TÈcnico en IntegraciÛn de Contenidos Digitales."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en T√©cnico en Integraci√≥n de Contenidos Digitales."
   }
 },
 {
@@ -4083,7 +4083,7 @@
   "fields": {
     "competencia": 10,
     "codigo": "RAP-03-5241",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -4092,7 +4092,7 @@
   "fields": {
     "competencia": 11,
     "codigo": "RAP-01-2281",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de TÈcnico en Sistemas."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de T√©cnico en Sistemas."
   }
 },
 {
@@ -4101,7 +4101,7 @@
   "fields": {
     "competencia": 11,
     "codigo": "RAP-02-2281",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en TÈcnico en Sistemas."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en T√©cnico en Sistemas."
   }
 },
 {
@@ -4110,7 +4110,7 @@
   "fields": {
     "competencia": 11,
     "codigo": "RAP-03-2281",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -4119,7 +4119,7 @@
   "fields": {
     "competencia": 12,
     "codigo": "RAP-01-2281",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de TecnÛlogo en GestiÛn de Redes de Datos."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de Tecn√≥logo en Gesti√≥n de Redes de Datos."
   }
 },
 {
@@ -4128,7 +4128,7 @@
   "fields": {
     "competencia": 12,
     "codigo": "RAP-02-2281",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en TecnÛlogo en GestiÛn de Redes de Datos."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en Tecn√≥logo en Gesti√≥n de Redes de Datos."
   }
 },
 {
@@ -4137,7 +4137,7 @@
   "fields": {
     "competencia": 12,
     "codigo": "RAP-03-2281",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -4146,7 +4146,7 @@
   "fields": {
     "competencia": 13,
     "codigo": "RAP-01-1120",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de TecnÛlogo en GestiÛn del Talento Humano."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de Tecn√≥logo en Gesti√≥n del Talento Humano."
   }
 },
 {
@@ -4155,7 +4155,7 @@
   "fields": {
     "competencia": 13,
     "codigo": "RAP-02-1120",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en TecnÛlogo en GestiÛn del Talento Humano."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en Tecn√≥logo en Gesti√≥n del Talento Humano."
   }
 },
 {
@@ -4164,7 +4164,7 @@
   "fields": {
     "competencia": 13,
     "codigo": "RAP-03-1120",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -4173,7 +4173,7 @@
   "fields": {
     "competencia": 14,
     "codigo": "RAP-01-1221",
-    "descripcion": "Apropiar fundamentos teÛricos y conceptuales de TecnÛlogo en GestiÛn Administrativa."
+    "descripcion": "Apropiar fundamentos te√≥ricos y conceptuales de Tecn√≥logo en Gesti√≥n Administrativa."
   }
 },
 {
@@ -4182,7 +4182,7 @@
   "fields": {
     "competencia": 14,
     "codigo": "RAP-02-1221",
-    "descripcion": "Aplicar metodologÌas pr·cticas y talleres de simulaciÛn en TecnÛlogo en GestiÛn Administrativa."
+    "descripcion": "Aplicar metodolog√≠as pr√°cticas y talleres de simulaci√≥n en Tecn√≥logo en Gesti√≥n Administrativa."
   }
 },
 {
@@ -4191,7 +4191,7 @@
   "fields": {
     "competencia": 14,
     "codigo": "RAP-03-1221",
-    "descripcion": "Construir producto tÈcnico final y sustentar ante el comitÈ evaluador."
+    "descripcion": "Construir producto t√©cnico final y sustentar ante el comit√© evaluador."
   }
 },
 {
@@ -4379,7 +4379,7 @@
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
-    "acudiente_nombre": "Acudiente de AndrÈs Felipe",
+    "acudiente_nombre": "Acudiente de Andr√©s Felipe",
     "acudiente_telefono": "3001234567"
   }
 },
@@ -4424,7 +4424,7 @@
     "fecha_matricula": "2026-09-18",
     "grado_escolar": "10",
     "estado_formacion": "En Formacion",
-    "acudiente_nombre": "Acudiente de SofÌa",
+    "acudiente_nombre": "Acudiente de Sof√≠a",
     "acudiente_telefono": "3001234567"
   }
 },
@@ -5054,9 +5054,9 @@
     "dia": "1",
     "hora_inicio": "07:00:00",
     "hora_fin": "11:00:00",
-    "ambiente": "Ambiente 1 - Sala de CÛmputo (Normal Superior)",
+    "ambiente": "Ambiente 1 - Sala de C√≥mputo (Normal Superior)",
     "modalidad": "Presencial",
-    "tema": "An·lisis y EspecificaciÛn de Requisitos de Software",
+    "tema": "An√°lisis y Especificaci√≥n de Requisitos de Software",
     "activo": true
   }
 },
@@ -5073,7 +5073,7 @@
     "hora_fin": "10:00:00",
     "ambiente": "Ambiente Virtual Teams / Sala 2",
     "modalidad": "Mixta",
-    "tema": "Modelado y DiseÒo de Bases de Datos Relacionales",
+    "tema": "Modelado y Dise√±o de Bases de Datos Relacionales",
     "activo": true
   }
 },
@@ -5090,7 +5090,7 @@
     "hora_fin": "12:00:00",
     "ambiente": "Ambiente 1 - Desarrollo de Software",
     "modalidad": "Presencial",
-    "tema": "ProgramaciÛn Backend en Python y Django Framework",
+    "tema": "Programaci√≥n Backend en Python y Django Framework",
     "activo": true
   }
 },
@@ -5107,7 +5107,7 @@
     "hora_fin": "11:00:00",
     "ambiente": "Ambiente 2 - Multimedia",
     "modalidad": "Presencial",
-    "tema": "DiseÒo de Interfaces Web Responsivas (HTML/CSS/JS)",
+    "tema": "Dise√±o de Interfaces Web Responsivas (HTML/CSS/JS)",
     "activo": true
   }
 },
@@ -5149,11 +5149,11 @@
   "model": "academico.recursobiblioteca",
   "pk": 1,
   "fields": {
-    "titulo": "DiseÒo Curricular Oficial ADSI - CÛdigo SOFIA 228118",
-    "autor": "DirecciÛn de FormaciÛn Profesional SENA",
+    "titulo": "Dise√±o Curricular Oficial ADSI - C√≥digo SOFIA 228118",
+    "autor": "Direcci√≥n de Formaci√≥n Profesional SENA",
     "categoria": "Diseno Curricular",
     "tipo_recurso": "Documento Curricular Nacional",
-    "descripcion": "Estructura curricular completa del programa TecnÛlogo en An·lisis y Desarrollo de Sistemas de InformaciÛn.",
+    "descripcion": "Estructura curricular completa del programa Tecn√≥logo en An√°lisis y Desarrollo de Sistemas de Informaci√≥n.",
     "programa": 1,
     "ano_publicacion": 2026,
     "archivo_adjunto": "",
@@ -5166,11 +5166,11 @@
   "model": "academico.recursobiblioteca",
   "pk": 2,
   "fields": {
-    "titulo": "Manual de Buenas Pr·cticas de ProgramaciÛn en Python y Django",
-    "autor": "Centro de LogÌstica y PromociÛn EcoturÌstica",
+    "titulo": "Manual de Buenas Pr√°cticas de Programaci√≥n en Python y Django",
+    "autor": "Centro de Log√≠stica y Promoci√≥n Ecotur√≠stica",
     "categoria": "Manual SENA",
-    "tipo_recurso": "Manual TÈcnico Especializado",
-    "descripcion": "GuÌa institucional con est·ndares PEP 8, Clean Code y arquitectura MTV para proyectos de software SENA.",
+    "tipo_recurso": "Manual T√©cnico Especializado",
+    "descripcion": "Gu√≠a institucional con est√°ndares PEP 8, Clean Code y arquitectura MTV para proyectos de software SENA.",
     "programa": 1,
     "ano_publicacion": 2026,
     "archivo_adjunto": "",
@@ -5183,11 +5183,11 @@
   "model": "academico.recursobiblioteca",
   "pk": 3,
   "fields": {
-    "titulo": "Est·ndar IEEE 830: EspecificaciÛn de Requerimientos de Software",
+    "titulo": "Est√°ndar IEEE 830: Especificaci√≥n de Requerimientos de Software",
     "autor": "IEEE Computer Society / SENA Magdalena",
     "categoria": "Documento Tecnico",
-    "tipo_recurso": "Norma TÈcnica Internacional",
-    "descripcion": "MetodologÌa recomendada para redacciÛn de especificaciones de requisitos de software SRS.",
+    "tipo_recurso": "Norma T√©cnica Internacional",
+    "descripcion": "Metodolog√≠a recomendada para redacci√≥n de especificaciones de requisitos de software SRS.",
     "programa": 1,
     "ano_publicacion": 2025,
     "archivo_adjunto": "",
@@ -5200,10 +5200,10 @@
   "model": "academico.recursobiblioteca",
   "pk": 4,
   "fields": {
-    "titulo": "GuÌa de Aprendizaje: NormalizaciÛn de Bases de Datos Relacionales en MySQL",
-    "autor": "Equipo PedagÛgico Media TÈcnica SENA",
+    "titulo": "Gu√≠a de Aprendizaje: Normalizaci√≥n de Bases de Datos Relacionales en MySQL",
+    "autor": "Equipo Pedag√≥gico Media T√©cnica SENA",
     "categoria": "Guia de Aprendizaje",
-    "tipo_recurso": "GuÌa de FormaciÛn Pr·ctica",
+    "tipo_recurso": "Gu√≠a de Formaci√≥n Pr√°ctica",
     "descripcion": "Taller paso a paso para aplicar Primera, Segunda y Tercera Forma Normal (1FN, 2FN, 3FN).",
     "programa": 1,
     "ano_publicacion": 2026,
@@ -5221,7 +5221,7 @@
     "autor": "SENA Regional Magdalena",
     "categoria": "Guia de Aprendizaje",
     "tipo_recurso": "Documento Digital PDF",
-    "descripcion": "DocumentaciÛn curricular para el desarrollo web en Media TÈcnica.",
+    "descripcion": "Documentaci√≥n curricular para el desarrollo web en Media T√©cnica.",
     "programa": null,
     "ano_publicacion": 2026,
     "archivo_adjunto": "",
@@ -5251,11 +5251,11 @@
   "model": "academico.recursobiblioteca",
   "pk": 7,
   "fields": {
-    "titulo": "Plan ⁄nico de Cuentas (PUC) para Comerciantes en Colombia",
+    "titulo": "Plan √önico de Cuentas (PUC) para Comerciantes en Colombia",
     "autor": "SENA Regional Magdalena",
     "categoria": "Libro Tecnico",
     "tipo_recurso": "Documento Digital PDF",
-    "descripcion": "GuÌa tÈcnica para el programa de ContabilizaciÛn de Operaciones.",
+    "descripcion": "Gu√≠a t√©cnica para el programa de Contabilizaci√≥n de Operaciones.",
     "programa": null,
     "ano_publicacion": 2026,
     "archivo_adjunto": "",
@@ -5268,7 +5268,7 @@
   "model": "academico.recursobiblioteca",
   "pk": 8,
   "fields": {
-    "titulo": "MetodologÌa de GestiÛn ¡gil de Proyectos con Scrum SENA",
+    "titulo": "Metodolog√≠a de Gesti√≥n √Ågil de Proyectos con Scrum SENA",
     "autor": "SENA Regional Magdalena",
     "categoria": "Manual SENA",
     "tipo_recurso": "Documento Digital PDF",
@@ -5307,8 +5307,8 @@
   "model": "academico.proyectoinnovacion",
   "pk": 1,
   "fields": {
-    "titulo": "SINETEC: Ecosistema Digital de Seguimiento para la Media TÈcnica",
-    "descripcion": "Plataforma de alta disponibilidad para la trazabilidad formativa, control criptogr·fico de carnÈ QR y acompaÒamiento integral en colegios articulados del Magdalena.",
+    "titulo": "SINETEC: Ecosistema Digital de Seguimiento para la Media T√©cnica",
+    "descripcion": "Plataforma de alta disponibilidad para la trazabilidad formativa, control criptogr√°fico de carn√© QR y acompa√±amiento integral en colegios articulados del Magdalena.",
     "lider": [
       "aprendiz_demo"
     ],
@@ -5327,8 +5327,8 @@
   "model": "academico.proyectoinnovacion",
   "pk": 2,
   "fields": {
-    "titulo": "Sistema IoT de Monitoreo AgrometeorolÛgico para Cultivos del Magdalena",
-    "descripcion": "Red de sensores de bajo costo para mediciÛn de humedad de suelo, temperatura y pluviometrÌa con telemetrÌa LoRaWAN.",
+    "titulo": "Sistema IoT de Monitoreo Agrometeorol√≥gico para Cultivos del Magdalena",
+    "descripcion": "Red de sensores de bajo costo para medici√≥n de humedad de suelo, temperatura y pluviometr√≠a con telemetr√≠a LoRaWAN.",
     "lider": [
       "instructor_demo"
     ],
@@ -5347,8 +5347,8 @@
   "model": "academico.proyectoinnovacion",
   "pk": 3,
   "fields": {
-    "titulo": "Sistema IoT para Monitoreo EcoturÌstico de la Sierra Nevada",
-    "descripcion": "Red de sensores IoT interconectados con Django y LoRaWAN para mediciÛn ambiental en senderos turÌsticos del Magdalena.",
+    "titulo": "Sistema IoT para Monitoreo Ecotur√≠stico de la Sierra Nevada",
+    "descripcion": "Red de sensores IoT interconectados con Django y LoRaWAN para medici√≥n ambiental en senderos tur√≠sticos del Magdalena.",
     "lider": [
       "admin"
     ],
@@ -5368,7 +5368,7 @@
   "pk": 4,
   "fields": {
     "titulo": "Plataforma Inteligente de Trazabilidad Agroindustrial para el Banano Magdalena",
-    "descripcion": "Sistema de gestiÛn integral para la trazabilidad de fincas bananeras en Zona Bananera articulado con aprendices ADSO.",
+    "descripcion": "Sistema de gesti√≥n integral para la trazabilidad de fincas bananeras en Zona Bananera articulado con aprendices ADSO.",
     "lider": [
       "admin"
     ],
@@ -5387,8 +5387,8 @@
   "model": "academico.proyectoinnovacion",
   "pk": 5,
   "fields": {
-    "titulo": "Dron AutÛnomo con VisiÛn Artificial para Levantamiento Topogr·fico Rural",
-    "descripcion": "Prototipo de aeronave no tripulada con procesamiento de im·genes satelitales para colegios agropecuarios articulados.",
+    "titulo": "Dron Aut√≥nomo con Visi√≥n Artificial para Levantamiento Topogr√°fico Rural",
+    "descripcion": "Prototipo de aeronave no tripulada con procesamiento de im√°genes satelitales para colegios agropecuarios articulados.",
     "lider": [
       "admin"
     ],
@@ -5411,7 +5411,7 @@
       "aprendiz_demo"
     ],
     "titulo": "Puntualidad Impecable",
-    "descripcion": "M·s de 30 sesiones consecutivas con asistencia puntual sin inasistencias injustificadas.",
+    "descripcion": "M√°s de 30 sesiones consecutivas con asistencia puntual sin inasistencias injustificadas.",
     "icono": "bi-clock-check-fill",
     "color": "success",
     "categoria": "Puntualidad y Asistencia",
@@ -5426,10 +5426,10 @@
       "aprendiz_demo"
     ],
     "titulo": "Innovador SENNOVA",
-    "descripcion": "ParticipaciÛn activa en el semillero de investigaciÛn institucional.",
+    "descripcion": "Participaci√≥n activa en el semillero de investigaci√≥n institucional.",
     "icono": "bi-lightbulb-fill",
     "color": "primary",
-    "categoria": "InvestigaciÛn Formativa",
+    "categoria": "Investigaci√≥n Formativa",
     "fecha_otorgado": "2026-09-19T20:14:11.946Z"
   }
 },
@@ -5437,9 +5437,9 @@
   "model": "academico.documentoinstitucional",
   "pk": 1,
   "fields": {
-    "titulo": "Formato Oficial F023 - Bit·cora de Etapa Productiva",
+    "titulo": "Formato Oficial F023 - Bit√°cora de Etapa Productiva",
     "categoria": "Formato Oficial SENA",
-    "descripcion": "Plantilla oficial institucional para el registro y concertaciÛn de actividades en empresa o proyecto productivo.",
+    "descripcion": "Plantilla oficial institucional para el registro y concertaci√≥n de actividades en empresa o proyecto productivo.",
     "archivo": "",
     "version": "2.0",
     "subido_por": [
@@ -5453,9 +5453,9 @@
   "model": "academico.documentoinstitucional",
   "pk": 2,
   "fields": {
-    "titulo": "ResoluciÛn de Apertura de Fichas de ArticulaciÛn con la EducaciÛn Media 2026",
+    "titulo": "Resoluci√≥n de Apertura de Fichas de Articulaci√≥n con la Educaci√≥n Media 2026",
     "categoria": "Normativa Institucional",
-    "descripcion": "Acto administrativo formal que avala las cohortes tÈcnicas en instituciones educativas de Santa Marta y Magdalena.",
+    "descripcion": "Acto administrativo formal que avala las cohortes t√©cnicas en instituciones educativas de Santa Marta y Magdalena.",
     "archivo": "",
     "version": "1.0",
     "subido_por": [
@@ -5469,9 +5469,9 @@
   "model": "academico.documentoinstitucional",
   "pk": 3,
   "fields": {
-    "titulo": "Convenio Marco de ArticulaciÛn con la EducaciÛn Media TÈcnica Magdalena 2026",
+    "titulo": "Convenio Marco de Articulaci√≥n con la Educaci√≥n Media T√©cnica Magdalena 2026",
     "categoria": "Formato Oficial SENA",
-    "descripcion": "Acuerdo oficial suscrito entre la DirecciÛn Regional del SENA Magdalena y las SecretarÌas de EducaciÛn Departamental y Distrital de Santa Marta.",
+    "descripcion": "Acuerdo oficial suscrito entre la Direcci√≥n Regional del SENA Magdalena y las Secretar√≠as de Educaci√≥n Departamental y Distrital de Santa Marta.",
     "archivo": "",
     "version": "1.0",
     "subido_por": [
@@ -5487,7 +5487,7 @@
   "fields": {
     "titulo": "Manual de Convivencia y Reglamento del Aprendiz SENA",
     "categoria": "Normativa Institucional",
-    "descripcion": "Reglamento oficial vigente de deberes, derechos, comitÈs de evaluaciÛn y rÈgimen disciplinario de los aprendices.",
+    "descripcion": "Reglamento oficial vigente de deberes, derechos, comit√©s de evaluaci√≥n y r√©gimen disciplinario de los aprendices.",
     "archivo": "",
     "version": "1.0",
     "subido_por": [
@@ -5501,9 +5501,9 @@
   "model": "academico.documentoinstitucional",
   "pk": 5,
   "fields": {
-    "titulo": "GuÌa Integrada de Aprendizaje N∞ 04: Arquitectura de Software MVC y Django",
+    "titulo": "Gu√≠a Integrada de Aprendizaje N¬∞ 04: Arquitectura de Software MVC y Django",
     "categoria": "Guia Pedagogica",
-    "descripcion": "OrientaciÛn pedagÛgica oficial para el desarrollo del componente tÈcnico en el TecnÛlogo en ADSO.",
+    "descripcion": "Orientaci√≥n pedag√≥gica oficial para el desarrollo del componente t√©cnico en el Tecn√≥logo en ADSO.",
     "archivo": "",
     "version": "1.0",
     "subido_por": [
@@ -5517,9 +5517,9 @@
   "model": "academico.documentoinstitucional",
   "pk": 6,
   "fields": {
-    "titulo": "Formato Institucional F-023: Registro de Visita y Bit·cora de Media TÈcnica",
+    "titulo": "Formato Institucional F-023: Registro de Visita y Bit√°cora de Media T√©cnica",
     "categoria": "Formato Oficial SENA",
-    "descripcion": "Plantilla oficial aprobada por el Sistema Integrado de GestiÛn para la formalizaciÛn de acuerdos en colegios.",
+    "descripcion": "Plantilla oficial aprobada por el Sistema Integrado de Gesti√≥n para la formalizaci√≥n de acuerdos en colegios.",
     "archivo": "",
     "version": "1.0",
     "subido_por": [
@@ -5666,7 +5666,7 @@
     "matricula": 17,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "Asistencia diaria registrada autom·ticamente por escaneo de Carnet Digital QR",
+    "observaciones": "Asistencia diaria registrada autom√°ticamente por escaneo de Carnet Digital QR",
     "registrado_por": [
       "aprendiz_demo"
     ]
@@ -5679,7 +5679,7 @@
     "matricula": 18,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5692,7 +5692,7 @@
     "matricula": 18,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5705,7 +5705,7 @@
     "matricula": 18,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5718,7 +5718,7 @@
     "matricula": 18,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5731,7 +5731,7 @@
     "matricula": 19,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5744,7 +5744,7 @@
     "matricula": 19,
     "fecha": "2026-09-17",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5757,7 +5757,7 @@
     "matricula": 19,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5770,7 +5770,7 @@
     "matricula": 19,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5783,7 +5783,7 @@
     "matricula": 20,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5796,7 +5796,7 @@
     "matricula": 20,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5809,7 +5809,7 @@
     "matricula": 20,
     "fecha": "2026-09-14",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5822,7 +5822,7 @@
     "matricula": 20,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5835,7 +5835,7 @@
     "matricula": 21,
     "fecha": "2026-09-19",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5848,7 +5848,7 @@
     "matricula": 21,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5861,7 +5861,7 @@
     "matricula": 21,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5874,7 +5874,7 @@
     "matricula": 21,
     "fecha": "2026-09-11",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5887,7 +5887,7 @@
     "matricula": 22,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5900,7 +5900,7 @@
     "matricula": 22,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5913,7 +5913,7 @@
     "matricula": 22,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5926,7 +5926,7 @@
     "matricula": 22,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_carlos"
     ]
@@ -5939,7 +5939,7 @@
     "matricula": 23,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -5952,7 +5952,7 @@
     "matricula": 23,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -5965,7 +5965,7 @@
     "matricula": 23,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -5978,7 +5978,7 @@
     "matricula": 23,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -5991,7 +5991,7 @@
     "matricula": 24,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6004,7 +6004,7 @@
     "matricula": 24,
     "fecha": "2026-09-17",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6017,7 +6017,7 @@
     "matricula": 24,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6030,7 +6030,7 @@
     "matricula": 24,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6043,7 +6043,7 @@
     "matricula": 25,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6056,7 +6056,7 @@
     "matricula": 25,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6069,7 +6069,7 @@
     "matricula": 25,
     "fecha": "2026-09-14",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6082,7 +6082,7 @@
     "matricula": 25,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6095,7 +6095,7 @@
     "matricula": 26,
     "fecha": "2026-09-19",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6108,7 +6108,7 @@
     "matricula": 26,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6121,7 +6121,7 @@
     "matricula": 26,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6134,7 +6134,7 @@
     "matricula": 26,
     "fecha": "2026-09-11",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6147,7 +6147,7 @@
     "matricula": 27,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6160,7 +6160,7 @@
     "matricula": 27,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6173,7 +6173,7 @@
     "matricula": 27,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6186,7 +6186,7 @@
     "matricula": 27,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_adso"
     ]
@@ -6199,7 +6199,7 @@
     "matricula": 28,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6212,7 +6212,7 @@
     "matricula": 28,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6225,7 +6225,7 @@
     "matricula": 28,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6238,7 +6238,7 @@
     "matricula": 28,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6251,7 +6251,7 @@
     "matricula": 29,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6264,7 +6264,7 @@
     "matricula": 29,
     "fecha": "2026-09-17",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6277,7 +6277,7 @@
     "matricula": 29,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6290,7 +6290,7 @@
     "matricula": 29,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6303,7 +6303,7 @@
     "matricula": 30,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6316,7 +6316,7 @@
     "matricula": 30,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6329,7 +6329,7 @@
     "matricula": 30,
     "fecha": "2026-09-14",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6342,7 +6342,7 @@
     "matricula": 30,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6355,7 +6355,7 @@
     "matricula": 31,
     "fecha": "2026-09-19",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6368,7 +6368,7 @@
     "matricula": 31,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6381,7 +6381,7 @@
     "matricula": 31,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6394,7 +6394,7 @@
     "matricula": 31,
     "fecha": "2026-09-11",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6407,7 +6407,7 @@
     "matricula": 32,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6420,7 +6420,7 @@
     "matricula": 32,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6433,7 +6433,7 @@
     "matricula": 32,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6446,7 +6446,7 @@
     "matricula": 32,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6459,7 +6459,7 @@
     "matricula": 33,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6472,7 +6472,7 @@
     "matricula": 33,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6485,7 +6485,7 @@
     "matricula": 33,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6498,7 +6498,7 @@
     "matricula": 33,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6511,7 +6511,7 @@
     "matricula": 34,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6524,7 +6524,7 @@
     "matricula": 34,
     "fecha": "2026-09-17",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6537,7 +6537,7 @@
     "matricula": 34,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6550,7 +6550,7 @@
     "matricula": 34,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6563,7 +6563,7 @@
     "matricula": 35,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6576,7 +6576,7 @@
     "matricula": 35,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6589,7 +6589,7 @@
     "matricula": 35,
     "fecha": "2026-09-14",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6602,7 +6602,7 @@
     "matricula": 35,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6615,7 +6615,7 @@
     "matricula": 36,
     "fecha": "2026-09-19",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6628,7 +6628,7 @@
     "matricula": 36,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6641,7 +6641,7 @@
     "matricula": 36,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6654,7 +6654,7 @@
     "matricula": 36,
     "fecha": "2026-09-11",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6667,7 +6667,7 @@
     "matricula": 37,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6680,7 +6680,7 @@
     "matricula": 37,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6693,7 +6693,7 @@
     "matricula": 37,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6706,7 +6706,7 @@
     "matricula": 37,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_sistemas"
     ]
@@ -6719,7 +6719,7 @@
     "matricula": 38,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6732,7 +6732,7 @@
     "matricula": 38,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6745,7 +6745,7 @@
     "matricula": 38,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6758,7 +6758,7 @@
     "matricula": 38,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6771,7 +6771,7 @@
     "matricula": 39,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6784,7 +6784,7 @@
     "matricula": 39,
     "fecha": "2026-09-17",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6797,7 +6797,7 @@
     "matricula": 39,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6810,7 +6810,7 @@
     "matricula": 39,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6823,7 +6823,7 @@
     "matricula": 40,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6836,7 +6836,7 @@
     "matricula": 40,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6849,7 +6849,7 @@
     "matricula": 40,
     "fecha": "2026-09-14",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6862,7 +6862,7 @@
     "matricula": 40,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6875,7 +6875,7 @@
     "matricula": 41,
     "fecha": "2026-09-19",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6888,7 +6888,7 @@
     "matricula": 41,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6901,7 +6901,7 @@
     "matricula": 41,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6914,7 +6914,7 @@
     "matricula": 41,
     "fecha": "2026-09-11",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6927,7 +6927,7 @@
     "matricula": 42,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6940,7 +6940,7 @@
     "matricula": 42,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6953,7 +6953,7 @@
     "matricula": 42,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6966,7 +6966,7 @@
     "matricula": 42,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_contable"
     ]
@@ -6979,7 +6979,7 @@
     "matricula": 43,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -6992,7 +6992,7 @@
     "matricula": 43,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7005,7 +7005,7 @@
     "matricula": 43,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7018,7 +7018,7 @@
     "matricula": 43,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7031,7 +7031,7 @@
     "matricula": 44,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7044,7 +7044,7 @@
     "matricula": 44,
     "fecha": "2026-09-17",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7057,7 +7057,7 @@
     "matricula": 44,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7070,7 +7070,7 @@
     "matricula": 44,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7083,7 +7083,7 @@
     "matricula": 45,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7096,7 +7096,7 @@
     "matricula": 45,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7109,7 +7109,7 @@
     "matricula": 45,
     "fecha": "2026-09-14",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7122,7 +7122,7 @@
     "matricula": 45,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7135,7 +7135,7 @@
     "matricula": 46,
     "fecha": "2026-09-19",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7148,7 +7148,7 @@
     "matricula": 46,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7161,7 +7161,7 @@
     "matricula": 46,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7174,7 +7174,7 @@
     "matricula": 46,
     "fecha": "2026-09-11",
     "estado": "A",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7187,7 +7187,7 @@
     "matricula": 47,
     "fecha": "2026-09-19",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7200,7 +7200,7 @@
     "matricula": 47,
     "fecha": "2026-09-17",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7213,7 +7213,7 @@
     "matricula": 47,
     "fecha": "2026-09-14",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7226,7 +7226,7 @@
     "matricula": 47,
     "fecha": "2026-09-11",
     "estado": "P",
-    "observaciones": "SesiÛn presencial normal en ambiente de aprendizaje.",
+    "observaciones": "Sesi√≥n presencial normal en ambiente de aprendizaje.",
     "registrado_por": [
       "instructor_admin"
     ]
@@ -7243,7 +7243,7 @@
     ],
     "fecha_visita": "2024-06-10",
     "tipo_seguimiento": "Presencial Aula",
-    "observaciones": "AcompaÒamiento presencial al grupo de ADSI en el aula de inform·tica de la I.E.D. Normal Superior MarÌa Auxiliadora. Se revisaron avances del proyecto formativo SINETEC y entrega de diagramas UML.",
+    "observaciones": "Acompa√±amiento presencial al grupo de ADSI en el aula de inform√°tica de la I.E.D. Normal Superior Mar√≠a Auxiliadora. Se revisaron avances del proyecto formativo SINETEC y entrega de diagramas UML.",
     "compromisos": "Presentar prototipo funcional de base de datos MySQL y pantallas iniciales de interfaz de usuario.",
     "fecha_verificacion": "2024-06-25",
     "archivo_adjunto": "",
@@ -7266,7 +7266,7 @@
     ],
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
-    "observaciones": "AcompaÒamiento presencial a la ficha 3173430. VerificaciÛn de equipos en sala de inform·tica y avance en talleres.",
+    "observaciones": "Acompa√±amiento presencial a la ficha 3173430. Verificaci√≥n de equipos en sala de inform√°tica y avance en talleres.",
     "compromisos": "Los aprendices deben subir la evidencia de taller antes del viernes.",
     "fecha_verificacion": "2026-09-24",
     "archivo_adjunto": "",
@@ -7289,7 +7289,7 @@
     ],
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
-    "observaciones": "AcompaÒamiento presencial a la ficha 2824910. VerificaciÛn de equipos en sala de inform·tica y avance en talleres.",
+    "observaciones": "Acompa√±amiento presencial a la ficha 2824910. Verificaci√≥n de equipos en sala de inform√°tica y avance en talleres.",
     "compromisos": "Los aprendices deben subir la evidencia de taller antes del viernes.",
     "fecha_verificacion": "2026-09-24",
     "archivo_adjunto": "",
@@ -7312,7 +7312,7 @@
     ],
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
-    "observaciones": "AcompaÒamiento presencial a la ficha 2694120. VerificaciÛn de equipos en sala de inform·tica y avance en talleres.",
+    "observaciones": "Acompa√±amiento presencial a la ficha 2694120. Verificaci√≥n de equipos en sala de inform√°tica y avance en talleres.",
     "compromisos": "Los aprendices deben subir la evidencia de taller antes del viernes.",
     "fecha_verificacion": "2026-09-24",
     "archivo_adjunto": "",
@@ -7335,7 +7335,7 @@
     ],
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
-    "observaciones": "AcompaÒamiento presencial a la ficha 2791820. VerificaciÛn de equipos en sala de inform·tica y avance en talleres.",
+    "observaciones": "Acompa√±amiento presencial a la ficha 2791820. Verificaci√≥n de equipos en sala de inform√°tica y avance en talleres.",
     "compromisos": "Los aprendices deben subir la evidencia de taller antes del viernes.",
     "fecha_verificacion": "2026-09-24",
     "archivo_adjunto": "",
@@ -7358,7 +7358,7 @@
     ],
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
-    "observaciones": "AcompaÒamiento presencial a la ficha 2718340. VerificaciÛn de equipos en sala de inform·tica y avance en talleres.",
+    "observaciones": "Acompa√±amiento presencial a la ficha 2718340. Verificaci√≥n de equipos en sala de inform√°tica y avance en talleres.",
     "compromisos": "Los aprendices deben subir la evidencia de taller antes del viernes.",
     "fecha_verificacion": "2026-09-24",
     "archivo_adjunto": "",
@@ -7381,7 +7381,7 @@
     ],
     "fecha_visita": "2026-09-09",
     "tipo_seguimiento": "Presencial Aula",
-    "observaciones": "AcompaÒamiento presencial a la ficha 2683900. VerificaciÛn de equipos en sala de inform·tica y avance en talleres.",
+    "observaciones": "Acompa√±amiento presencial a la ficha 2683900. Verificaci√≥n de equipos en sala de inform√°tica y avance en talleres.",
     "compromisos": "Los aprendices deben subir la evidencia de taller antes del viernes.",
     "fecha_verificacion": "2026-09-24",
     "archivo_adjunto": "",
@@ -7401,7 +7401,7 @@
     "remitente": [
       "admin"
     ],
-    "mensaje": "Se informa que la evidencia de taller y avances de bit·cora han sido verificados satisfactoriamente por el equipo de articulaciÛn SENA.",
+    "mensaje": "Se informa que la evidencia de taller y avances de bit√°cora han sido verificados satisfactoriamente por el equipo de articulaci√≥n SENA.",
     "fecha_envio": "2026-09-19T20:58:05.803Z"
   }
 },
@@ -7413,10 +7413,10 @@
       "ap_1082987123"
     ],
     "ficha": 1,
-    "asunto": "Solicitud de constancia de matrÌcula para transporte escolar",
+    "asunto": "Solicitud de constancia de matr√≠cula para transporte escolar",
     "categoria": "Certificacion",
     "prioridad": "Media",
-    "mensaje": "Buenos dÌas SecretarÌa SENA. Requiero una constancia de estudio y matrÌcula formal en el programa ADSI Ficha 3173430 para tramitar el subsidio de transporte escolar en la AlcaldÌa Distrital de Santa Marta.",
+    "mensaje": "Buenos d√≠as Secretar√≠a SENA. Requiero una constancia de estudio y matr√≠cula formal en el programa ADSI Ficha 3173430 para tramitar el subsidio de transporte escolar en la Alcald√≠a Distrital de Santa Marta.",
     "archivo_adjunto": "",
     "estado": "RESPONDIDA",
     "responsable": [
@@ -7434,10 +7434,10 @@
       "ap_1082544991"
     ],
     "ficha": 1,
-    "asunto": "Consulta sobre horario formativo en sala de cÛmputo los miÈrcoles",
+    "asunto": "Consulta sobre horario formativo en sala de c√≥mputo los mi√©rcoles",
     "categoria": "Horario",
     "prioridad": "Alta",
-    "mensaje": "Cordial saludo. Quisiera confirmar si la jornada de desarrollo de software del dÌa miÈrcoles se mantendr· en el Ambiente 1 de la Escuela Normal Superior MarÌa Auxiliadora.",
+    "mensaje": "Cordial saludo. Quisiera confirmar si la jornada de desarrollo de software del d√≠a mi√©rcoles se mantendr√° en el Ambiente 1 de la Escuela Normal Superior Mar√≠a Auxiliadora.",
     "archivo_adjunto": "",
     "estado": "EN_REVISION",
     "responsable": [
@@ -7455,10 +7455,10 @@
       "aprendiz_demo"
     ],
     "ficha": 2,
-    "asunto": "Solicitud de constancia de matrÌcula con promedio para subsidio",
+    "asunto": "Solicitud de constancia de matr√≠cula con promedio para subsidio",
     "categoria": "Certificacion",
     "prioridad": "Media",
-    "mensaje": "Requiero constancia formal de matrÌcula activa en el programa ADSI para tr·mite ante JÛvenes en AcciÛn.",
+    "mensaje": "Requiero constancia formal de matr√≠cula activa en el programa ADSI para tr√°mite ante J√≥venes en Acci√≥n.",
     "archivo_adjunto": "",
     "estado": "RECIBIDA",
     "responsable": null,
@@ -7474,7 +7474,7 @@
     "usuario": [
       "laura"
     ],
-    "mensaje": "Estimado(a) aprendiz. Se adjunta constancia formal de matrÌcula activa con sello de la CoordinaciÛn de FormaciÛn del Centro de LogÌstica y PromociÛn EcoturÌstica. Quedamos atentos.",
+    "mensaje": "Estimado(a) aprendiz. Se adjunta constancia formal de matr√≠cula activa con sello de la Coordinaci√≥n de Formaci√≥n del Centro de Log√≠stica y Promoci√≥n Ecotur√≠stica. Quedamos atentos.",
     "archivo_adjunto": "",
     "fecha_respuesta": "2026-09-19T04:56:54.872Z"
   }
@@ -7486,8 +7486,8 @@
     "usuario": [
       "ap_1082987123"
     ],
-    "titulo": "SecretarÌa respondiÛ tu solicitud de constancia",
-    "mensaje": "Tu tr·mite de constancia de matrÌcula ha sido atendido por la CoordinaciÛn. Ya puedes revisar la respuesta y documento.",
+    "titulo": "Secretar√≠a respondi√≥ tu solicitud de constancia",
+    "mensaje": "Tu tr√°mite de constancia de matr√≠cula ha sido atendido por la Coordinaci√≥n. Ya puedes revisar la respuesta y documento.",
     "enlace": "/seguimiento/secretaria/solicitud/1/",
     "tipo": "success",
     "leida": false,
@@ -7502,7 +7502,7 @@
       "ap_1082987123"
     ],
     "titulo": "Nueva evidencia asignada en ADSI",
-    "mensaje": "El instructor Carlos MartÌnez ha publicado una nueva actividad pr·ctica en el Resultado de Aprendizaje RAP-01.",
+    "mensaje": "El instructor Carlos Mart√≠nez ha publicado una nueva actividad pr√°ctica en el Resultado de Aprendizaje RAP-01.",
     "enlace": "/aula/aprendiz/",
     "tipo": "info",
     "leida": false,
@@ -7517,7 +7517,7 @@
       "instructor_carlos"
     ],
     "titulo": "Nueva solicitud de aprendiz radicada",
-    "mensaje": "El aprendiz Camila Ortiz De la Rosa radicÛ una consulta sobre horarios de formaciÛn para la Ficha 3173430.",
+    "mensaje": "El aprendiz Camila Ortiz De la Rosa radic√≥ una consulta sobre horarios de formaci√≥n para la Ficha 3173430.",
     "enlace": "/seguimiento/secretaria/solicitud/2/",
     "tipo": "info",
     "leida": false,
@@ -7531,9 +7531,9 @@
     "usuario": [
       "admin"
     ],
-    "accion": "SincronizaciÛn y apertura de cohorte Ficha 3173430",
-    "modulo": "Fichas TÈcnicas",
-    "detalles": "Se validaron 16 aprendices matriculados en An·lisis y Desarrollo de Sistemas de InformaciÛn (ADSI) y se configurÛ instructor lÌder.",
+    "accion": "Sincronizaci√≥n y apertura de cohorte Ficha 3173430",
+    "modulo": "Fichas T√©cnicas",
+    "detalles": "Se validaron 16 aprendices matriculados en An√°lisis y Desarrollo de Sistemas de Informaci√≥n (ADSI) y se configur√≥ instructor l√≠der.",
     "ip_address": null,
     "fecha": "2026-09-19T04:56:54.903Z"
   }
@@ -7561,8 +7561,8 @@
     "instructor": [
       "instructor_demo"
     ],
-    "titulo": "NivelaciÛn en modelado entidad-relaciÛn",
-    "descripcion": "El aprendiz presentar· el diagrama ER normalizado hasta 3FN del proyecto formativo.",
+    "titulo": "Nivelaci√≥n en modelado entidad-relaci√≥n",
+    "descripcion": "El aprendiz presentar√° el diagrama ER normalizado hasta 3FN del proyecto formativo.",
     "fecha_limite": "2026-09-24",
     "estado": "PENDIENTE",
     "evidencia_cumplimiento": "",
@@ -7580,7 +7580,7 @@
     "instructor": [
       "instructor_carlos"
     ],
-    "titulo": "Ponerse al dÌa con talleres pr·cticos pendientes",
+    "titulo": "Ponerse al d√≠a con talleres pr√°cticos pendientes",
     "descripcion": "El aprendiz se compromete a entregar las evidencias pendientes.",
     "fecha_limite": "2026-09-26",
     "estado": "PENDIENTE",
@@ -7598,12 +7598,12 @@
     "tipo_alerta": "academica",
     "nivel_riesgo": "MEDIO",
     "puntuacion_riesgo": "45.0",
-    "factores_detectados": "Ajuste de evidencias de taller de programaciÛn modular.",
+    "factores_detectados": "Ajuste de evidencias de taller de programaci√≥n modular.",
     "estado": "INTERVENCION",
     "responsable": [
       "instructor_demo"
     ],
-    "plan_accion": "AcompaÒamiento tutorial en el ambiente de formaciÛn y seguimiento de compromisos.",
+    "plan_accion": "Acompa√±amiento tutorial en el ambiente de formaci√≥n y seguimiento de compromisos.",
     "resultado_final": "",
     "fecha_deteccion": "2026-09-19T20:13:26.713Z",
     "fecha_cierre": null
@@ -7617,12 +7617,12 @@
     "tipo_alerta": "inasistencia",
     "nivel_riesgo": "MEDIO",
     "puntuacion_riesgo": "55.0",
-    "factores_detectados": "El aprendiz acumulÛ inasistencias consecutivas en el periodo.",
+    "factores_detectados": "El aprendiz acumul√≥ inasistencias consecutivas en el periodo.",
     "estado": "SEGUIMIENTO",
     "responsable": [
       "instructor_carlos"
     ],
-    "plan_accion": "Llamada al acudiente y citaciÛn a coordinaciÛn pedagÛgica.",
+    "plan_accion": "Llamada al acudiente y citaci√≥n a coordinaci√≥n pedag√≥gica.",
     "resultado_final": "",
     "fecha_deteccion": "2026-09-19T20:56:56.445Z",
     "fecha_cierre": null
@@ -7635,7 +7635,7 @@
     "razon_social": "Soluciones Digitales del Caribe S.A.S.",
     "nit": "900889977-1",
     "representante_legal": "",
-    "contacto_nombre": "Ing. AndrÈs Palomino",
+    "contacto_nombre": "Ing. Andr√©s Palomino",
     "contacto_cargo": "Director de Desarrollo",
     "contacto_email": "contacto@solucionescaribe.com",
     "contacto_telefono": "3015551234",
@@ -7669,7 +7669,7 @@
     "razon_social": "Drummond Ltd. Colombia",
     "nit": "860002456-4",
     "representante_legal": "",
-    "contacto_nombre": "GestiÛn Humana Drummond",
+    "contacto_nombre": "Gesti√≥n Humana Drummond",
     "contacto_cargo": "",
     "contacto_email": "convenios@empresa.com",
     "contacto_telefono": "3004567890",
@@ -7700,10 +7700,10 @@
   "model": "seguimiento.empresaconvenio",
   "pk": 5,
   "fields": {
-    "razon_social": "ClÌnica del Prado Santa Marta",
+    "razon_social": "Cl√≠nica del Prado Santa Marta",
     "nit": "900321654-8",
     "representante_legal": "",
-    "contacto_nombre": "AdministraciÛn ClÌnica",
+    "contacto_nombre": "Administraci√≥n Cl√≠nica",
     "contacto_cargo": "",
     "contacto_email": "convenios@empresa.com",
     "contacto_telefono": "3004567890",
@@ -7723,8 +7723,8 @@
     "instructor_seguimiento": [
       "instructor_demo"
     ],
-    "tutor_empresarial": "Ing. AndrÈs Palomino",
-    "tutor_cargo": "LÌder de Desarrollo",
+    "tutor_empresarial": "Ing. Andr√©s Palomino",
+    "tutor_cargo": "L√≠der de Desarrollo",
     "tutor_email": "andres@solucionescaribe.com",
     "tutor_telefono": "3015551234",
     "fecha_inicio": "2026-07-21",
@@ -7767,7 +7767,7 @@
     "instructor": [
       "instructor_demo"
     ],
-    "actividades_desarrolladas": "ConcertaciÛn del plan de trabajo, inducciÛn al repositorio y configuraciÛn de ambientes de desarrollo.",
+    "actividades_desarrolladas": "Concertaci√≥n del plan de trabajo, inducci√≥n al repositorio y configuraci√≥n de ambientes de desarrollo.",
     "concepto_evaluativo": "SATISFACTORIO",
     "observaciones_tutor": "El aprendiz demuestra alto compromiso y conocimientos en bases de datos.",
     "observaciones_instructor": "Cumple a cabalidad con los lineamientos del Formato F023 SENA.",
@@ -7785,7 +7785,7 @@
     "instructor": [
       "instructor_carlos"
     ],
-    "actividades_desarrolladas": "InducciÛn tÈcnica, configuraciÛn de ambientes y soporte a base de datos institucional.",
+    "actividades_desarrolladas": "Inducci√≥n t√©cnica, configuraci√≥n de ambientes y soporte a base de datos institucional.",
     "concepto_evaluativo": "SATISFACTORIO",
     "observaciones_tutor": "",
     "observaciones_instructor": "",
@@ -7803,7 +7803,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.816Z"
   }
@@ -7818,7 +7818,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.821Z"
   }
@@ -7833,7 +7833,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "D",
-    "observaciones": "Requiere plan de mejoramiento en normalizaciÛn de bases de datos.",
+    "observaciones": "Requiere plan de mejoramiento en normalizaci√≥n de bases de datos.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.825Z"
   }
@@ -7848,7 +7848,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.830Z"
   }
@@ -7863,7 +7863,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.837Z"
   }
@@ -7878,7 +7878,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.842Z"
   }
@@ -7893,7 +7893,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.847Z"
   }
@@ -7908,7 +7908,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.852Z"
   }
@@ -7923,7 +7923,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.860Z"
   }
@@ -7938,7 +7938,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.865Z"
   }
@@ -7953,7 +7953,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.870Z"
   }
@@ -7968,7 +7968,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.875Z"
   }
@@ -7983,7 +7983,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.882Z"
   }
@@ -7998,7 +7998,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.887Z"
   }
@@ -8013,7 +8013,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.892Z"
   }
@@ -8028,7 +8028,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.896Z"
   }
@@ -8043,7 +8043,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.904Z"
   }
@@ -8058,7 +8058,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.908Z"
   }
@@ -8073,7 +8073,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.911Z"
   }
@@ -8088,7 +8088,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.917Z"
   }
@@ -8103,7 +8103,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.924Z"
   }
@@ -8118,7 +8118,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.929Z"
   }
@@ -8133,7 +8133,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "D",
-    "observaciones": "Requiere plan de mejoramiento en normalizaciÛn de bases de datos.",
+    "observaciones": "Requiere plan de mejoramiento en normalizaci√≥n de bases de datos.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.935Z"
   }
@@ -8148,7 +8148,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.941Z"
   }
@@ -8163,7 +8163,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.949Z"
   }
@@ -8178,7 +8178,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.953Z"
   }
@@ -8193,7 +8193,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.958Z"
   }
@@ -8208,7 +8208,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.964Z"
   }
@@ -8223,7 +8223,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.972Z"
   }
@@ -8238,7 +8238,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.977Z"
   }
@@ -8253,7 +8253,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.982Z"
   }
@@ -8268,7 +8268,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.987Z"
   }
@@ -8283,7 +8283,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.992Z"
   }
@@ -8298,7 +8298,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:13.996Z"
   }
@@ -8313,7 +8313,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.003Z"
   }
@@ -8328,7 +8328,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.008Z"
   }
@@ -8343,7 +8343,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.015Z"
   }
@@ -8358,7 +8358,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.021Z"
   }
@@ -8373,7 +8373,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.025Z"
   }
@@ -8388,7 +8388,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.029Z"
   }
@@ -8403,7 +8403,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.036Z"
   }
@@ -8418,7 +8418,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.041Z"
   }
@@ -8433,7 +8433,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "D",
-    "observaciones": "Requiere plan de mejoramiento en normalizaciÛn de bases de datos.",
+    "observaciones": "Requiere plan de mejoramiento en normalizaci√≥n de bases de datos.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.045Z"
   }
@@ -8448,7 +8448,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.051Z"
   }
@@ -8463,7 +8463,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.056Z"
   }
@@ -8478,7 +8478,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.060Z"
   }
@@ -8493,7 +8493,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.066Z"
   }
@@ -8508,7 +8508,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.071Z"
   }
@@ -8523,7 +8523,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.076Z"
   }
@@ -8538,7 +8538,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.082Z"
   }
@@ -8553,7 +8553,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.088Z"
   }
@@ -8568,7 +8568,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.094Z"
   }
@@ -8583,7 +8583,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.100Z"
   }
@@ -8598,7 +8598,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.105Z"
   }
@@ -8613,7 +8613,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.110Z"
   }
@@ -8628,7 +8628,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.114Z"
   }
@@ -8643,7 +8643,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.123Z"
   }
@@ -8658,7 +8658,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.127Z"
   }
@@ -8673,7 +8673,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.133Z"
   }
@@ -8688,7 +8688,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.137Z"
   }
@@ -8703,7 +8703,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.143Z"
   }
@@ -8718,7 +8718,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.149Z"
   }
@@ -8733,7 +8733,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "D",
-    "observaciones": "Requiere plan de mejoramiento en normalizaciÛn de bases de datos.",
+    "observaciones": "Requiere plan de mejoramiento en normalizaci√≥n de bases de datos.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.154Z"
   }
@@ -8748,7 +8748,7 @@
       "instructor_carlos"
     ],
     "juicio_valor": "A",
-    "observaciones": "AlcanzÛ satisfactoriamente los criterios de evaluaciÛn.",
+    "observaciones": "Alcanz√≥ satisfactoriamente los criterios de evaluaci√≥n.",
     "fecha_evaluacion": "2024-05-20",
     "fecha_registro": "2026-09-19T04:50:14.159Z"
   }
@@ -8763,7 +8763,7 @@
       "instructor_demo"
     ],
     "juicio_valor": "A",
-    "observaciones": "Excelente desempeÒo tÈcnico y entrega oportuna.",
+    "observaciones": "Excelente desempe√±o t√©cnico y entrega oportuna.",
     "fecha_evaluacion": "2026-09-14",
     "fecha_registro": "2026-09-19T20:13:26.669Z"
   }
