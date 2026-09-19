@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cuadro de Mando e Indicadores Institucionales · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <!-- Encabezado Institucional -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
+                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-speedometer2 text-success me-2"></i>Cuadro de Mando e Indicadores Clave (KPIs)
+            </h1>
+            <p class="text-muted mb-0">Monitoreo en tiempo real de la formación, desempeño evaluativo y atención de novedades.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'centro_reportes' %}" class="btn btn-outline-success fw-semibold">
+                <i class="bi bi-file-earmark-bar-graph me-1"></i> Ir al Centro de Reportes
+            </a>
+            <button class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Imprimir Informe
+            </button>
+        </div>
+    </div>
+
+    <!-- Primera Fila: Indicadores de Población y Fichas -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border-start border-4" style="border-color: #39A900 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Aprendices Matriculados</span>
+                        <h2 class="fw-bold text-dark mb-0 mt-1">{{ total_aprendices }}</h2>
+                        <span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill"></i> 100% articulados</span>
+                    </div>
+                    <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-people-fill fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border-start border-4 border-primary">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Cohortes y Fichas</span>
+                        <h2 class="fw-bold text-primary mb-0 mt-1">{{ total_fichas }}</h2>
+                        <span class="text-muted small">{{ fichas_activas }} en ejecución activa</span>
+                    </div>
+                    <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-layers-fill fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border-start border-4 border-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Tasa de Aprobación RAP</span>
+                        <h2 class="fw-bold text-dark mb-0 mt-1">{{ tasa_aprobacion }}%</h2>
+                        <span class="text-warning small fw-semibold">{{ juicios_a }} aprobados / {{ juicios_d }} por mejorar</span>
+                    </div>
+                    <div class="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-pie-chart-fill fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border-start border-4 border-danger">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Trámites Pendientes</span>
+                        <h2 class="fw-bold text-danger mb-0 mt-1">{{ solicitudes_abiertas }}</h2>
+                        <span class="text-muted small">{{ solicitudes_cerradas }} resueltos en secretaría</span>
+                    </div>
+                    <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-inbox-fill fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Segunda Fila: Métricas Detalladas de Rendimiento Formativo -->
+    <div class="row g-4 mb-4">
+
+        <!-- 1. Desglose de Evaluación RAP -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-award-fill text-success me-2"></i>Rendimiento en Evaluaciones (RAP)
+                    </h5>
+                    <span class="badge bg-light text-dark border">{{ total_juicios }} juicios totales</span>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small fw-semibold mb-1">
+                        <span>Aprobados ('A'): {{ juicios_a }}</span>
+                        <span class="text-success">{{ tasa_aprobacion }}%</span>
+                    </div>
+                    <div class="progress" style="height: 12px;">
+                        <div class="progress-bar bg-success" style="width: {{ tasa_aprobacion }}%;"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between small fw-semibold mb-1">
+                        <span>Deficientes / Por Mejorar ('D'): {{ juicios_d }}</span>
+                        <span class="text-danger">
+                            {% widthratio juicios_d total_juicios 100 as pct_d %}{{ pct_d }}%
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 12px;">
+                        <div class="progress-bar bg-danger" style="width: {% widthratio juicios_d total_juicios 100 as pct_d %}{{ pct_d }}%;"></div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-dark small text-uppercase mb-2">Resultados con Mayor Dificultad:</h6>
+                {% if dificultad %}
+                    <ul class="list-group list-group-flush small">
+                        {% for d in dificultad %}
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ d.resultado_aprendizaje__codigo }}</strong> — 
+                                    <span class="text-muted">{{ d.resultado_aprendizaje__descripcion|truncatechars:45 }}</span>
+                                </div>
+                                <span class="badge bg-danger rounded-pill">{{ d.total }} D</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted small mb-0">No se registran resultados con deficiencia.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 2. Estado del Módulo de Evidencias -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-file-earmark-check-fill text-primary me-2"></i>Gestión de Evidencias y Talleres
+                    </h5>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">{{ evidencias_totales }} talleres publicados</span>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="text-muted small d-block">Entregas Recibidas:</span>
+                            <h4 class="fw-bold text-dark mb-0">{{ calificaciones_entregadas }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="text-muted small d-block">Pendientes de Calificar:</span>
+                            <h4 class="fw-bold text-warning mb-0">{{ evidencias_pendientes }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small fw-semibold mb-1">
+                        <span>Evidencias Aprobadas: {{ evidencias_aprobadas }}</span>
+                        <span class="text-success">
+                            {% widthratio evidencias_aprobadas calificaciones_entregadas 100 as pct_ap %}{{ pct_ap }}%
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 12px;">
+                        <div class="progress-bar bg-success" style="width: {% widthratio evidencias_aprobadas calificaciones_entregadas 100 as pct_ap %}{{ pct_ap }}%;"></div>
+                    </div>
+                </div>
+                <div class="alert alert-info py-2 px-3 small mb-0 mt-auto">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    Los instructores deben registrar la retroalimentación pedagógica oportuna para mantener la vigencia de la ruta formativa SENA.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tercera Fila: Acompañamiento y Secretaría -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h5 class="fw-bold text-dark mb-2">
+                    <i class="bi bi-clipboard2-pulse-fill text-warning me-2"></i>Cobertura de Visitas de Seguimiento
+                </h5>
+                <p class="text-muted small mb-3">
+                    Bitácoras registradas para acompañamiento técnico y pedagógico en los ambientes de aprendizaje.
+                </p>
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border">
+                    <div class="p-3 rounded-circle bg-warning bg-opacity-25 text-dark">
+                        <i class="bi bi-calendar-check fs-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-dark mb-0">{{ total_seguimientos }}</h4>
+                        <span class="text-muted small">Sesiones de seguimiento documentadas en plataforma</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h5 class="fw-bold text-dark mb-2">
+                    <i class="bi bi-inboxes-fill text-danger me-2"></i>Efectividad en Trámites de Secretaría
+                </h5>
+                <p class="text-muted small mb-3">
+                    Balance entre solicitudes recibidas y respuestas emitidas por secretaría académica.
+                </p>
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border">
+                    <div class="p-3 rounded-circle bg-success bg-opacity-25 text-success">
+                        <i class="bi bi-check-all fs-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-dark mb-0">{{ solicitudes_cerradas }} cerradas</h4>
+                        <span class="text-muted small">{{ solicitudes_abiertas }} en proceso de respuesta</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

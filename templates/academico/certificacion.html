@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Consulta de Certificación - SINETEC | SENA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #1b4d3e 0%, #11382c 100%); color: white; padding: 2rem; border-radius: 1rem;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="sinetec-eyebrow text-success-subtle mb-1" style="color: #86efac !important; font-weight: 600;">
+                    <i class="bi bi-patch-check-fill me-1"></i> Auditoría Curricular y Requisitos de Grado
+                </div>
+                <h1 class="h2 fw-bold text-white mb-1">Control de Certificación Técnica</h1>
+                <p class="mb-0 text-white-50 small">
+                    Verificación interna de juicios evaluativos aprobados ('A') y cumplimiento del 100% de los Resultados de Aprendizaje para graduación en Media Técnica.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-warning fw-semibold">
+                    <i class="bi bi-award me-1"></i> Asentar Juicios
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro de Ficha -->
+    <div class="sinetec-card p-3 mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-9">
+                <label class="form-label small fw-semibold text-secondary">Seleccione la Ficha para consultar estado de certificación:</label>
+                <select name="ficha" class="form-select">
+                    {% for f in fichas %}
+                        <option value="{{ f.id }}" {% if ficha_seleccionada and ficha_seleccionada.id == f.id %}selected{% endif %}>
+                            Ficha {{ f.codigo_ficha }} — {{ f.programa.denominacion }} ({{ f.institucion.nombre }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-success w-100 fw-semibold" style="background-color: #39A900; border-color: #39A900;">
+                    <i class="bi bi-filter me-1"></i> Consultar Ficha
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Resultados de Certificación -->
+    {% if ficha_seleccionada %}
+        <div class="sinetec-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 border-bottom pb-3">
+                <div>
+                    <span class="badge bg-success me-2" style="background-color: #39A900 !important;">Ficha {{ ficha_seleccionada.codigo_ficha }}</span>
+                    <strong class="fs-6 text-dark">{{ ficha_seleccionada.programa.denominacion }}</strong>
+                    <small class="text-muted d-block mt-1">Total RAPs del Programa Curricular: {{ ficha_seleccionada.programa.competencias.all|length }} competencias</small>
+                </div>
+                <div class="alert alert-info py-2 px-3 mb-0 small" role="status">
+                    <i class="bi bi-info-circle me-1"></i> <strong>Nota:</strong> Esta es una consulta interna de requisitos en SINETEC previa a la emisión del certificado oficial en SOFIA Plus.
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light text-uppercase">
+                        <tr>
+                            <th>No.</th>
+                            <th>Aprendiz</th>
+                            <th>Documento</th>
+                            <th>RAPs Totales</th>
+                            <th>RAPs Aprobados ('A')</th>
+                            <th>Avance</th>
+                            <th>Estado de Certificación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in aprendices_cert %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <strong>{{ item.matricula.aprendiz.get_full_name|default:item.matricula.aprendiz.username }}</strong>
+                                </td>
+                                <td>{{ item.matricula.aprendiz.perfil.get_tipo_documento_display }} {{ item.matricula.aprendiz.perfil.numero_documento }}</td>
+                                <td>{{ item.raps_total }}</td>
+                                <td><span class="badge bg-success">{{ item.aprobados }}</span></td>
+                                <td style="min-width: 140px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ item.porcentaje }}%;" aria-valuenow="{{ item.porcentaje }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="fw-bold">{{ item.porcentaje }}%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if item.apto %}
+                                        <span class="badge bg-success px-3 py-2 rounded-pill">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Requisitos Completados
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                            <i class="bi bi-hourglass-split me-1"></i> En Formación ({{ item.pendientes }} pendientes)
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    No hay aprendices matriculados en esta ficha.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

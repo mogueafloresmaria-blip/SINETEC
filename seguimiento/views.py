@@ -17,10 +17,12 @@ from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+from django.db.models import Q
 from reportlab.platypus import Image as PDFImage, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-from .models import AsistenciaAprendiz, BitacoraSeguimiento, MensajeSeguimiento
+from .models import AsistenciaAprendiz, BitacoraSeguimiento, MensajeSeguimiento, SolicitudSecretaria, RespuestaSolicitud, Notificacion, RegistroAuditoria
 from .forms import BitacoraSeguimientoForm
-from academico.models import Ficha
+from academico.models import Ficha, Matricula
+from django.contrib.auth.models import User
 
 
 @login_required
@@ -290,3 +292,209 @@ def descargar_acta_pdf(request, pk):
     respuesta = HttpResponse(buffer.getvalue(), content_type='application/pdf')
     respuesta['Content-Disposition'] = f'attachment; filename="acta_visita_{bitacora.pk}.pdf"'
     return respuesta
+
+
+@login_required
+def secretaria_bandeja(request):
+    """
+    Bandeja de gestión de solicitudes y trámites ante la Secretaría del SENA.
+    """
+    estado_filtro = request.GET.get('estado', '').strip()
+    categoria_filtro = request.GET.get('categoria', '').strip()
+    query = request.GET.get('q', '').strip()
+
+    solicitudes = SolicitudSecretaria.objects.select_related(
+        'aprendiz', 'aprendiz__perfil', 'ficha', 'responsable'
+    ).all()
+
+    if estado_filtro:
+        solicitudes = solicitudes.filter(estado=estado_filtro)
+    if categoria_filtro:
+        solicitudes = solicitudes.filter(categoria=categoria_filtro)
+    if query:
+        solicitudes = solicitudes.filter(
+            Q(asunto__icontains=query) |
+            Q(mensaje__icontains=query) |
+            Q(aprendiz__first_name__icontains=query) |
+            Q(aprendiz__last_name__icontains=query) |
+            Q(aprendiz__perfil__numero_documento__icontains=query)
+        )
+
+    context = {
+        'solicitudes': solicitudes,
+        'query': query,
+        'estado_filtro': estado_filtro,
+        'categoria_filtro': categoria_filtro,
+        'total_solicitudes': SolicitudSecretaria.objects.count(),
+        'pendientes': SolicitudSecretaria.objects.filter(estado__in=['ENVIADA', 'RECIBIDA', 'EN_REVISION']).count(),
+        'respondidas': SolicitudSecretaria.objects.filter(estado='RESPONDIDA').count(),
+        'cerradas': SolicitudSecretaria.objects.filter(estado='CERRADA').count(),
+        'categorias': SolicitudSecretaria.CATEGORIAS_SOLICITUD,
+        'estados': SolicitudSecretaria.ESTADOS_SOLICITUD,
+    }
+    return render(request, 'seguimiento/secretaria_bandeja.html', context)
+
+
+@login_required
+def nueva_solicitud(request):
+    """
+    Formulario oficial 'CONTACTAR SECRETARÍA' para que aprendices e instructores
+    radiquen una nueva solicitud, trámite o novedad ante la Secretaría SENA.
+    """
+    fichas = Ficha.objects.all()
+    perfil = getattr(request.user, 'perfil', None)
+    ficha_defecto = None
+    if perfil and perfil.rol and perfil.rol.nombre == 'Estudiante':
+        mat = Matricula.objects.filter(aprendiz=request.user).first()
+        if mat:
+            ficha_defecto = mat.ficha
+
+    if request.method == 'POST':
+        asunto = request.POST.get('asunto', '').strip()
+        categoria = request.POST.get('categoria', 'Academica')
+        prioridad = request.POST.get('prioridad', 'Media')
+        mensaje = request.POST.get('mensaje', '').strip()
+        ficha_id = request.POST.get('ficha_id')
+        archivo = request.FILES.get('archivo_adjunto')
+
+        if not asunto or not mensaje:
+            messages.error(request, "Por favor complete el asunto y la descripción detallada del trámite.")
+        else:
+            ficha_asociada = Ficha.objects.filter(id=ficha_id).first() if ficha_id else ficha_defecto
+            solicitud = SolicitudSecretaria.objects.create(
+                aprendiz=request.user,
+                ficha=ficha_asociada,
+                asunto=asunto,
+                categoria=categoria,
+                prioridad=prioridad,
+                mensaje=mensaje,
+                archivo_adjunto=archivo,
+                estado='ENVIADA',
+            )
+
+            # Notificar a coordinadores/secretaría
+            responsables = User.objects.filter(perfil__rol__nombre__in=['Coordinador', 'Administrador'])
+            for resp in responsables:
+                Notificacion.objects.create(
+                    usuario=resp,
+                    titulo=f"Nueva solicitud de {request.user.get_full_name() or request.user.username}",
+                    mensaje=f"[{solicitud.get_categoria_display()}] {solicitud.asunto}",
+                    enlace=f"/seguimiento/secretaria/solicitud/{solicitud.id}/",
+                    tipo='info'
+                )
+
+            # Auditoría
+            RegistroAuditoria.objects.create(
+                usuario=request.user,
+                accion="Radicación de solicitud a Secretaría",
+                modulo="Secretaría",
+                detalles=f"Solicitud #{solicitud.id} - {solicitud.asunto} ({solicitud.categoria})"
+            )
+
+            messages.success(request, "¡Tu solicitud ha sido radicada formalmente ante la Secretaría SENA! Te notificaremos cuando haya respuesta.")
+            return redirect('mis_solicitudes')
+
+    return render(request, 'seguimiento/secretaria_nueva.html', {
+        'fichas': fichas,
+        'ficha_defecto': ficha_defecto,
+        'categorias': SolicitudSecretaria.CATEGORIAS_SOLICITUD,
+        'prioridades': SolicitudSecretaria.PRIORIDADES_SOLICITUD,
+    })
+
+
+@login_required
+def mis_solicitudes(request):
+    """
+    Consulta de las solicitudes radicadas por el usuario actual.
+    """
+    solicitudes = SolicitudSecretaria.objects.filter(aprendiz=request.user).select_related('ficha', 'responsable').order_by('-fecha_creacion')
+    return render(request, 'seguimiento/mis_solicitudes.html', {
+        'solicitudes': solicitudes,
+        'total': solicitudes.count(),
+    })
+
+
+@login_required
+def secretaria_detalle(request, pk):
+    """
+    Expediente de una solicitud ante Secretaría: conversación, respuesta oficial,
+    adjuntos y cambio de estado del trámite.
+    """
+    solicitud = get_object_or_404(
+        SolicitudSecretaria.objects.select_related('aprendiz', 'aprendiz__perfil', 'ficha', 'responsable'),
+        pk=pk
+    )
+
+    perfil = getattr(request.user, 'perfil', None)
+    rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+    es_personal = request.user.is_superuser or rol_nombre in ['Administrador', 'Coordinador', 'Instructor SENA']
+
+    if not es_personal and solicitud.aprendiz != request.user:
+        messages.error(request, "No tienes permisos para consultar esta solicitud.")
+        return redirect('mis_solicitudes')
+
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+        if accion == 'responder':
+            texto_resp = request.POST.get('mensaje', '').strip()
+            archivo_resp = request.FILES.get('archivo_adjunto')
+            if texto_resp:
+                RespuestaSolicitud.objects.create(
+                    solicitud=solicitud,
+                    usuario=request.user,
+                    mensaje=texto_resp,
+                    archivo_adjunto=archivo_resp
+                )
+
+                if es_personal:
+                    solicitud.estado = 'RESPONDIDA'
+                    solicitud.responsable = request.user
+                    solicitud.save(update_fields=['estado', 'responsable', 'fecha_actualizacion'])
+
+                    Notificacion.objects.create(
+                        usuario=solicitud.aprendiz,
+                        titulo="Secretaría respondió tu solicitud",
+                        mensaje=f"Hay una respuesta oficial a tu trámite: '{solicitud.asunto}'",
+                        enlace=f"/seguimiento/secretaria/solicitud/{solicitud.id}/",
+                        tipo='success'
+                    )
+                else:
+                    solicitud.estado = 'EN_REVISION'
+                    solicitud.save(update_fields=['estado', 'fecha_actualizacion'])
+
+                messages.success(request, "Respuesta enviada y registrada en el expediente.")
+                return redirect('secretaria_detalle', pk=solicitud.pk)
+
+        elif accion == 'cambiar_estado' and es_personal:
+            nuevo_estado = request.POST.get('nuevo_estado')
+            if nuevo_estado in dict(SolicitudSecretaria.ESTADOS_SOLICITUD):
+                solicitud.estado = nuevo_estado
+                solicitud.responsable = request.user
+                solicitud.save(update_fields=['estado', 'responsable', 'fecha_actualizacion'])
+
+                RegistroAuditoria.objects.create(
+                    usuario=request.user,
+                    accion=f"Cambio de estado a {nuevo_estado} en solicitud #{solicitud.id}",
+                    modulo="Secretaría",
+                    detalles=f"Solicitud: {solicitud.asunto}"
+                )
+
+                messages.success(request, f"Estado actualizado a: {solicitud.get_estado_display()}")
+                return redirect('secretaria_detalle', pk=solicitud.pk)
+
+    respuestas = solicitud.respuestas.select_related('usuario', 'usuario__perfil').order_by('fecha_respuesta')
+    return render(request, 'seguimiento/secretaria_detalle.html', {
+        'solicitud': solicitud,
+        'respuestas': respuestas,
+        'es_personal': es_personal,
+        'estados': SolicitudSecretaria.ESTADOS_SOLICITUD,
+    })
+
+
+@login_required
+def cambiar_estado_solicitud(request, pk):
+    """Acción rápida para cambiar el estado de una solicitud."""
+    if request.method == 'POST':
+        return secretaria_detalle(request, pk)
+    return redirect('secretaria_bandeja')
+

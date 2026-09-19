@@ -1,0 +1,475 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Carnet Digital Institucional SENA · SINETEC{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos de Seguridad Criptográfica y Anti-Foto */
+    .carnet-wrapper {
+        max-width: 640px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Tarjeta Principal del Carnet con Proporción Oficial Ampliada */
+    .sena-carnet {
+        background: linear-gradient(145deg, #0b2414 0%, #153e24 45%, #0a2012 100%);
+        color: #ffffff;
+        border-radius: 28px;
+        padding: 30px 28px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 24px 50px rgba(11, 36, 20, 0.45), 0 2px 8px rgba(0,0,0,0.2);
+        border: 2px solid rgba(57, 169, 0, 0.45);
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    /* Moiré Anti-Foto */
+    .sena-carnet::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(#39a900 0.75px, transparent 0.75px), radial-gradient(#ffffff 0.5px, transparent 0.5px);
+        background-size: 8px 8px, 12px 12px;
+        background-position: 0 0, 4px 4px;
+        opacity: 0.13;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* Haz Holográfico Dinámico Continuo */
+    .holographic-sheen {
+        position: absolute;
+        top: -120%;
+        left: -120%;
+        width: 340%;
+        height: 340%;
+        background: linear-gradient(
+            45deg,
+            transparent 35%,
+            rgba(57, 169, 0, 0.12) 42%,
+            rgba(255, 255, 255, 0.32) 48%,
+            rgba(0, 220, 180, 0.22) 53%,
+            transparent 62%
+        );
+        transform: rotate(25deg);
+        animation: holoMove 3.5s infinite linear;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    @keyframes holoMove {
+        0% { transform: translateY(-30%) rotate(25deg); }
+        100% { transform: translateY(30%) rotate(25deg); }
+    }
+
+    .watermark-dynamic {
+        position: absolute;
+        bottom: 10px;
+        right: 16px;
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.35);
+        font-weight: 700;
+        z-index: 3;
+    }
+
+    .carnet-content {
+        position: relative;
+        z-index: 4;
+    }
+
+    /* Encabezado del Carnet */
+    .carnet-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+    }
+
+    .sena-badge-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .sena-icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        background: #39a900;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        box-shadow: 0 4px 12px rgba(57, 169, 0, 0.4);
+    }
+
+    .carnet-entity {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #cde88e;
+        font-weight: 800;
+    }
+
+    .carnet-main-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0;
+    }
+
+    /* Reloj de Seguridad en Vivo */
+    .security-clock {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(57, 169, 0, 0.5);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: #79f244;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .pulse-dot {
+        width: 10px;
+        height: 10px;
+        background: #39a900;
+        border-radius: 50%;
+        animation: pulseAnimation 1.2s infinite;
+    }
+
+    @keyframes pulseAnimation {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(0.7); }
+    }
+
+    /* Cuerpo del Carnet: Foto, Datos y QR */
+    .carnet-body {
+        display: grid;
+        grid-template-columns: 1fr 165px;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .student-name {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #ffffff;
+        line-height: 1.2;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+    .student-role-tag {
+        display: inline-block;
+        background: rgba(57, 169, 0, 0.25);
+        color: #92ec66;
+        border: 1px solid #39a900;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 3px 10px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 12px;
+    }
+
+    .info-item {
+        margin-bottom: 8px;
+    }
+
+    .info-item-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #a4beab;
+        display: block;
+        margin-bottom: 1px;
+    }
+
+    .info-item-val {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    /* Contenedor del QR */
+    .qr-container {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 10px;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .qr-container img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 10px;
+    }
+
+    .qr-subtext {
+        font-size: 0.68rem;
+        color: #1b3824;
+        font-weight: 800;
+        margin-top: 6px;
+        line-height: 1.1;
+    }
+
+    /* Pie del Carnet */
+    .carnet-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #c0d4c5;
+    }
+
+    .security-token-pill {
+        font-family: monospace;
+        font-size: 0.82rem;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 3px 10px;
+        border-radius: 6px;
+        border: 1px dashed rgba(255, 255, 255, 0.4);
+        color: #f7ffbf;
+    }
+
+    /* Pantalla de bloqueo anti-captura */
+    #antiCaptureShield {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: #0b1a10;
+        color: #ff5252;
+        border-radius: 28px;
+        z-index: 100;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 30px;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden !important;
+        }
+        .carnet-wrapper, .carnet-wrapper * {
+            visibility: visible !important;
+        }
+        .carnet-wrapper {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Encabezado de Página -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 no-print">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
+                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-1">Carnet Digital de Identificación</h1>
+            <p class="text-muted mb-0">Credencial institucional ampliada con rotación criptográfica de seguridad y validación en tiempo real.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+                <i class="bi bi-printer-fill me-1"></i> Imprimir Carnet
+            </button>
+            <a href="{% url 'estudiantes_lista' %}" class="btn btn-light border btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Volver a la Lista
+            </a>
+        </div>
+    </div>
+
+    <!-- Contenedor del Carnet Ampliado -->
+    <div class="carnet-wrapper">
+        <div class="sena-carnet" id="carnetCard" oncontextmenu="return false;">
+            <!-- Capa Holográfica -->
+            <div class="holographic-sheen"></div>
+
+            <!-- Marca de agua dinámica con fecha y hora -->
+            <div class="watermark-dynamic" id="liveWatermark">
+                SINETEC · {{ hoy }} · <span id="clockSecWatermark">{{ ahora|time:'H:i:s' }}</span>
+            </div>
+
+            <!-- Pantalla de bloqueo anti-captura -->
+            <div id="antiCaptureShield">
+                <i class="bi bi-shield-slash-fill fs-1 mb-2"></i>
+                <h5 class="fw-bold mb-1">CREDENCIAL INSTITUCIONAL PROTEGIDA</h5>
+                <p class="small text-white opacity-75 mb-0">
+                    Por normativas de seguridad institucional SENA, esta credencial cuenta con rotación dinámica diaria y protección activa.
+                </p>
+                <button class="btn btn-sm btn-outline-light mt-3" onclick="restaurarCarnet()">Restaurar vista</button>
+            </div>
+
+            <!-- Contenido Oficial del Carnet -->
+            <div class="carnet-content">
+                <div class="carnet-header">
+                    <div class="sena-badge-logo">
+                        <div class="sena-icon-box">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <div class="carnet-entity">SENA · Regional Magdalena</div>
+                            <h2 class="carnet-main-title">CARNET DE APRENDIZ</h2>
+                            <small class="text-white opacity-75" style="font-size: 0.68rem;">Centro de Logística y Promoción Ecoturística</small>
+                        </div>
+                    </div>
+                    <!-- Reloj en vivo de segundos -->
+                    <div class="security-clock">
+                        <span class="pulse-dot"></span>
+                        <span id="liveClockDisplay">{{ ahora|time:'H:i:s' }}</span>
+                    </div>
+                </div>
+
+                <div class="carnet-body">
+                    <!-- Datos del Aprendiz -->
+                    <div>
+                        <div class="student-role-tag">
+                            <i class="bi bi-check-circle-fill me-1"></i> Vigente Hoy · {{ hoy|date:"d M Y" }}
+                        </div>
+                        <div class="student-name">
+                            {{ perfil.usuario.get_full_name|default:perfil.usuario.username }}
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-item-label">Documento de Identidad</span>
+                            <span class="info-item-val">{{ perfil.get_tipo_documento_display }} {{ perfil.numero_documento }}</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-item-label">Ficha Técnica SENA</span>
+                            <span class="info-item-val">
+                                {% if matricula %}Ficha {{ matricula.ficha.codigo_ficha }}{% else %}Ficha 3173430{% endif %}
+                            </span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-item-label">Programa de Formación</span>
+                            <span class="info-item-val small">
+                                {% if matricula %}{{ matricula.ficha.programa.denominacion }}{% else %}Análisis y Desarrollo de Sistemas de Información{% endif %}
+                            </span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-item-label">Institución Articulada</span>
+                            <span class="info-item-val small text-truncate d-block" style="max-width: 320px;">
+                                {% if matricula %}{{ matricula.ficha.institucion.nombre }}{% else %}I.E.D. Escuela Normal Superior María Auxiliadora{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Código QR Dinámico del Día -->
+                    <div class="qr-container">
+                        <img src="data:image/png;base64,{{ qr_base64 }}" alt="Código QR de Verificación">
+                        <div class="qr-subtext">
+                            <i class="bi bi-qr-code-scan text-success me-1"></i> ESCANEAR PARA VALIDAR
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carnet-footer">
+                    <div>
+                        <small class="d-block text-white opacity-75">Token Criptográfico Diario:</small>
+                        <span class="security-token-pill">{{ codigo_seguridad_dia }}</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50 px-2 py-1">
+                            <i class="bi bi-shield-fill-check me-1"></i> Oficial SENA · Activo
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Botones de Acción Obligatorios -->
+        <div class="card border-0 shadow-sm rounded-4 mt-3 p-3 bg-white no-print">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <a href="{% url 'estudiante_detalle' perfil.pk %}" class="btn text-white w-100 fw-semibold" style="background-color: #39A900;">
+                        <i class="bi bi-person-badge-fill me-1"></i> Ver Perfil Completo
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'estudiante_detalle' perfil.pk %}#tab-seguimiento" class="btn btn-outline-success w-100 fw-semibold">
+                        <i class="bi bi-clipboard2-pulse-fill me-1"></i> Ver Seguimiento
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'estudiante_detalle' perfil.pk %}#tab-evidencias" class="btn btn-outline-primary w-100 fw-semibold">
+                        <i class="bi bi-award-fill me-1"></i> Ver Evidencias
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-secondary w-100 fw-semibold" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Imprimir Carnet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta Informativa de Funcionamiento -->
+        <div class="card border-0 shadow-sm rounded-4 mt-3 p-3 bg-white no-print">
+            <h6 class="fw-bold mb-2"><i class="bi bi-shield-check text-success me-1"></i> Protocolo de Seguridad y Rotación</h6>
+            <p class="text-muted small mb-2">
+                El código QR institucional contiene una firma digital con validez de 24 horas. Los verificadores y porterías escanean el código para constatar de inmediato en el servidor de SINETEC la condición de matrícula activa del aprendiz.
+            </p>
+            <div class="text-center mt-2">
+                <a href="{{ url_verificacion }}" target="_blank" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Abrir vista pública de verificación QR (Portería)
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const timeStr = `${hours}:${minutes}:${seconds}`;
+
+        const clockElem = document.getElementById('liveClockDisplay');
+        const waterElem = document.getElementById('clockSecWatermark');
+        if (clockElem) clockElem.textContent = timeStr;
+        if (waterElem) waterElem.textContent = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function restaurarCarnet() {
+        const shield = document.getElementById('antiCaptureShield');
+        if (shield) shield.style.display = 'none';
+    }
+</script>
+{% endblock %}

@@ -18,3 +18,8 @@ staticfiles/
 # Carpetas de editores
 .vscode/
 .idea/
+
+# Respaldos SQL pesados y temporales
+*.sql
+scratch/
+SINETEC/

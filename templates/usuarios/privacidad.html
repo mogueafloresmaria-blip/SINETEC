@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Privacidad, Seguridad y Protección de Datos · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+        <div>
+            <div class="sinetec-eyebrow mb-1">Seguridad y Marco Legal</div>
+            <h1 class="sinetec-page-title h3 mb-1">Privacidad y Protección de Datos Institucionales</h1>
+            <p class="text-muted mb-0">Cumplimiento estricto de la Ley Estatutaria 1581 de 2012 (Habeas Data) y normativas de confidencialidad de menores de edad.</p>
+        </div>
+        <span class="badge bg-success bg-opacity-10 text-success p-2 px-3 fs-6">
+            <i class="bi bi-shield-check me-1"></i> Estado Normativo: 100% Conforme
+        </span>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="sinetec-card p-4 mb-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-file-lock2 text-success me-2"></i>Declaración de Privacidad y Manejo de Información</h5>
+                <p class="text-muted small">
+                    La plataforma <strong>SINETEC</strong> implementa protocolos de seguridad por diseño (Security by Design) para salvaguardar la información académica, asistencias, datos biométricos, fotografías y registros de contacto de los aprendices (mayores y menores de edad), así como del cuerpo docente e instructores de la Regional Magdalena.
+                </p>
+
+                <h6 class="fw-bold mt-4 mb-2">Pilares de Cumplimiento Activo:</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <strong class="d-block text-dark mb-1"><i class="bi bi-person-check text-primary me-1"></i> Consentimiento Informado</strong>
+                            <small class="text-muted">Registro de autorizaciones firmadas por padres o acudientes para el tratamiento de datos de menores en Media Técnica.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <strong class="d-block text-dark mb-1"><i class="bi bi-key text-success me-1"></i> Cifrado y Tokens Rotativos</strong>
+                            <small class="text-muted">Los carnets digitales y URLs de verificación utilizan hashes criptográficos SHA-256 renovados cada 24 horas.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <strong class="d-block text-dark mb-1"><i class="bi bi-shield-shaded text-warning me-1"></i> Control de Acceso Basado en Roles</strong>
+                            <small class="text-muted">Aislamiento estricto de visibilidad: un estudiante solo accede a su propia información y un instructor solo a sus fichas asignadas.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <strong class="d-block text-dark mb-1"><i class="bi bi-clock-history text-info me-1"></i> Auditoría de Trazabilidad</strong>
+                            <small class="text-muted">Registro detallado de fecha, hora y usuario responsable de cada modificación de calificaciones o asistencia.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="sinetec-card p-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-shield-shaded text-success me-2"></i>Auditoría de Seguridad</h6>
+                <div class="d-flex justify-content-between py-2 border-bottom small">
+                    <span class="text-muted">Cifrado de Sesión</span>
+                    <strong class="text-success"><i class="bi bi-check-lg"></i> HTTPS / TLS 1.3</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom small">
+                    <span class="text-muted">Protección Anti-Captura</span>
+                    <strong class="text-success"><i class="bi bi-check-lg"></i> Activa (Moiré + Holo)</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom small">
+                    <span class="text-muted">Rotación Diaria QR</span>
+                    <strong class="text-success"><i class="bi bi-check-lg"></i> Criptográfica 24h</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 small">
+                    <span class="text-muted">Marco Normativo</span>
+                    <strong class="text-success"><i class="bi bi-check-lg"></i> Ley 1581 de 2012</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

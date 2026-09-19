@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Centro de Notificaciones · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Encabezado Institucional -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
+                <span class="text-muted small">Centro de Notificaciones Institucionales</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-bell-fill text-success me-2"></i>Bandeja de Notificaciones y Avisos
+            </h1>
+            <p class="text-muted mb-0">Alertas de seguimiento, respuestas de secretaría y novedades del proceso formativo.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="?filtro=todas" class="btn btn-sm {% if filtro != 'no_leidas' %}btn-dark{% else %}btn-outline-secondary{% endif %}">
+                Todas las Notificaciones
+            </a>
+            <a href="?filtro=no_leidas" class="btn btn-sm {% if filtro == 'no_leidas' %}btn-success text-white{% else %}btn-outline-success{% endif %}">
+                No Leídas ({{ total_no_leidas }})
+            </a>
+        </div>
+    </div>
+
+    <!-- Listado de Notificaciones -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        <div class="list-group list-group-flush">
+            {% for n in notificaciones %}
+                <div class="list-group-item p-4 d-flex justify-content-between align-items-start gap-3 {% if not n.leida %}bg-light border-start border-4 border-success{% endif %}">
+                    <div class="d-flex gap-3">
+                        <div class="p-3 rounded-circle {% if n.tipo == 'EXITO' %}bg-success text-white{% elif n.tipo == 'ALERTA' %}bg-warning text-dark{% elif n.tipo == 'URGENTE' %}bg-danger text-white{% else %}bg-primary text-white{% endif %} d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            {% if n.tipo == 'EXITO' %}
+                                <i class="bi bi-check-circle-fill fs-5"></i>
+                            {% elif n.tipo == 'ALERTA' %}
+                                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                            {% elif n.tipo == 'URGENTE' %}
+                                <i class="bi bi-shield-exclamation fs-5"></i>
+                            {% else %}
+                                <i class="bi bi-bell-fill fs-5"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h6 class="fw-bold text-dark mb-0">{{ n.titulo }}</h6>
+                                {% if not n.leida %}
+                                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50" style="font-size: 0.7rem;">NUEVA</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-muted small mb-2">{{ n.mensaje }}</p>
+                            <span class="text-secondary small" style="font-size: 0.75rem;">
+                                <i class="bi bi-clock me-1"></i> {{ n.fecha_creacion|date:"d/m/Y H:i" }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column align-items-end gap-2 flex-shrink-0">
+                        {% if n.url_destino %}
+                            <a href="{{ n.url_destino }}" class="btn btn-sm text-white fw-semibold" style="background-color: #39A900;">
+                                Ver Detalle <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        {% endif %}
+                        {% if not n.leida %}
+                            <a href="{% url 'marcar_notificacion_leida' n.pk %}" class="btn btn-sm btn-outline-secondary" title="Marcar como leída">
+                                <i class="bi bi-check2"></i> Marcar leída
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="p-5 text-center text-muted">
+                    <i class="bi bi-bell-slash fs-1 d-block mb-2 opacity-50"></i>
+                    <h5 class="fw-bold text-dark">No tienes notificaciones pendientes</h5>
+                    <p class="text-muted small mb-0">Cuando se registren novedades en tus fichas, evidencias o trámites aparecerán aquí.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

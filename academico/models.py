@@ -1,6 +1,6 @@
 """
 Aplicación: academico
-Modelos: ProgramaFormacion, Competencia, ResultadoAprendizaje, Ficha, Matricula
+Modelos: ProgramaFormacion, Competencia, ResultadoAprendizaje, Ficha, Matricula, HorarioFicha
 Reglas de Negocio Asociadas: RN-002 (Pertenencia Escolar), RN-004 (Inmutabilidad Periodos), RN-007 (Grado 10/11)
 """
 
@@ -160,6 +160,13 @@ class Ficha(models.Model):
     def __str__(self):
         return f"Ficha {self.codigo_ficha} - {self.programa.denominacion} ({self.institucion.nombre})"
 
+    def clean(self):
+        super().clean()
+        if self.fecha_inicio and self.fecha_fin and self.fecha_fin <= self.fecha_inicio:
+            raise ValidationError({
+                'fecha_fin': "La fecha estimada de finalización debe ser posterior a la fecha de inicio lectivo."
+            })
+
 
 class Matricula(models.Model):
     """
@@ -250,7 +257,166 @@ class HorarioFicha(models.Model):
     activo = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name = "Horario de Ficha"
+        verbose_name_plural = "Horarios de Fichas"
         ordering = ['dia', 'hora_inicio']
 
     def __str__(self):
         return f'{self.ficha.codigo_ficha} · {self.get_dia_display()} {self.hora_inicio:%H:%M}'
+
+    def clean(self):
+        super().clean()
+        if self.hora_inicio and self.hora_fin and self.hora_fin <= self.hora_inicio:
+            raise ValidationError({
+                'hora_fin': "La hora final debe ser posterior a la hora inicial del bloque formativo."
+            })
+
+
+class RecursoBiblioteca(models.Model):
+    """
+    Catálogo bibliográfico oficial SENA: Libros, Guías de Aprendizaje,
+    Manuales Técnicos, Diseños Curriculares SOFIA y Documentos Técnicos.
+    """
+    CATEGORIAS = [
+        ('Libro Tecnico', 'Libro Técnico'),
+        ('Manual SENA', 'Manual SENA'),
+        ('Guia de Aprendizaje', 'Guía de Aprendizaje'),
+        ('Diseno Curricular', 'Diseño Curricular SOFIA'),
+        ('Documento Tecnico', 'Documento Técnico / Estándar'),
+        ('Publicacion', 'Publicación Académica'),
+    ]
+
+    titulo = models.CharField(max_length=220, verbose_name="Título del Recurso")
+    autor = models.CharField(max_length=160, default="SENA Regional Magdalena", verbose_name="Autor / Entidad")
+    categoria = models.CharField(max_length=40, choices=CATEGORIAS, default='Guia de Aprendizaje')
+    tipo_recurso = models.CharField(max_length=60, default="Documento Digital PDF")
+    descripcion = models.TextField(verbose_name="Descripción y Contenido")
+    programa = models.ForeignKey(ProgramaFormacion, on_delete=models.SET_NULL, null=True, blank=True, related_name='recursos_biblioteca')
+    ano_publicacion = models.IntegerField(default=2026, verbose_name="Año de Publicación")
+    archivo_adjunto = models.FileField(upload_to='biblioteca_recursos/%Y/', blank=True, null=True)
+    url_externa = models.URLField(blank=True, null=True, verbose_name="Enlace de Consulta Externa")
+    disponible = models.BooleanField(default=True, verbose_name="Disponible para Descarga")
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Recurso de Biblioteca"
+        verbose_name_plural = "Recursos de Biblioteca"
+        ordering = ['-ano_publicacion', 'titulo']
+
+    def __str__(self):
+        return f"[{self.get_categoria_display()}] {self.titulo}"
+
+
+class RecursoGuardadoAprendiz(models.Model):
+    """
+    Recursos guardados / favoritos por el aprendiz en su espacio 'Mis Recursos'.
+    """
+    aprendiz = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recursos_guardados')
+    recurso = models.ForeignKey(RecursoBiblioteca, on_delete=models.CASCADE, related_name='guardados_por')
+    fecha_guardado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('aprendiz', 'recurso')
+        verbose_name = "Recurso Guardado por Aprendiz"
+        verbose_name_plural = "Recursos Guardados por Aprendices"
+        ordering = ['-fecha_guardado']
+
+    def __str__(self):
+        return f"{self.aprendiz.username} guardó {self.recurso.titulo}"
+
+
+class ProyectoInnovacion(models.Model):
+    """
+    Centro de Innovación y Emprendimiento SENA (Ideas, Proyectos, Prototipos y Emprendimientos).
+    """
+    ESTADOS = [
+        ('IDEA', 'Idea en Conceptualización'),
+        ('PROPUESTA', 'Propuesta Radicada'),
+        ('EN_EVALUACION', 'En Evaluación de Comité'),
+        ('EN_DESARROLLO', 'En Desarrollo Activo'),
+        ('FINALIZADO', 'Proyecto Finalizado / Transferido'),
+    ]
+
+    CATEGORIAS = [
+        ('Software TIC', 'Desarrollo de Software y TIC'),
+        ('Agroecologia', 'Agroecología y Biotecnología'),
+        ('Ecoturismo', 'Ecoturismo y Hotelería Regional'),
+        ('Logistica', 'Logística y Comercio Portuario'),
+        ('Emprendimiento', 'Emprendimiento Comunitario'),
+    ]
+
+    titulo = models.CharField(max_length=220, verbose_name="Título del Proyecto / Idea")
+    descripcion = models.TextField(verbose_name="Descripción, Justificación e Impacto")
+    lider = models.ForeignKey(User, on_delete=models.PROTECT, related_name='proyectos_innovacion_liderados', verbose_name="Aprendiz / Instructor Líder")
+    ficha = models.ForeignKey(Ficha, on_delete=models.SET_NULL, null=True, blank=True, related_name='proyectos_innovacion', verbose_name="Ficha Formativa")
+    instructor_asesor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='proyectos_innovacion_asesorados', verbose_name="Instructor Asesor Técnico")
+    categoria = models.CharField(max_length=50, choices=CATEGORIAS, default='Software TIC', verbose_name="Línea Tecnológica")
+    estado = models.CharField(max_length=30, choices=ESTADOS, default='IDEA', verbose_name="Estado de Madurez")
+    archivo_soporte = models.FileField(upload_to='proyectos_innovacion/%Y/%m/', blank=True, null=True, verbose_name="Ficha Técnica o Documento de Propuesta")
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Proyecto de Innovación"
+        verbose_name_plural = "Proyectos de Innovación"
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"[{self.get_estado_display()}] {self.titulo}"
+
+
+class LogroAprendiz(models.Model):
+    """
+    Sistema de Gamificación Formativa: Insignias y reconocimientos de excelencia (asistencia, cumplimiento, liderazgo).
+    """
+    aprendiz = models.ForeignKey(User, on_delete=models.CASCADE, related_name='logros_obtenidos', verbose_name="Aprendiz Destacado")
+    titulo = models.CharField(max_length=120, verbose_name="Nombre de la Insignia")
+    descripcion = models.CharField(max_length=255, verbose_name="Mérito Reconocido")
+    icono = models.CharField(max_length=60, default='bi-trophy-fill', verbose_name="Icono Bootstrap")
+    color = models.CharField(max_length=30, default='success', verbose_name="Color de la Insignia")
+    categoria = models.CharField(max_length=50, default='Puntualidad y Asistencia', verbose_name="Categoría")
+    fecha_otorgado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Logro / Insignia Formativa"
+        verbose_name_plural = "Logros e Insignias Formativas"
+        ordering = ['-fecha_otorgado']
+
+    def __str__(self):
+        return f"{self.aprendiz.get_full_name()} · {self.titulo}"
+
+
+class DocumentoInstitucional(models.Model):
+    """
+    Gestión Documental oficial SENA con clasificación, control de versiones y permisos RBAC.
+    """
+    CATEGORIAS = [
+        ('Formato Oficial SENA', 'Formato Oficial SENA (PE-04 / F023)'),
+        ('Guia Pedagogica', 'Guía de Aprendizaje Pedagógica'),
+        ('Acta de Comite', 'Acta de Comité de Evaluación'),
+        ('Paz y Salvo', 'Paz y Salvo y Certificaciones'),
+        ('Normativa Institucional', 'Normativa y Circulares del Centro'),
+    ]
+
+    titulo = models.CharField(max_length=220, verbose_name="Título del Documento")
+    categoria = models.CharField(max_length=50, choices=CATEGORIAS, default='Formato Oficial SENA', verbose_name="Categoría")
+    descripcion = models.TextField(blank=True, verbose_name="Descripción del Contenido")
+    archivo = models.FileField(upload_to='gestion_documental/%Y/%m/', verbose_name="Archivo Digital (PDF / Word / Excel)")
+    version = models.CharField(max_length=10, default='1.0', verbose_name="Versión")
+    subido_por = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name="Funcionario que Publica")
+    roles_permitidos = models.CharField(
+        max_length=255,
+        default='Todos',
+        verbose_name="Roles Autorizados",
+        help_text="Escribir 'Todos' o roles separados por coma: Ej: Coordinador,Instructor SENA,Secretaría"
+    )
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Documento Institucional"
+        verbose_name_plural = "Documentos Institucionales"
+        ordering = ['-fecha_subida']
+
+    def __str__(self):
+        return f"[{self.version}] {self.titulo} ({self.get_categoria_display()})"
+

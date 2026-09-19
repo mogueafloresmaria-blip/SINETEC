@@ -124,3 +124,22 @@ class AcademicoModelTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(PerfilUsuario.objects.filter(numero_documento='1002003006').exists())
         self.assertContains(response, 'repetido en el archivo')
+
+    def test_matricular_aprendiz_manual_exitoso(self):
+        """Verifica el flujo manual de matricula de un aprendiz desde el formulario web"""
+        self.client.force_login(self.instructor)
+        datos = {
+            'tipo_documento': 'TI',
+            'numero_documento': '1002003099',
+            'nombres': 'Manuel',
+            'apellidos': 'Gómez',
+            'correo': 'manuel@example.com',
+            'telefono': '3001234567',
+            'grado_escolar': '10',
+            'acudiente_nombre': 'Pedro Gómez',
+            'acudiente_telefono': '3007654321',
+        }
+        response = self.client.post(f'/academico/fichas/{self.ficha.id}/matricular/', datos)
+        self.assertRedirects(response, f'/academico/fichas/{self.ficha.id}/')
+        self.assertTrue(PerfilUsuario.objects.filter(numero_documento='1002003099').exists())
+        self.assertTrue(Matricula.objects.filter(ficha=self.ficha, aprendiz__username='ap_1002003099').exists())

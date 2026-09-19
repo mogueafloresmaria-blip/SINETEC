@@ -1,189 +1,571 @@
 {% extends 'base.html' %}
 
-{% block title %}Ficha {{ ficha.codigo_ficha }} - SINETEC{% endblock %}
+{% block title %}Expediente Ficha {{ ficha.codigo_ficha }} - SINETEC{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <a href="{% url 'fichas_lista' %}" class="btn btn-outline-secondary btn-sm mb-3">
-        <i class="bi bi-arrow-left me-1"></i> Volver a Fichas
-    </a>
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-primary fs-6">Ficha {{ ficha.codigo_ficha }}</span>
-                {% if ficha.periodo_cerrado %}
-                    <span class="badge bg-danger"><i class="bi bi-lock-fill me-1"></i>Periodo Cerrado (RN-004)</span>
-                {% else %}
-                    <span class="badge bg-success"><i class="bi bi-unlock-fill me-1"></i>Periodo Abierto</span>
-                {% endif %}
-            </div>
-            <div class="sinetec-eyebrow mb-1">Expediente académico y operativo</div>
-            <h1 class="sinetec-page-title h3 mb-1">{{ ficha.programa.denominacion }}</h1>
-            <p class="text-muted small mb-0">
-                <i class="bi bi-building me-1"></i>{{ ficha.institucion.nombre }} ({{ ficha.institucion.municipio }}) · 
-                <i class="bi bi-person me-1"></i>Líder: {{ ficha.instructor_lider.get_full_name|default:ficha.instructor_lider.username }}
-            </p>
+<div class="container-fluid py-3">
+
+    <!-- Barra de Navegación Superior y Retorno -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{% url 'fichas_lista' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Volver al listado de fichas
+        </a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'ficha_reporte_pdf' ficha.id %}" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-file-pdf me-1"></i> Exportar PDF
+            </a>
+            <a href="{% url 'ficha_reporte_excel' ficha.id %}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-file-excel me-1"></i> Exportar Excel
+            </a>
+            {% if puede_editar %}
+                <a href="{% url 'ficha_editar' ficha.id %}" class="btn btn-primary btn-sm" style="background-color: #39A900; border-color: #39A900;">
+                    <i class="bi bi-pencil-square me-1"></i> Editar Ficha
+                </a>
+            {% endif %}
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'evaluaciones_calificar' %}?ficha={{ ficha.id }}" class="btn btn-warning fw-semibold">
-                <i class="bi bi-award me-1"></i> Calificar Notas
-            </a>
-            <a href="{% url 'seguimiento_nuevo' %}?ficha={{ ficha.id }}" class="btn btn-outline-primary">
-                <i class="bi bi-journal-plus me-1"></i> Registrar Seguimiento
-            </a>
-            <a href="{% url 'seguimiento_asistencia' %}?ficha={{ ficha.id }}" class="btn btn-outline-success">
-                <i class="bi bi-check2-square me-1"></i> Tomar Asistencia
-            </a>
-            <a href="{% url 'horarios_tablero' %}?ficha={{ ficha.id }}" class="btn btn-outline-dark">
-                <i class="bi bi-calendar3 me-1"></i> Ver Horario
-            </a>
-            <a href="{% url 'fichas_matricular' ficha.id %}" class="btn btn-sinetec-primary">
-                <i class="bi bi-person-plus-fill me-1"></i> Matricular Aprendiz
-            </a>
-            <form method="post" action="{% url 'evaluaciones_cerrar_periodo' ficha.id %}" onsubmit="return confirm('¿Seguro que desea cambiar el estado del periodo formal?');">
-                {% csrf_token %}
-                <button type="submit" class="btn {% if ficha.periodo_cerrado %}btn-outline-success{% else %}btn-outline-danger{% endif %}">
+    </div>
+
+    <!-- Tarjeta Principal del Expediente de la Ficha -->
+    <div class="sinetec-card p-4 mb-4 border-start border-4 border-success">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="badge fs-6 fw-bold text-white px-3 py-1 rounded-pill" style="background-color: #1b4d3e;">
+                        Ficha {{ ficha.codigo_ficha }}
+                    </span>
+                    <span class="badge {% if ficha.estado == 'En Ejecucion' %}bg-success bg-opacity-10 text-success border border-success border-opacity-25{% else %}bg-secondary text-white{% endif %} rounded-pill">
+                        {{ ficha.get_estado_display }}
+                    </span>
                     {% if ficha.periodo_cerrado %}
-                        <i class="bi bi-unlock me-1"></i> Reabrir Periodo
+                        <span class="badge bg-danger"><i class="bi bi-lock-fill me-1"></i>Periodo Evaluativo Cerrado (RN-004)</span>
                     {% else %}
-                        <i class="bi bi-lock me-1"></i> Cerrar Periodo Oficial
+                        <span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-unlock-fill me-1"></i>Periodo Evaluativo Abierto</span>
                     {% endif %}
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Pestañas de Aprendices, Seguimientos y Estructura Curricular -->
-<div class="sinetec-card p-3 p-lg-4 mb-4">
-    <ul class="nav nav-tabs nav-fill mb-4" id="fichaTabs" role="tablist">
-        <li class="nav-item">
-            <button class="nav-link active fw-semibold" id="aprendices-tab" data-bs-toggle="tab" data-bs-target="#aprendicesTab">
-                <i class="bi bi-people me-1"></i> Aprendices Matriculados ({{ matriculas.count }})
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link fw-semibold" id="seguimientos-tab" data-bs-toggle="tab" data-bs-target="#seguimientosTab">
-                <i class="bi bi-journal-check me-1"></i> Bitácoras de Visita Recientes
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link fw-semibold" id="curricular-tab" data-bs-toggle="tab" data-bs-target="#curricularTab">
-                <i class="bi bi-diagram-3 me-1"></i> Competencias y Resultados (RAP)
-            </button>
-        </li>
-    </ul>
-
-    <div class="tab-content" id="fichaTabsContent">
-        <!-- Pestaña: Aprendices -->
-        <div class="tab-pane fade show active" id="aprendicesTab">
-            <div class="table-responsive">
-                <table class="table table-sinetec table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Documento</th>
-                            <th>Nombres y Apellidos</th>
-                            <th>Grado Escolar</th>
-                            <th>Estado</th>
-                            <th>Contacto / Acudiente</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for m in matriculas %}
-                            <tr>
-                                <td class="fw-bold">{{ m.aprendiz.perfil.tipo_documento }} {{ m.aprendiz.perfil.numero_documento }}</td>
-                                <td class="fw-semibold">{{ m.aprendiz.last_name }}, {{ m.aprendiz.first_name }}</td>
-                                <td><span class="badge bg-light text-dark border">{{ m.get_grado_escolar_display }}</span></td>
-                                <td><span class="badge bg-success bg-opacity-10 text-success">{{ m.get_estado_formacion_display }}</span></td>
-                                <td>
-                                    <small>Tel: {{ m.aprendiz.perfil.telefono|default:"-" }}</small><br>
-                                    <small class="text-muted">Acudiente: {{ m.acudiente_nombre|default:"-" }} ({{ m.acudiente_telefono|default:"-" }})</small>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">
-                                    No hay aprendices matriculados en esta ficha técnica aún.
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Pestaña: Seguimientos -->
-        <div class="tab-pane fade" id="seguimientosTab">
-            <div class="table-responsive">
-                <table class="table table-sinetec table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Tipo Visita</th>
-                            <th>Instructor</th>
-                            <th>Observaciones Técnicas</th>
-                            <th>Compromisos</th>
-                            <th class="text-end">Detalle</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for s in seguimientos %}
-                            <tr>
-                                <td class="fw-semibold text-nowrap">{{ s.fecha_visita|date:"d/m/Y" }}</td>
-                                <td><span class="badge bg-light text-dark border">{{ s.tipo_seguimiento }}</span></td>
-                                <td>{{ s.instructor.get_full_name|default:s.instructor.username }}</td>
-                                <td>{{ s.observaciones|truncatechars:60 }}</td>
-                                <td>
-                                    {% if s.compromisos %}
-                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Hasta {{ s.fecha_verificacion|date:"d/m/Y" }}</span>
-                                    {% else %}
-                                        <span class="text-muted small">Sin novedades</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-end">
-                                    <a href="{% url 'seguimiento_detalle' s.id %}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">
-                                    No hay visitas de seguimiento registradas para esta ficha.
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Pestaña: Competencias y RAP -->
-        <div class="tab-pane fade" id="curricularTab">
-            {% for comp in competencias %}
-                <div class="card mb-3 border">
-                    <div class="card-header bg-light fw-bold text-dark">
-                        <i class="bi bi-bookmark-fill text-primary me-2"></i>{{ comp.codigo }} — {{ comp.descripcion }}
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        {% for rap in comp.resultados.all %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong class="text-primary">{{ rap.codigo }}:</strong> {{ rap.descripcion }}
-                                </div>
-                                <a href="{% url 'evaluaciones_calificar' %}?ficha={{ ficha.id }}&rap={{ rap.id }}" class="btn btn-sm btn-outline-warning text-dark fw-medium text-nowrap ms-2">
-                                    <i class="bi bi-award me-1"></i> Calificar Este RAP
-                                </a>
-                            </li>
-                        {% empty %}
-                            <li class="list-group-item text-muted small">No hay resultados de aprendizaje asociados a esta competencia.</li>
-                        {% endfor %}
-                    </ul>
                 </div>
-            {% empty %}
-                <p class="text-muted text-center py-4">No hay competencias curriculares cargadas para este programa.</p>
-            {% endfor %}
+                <h1 class="h3 fw-bold text-dark mb-1">{{ ficha.programa.denominacion }}</h1>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>Regional Magdalena · Centro de Logística y Promoción Ecoturística
+                    <span class="mx-2">|</span>
+                    <i class="bi bi-building text-primary me-1"></i>{{ ficha.institucion.nombre }} ({{ ficha.institucion.municipio }})
+                    <span class="mx-2">|</span>
+                    <i class="bi bi-person-badge text-warning me-1"></i>Instructor Líder: <strong>{{ ficha.instructor_lider.get_full_name|default:ficha.instructor_lider.username }}</strong>
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'evaluaciones_calificar' %}?ficha={{ ficha.id }}" class="btn btn-warning fw-semibold shadow-sm">
+                    <i class="bi bi-award me-1"></i> Calificar RAP
+                </a>
+                <a href="{% url 'fichas_matricular' ficha.id %}" class="btn btn-success fw-semibold shadow-sm" style="background-color: #39A900; border-color: #39A900;">
+                    <i class="bi bi-person-plus-fill me-1"></i> Matricular
+                </a>
+                <a href="{% url 'seguimiento_nuevo' %}?ficha={{ ficha.id }}" class="btn btn-outline-dark">
+                    <i class="bi bi-journal-plus me-1"></i> Visita / Seguimiento
+                </a>
+            </div>
         </div>
     </div>
+
+    <!-- Navegación de las 10 Pestañas Oficiales -->
+    <div class="sinetec-card p-0 mb-4 overflow-hidden">
+        <ul class="nav nav-tabs nav-justified bg-light border-bottom" id="fichaExpedienteTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-semibold py-3" id="tab-resumen-btn" data-bs-toggle="tab" data-bs-target="#tab-resumen" type="button" role="tab">
+                    <i class="bi bi-info-circle me-1"></i> RESUMEN
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold py-3" id="tab-aprendices-btn" data-bs-toggle="tab" data-bs-target="#tab-aprendices" type="button" role="tab">
+                    <i class="bi bi-people me-1"></i> APRENDICES ({{ total_aprendices }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold py-3" id="tab-programa-btn" data-bs-toggle="tab" data-bs-target="#tab-programa" type="button" role="tab">
+                    <i class="bi bi-journal-code me-1"></i> PROGRAMA
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold py-3" id="tab-instructores-btn" data-bs-toggle="tab" data-bs-target="#tab-instructores" type="button" role="tab">
+                    <i class="bi bi-person-workspace me-1"></i> INSTRUCTORES
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold py-3" id="tab-horario-btn" data-bs-toggle="tab" data-bs-target="#tab-horario" type="button" role="tab">
+                    <i class="bi bi-calendar3 me-1"></i> HORARIO
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold py-3" id="tab-seguimiento-btn" data-bs-toggle="tab" data-bs-target="#tab-seguimiento" type="button" role="tab">
+                    <i class="bi bi-clipboard2-pulse me-1"></i> SEGUIMIENTO
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold py-3" id="tab-evaluaciones-btn" data-bs-toggle="tab" data-bs-target="#tab-evaluaciones" type="button" role="tab">
+                    <i class="bi bi-award me-1"></i> EVALUACIONES
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold py-3" id="tab-evidencias-btn" data-bs-toggle="tab" data-bs-target="#tab-evidencias" type="button" role="tab">
+                    <i class="bi bi-file-earmark-check me-1"></i> EVIDENCIAS
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold py-3" id="tab-novedades-btn" data-bs-toggle="tab" data-bs-target="#tab-novedades" type="button" role="tab">
+                    <i class="bi bi-bell me-1"></i> NOVEDADES
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold py-3" id="tab-reportes-btn" data-bs-toggle="tab" data-bs-target="#tab-reportes" type="button" role="tab">
+                    <i class="bi bi-bar-chart me-1"></i> REPORTES
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content p-4" id="fichaExpedienteContent">
+            
+            <!-- 1. PESTAÑA RESUMEN -->
+            <div class="tab-pane fade show active" id="tab-resumen" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 bg-light p-4 rounded-4">
+                            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-info-square-fill text-success me-2"></i>Ficha Técnica y Operación</h5>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5 text-secondary">Número de Ficha:</dt>
+                                <dd class="col-sm-7 fw-bold text-dark">{{ ficha.codigo_ficha }}</dd>
+
+                                <dt class="col-sm-5 text-secondary">Programa Formativo:</dt>
+                                <dd class="col-sm-7 fw-semibold">{{ ficha.programa.denominacion }}</dd>
+
+                                <dt class="col-sm-5 text-secondary">Código SOFIA Plus:</dt>
+                                <dd class="col-sm-7">{{ ficha.programa.codigo_programa }} (Versión {{ ficha.programa.version }})</dd>
+
+                                <dt class="col-sm-5 text-secondary">Estado de Cohorte:</dt>
+                                <dd class="col-sm-7">
+                                    <span class="badge bg-success bg-opacity-10 text-success fw-bold">{{ ficha.get_estado_display }}</span>
+                                </dd>
+
+                                <dt class="col-sm-5 text-secondary">Inicio Lectivo:</dt>
+                                <dd class="col-sm-7">{{ ficha.fecha_inicio|date:"d/m/Y" }}</dd>
+
+                                <dt class="col-sm-5 text-secondary">Fin Estimado:</dt>
+                                <dd class="col-sm-7">{{ ficha.fecha_fin|date:"d/m/Y" }}</dd>
+
+                                <dt class="col-sm-5 text-secondary">Periodo Formal:</dt>
+                                <dd class="col-sm-7">
+                                    {% if ficha.periodo_cerrado %}
+                                        <span class="text-danger fw-semibold"><i class="bi bi-lock-fill me-1"></i>Cerrado (Bloqueo de Notas RN-004)</span>
+                                    {% else %}
+                                        <span class="text-success fw-semibold"><i class="bi bi-unlock-fill me-1"></i>Abierto para Calificaciones</span>
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 bg-light p-4 rounded-4">
+                            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-building text-primary me-2"></i>Institución Educativa Articulada</h5>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5 text-secondary">Nombre de la Sede:</dt>
+                                <dd class="col-sm-7 fw-bold text-dark">{{ ficha.institucion.nombre }}</dd>
+
+                                <dt class="col-sm-5 text-secondary">Código DANE:</dt>
+                                <dd class="col-sm-7">{{ ficha.institucion.codigo_dane }}</dd>
+
+                                <dt class="col-sm-5 text-secondary">Municipio:</dt>
+                                <dd class="col-sm-7">{{ ficha.institucion.municipio }}, Magdalena</dd>
+
+                                <dt class="col-sm-5 text-secondary">Dirección:</dt>
+                                <dd class="col-sm-7">{{ ficha.institucion.direccion|default:"Dirección institucional" }}</dd>
+
+                                <dt class="col-sm-5 text-secondary">Rector(a):</dt>
+                                <dd class="col-sm-7">{{ ficha.institucion.rector_nombre|default:"Por registrar" }}</dd>
+
+                                <dt class="col-sm-5 text-secondary">Docente Enlace:</dt>
+                                <dd class="col-sm-7">{{ ficha.institucion.enlace_nombre|default:"Por registrar" }}</dd>
+
+                                <dt class="col-sm-5 text-secondary">Teléfono de Enlace:</dt>
+                                <dd class="col-sm-7">{{ ficha.institucion.enlace_telefono|default:"No registrado" }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. PESTAÑA APRENDICES -->
+            <div class="tab-pane fade" id="tab-aprendices" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h5 class="fw-bold mb-0">Directorio de Aprendices Matriculados en Ficha {{ ficha.codigo_ficha }}</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'fichas_matricular' ficha.id %}" class="btn btn-sm btn-success fw-semibold" style="background-color: #39A900; border-color: #39A900;">
+                            <i class="bi bi-person-plus me-1"></i> Matricular Aprendiz
+                        </a>
+                        <a href="{% url 'ficha_reporte_excel' ficha.id %}" class="btn btn-sm btn-outline-dark">
+                            <i class="bi bi-file-excel me-1"></i> Descargar Nómina Excel
+                        </a>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-uppercase small">
+                            <tr>
+                                <th>No.</th>
+                                <th>Documento</th>
+                                <th>Apellidos y Nombres</th>
+                                <th>Correo Institucional</th>
+                                <th>Grado</th>
+                                <th>Estado</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in matriculas %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            {{ m.aprendiz.perfil.get_tipo_documento_display }} {{ m.aprendiz.perfil.numero_documento }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                    </td>
+                                    <td><small class="text-muted">{{ m.aprendiz.email }}</small></td>
+                                    <td>{{ m.get_grado_escolar_display }}</td>
+                                    <td>
+                                        <span class="badge bg-success bg-opacity-10 text-success">
+                                            {{ m.get_estado_formacion_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-primary" title="Ver perfil">
+                                            <i class="bi bi-person-vcard"></i>
+                                        </a>
+                                        <a href="{% url 'carnet_digital_id' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-success" title="Ver carné oficial ampliado">
+                                            <i class="bi bi-qr-code"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <i class="bi bi-people fs-2 d-block mb-2"></i>
+                                        Esta ficha aún no tiene aprendices matriculados.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. PESTAÑA PROGRAMA -->
+            <div class="tab-pane fade" id="tab-programa" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Estructura Curricular del Programa: {{ ficha.programa.denominacion }}</h5>
+                    <a href="{% url 'programa_detalle' ficha.programa.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Expediente del Programa
+                    </a>
+                </div>
+                <div class="row g-3">
+                    {% for comp in competencias %}
+                        <div class="col-12">
+                            <div class="border rounded-3 p-3 bg-white shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-success px-2 py-1" style="background-color: #39A900 !important;">Norma {{ comp.codigo }}</span>
+                                    <span class="text-muted small">{{ comp.resultados.count }} Resultados de Aprendizaje</span>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">{{ comp.descripcion }}</h6>
+                                <div class="list-group list-group-flush border-top pt-2">
+                                    {% for rap in comp.resultados.all %}
+                                        <div class="list-group-item px-0 py-2 border-0 d-flex justify-content-between align-items-center">
+                                            <div class="small">
+                                                <strong class="text-success me-2">{{ rap.codigo }}:</strong>
+                                                {{ rap.descripcion }}
+                                            </div>
+                                            <a href="{% url 'evaluaciones_calificar' %}?ficha={{ ficha.id }}&rap={{ rap.id }}" class="btn btn-xs btn-outline-secondary btn-sm ms-2">
+                                                Evaluar RAP
+                                            </a>
+                                        </div>
+                                    {% empty %}
+                                        <small class="text-muted">No hay RAPs registrados para esta competencia.</small>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 4. PESTAÑA INSTRUCTORES -->
+            <div class="tab-pane fade" id="tab-instructores" role="tabpanel">
+                <h5 class="fw-bold mb-3">Equipo Técnico y Pedagógico Responsable</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card p-3 border rounded-3 bg-light">
+                            <span class="badge bg-warning text-dark align-self-start mb-2">Instructor Líder</span>
+                            <h6 class="fw-bold mb-1">{{ ficha.instructor_lider.get_full_name|default:ficha.instructor_lider.username }}</h6>
+                            <p class="small text-muted mb-2"><i class="bi bi-envelope me-1"></i>{{ ficha.instructor_lider.email }}</p>
+                            <span class="small text-muted">Responsable formal del seguimiento, evaluación y reporte institucional de la cohorte.</span>
+                        </div>
+                    </div>
+                    {% for inst in instructores %}
+                        {% if inst.id != ficha.instructor_lider_id %}
+                            <div class="col-md-6">
+                                <div class="card p-3 border rounded-3 bg-white">
+                                    <span class="badge bg-secondary align-self-start mb-2">Instructor Asignado</span>
+                                    <h6 class="fw-bold mb-1">{{ inst.get_full_name|default:inst.username }}</h6>
+                                    <p class="small text-muted mb-2"><i class="bi bi-envelope me-1"></i>{{ inst.email }}</p>
+                                    <span class="small text-muted">A cargo de bloques formativos y ambientes en el horario semanal.</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 5. PESTAÑA HORARIO -->
+            <div class="tab-pane fade" id="tab-horario" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Bloques Formativos y Ambientes de Aprendizaje</h5>
+                    <a href="{% url 'horarios_tablero' %}?ficha={{ ficha.id }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-calendar-plus me-1"></i> Gestionar Horario
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-uppercase small">
+                            <tr>
+                                <th>Día</th>
+                                <th>Horario</th>
+                                <th>Modalidad</th>
+                                <th>Ambiente de Aprendizaje</th>
+                                <th>Módulo / Tema</th>
+                                <th>Instructor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in horarios %}
+                                <tr>
+                                    <td><strong>{{ h.get_dia_display }}</strong></td>
+                                    <td>{{ h.hora_inicio|time:"H:i" }} — {{ h.hora_fin|time:"H:i" }}</td>
+                                    <td><span class="badge bg-light text-dark border">{{ h.modalidad }}</span></td>
+                                    <td><i class="bi bi-building me-1 text-primary"></i>{{ h.ambiente|default:"Sala de Informática" }}</td>
+                                    <td>{{ h.tema|default:"Formación Técnica ADSI" }}</td>
+                                    <td>{{ h.instructor.get_full_name|default:h.instructor.username }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        No hay horarios formativos configurados para esta ficha.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 6. PESTAÑA SEGUIMIENTO -->
+            <div class="tab-pane fade" id="tab-seguimiento" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Bitácoras de Acompañamiento y Visitas Presenciales</h5>
+                    <a href="{% url 'seguimiento_nuevo' %}?ficha={{ ficha.id }}" class="btn btn-sm btn-success" style="background-color: #39A900; border-color: #39A900;">
+                        <i class="bi bi-journal-plus me-1"></i> Registrar Bitácora
+                    </a>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for seg in seguimientos %}
+                        <div class="list-group-item p-3 border rounded-3 mb-2 bg-white">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div>
+                                    <span class="badge bg-dark me-2">{{ seg.fecha_visita|date:"d M Y" }}</span>
+                                    <span class="badge bg-light text-dark border">{{ seg.tipo_seguimiento }}</span>
+                                </div>
+                                <a href="{% url 'seguimiento_detalle' seg.id %}" class="btn btn-sm btn-outline-primary py-0">
+                                    Ver acta completa
+                                </a>
+                            </div>
+                            <h6 class="fw-bold text-dark mt-2 mb-1">
+                                {% if seg.matricula %}Aprendiz: {{ seg.matricula.aprendiz.get_full_name }}{% else %}Acompañamiento General al Grupo{% endif %}
+                            </h6>
+                            <p class="small text-secondary mb-2">{{ seg.observaciones }}</p>
+                            {% if seg.compromisos %}
+                                <div class="bg-light p-2 rounded small text-dark">
+                                    <strong><i class="bi bi-check2-circle text-success me-1"></i>Compromiso:</strong> {{ seg.compromisos }}
+                                    <span class="text-muted ms-2">(Verificar: {{ seg.fecha_verificacion|date:"d/m/Y" }})</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-clipboard2-pulse fs-2 d-block mb-2"></i>
+                            Esta ficha aún no registra bitácoras de visita o acompañamiento.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 7. PESTAÑA EVALUACIONES -->
+            <div class="tab-pane fade" id="tab-evaluaciones" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-0">Juicios Evaluativos Cualitativos Asentados</h5>
+                        <small class="text-muted">Total: {{ total_juicios }} juicios | {{ juicios_aprobados }} Aprobados ('A') | {{ juicios_deficientes }} Por Mejorar ('D')</small>
+                    </div>
+                    <a href="{% url 'evaluaciones_calificar' %}?ficha={{ ficha.id }}" class="btn btn-sm btn-warning fw-semibold">
+                        <i class="bi bi-award me-1"></i> Abrir Sábana Completa
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-secondary small">
+                        <thead class="table-light text-uppercase">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Aprendiz</th>
+                                <th>Resultado de Aprendizaje (RAP)</th>
+                                <th>Juicio Valorativo</th>
+                                <th>Observaciones / Retroalimentación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ev in evaluaciones %}
+                                <tr>
+                                    <td>{{ ev.fecha_evaluacion|date:"d/m/Y" }}</td>
+                                    <td><strong>{{ ev.matricula.aprendiz.get_full_name|default:ev.matricula.aprendiz.username }}</strong></td>
+                                    <td><span class="badge bg-light text-dark border">{{ ev.resultado_aprendizaje.codigo }}</span> {{ ev.resultado_aprendizaje.descripcion|truncatechars:45 }}</td>
+                                    <td>
+                                        {% if ev.juicio_valor == 'A' %}
+                                            <span class="badge bg-success px-2 py-1">A - Aprobado</span>
+                                        {% else %}
+                                            <span class="badge bg-danger px-2 py-1">D - No Aprobado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ ev.observaciones|default:"Sin observaciones registradas." }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        No hay evaluaciones registradas en esta cohorte.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 8. PESTAÑA EVIDENCIAS -->
+            <div class="tab-pane fade" id="tab-evidencias" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Talleres y Evidencias de Aprendizaje Asignadas</h5>
+                    <a href="{% url 'crear_evidencia' %}" class="btn btn-sm btn-success" style="background-color: #39A900; border-color: #39A900;">
+                        <i class="bi bi-plus-lg me-1"></i> Publicar Nueva Evidencia
+                    </a>
+                </div>
+                <div class="row g-3">
+                    {% for comp in competencias %}
+                        {% for rap in comp.resultados.all %}
+                            <div class="col-md-6">
+                                <div class="border rounded-3 p-3 bg-light">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-success bg-opacity-25 text-success fw-bold">{{ rap.codigo }}</span>
+                                        <small class="text-muted">Norma {{ comp.codigo }}</small>
+                                    </div>
+                                    <h6 class="fw-semibold text-dark mb-2">{{ rap.descripcion|truncatechars:70 }}</h6>
+                                    <a href="{% url 'evaluaciones_calificar' %}?ficha={{ ficha.id }}&rap={{ rap.id }}" class="btn btn-sm btn-outline-dark">
+                                        <i class="bi bi-check2-all me-1"></i> Consultar Evidencias
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% empty %}
+                        <div class="col-12 text-center text-muted py-4">No hay evidencias asignadas.</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 9. PESTAÑA NOVEDADES -->
+            <div class="tab-pane fade" id="tab-novedades" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Novedades y Solicitudes Vinculadas a la Ficha</h5>
+                    <a href="{% url 'nueva_solicitud' %}?ficha={{ ficha.id }}" class="btn btn-sm btn-outline-dark">
+                        <i class="bi bi-envelope-plus me-1"></i> Radicar Novedad
+                    </a>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for nov in novedades %}
+                        <div class="list-group-item p-3 border rounded-3 mb-2 bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-light text-dark border">{{ nov.get_categoria_display }}</span>
+                                <span class="badge {% if nov.estado == 'CERRADA' %}bg-secondary{% elif nov.estado == 'RESPONDIDA' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                    {{ nov.get_estado_display }}
+                                </span>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">{{ nov.asunto }}</h6>
+                            <p class="small text-muted mb-0">Radicado por: {{ nov.aprendiz.get_full_name }} el {{ nov.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    {% empty %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-check-circle fs-2 d-block mb-2 text-success"></i>
+                            No existen novedades activas o casos pendientes para esta ficha.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 10. PESTAÑA REPORTES -->
+            <div class="tab-pane fade" id="tab-reportes" role="tabpanel">
+                <h5 class="fw-bold mb-3">Centro de Reportes y Descargas Institucionales</h5>
+                <div class="row g-3">
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card p-4 border-0 bg-light rounded-4 h-100">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger fs-1"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-0">Acta Oficial de Ficha PDF</h6>
+                                    <small class="text-muted">Expediente completo con firmas</small>
+                                </div>
+                            </div>
+                            <p class="small text-muted mb-3">Genera el reporte oficial en PDF con la relación completa de aprendices, fechas lectivas y sedes.</p>
+                            <a href="{% url 'ficha_reporte_pdf' ficha.id %}" class="btn btn-danger btn-sm mt-auto fw-semibold">
+                                <i class="bi bi-download me-1"></i> Descargar PDF Oficial
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card p-4 border-0 bg-light rounded-4 h-100">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <i class="bi bi-file-earmark-spreadsheet-fill text-success fs-1"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-0">Sábana de Aprendices Excel</h6>
+                                    <small class="text-muted">Formato .xlsx para auditoría</small>
+                                </div>
+                            </div>
+                            <p class="small text-muted mb-3">Planilla estructurada en Excel con documento, acudiente, grado escolar y estado de matrícula.</p>
+                            <a href="{% url 'ficha_reporte_excel' ficha.id %}" class="btn btn-success btn-sm mt-auto fw-semibold" style="background-color: #39A900; border-color: #39A900;">
+                                <i class="bi bi-download me-1"></i> Descargar Nómina Excel
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card p-4 border-0 bg-light rounded-4 h-100">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <i class="bi bi-award-fill text-warning fs-1"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-0">Certificación Técnica</h6>
+                                    <small class="text-muted">Control de cumplimiento curricular</small>
+                                </div>
+                            </div>
+                            <p class="small text-muted mb-3">Consulta el avance de cada aprendiz frente al 100% de los RAPs obligatorios del diseño curricular.</p>
+                            <a href="{% url 'consulta_certificacion' %}?ficha={{ ficha.id }}" class="btn btn-outline-dark btn-sm mt-auto fw-semibold">
+                                <i class="bi bi-check2-all me-1"></i> Consultar Estado
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 </div>
 {% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Solicitudes - Secretaría SENA | SINETEC{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <div class="sinetec-eyebrow mb-1">Trámites y Consultas</div>
+            <h1 class="sinetec-page-title h3 mb-1">Mis Solicitudes a Secretaría</h1>
+            <p class="text-muted small mb-0">Seguimiento a tus radicaciones, respuestas oficiales y estado de atención.</p>
+        </div>
+        <a href="{% url 'nueva_solicitud' %}" class="btn btn-success fw-bold px-4 shadow-sm" style="background-color: #39A900; border-color: #39A900;">
+            <i class="bi bi-plus-circle me-1"></i> [ NUEVA SOLICITUD ]
+        </a>
+    </div>
+
+    <div class="sinetec-card p-0 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+                <thead class="table-light text-uppercase">
+                    <tr>
+                        <th class="ps-3">Radicado</th>
+                        <th>Categoría</th>
+                        <th>Asunto</th>
+                        <th>Ficha</th>
+                        <th>Estado</th>
+                        <th>Fecha de Envío</th>
+                        <th class="text-end pe-3">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in solicitudes %}
+                        <tr>
+                            <td class="ps-3 fw-bold text-dark">#{{ s.id }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ s.get_categoria_display }}</span></td>
+                            <td>
+                                <strong class="text-dark">{{ s.asunto }}</strong>
+                                {% if s.archivo_adjunto %}
+                                    <i class="bi bi-paperclip text-success ms-1" title="Contiene documento adjunto"></i>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if s.ficha %}
+                                    <span class="badge bg-light text-dark border">Ficha {{ s.ficha.codigo_ficha }}</span>
+                                {% else %}
+                                    <span class="text-muted">General</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if s.estado == 'RESPONDIDA' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success fw-bold">Respondida</span>
+                                {% elif s.estado == 'CERRADA' %}
+                                    <span class="badge bg-secondary">Cerrada</span>
+                                {% elif s.estado == 'EN_REVISION' %}
+                                    <span class="badge bg-warning text-dark">En Revisión</span>
+                                {% else %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border">Enviada</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ s.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                            <td class="text-end pe-3">
+                                <a href="{% url 'secretaria_detalle' s.id %}" class="btn btn-sm btn-outline-dark fw-semibold">
+                                    <i class="bi bi-chat-text me-1"></i> Ver Respuestas
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Aún no has radicado solicitudes ante Secretaría.
+                                <div class="mt-3">
+                                    <a href="{% url 'nueva_solicitud' %}" class="btn btn-sm btn-success" style="background-color: #39A900; border-color: #39A900;">
+                                        Crear mi primera solicitud
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

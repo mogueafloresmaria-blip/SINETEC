@@ -19,10 +19,42 @@
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Aprendices activos</div><div class="sinetec-metric-value">{{ total_aprendices|default:0 }}</div><small class="text-success fw-semibold"><i class="bi bi-arrow-up-right"></i> Matrículas en formación</small></div></div>
-        <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Instructores</div><div class="sinetec-metric-value">{{ total_instructores|default:0 }}</div><small class="text-muted">Equipo responsable</small></div></div>
-        <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Fichas activas</div><div class="sinetec-metric-value">{{ fichas_activas|default:0 }}</div><small class="text-muted">De {{ total_fichas|default:0 }} registradas</small></div></div>
-        <div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Pendientes de seguimiento</div><div class="sinetec-metric-value">{{ seguimientos_pendientes|default:0 }}</div><small class="text-warning fw-semibold"><i class="bi bi-clock"></i> Requieren atención</small></div></div>
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'estudiantes_lista' %}" class="text-decoration-none">
+                <div class="sinetec-card sinetec-metric h-100 transition-all">
+                    <div class="sinetec-metric-label">Aprendices activos</div>
+                    <div class="sinetec-metric-value text-dark">{{ total_aprendices|default:0 }}</div>
+                    <small class="text-success fw-semibold"><i class="bi bi-arrow-up-right"></i> Ver directorio completo</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'gestion_usuarios' %}?rol=instructor" class="text-decoration-none">
+                <div class="sinetec-card sinetec-metric h-100">
+                    <div class="sinetec-metric-label">Instructores SENA</div>
+                    <div class="sinetec-metric-value text-dark">{{ total_instructores|default:0 }}</div>
+                    <small class="text-primary fw-semibold"><i class="bi bi-person-badge"></i> Equipo técnico y líderes</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'fichas_lista' %}" class="text-decoration-none">
+                <div class="sinetec-card sinetec-metric h-100">
+                    <div class="sinetec-metric-label">Fichas activas</div>
+                    <div class="sinetec-metric-value text-dark">{{ fichas_activas|default:0 }}</div>
+                    <small class="text-muted">De {{ total_fichas|default:0 }} cohortes</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'seguimiento_lista' %}" class="text-decoration-none">
+                <div class="sinetec-card sinetec-metric h-100">
+                    <div class="sinetec-metric-label">Pendientes seguimiento</div>
+                    <div class="sinetec-metric-value text-dark">{{ seguimientos_pendientes|default:0 }}</div>
+                    <small class="text-warning fw-semibold"><i class="bi bi-clock"></i> Bitácoras y visitas</small>
+                </div>
+            </a>
+        </div>
     </div>
 
     <div class="row g-4 mb-4">
@@ -38,13 +70,18 @@
                 <div class="row g-3">
                     {% for modulo in modulos_disponibles %}
                         {% if modulo.activo %}
-                            <div class="col-md-6 col-xl-4">
-                                <div class="border border-success-subtle rounded-4 p-3 h-100 bg-gradient" style="background: linear-gradient(135deg, rgba(57,169,0,.08), rgba(255,255,255,1));">
-                                    <div class="d-flex align-items-center gap-3 mb-2">
-                                        <span class="rounded-3 p-2 bg-white border" style="color:#1f5e2d"><i class="bi {{ modulo.icono }} fs-5"></i></span>
-                                        <strong>{{ modulo.titulo }}</strong>
+                            <div class="col-md-6 col-xl-3">
+                                <div class="card border-0 shadow-sm rounded-4 p-3 h-100 bg-gradient border-start border-4 d-flex flex-column justify-content-between" style="border-left-color: #39A900 !important; background: linear-gradient(135deg, rgba(57,169,0,.06), rgba(255,255,255,1));">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <span class="rounded-3 p-2 bg-white border shadow-sm text-success"><i class="bi {{ modulo.icono }} fs-5"></i></span>
+                                            <strong class="text-dark small">{{ modulo.titulo }}</strong>
+                                        </div>
+                                        <p class="text-muted small mb-3">{{ modulo.descripcion }}</p>
                                     </div>
-                                    <p class="text-muted small mb-0">{{ modulo.descripcion }}</p>
+                                    <a href="{{ modulo.url }}" class="btn btn-sm btn-outline-success fw-semibold w-100 mt-auto">
+                                        {{ modulo.accion }} <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
                                 </div>
                             </div>
                         {% endif %}
@@ -61,32 +98,57 @@
             <section class="sinetec-card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <div class="sinetec-eyebrow">Horario digital</div>
+                        <div class="sinetec-eyebrow">Cohortes y Programas</div>
                         <h2 class="sinetec-page-title h3 mb-0">Tablero de fichas y rutas formativas</h2>
                     </div>
-                    <span class="badge bg-light text-dark border">Actualización diaria</span>
+                    <a href="{% url 'fichas_lista' %}" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-layers me-1"></i> Ver todas las fichas
+                    </a>
                 </div>
                 <div class="row g-3">
                     {% for ficha in tablero_fichas %}
                         <div class="col-md-6 col-xl-4">
-                            <div class="border rounded-4 p-3 h-100 shadow-sm">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <div class="small text-uppercase text-muted">Ficha</div>
-                                        <strong class="fs-5">{{ ficha.codigo }}</strong>
+                            <div class="card border-0 shadow-sm rounded-4 p-3 h-100 bg-white d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <div class="small text-uppercase text-muted fw-bold">Ficha Técnica</div>
+                                            <a href="{{ ficha.url_detalle }}" class="fs-5 fw-bold text-success text-decoration-none">
+                                                Ficha {{ ficha.codigo }}
+                                            </a>
+                                        </div>
+                                        <span class="badge {% if ficha.estado == 'En Ejecucion' %}bg-success-subtle text-success-emphasis{% else %}bg-secondary-subtle text-secondary-emphasis{% endif %} rounded-pill">{{ ficha.estado }}</span>
                                     </div>
-                                    <span class="badge {% if ficha.estado == 'En Ejecucion' %}bg-success-subtle text-success-emphasis{% else %}bg-secondary-subtle text-secondary-emphasis{% endif %} rounded-pill">{{ ficha.estado }}</span>
+                                    <p class="mb-1 fw-bold text-dark small">{{ ficha.programa }}</p>
+                                    <p class="text-muted small mb-2">{{ ficha.institucion }}<br><strong>Instructor:</strong> {{ ficha.instructor }}</p>
                                 </div>
-                                <p class="mb-2 fw-semibold">{{ ficha.programa }}</p>
-                                <p class="text-muted small mb-3">{{ ficha.institucion }} · Instructor: {{ ficha.instructor }}</p>
-                                <div class="d-flex flex-wrap gap-2 mb-3">
-                                    {% for modulo in ficha.modulos %}
-                                        <span class="badge rounded-pill bg-light text-dark border">{{ modulo }}</span>
-                                    {% endfor %}
-                                </div>
-                                <div class="d-flex justify-content-between small text-muted">
-                                    <span>Aprendices: {{ ficha.aprendices }}</span>
-                                    <span>{{ ficha.jornada }}</span>
+                                <div>
+                                    <div class="d-flex justify-content-between small text-muted mb-2 border-top pt-2">
+                                        <span><i class="bi bi-people me-1"></i> Aprendices: <strong>{{ ficha.aprendices }}</strong></span>
+                                        <span><i class="bi bi-sun me-1"></i> {{ ficha.jornada }}</span>
+                                    </div>
+                                    <div class="row g-1">
+                                        <div class="col-6">
+                                            <a href="{{ ficha.url_detalle }}" class="btn btn-sm btn-outline-dark w-100" style="font-size: 0.72rem;">
+                                                <i class="bi bi-eye"></i> Ver Detalle
+                                            </a>
+                                        </div>
+                                        <div class="col-6">
+                                            <a href="{{ ficha.url_aprendices }}" class="btn btn-sm btn-outline-success w-100" style="font-size: 0.72rem;">
+                                                <i class="bi bi-people"></i> Aprendices
+                                            </a>
+                                        </div>
+                                        <div class="col-6">
+                                            <a href="{{ ficha.url_seguimiento }}" class="btn btn-sm btn-outline-warning text-dark w-100" style="font-size: 0.72rem;">
+                                                <i class="bi bi-clipboard2-pulse"></i> Seguimiento
+                                            </a>
+                                        </div>
+                                        <div class="col-6">
+                                            <a href="{{ ficha.url_evaluaciones }}" class="btn btn-sm btn-outline-primary w-100" style="font-size: 0.72rem;">
+                                                <i class="bi bi-award"></i> Calificar
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -111,291 +173,7 @@
             <section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h5 fw-bold mb-1">Próximos compromisos</h2><p class="text-muted small mb-0">Fechas que requieren seguimiento</p></div><div class="p-3">
                 {% for seguimiento in proximos_seguimientos %}<div class="d-flex gap-3 align-items-start py-2 border-bottom"><div class="text-center"><strong class="d-block text-success">{{ seguimiento.fecha_verificacion|date:'d' }}</strong><small class="text-muted">{{ seguimiento.fecha_verificacion|date:'M'|upper }}</small></div><div><strong class="d-block small">Ficha {{ seguimiento.ficha.codigo_ficha }}</strong><span class="text-muted small">{{ seguimiento.compromisos|truncatechars:58 }}</span></div></div>{% empty %}<div class="text-center text-muted py-4"><i class="bi bi-calendar2-check fs-3 d-block mb-2"></i>No hay compromisos próximos.</div>{% endfor %}
             </div></section>
-        </div>
     </div>
-    
-    {% comment "legacy_dashboard" %}
-    <!-- Alerta Dinámica del Módulo Activo -->
-    {% if titulo_modulo %}
-        <div class="alert py-3 mb-4 fw-bold text-center shadow-sm d-flex align-items-center justify-content-center gap-2" style="background-color: #fce4ec; color: #880e4f; border: 1px solid #f8bbd0; border-radius: 12px;">
-            <i class="bi bi-info-circle-fill fs-5"></i> 
-            <span>Módulo Activo: {{ titulo_modulo }}</span>
-        </div>
-    {% endif %}
-    
-    <!-- Encabezado del Panel -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-speedometer2 text-danger me-2"></i> Panel de Control General
-            </h2>
-            <p class="text-muted mb-0">
-                Seguimiento a la Integración con la Media Técnica · Regional Magdalena
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="#" class="btn btn-primary fw-semibold shadow-sm" style="background-color: #39A900; border-color: #39A900;">
-                <i class="bi bi-plus-circle me-1"></i> Nueva Visita
-            </a>
-            <a href="#" class="btn btn-outline-secondary fw-semibold bg-white">
-                <i class="bi bi-building-add me-1"></i> Vincular Colegio
-            </a>
-        </div>
-    </div>
-
-    <!-- Fila de Tarjetas de Métricas Principales -->
-    <div class="row g-4 mb-4">
-        <!-- Colegios Activos -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-metric shadow-sm p-3 bg-white border-start border-4 border-danger">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-uppercase text-muted fw-semibold small">Colegios Activos</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_instituciones|default:0 }}</h3>
-                        <span class="text-success small fw-semibold"><i class="bi bi-check-circle"></i> Convenios activos</span>
-                    </div>
-                    <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
-                        <i class="bi bi-buildings fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Fichas Técnicas -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-metric shadow-sm p-3 bg-white border-start border-4 border-warning">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-uppercase text-muted fw-semibold small">Fichas Técnicas</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_fichas|default:0 }}</h3>
-                        <span class="text-muted small">Fichas registradas</span>
-                    </div>
-                    <div class="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
-                        <i class="bi bi-journal-text fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Aprendices SENA -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-metric shadow-sm p-3 bg-white border-start border-4 border-success">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-uppercase text-muted fw-semibold small">Aprendices</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_aprendices|default:0 }}</h3>
-                        <span class="text-success small fw-semibold">Matrículas activas</span>
-                    </div>
-                    <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success">
-                        <i class="bi bi-people fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tasa de Aprobación -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-metric shadow-sm p-3 bg-white border-start border-4 border-primary">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-uppercase text-muted fw-semibold small">Tasa de Aprobación</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ fichas_activas|default:0 }}</h3>
-                        <span class="text-primary small fw-semibold">Fichas en ejecución</span>
-                    </div>
-                    <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
-                        <i class="bi bi-pie-chart fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sección Principal Dividida -->
-    <div class="row g-4">
-        
-        <!-- Columna Izquierda: Territorio, Tabla de Ingresos y el Escáner QR Ajustado -->
-        <div class="col-lg-8">
-            <div class="d-flex flex-column gap-4">
-                
-                <!-- Progreso por Municipio -->
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-bar-chart-line text-danger me-2"></i> Aprobación general por territorio
-                        </h5>
-                        <span class="badge bg-light text-secondary border">A / Total de juicios</span>
-                    </div>
-                    <div class="card-body p-4">
-                        <p class="text-muted small mb-3">Porcentaje de juicios aprobados por municipio en la integración con la Media Técnica.</p>
-                        
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between small fw-bold mb-1">
-                                <span>Santa Marta (Zona Urbana)</span>
-                                <span class="text-success">96% Aprobación</span>
-                            </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: 96%"></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between small fw-bold mb-1">
-                                <span>Ciénaga</span>
-                                <span class="text-primary">91% Aprobación</span>
-                            </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: 91%"></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-1">
-                            <div class="d-flex justify-content-between small fw-bold mb-1">
-                                <span>Aracataca / Fundación</span>
-                                <span class="text-warning text-dark">88% Aprobación</span>
-                            </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-warning" role="progressbar" style="width: 88%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabla de Control de Ingresos en Portería -->
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold text-dark mb-0 fs-6">
-                            <i class="bi bi-person-badge text-primary me-2"></i> Registro de Ingresos en Portería
-                        </h5>
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Portería Activa</span>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0 text-secondary small">
-                                <thead class="table-light text-uppercase fs-7">
-                                    <tr>
-                                        <th class="py-2 ps-3">Personal / Aprendiz</th>
-                                        <th class="py-2">Rol / Ficha SENA</th>
-                                        <th class="py-2">Institución</th>
-                                        <th class="py-2 pe-3 text-end">Hora de Entrada</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="ps-3 fw-semibold text-dark">Carlos Julio Mendoza</td>
-                                        <td><span class="badge bg-secondary">Vigilante Turno 1</span></td>
-                                        <td>I.E.D. Normal María Auxiliadora</td>
-                                        <td class="pe-3 text-end text-success fw-semibold">05:45 AM</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-3 fw-semibold text-dark">Ana Milena Rúa</td>
-                                        <td><span class="badge bg-info text-dark">Servicios Generales (Aseo)</span></td>
-                                        <td>I.E.D. Simón Bolívar</td>
-                                        <td class="pe-3 text-end text-success fw-semibold">06:05 AM</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-3 fw-semibold text-dark">Martha Lucía Pérez</td>
-                                        <td><span class="badge bg-warning text-dark">Secretaría Académica</span></td>
-                                        <td>I.E.D. Técnica Industrial</td>
-                                        <td class="pe-3 text-end text-success fw-semibold">06:30 AM</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-3 fw-semibold text-dark">Juan Camilo Torres</td>
-                                        <td><span class="badge bg-primary">Aprendiz (Ficha 2654102)</span></td>
-                                        <td>I.E.D. Normal María Auxiliadora</td>
-                                        <td class="pe-3 text-end text-success fw-semibold">06:42 AM</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="ps-3 fw-semibold text-dark">Luisa Fernanda Daza</td>
-                                        <td><span class="badge bg-primary">Aprendiz (Ficha 2654102)</span></td>
-                                        <td>I.E.D. Normal María Auxiliadora</td>
-                                        <td class="pe-3 text-end text-success fw-semibold">06:50 AM</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Módulo de Control de Acceso por QR -->
-                <div class="card shadow-sm border-0 rounded-3 text-center p-3 bg-white">
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center p-2">
-                        <div class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill mb-2 fw-semibold">
-                            <i class="bi bi-qr-code-scan me-1"></i> Control de Entrada
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1">Escáner QR Institucional</h6>
-                        <p class="text-muted small mb-2">Vigilancia, aseo, secretaría y aprendices.</p>
-                        
-                        <!-- Imagen de Código QR Ajustada -->
-                        <div class="p-2 bg-light border rounded-3 mb-2 shadow-sm d-inline-block">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=SINETEC-SENA-MAGDALENA-CONTROL-PERSONAL-Y-APRENDICES" alt="QR SINETEC Personal" class="img-fluid rounded">
-                        </div>
-
-                        <!-- Botón para abrir la cámara -->
-                        <div class="d-grid w-100 gap-2 mb-2">
-                            <a href="{% url 'estudiantes_lista' %}" class="btn btn-danger btn-sm py-2 fw-semibold shadow-sm text-white" style="background-color: #39A900; border-color: #39A900;">
-                                <i class="bi bi-camera-fill me-1"></i> Abrir control QR
-                            </a>
-                        </div>
-                        
-                        <span class="text-secondary small d-block mb-2" style="font-size: 0.75rem;">Regional Magdalena · SINETEC v2.0</span>
-                        
-                        <a href="{% url 'alertas_tempranas' %}" class="btn btn-sm btn-outline-dark fw-semibold w-100 py-1">
-                            <i class="bi bi-exclamation-triangle me-1 text-warning"></i> Ver Alertas Generadas
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Columna Derecha: Acciones Rápidas y Mensajería Institucional -->
-        <div class="col-lg-4">
-            <div class="d-flex flex-column gap-4">
-                
-                <!-- Acciones Rápidas -->
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-lightning-charge text-warning me-2"></i> Acciones Rápidas
-                        </h5>
-                    </div>
-                    <div class="card-body d-flex flex-column gap-2 p-3">
-                        <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-dark text-start py-2 px-3 d-flex align-items-center justify-content-between text-decoration-none">
-                            <span class="text-truncate me-2"><i class="bi bi-people me-2 text-primary"></i> Consultar Aprendices</span>
-                            <i class="bi bi-chevron-right small text-muted flex-shrink-0"></i>
-                        </a>
-                        <a href="{% url 'alertas_tempranas' %}" class="btn btn-outline-dark text-start py-2 px-3 d-flex align-items-center justify-content-between text-decoration-none">
-                            <span class="text-truncate me-2"><i class="bi bi-exclamation-triangle me-2 text-warning"></i> Revisar Alertas</span>
-                            <i class="bi bi-chevron-right small text-muted flex-shrink-0"></i>
-                        </a>
-                        <a href="{% url 'gestion_usuarios' %}" class="btn btn-outline-dark text-start py-2 px-3 d-flex align-items-center justify-content-between text-decoration-none">
-                            <span class="text-truncate me-2"><i class="bi bi-shield-lock me-2 text-danger"></i> Administrar Roles</span>
-                            <i class="bi bi-chevron-right small text-muted flex-shrink-0"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Mensajería Institucional -->
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-body text-center p-4">
-                        <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger d-inline-block mb-3">
-                            <i class="bi bi-chat-square-text-fill fs-2"></i>
-                        </div>
-                        <h5 class="fw-bold text-dark">Mensajería Institucional</h5>
-                        <p class="text-muted small">Comunícate entre Coordinadores, Instructores, Secretaría y Aprendices.</p>
-                        <a href="{% url 'mensajeria' %}" class="btn btn-primary btn-sm text-white px-4" style="background-color: #39A900; border-color: #39A900;">
-                            Ir al Centro de Mensajes
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-
-</div>
-    {% endcomment %}
 
     <div class="row g-4">
         <div class="col-xl-8"><section class="sinetec-card p-4 h-100"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2 class="h5 fw-bold mb-1">Ruta operativa SENA</h2><p class="text-muted small mb-0">Accede al siguiente paso de tu proceso sin salir del panel.</p></div><i class="bi bi-signpost-2 text-success fs-3"></i></div><div class="row g-2"><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'fichas' %}"><i class="bi bi-layers text-success fs-4 d-block mb-2"></i><strong>Fichas</strong><small class="d-block text-muted">Consulta expedientes y aprendices.</small></a></div><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'aula_instructor' %}"><i class="bi bi-person-workspace text-success fs-4 d-block mb-2"></i><strong>Aula instructor</strong><small class="d-block text-muted">Publica y califica evidencias.</small></a></div><div class="col-md-4"><a class="btn btn-light w-100 text-start p-3 h-100" href="{% url 'coordinador_dashboard' %}"><i class="bi bi-kanban text-success fs-4 d-block mb-2"></i><strong>Coordinación</strong><small class="d-block text-muted">Supervisa avances y alertas.</small></a></div></div></section></div>

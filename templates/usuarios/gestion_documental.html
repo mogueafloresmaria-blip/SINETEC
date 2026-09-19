@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión Documental y Normatividad · SINETEC SENA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .documental-hero {
+        background: linear-gradient(135deg, #1c2d27 0%, #2b473d 50%, #39A900 100%);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: clamp(24px, 3.5vw, 36px);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 12px 30px rgba(28, 45, 39, 0.2);
+    }
+    .documental-hero::after {
+        content: 'DOCUMENTOS';
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        color: rgba(255, 255, 255, 0.05);
+        font: 800 5.5rem/1 'Plus Jakarta Sans', sans-serif;
+        letter-spacing: -0.04em;
+        pointer-events: none;
+    }
+    .doc-item-card {
+        background: #ffffff;
+        border: 1px solid #E2EEDF;
+        border-radius: 14px;
+        padding: 16px 20px;
+        transition: all 0.2s ease;
+    }
+    .doc-item-card:hover {
+        border-color: #39A900;
+        box-shadow: 0 6px 18px rgba(57, 169, 0, 0.08);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-3">
+
+    <!-- Hero Header -->
+    <div class="documental-hero mb-4">
+        <div class="position-relative" style="z-index: 2;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge" style="background-color: rgba(255,255,255,0.2); color: #ffffff;">Sistema de Gestión de Calidad SENA</span>
+                        <span class="text-white-50 small">Centro de Logística y Promoción Ecoturística</span>
+                    </div>
+                    <h1 class="h2 fw-bold text-white mb-2">Repositorio Documental y Normatividad</h1>
+                    <p class="text-white-50 mb-0" style="font-size: 0.95rem; max-width: 780px;">
+                        Archivo institucional oficial clasificado: resoluciones de apertura de fichas, formatos F023 de etapa productiva,
+                        guías de aprendizaje SOFIA Plus, actas de comité y circulares vigentes.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros de Categoría y Búsqueda -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="q" value="{{ q|default:'' }}" class="form-control" placeholder="Buscar por título, código o palabra clave...">
+            </div>
+            <div class="col-md-4">
+                <select name="categoria" class="form-select">
+                    <option value="">-- Todas las categorías --</option>
+                    <option value="GUIA_APRENDIZAJE" {% if categoria_filtro == 'GUIA_APRENDIZAJE' %}selected{% endif %}>Guías de Aprendizaje</option>
+                    <option value="FORMATO_F023" {% if categoria_filtro == 'FORMATO_F023' %}selected{% endif %}>Formatos F023 (Bitácoras)</option>
+                    <option value="RESOLUCION" {% if categoria_filtro == 'RESOLUCION' %}selected{% endif %}>Resoluciones y Actos</option>
+                    <option value="CIRCULAR" {% if categoria_filtro == 'CIRCULAR' %}selected{% endif %}>Circulares Institucionales</option>
+                    <option value="ACTA_COMITE" {% if categoria_filtro == 'ACTA_COMITE' %}selected{% endif %}>Actas de Comité Evaluador</option>
+                    <option value="OTRO" {% if categoria_filtro == 'OTRO' %}selected{% endif %}>Otros Documentos</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-success fw-semibold w-100" style="background-color: #39A900;">
+                    <i class="bi bi-funnel me-1"></i> Filtrar
+                </button>
+                <a href="{% url 'gestion_documental_lista' %}" class="btn btn-light border">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Documentos -->
+    <div class="row g-3">
+        {% for doc in documentos %}
+            <div class="col-md-6 col-xl-4">
+                <div class="doc-item-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                                {{ doc.get_categoria_display }}
+                            </span>
+                            <span class="badge bg-light text-dark border">v{{ doc.version }}</span>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">{{ doc.titulo }}</h6>
+                        {% if doc.codigo %}
+                            <small class="text-muted d-block mb-2"><i class="bi bi-tag me-1"></i>Código: {{ doc.codigo }}</small>
+                        {% endif %}
+                        <p class="text-muted small mb-3">{{ doc.descripcion|truncatechars:120 }}</p>
+                    </div>
+                    <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+                        <small class="text-muted">{{ doc.fecha_actualizacion|date:'d/m/Y' }}</small>
+                        {% if doc.archivo %}
+                            <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-download me-1"></i> Descargar
+                            </a>
+                        {% else %}
+                            <span class="badge bg-light text-muted">Disponible en Sede</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white text-muted">
+                    <i class="bi bi-folder-x fs-1 d-block mb-2 text-muted"></i>
+                    <h5 class="fw-bold text-dark">No se encontraron documentos</h5>
+                    <p class="small mb-0">No hay documentos registrados para el filtro seleccionado.</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

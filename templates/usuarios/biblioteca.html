@@ -1,9 +1,264 @@
 {% extends 'base.html' %}
-{% block title %}Biblioteca de formación - SINETEC{% endblock %}
+{% load static %}
+
+{% block title %}Biblioteca Digital SENA — SINETEC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sinetec-library-hero {
+        background: linear-gradient(135deg, #142d20 0%, #1e4530 100%);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: clamp(24px, 3.5vw, 40px);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(20, 45, 32, 0.15);
+    }
+    .sinetec-library-hero::after {
+        content: 'BIBLIOTECA';
+        position: absolute;
+        right: -10px;
+        bottom: -25px;
+        color: rgba(255, 255, 255, 0.04);
+        font: 800 6.5rem/1 'Plus Jakarta Sans', sans-serif;
+        letter-spacing: -0.05em;
+        pointer-events: none;
+    }
+    .resource-card {
+        background: #ffffff;
+        border: 1px solid #E5E9E2;
+        border-radius: 16px;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .resource-card:hover {
+        border-color: #8E5266;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(94, 43, 60, 0.08);
+    }
+    .category-badge {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+    .cat-libro { background: #EBF3FF; color: #0052CC; }
+    .cat-guia { background: #E3FCEF; color: #00875A; }
+    .cat-manual { background: #FFF0B3; color: #974F0C; }
+    .cat-diseno { background: #F3E8FF; color: #6554C0; }
+    .cat-norma { background: #FFEBE6; color: #DE350B; }
+    .cat-general { background: #F4F5F7; color: #42526E; }
+
+    .bookmark-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #E0D0D8;
+        background: #FDF7FA;
+        color: #8E5266;
+        transition: all 0.2s;
+    }
+    .bookmark-btn:hover {
+        background: #8E5266;
+        color: #ffffff;
+        border-color: #8E5266;
+    }
+    .bookmark-btn.active {
+        background: #8E5266;
+        color: #ffffff;
+        border-color: #8E5266;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<style>.library-hero{background:#142d20;color:#fff;border-radius:18px;padding:clamp(24px,4vw,42px);position:relative;overflow:hidden}.library-hero:after{content:'LIBRARY';position:absolute;right:-10px;bottom:-40px;color:rgba(255,255,255,.05);font:800 7rem/1 'Plus Jakarta Sans';letter-spacing:-.08em}.library-search{position:relative;z-index:1;max-width:760px}.library-card{height:100%;border:1px solid #e1eadc;border-radius:15px;transition:.2s}.library-card:hover{border-color:#a6cb89;transform:translateY(-3px);box-shadow:0 12px 28px rgba(23,34,29,.08)}.library-mark{width:42px;height:42px;display:grid;place-items:center;background:#edf6e5;color:#2f7e27;border-radius:12px}</style>
-<div class="library-hero mb-4"><div class="library-search"><div class="sinetec-eyebrow" style="color:#cde88e">Centro de recursos · SENA</div><h1 class="sinetec-page-title h2 mt-2 mb-2">Biblioteca de formación</h1><p class="mb-4" style="color:#dbe8dc">Busca fichas, programas, resultados de aprendizaje y guías para estudiar o preparar tu sesión.</p><form class="row g-2" method="get"><div class="col-md-8"><input class="form-control form-control-lg" name="q" value="{{ query }}" placeholder="Ej. Sistemas, RAP-01, ficha 2501234..."></div><div class="col-md-2"><select class="form-select form-select-lg" name="tipo"><option value="">Todo</option><option value="fichas" {% if tipo == 'fichas' %}selected{% endif %}>Fichas</option><option value="guias" {% if tipo == 'guias' %}selected{% endif %}>Guías</option></select></div><div class="col-md-2"><button class="btn btn-success btn-lg w-100" type="submit"><i class="bi bi-search"></i></button></div></form></div></div>
-<div class="row g-3 mb-4"><div class="col-md-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Fichas disponibles</div><div class="sinetec-metric-value">{{ total_fichas }}</div><small class="text-success">Programas en ejecución</small></div></div><div class="col-md-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Guías y evidencias</div><div class="sinetec-metric-value">{{ total_guias }}</div><small class="text-muted">Actividades con fecha vigente</small></div></div><div class="col-md-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Ruta de estudio</div><div class="sinetec-metric-value"><i class="bi bi-signpost-2"></i></div><small class="text-muted">Programa → RAP → evidencia</small></div></div></div>
-<div class="row g-4"><div class="col-xl-6"><section class="sinetec-card p-4 h-100"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2 class="h5 fw-bold mb-1">Fichas y programas</h2><p class="text-muted small mb-0">Grupos activos de formación.</p></div><i class="bi bi-layers text-success fs-2"></i></div><div class="row g-2">{% for ficha in fichas %}<div class="col-sm-6"><a href="{% url 'fichas_detalle' ficha.pk %}" class="library-card d-block p-3 text-decoration-none text-dark"><span class="sinetec-status sinetec-status-success">{{ ficha.codigo_ficha }}</span><strong class="d-block mt-2">{{ ficha.programa.denominacion|truncatechars:42 }}</strong><small class="text-muted d-block mt-1">Abrir expediente <i class="bi bi-arrow-right"></i></small></a></div>{% empty %}<div class="text-center text-muted py-4">No se encontraron fichas.</div>{% endfor %}</div></section></div><div class="col-xl-6"><section class="sinetec-card p-4 h-100"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2 class="h5 fw-bold mb-1">Guías y evidencias</h2><p class="text-muted small mb-0">Material para preparar y entregar.</p></div><i class="bi bi-journal-text text-success fs-2"></i></div>{% for evidencia in evidencias %}<a href="{% url 'entregar_evidencia' evidencia.pk %}" class="library-card d-flex gap-3 align-items-center p-3 mb-2 text-decoration-none text-dark"><span class="library-mark"><i class="bi bi-file-earmark-text"></i></span><span><strong class="d-block">{{ evidencia.titulo }}</strong><small class="text-muted">RAP {{ evidencia.rap.codigo }} · Fecha límite {{ evidencia.fecha_limite|date:'d/m/Y' }}</small></span><i class="bi bi-arrow-right ms-auto text-success"></i></a>{% empty %}<div class="text-center text-muted py-4">No hay guías vigentes.</div>{% endfor %}</section></div></div>
-<div class="sinetec-card p-4 mt-4"><div class="row g-3 align-items-center"><div class="col-md-8"><div class="sinetec-eyebrow text-success mb-2">Método SINETEC</div><h2 class="h5 fw-bold">Estudia con una ruta clara</h2><p class="text-muted mb-0">Localiza tu ficha, revisa el RAP, abre la evidencia y entrega tu trabajo desde el aula del aprendiz. El instructor podrá retroalimentarte y coordinación verá tu avance.</p></div><div class="col-md-4 text-md-end"><a href="{% url 'aprendiz_dashboard' %}" class="btn sinetec-btn sinetec-btn-primary">Ir a mi aula <i class="bi bi-arrow-right"></i></a></div></div></div>
+<div class="container-fluid px-3 px-md-4 py-3">
+
+    <!-- Hero Banner -->
+    <div class="sinetec-library-hero mb-4">
+        <div class="position-relative" style="z-index: 2; max-width: 820px;">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge" style="background-color: #39A900; color: #ffffff; font-size: 0.72rem;">SENA · Regional Magdalena</span>
+                <span class="text-white-50 small">Centro de Logística y Promoción Ecoturística</span>
+            </div>
+            <h1 class="h2 fw-bold text-white mb-2">Biblioteca Digital Institucional</h1>
+            <p class="text-white-50 mb-4" style="font-size: 0.95rem;">
+                Acervo oficial para la formación profesional integral: manuales técnicos de ingeniería de software,
+                guías pedagógicas de aprendizaje ADSI, diseños curriculares SOFIA Plus y estándares IEEE.
+            </p>
+
+            <!-- Search & Filter Bar -->
+            <form method="get" action="{% url 'biblioteca_formacion' %}" class="row g-2">
+                <input type="hidden" name="tab" value="{{ tab }}">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" value="{{ query }}" class="form-control form-control-lg border-0" placeholder="Buscar por título, autor, tema o diseño curricular...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select name="categoria" class="form-select form-select-lg border-0">
+                        <option value="">Todas las categorías</option>
+                        {% for c_val, c_lbl in categorias %}
+                            <option value="{{ c_val }}" {% if categoria_filtro == c_val %}selected{% endif %}>{{ c_lbl }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-lg w-100 fw-semibold text-white" style="background-color: #39A900;">
+                        Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Navegación por pestañas: Todos vs Mis Recursos -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-2 border-bottom">
+        <ul class="nav nav-pills gap-2" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-3 py-2 fw-semibold {% if tab != 'mis_recursos' %}active bg-success text-white{% else %}text-muted{% endif %}"
+                   href="{% url 'biblioteca_formacion' %}?tab=todos{% if query %}&q={{ query }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}">
+                    <i class="bi bi-grid-fill me-1"></i> Catálogo General
+                    <span class="badge bg-white text-success ms-1">{{ total_recursos }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-3 py-2 fw-semibold {% if tab == 'mis_recursos' %}active bg-success text-white{% else %}text-muted{% endif %}"
+                   href="{% url 'biblioteca_formacion' %}?tab=mis_recursos{% if query %}&q={{ query }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}">
+                    <i class="bi bi-bookmark-star-fill me-1"></i> Mis Recursos Guardados
+                    <span class="badge bg-white text-success ms-1">{{ total_mis_recursos }}</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-2 text-muted small">
+            <span>Mostrando <strong>{{ recursos.count }}</strong> recursos disponibles</span>
+            {% if query or categoria_filtro %}
+                <a href="{% url 'biblioteca_formacion' %}?tab={{ tab }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                    <i class="bi bi-x-circle me-1"></i> Limpiar filtros
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Grid de Recursos -->
+    {% if recursos %}
+        <div class="row g-4">
+            {% for r in recursos %}
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="resource-card p-3 p-md-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="category-badge 
+                                {% if r.categoria == 'LIBRO' %}cat-libro
+                                {% elif r.categoria == 'GUIA' %}cat-guia
+                                {% elif r.categoria == 'MANUAL' %}cat-manual
+                                {% elif r.categoria == 'DISENO' %}cat-diseno
+                                {% elif r.categoria == 'NORMA' %}cat-norma
+                                {% else %}cat-general{% endif %}">
+                                {{ r.get_categoria_display }}
+                            </span>
+                            <form method="post" action="{% url 'guardar_recurso_aprendiz' r.pk %}" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="bookmark-btn {% if r.id in ids_guardados %}active{% endif %}" 
+                                        title="{% if r.id in ids_guardados %}Quitar de Mis Recursos{% else %}Guardar en Mis Recursos{% endif %}">
+                                    <i class="bi {% if r.id in ids_guardados %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <h3 class="h6 fw-bold text-dark mb-2" style="min-height: 2.8rem; line-height: 1.35;">
+                            {{ r.titulo }}
+                        </h3>
+
+                        <p class="text-muted small mb-3 flex-grow-1" style="font-size: 0.84rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ r.descripcion }}
+                        </p>
+
+                        <div class="pt-3 border-top mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-2" style="font-size: 0.75rem;">
+                                <span class="text-muted">
+                                    <i class="bi bi-person me-1"></i> {{ r.autor|default:"SENA"|truncatechars:22 }}
+                                </span>
+                                <span class="badge bg-light text-dark border">
+                                    {{ r.tipo_recurso }}
+                                </span>
+                            </div>
+
+                            {% if r.url_externa %}
+                                <a href="{{ r.url_externa }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success w-100 rounded-pill fw-semibold">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Consultar Recurso
+                                </a>
+                            {% elif r.archivo_adjunto %}
+                                <a href="{{ r.archivo_adjunto.url }}" target="_blank" download class="btn btn-sm btn-outline-primary w-100 rounded-pill fw-semibold">
+                                    <i class="bi bi-download me-1"></i> Descargar Documento
+                                </a>
+                            {% else %}
+                                <button class="btn btn-sm btn-light w-100 rounded-pill text-muted" disabled>
+                                    <i class="bi bi-check-circle me-1"></i> Consulta en Centro
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Estado Vacío Profesional -->
+        <div class="sinetec-card text-center p-5 my-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 70px; height: 70px; background-color: #FDF7FA; color: #8E5266;">
+                <i class="bi bi-journal-x fs-2"></i>
+            </div>
+            <h4 class="h5 fw-bold text-dark mb-1">
+                {% if tab == 'mis_recursos' %}
+                    No tienes recursos guardados en tu espacio personal
+                {% else %}
+                    Todavía no hay recursos registrados con estos criterios
+                {% endif %}
+            </h4>
+            <p class="text-muted small mx-auto mb-4" style="max-width: 480px;">
+                {% if tab == 'mis_recursos' %}
+                    Puedes explorar el Catálogo General y presionar el botón de guardado en los libros, guías de aprendizaje y manuales que desees consultar en tu formación.
+                {% else %}
+                    Intenta modificar los términos de búsqueda o seleccionar otra categoría pedagógica.
+                {% endif %}
+            </p>
+            {% if tab == 'mis_recursos' %}
+                <a href="{% url 'biblioteca_formacion' %}?tab=todos" class="btn btn-sm btn-success rounded-pill px-4">
+                    <i class="bi bi-search me-1"></i> Explorar Catálogo General
+                </a>
+            {% else %}
+                <a href="{% url 'biblioteca_formacion' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Restablecer Catálogo
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- Footer formativo -->
+    <div class="sinetec-card p-4 mt-5">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-8">
+                <div class="sinetec-eyebrow text-success mb-1">Sistema de Bibliotecas SENA</div>
+                <h4 class="h6 fw-bold mb-1">Articulación con los Resultados de Aprendizaje (RAP)</h4>
+                <p class="text-muted small mb-0">
+                    Cada recurso técnico, guía y manual catalogado en SINETEC respalda la ejecución de las competencias del programa ADSI (Ficha 3173430) en el Centro de Logística y Promoción Ecoturística.
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'portafolio_aprendiz' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                    <i class="bi bi-journal-check me-1"></i> Ir a mi Portafolio Digital
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
 {% endblock %}

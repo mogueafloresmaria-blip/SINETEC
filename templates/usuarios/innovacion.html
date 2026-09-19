@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Centro de Innovación y Banco de Proyectos SENNOVA · SINETEC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .innovacion-hero {
+        background: linear-gradient(135deg, #1b3842 0%, #235263 50%, #0891b2 100%);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: clamp(24px, 3.5vw, 36px);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 12px 30px rgba(8, 145, 178, 0.2);
+    }
+    .innovacion-hero::after {
+        content: 'SENNOVA';
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        color: rgba(255, 255, 255, 0.05);
+        font: 800 6rem/1 'Plus Jakarta Sans', sans-serif;
+        letter-spacing: -0.04em;
+        pointer-events: none;
+    }
+    .project-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #E2EBF2;
+        padding: 20px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .project-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(8, 145, 178, 0.12);
+        border-color: #0891b2;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-3">
+
+    <!-- Hero Header -->
+    <div class="innovacion-hero mb-4">
+        <div class="position-relative" style="z-index: 2;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge" style="background-color: rgba(255,255,255,0.2); color: #ffffff;">SENNOVA · Investigación Aplicada</span>
+                        <span class="text-white-50 small">Centro de Logística y Promoción Ecoturística</span>
+                    </div>
+                    <h1 class="h2 fw-bold text-white mb-2">Centro de Innovación y Banco de Proyectos</h1>
+                    <p class="text-white-50 mb-0" style="font-size: 0.95rem; max-width: 780px;">
+                        Repositorio de proyectos formativos, semilleros de investigación, prototipos y desarrollos tecnológicos
+                        adelantados por instructores y aprendices del SENA articulados con las necesidades de la región.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicadores -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-4 border-info">
+                <span class="text-muted small text-uppercase fw-semibold">Total Proyectos</span>
+                <h3 class="fw-bold text-dark mb-0">{{ total_proyectos|default:0 }}</h3>
+                <small class="text-muted">Iniciativas registradas</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-4 border-primary">
+                <span class="text-muted small text-uppercase fw-semibold">En Desarrollo</span>
+                <h3 class="fw-bold text-primary mb-0">{{ en_desarrollo|default:0 }}</h3>
+                <small class="text-muted">En fase activa de investigación</small>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-4 border-success">
+                <span class="text-muted small text-uppercase fw-semibold">Terminados / Transferidos</span>
+                <h3 class="fw-bold text-success mb-0">{{ terminados|default:0 }}</h3>
+                <small class="text-muted">Proyectos concluidos exitosamente</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Directorio de Proyectos -->
+    <div class="row g-4">
+        {% for p in proyectos %}
+            <div class="col-md-6 col-xl-4">
+                <div class="project-card shadow-sm">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                                {{ p.get_categoria_display }}
+                            </span>
+                            <span class="badge {% if p.estado == 'FINALIZADO' %}bg-success{% elif p.estado == 'DESARROLLO' or p.estado == 'PROTOTIPO_VALIDADO' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                {{ p.get_estado_display }}
+                            </span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-2">{{ p.titulo }}</h5>
+                        <p class="text-muted small mb-3">{{ p.descripcion|truncatechars:140 }}</p>
+                    </div>
+                    <div class="pt-3 border-top">
+                        <div class="small text-muted mb-2">
+                            <i class="bi bi-person-badge me-1"></i> Asesor: <strong>{{ p.instructor_asesor.get_full_name|default:p.instructor_asesor.username|default:'Sin asignar' }}</strong>
+                        </div>
+                        <div class="small text-muted mb-3">
+                            <i class="bi bi-layers me-1"></i> Ficha: <strong>{{ p.ficha.codigo_ficha }}</strong> ({{ p.ficha.programa.denominacion|truncatechars:28 }})
+                        </div>
+                        {% if p.archivo_soporte %}
+                            <a href="{{ p.archivo_soporte.url }}" target="_blank" class="btn btn-sm btn-outline-dark w-100">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> Ver Ficha Técnica
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white text-muted">
+                    <i class="bi bi-lightbulb fs-1 d-block mb-2 text-info"></i>
+                    <h5 class="fw-bold text-dark">No hay proyectos formativos registrados</h5>
+                    <p class="small mb-0">Los proyectos de semilleros y SENNOVA registrados se visualizarán en esta vitrina.</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

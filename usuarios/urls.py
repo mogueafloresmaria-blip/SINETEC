@@ -1,7 +1,9 @@
 from django.urls import path
+from django.http import HttpResponse
 from . import views
 
 urlpatterns = [
+    path('service-worker.js', lambda r: HttpResponse('', content_type='application/javascript')),
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('buscar/', views.busqueda_global, name='busqueda_global'),
@@ -9,7 +11,10 @@ urlpatterns = [
     path('estudiantes/', views.estudiantes_lista, name='estudiantes_lista'),
     path('estudiantes/registrar/', views.registrar_aprendiz, name='registrar_aprendiz'),
     path('biblioteca/', views.biblioteca_formacion, name='biblioteca_formacion'),
+    path('asistencia/escanear/', views.escanear_asistencia_camara, name='escanear_asistencia_camara'),
+    path('asistencia/api/escanear-qr/', views.api_registrar_asistencia_qr, name='api_registrar_asistencia_qr'),
     path('estudiantes/qr/<uuid:token>/', views.qr_estudiante, name='estudiante_qr'),
+    path('estudiantes/<int:pk>/carnet/', views.ver_carnet_digital, name='carnet_digital_id'),
     path('estudiantes/<int:pk>/boletin-pdf/', views.boletin_estudiante, name='estudiantes_boletin_pdf'),
     path('estudiantes/<int:pk>/', views.detalle_estudiante, name='estudiante_detalle'),
     path('seguimiento-panel/', views.seguimiento, name='seguimiento'),
@@ -22,7 +27,23 @@ urlpatterns = [
     path('aprendiz/', views.aprendiz_dashboard, name='aprendiz_dashboard'),
     path('aprendiz/evidencias/<int:pk>/entregar/', views.entregar_evidencia, name='entregar_evidencia'),
     path('coordinacion/', views.coordinador_dashboard, name='coordinador_dashboard'),
+    path('secretaria/', views.secretaria_dashboard, name='secretaria_dashboard'),
     path('alertas/', views.alertas_tempranas, name='alertas_tempranas'),
-    path('usuarios/', lambda request: views.modulo_simple(request, 'usuarios/gestion_usuarios.html'), name='gestion_usuarios'),
+    path('alertas/caso/<int:pk>/cambiar-fase/', views.cambiar_fase_caso, name='cambiar_fase_caso'),
+    path('alertas/compromiso/<int:pk>/cumplir/', views.cumplir_compromiso, name='cumplir_compromiso'),
+    path('etapa-productiva/', views.etapa_productiva_dashboard, name='etapa_productiva_dashboard'),
+    path('innovacion/', views.innovacion_dashboard, name='innovacion_dashboard'),
+    path('documentos/', views.gestion_documental_lista, name='gestion_documental_lista'),
+    path('usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
     path('mensajeria/', views.mensajeria, name='mensajeria'),
-]
+    path('reportes/', views.centro_reportes, name='centro_reportes'),
+    path('indicadores/', views.indicadores_dashboard, name='indicadores_dashboard'),
+    path('notificaciones/', views.notificaciones_lista, name='notificaciones_lista'),
+    path('notificaciones/<int:pk>/marcar-leida/', views.marcar_notificacion_leida, name='marcar_notificacion_leida'),
+    path('auditoria/', views.auditoria_lista, name='auditoria_lista'),
+    path('portafolio/', views.portafolio_aprendiz, name='portafolio_aprendiz'),
+    path('portafolio/actividad/<int:pk>/', views.portafolio_actividad_detalle, name='portafolio_actividad_detalle'),
+    path('portafolio/actividad/<int:pk>/entregar/', views.portafolio_entregar_actividad, name='portafolio_entregar_actividad'),
+    path('asistente/consulta/', views.asistente_consulta, name='asistente_consulta'),
+    path('biblioteca/recurso/<int:pk>/guardar/', views.guardar_recurso_aprendiz, name='guardar_recurso_aprendiz'),
+]

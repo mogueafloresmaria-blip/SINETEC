@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Programas de Formación - SINETEC | SENA Regional Magdalena{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #1b4d3e 0%, #11382c 100%); color: white; padding: 2rem; border-radius: 1rem;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="sinetec-eyebrow text-success-subtle mb-1" style="color: #86efac !important; font-weight: 600;">
+                    <i class="bi bi-award-fill me-1"></i> Catálogo Curricular Institucional SENA
+                </div>
+                <h1 class="h2 fw-bold text-white mb-1">Programas de Formación</h1>
+                <p class="mb-0 text-white-50 small">Diseños curriculares oficiales articulados con la Media Técnica en el Magdalena.</p>
+            </div>
+            <a href="{% url 'fichas_lista' %}" class="btn btn-outline-light px-3">
+                <i class="bi bi-layers me-1"></i> Ver Fichas Técnicas
+            </a>
+        </div>
+    </div>
+
+    <!-- Buscador -->
+    <div class="sinetec-card p-3 mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar programa por denominación o código SOFIA (ej. ADSI, 228118, Sistemas)...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success w-100 fw-semibold" style="background-color: #39A900; border-color: #39A900;">Buscar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Grid de Programas -->
+    <div class="row g-4">
+        {% for prog in programas %}
+            <div class="col-12 col-lg-6">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4" style="border-top: 4px solid #39A900 !important;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-light text-dark border fw-bold">Código SOFIA: {{ prog.codigo_programa }}</span>
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill">Versión {{ prog.version }} · Activo</span>
+                    </div>
+                    <h3 class="h5 fw-bold text-dark mb-2">{{ prog.denominacion }}</h3>
+                    <p class="text-muted small mb-3">
+                        Formación técnica y tecnológica impartida por el Centro de Logística y Promoción Ecoturística en articulación escolar.
+                    </p>
+                    <div class="row g-2 mb-3 bg-light p-3 rounded-3 text-secondary small">
+                        <div class="col-6">
+                            <i class="bi bi-layers text-success me-1"></i>
+                            <strong>Fichas Asociadas:</strong> {{ prog.num_fichas }}
+                        </div>
+                        <div class="col-6">
+                            <i class="bi bi-award text-primary me-1"></i>
+                            <strong>Competencias Laborales:</strong> {{ prog.num_competencias }}
+                        </div>
+                    </div>
+                    <div class="mt-auto d-flex flex-wrap gap-2 pt-2 border-top">
+                        <a href="{% url 'programa_detalle' prog.id %}" class="btn btn-sm btn-outline-dark fw-semibold">
+                            <i class="bi bi-eye me-1"></i> [ VER ]
+                        </a>
+                        <a href="{% url 'fichas_lista' %}?q={{ prog.codigo_programa }}" class="btn btn-sm btn-outline-success fw-semibold">
+                            <i class="bi bi-layers me-1"></i> [ FICHAS ]
+                        </a>
+                        <a href="{% url 'estudiantes_lista' %}?q={{ prog.codigo_programa }}" class="btn btn-sm btn-outline-primary fw-semibold">
+                            <i class="bi bi-people me-1"></i> [ APRENDICES ]
+                        </a>
+                        <a href="{% url 'programa_detalle' prog.id %}#competencias" class="btn btn-sm btn-outline-warning text-dark fw-semibold">
+                            <i class="bi bi-award me-1"></i> [ COMPETENCIAS ]
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="sinetec-card p-5 text-center text-muted">
+                    <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
+                    No se encontraron programas de formación con los criterios especificados.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

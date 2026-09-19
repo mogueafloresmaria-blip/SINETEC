@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}Centro de Mensajería Masiva y Notificaciones · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+        <div>
+            <div class="sinetec-eyebrow mb-1">Comunicaciones y Manejo de Datos</div>
+            <h1 class="sinetec-page-title h3 mb-1">Centro de Mensajería Masiva y Notificaciones</h1>
+            <p class="text-muted mb-0">Envío de comunicados oficiales, alertas tempranas y citaciones a través de Correo Institucional, SMS Masivo y Notificaciones Push a la App Móvil.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Formulario de Envío Masivo -->
+        <div class="col-lg-6">
+            <div class="sinetec-card p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="bi bi-send-check text-success me-2"></i>Emitir Nueva Comunicación Masiva</h5>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Canal de Difusión Masiva</label>
+                        <div class="d-flex gap-2">
+                            <div class="form-check form-check-inline flex-fill border rounded p-2 m-0 text-center">
+                                <input class="form-check-input" type="radio" name="canal" id="canalEmail" value="Email" checked>
+                                <label class="form-check-label fw-bold small" for="canalEmail">
+                                    <i class="bi bi-envelope text-primary d-block fs-5"></i> Email
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline flex-fill border rounded p-2 m-0 text-center">
+                                <input class="form-check-input" type="radio" name="canal" id="canalSMS" value="SMS Masivo">
+                                <label class="form-check-label fw-bold small" for="canalSMS">
+                                    <i class="bi bi-chat-left-dots text-success d-block fs-5"></i> SMS Masivo
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline flex-fill border rounded p-2 m-0 text-center">
+                                <input class="form-check-input" type="radio" name="canal" id="canalPush" value="Notificación Push">
+                                <label class="form-check-label fw-bold small" for="canalPush">
+                                    <i class="bi bi-phone text-warning d-block fs-5"></i> Push Móvil
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Audiencia / Destinatarios</label>
+                        <select name="destinatarios" class="form-select" required>
+                            <option value="Todos los aprendices">Toda la cohorte activa ({{ total_aprendices }} Aprendices)</option>
+                            {% for f in fichas %}
+                                <option value="Ficha {{ f.codigo_ficha }}">Ficha {{ f.codigo_ficha }} · {{ f.programa.denominacion }}</option>
+                            {% endfor %}
+                            <option value="Padres y Acudientes">Padres y Acudientes de Familia</option>
+                            <option value="Instructores y Docentes">Instructores SENA y Docentes I.E.</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Asunto o Título del Comunicado</label>
+                        <input type="text" name="asunto" class="form-control" placeholder="Ej: Citación Comité Evaluador / Entrega de Evidencias" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Cuerpo del Mensaje</label>
+                        <textarea name="contenido" class="form-control" rows="4" placeholder="Escribe el contenido oficial del comunicado..." required></textarea>
+                        <small class="text-muted">Se incluirán automáticamente las etiquetas institucionales SENA y firma digital.</small>
+                    </div>
+
+                    <button type="submit" class="btn sinetec-btn sinetec-btn-primary w-100 py-2">
+                        <i class="bi bi-broadcast me-1"></i> Transmitir Campaña Masiva
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Métricas y Capacidades de Envío -->
+        <div class="col-lg-6">
+            <div class="sinetec-card p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="bi bi-reception-4 text-success me-2"></i>Historial de Campañas Transmitidas</h5>
+                <div class="list-group list-group-flush mb-4">
+                    {% for item in historial %}
+                    <div class="list-group-item px-0 py-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark">{{ item.asunto }}</strong>
+                            <span class="badge bg-success bg-opacity-10 text-success">{{ item.estado }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span><i class="bi bi-people me-1"></i>{{ item.destino }} · {{ item.canal }}</span>
+                            <span>{{ item.fecha }}</span>
+                        </div>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: {{ item.tasa_apertura }};"></div>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 0.72rem;">
+                            <span>{{ item.enviados }} notificaciones enviadas</span>
+                            <span>Apertura: {{ item.tasa_apertura }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="border-top pt-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="p-3 bg-light rounded-circle text-success fs-4">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <strong class="d-block small text-dark">Gestión Segura de Datos Masivos</strong>
+                            <small class="text-muted">Cumple con la política de Habeas Data y protección de información personal (Ley 1581 de 2012).</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

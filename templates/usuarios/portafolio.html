@@ -1,0 +1,605 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Portafolio Digital · SINETEC{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --portafolio-rose-bg: #FDF8FA;
+        --portafolio-rose-card: #FFFFFF;
+        --portafolio-rose-border: #F0D9E5;
+        --portafolio-rose-accent: #8E5266;
+        --portafolio-rose-dark: #4A2834;
+        --portafolio-slate: #24342C;
+        --portafolio-muted: #627269;
+        --sena-green: #39A900;
+        --sena-green-dark: #1E6B00;
+    }
+
+    .portafolio-header {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FAF1F5 100%);
+        border: 1px solid var(--portafolio-rose-border);
+        border-radius: 26px;
+        padding: 32px;
+        margin-bottom: 28px;
+        box-shadow: 0 12px 36px rgba(142, 82, 102, 0.05);
+    }
+
+    .portafolio-avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, var(--portafolio-rose-accent), var(--portafolio-rose-dark));
+        color: #FFFFFF;
+        display: grid;
+        place-items: center;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 2.2rem;
+        font-weight: 800;
+        box-shadow: 0 12px 24px rgba(142, 82, 102, 0.22);
+    }
+
+    .portafolio-kicker {
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--portafolio-rose-accent);
+    }
+
+    .kpi-metric-card {
+        background: #FFFFFF;
+        border: 1px solid var(--portafolio-rose-border);
+        border-radius: 20px;
+        padding: 22px;
+        height: 100%;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(142, 82, 102, 0.07);
+        border-color: var(--portafolio-rose-accent);
+    }
+
+    .kpi-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 1.25rem;
+    }
+
+    .tab-pills .nav-link {
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        color: var(--portafolio-slate);
+        padding: 10px 18px;
+        border: 1px solid transparent;
+        transition: all 0.18s ease;
+    }
+
+    .tab-pills .nav-link.active {
+        background-color: var(--portafolio-rose-accent);
+        color: #FFFFFF;
+        box-shadow: 0 8px 18px rgba(142, 82, 102, 0.22);
+    }
+
+    .tab-pills .nav-link:hover:not(.active) {
+        background-color: #F8EDF3;
+        color: var(--portafolio-rose-dark);
+    }
+
+    /* Tarjetas de Actividades */
+    .activity-card {
+        background: #FFFFFF;
+        border: 1px solid var(--portafolio-rose-border);
+        border-radius: 18px;
+        padding: 22px;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .activity-card:hover {
+        border-color: var(--sena-green);
+        box-shadow: 0 10px 26px rgba(57, 169, 0, 0.08);
+    }
+
+    /* Línea de Tiempo del Aprendiz */
+    .timeline-stream {
+        position: relative;
+        padding-left: 28px;
+    }
+
+    .timeline-stream::before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 8px;
+        bottom: 8px;
+        width: 2px;
+        background: var(--portafolio-rose-border);
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 24px;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -28px;
+        top: 2px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #FFFFFF;
+        border: 2px solid var(--portafolio-rose-accent);
+        display: grid;
+        place-items: center;
+        font-size: 0.65rem;
+        color: var(--portafolio-rose-accent);
+    }
+
+    .timeline-content {
+        background: #FFFFFF;
+        border: 1px solid var(--portafolio-rose-border);
+        border-radius: 16px;
+        padding: 16px 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+
+    <!-- 1. PORTADA DEL PORTAFOLIO -->
+    <header class="portafolio-header">
+        <div class="row align-items-center g-4">
+            <div class="col-auto">
+                <div class="portafolio-avatar">
+                    {{ aprendiz.first_name|default:aprendiz.username|slice:':1'|upper }}
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="portafolio-kicker mb-1">
+                    <i class="bi bi-book-half me-1"></i> Mi Portafolio Digital · Historial de Formación
+                </div>
+                <h1 class="h3 fw-bold text-dark mb-1">
+                    {{ aprendiz.get_full_name|default:aprendiz.username }}
+                </h1>
+                <div class="d-flex flex-wrap align-items-center gap-2 text-muted small mb-2">
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 fw-semibold">
+                        {{ perfil.rol.nombre|default:'Aprendiz SENA' }} · Etapa Lectiva
+                    </span>
+                    <span><i class="bi bi-person-vcard me-1"></i>{{ perfil.tipo_documento }} {{ perfil.numero_documento }}</span>
+                    <span>·</span>
+                    <span class="fw-bold text-dark"><i class="bi bi-layers-fill me-1 text-success"></i>Ficha {{ ficha.codigo_ficha|default:'3173430' }}</span>
+                </div>
+                <p class="text-muted small mb-0">
+                    <strong>Programa:</strong> {{ programa.denominacion|default:'Análisis y Desarrollo de Sistemas de Información (ADSI)' }} 
+                    {% if instructor_lider %}
+                        · <strong>Instructor Líder:</strong> {{ instructor_lider.get_full_name|default:instructor_lider.username }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-lg-3 text-lg-end">
+                <div class="p-3 bg-white rounded-4 border d-inline-block text-center shadow-sm" style="border-color: var(--portafolio-rose-border) !important; min-width: 170px;">
+                    <div class="small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.72rem;">Progreso Global</div>
+                    <div class="h3 fw-bold text-success mb-1">{{ progreso_global }}%</div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-success" style="width: {{ progreso_global }}%;"></div>
+                    </div>
+                    <small class="text-muted mt-1 d-block" style="font-size: 0.7rem;">Cálculo RAPs + Entregas</small>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. RESUMEN DE INDICADORES REALES -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="kpi-metric-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Actividades y Guías</span>
+                    <div class="kpi-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-journal-code"></i></div>
+                </div>
+                <div class="h4 fw-bold text-dark mb-1">{{ total_actividades }}</div>
+                <div class="small text-muted">
+                    <span class="text-success fw-bold">{{ conteo_entregadas }} entregadas</span> · {{ conteo_pendientes }} pendientes
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-metric-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Evaluación RAP</span>
+                    <div class="kpi-icon bg-success bg-opacity-10 text-success"><i class="bi bi-award-fill"></i></div>
+                </div>
+                <div class="h4 fw-bold text-dark mb-1">{{ juicios_a }} / {{ total_raps }}</div>
+                <div class="small text-muted">
+                    <span class="text-success fw-bold">{{ juicios_a }} Aprobados</span> · {{ juicios_d }} Por Mejorar
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-metric-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Asistencia y QR</span>
+                    <div class="kpi-icon bg-info bg-opacity-10 text-info"><i class="bi bi-qr-code-scan"></i></div>
+                </div>
+                <div class="h4 fw-bold text-dark mb-1">{{ porcentaje_asistencia }}%</div>
+                <div class="small text-muted">
+                    {{ asistencias_p }} Asistencias · {{ asistencias_a }} Ausencias
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-metric-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Trámites Secretaría</span>
+                    <div class="kpi-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-inbox-fill"></i></div>
+                </div>
+                <div class="h4 fw-bold text-dark mb-1">{{ solicitudes.count }}</div>
+                <div class="small text-muted">
+                    Radicados registrados ante Secretaría
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. NAVEGACIÓN POR PESTAÑAS DEL PORTAFOLIO -->
+    <ul class="nav tab-pills gap-2 mb-4" id="portafolioTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="actividades-tab" data-bs-toggle="tab" data-bs-target="#tab-actividades" type="button" role="tab">
+                <i class="bi bi-journal-check me-1"></i> Mis Actividades ({{ total_actividades }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="evaluaciones-tab" data-bs-toggle="tab" data-bs-target="#tab-evaluaciones" type="button" role="tab">
+                <i class="bi bi-award me-1"></i> Mis Evaluaciones RAP ({{ total_raps }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="asistencia-tab" data-bs-toggle="tab" data-bs-target="#tab-asistencia" type="button" role="tab">
+                <i class="bi bi-calendar2-check me-1"></i> Mi Asistencia ({{ porcentaje_asistencia }}%)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="seguimiento-tab" data-bs-toggle="tab" data-bs-target="#tab-seguimiento" type="button" role="tab">
+                <i class="bi bi-clipboard2-pulse me-1"></i> Mi Seguimiento en Aula
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#tab-timeline" type="button" role="tab">
+                <i class="bi bi-clock-history me-1"></i> Historia de mi Formación
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="recursos-tab" data-bs-toggle="tab" data-bs-target="#tab-recursos" type="button" role="tab">
+                <i class="bi bi-bookmark-star me-1"></i> Mis Recursos ({{ recursos_guardados.count }})
+            </button>
+        </li>
+    </ul>
+
+    <!-- 4. CONTENIDO DE LAS PESTAÑAS -->
+    <div class="tab-content" id="portafolioTabsContent">
+
+        <!-- TAB 1: MIS ACTIVIDADES -->
+        <div class="tab-pane fade show active" id="tab-actividades" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                <!-- Buscador y Filtros -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <div>
+                        <h2 class="h5 fw-bold text-dark mb-1">Actividades y Talleres Formativos</h2>
+                        <p class="text-muted small mb-0">Guías asignadas por tus instructores vinculadas a los Resultados de Aprendizaje.</p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="?estado=todos" class="btn btn-sm {% if filtro_estado == 'todos' %}btn-dark{% else %}btn-light border{% endif %} rounded-pill px-3">Todas</a>
+                        <a href="?estado=pendiente" class="btn btn-sm {% if filtro_estado == 'pendiente' %}btn-warning text-dark{% else %}btn-light border{% endif %} rounded-pill px-3">Pendientes</a>
+                        <a href="?estado=en revision" class="btn btn-sm {% if filtro_estado == 'en revision' %}btn-primary{% else %}btn-light border{% endif %} rounded-pill px-3">En Revisión</a>
+                        <a href="?estado=evaluada" class="btn btn-sm {% if filtro_estado == 'evaluada' %}btn-success{% else %}btn-light border{% endif %} rounded-pill px-3">Evaluadas</a>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    {% for item in actividades %}
+                        <div class="col-md-6 col-xl-4">
+                            <div class="activity-card h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge {% if item.estado == 'Evaluada' %}bg-success{% elif item.estado == 'En revision' %}bg-primary{% elif item.estado == 'Vencida' %}bg-danger{% else %}bg-warning text-dark{% endif %} rounded-pill px-3 py-1">
+                                            {{ item.estado }}
+                                        </span>
+                                        <small class="text-muted" style="font-size: 0.72rem;">
+                                            <i class="bi bi-clock me-1"></i>{{ item.actividad.fecha_limite|date:'d/m/Y H:i' }}
+                                        </small>
+                                    </div>
+                                    <h3 class="h6 fw-bold text-dark mb-2">
+                                        {{ item.actividad.titulo }}
+                                    </h3>
+                                    <p class="text-muted small mb-3">
+                                        {{ item.actividad.descripcion|truncatechars:110 }}
+                                    </p>
+                                    <div class="p-2 rounded-3 bg-light text-muted small mb-3">
+                                        <div><strong class="text-dark">RAP:</strong> {% if item.actividad.rap_curricular %}{{ item.actividad.rap_curricular.codigo }}{% elif item.actividad.rap %}{{ item.actividad.rap.codigo }}{% else %}ADSI{% endif %}</div>
+                                        <div><strong class="text-dark">Instructor:</strong> {{ item.actividad.instructor.get_full_name|default:'Carlos Martínez' }}</div>
+                                    </div>
+                                </div>
+                                <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+                                    {% if item.entrega %}
+                                        <span class="small text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Evidencia subida</span>
+                                    {% else %}
+                                        <span class="small text-danger fw-semibold"><i class="bi bi-exclamation-circle me-1"></i>Sin entrega</span>
+                                    {% endif %}
+                                    <a href="{% url 'portafolio_actividad_detalle' item.actividad.id %}" class="btn btn-sm btn-outline-success fw-bold px-3 rounded-pill">
+                                        Ver Detalle <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 py-5 text-center text-muted">
+                            <i class="bi bi-journal-check fs-1 text-success d-block mb-2"></i>
+                            <h3 class="h6 fw-bold text-dark">No se encontraron actividades en esta categoría</h3>
+                            <p class="small text-muted mb-0">Todas tus guías y entregas se sincronizan en tiempo real.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MIS EVALUACIONES RAP -->
+        <div class="tab-pane fade" id="tab-evaluaciones" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="h5 fw-bold text-dark mb-1">Resultados de Aprendizaje (RAP) Oficiales</h2>
+                        <p class="text-muted small mb-0">Juicios cualitativos emitidos por los instructores conforme al modelo pedagógico SENA.</p>
+                    </div>
+                    <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                        <i class="bi bi-table me-1"></i> Consultar Sábana General
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código RAP</th>
+                                <th>Descripción del Resultado</th>
+                                <th>Competencia Laboral</th>
+                                <th>Juicio</th>
+                                <th>Instructor Evaluador</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for j in juicios %}
+                                <tr>
+                                    <td><strong class="text-dark">{{ j.resultado_aprendizaje.codigo }}</strong></td>
+                                    <td class="small">{{ j.resultado_aprendizaje.descripcion }}</td>
+                                    <td><span class="badge bg-light text-dark border">{{ j.resultado_aprendizaje.competencia.codigo }}</span></td>
+                                    <td>
+                                        <span class="badge {% if j.juicio_valor == 'A' %}bg-success{% else %}bg-danger{% endif %} rounded-pill px-3 py-2">
+                                            {% if j.juicio_valor == 'A' %}A - Aprobado{% else %}D - No Aprobado{% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="small text-muted">{{ j.instructor.get_full_name|default:j.instructor.username }}</td>
+                                    <td class="small text-muted">{{ j.fecha_evaluacion|date:'d/m/Y' }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-award fs-1 text-muted d-block mb-2"></i>
+                                        Aún no registras juicios evaluativos asentados para esta ficha.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: MI ASISTENCIA -->
+        <div class="tab-pane fade" id="tab-asistencia" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="h5 fw-bold text-dark mb-1">Registro y Control de Asistencia</h2>
+                        <p class="text-muted small mb-0">Trazabilidad de sesiones presenciales y virtuales en la Media Técnica SENA.</p>
+                    </div>
+                    <a href="{% url 'carnet_digital_id' perfil.pk %}" class="btn btn-sm btn-success rounded-pill px-3">
+                        <i class="bi bi-qr-code-scan me-1"></i> Abrir Mi Carnet QR
+                    </a>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-4 text-center">
+                            <span class="text-muted small">Porcentaje Global</span>
+                            <div class="h3 fw-bold text-success mt-1 mb-0">{{ porcentaje_asistencia }}%</div>
+                            <small class="text-muted">Mínimo exigido: 80%</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-4 text-center">
+                            <span class="text-muted small">Sesiones Asistidas</span>
+                            <div class="h3 fw-bold text-dark mt-1 mb-0">{{ asistencias_p }}</div>
+                            <small class="text-success">Presente en aula</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-4 text-center">
+                            <span class="text-muted small">Inasistencias</span>
+                            <div class="h3 fw-bold text-danger mt-1 mb-0">{{ asistencias_a }}</div>
+                            <small class="text-muted">{{ asistencias_j }} justificadas</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha de la Sesión</th>
+                                <th>Estado</th>
+                                <th>Observaciones</th>
+                                <th>Registrado Por</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in asistencias %}
+                                <tr>
+                                    <td><strong>{{ a.fecha|date:'d/m/Y' }}</strong></td>
+                                    <td>
+                                        <span class="badge {% if a.estado == 'P' %}bg-success{% elif a.estado == 'J' %}bg-warning text-dark{% else %}bg-danger{% endif %} rounded-pill px-3">
+                                            {{ a.get_estado_display }}
+                                        </span>
+                                    </td>
+                                    <td class="small text-muted">{{ a.observaciones|default:'Asistencia verificada en ambiente.' }}</td>
+                                    <td class="small text-muted">{{ a.registrado_por.get_full_name|default:a.registrado_por.username }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        No hay asistencias registradas recientemente. Utiliza tu carné QR en cada jornada.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MI SEGUIMIENTO EN AULA -->
+        <div class="tab-pane fade" id="tab-seguimiento" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="h5 fw-bold text-dark mb-1">Acompañamiento y Bitácoras de Formación</h2>
+                        <p class="text-muted small mb-0">Visitas institucionales, diagnóstico pedagógico y compromisos de mejora acordados.</p>
+                    </div>
+                    <a href="{% url 'seguimiento_lista' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                        <i class="bi bi-card-checklist me-1"></i> Historial de Visitas
+                    </a>
+                </div>
+
+                <div class="list-group list-group-flush">
+                    {% for seg in seguimientos %}
+                        <div class="list-group-item px-0 py-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-light text-dark border">{{ seg.tipo_seguimiento }}</span>
+                                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ seg.fecha_visita|date:'d/m/Y' }}</small>
+                            </div>
+                            <h3 class="h6 fw-bold text-dark mb-1">Visita del Instructor: {{ seg.instructor.get_full_name|default:seg.instructor.username }}</h3>
+                            <p class="text-muted small mb-2">{{ seg.observaciones }}</p>
+                            {% if seg.compromisos %}
+                                <div class="p-2 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 small">
+                                    <strong class="text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Compromiso Acordado:</strong>
+                                    {{ seg.compromisos }}
+                                    {% if seg.fecha_verificacion %}
+                                        <div class="text-muted mt-1" style="font-size: 0.75rem;">Fecha de verificación: {{ seg.fecha_verificacion|date:'d/m/Y' }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-clipboard2-pulse fs-1 text-muted d-block mb-2"></i>
+                            No hay seguimientos registrados para tu cohorte en este momento.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: HISTORIA DE MI FORMACIÓN (LÍNEA DE TIEMPO) -->
+        <div class="tab-pane fade" id="tab-timeline" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h2 class="h5 fw-bold text-dark mb-1">Historia de mi Formación</h2>
+                <p class="text-muted small mb-4">Línea de tiempo cronológica con eventos reales registrados en SINETEC.</p>
+
+                <div class="timeline-stream">
+                    {% for ev in linea_tiempo %}
+                        <div class="timeline-item">
+                            <div class="timeline-dot"><i class="bi {{ ev.icono }}"></i></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <span class="badge bg-{{ ev.badge_color }} rounded-pill px-3 py-1">{{ ev.badge }}</span>
+                                    <small class="text-muted">{{ ev.fecha|date:'d/m/Y H:i' }}</small>
+                                </div>
+                                <h3 class="h6 fw-bold text-dark mb-1">{{ ev.titulo }}</h3>
+                                <p class="text-muted small mb-2">{{ ev.descripcion }}</p>
+                                {% if ev.url %}
+                                    <a href="{{ ev.url }}" class="small text-success fw-bold text-decoration-none">
+                                        Consultar registro <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-clock-history fs-1 text-muted d-block mb-2"></i>
+                            Aún no se han generado eventos históricos en tu proceso.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: MIS RECURSOS GUARDADOS -->
+        <div class="tab-pane fade" id="tab-recursos" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="h5 fw-bold text-dark mb-1">Mis Recursos y Documentos Guardados</h2>
+                        <p class="text-muted small mb-0">Materiales y guías técnicas guardadas desde la Biblioteca General SENA.</p>
+                    </div>
+                    <a href="{% url 'biblioteca_formacion' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                        <i class="bi bi-book me-1"></i> Explorar Biblioteca General
+                    </a>
+                </div>
+
+                <div class="row g-3">
+                    {% for item in recursos_guardados %}
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 border bg-light d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-white text-dark border mb-1">{{ item.recurso.get_categoria_display }}</span>
+                                    <strong class="d-block text-dark">{{ item.recurso.titulo }}</strong>
+                                    <small class="text-muted">{{ item.recurso.autor }} · {{ item.recurso.ano_publicacion }}</small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    {% if item.recurso.archivo_adjunto %}
+                                        <a href="{{ item.recurso.archivo_adjunto.url }}" target="_blank" class="btn btn-sm btn-success rounded-circle" title="Descargar">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'guardar_recurso_aprendiz' item.recurso.id %}" class="btn btn-sm btn-outline-danger rounded-circle" title="Retirar de guardados">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center py-5 text-muted">
+                            <i class="bi bi-bookmark-star fs-1 text-muted d-block mb-2"></i>
+                            Aún no has guardado recursos de la biblioteca. Explora la Biblioteca Digital y guarda tus guías favoritas.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

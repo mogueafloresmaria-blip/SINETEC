@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Escáner de Asistencia QR · SINETEC SENA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .scanner-container {
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    .scanner-card {
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid rgba(57, 169, 0, 0.2);
+        box-shadow: 0 16px 40px rgba(0, 50, 77, 0.08);
+        overflow: hidden;
+    }
+
+    .scanner-header {
+        background: linear-gradient(135deg, #00324D 0%, #107C41 100%);
+        color: #ffffff;
+        padding: 24px;
+        text-align: center;
+    }
+
+    #reader {
+        width: 100%;
+        border-radius: 16px;
+        overflow: hidden;
+        border: none !important;
+    }
+
+    #reader video {
+        border-radius: 16px;
+        object-fit: cover;
+    }
+
+    .scanner-viewfinder {
+        position: relative;
+        background: #000000;
+        border-radius: 18px;
+        overflow: hidden;
+        min-height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .scan-reticle {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border: 3px solid rgba(57, 169, 0, 0.85);
+        border-radius: 18px;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+        pointer-events: none;
+        animation: reticlePulse 2s infinite ease-in-out;
+    }
+
+    @keyframes reticlePulse {
+        0%, 100% { border-color: rgba(57, 169, 0, 0.85); transform: scale(1); }
+        50% { border-color: rgba(255, 255, 255, 0.9); transform: scale(1.03); }
+    }
+
+    .scan-laser {
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #39A900, #39A900, transparent);
+        box-shadow: 0 0 8px #39A900;
+        top: 0;
+        animation: laserScan 2.4s infinite linear;
+    }
+
+    @keyframes laserScan {
+        0% { top: 10%; opacity: 0; }
+        15% { opacity: 1; }
+        85% { opacity: 1; }
+        100% { top: 90%; opacity: 0; }
+    }
+
+    .result-alert {
+        display: none;
+        border-radius: 16px;
+        padding: 16px 20px;
+        animation: slideInDown 0.3s ease;
+    }
+
+    @keyframes slideInDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scanner-container py-3">
+
+    <!-- Encabezado y Navegación Rápida -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Volver al Inicio
+        </a>
+        <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill">
+            <i class="bi bi-circle-fill text-success small me-1"></i> Sistema de Asistencia Activo
+        </span>
+    </div>
+
+    <div class="scanner-card">
+        <div class="scanner-header">
+            <div class="d-inline-flex p-3 rounded-circle bg-white bg-opacity-10 mb-2">
+                <i class="bi bi-qr-code-scan fs-2 text-white"></i>
+            </div>
+            <h3 class="fw-bold mb-1">Escáner de Asistencia Diaria</h3>
+            <p class="text-white-50 small mb-0">
+                Apunta la cámara del celular o laptop al Carnet Digital QR del aprendiz para registrar su presencia hoy.
+            </p>
+        </div>
+
+        <div class="p-4">
+            <!-- Mensaje de resultado en vivo -->
+            <div id="resultContainer" class="result-alert mb-3"></div>
+
+            <!-- Visor de la Cámara -->
+            <div class="scanner-viewfinder mb-3 position-relative">
+                <div id="reader"></div>
+                <div id="scannerOverlay" class="scan-reticle">
+                    <div class="scan-laser"></div>
+                </div>
+            </div>
+
+            <!-- Controles de la Cámara -->
+            <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+                <button id="btnStartCamera" class="btn btn-success rounded-pill px-4 fw-bold">
+                    <i class="bi bi-camera-video-fill me-1"></i> Iniciar Cámara
+                </button>
+                <button id="btnSwitchCamera" class="btn btn-outline-dark rounded-pill px-3" style="display:none;">
+                    <i class="bi bi-arrow-repeat me-1"></i> Cambiar Cámara (Trasera/Frontal)
+                </button>
+                <button id="btnStopCamera" class="btn btn-outline-danger rounded-pill px-3" style="display:none;">
+                    <i class="bi bi-stop-circle me-1"></i> Detener Cámara
+                </button>
+            </div>
+
+            <!-- Búsqueda Manual / Escaneo por Documento Alternativo -->
+            <div class="pt-3 border-top">
+                <label class="form-label small fw-bold text-muted text-uppercase mb-2">
+                    <i class="bi bi-keyboard me-1"></i> ¿Problemas con la cámara? Registro rápido por documento o código:
+                </label>
+                <form id="formManual" class="input-group">
+                    <input type="text" id="inputDocumento" class="form-control rounded-start-pill px-3" 
+                           placeholder="Ingrese número de documento o token del aprendiz..." required>
+                    <button class="btn btn-dark rounded-end-pill px-4 fw-bold" type="submit">
+                        <i class="bi bi-check-circle-fill me-1"></i> Registrar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="bg-light p-3 text-center border-top">
+            <small class="text-muted">
+                <i class="bi bi-shield-check text-success me-1"></i> Registro inmediato e inmutable en base de datos oficial SENA (AsistenciaAprendiz).
+            </small>
+        </div>
+    </div>
+
+</div>
+
+<!-- Librería Liviana Html5-QRCode para escaneo confiable en celulares -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<script>
+    let html5QrCode = null;
+    let currentFacingMode = "environment"; // Por defecto cámara trasera en móviles
+    let isProcessing = false;
+
+    const resultContainer = document.getElementById('resultContainer');
+    const btnStartCamera = document.getElementById('btnStartCamera');
+    const btnSwitchCamera = document.getElementById('btnSwitchCamera');
+    const btnStopCamera = document.getElementById('btnStopCamera');
+    const scannerOverlay = document.getElementById('scannerOverlay');
+
+    function playBeep(success = true) {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            if (success) {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
+                gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } else {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, ctx.currentTime);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.35);
+            }
+        } catch(e) {}
+    }
+
+    function showResult(data, isSuccess) {
+        resultContainer.style.display = 'block';
+        if (isSuccess) {
+            playBeep(true);
+            resultContainer.className = 'result-alert alert alert-success text-dark shadow-sm';
+            resultContainer.innerHTML = `
+                <div class="d-flex align-items-center gap-3">
+                    <div class="fs-2 text-success"><i class="bi bi-check-circle-fill"></i></div>
+                    <div class="flex-grow-1">
+                        <strong class="d-block fs-6 text-success">${data.mensaje || '¡Asistencia registrada con éxito!'}</strong>
+                        <div class="small"><strong>Aprendiz:</strong> ${data.aprendiz || 'N/A'} · <strong>Doc:</strong> ${data.documento || ''}</div>
+                        <div class="small text-muted"><strong>Ficha:</strong> ${data.ficha || 'SENA'} · <strong>Hora:</strong> ${data.hora || ''} · <strong>Estado:</strong> PRESENTE</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            playBeep(false);
+            resultContainer.className = 'result-alert alert alert-danger shadow-sm';
+            resultContainer.innerHTML = `
+                <div class="d-flex align-items-center gap-3">
+                    <div class="fs-2 text-danger"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <div>
+                        <strong class="d-block">${data.mensaje || 'No se pudo verificar el carnet.'}</strong>
+                        <div class="small text-muted">Verifique que el código o documento corresponda a un aprendiz activo.</div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    async function sendScanData(value) {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        try {
+            const response = await fetch("{% url 'api_registrar_asistencia_qr' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ raw_data: value })
+            });
+
+            const data = await response.json();
+            showResult(data, data.success);
+
+            // Si vino desde la cámara, si tiene URL de confirmación completa, podemos redirigir después de 1.8 segundos o mantenerlo escaneando
+            setTimeout(() => {
+                isProcessing = false;
+            }, 2500);
+
+        } catch (err) {
+            showResult({ mensaje: 'Error de comunicación con el servidor.' }, false);
+            isProcessing = false;
+        }
+    }
+
+    function startScanner(facingMode) {
+        if (!html5QrCode) {
+            html5QrCode = new Html5Qrcode("reader");
+        }
+
+        const config = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+        };
+
+        html5QrCode.start(
+            { facingMode: facingMode },
+            config,
+            (decodedText, decodedResult) => {
+                sendScanData(decodedText);
+            },
+            (errorMessage) => {
+                // scanning...
+            }
+        ).then(() => {
+            btnStartCamera.style.display = 'none';
+            btnSwitchCamera.style.display = 'inline-block';
+            btnStopCamera.style.display = 'inline-block';
+            scannerOverlay.style.display = 'block';
+        }).catch(err => {
+            alert('No se pudo acceder a la cámara. Verifique los permisos de cámara en su navegador o use el registro manual por documento.');
+            console.error(err);
+        });
+    }
+
+    function stopScanner() {
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => {
+                btnStartCamera.style.display = 'inline-block';
+                btnSwitchCamera.style.display = 'none';
+                btnStopCamera.style.display = 'none';
+                scannerOverlay.style.display = 'none';
+            });
+        }
+    }
+
+    btnStartCamera.addEventListener('click', () => {
+        startScanner(currentFacingMode);
+    });
+
+    btnStopCamera.addEventListener('click', () => {
+        stopScanner();
+    });
+
+    btnSwitchCamera.addEventListener('click', () => {
+        currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => {
+                startScanner(currentFacingMode);
+            });
+        }
+    });
+
+    // Envío Manual por Documento
+    document.getElementById('formManual').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const doc = document.getElementById('inputDocumento').value.trim();
+        if (doc) {
+            sendScanData(doc);
+        }
+    });
+
+    // Auto-iniciar cámara si el dispositivo soporta mediaDevices
+    window.addEventListener('DOMContentLoaded', () => {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            startScanner("environment");
+        }
+    });
+</script>
+{% endblock %}

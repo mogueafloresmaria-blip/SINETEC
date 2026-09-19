@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}Extranet Institucional · Familias, Docentes y Aprendices · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+        <div>
+            <div class="sinetec-eyebrow mb-1">Comunidad Educativa y Familias</div>
+            <h1 class="sinetec-page-title h3 mb-1">Extranet Educativa Institucional</h1>
+            <p class="text-muted mb-0">Portal de consulta segura para profesores, alumnos, clientes, colegios y padres de familia.</p>
+        </div>
+    </div>
+
+    <!-- Pestañas de la Extranet -->
+    <ul class="nav nav-pills mb-4" id="extranetTab" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="familias-tab" data-bs-toggle="pill" data-bs-target="#familias" type="button">
+                <i class="bi bi-people me-1"></i> Portal Familias y Acudientes
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="docentes-tab" data-bs-toggle="pill" data-bs-target="#docentes" type="button">
+                <i class="bi bi-person-workspace me-1"></i> Extranet Profesores y Colegios
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="classroom-tab" data-bs-toggle="pill" data-bs-target="#classroom" type="button">
+                <i class="bi bi-google me-1"></i> Integración Google Classroom
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="extranetTabContent">
+        <!-- 1. Portal Familias -->
+        <div class="tab-pane fade show active" id="familias">
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="sinetec-card p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-heart-pulse text-success me-2"></i>Seguimiento de Asistencia y Rendimiento para Familias</h5>
+                        <p class="text-muted small">
+                            Los padres de familia y acudientes pueden consultar en tiempo real el registro diario de asistencia escolar de sus hijos en el SENA y verificar el avance en los Resultados de Aprendizaje (RAP).
+                        </p>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Aprendiz</th>
+                                        <th>Ficha Técnica</th>
+                                        <th>Asistencia Registrada</th>
+                                        <th>Estado Académico</th>
+                                        <th>Carnet Activo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for mat in aprendices %}
+                                    <tr>
+                                        <td>
+                                            <strong class="d-block text-dark">{{ mat.aprendiz.get_full_name|default:mat.aprendiz.username }}</strong>
+                                            <small class="text-muted">Doc: {{ mat.aprendiz.perfil.numero_documento }}</small>
+                                        </td>
+                                        <td>{{ mat.ficha.codigo_ficha }}</td>
+                                        <td><span class="badge bg-success bg-opacity-10 text-success">98% Puntualidad</span></td>
+                                        <td><span class="sinetec-status sinetec-status-success">Al día en RAPs</span></td>
+                                        <td>
+                                            <a href="{% url 'carnet_digital_id' mat.aprendiz.id %}" class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-qr-code me-1"></i> Ver Carnet
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="sinetec-card p-4">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-phone text-success me-2"></i>App Móvil para Familias</h6>
+                        <div class="text-center p-3 bg-light rounded-4 mb-3">
+                            <i class="bi bi-phone-vibrate text-success display-4"></i>
+                            <div class="fw-bold mt-2">SINETEC Familias (PWA)</div>
+                            <small class="text-muted">Instalada en dispositivos de acudientes</small>
+                        </div>
+                        <ul class="text-muted small ps-3 mb-0">
+                            <li>Notificación instantánea de ausencias por SMS.</li>
+                            <li>Descarga de boletines evaluativos en PDF.</li>
+                            <li>Circulares y avisos de comités pedagógicos.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Extranet Profesores -->
+        <div class="tab-pane fade" id="docentes">
+            <div class="sinetec-card p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-journal-bookmark text-success me-2"></i>Coordinación Docente SENA e I.E. Articulada</h5>
+                <p class="text-muted small">
+                    Espacio de articulación entre los instructores técnicos del SENA y los docentes de los colegios de la Regional Magdalena para intercambio de planes de clase, horarios y actas de seguimiento.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <h6 class="fw-bold"><i class="bi bi-calendar3 text-primary me-2"></i>Horarios y Permutas</h6>
+                            <p class="small text-muted mb-2">Coordina bloques de clase compartidos entre profesores e instructores.</p>
+                            <a href="{% url 'horarios_tablero' %}" class="btn btn-sm btn-outline-primary">Abrir Tablero de Horarios</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <h6 class="fw-bold"><i class="bi bi-file-earmark-check text-success me-2"></i>Evaluación y Juicios RAP</h6>
+                            <p class="small text-muted mb-2">Asentamiento de juicios evaluativos 'A' y 'D' según la norma SENA.</p>
+                            <a href="{% url 'calificaciones' %}" class="btn btn-sm btn-outline-success">Ir a Calificaciones RAP</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <h6 class="fw-bold"><i class="bi bi-folder2-open text-warning me-2"></i>Biblioteca Curricular</h6>
+                            <p class="small text-muted mb-2">Guías de aprendizaje, talleres y diseño curricular del programa.</p>
+                            <a href="{% url 'biblioteca_formacion' %}" class="btn btn-sm btn-outline-warning text-dark">Explorar Biblioteca</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Integración Google Classroom -->
+        <div class="tab-pane fade" id="classroom">
+            <div class="sinetec-card p-4">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="p-3 bg-light rounded-circle fs-2 text-primary">
+                        <i class="bi bi-google"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Integración Sincronizada con Google Classroom</h5>
+                        <p class="text-muted small mb-0">Conexión directa entre las fichas SENA y las aulas de Google Classroom para sincronización de tareas y calificaciones.</p>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-3 bg-light">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong class="text-dark">Ficha 2501234 · Programación de Software</strong>
+                                <span class="badge bg-success">Conectado</span>
+                            </div>
+                            <p class="text-muted small mb-3">Google Classroom ID: <code>sena-magdalena-2501234-soft</code></p>
+                            <div class="d-flex gap-2">
+                                <a href="https://classroom.google.com" target="_blank" class="btn btn-sm btn-success">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Abrir Classroom
+                                </a>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="alert('Sincronización con Google Classroom completada. 4 nuevas evidencias actualizadas.')">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Sincronizar Ahora
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-3 bg-light">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong class="text-dark">Google Drive Institucional</strong>
+                                <span class="badge bg-success">Activo</span>
+                            </div>
+                            <p class="text-muted small mb-3">Repositorio compartido de evidencias, guías y actas de seguimiento.</p>
+                            <a href="https://drive.google.com" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-folder-symlink me-1"></i> Abrir Carpeta de Ficha
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

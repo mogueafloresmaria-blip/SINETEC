@@ -1,6 +1,378 @@
 {% extends 'base.html' %}
-{% block title %}Panel de Aprendiz - SINETEC{% endblock %}
+{% load static %}
+
+{% block title %}Mi Espacio de Formación · Aprendiz SENA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .aprendiz-welcome {
+        background: linear-gradient(135deg, #103823 0%, #1a5c36 60%, #39A900 100%);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: clamp(20px, 3.5vw, 32px);
+        box-shadow: 0 12px 30px rgba(16, 56, 35, 0.18);
+        position: relative;
+        overflow: hidden;
+    }
+    .aprendiz-welcome::after {
+        content: 'APRENDIZ';
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        color: rgba(255, 255, 255, 0.05);
+        font: 800 5.5rem/1 'Plus Jakarta Sans', sans-serif;
+        letter-spacing: -0.04em;
+        pointer-events: none;
+    }
+    .stat-card-aprendiz {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #E2EEDF;
+        padding: 18px 20px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .stat-card-aprendiz:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(23, 34, 29, 0.08);
+    }
+    .kpi-icon-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 1.25rem;
+    }
+    .progress-bar-sena {
+        height: 10px;
+        border-radius: 999px;
+        background-color: #E2EEDF;
+        overflow: hidden;
+    }
+    .progress-bar-sena-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #39A900, #54c916);
+        border-radius: 999px;
+        transition: width 0.6s ease;
+    }
+    .actividad-item {
+        border-left: 4px solid #39A900;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        border-top: 1px solid #EAEFE7;
+        border-right: 1px solid #EAEFE7;
+        border-bottom: 1px solid #EAEFE7;
+        transition: all 0.2s ease;
+    }
+    .actividad-item:hover {
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        transform: translateX(3px);
+    }
+    .badge-insignia {
+        background: linear-gradient(135deg, #FFF9EB, #FFF3D6);
+        border: 1px solid #FDE68A;
+        color: #B45309;
+        border-radius: 12px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="mb-4"><div class="sinetec-eyebrow mb-2">Mi formación SENA</div><h1 class="sinetec-page-title h3 mb-1">Mi aula de aprendizaje</h1><p class="text-muted mb-0">Consulta tus actividades, entrega evidencias y recibe la retroalimentación de tu instructor.</p></div>
-<div class="row g-4"><div class="col-xl-7"><section class="sinetec-card"><div class="sinetec-card-header"><h2 class="h5 fw-bold mb-1">Actividades pendientes</h2><p class="text-muted small mb-0">Organiza tus entregas por fecha límite</p></div><div class="list-group list-group-flush">{% for evidencia in pendientes %}<div class="list-group-item p-3 d-flex justify-content-between align-items-center gap-3"><div><strong class="d-block">{{ evidencia.titulo }}</strong><small class="text-muted">RAP {{ evidencia.rap.codigo }} · Entrega hasta {{ evidencia.fecha_limite|date:'d/m/Y H:i' }}</small></div><a href="{% url 'entregar_evidencia' evidencia.pk %}" class="btn btn-sm sinetec-btn sinetec-btn-primary">Entregar <i class="bi bi-arrow-right"></i></a></div>{% empty %}<div class="p-5 text-center text-muted"><i class="bi bi-check2-circle fs-2 d-block mb-2 text-success"></i>No tienes actividades pendientes.</div>{% endfor %}</div></section></div><div class="col-xl-5"><section class="sinetec-card"><div class="sinetec-card-header"><h2 class="h5 fw-bold mb-1">Mis entregas</h2><p class="text-muted small mb-0">Historial y juicios evaluativos</p></div><div class="list-group list-group-flush">{% for entrega in entregas %}<div class="list-group-item px-3 py-3"><strong class="d-block">{{ entrega.evidencia.titulo }}</strong><small class="text-muted d-block mb-1">{{ entrega.fecha_entrega|date:'d/m/Y H:i' }}</small><span class="sinetec-status {% if entrega.juicio_evaluativo == 'PENDIENTE' %}sinetec-status-warning{% elif entrega.juicio_evaluativo == 'A' %}sinetec-status-success{% else %}sinetec-status-danger{% endif %}">{{ entrega.get_juicio_evaluativo_display }}</span>{% if entrega.observaciones %}<p class="small mt-2 mb-0">{{ entrega.observaciones }}</p>{% endif %}</div>{% empty %}<div class="p-4 text-center text-muted">Todavía no has entregado evidencias.</div>{% endfor %}</div></section></div></div>
+<div class="container-fluid px-2 px-md-4 py-2">
+
+    <!-- 1. Encabezado de Bienvenida Personalizado -->
+    <div class="aprendiz-welcome mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 position-relative" style="z-index: 2;">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-2 py-1 small">
+                        <i class="bi bi-mortarboard-fill me-1"></i> Formación Titulada SENA
+                    </span>
+                    <span class="text-white-50 small">Centro de Logística y Promoción Ecoturística</span>
+                </div>
+                <h1 class="h2 fw-bold text-white mb-1">¡Hola, {{ user.first_name|default:user.username }}! 👋</h1>
+                <p class="text-white-50 mb-0" style="font-size: 0.95rem;">
+                    {% if ficha %}
+                        Ficha <strong>{{ ficha.codigo_ficha }}</strong> · {{ ficha.programa.denominacion }} ({{ ficha.institucion.nombre }})
+                    {% else %}
+                        Bienvenido a tu entorno oficial de formación y seguimiento académico SINETEC.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                {% if user.perfil.pk %}
+                <a href="{% url 'carnet_digital_id' user.perfil.pk %}" class="btn btn-light fw-bold text-success d-flex align-items-center gap-2 shadow-sm">
+                    <i class="bi bi-qr-code-scan fs-5"></i> Mi Carné Digital QR
+                </a>
+                {% endif %}
+                <a href="{% url 'portafolio_aprendiz' %}" class="btn btn-outline-light d-flex align-items-center gap-2">
+                    <i class="bi bi-journal-bookmark-fill"></i> Mi Portafolio
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Tarjetas de Resumen y KPIs del Aprendiz -->
+    <div class="row g-3 mb-4">
+        <!-- Mi Progreso -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-card-aprendiz shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small text-uppercase fw-semibold">Mi Progreso</span>
+                    <div class="kpi-icon-circle bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-pie-chart-fill"></i>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">{{ progreso_global|default:100 }}%</h3>
+                    <div class="progress-bar-sena mb-1">
+                        <div class="progress-bar-sena-fill" style="width: {{ progreso_global|default:100 }}%;"></div>
+                    </div>
+                    <small class="text-muted">Cumplimiento formativo general</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mi Asistencia -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-card-aprendiz shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small text-uppercase fw-semibold">Mi Asistencia</span>
+                    <div class="kpi-icon-circle bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">{{ porcentaje_asistencia|default:100 }}%</h3>
+                    <div class="d-flex align-items-center gap-2 text-muted small">
+                        <span><i class="bi bi-check-circle text-success"></i> {{ asistencias_p|default:0 }} Asistencias</span>
+                        <span><i class="bi bi-x-circle text-danger"></i> {{ asistencias_a|default:0 }} Faltas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actividades Pendientes -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-card-aprendiz shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small text-uppercase fw-semibold">Actividades Pendientes</span>
+                    <div class="kpi-icon-circle bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">{{ conteo_pendientes|default:0 }}</h3>
+                    <small class="text-muted">Talleres asignados por entregar</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- RAPs Aprobados -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-card-aprendiz shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small text-uppercase fw-semibold">Evaluación RAP</span>
+                    <div class="kpi-icon-circle bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-award-fill"></i>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="fw-bold text-success mb-1">{{ juicios_aprobados|default:0 }} <small class="text-muted fs-6">Aprobados</small></h3>
+                    <small class="text-muted">{% if juicios_deficientes %}<span class="text-danger fw-bold">{{ juicios_deficientes }} por mejorar</span>{% else %}100% de juicios superados{% endif %}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Contenido Principal en 2 Columnas -->
+    <div class="row g-4">
+        <!-- Columna Izquierda: Actividades por Entregar y Compromisos -->
+        <div class="col-lg-7">
+            <!-- Actividades Pendientes -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-pencil-square text-success me-2"></i>Actividades y Talleres Formativos
+                        </h5>
+                        <small class="text-muted">Entrega a tiempo tus evidencias para evaluación del instructor</small>
+                    </div>
+                    <a href="{% url 'portafolio_aprendiz' %}" class="btn btn-sm btn-light">Ver Todas</a>
+                </div>
+                <div class="card-body p-3">
+                    {% for evidencia in pendientes %}
+                        <div class="actividad-item d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                            <div>
+                                <strong class="text-dark d-block mb-1">{{ evidencia.titulo }}</strong>
+                                <div class="d-flex flex-wrap gap-2 small text-muted">
+                                    <span><i class="bi bi-tag text-success"></i> RAP: {{ evidencia.rap_codigo }}</span>
+                                    <span><i class="bi bi-calendar-event text-warning"></i> Límite: {{ evidencia.fecha_limite|date:'d/m/Y H:i' }}</span>
+                                    {% if evidencia.instructor %}
+                                        <span><i class="bi bi-person"></i> {{ evidencia.instructor.get_full_name|default:evidencia.instructor.username }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{% url 'portafolio_actividad_detalle' evidencia.pk %}" class="btn btn-sm btn-success px-3 text-nowrap fw-semibold" style="background-color: #39A900;">
+                                <i class="bi bi-upload me-1"></i> Entregar
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-check-circle-fill text-success fs-1 d-block mb-2"></i>
+                            <h6 class="fw-bold text-dark">¡Estás al día!</h6>
+                            <p class="small mb-0">No tienes talleres ni actividades pendientes de entrega en este momento.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Mis Compromisos Formativos -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-clipboard2-check-fill text-warning me-2"></i>Mis Compromisos de Mejora
+                        </h5>
+                        <small class="text-muted">Acuerdos pedagógicos pactados durante visitas y seguimientos</small>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    {% for comp in compromisos %}
+                        <div class="p-3 mb-2 rounded-3 border bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="d-block text-dark">{{ comp.titulo }}</strong>
+                                <small class="text-muted d-block">{{ comp.descripcion|truncatechars:90 }}</small>
+                                <small class="text-muted"><i class="bi bi-calendar-event me-1"></i>Fecha límite: {{ comp.fecha_limite|date:'d/m/Y' }}</small>
+                            </div>
+                            <span class="badge {% if comp.estado == 'CUMPLIDO' %}bg-success{% elif comp.estado == 'VENCIDO' %}bg-danger{% else %}bg-warning text-dark{% endif %} px-3 py-2">
+                                {{ comp.get_estado_display }}
+                            </span>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-4 text-muted small">
+                            <i class="bi bi-shield-check fs-3 text-success d-block mb-1"></i>
+                            No registras compromisos pendientes de verificación.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Alertas, Horario, Trámites y Logros -->
+        <div class="col-lg-5">
+            <!-- Alertas Tempranas del Aprendiz -->
+            {% if alertas %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-danger bg-white">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="fw-bold text-danger mb-0">
+                        <i class="bi bi-exclamation-octagon-fill me-2"></i>Atención Recomendada
+                    </h6>
+                </div>
+                <div class="card-body p-3">
+                    {% for al in alertas %}
+                        <div class="alert alert-warning py-2 px-3 small mb-2 d-flex align-items-center gap-2">
+                            <i class="bi bi-info-circle-fill fs-5"></i>
+                            <div>{{ al.mensaje }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Próximos Horarios y Sesiones -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h6 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-calendar3 text-primary me-2"></i>Horario de Formación
+                    </h6>
+                    {% if ficha %}
+                    <a href="{% url 'horarios_tablero' %}?ficha={{ ficha.id }}" class="btn btn-sm btn-light">Ver Calendario</a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-3">
+                    {% for h in horarios %}
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <div>
+                                <strong class="d-block text-dark small">{{ h.get_dia_display }} · {{ h.hora_inicio|time:'H:i' }} - {{ h.hora_fin|time:'H:i' }}</strong>
+                                <small class="text-muted">{{ h.ambiente|default:'Ambiente SENA' }} · {{ h.modalidad }}</small>
+                            </div>
+                            <span class="badge bg-light text-dark border">{{ h.instructor.get_full_name|default:h.instructor.username }}</span>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-3 text-muted small">
+                            Horarios regulares según la programación de tu institución.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Trámites en Secretaría -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h6 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-envelope-check-fill text-success me-2"></i>Mis Trámites en Secretaría
+                    </h6>
+                    <a href="{% url 'nueva_solicitud' %}" class="btn btn-sm btn-outline-success">Radicar</a>
+                </div>
+                <div class="card-body p-3">
+                    {% for sol in solicitudes %}
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <div>
+                                <a href="{% url 'secretaria_detalle' sol.id %}" class="fw-semibold text-dark text-decoration-none small d-block">
+                                    #{{ sol.id }} · {{ sol.asunto|truncatechars:35 }}
+                                </a>
+                                <small class="text-muted">{{ sol.fecha_creacion|date:'d/m/Y' }}</small>
+                            </div>
+                            <span class="badge bg-light text-dark border">{{ sol.get_estado_display }}</span>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-3 text-muted small">
+                            ¿Necesitas constancias o novedades? Usa el botón Radicar.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Gamificación e Insignias -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-award-fill text-warning me-2"></i>Mis Logros e Insignias
+                    </h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="badge-insignia">
+                            <i class="bi bi-check-all fs-5 text-success"></i>
+                            <span>Puntualidad Impecable</span>
+                        </div>
+                        <div class="badge-insignia">
+                            <i class="bi bi-journal-check fs-5 text-primary"></i>
+                            <span>Portafolio Activo</span>
+                        </div>
+                        {% for logro in logros %}
+                            <div class="badge-insignia">
+                                <i class="bi {{ logro.icono }} fs-5 text-{{ logro.color }}"></i>
+                                <span>{{ logro.titulo }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

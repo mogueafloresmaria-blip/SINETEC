@@ -1,17 +1,325 @@
 {% extends 'base.html' %}
-{% block title %}Panel de Instructor - SINETEC{% endblock %}
+{% load static %}
+
+{% block title %}Panel de Gestión del Instructor · SINETEC SENA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .instructor-hero {
+        background: linear-gradient(135deg, #1A382B 0%, #2A5C45 60%, #39A900 100%);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: clamp(20px, 3.5vw, 32px);
+        box-shadow: 0 12px 30px rgba(26, 56, 43, 0.18);
+        position: relative;
+        overflow: hidden;
+    }
+    .instructor-hero::after {
+        content: 'INSTRUCTOR';
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        color: rgba(255, 255, 255, 0.05);
+        font: 800 5.5rem/1 'Plus Jakarta Sans', sans-serif;
+        letter-spacing: -0.04em;
+        pointer-events: none;
+    }
+    .kpi-stat-instructor {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #E2EEDF;
+        padding: 18px 20px;
+        height: 100%;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-stat-instructor:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(23, 34, 29, 0.08);
+    }
+    .today-agenda-item {
+        border-left: 4px solid #39A900;
+        background: #F8FAF7;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+    }
+    .ficha-card-item {
+        border: 1px solid #E2EEDF;
+        border-radius: 16px;
+        padding: 18px;
+        background: #ffffff;
+        transition: all 0.2s ease;
+    }
+    .ficha-card-item:hover {
+        border-color: #39A900;
+        box-shadow: 0 8px 22px rgba(57, 169, 0, 0.09);
+    }
+    .risk-indicator-pill {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="mb-4 d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3">
-    <div><div class="sinetec-eyebrow mb-2">Espacio del instructor</div><h1 class="sinetec-page-title h3 mb-1">Aula de formación</h1><p class="text-muted mb-0">Publica actividades, revisa evidencias y acompaña el avance de tus aprendices desde un solo lugar.</p></div>
-    <a href="{% url 'crear_evidencia' %}" class="btn sinetec-btn sinetec-btn-primary"><i class="bi bi-plus-lg me-1"></i> Publicar evidencia</a>
-</div>
-<div class="row g-3 mb-4">
-    <div class="col-6 col-lg-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Evidencias publicadas</div><div class="sinetec-metric-value">{{ total_evidencias }}</div><small class="text-muted">Guías y talleres activos</small></div></div>
-    <div class="col-6 col-lg-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Entregas recibidas</div><div class="sinetec-metric-value">{{ total_entregas }}</div><small class="text-success">Archivos de aprendices</small></div></div>
-    <div class="col-6 col-lg-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Por calificar</div><div class="sinetec-metric-value">{{ pendientes_calificar }}</div><small class="text-warning">Requieren retroalimentación</small></div></div>
-</div>
-<div class="row g-4">
-    <div class="col-xl-7"><section class="sinetec-card"><div class="sinetec-card-header d-flex justify-content-between align-items-center"><div><h2 class="h5 fw-bold mb-1">Actividades de aprendizaje</h2><p class="text-muted small mb-0">Publicadas por resultado de aprendizaje</p></div><span class="sinetec-status sinetec-status-success">Aula activa</span></div><div class="table-responsive"><table class="table sinetec-table mb-0"><thead><tr><th>Actividad</th><th>RAP</th><th>Fecha límite</th><th>Entregas</th></tr></thead><tbody>{% for evidencia in evidencias %}<tr><td><strong>{{ evidencia.titulo }}</strong><small class="d-block text-muted">{{ evidencia.descripcion|truncatechars:48 }}</small></td><td>{{ evidencia.rap.codigo }}</td><td>{{ evidencia.fecha_limite|date:'d/m/Y H:i' }}</td><td><span class="sinetec-status sinetec-status-success">{{ evidencia.calificaciones.count }}</span></td></tr>{% empty %}<tr><td colspan="4" class="text-center py-5 text-muted">Aún no hay evidencias. Publica la primera actividad.</td></tr>{% endfor %}</tbody></table></div></section></div>
-    <div class="col-xl-5"><section class="sinetec-card"><div class="sinetec-card-header"><h2 class="h5 fw-bold mb-1">Últimas entregas</h2><p class="text-muted small mb-0">Revisión y retroalimentación</p></div><div class="list-group list-group-flush">{% for entrega in entregas %}<div class="list-group-item px-3 py-3"><div class="d-flex justify-content-between gap-2"><strong>{{ entrega.aprendiz.get_full_name|default:entrega.aprendiz.username }}</strong><span class="sinetec-status {% if entrega.juicio_evaluativo == 'PENDIENTE' %}sinetec-status-warning{% elif entrega.juicio_evaluativo == 'A' %}sinetec-status-success{% else %}sinetec-status-danger{% endif %}">{{ entrega.get_juicio_evaluativo_display }}</span></div><small class="text-muted d-block mb-2">{{ entrega.evidencia.titulo }} · {{ entrega.fecha_entrega|date:'d/m/Y H:i' }}</small>{% if entrega.archivo_entregado %}<a href="{{ entrega.archivo_entregado.url }}" target="_blank" class="btn btn-sm btn-light me-1"><i class="bi bi-download me-1"></i> Ver archivo</a>{% endif %}<a href="{% url 'revisar_evidencia' entrega.pk %}" class="btn btn-sm btn-outline-success">Revisar</a></div>{% empty %}<div class="p-4 text-center text-muted">No hay entregas todavía.</div>{% endfor %}</div></section></div>
+<div class="container-fluid px-2 px-md-4 py-2">
+
+    <!-- 1. Encabezado del Instructor -->
+    <div class="instructor-hero mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 position-relative" style="z-index: 2;">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-2 py-1 small">
+                        <i class="bi bi-person-badge-fill me-1"></i> Docente Técnico SENA
+                    </span>
+                    <span class="text-white-50 small">Centro de Logística y Promoción Ecoturística</span>
+                </div>
+                <h1 class="h2 fw-bold text-white mb-1">Buenos días, {{ user.first_name|default:user.username }} 👨‍🏫</h1>
+                <p class="text-white-50 mb-0" style="font-size: 0.95rem;">
+                    Acompañamiento formativo, control de asistencia, evaluación RAP y seguimiento de tus cohortes asignadas.
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'crear_evidencia' %}" class="btn btn-light fw-bold text-success shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Asignar Taller
+                </a>
+                <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-outline-light">
+                    <i class="bi bi-award-fill me-1"></i> Evaluar RAPs
+                </a>
+                <a href="{% url 'seguimiento_asistencia' %}" class="btn btn-outline-light">
+                    <i class="bi bi-calendar2-check-fill me-1"></i> Asistencia
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Sección: HOY (Clases, Seguimientos, Alertas, Actividades, Compromisos) -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0">
+                <i class="bi bi-calendar-event-fill text-success me-2"></i>Agenda y Compromisos de Hoy ({{ hoy|date:'d \d\e F, Y' }})
+            </h5>
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1">
+                Jornada Activa
+            </span>
+        </div>
+        <div class="card-body p-3">
+            <div class="row g-3">
+                <!-- Sesiones / Clases Hoy -->
+                <div class="col-md-6 col-xl-3">
+                    <div class="p-3 rounded-3 bg-light border h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase">Sesiones Hoy</span>
+                            <i class="bi bi-calendar3 text-primary fs-5"></i>
+                        </div>
+                        <h4 class="fw-bold text-dark mb-1">{{ clases_hoy|length }}</h4>
+                        <small class="text-muted">Bloques formativos programados</small>
+                    </div>
+                </div>
+
+                <!-- Evidencias por Calificar -->
+                <div class="col-md-6 col-xl-3">
+                    <div class="p-3 rounded-3 bg-light border h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase">Por Calificar</span>
+                            <i class="bi bi-clock-history text-warning fs-5"></i>
+                        </div>
+                        <h4 class="fw-bold text-warning mb-1">{{ pendientes_calificar|default:0 }}</h4>
+                        <small class="text-muted">Entregas esperando juicio RAP</small>
+                    </div>
+                </div>
+
+                <!-- Casos en Alerta -->
+                <div class="col-md-6 col-xl-3">
+                    <div class="p-3 rounded-3 bg-light border h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase">Alertas Activas</span>
+                            <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+                        </div>
+                        <h4 class="fw-bold text-danger mb-1">{{ aprendices_en_alerta|length }}</h4>
+                        <small class="text-muted">Aprendices con bajo rendimiento o falta</small>
+                    </div>
+                </div>
+
+                <!-- Compromisos Pendientes -->
+                <div class="col-md-6 col-xl-3">
+                    <div class="p-3 rounded-3 bg-light border h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase">Compromisos</span>
+                            <i class="bi bi-clipboard2-check-fill text-success fs-5"></i>
+                        </div>
+                        <h4 class="fw-bold text-success mb-1">{{ compromisos_pendientes|length }}</h4>
+                        <small class="text-muted">Planes de mejora bajo tu seguimiento</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Sección: MIS FICHAS Y ATENCIÓN REQUERIDA -->
+    <div class="row g-4 mb-4">
+        <!-- Mis Fichas -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-layers-fill text-primary me-2"></i>Mis Fichas de Formación
+                        </h5>
+                        <small class="text-muted">Estadísticas, cohortes y avances de tus grupos a cargo</small>
+                    </div>
+                    <a href="{% url 'fichas_lista' %}" class="btn btn-sm btn-light">Directorio Fichas</a>
+                </div>
+                <div class="card-body p-3">
+                    {% for item in fichas_con_stats %}
+                        <div class="ficha-card-item mb-3">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-2">
+                                <div>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 me-1">
+                                        Ficha {{ item.ficha.codigo_ficha }}
+                                    </span>
+                                    <strong class="text-dark">{{ item.ficha.programa.denominacion }}</strong>
+                                    <div class="text-muted small">{{ item.ficha.institucion.nombre }}</div>
+                                </div>
+                                <span class="badge {% if item.ficha.estado == 'En Ejecucion' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ item.ficha.estado }}
+                                </span>
+                            </div>
+                            <div class="row g-2 text-center pt-2 border-top">
+                                <div class="col-3">
+                                    <small class="text-muted d-block" style="font-size: 0.72rem;">APRENDICES</small>
+                                    <strong class="text-dark">{{ item.total_aprendices }}</strong>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted d-block" style="font-size: 0.72rem;">ASISTENCIA</small>
+                                    <strong class="text-success">{{ item.asistencia_promedio }}%</strong>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted d-block" style="font-size: 0.72rem;">POR CALIFICAR</small>
+                                    <strong class="text-warning">{{ item.por_calificar }}</strong>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted d-block" style="font-size: 0.72rem;">GESTIÓN</small>
+                                    <a href="{% url 'fichas_detalle' item.ficha.id %}" class="btn btn-sm btn-light py-0 px-2 small">Ver Ficha</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-layers text-muted fs-2 d-block mb-1"></i>
+                            No tienes fichas asignadas formalmente como líder.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Atención Requerida -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 border-start border-4 border-warning">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Atención Requerida
+                        </h5>
+                        <small class="text-muted">Aprendices con indicadores prioritarios</small>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    {% for caso in aprendices_en_alerta %}
+                        <div class="p-3 mb-2 rounded-3 border bg-light">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong class="text-dark d-block">{{ caso.aprendiz.get_full_name|default:caso.aprendiz.username }}</strong>
+                                    <small class="text-muted">Ficha {{ caso.ficha.codigo_ficha }} · Doc: {{ caso.aprendiz.perfil.numero_documento }}</small>
+                                </div>
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                                    Alerta
+                                </span>
+                            </div>
+                            <div class="mt-2 text-muted small">
+                                {% for m in caso.motivos %}
+                                    <div><i class="bi bi-dot text-danger"></i> {{ m.detalle }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-2 text-end">
+                                <a href="{% url 'estudiante_detalle' caso.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-dark py-1">
+                                    Ver Expediente <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-shield-check text-success fs-1 d-block mb-2"></i>
+                            <h6 class="fw-bold text-dark">Sin alertas críticas</h6>
+                            <p class="small mb-0">Tus aprendices se encuentran en niveles satisfactorios de formación.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Sección: MIS APRENDICES (Buscador y Directorio Rápido) -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+        <div class="card-header bg-white py-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-people-fill text-success me-2"></i>Mis Aprendices Asignados
+                </h5>
+                <small class="text-muted">Directorio con filtros y acceso a expediente pedagógico</small>
+            </div>
+            <form method="get" class="d-flex gap-2" style="max-width: 380px; width: 100%;">
+                <input type="text" name="q_aprendiz" value="{{ q_aprendiz|default:'' }}" class="form-control form-control-sm" placeholder="Buscar por nombre o cédula...">
+                <button type="submit" class="btn btn-sm btn-success fw-semibold" style="background-color: #39A900;">Buscar</button>
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase">
+                    <tr>
+                        <th class="ps-3 py-3">Aprendiz</th>
+                        <th class="py-3">Ficha Formativa</th>
+                        <th class="py-3">Asistencia</th>
+                        <th class="py-3">Evidencias</th>
+                        <th class="py-3 text-end pe-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in aprendices_lista %}
+                        <tr>
+                            <td class="ps-3">
+                                <strong class="text-dark d-block">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                <small class="text-muted">{{ m.aprendiz.perfil.numero_documento }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">Ficha {{ m.ficha.codigo_ficha }}</span>
+                                <small class="d-block text-muted">{{ m.ficha.programa.denominacion|truncatechars:35 }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">En Regla</span>
+                            </td>
+                            <td>
+                                <span class="small text-muted">Historial Activo</span>
+                            </td>
+                            <td class="text-end pe-3">
+                                <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-folder2-open me-1"></i> Expediente
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                No se encontraron aprendices con el criterio de búsqueda.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

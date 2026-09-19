@@ -9,6 +9,7 @@ from openpyxl import Workbook
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from usuarios.decorators import requerir_roles
+from usuarios.models import CalificacionEvidencia
 from .models import JuicioEvaluativo
 from academico.models import Ficha, ResultadoAprendizaje, Matricula
 
@@ -44,7 +45,9 @@ def filtrar_juicios_por_periodo(juicios, periodo_academico, trimestre):
 def periodos_para_ficha(ficha):
     if not ficha:
         return []
-    return [str(año) for año in range(ficha.fecha_inicio.year, ficha.fecha_fin.year + 1)]
+    inicio = ficha.fecha_inicio.year if ficha.fecha_inicio else timezone.now().year
+    fin = ficha.fecha_fin.year if ficha.fecha_fin else inicio + 1
+    return [str(año) for año in range(inicio, fin + 1)]
 
 
 @login_required
@@ -138,6 +141,31 @@ def sabana_calificaciones(request):
         total_deficientes = sum(item['juicio_actual'] == 'D' for item in aprendices_datos)
     porcentaje_aprobacion = round((total_aprobados / total_aprendices) * 100, 1) if total_aprendices else 0
 
+    # Métricas reales de base de datos para los 4 cuadros superiores de la Sábana de Juicios
+    if ficha_actual:
+        juicios_scope = JuicioEvaluativo.objects.filter(matricula__ficha=ficha_actual)
+        if rap_actual:
+            juicios_scope = juicios_scope.filter(resultado_aprendizaje=rap_actual)
+        total_evaluaciones = juicios_scope.count()
+        total_aprobados_kpi = juicios_scope.filter(juicio_valor='A').count()
+        total_deficientes_kpi = juicios_scope.filter(juicio_valor='D').count()
+        
+        matriculas_count = ficha_actual.matriculas.count()
+        if rap_actual:
+            total_pendientes = max(0, matriculas_count - (total_aprobados_kpi + total_deficientes_kpi))
+        else:
+            total_pendientes = CalificacionEvidencia.objects.filter(
+                evidencia__ficha=ficha_actual, juicio_evaluativo='PENDIENTE'
+            ).count()
+    else:
+        juicios_scope = JuicioEvaluativo.objects.all()
+        total_evaluaciones = juicios_scope.count()
+        total_aprobados_kpi = juicios_scope.filter(juicio_valor='A').count()
+        total_deficientes_kpi = juicios_scope.filter(juicio_valor='D').count()
+        total_pendientes = CalificacionEvidencia.objects.filter(juicio_evaluativo='PENDIENTE').count()
+        
+    tasa_aprobacion = round((total_aprobados_kpi / total_evaluaciones) * 100, 1) if total_evaluaciones else 0
+
     context = {
         'fichas': fichas,
         'ficha_actual': ficha_actual,
@@ -148,6 +176,11 @@ def sabana_calificaciones(request):
         'total_aprobados': total_aprobados,
         'total_deficientes': total_deficientes,
         'porcentaje_aprobacion': porcentaje_aprobacion,
+        'total_evaluaciones': total_evaluaciones,
+        'total_aprobados_kpi': total_aprobados_kpi,
+        'total_deficientes_kpi': total_deficientes_kpi,
+        'total_pendientes': total_pendientes,
+        'tasa_aprobacion': tasa_aprobacion,
         'periodo_academico': periodo_academico,
         'trimestre': trimestre,
         'periodos_academicos': periodos_para_ficha(ficha_actual),

@@ -97,7 +97,9 @@ class InstitucionEducativa(models.Model):
         if hasattr(self, 'fichas'):
             total = 0
             for ficha in self.fichas.all():
-                if hasattr(ficha, 'estudiantes'):
+                if hasattr(ficha, 'matriculas'):
+                    total += ficha.matriculas.count()
+                elif hasattr(ficha, 'estudiantes'):
                     total += ficha.estudiantes.count()
                 elif hasattr(ficha, 'aprendices'):
                     total += ficha.aprendices.count()

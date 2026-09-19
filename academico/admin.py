@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ProgramaFormacion, Competencia, ResultadoAprendizaje, Ficha, Matricula
+from .models import ProgramaFormacion, Competencia, ResultadoAprendizaje, Ficha, Matricula, HorarioFicha
 
 
 class CompetenciaInline(admin.TabularInline):
@@ -49,12 +49,17 @@ class MatriculaInline(admin.TabularInline):
     autocomplete_fields = ['aprendiz']
 
 
+class HorarioFichaInline(admin.TabularInline):
+    model = HorarioFicha
+    extra = 1
+
+
 @admin.register(Ficha)
 class FichaAdmin(admin.ModelAdmin):
     list_display = ('codigo_ficha', 'programa', 'institucion', 'instructor_lider', 'estado', 'periodo_cerrado', 'fecha_inicio', 'fecha_fin')
     list_filter = ('estado', 'periodo_cerrado', 'institucion__municipio', 'institucion')
     search_fields = ('codigo_ficha', 'programa__denominacion', 'institucion__nombre', 'instructor_lider__first_name', 'instructor_lider__last_name')
-    inlines = [MatriculaInline]
+    inlines = [MatriculaInline, HorarioFichaInline]
 
 
 @admin.register(Matricula)
@@ -62,3 +67,10 @@ class MatriculaAdmin(admin.ModelAdmin):
     list_display = ('aprendiz', 'ficha', 'grado_escolar', 'estado_formacion', 'fecha_matricula')
     list_filter = ('estado_formacion', 'grado_escolar', 'ficha__institucion')
     search_fields = ('aprendiz__first_name', 'aprendiz__last_name', 'aprendiz__username', 'ficha__codigo_ficha')
+
+
+@admin.register(HorarioFicha)
+class HorarioFichaAdmin(admin.ModelAdmin):
+    list_display = ('ficha', 'dia', 'hora_inicio', 'hora_fin', 'instructor', 'modalidad', 'ambiente', 'activo')
+    list_filter = ('dia', 'modalidad', 'activo', 'ficha__institucion')
+    search_fields = ('ficha__codigo_ficha', 'instructor__first_name', 'instructor__last_name', 'tema', 'ambiente')

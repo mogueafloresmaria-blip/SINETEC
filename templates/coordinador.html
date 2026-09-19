@@ -1,8 +1,431 @@
 {% extends 'base.html' %}
-{% block title %}Coordinación SENA - SINETEC{% endblock %}
+{% load static %}
+
+{% block title %}Panel de Coordinación Académica — SINETEC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .coordinador-hero {
+        background: linear-gradient(135deg, #2D1B28 0%, #4A2838 50%, #8E5266 100%);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: clamp(24px, 3.5vw, 36px);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 12px 30px rgba(74, 40, 56, 0.2);
+    }
+    .coordinador-hero::after {
+        content: 'COORDINACIÓN';
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        color: rgba(255, 255, 255, 0.04);
+        font: 800 6rem/1 'Plus Jakarta Sans', sans-serif;
+        letter-spacing: -0.05em;
+        pointer-events: none;
+    }
+    .kpi-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #EAD8E2;
+        padding: 18px 20px;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #8E5266;
+    }
+    .kpi-card.kpi-success::before { background: #39A900; }
+    .kpi-card.kpi-warning::before { background: #FFAB00; }
+    .kpi-card.kpi-danger::before { background: #DE350B; }
+    .kpi-card.kpi-info::before { background: #0065FF; }
+
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(142, 82, 102, 0.12);
+    }
+    .kpi-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1.1;
+        color: #2D1B28;
+    }
+
+    .alert-case-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #F0D9E5;
+        border-left: 5px solid #DE350B;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        transition: all 0.2s ease;
+    }
+    .alert-case-card.case-warning { border-left-color: #FFAB00; }
+    .alert-case-card.case-info { border-left-color: #0065FF; }
+    .alert-case-card:hover {
+        background: #FDF7FA;
+        transform: translateX(4px);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-end gap-3 mb-4"><div><div class="sinetec-eyebrow mb-2">Centro de coordinación SENA</div><h1 class="sinetec-page-title h3 mb-1">Control académico y seguimiento</h1><p class="text-muted mb-0">Supervisa fichas, resultados de aprendizaje, alertas y compromisos desde un solo panel.</p></div><div class="d-flex gap-2"><a href="{% url 'fichas_crear' %}" class="btn sinetec-btn sinetec-btn-primary"><i class="bi bi-plus-lg me-1"></i> Nueva ficha</a><a href="{% url 'alertas_tempranas' %}" class="btn btn-outline-dark bg-white sinetec-btn"><i class="bi bi-bell me-1"></i> Ver alertas</a></div></div>
-<div class="row g-3 mb-4"><div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Fichas activas</div><div class="sinetec-metric-value">{{ fichas_activas }}</div><small class="text-muted">{{ total_fichas }} en el sistema</small></div></div><div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Aprendices en formación</div><div class="sinetec-metric-value">{{ total_aprendices }}</div><small class="text-success">Matrículas vigentes</small></div></div><div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Alertas activas</div><div class="sinetec-metric-value">{{ alertas_activas }}</div><small class="text-warning">Priorizar acompañamiento</small></div></div><div class="col-6 col-xl-3"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Seguimientos pendientes</div><div class="sinetec-metric-value">{{ seguimientos_pendientes }}</div><small class="text-muted">Compromisos por verificar</small></div></div></div>
-<div class="row g-4 mb-4"><div class="col-xl-7"><section class="sinetec-card"><div class="sinetec-card-header d-flex justify-content-between align-items-center"><div><h2 class="h5 fw-bold mb-1">Fichas bajo coordinación</h2><p class="text-muted small mb-0">Estado operativo de los grupos SENA</p></div><a href="{% url 'fichas_lista' %}" class="btn btn-sm btn-light">Abrir todas</a></div><div class="table-responsive"><table class="table sinetec-table mb-0"><thead><tr><th>Ficha</th><th>Programa</th><th>Instructor líder</th><th>Estado</th></tr></thead><tbody>{% for ficha in fichas %}<tr><td><a class="fw-bold text-success text-decoration-none" href="{% url 'fichas_detalle' ficha.pk %}">{{ ficha.codigo_ficha }}</a></td><td>{{ ficha.programa.denominacion|truncatechars:30 }}</td><td>{{ ficha.instructor_lider.get_full_name|default:ficha.instructor_lider.username|truncatechars:22 }}</td><td>{% if ficha.periodo_cerrado %}<span class="sinetec-status sinetec-status-warning">Periodo cerrado</span>{% else %}<span class="sinetec-status sinetec-status-success">En ejecución</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="4" class="text-center text-muted py-5">No hay fichas registradas.</td></tr>{% endfor %}</tbody></table></div></section></div><div class="col-xl-5"><section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h5 fw-bold mb-1">Resultados institucionales</h2><p class="text-muted small mb-0">Juicios registrados en el sistema</p></div><div class="p-4"><div class="d-flex justify-content-between mb-2"><span class="text-muted">Aprobados</span><strong class="text-success">{{ juicios_aprobados }}</strong></div><div class="progress mb-4" style="height:9px"><div class="progress-bar bg-success" style="width:70%"></div></div><div class="d-flex justify-content-between mb-2"><span class="text-muted">Por mejorar</span><strong class="text-warning">{{ juicios_por_mejorar }}</strong></div><div class="progress" style="height:9px"><div class="progress-bar bg-warning" style="width:30%"></div></div><hr><a href="{% url 'evaluaciones_calificar' %}" class="btn btn-outline-success w-100">Revisar evaluación RAP <i class="bi bi-arrow-right"></i></a></div></section></div></div>
-<div class="sinetec-card"><div class="sinetec-card-header"><h2 class="h5 fw-bold mb-1">Últimos seguimientos</h2><p class="text-muted small mb-0">Trazabilidad del acompañamiento formativo</p></div><div class="list-group list-group-flush">{% for seguimiento in seguimientos_recientes %}<a href="{% url 'seguimiento_detalle' seguimiento.pk %}" class="list-group-item list-group-item-action px-4 py-3 d-flex justify-content-between align-items-center"><span><strong>Ficha {{ seguimiento.ficha.codigo_ficha }}</strong><small class="text-muted d-block">{{ seguimiento.observaciones|truncatechars:90 }}</small></span><span class="text-muted small">{{ seguimiento.fecha_visita|date:'d/m/Y' }} <i class="bi bi-chevron-right ms-2"></i></span></a>{% empty %}<div class="p-5 text-center text-muted">No hay seguimientos recientes.</div>{% endfor %}</div></div>
+<div class="container-fluid px-3 px-md-4 py-3">
+
+    <!-- Hero Header -->
+    <div class="coordinador-hero mb-4">
+        <div class="position-relative" style="z-index: 2;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge" style="background-color: #39A900; color: #ffffff;">SENA · Regional Magdalena</span>
+                        <span class="text-white-50 small">Centro de Logística y Promoción Ecoturística</span>
+                    </div>
+                    <h1 class="h2 fw-bold text-white mb-2">Panel del Coordinador Académico</h1>
+                    <p class="text-white-50 mb-0" style="font-size: 0.95rem; max-width: 760px;">
+                        Control y supervisión estratégica de cohortes, resultados de aprendizaje (RAP), novedades de secretaría,
+                        asignación docente y alertas tempranas del proceso de integración con la educación media.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'fichas_crear' %}" class="btn text-white fw-bold rounded-pill px-3 shadow-sm" style="background-color: #39A900;">
+                        <i class="bi bi-plus-lg me-1"></i> Nueva Ficha
+                    </a>
+                    <a href="{% url 'horarios_tablero' %}" class="btn btn-outline-light rounded-pill px-3">
+                        <i class="bi bi-calendar3 me-1"></i> Tablero Horarios
+                    </a>
+                    <a href="{% url 'centro_reportes' %}" class="btn btn-light rounded-pill px-3 text-dark fw-semibold">
+                        <i class="bi bi-file-earmark-bar-graph me-1"></i> Reportes Oficiales
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs Grid -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-success">
+                <div class="text-muted small fw-semibold text-uppercase">Fichas Activas</div>
+                <div class="kpi-value mt-1">{{ fichas_activas|default:0 }}</div>
+                <small class="text-muted">{{ total_fichas|default:0 }} registradas</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-info">
+                <div class="text-muted small fw-semibold text-uppercase">Aprendices</div>
+                <div class="kpi-value mt-1">{{ total_aprendices|default:0 }}</div>
+                <small class="text-success fw-medium">Matrículas vigentes</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card">
+                <div class="text-muted small fw-semibold text-uppercase">Instructores</div>
+                <div class="kpi-value mt-1">{{ total_instructores|default:0 }}</div>
+                <small class="text-muted">Equipo técnico SENA</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-success">
+                <div class="text-muted small fw-semibold text-uppercase">Aprobación RAP</div>
+                <div class="kpi-value mt-1">{{ tasa_aprobacion|default:0 }}%</div>
+                <small class="text-success fw-medium">{{ juicios_aprobados|default:0 }} Aprobados ('A')</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card {% if tramites_pendientes > 0 %}kpi-warning{% endif %}">
+                <div class="text-muted small fw-semibold text-uppercase">Trámites Pend.</div>
+                <div class="kpi-value mt-1">{{ tramites_pendientes|default:0 }}</div>
+                <small class="text-muted">En Secretaría</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card {% if evidencias_pendientes > 0 %}kpi-info{% endif %}">
+                <div class="text-muted small fw-semibold text-uppercase">Por Calificar</div>
+                <div class="kpi-value mt-1">{{ evidencias_pendientes|default:0 }}</div>
+                <small class="text-muted">Entregas de aprendices</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Casos que requieren atención prioritaria -->
+    {% if casos_atencion %}
+        <div class="mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="h5 fw-bold text-dark mb-0">
+                    <i class="bi bi-shield-exclamation text-danger me-2"></i> Casos que Requieren Atención Prioritaria
+                </h2>
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                    {{ casos_atencion|length }} caso(s) activos
+                </span>
+            </div>
+            <div class="row g-3">
+                {% for caso in casos_atencion %}
+                    <div class="col-md-6 col-xl-3">
+                        <div class="alert-case-card h-100 {% if caso.tipo == 'warning' %}case-warning{% elif caso.tipo == 'info' %}case-info{% endif %}">
+                            <div class="flex-grow-1">
+                                <strong class="d-block small text-dark mb-1">{{ caso.titulo }}</strong>
+                                <p class="text-muted small mb-2" style="font-size: 0.78rem; line-height: 1.35;">{{ caso.descripcion }}</p>
+                                <a href="{{ caso.url }}" class="btn btn-sm btn-outline-dark rounded-pill py-1 px-3 fw-semibold" style="font-size: 0.75rem;">
+                                    {{ caso.btn_texto }} <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                            <div class="text-muted fs-3">
+                                <i class="bi {{ caso.icono }}"></i>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Contenido Principal: 2 Columnas -->
+    <div class="row g-4 mb-4">
+        
+        <!-- Columna Izquierda: Fichas Técnicas Bajo Coordinación -->
+        <div class="col-xl-7">
+            <section class="sinetec-card p-4 h-100">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h2 class="h5 fw-bold mb-1">Fichas Formativas Bajo Coordinación</h2>
+                        <p class="text-muted small mb-0">Seguimiento en tiempo real de grupos, sedes y docentes líderes</p>
+                    </div>
+                    <a href="{% url 'fichas_lista' %}" class="btn btn-sm btn-light border rounded-pill px-3">
+                        Ver Catálogo Completo
+                    </a>
+                </div>
+
+                <!-- Barra de búsqueda rápida de fichas -->
+                <form method="get" class="row g-2 mb-3">
+                    <div class="col-sm-7">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                            <input type="text" name="q_ficha" value="{{ q_ficha }}" class="form-control border-start-0" placeholder="Buscar ficha, programa o instructor...">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <select name="estado" class="form-select form-select-sm">
+                            <option value="">Todos los estados</option>
+                            <option value="En Ejecucion" {% if estado_filtro == 'En Ejecucion' %}selected{% endif %}>En Ejecución</option>
+                            <option value="Cerrada" {% if estado_filtro == 'Cerrada' %}selected{% endif %}>Cerrada</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="submit" class="btn btn-sm btn-dark w-100">Filtrar</button>
+                    </div>
+                </form>
+
+                <!-- Tabla de Fichas -->
+                <div class="table-responsive">
+                    <table class="table sinetec-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ficha</th>
+                                <th>Programa / Institución</th>
+                                <th>Instructor Líder</th>
+                                <th class="text-center">Aprendices</th>
+                                <th>Estado</th>
+                                <th class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in fichas %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'fichas_detalle' f.pk %}" class="fw-bold text-success text-decoration-none">
+                                            {{ f.codigo_ficha }}
+                                        </a>
+                                        <small class="d-block text-muted">{{ f.modalidad }}</small>
+                                    </td>
+                                    <td>
+                                        <strong class="d-block text-dark small">{{ f.programa.denominacion|truncatechars:32 }}</strong>
+                                        <span class="text-muted" style="font-size: 0.75rem;">
+                                            <i class="bi bi-building me-1"></i>{{ f.institucion.nombre|default:"Sede SENA"|truncatechars:28 }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if f.instructor_lider %}
+                                            <span class="text-dark small fw-medium">{{ f.instructor_lider.get_full_name|default:f.instructor_lider.username }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Sin asignar</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border">{{ f.num_aprendices }}</span>
+                                    </td>
+                                    <td>
+                                        {% if f.periodo_cerrado %}
+                                            <span class="sinetec-status sinetec-status-warning">Cerrado</span>
+                                        {% else %}
+                                            <span class="sinetec-status sinetec-status-success">En Ejecución</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'fichas_detalle' f.pk %}" class="btn btn-sm btn-light border rounded-pill px-2" title="Abrir expediente">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        No se encontraron fichas con los criterios seleccionados.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- Columna Derecha: Balance RAP, Trámites Radicados y Seguimientos -->
+        <div class="col-xl-5 d-flex flex-column gap-4">
+            
+            <!-- Balance Cualitativo de Evaluación RAP -->
+            <section class="sinetec-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h6 fw-bold mb-0">Balance de Juicios Evaluativos RAP</h2>
+                        <small class="text-muted">Resultados oficiales de la formación ADSI</small>
+                    </div>
+                    <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                        Sábana RAP
+                    </a>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="fw-semibold text-success"><i class="bi bi-check-circle-fill me-1"></i> Aprobados ('A')</span>
+                        <strong class="text-success">{{ juicios_aprobados }} ({{ tasa_aprobacion }}%)</strong>
+                    </div>
+                    <div class="progress" style="height: 10px; border-radius: 8px;">
+                        <div class="progress-bar bg-success" style="width: {{ tasa_aprobacion }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="fw-semibold text-warning"><i class="bi bi-exclamation-circle-fill me-1"></i> Por Mejorar ('D')</span>
+                        <strong class="text-warning">{{ juicios_por_mejorar }}</strong>
+                    </div>
+                    <div class="progress" style="height: 10px; border-radius: 8px;">
+                        <div class="progress-bar bg-warning" style="width: {% if total_juicios > 0 %}{% widthratio juicios_por_mejorar total_juicios 100 %}{% else %}0{% endif %}%;"></div>
+                    </div>
+                </div>
+
+                <div class="bg-light p-3 rounded-3 mt-3">
+                    <small class="text-muted d-block" style="font-size: 0.78rem;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Para la certificación oficial técnica se exige el 100% de RAPs aprobados con juicio 'A' y cumplimiento del 80% de asistencia.
+                    </small>
+                </div>
+            </section>
+
+            <!-- Trámites Radicados en Secretaría Recientes -->
+            <section class="sinetec-card p-4 flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h6 fw-bold mb-0">Trámites Recientes en Secretaría</h2>
+                        <small class="text-muted">Peticiones, constancias y novedades</small>
+                    </div>
+                    <a href="{% url 'secretaria_bandeja' %}" class="btn btn-sm btn-light border rounded-pill px-3">
+                        Ver Bandeja
+                    </a>
+                </div>
+
+                <div class="list-group list-group-flush">
+                    {% for t in tramites_recientes %}
+                        <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-light text-dark border me-1">#{{ t.id }}</span>
+                                <strong class="small text-dark">{{ t.asunto|truncatechars:28 }}</strong>
+                                <div class="text-muted" style="font-size: 0.75rem;">
+                                    {{ t.aprendiz.get_full_name|default:t.aprendiz.username }} · {{ t.fecha_creacion|date:'d/m/Y' }}
+                                </div>
+                            </div>
+                            <span class="badge 
+                                {% if t.estado == 'PENDIENTE' %}bg-warning text-dark
+                                {% elif t.estado == 'EN_TRAMITE' %}bg-info text-white
+                                {% elif t.estado == 'RESPONDIDA' or t.estado == 'CERRADA' %}bg-success
+                                {% else %}bg-secondary{% endif %}">
+                                {{ t.get_estado_display }}
+                            </span>
+                        </div>
+                    {% empty %}
+                        <div class="text-center text-muted py-3 small">No hay trámites recientes.</div>
+                    {% endfor %}
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Sección de Aprendices con Alerta Temprana -->
+    {% if aprendices_alerta %}
+        <div class="sinetec-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="h5 fw-bold mb-0 text-danger">
+                        <i class="bi bi-person-exclamation me-1"></i> Aprendices con Señales de Alerta Temprana
+                    </h2>
+                    <small class="text-muted">Inasistencias reiteradas o juicios deficientes que requieren acompañamiento tutorial</small>
+                </div>
+                <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                    Directorio de Aprendices
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table sinetec-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Aprendiz</th>
+                            <th>Ficha</th>
+                            <th>Motivo de Alerta</th>
+                            <th class="text-end">Expediente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in aprendices_alerta %}
+                            <tr>
+                                <td>
+                                    <strong class="text-dark">{{ item.aprendiz.get_full_name|default:item.aprendiz.username }}</strong>
+                                    <small class="d-block text-muted">{{ item.aprendiz.email }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">Ficha {{ item.ficha.codigo_ficha }}</span>
+                                </td>
+                                <td>
+                                    {% for al in item.alertas %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 me-1">
+                                            {{ al.mensaje }}
+                                        </span>
+                                    {% endfor %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'estudiante_detalle' item.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                                        Ver Expediente
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
 {% endblock %}

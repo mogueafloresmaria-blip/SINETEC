@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Centro Integral de Reportes SENA · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <!-- Encabezado Institucional -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
+                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-file-earmark-bar-graph-fill text-success me-2"></i>Centro Integral de Reportes y Auditoría
+            </h1>
+            <p class="text-muted mb-0">Generación y exportación de informes oficiales en PDF y Excel para evaluación, seguimiento y cohorte.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'indicadores_dashboard' %}" class="btn btn-outline-success fw-semibold">
+                <i class="bi bi-speedometer2 me-1"></i> Ver Cuadro de Mando (KPIs)
+            </a>
+            <button class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Imprimir Catálogo
+            </button>
+        </div>
+    </div>
+
+    <!-- Métricas Resumen -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4" style="border-color: #39A900 !important;">
+                <span class="text-muted small text-uppercase fw-semibold">Total Fichas Activas</span>
+                <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_fichas|default:0 }}</h3>
+                <span class="text-success small fw-semibold">Disponibles para reportes</span>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-primary">
+                <span class="text-muted small text-uppercase fw-semibold">Total Aprendices</span>
+                <h3 class="fw-bold text-primary mb-0 mt-1">{{ total_aprendices|default:0 }}</h3>
+                <span class="text-muted small">En formación articulada</span>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-warning">
+                <span class="text-muted small text-uppercase fw-semibold">Juicios Evaluativos</span>
+                <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_juicios|default:0 }}</h3>
+                <span class="text-warning small fw-semibold">Calificaciones RAP</span>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-info">
+                <span class="text-muted small text-uppercase fw-semibold">Trámites Secretaría</span>
+                <h3 class="fw-bold text-info mb-0 mt-1">{{ total_solicitudes|default:0 }}</h3>
+                <span class="text-muted small">Solicitudes registradas</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catálogo de Reportes Disponibles -->
+    <div class="row g-4">
+
+        <!-- 1. Reporte Oficial por Ficha -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="p-3 rounded-3 bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-people-fill fs-3"></i>
+                        </div>
+                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">PDF & EXCEL</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">Consolidado de Aprendices por Ficha</h5>
+                    <p class="text-muted small mb-3">
+                        Informe detallado con número de documento, nombres, apellidos, correo, estado formativo y contacto de acudiente para la cohorte seleccionada.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Seleccionar Ficha:</label>
+                        <select class="form-select form-select-sm" id="select-ficha-aprendices">
+                            {% for f in fichas %}
+                                <option value="{{ f.id }}" {% if f.codigo_ficha == '3173430' %}selected{% endif %}>
+                                    Ficha {{ f.codigo_ficha }} — {{ f.programa.denominacion|truncatechars:28 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 pt-2 border-top">
+                    <button class="btn btn-sm btn-outline-danger flex-fill fw-semibold" onclick="descargarReporte('pdf', 'select-ficha-aprendices')">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Exportar PDF
+                    </button>
+                    <button class="btn btn-sm btn-outline-success flex-fill fw-semibold" onclick="descargarReporte('excel', 'select-ficha-aprendices')">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Exportar Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Sábana de Juicios RAP -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="p-3 rounded-3 bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-award-fill fs-3"></i>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">EVALUACIÓN</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">Sábana de Juicios Evaluativos (RAP)</h5>
+                    <p class="text-muted small mb-3">
+                        Matriz de evaluación con el estado de aprobación (A / D) de cada Resultado de Aprendizaje para la cohorte técnica.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Seleccionar Ficha:</label>
+                        <select class="form-select form-select-sm" id="select-ficha-rap">
+                            {% for f in fichas %}
+                                <option value="{{ f.id }}">
+                                    Ficha {{ f.codigo_ficha }} ({{ f.programa.denominacion|truncatechars:25 }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 pt-2 border-top">
+                    <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm text-white w-100 fw-semibold" style="background-color: #39A900;">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Consultar y Exportar Matriz
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Bitácoras y Visitas de Seguimiento -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="p-3 rounded-3 bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-clipboard2-pulse-fill fs-3"></i>
+                        </div>
+                        <span class="badge bg-warning bg-opacity-25 text-dark border border-warning">SEGUIMIENTO</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">Historial de Bitácoras y Visitas</h5>
+                    <p class="text-muted small mb-3">
+                        Registro cronológico de las sesiones de acompañamiento pedagógico, observaciones del instructor y compromisos del aprendiz.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Ficha Objetivo:</label>
+                        <select class="form-select form-select-sm" id="select-ficha-seguimiento">
+                            {% for f in fichas %}
+                                <option value="{{ f.id }}">
+                                    Ficha {{ f.codigo_ficha }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 pt-2 border-top">
+                    <a href="{% url 'seguimiento_lista' %}" class="btn btn-sm btn-outline-dark w-100 fw-semibold">
+                        <i class="bi bi-journal-text me-1"></i> Abrir Bitácoras de Visitas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Auditoría de Requisitos de Certificación -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="p-3 rounded-3 bg-info bg-opacity-10 text-info">
+                            <i class="bi bi-patch-check-fill fs-3"></i>
+                        </div>
+                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">CERTIFICACIÓN</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">Estado de Paz y Salvo para Certificación</h5>
+                    <p class="text-muted small mb-3">
+                        Auditoría de requisitos formativos: 100% de RAP aprobados, paz y salvo académico interno y verificación documental.
+                    </p>
+                </div>
+                <div class="pt-2 border-top">
+                    <a href="{% url 'consulta_certificacion' %}" class="btn btn-sm btn-outline-info text-dark w-100 fw-semibold">
+                        <i class="bi bi-shield-check me-1"></i> Consultar Estado de Certificación
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Trámites y Novedades de Secretaría -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="p-3 rounded-3 bg-danger bg-opacity-10 text-danger">
+                            <i class="bi bi-inboxes-fill fs-3"></i>
+                        </div>
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">SECRETARÍA</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">Reporte de Novedades y Solicitudes</h5>
+                    <p class="text-muted small mb-3">
+                        Consolidado de casos radicados por aprendices, tiempos de respuesta, estado de atención y trazabilidad institucional.
+                    </p>
+                </div>
+                <div class="pt-2 border-top">
+                    <a href="{% url 'secretaria_bandeja' %}" class="btn btn-sm btn-outline-danger w-100 fw-semibold">
+                        <i class="bi bi-inbox me-1"></i> Bandeja General de Secretaría
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Horarios y Ambientes de Aprendizaje -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="p-3 rounded-3 bg-secondary bg-opacity-10 text-dark">
+                            <i class="bi bi-calendar3-range-fill fs-3"></i>
+                        </div>
+                        <span class="badge bg-light text-dark border">HORARIOS</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">Distribución de Horarios y Ambientes</h5>
+                    <p class="text-muted small mb-3">
+                        Malla horaria semanal por cohorte, asignación de instructores técnicos e infraestructura de ambientes formativos.
+                    </p>
+                </div>
+                <div class="pt-2 border-top">
+                    <a href="{% url 'horarios_tablero' %}" class="btn btn-sm btn-outline-secondary w-100 fw-semibold">
+                        <i class="bi bi-calendar3 me-1"></i> Ver Tablero de Horarios
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function descargarReporte(formato, selectId) {
+        const select = document.getElementById(selectId);
+        const fichaId = select.value;
+        if (!fichaId) return;
+        if (formato === 'pdf') {
+            window.open(`/academico/fichas/${fichaId}/reporte/pdf/`, '_blank');
+        } else if (formato === 'excel') {
+            window.location.href = `/academico/fichas/${fichaId}/reporte/excel/`;
+        }
+    }
+</script>
+{% endblock %}

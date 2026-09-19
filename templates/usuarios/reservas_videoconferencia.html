@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block title %}Aula Online y Reservas de Videoconferencia · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+        <div>
+            <div class="sinetec-eyebrow mb-1">Entornos Virtuales de Aprendizaje</div>
+            <h1 class="sinetec-page-title h3 mb-1">Aula Online y Reservas de Videoconferencia</h1>
+            <p class="text-muted mb-0">Gestión de salas virtuales sincrónicas conectadas a Google Meet, Microsoft Teams y Jitsi Meet para clases y asesorías.</p>
+        </div>
+        <button class="btn sinetec-btn sinetec-btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaReservaModal">
+            <i class="bi bi-camera-video me-1"></i> Agendar Nueva Sala Virtual
+        </button>
+    </div>
+
+    <!-- Tarjetas de Resumen -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="sinetec-card p-3">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Salas Programadas</span>
+                    <i class="bi bi-camera-video text-success fs-4"></i>
+                </div>
+                <div class="h3 fw-bold mt-2 mb-0">3</div>
+                <small class="text-success"><i class="bi bi-check-circle"></i> Sincronizadas hoy</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="sinetec-card p-3">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Herramientas Conectadas</span>
+                    <i class="bi bi-plug text-primary fs-4"></i>
+                </div>
+                <div class="h3 fw-bold mt-2 mb-0">3</div>
+                <small class="text-muted">Meet, Teams, Jitsi</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="sinetec-card p-3">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Aprendices Conectados</span>
+                    <i class="bi bi-people text-info fs-4"></i>
+                </div>
+                <div class="h3 fw-bold mt-2 mb-0">28</div>
+                <small class="text-muted">Convocados esta semana</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="sinetec-card p-3">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Grabaciones y Actas</span>
+                    <i class="bi bi-cloud-arrow-down text-warning fs-4"></i>
+                </div>
+                <div class="h3 fw-bold mt-2 mb-0">12</div>
+                <small class="text-muted">Disponibles en la nube</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Salas Virtuales -->
+    <div class="sinetec-card p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-calendar-event text-success me-2"></i>Sesiones y Clases Virtuales Activas</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sesión / Tema</th>
+                        <th>Ficha Técnica / Destinatarios</th>
+                        <th>Instructor Responsable</th>
+                        <th>Horario Programado</th>
+                        <th>Plataforma</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acceso Directo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in sesiones %}
+                    <tr>
+                        <td>
+                            <strong class="d-block text-dark">{{ s.titulo }}</strong>
+                            <small class="text-muted"><i class="bi bi-people me-1"></i>{{ s.cupos }}</small>
+                        </td>
+                        <td>{{ s.ficha }}</td>
+                        <td>{{ s.instructor }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ s.fecha }}</span></td>
+                        <td>
+                            <span class="badge bg-white text-dark border shadow-sm">
+                                <i class="bi {{ s.icono }} text-primary me-1"></i> {{ s.plataforma }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="sinetec-status sinetec-status-success">{{ s.estado }}</span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ s.enlace }}" target="_blank" class="btn btn-sm btn-success px-3">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Entrar a la Sala
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agendar sala -->
+<div class="modal fade" id="nuevaReservaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-camera-video text-success me-2"></i>Agendar Sala Virtual</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Tema o Asignatura de la Sesión</label>
+                        <input type="text" name="titulo" class="form-control" placeholder="Ej: Taller Práctico de Frontend y CSS" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Ficha Técnica Destinataria</label>
+                        <select name="ficha" class="form-select" required>
+                            {% for f in fichas %}
+                                <option value="{{ f.id }}">Ficha {{ f.codigo_ficha }} · {{ f.programa.denominacion }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Herramienta de Videoconferencia</label>
+                            <select name="plataforma" class="form-select">
+                                <option value="Google Meet">Google Meet</option>
+                                <option value="Microsoft Teams">Microsoft Teams</option>
+                                <option value="Jitsi Meet">Jitsi Meet Seguro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Fecha y Hora</label>
+                            <input type="datetime-local" name="fecha_hora" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success px-4">Confirmar y Generar Enlace</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

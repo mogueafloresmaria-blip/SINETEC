@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Mis Resultados de Aprendizaje (RAP) · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+        <div>
+            <div class="sinetec-eyebrow mb-1">Historial Académico SENA</div>
+            <h1 class="sinetec-page-title h3 mb-1">Mis Evaluaciones y Resultados de Aprendizaje</h1>
+            <p class="text-muted mb-0">Seguimiento oficial de competencias y juicios evaluativos cualitativos ('A' - Aprobado / 'D' - No aprobado).</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'carnet_digital' %}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-person-badge me-1"></i> Mi Carnet Digital
+            </a>
+            {% if matricula %}
+            <a href="{% url 'estudiantes_boletin_pdf' matricula.aprendiz.perfil.id %}" target="_blank" class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Descargar Boletín Oficial
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Barra de Progreso de la Formación -->
+    <div class="sinetec-card p-4 mb-4">
+        <div class="row align-items-center g-3">
+            <div class="col-md-7">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle fs-2">
+                        <i class="bi bi-mortarboard"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">{{ matricula.ficha.programa.denominacion|default:'Técnico en Programación de Software' }}</h5>
+                        <div class="text-muted small">
+                            Ficha: <strong>{{ matricula.ficha.codigo_ficha }}</strong> · Grado: <strong>{{ matricula.get_grado_escolar_display }}</strong> · Estado: <span class="badge bg-success bg-opacity-10 text-success">En Formación</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="d-flex justify-content-between small fw-bold mb-1">
+                    <span>Avance Curricular</span>
+                    <span class="text-success">{{ progreso }}% ({{ aprobados }}/{{ total_raps }} RAPs Aprobados)</span>
+                </div>
+                <div class="progress" style="height: 12px; border-radius: 6px;">
+                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: {{ progreso }}%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de RAPs y Calificaciones -->
+    <div class="sinetec-card p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-award text-success me-2"></i>Resultados de Aprendizaje y Juicios Asentados</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Código RAP</th>
+                        <th>Competencia Curricular</th>
+                        <th>Descripción del Logro</th>
+                        <th>Juicio Evaluativo</th>
+                        <th>Instructor Evaluador</th>
+                        <th>Retroalimentación Pedagógica</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for j in juicios %}
+                    <tr>
+                        <td>
+                            <strong class="font-monospace text-dark">{{ j.resultado_aprendizaje.codigo }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border small">{{ j.resultado_aprendizaje.competencia.codigo }}</span>
+                            <small class="d-block text-muted text-truncate" style="max-width: 200px;">{{ j.resultado_aprendizaje.competencia.descripcion }}</small>
+                        </td>
+                        <td class="small">{{ j.resultado_aprendizaje.descripcion }}</td>
+                        <td>
+                            {% if j.juicio_valor == 'A' %}
+                                <span class="badge bg-success px-3 py-2 fs-6">
+                                    <i class="bi bi-check-circle-fill me-1"></i> A · Aprobado
+                                </span>
+                            {% elif j.juicio_valor == 'D' %}
+                                <span class="badge bg-danger px-3 py-2 fs-6">
+                                    <i class="bi bi-exclamation-circle-fill me-1"></i> D · Por Mejorar
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary px-3 py-2">
+                                    Pendiente
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="small">{{ j.instructor.get_full_name|default:j.instructor.username }}</td>
+                        <td class="small text-muted fst-italic">
+                            {{ j.observaciones|default:'Desempeño satisfactorio en las evidencias.' }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            Aún no se registran juicios evaluativos asentados para tu matrícula.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

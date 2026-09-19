@@ -1,12 +1,450 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Aprendices SENA - SINETEC{% endblock %}
+
+{% block title %}Directorio y Carnés de Aprendices · SINETEC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sena-carnet-card {
+        background: linear-gradient(145deg, #0d2c18 0%, #174828 55%, #0e2e1a 100%);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(57, 169, 0, 0.4);
+        box-shadow: 0 12px 28px rgba(11, 36, 20, 0.25);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .sena-carnet-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 36px rgba(11, 36, 20, 0.35);
+        border-color: #39a900;
+    }
+    .sena-carnet-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(#39a900 0.75px, transparent 0.75px);
+        background-size: 8px 8px;
+        opacity: 0.15;
+        pointer-events: none;
+    }
+    .carnet-avatar-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 16px;
+        background: #ffffff;
+        color: #174828;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: 800;
+        border: 3px solid #39a900;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        flex-shrink: 0;
+    }
+    .carnet-chip {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 2px 8px;
+        border-radius: 6px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4"><div><div class="sinetec-eyebrow mb-2">Formación SENA</div><h1 class="sinetec-page-title h3 mb-1">Aprendices matriculados</h1><p class="text-muted mb-0">Consulta expedientes, carnet QR, fichas, notas y seguimiento.</p></div><div class="d-flex gap-2"><a href="{% url 'registrar_aprendiz' %}" class="btn sinetec-btn sinetec-btn-primary"><i class="bi bi-person-plus me-1"></i> Registrar aprendiz</a><a href="{% url 'busqueda_global' %}" class="btn btn-outline-dark bg-white sinetec-btn"><i class="bi bi-search me-1"></i> Buscar</a></div></div>
-<div class="row g-3 mb-4"><div class="col-md-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Aprendices activos</div><div class="sinetec-metric-value">{{ total_aprendices|default:0 }}</div><small class="text-success">Matrículas en formación</small></div></div><div class="col-md-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Carnet digital</div><div class="sinetec-metric-value"><i class="bi bi-qr-code"></i></div><small class="text-muted">Disponible en cada expediente</small></div></div><div class="col-md-4"><div class="sinetec-card sinetec-metric"><div class="sinetec-metric-label">Importación</div><div class="sinetec-metric-value"><i class="bi bi-file-earmark-spreadsheet"></i></div><small class="text-muted">Carga masiva XLSX</small></div></div></div>
-{% if error_importacion %}<div class="alert alert-danger">{{ error_importacion }}</div>{% endif %}
-<div class="sinetec-card p-3 mb-4"><form method="get" class="row g-2"><div class="col-md-10"><input class="form-control" name="q" value="{{ query }}" placeholder="Buscar por nombre, documento o ficha..."></div><div class="col-md-2"><button class="btn sinetec-btn sinetec-btn-primary w-100" type="submit"><i class="bi bi-search me-1"></i> Filtrar</button></div></form></div>
-<div class="sinetec-card mb-4"><div class="sinetec-card-header d-flex justify-content-between align-items-center"><div><h2 class="h5 fw-bold mb-1">Directorio de aprendices</h2><p class="text-muted small mb-0">Cada fila enlaza a un expediente completo.</p></div><span class="sinetec-status sinetec-status-success">{{ total_aprendices|default:0 }} activos</span></div><div class="table-responsive"><table class="table sinetec-table mb-0"><thead><tr><th>Aprendiz</th><th>Documento</th><th>Ficha / programa</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody>{% for matricula in matriculas %}<tr><td><strong>{{ matricula.aprendiz.get_full_name|default:matricula.aprendiz.username }}</strong><small class="d-block text-muted">{{ matricula.aprendiz.email|default:'Sin correo registrado' }}</small></td><td>{{ matricula.aprendiz.perfil.get_tipo_documento_display }} {{ matricula.aprendiz.perfil.numero_documento }}</td><td><strong>{{ matricula.ficha.codigo_ficha }}</strong><small class="d-block text-muted">{{ matricula.ficha.programa.denominacion|truncatechars:38 }}</small></td><td><span class="sinetec-status sinetec-status-success">{{ matricula.get_estado_formacion_display }}</span></td><td class="text-end"><a href="{% url 'estudiante_detalle' matricula.aprendiz.perfil.pk %}" class="btn btn-sm btn-light" title="Abrir expediente"><i class="bi bi-person-vcard"></i></a><a href="{% url 'evaluaciones_calificar' %}?ficha={{ matricula.ficha.pk }}" class="btn btn-sm btn-light" title="Ver evaluación"><i class="bi bi-award"></i></a><a href="{% url 'seguimiento_lista' %}?ficha={{ matricula.ficha.pk }}" class="btn btn-sm btn-light" title="Ver seguimiento"><i class="bi bi-clipboard2-pulse"></i></a></td></tr>{% empty %}<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-people fs-2 d-block mb-2"></i>No hay aprendices registrados con este filtro.</td></tr>{% endfor %}</tbody></table></div></div>
-<div class="sinetec-card p-4"><div class="d-flex justify-content-between align-items-center"><div><h2 class="h6 fw-bold mb-1">Importar aprendices</h2><p class="text-muted small mb-0">Carga un archivo XLSX con las columnas requeridas y matrícula por ficha.</p></div><i class="bi bi-cloud-arrow-up text-success fs-2"></i></div><form method="post" enctype="multipart/form-data" class="row g-2 align-items-end mt-2">{% csrf_token %}<div class="col-md-9"><label class="form-label small fw-semibold">Archivo Excel</label><input class="form-control" type="file" name="archivo" accept=".xlsx" required></div><div class="col-md-3"><button class="btn btn-outline-success w-100" type="submit"><i class="bi bi-upload me-1"></i> Importar</button></div></form><small class="text-muted d-block mt-2">Incluye: numero_documento, nombres, apellidos, correo, grado_escolar y codigo_ficha.</small></div>
-<div class="visually-hidden">Escanear carnet QR · html5-qrcode · <a href="{% static 'manifest.webmanifest' %}">manifest.webmanifest</a></div>
+<div class="container-fluid py-3">
+
+    <!-- Encabezado Institucional SENA -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
+                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-people-fill text-success me-2"></i>Directorio y Carnetización de Aprendices
+            </h1>
+            <p class="text-muted mb-0">Gestión de expedientes formativos, consulta de carnet digital y seguimiento académico integral.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-success fw-semibold" data-bs-toggle="modal" data-bs-target="#modalImportar">
+                <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Importar XLSX
+            </button>
+            <a href="{% url 'registrar_aprendiz' %}" class="btn text-white fw-semibold" style="background-color: #39A900;">
+                <i class="bi bi-person-plus-fill me-1"></i> Registrar Aprendiz
+            </a>
+        </div>
+    </div>
+
+    {% if error_importacion %}
+        <div class="alert alert-danger shadow-sm rounded-3 mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error_importacion }}
+        </div>
+    {% endif %}
+
+    <!-- Tarjetas Métricas Reales -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4" style="border-color: #39A900 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Aprendices Activos</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_aprendices }}</h3>
+                        <span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill"></i> Matrículas registradas</span>
+                    </div>
+                    <div class="p-3 rounded-3 bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-mortarboard-fill fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-primary">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Ficha Principal</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">3173430</h3>
+                        <span class="text-primary small fw-semibold">ADSI · En Ejecución</span>
+                    </div>
+                    <div class="p-3 rounded-3 bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-layers-fill fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Carnet Digital QR</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">Seguridad 24h</h3>
+                        <span class="text-warning small fw-semibold">Rotación Criptográfica</span>
+                    </div>
+                    <div class="p-3 rounded-3 bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-qr-code-scan fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Institución Articulada</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1 fs-5">Escuela Normal</h3>
+                        <span class="text-info small fw-semibold">Santa Marta · Magdalena</span>
+                    </div>
+                    <div class="p-3 rounded-3 bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-building fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros de Búsqueda Avanzada -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-secondary mb-1">
+                        <i class="bi bi-search me-1"></i> Búsqueda por Nombre, Documento o Correo:
+                    </label>
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Ej: Juan Camilo, 1082934001, @soy.sena...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Ficha Técnica:</label>
+                    <select name="ficha" class="form-select">
+                        <option value="">-- Todas las fichas --</option>
+                        {% for f in fichas_disponibles %}
+                            <option value="{{ f.codigo_ficha }}" {% if ficha_filtro == f.codigo_ficha %}selected{% endif %}>
+                                {{ f.codigo_ficha }} ({{ f.programa.denominacion|truncatechars:20 }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Programa:</label>
+                    <select name="programa" class="form-select">
+                        <option value="">-- Todos los programas --</option>
+                        {% for p in programas_disponibles %}
+                            <option value="{{ p.id }}" {% if programa_filtro == p.id|stringformat:"s" %}selected{% endif %}>
+                                {{ p.denominacion|truncatechars:25 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Estado:</label>
+                    <select name="estado" class="form-select">
+                        <option value="">-- Todos --</option>
+                        {% for val, nom in estados_disponibles %}
+                            <option value="{{ val }}" {% if estado_filtro == val %}selected{% endif %}>{{ nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn text-white fw-semibold w-100" style="background-color: #39A900;">
+                        <i class="bi bi-funnel-fill me-1"></i> Filtrar
+                    </button>
+                    <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary" title="Limpiar filtros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Barra de Pestañas de Vista: Carnés Ampliados vs Tabla -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <ul class="nav nav-pills" id="viewTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-semibold" id="carnets-tab" data-bs-toggle="pill" data-bs-target="#carnets-view" type="button" role="tab">
+                    <i class="bi bi-person-vcard-fill me-1"></i> Carnés Ampliados ({{ total_aprendices }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold" id="table-tab" data-bs-toggle="pill" data-bs-target="#table-view" type="button" role="tab">
+                    <i class="bi bi-table me-1"></i> Vista Tabla Detallada
+                </button>
+            </li>
+        </ul>
+        <span class="text-muted small">Total coincidencias: <strong>{{ total_aprendices }}</strong></span>
+    </div>
+
+    <!-- Contenido de las Vistas -->
+    <div class="tab-content" id="viewTabsContent">
+
+        <!-- 1. VISTA CARNÉS AMPLIADOS -->
+        <div class="tab-pane fade show active" id="carnets-view" role="tabpanel">
+            <div class="row g-4">
+                {% for m in matriculas %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="sena-carnet-card h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <!-- Encabezado del Carné -->
+                                <div class="d-flex justify-content-between align-items-start border-bottom border-white border-opacity-10 pb-2 mb-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="bg-white rounded p-1" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-mortarboard-fill text-success fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-white opacity-75 fw-bold" style="font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;">SENA · REGIONAL MAGDALENA</div>
+                                            <div class="text-white fw-extrabold" style="font-size: 0.82rem;">CARNET DE APRENDIZ</div>
+                                        </div>
+                                    </div>
+                                    <span class="carnet-chip bg-success bg-opacity-25 text-white border border-success">
+                                        {{ m.get_estado_formacion_display }}
+                                    </span>
+                                </div>
+
+                                <!-- Cuerpo: Avatar + Datos -->
+                                <div class="d-flex gap-3 align-items-center mb-3">
+                                    <div class="carnet-avatar-box">
+                                        <span>{{ m.aprendiz.first_name|slice:":1" }}{{ m.aprendiz.last_name|slice:":1" }}</span>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <h5 class="fw-bold text-white mb-1 text-truncate" title="{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}">
+                                            {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
+                                        </h5>
+                                        <div class="text-white opacity-90 small mb-1">
+                                            <strong>{{ m.aprendiz.perfil.get_tipo_documento_display }}</strong> {{ m.aprendiz.perfil.numero_documento }}
+                                        </div>
+                                        <div class="text-white opacity-75 small text-truncate">
+                                            <i class="bi bi-envelope me-1"></i>{{ m.aprendiz.email|default:'Sin correo institucional' }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Detalles Formativos -->
+                                <div class="bg-black bg-opacity-25 rounded-3 p-2 mb-3 border border-white border-opacity-10 small">
+                                    <div class="row g-1">
+                                        <div class="col-6">
+                                            <span class="text-white opacity-50 d-block" style="font-size: 0.65rem;">FICHA TÉCNICA:</span>
+                                            <strong class="text-white">{{ m.ficha.codigo_ficha }}</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="text-white opacity-50 d-block" style="font-size: 0.65rem;">NIVEL / GRADO:</span>
+                                            <span class="text-white">{{ m.grado_escolar|default:'Media Técnica' }}</span>
+                                        </div>
+                                        <div class="col-12 mt-1">
+                                            <span class="text-white opacity-50 d-block" style="font-size: 0.65rem;">PROGRAMA:</span>
+                                            <span class="text-white small text-truncate d-block">{{ m.ficha.programa.denominacion }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de Acción Obligatorios -->
+                            <div class="pt-2 border-top border-white border-opacity-10">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <a href="{% url 'carnet_digital_id' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-light w-100 fw-bold text-dark shadow-sm">
+                                            <i class="bi bi-qr-code-scan text-success me-1"></i> Ver Carné
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-sm text-white w-100 fw-bold" style="background-color: #39A900;">
+                                            <i class="bi bi-person-badge me-1"></i> Ver Perfil
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="{% url 'seguimiento_lista' %}?ficha={{ m.ficha.pk }}" class="btn btn-sm btn-outline-light w-100">
+                                            <i class="bi bi-clipboard2-pulse me-1"></i> Seguimiento
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}#tab-evidencias" class="btn btn-sm btn-outline-light w-100">
+                                            <i class="bi bi-award me-1"></i> Evidencias
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+                            <div class="mb-3 text-muted">
+                                <i class="bi bi-people fs-1 d-block text-secondary opacity-50 mb-2"></i>
+                                <h4 class="fw-bold text-dark">Actualmente no hay aprendices que coincidan con la búsqueda</h4>
+                                <p class="text-muted mb-4">No se encontraron registros con los filtros aplicados. Puedes restablecer los criterios o registrar un nuevo aprendiz.</p>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Ver Todos los Aprendices
+                                    </a>
+                                    <a href="{% url 'registrar_aprendiz' %}" class="btn text-white fw-semibold" style="background-color: #39A900;">
+                                        <i class="bi bi-person-plus-fill me-1"></i> Registrar Nuevo Aprendiz
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 2. VISTA TABLA DETALLADA -->
+        <div class="tab-pane fade" id="table-view" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-uppercase small">
+                            <tr>
+                                <th class="ps-3 py-3">Aprendiz</th>
+                                <th class="py-3">Tipo y N° Documento</th>
+                                <th class="py-3">Ficha Técnica</th>
+                                <th class="py-3">Programa de Formación</th>
+                                <th class="py-3">Estado</th>
+                                <th class="py-3 pe-3 text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in matriculas %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle bg-success bg-opacity-10 text-success fw-bold d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                                                {{ m.aprendiz.first_name|slice:":1" }}{{ m.aprendiz.last_name|slice:":1" }}
+                                            </div>
+                                            <div>
+                                                <strong class="text-dark d-block">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                                <small class="text-muted">{{ m.aprendiz.email|default:'Sin correo' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">{{ m.aprendiz.perfil.get_tipo_documento_display }}</span>
+                                        <strong>{{ m.aprendiz.perfil.numero_documento }}</strong>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'fichas_detalle' m.ficha.id %}" class="fw-bold text-decoration-none text-success">
+                                            Ficha {{ m.ficha.codigo_ficha }}
+                                        </a>
+                                        <small class="d-block text-muted">{{ m.ficha.institucion.nombre|truncatechars:30 }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="small fw-semibold text-secondary">{{ m.ficha.programa.denominacion }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                                            {{ m.get_estado_formacion_display }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'carnet_digital_id' m.aprendiz.perfil.pk %}" class="btn btn-outline-success" title="Ver Carné Digital">
+                                                <i class="bi bi-qr-code"></i>
+                                            </a>
+                                            <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-outline-primary" title="Ver Expediente Completo">
+                                                <i class="bi bi-person-vcard"></i>
+                                            </a>
+                                            <a href="{% url 'seguimiento_lista' %}?ficha={{ m.ficha.pk }}" class="btn btn-outline-secondary" title="Ver Seguimiento">
+                                                <i class="bi bi-clipboard2-pulse"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-people fs-2 d-block mb-2 text-secondary opacity-50"></i>
+                                        No hay aprendices registrados con los filtros especificados.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal para Importación Masiva Excel -->
+<div class="modal fade" id="modalImportar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-dark">
+                    <i class="bi bi-file-earmark-spreadsheet-fill text-success me-2"></i> Importación Masiva de Aprendices
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">
+                        Carga una plantilla XLSX con las columnas requeridas para vincular automáticamente los aprendices a su Ficha Técnica SENA.
+                    </p>
+                    <div class="alert alert-info py-2 small mb-3">
+                        <strong>Columnas obligatorias en fila 1:</strong><br>
+                        <code>numero_documento, nombres, apellidos, correo, grado_escolar, codigo_ficha</code>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Seleccionar archivo Excel (.xlsx):</label>
+                        <input type="file" name="archivo" class="form-control" accept=".xlsx" required>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-semibold" style="background-color: #39A900;">
+                        <i class="bi bi-upload me-1"></i> Procesar Archivo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="visually-hidden">
+    Escanear carnet QR · html5-qrcode · <a href="{% static 'manifest.webmanifest' %}">manifest.webmanifest</a>
+</div>
 {% endblock %}

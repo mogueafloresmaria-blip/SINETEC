@@ -1,0 +1,556 @@
+<!-- ===================================================================
+     ASISTENTE INTELIGENTE SINETEC — COMPONENTE INSTITUCIONAL
+     Centro de Logística y Promoción Ecoturística — Regional Magdalena
+=================================================================== -->
+<style>
+    /* Botón flotante lanzador */
+    .sinetec-asistente-launcher {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 1080;
+        width: 62px;
+        height: 62px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8E5266 0%, #5E2B3C 100%);
+        color: #ffffff;
+        box-shadow: 0 8px 24px rgba(94, 43, 60, 0.35);
+        border: 2px solid #ffffff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .sinetec-asistente-launcher:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 12px 28px rgba(94, 43, 60, 0.45);
+        color: #ffffff;
+    }
+    .sinetec-asistente-launcher .pulse-dot {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 14px;
+        height: 14px;
+        background-color: #39A900;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+    }
+
+    /* Contenedor del Widget */
+    .sinetec-asistente-window {
+        position: fixed;
+        bottom: 96px;
+        right: 24px;
+        width: 380px;
+        max-width: calc(100vw - 32px);
+        height: 560px;
+        max-height: calc(100vh - 120px);
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 16px 40px rgba(94, 43, 60, 0.22);
+        border: 1px solid rgba(142, 82, 102, 0.15);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 1085;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px) scale(0.96);
+        transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sinetec-asistente-window.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0) scale(1);
+    }
+
+    /* Header */
+    .sinetec-asistente-header {
+        background: linear-gradient(135deg, #8E5266 0%, #70384C 100%);
+        color: #ffffff;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .sinetec-asistente-header .agent-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    /* Messages container */
+    .sinetec-asistente-body {
+        flex: 1;
+        background: #FDF7FA;
+        padding: 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        scroll-behavior: smooth;
+    }
+
+    /* Bubbles */
+    .chat-msg {
+        display: flex;
+        flex-direction: column;
+        max-width: 86%;
+        animation: fadeInMsg 0.25s ease-out;
+    }
+    @keyframes fadeInMsg {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .chat-msg.user {
+        align-self: flex-end;
+    }
+    .chat-msg.bot {
+        align-self: flex-start;
+    }
+    .chat-msg .bubble {
+        padding: 10px 14px;
+        border-radius: 16px;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        word-break: break-word;
+    }
+    .chat-msg.user .bubble {
+        background: #8E5266;
+        color: #ffffff;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 2px 6px rgba(142, 82, 102, 0.25);
+    }
+    .chat-msg.bot .bubble {
+        background: #ffffff;
+        color: #2D3748;
+        border: 1px solid #EAD8E1;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        white-space: pre-line;
+    }
+    .chat-msg .time {
+        font-size: 0.68rem;
+        color: #8C8287;
+        margin-top: 3px;
+        padding: 0 4px;
+    }
+    .chat-msg.user .time {
+        text-align: right;
+    }
+
+    /* Action button in bot message */
+    .bot-action-card {
+        margin-top: 8px;
+        background: #FDF7FA;
+        border: 1px solid #E8D5DE;
+        border-radius: 12px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .bot-action-btn {
+        background-color: #39A900;
+        color: #ffffff !important;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s;
+    }
+    .bot-action-btn:hover {
+        background-color: #2E8600;
+        color: #ffffff;
+    }
+
+    /* Chips container */
+    .sinetec-asistente-chips {
+        padding: 8px 14px;
+        background: #ffffff;
+        border-top: 1px solid #F0D9E5;
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: thin;
+    }
+    .sinetec-asistente-chips::-webkit-scrollbar {
+        height: 4px;
+    }
+    .sinetec-asistente-chips::-webkit-scrollbar-thumb {
+        background: #E0C7D5;
+        border-radius: 4px;
+    }
+    .chip-item {
+        background: #F8EDF3;
+        color: #5E2B3C;
+        border: 1px solid #EAD4E1;
+        font-size: 0.76rem;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .chip-item:hover {
+        background: #8E5266;
+        color: #ffffff;
+        border-color: #8E5266;
+    }
+
+    /* Input area */
+    .sinetec-asistente-footer {
+        padding: 10px 14px;
+        background: #ffffff;
+        border-top: 1px solid #F0D9E5;
+    }
+    .sinetec-asistente-input-group {
+        display: flex;
+        align-items: center;
+        background: #FDF7FA;
+        border: 1px solid #EAD4E1;
+        border-radius: 24px;
+        padding: 4px 8px 4px 14px;
+        transition: border 0.2s;
+    }
+    .sinetec-asistente-input-group:focus-within {
+        border-color: #8E5266;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(142, 82, 102, 0.12);
+    }
+    .sinetec-asistente-input-group input {
+        border: none;
+        background: transparent;
+        outline: none;
+        flex: 1;
+        font-size: 0.88rem;
+        color: #2D3748;
+    }
+    .sinetec-asistente-input-group button {
+        background: #8E5266;
+        border: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .sinetec-asistente-input-group button:hover {
+        background: #70384C;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 8px 12px;
+        background: #ffffff;
+        border: 1px solid #EAD8E1;
+        border-radius: 16px;
+        border-bottom-left-radius: 4px;
+        width: fit-content;
+    }
+    .typing-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #8E5266;
+        border-radius: 50%;
+        animation: typingBlink 1.4s infinite ease-in-out both;
+    }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typingBlink {
+        0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+        40% { transform: scale(1); opacity: 1; }
+    }
+
+    @media (max-width: 576px) {
+        .sinetec-asistente-window {
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 90vh;
+            max-width: 100vw;
+            border-radius: 20px 20px 0 0;
+        }
+        .sinetec-asistente-launcher {
+            bottom: 16px;
+            right: 16px;
+            width: 54px;
+            height: 54px;
+        }
+    }
+</style>
+
+<!-- Botón Flotante -->
+<button class="sinetec-asistente-launcher" id="asistenteLauncherBtn" type="button" aria-label="Abrir Asistente Institucional SINETEC" title="Asistente SINETEC">
+    <i class="bi bi-robot fs-4"></i>
+    <span class="pulse-dot"></span>
+</button>
+
+<!-- Ventana del Asistente -->
+<div class="sinetec-asistente-window" id="asistenteWindow" role="dialog" aria-modal="false" aria-label="Asistente Institucional SINETEC">
+    <!-- Header -->
+    <div class="sinetec-asistente-header">
+        <div class="d-flex align-items-center gap-2">
+            <div class="agent-avatar">
+                <i class="bi bi-robot"></i>
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <strong class="small mb-0">Asistente SINETEC</strong>
+                    <span class="badge bg-success" style="font-size: 0.65rem;">En línea</span>
+                </div>
+                <div style="font-size: 0.7rem; opacity: 0.85;">Centro Logística y Ecoturismo · SENA</div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+            <button class="btn btn-sm btn-link text-white p-1" id="asistenteResetBtn" title="Reiniciar conversación" type="button">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <button class="btn btn-sm btn-link text-white p-1" id="asistenteCloseBtn" title="Minimizar" type="button">
+                <i class="bi bi-dash-lg fs-5"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Cuerpo de Mensajes -->
+    <div class="sinetec-asistente-body" id="asistenteChatBody">
+        <!-- Saludo Inicial por defecto -->
+        <div class="chat-msg bot">
+            <div class="bubble">
+                ¡Hola, {{ request.user.first_name|default:request.user.username }}! 👋
+                Soy el <strong>Asistente Institucional SINETEC</strong>.
+                
+                Estoy conectado en tiempo real a tu expediente y a la base de datos institucional del SENA Regional Magdalena.
+                
+                ¿Qué necesitas consultar o gestionar hoy?
+            </div>
+            <div class="time">Ahora</div>
+        </div>
+    </div>
+
+    <!-- Indicador de tipeo (oculto por defecto) -->
+    <div id="asistenteTyping" class="px-3 pb-1" style="display: none; background: #FDF7FA;">
+        <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    </div>
+
+    <!-- Chips de Sugerencias Rápidas -->
+    <div class="sinetec-asistente-chips" id="asistenteChips">
+        <button type="button" class="chip-item" data-action="mi_formacion">📘 Mi Formación</button>
+        <button type="button" class="chip-item" data-action="mi_ficha">🏷️ Mi Ficha</button>
+        <button type="button" class="chip-item" data-action="mis_actividades">📝 Mis Actividades</button>
+        <button type="button" class="chip-item" data-action="mis_evidencias">📂 Mis Evidencias</button>
+        <button type="button" class="chip-item" data-action="mis_evaluaciones">📊 Mis Evaluaciones</button>
+        <button type="button" class="chip-item" data-action="mi_portafolio">💼 Mi Portafolio</button>
+        <button type="button" class="chip-item" data-action="mi_horario">📅 Mi Horario</button>
+        <button type="button" class="chip-item" data-action="mi_asistencia">🟢 Mi Asistencia</button>
+        <button type="button" class="chip-item" data-action="mi_carne">🪪 Mi Carné</button>
+        <button type="button" class="chip-item" data-action="biblioteca">📚 Biblioteca</button>
+        <button type="button" class="chip-item" data-action="mis_recursos">🔖 Mis Recursos</button>
+        <button type="button" class="chip-item" data-action="mis_tramites">📥 Mis Trámites</button>
+        <button type="button" class="chip-item" data-action="ayuda">❓ Ayuda</button>
+    </div>
+
+    <!-- Input Form -->
+    <div class="sinetec-asistente-footer">
+        <form id="asistenteForm" onsubmit="event.preventDefault(); enviarMensajeAsistente();">
+            {% csrf_token %}
+            <div class="sinetec-asistente-input-group">
+                <input type="text" id="asistenteInput" placeholder="Escribe tu consulta o trámite..." autocomplete="off" />
+                <button type="submit" id="asistenteSubmitBtn" title="Enviar mensaje">
+                    <i class="bi bi-send-fill" style="font-size: 0.82rem;"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Script del Asistente SINETEC -->
+<script>
+(function() {
+    const launcherBtn = document.getElementById('asistenteLauncherBtn');
+    const closeBtn = document.getElementById('asistenteCloseBtn');
+    const resetBtn = document.getElementById('asistenteResetBtn');
+    const windowEl = document.getElementById('asistenteWindow');
+    const chatBody = document.getElementById('asistenteChatBody');
+    const inputEl = document.getElementById('asistenteInput');
+    const typingEl = document.getElementById('asistenteTyping');
+    const chipsContainer = document.getElementById('asistenteChips');
+
+    // Toggle ventana
+    function toggleWindow() {
+        const isOpen = windowEl.classList.toggle('is-open');
+        if (isOpen) {
+            setTimeout(() => inputEl.focus(), 250);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+    }
+
+    launcherBtn.addEventListener('click', toggleWindow);
+    closeBtn.addEventListener('click', toggleWindow);
+
+    resetBtn.addEventListener('click', () => {
+        chatBody.innerHTML = `
+            <div class="chat-msg bot">
+                <div class="bubble">
+                    ¡Conversación reiniciada! 👋
+                    Soy el Asistente Institucional SINETEC. ¿En qué módulo formativo o trámite puedo orientarte?
+                </div>
+                <div class="time">Ahora</div>
+            </div>
+        `;
+        consultarServidor('', 'inicio');
+    });
+
+    // Delegación de clics en chips
+    chipsContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chip-item');
+        if (!btn) return;
+        const accion = btn.getAttribute('data-action');
+        const label = btn.textContent.trim();
+        agregarMensajeUsuario(label);
+        consultarServidor('', accion);
+    });
+
+    // Agregar mensaje del usuario
+    function agregarMensajeUsuario(texto) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-msg user';
+        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        msgDiv.innerHTML = `
+            <div class="bubble">${escapeHtml(texto)}</div>
+            <div class="time">${now}</div>
+        `;
+        chatBody.appendChild(msgDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // Agregar respuesta del Asistente
+    function agregarMensajeBot(texto, enlaceAccion) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-msg bot';
+        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        let actionHtml = '';
+        if (enlaceAccion && enlaceAccion.url && enlaceAccion.texto) {
+            actionHtml = `
+                <div class="bot-action-card">
+                    <span class="small fw-semibold text-muted">Acceso sugerido:</span>
+                    <a href="${enlaceAccion.url}" class="bot-action-btn">
+                        <i class="bi bi-arrow-right-circle-fill"></i> ${escapeHtml(enlaceAccion.texto)}
+                    </a>
+                </div>
+            `;
+        }
+
+        msgDiv.innerHTML = `
+            <div class="bubble">${escapeHtml(texto)}</div>
+            ${actionHtml}
+            <div class="time">${now}</div>
+        `;
+        chatBody.appendChild(msgDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // Actualizar chips dinámicos
+    function actualizarChips(chips) {
+        if (!chips || !chips.length) return;
+        chipsContainer.innerHTML = '';
+        chips.forEach(c => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'chip-item';
+            btn.setAttribute('data-action', c.action);
+            btn.textContent = c.label;
+            chipsContainer.appendChild(btn);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // Enviar mensaje manual
+    window.enviarMensajeAsistente = function() {
+        const texto = inputEl.value.trim();
+        if (!texto) return;
+        agregarMensajeUsuario(texto);
+        inputEl.value = '';
+        consultarServidor(texto, '');
+    };
+
+    // Petición AJAX al backend de Django
+    function consultarServidor(mensaje, accion) {
+        typingEl.style.display = 'block';
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+
+        fetch('/asistente/consulta/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ mensaje: mensaje, accion: accion })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Error de conexión');
+            return res.json();
+        })
+        .then(data => {
+            typingEl.style.display = 'none';
+            agregarMensajeBot(data.respuesta, data.enlace_accion);
+            if (data.chips && data.chips.length) {
+                actualizarChips(data.chips);
+            }
+        })
+        .catch(err => {
+            typingEl.style.display = 'none';
+            agregarMensajeBot('No fue posible conectar con el servicio en este instante. Por favor intenta de nuevo o revisa tu conexión institucional.', null);
+        });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+})();
+</script>

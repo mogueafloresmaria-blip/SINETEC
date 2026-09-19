@@ -178,34 +178,61 @@ class ResultadoAprendizaje(models.Model):
 
 
 class EvidenciaTaller(models.Model):
-    """Guía o Taller asignado al aprendiz"""
-    rap = models.ForeignKey(ResultadoAprendizaje, on_delete=models.CASCADE, related_name='evidencias')
+    """Guía o Taller asignado al aprendiz dentro de la formación SENA"""
+    rap = models.ForeignKey(ResultadoAprendizaje, on_delete=models.CASCADE, related_name='evidencias', null=True, blank=True)
+    rap_curricular = models.ForeignKey('academico.ResultadoAprendizaje', on_delete=models.SET_NULL, null=True, blank=True, related_name='evidencias_talleres', verbose_name="RAP Curricular SOFIA")
+    ficha = models.ForeignKey('academico.Ficha', on_delete=models.SET_NULL, null=True, blank=True, related_name='actividades_formativas', verbose_name="Ficha Asociada")
+    instructor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='actividades_publicadas', verbose_name="Instructor Asignador")
     titulo = models.CharField(max_length=200, verbose_name="Título del Taller / Evidencia")
     descripcion = models.TextField(verbose_name="Instrucciones de la Guía de Aprendizaje")
+    material_apoyo = models.FileField(upload_to='material_talleres/%Y/%m/', blank=True, null=True, verbose_name="Material Proporcionado por el Instructor")
+    fecha_asignacion = models.DateTimeField(auto_now_add=True, null=True, verbose_name="Fecha de Asignación")
     fecha_limite = models.DateTimeField(verbose_name="Fecha y Hora Límite de Entrega")
-    
+
+    class Meta:
+        ordering = ['-fecha_asignacion', 'fecha_limite']
+        verbose_name = "Actividad / Taller de Aprendizaje"
+        verbose_name_plural = "Actividades / Talleres de Aprendizaje"
+
     def __str__(self):
-        return f"{self.titulo} - RAP: {self.rap.codigo}"
+        rap_str = self.rap_curricular.codigo if self.rap_curricular else (self.rap.codigo if self.rap else 'Sin RAP')
+        return f"{self.titulo} - RAP: {rap_str}"
+
+    @property
+    def rap_codigo(self):
+        if self.rap_curricular:
+            return self.rap_curricular.codigo
+        if self.rap:
+            return self.rap.codigo
+        return 'ADSI-01'
 
 
 class CalificacionEvidencia(models.Model):
-    """Juicio evaluativo SENA (Aprobado 'A' o Deficiente 'D')"""
+    """Juicio evaluativo SENA (Aprobado 'A' o Deficiente 'D') y entrega de evidencia"""
     ESTADOS_JUICIO = [
         ('A', 'Aprobado (A)'),
         ('D', 'Deficiente (D)'),
         ('PENDIENTE', 'Pendiente de Calificar'),
     ]
-    
+
     evidencia = models.ForeignKey(EvidenciaTaller, on_delete=models.CASCADE, related_name='calificaciones')
     aprendiz = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'perfil__rol__nombre': 'Estudiante'})
     archivo_entregado = models.FileField(upload_to='talleres_aprendices/', blank=True, null=True, verbose_name="Archivo del Taller")
+    comentarios_aprendiz = models.TextField(blank=True, null=True, verbose_name="Comentarios de la Entrega")
     fecha_entrega = models.DateTimeField(auto_now_add=True)
-    
-    juicio_evaluativo = models.CharField(max_length=10, choices=ESTADOS_JUICIO, default='PENDIENTE', verbose_name="Juicio Evaluativo")
+
+    juicio_evaluativo = models.CharField(max_length=15, choices=ESTADOS_JUICIO, default='PENDIENTE', verbose_name="Juicio Evaluativo")
     observaciones = models.TextField(blank=True, null=True, verbose_name="Retroalimentación del Instructor")
-    
+    fecha_revision = models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Revisión")
+
     class Meta:
         unique_together = ('evidencia', 'aprendiz')
+        verbose_name = "Entrega y Calificación de Evidencia"
+        verbose_name_plural = "Entregas y Calificaciones de Evidencias"
 
     def __str__(self):
         return f"Aprendiz {self.aprendiz.get_full_name()} - {self.evidencia.titulo} [{self.juicio_evaluativo}]"
+
+    @property
+    def rap_codigo(self):
+        return self.evidencia.rap_codigo

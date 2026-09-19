@@ -1,26 +1,20 @@
-# ==============================================================================
-# PROYECTO FORMATIVO: "SISTEMAS DE INFORMACIÓN Y DESARROLLO DE SOFTWARE EN EL MAGDALENA"
-# SOFTWARE: SINETEC (Sistema de Integración Técnica Education)
-# DEPENDENCIAS OFICIALES DEL PROYECTO (Python 3.12 compatible)
-# ==============================================================================
-
-# Framework Web principal (Versión LTS con soporte extendido)
-Django>=4.2,<5.1
-
-# Conector de base de datos MySQL (100% Python, sin requerir compiladores C++)
-PyMySQL>=1.1.0
-cryptography>=42.0.0
-
-# Gestión segura de variables de entorno y credenciales (.env)
-python-decouple>=3.8
-
-# Procesamiento de imágenes y actas escaneadas para modelos Django
-Pillow>=10.2.0
-
-# Generador y lector de hojas de cálculo de Excel (.xlsx) para reportes
-openpyxl>=3.1.2
-qrcode[pil]>=8.2
-
-# Generación de actas oficiales en PDF
-reportlab>=4.2.0
-
+asgiref==3.12.1
+cffi==2.1.1
+charset-normalizer==3.5.1
+colorama==0.4.6
+cryptography==50.0.1
+Django==5.0.14
+dj-database-url==3.1.2
+et_xmlfile==2.0.0
+gunicorn==26.2.0
+openpyxl==3.1.5
+pillow==12.3.0
+psycopg2-binary==2.9.13
+pycparser==3.0
+PyMySQL==1.2.3
+python-decouple==3.8
+qrcode==8.2
+reportlab==5.0.1
+sqlparse==0.6.0
+tzdata==2026.4
+whitenoise==6.12.0

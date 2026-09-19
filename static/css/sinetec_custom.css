@@ -105,47 +105,100 @@ a:hover { color: var(--sinetec-primary-dark); }
   border-radius: 8px;
 }
 
-/* Adaptación de los estados Bootstrap a la identidad palo rosa de SINETEC */
+/* Identidad visual institucional y mapeo de colores funcionales con soporte de opacidad */
+:root {
+  --sinetec-brand-mauve: #5E2B3C;
+  --sinetec-brand-rose: #8E5266;
+  --sinetec-brand-blue: #1D4ED8;
+  --sinetec-brand-cyan: #0284C7;
+
+  --bs-primary: #5E2B3C;
+  --bs-primary-rgb: 94, 43, 60;
+  --bs-success: #39A900;
+  --bs-success-rgb: 57, 169, 0;
+  --bs-warning: #D97706;
+  --bs-warning-rgb: 217, 119, 6;
+  --bs-danger: #DC2626;
+  --bs-danger-rgb: 220, 38, 38;
+  --bs-info: #0284C7;
+  --bs-info-rgb: 2, 132, 199;
+}
+
+.bg-opacity-10 {
+  --bs-bg-opacity: 0.12 !important;
+}
+
+.bg-opacity-25 {
+  --bs-bg-opacity: 0.25 !important;
+}
+
+.bg-opacity-50 {
+  --bs-bg-opacity: 0.5 !important;
+}
+
 .text-primary {
-  color: var(--sinetec-primary) !important;
+  color: #5E2B3C !important;
 }
 
 .bg-primary {
-  background-color: var(--sinetec-primary) !important;
+  --bs-bg-opacity: 1;
+  background-color: rgba(94, 43, 60, var(--bs-bg-opacity)) !important;
 }
 
-.btn-primary,
-.btn-outline-primary {
-  --bs-btn-color: var(--sinetec-primary);
-  --bs-btn-border-color: var(--sinetec-primary);
-  --bs-btn-hover-color: #FFFFFF;
-  --bs-btn-hover-bg: var(--sinetec-primary);
-  --bs-btn-hover-border-color: var(--sinetec-primary-dark);
-  --bs-btn-active-bg: var(--sinetec-primary-dark);
-  --bs-btn-active-border-color: var(--sinetec-primary-dark);
+.border-primary {
+  border-color: #8E5266 !important;
 }
 
-.btn-primary {
-  --bs-btn-color: #FFFFFF;
-  --bs-btn-bg: var(--sinetec-primary);
-  --bs-btn-border-color: var(--sinetec-primary);
+.text-info {
+  color: #0284C7 !important;
 }
 
-.text-info,
-.text-primary { color: var(--sinetec-primary) !important; }
-.bg-info,
-.bg-primary { background-color: var(--sinetec-primary) !important; }
-.border-info,
-.border-primary { border-color: var(--sinetec-primary) !important; }
-.btn-info,
-.btn-outline-info,
-.btn-primary,
-.btn-outline-primary {
-  --bs-btn-color: var(--sinetec-primary);
-  --bs-btn-border-color: var(--sinetec-primary);
-  --bs-btn-hover-color: #FFFFFF;
-  --bs-btn-hover-bg: var(--sinetec-primary);
-  --bs-btn-hover-border-color: var(--sinetec-primary-dark);
+.bg-info {
+  --bs-bg-opacity: 1;
+  background-color: rgba(2, 132, 199, var(--bs-bg-opacity)) !important;
+}
+
+.border-info {
+  border-color: #0284C7 !important;
+}
+
+.text-success {
+  color: #1F5E2D !important;
+}
+
+.bg-success {
+  --bs-bg-opacity: 1;
+  background-color: rgba(57, 169, 0, var(--bs-bg-opacity)) !important;
+}
+
+.border-success {
+  border-color: #39A900 !important;
+}
+
+.text-warning {
+  color: #B45309 !important;
+}
+
+.bg-warning {
+  --bs-bg-opacity: 1;
+  background-color: rgba(217, 119, 6, var(--bs-bg-opacity)) !important;
+}
+
+.border-warning {
+  border-color: #D97706 !important;
+}
+
+.text-danger {
+  color: #B91C1C !important;
+}
+
+.bg-danger {
+  --bs-bg-opacity: 1;
+  background-color: rgba(220, 38, 38, var(--bs-bg-opacity)) !important;
+}
+
+.border-danger {
+  border-color: #DC2626 !important;
 }
 
 .chatbot-launcher {
@@ -216,3 +269,11 @@ a:hover { color: var(--sinetec-primary-dark); }
   font-size: 0.85rem;
   color: var(--sinetec-text-muted);
 }
+
+/* Campos de selección y controles de formulario */
+.form-select {
+  padding-right: 2.5rem !important;
+  background-position: right 0.85rem center !important;
+  border-radius: 10px;
+}
+
