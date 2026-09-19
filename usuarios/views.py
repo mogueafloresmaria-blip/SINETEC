@@ -48,6 +48,16 @@ def error_403_view(request, exception=None):
     return render(request, '403.html', status=403)
 
 
+def csrf_failure(request, reason=""):
+    """
+    Manejador amigable institucional cuando el navegador móvil (Safari/Chrome)
+    envía un token de sesión o cookie desincronizada.
+    Redirige suavemente al login sin mostrar pantallas técnicas ni errores 403 crudos.
+    """
+    messages.warning(request, "Tu sesión previa o verificación de seguridad se actualizó. Por favor ingresa tus datos para continuar.")
+    return redirect('login_short')
+
+
 @csrf_exempt
 def custom_login_view(request):
     """
@@ -72,6 +82,7 @@ def custom_login_view(request):
 
         if user is not None:
             auth_login(request, user)
+            request.session.modified = True
             next_url = request.GET.get('next') or request.POST.get('next') or 'dashboard'
             return redirect(next_url)
         else:
@@ -109,8 +120,16 @@ def alertas_desercion_para_matricula(matricula):
         })
     return alertas
 
+@csrf_exempt
 def home(request):
     """Página de inicio institucional de SINETEC."""
+    if request.method == 'POST':
+        # Si se envió formulario de autenticación desde el portal de inicio
+        if 'username' in request.POST or 'password' in request.POST:
+            return custom_login_view(request)
+        # Si se envió escaneo o documento para asistencia
+        if 'raw_data' in request.POST:
+            return api_registrar_asistencia_qr(request)
     contexto_usuario = None
     if request.user.is_authenticated:
         perfil = getattr(request.user, 'perfil', None)
