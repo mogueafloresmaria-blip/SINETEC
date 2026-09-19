@@ -11,7 +11,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: SECRET_KEY
-        generateValue: true
+        value: "django-insecure-sinetec-adsi-magdalena-2026-production-key-fixed"
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS

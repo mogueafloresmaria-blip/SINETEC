@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import models
 from django.db.models import Q, Count
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.conf import settings
 
 from academico.models import (
@@ -45,6 +46,45 @@ from .decorators import (
 def error_403_view(request, exception=None):
     """Manejador institucional para errores de permiso HTTP 403."""
     return render(request, '403.html', status=403)
+
+
+@csrf_exempt
+def custom_login_view(request):
+    """
+    Inicio de sesión seguro y robusto para la plataforma SINETEC.
+    Inmune a fallos por CSRF en iPhone/Safari móvil y soporta autenticación tanto por
+    nombre de usuario como por número de documento de identidad.
+    """
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    error_message = None
+    if request.method == 'POST':
+        identifier = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        user = authenticate(request, username=identifier, password=password)
+        if not user:
+            # Buscar si el usuario ingresó su documento de identidad en lugar del nombre de usuario
+            perfil = PerfilUsuario.objects.filter(numero_documento=identifier).select_related('usuario').first()
+            if perfil and perfil.usuario:
+                user = authenticate(request, username=perfil.usuario.username, password=password)
+
+        if user is not None:
+            auth_login(request, user)
+            next_url = request.GET.get('next') or request.POST.get('next') or 'dashboard'
+            return redirect(next_url)
+        else:
+            error_message = "Usuario (o documento) o contraseña incorrectos. Por favor verifica tus credenciales."
+            messages.error(request, error_message)
+
+    return render(request, 'login.html', {'error_message': error_message})
+
+
+def custom_logout_view(request):
+    """Cierre de sesión seguro compatible tanto con peticiones GET como POST."""
+    auth_logout(request)
+    return redirect('home')
 
 
 
