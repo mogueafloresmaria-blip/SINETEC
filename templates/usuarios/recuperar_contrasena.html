@@ -1,0 +1,343 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Contraseña · SINETEC SENA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="{% static 'js/antigravity_color.js' %}"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #071927;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(33, 150, 243, 0.2) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(25, 118, 210, 0.15) 0%, transparent 50%),
+                linear-gradient(180deg, #071927 0%, #0A2540 100%);
+            display: grid;
+            place-items: center;
+            color: #0F172A;
+            padding: 20px;
+        }
+        .recovery-shell {
+            width: 100%;
+            max-width: 490px;
+            background: #FFFFFF;
+            border-radius: 24px;
+            box-shadow: 
+                0 25px 60px -15px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .recovery-header {
+            background: linear-gradient(135deg, #0A2540 0%, #1976D2 100%);
+            padding: 34px 30px 26px;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid #2196F3;
+        }
+        .brand-logo-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+        .brand-logo-wrap img {
+            height: 48px;
+            width: auto;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+        }
+        .recovery-title {
+            color: #FFFFFF;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+        .recovery-subtitle {
+            color: #94A3B8;
+            font-size: 0.86rem;
+            line-height: 1.45;
+        }
+        .recovery-body {
+            padding: 30px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-wrap i.prefix-icon {
+            position: absolute;
+            left: 14px;
+            color: #64748B;
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            height: 48px;
+            border: 1.5px solid #E2E8F0;
+            background: #F8FAFC;
+            border-radius: 12px;
+            padding: 0 14px 0 42px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: #0F172A;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #2196F3;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.15);
+        }
+        .btn-submit {
+            width: 100%;
+            height: 48px;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
+            color: #FFFFFF;
+            font-weight: 800;
+            font-size: 0.96rem;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 10px 22px rgba(33, 150, 243, 0.28);
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(33, 150, 243, 0.35);
+            filter: brightness(1.04);
+        }
+        .btn-submit:active {
+            transform: scale(0.99);
+        }
+        .alert-box {
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 0.86rem;
+            line-height: 1.45;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .alert-box.success {
+            background: #ECFDF5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+        .alert-box.danger {
+            background: #FEF2F2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+        .alert-box i {
+            font-size: 1.15rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .verified-card {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 20px;
+        }
+        .verified-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #15803D;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+        .verified-name {
+            font-weight: 800;
+            color: #0F2417;
+            font-size: 1.05rem;
+        }
+        .verified-badge {
+            display: inline-block;
+            background: #DCFCE7;
+            color: #166534;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-top: 4px;
+        }
+        .links-bar {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #F1F5F9;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+        }
+        .back-link {
+            color: #334155;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #29AAE3;
+        }
+        .whatsapp-support {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: #0F172A;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .whatsapp-support:hover {
+            background: #F0FDF4;
+            border-color: #86EFAC;
+            color: #166534;
+        }
+        .whatsapp-support i {
+            color: #22C55E;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="recovery-shell">
+        <!-- Cabecera -->
+        <header class="recovery-header">
+            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                <img src="{% static 'img/sinetec_logo_oficial.png' %}" alt="SINETEC SENA" style="height: 58px; width: auto; display: block; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(10,37,64,0.35));">
+            </div>
+            <h1 class="recovery-title">Recuperar Contraseña</h1>
+            <p class="recovery-subtitle">Acceso y restablecimiento oficial para instructores y aprendices</p>
+        </header>
+
+        <div class="recovery-body">
+            {% if mensaje_error %}
+            <div class="alert-box danger">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>{{ mensaje_error }}</div>
+            </div>
+            {% endif %}
+
+            {% if mensaje_exito and not usuario_encontrado %}
+            <div class="alert-box success">
+                <i class="bi bi-check-circle-fill"></i>
+                <div>{{ mensaje_exito }}</div>
+            </div>
+            {% endif %}
+
+            {% if usuario_encontrado %}
+            <!-- Paso 2: Crear Nueva Contraseña -->
+            <div class="verified-card">
+                <div class="verified-header">
+                    <i class="bi bi-shield-check"></i> Identidad Confirmada
+                </div>
+                <div class="verified-name">{{ usuario_encontrado.get_full_name|default:usuario_encontrado.username }}</div>
+                <span class="verified-badge">Documento: {{ usuario_encontrado.perfil.numero_documento|default:"Registrado" }}</span>
+            </div>
+
+            <form method="post" autocomplete="off">
+                {% csrf_token %}
+                <input type="hidden" name="usuario_id" value="{{ usuario_encontrado.pk }}">
+                
+                <div class="form-group">
+                    <label for="nueva_contrasena">Nueva Contraseña</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-lock-fill prefix-icon"></i>
+                        <input id="nueva_contrasena" type="password" name="nueva_contrasena" placeholder="Mínimo 4 caracteres" required autofocus>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmar_contrasena">Confirmar Nueva Contraseña</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-shield-lock-fill prefix-icon"></i>
+                        <input id="confirmar_contrasena" type="password" name="confirmar_contrasena" placeholder="Repite tu contraseña" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="bi bi-key-fill"></i> Guardar Nueva Contraseña
+                </button>
+            </form>
+            {% else %}
+            <!-- Paso 1: Ingreso de Documento o Usuario -->
+            <form method="post" autocomplete="off">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="identificador">Documento de Identidad o Usuario</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person-badge-fill prefix-icon"></i>
+                        <input id="identificador" type="text" name="identificador" placeholder="Ej: 1082987123 o aprendiz_carlos" required autofocus>
+                    </div>
+                    <small style="color: #64748B; font-size: 0.76rem; display: block; margin-top: 6px;">
+                        Ingresa el número de identificación (CC/TI) o tu nombre de usuario en SINETEC.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="bi bi-arrow-right-circle-fill"></i> Verificar Identidad
+                </button>
+            </form>
+            {% endif %}
+
+            <!-- Enlaces de navegación y asistencia -->
+            <div class="links-bar">
+                <a href="{% url 'login_short' %}" class="back-link">
+                    <i class="bi bi-arrow-left"></i> Volver a Iniciar Sesión
+                </a>
+
+                <a href="https://wa.me/573000000000?text=Hola,%20solicito%20asistencia%20para%20recuperar%20mi%20contrase%C3%B1a%20en%20SINETEC%20SENA" target="_blank" class="whatsapp-support">
+                    <i class="bi bi-whatsapp"></i> Soporte Directo Coordinación SENA
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

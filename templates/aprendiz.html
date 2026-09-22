@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mi Espacio de Formación · Aprendiz SENA{% endblock %}
+{% block title %}Mi Espacio de Formación · Estudiante SENA{% endblock %}
 
 {% block extra_css %}
 <style>
     .aprendiz-welcome {
-        background: linear-gradient(135deg, #103823 0%, #1a5c36 60%, #39A900 100%);
+        background: linear-gradient(135deg, #103823 0%, #1a5c36 60%, #29AAE3 100%);
         color: #ffffff;
         border-radius: 20px;
         padding: clamp(20px, 3.5vw, 32px);
@@ -55,12 +55,12 @@
     }
     .progress-bar-sena-fill {
         height: 100%;
-        background: linear-gradient(90deg, #39A900, #54c916);
+        background: linear-gradient(90deg, #29AAE3, #54c916);
         border-radius: 999px;
         transition: width 0.6s ease;
     }
     .actividad-item {
-        border-left: 4px solid #39A900;
+        border-left: 4px solid #29AAE3;
         background: #ffffff;
         border-radius: 12px;
         padding: 14px 16px;
@@ -85,6 +85,58 @@
         gap: 8px;
         font-weight: 700;
         font-size: 0.85rem;
+    }
+    /* Carné PVC Oficial en Panel Aprendiz */
+    .pvc-aprendiz-widget {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid #d1d5db;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 24px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .pvc-aprendiz-widget:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 36px -6px rgba(11, 36, 20, 0.14);
+        border-color: #29AAE3;
+    }
+    .pvc-header-strip {
+        background: linear-gradient(135deg, #0b2414 0%, #164e2a 100%);
+        color: #ffffff;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .pvc-body-grid {
+        padding: 16px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+    .pvc-photo-box {
+        width: 86px;
+        height: 108px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2.5px solid #29AAE3;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        flex-shrink: 0;
+        background: #f8fafc;
+    }
+    .pvc-qr-box {
+        width: 76px;
+        height: 76px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
 </style>
 {% endblock %}
@@ -225,7 +277,7 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <a href="{% url 'portafolio_actividad_detalle' evidencia.pk %}" class="btn btn-sm btn-success px-3 text-nowrap fw-semibold" style="background-color: #39A900;">
+                            <a href="{% url 'portafolio_actividad_detalle' evidencia.pk %}" class="btn btn-sm btn-success px-3 text-nowrap fw-semibold" style="background-color: #29AAE3;">
                                 <i class="bi bi-upload me-1"></i> Entregar
                             </a>
                         </div>
@@ -271,8 +323,72 @@
             </div>
         </div>
 
-        <!-- Columna Derecha: Alertas, Horario, Trámites y Logros -->
+        <!-- Columna Derecha: Carné Digital PVC, Alertas, Horario, Trámites -->
         <div class="col-lg-5">
+            <!-- Carné Digital del Estudiante (Tarjeta PVC Oficial SENA) -->
+            <div class="pvc-aprendiz-widget">
+                <div class="pvc-header-strip">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="{% static 'img/sena_logo_oficial.png' %}" alt="SENA" style="width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1);">
+                        <div>
+                            <div style="font-size: 0.62rem; letter-spacing: 0.08em; font-weight: 700; color: #a7f3d0; text-transform: uppercase;">SERVICIO NACIONAL DE APRENDIZAJE</div>
+                            <div style="font-size: 0.82rem; font-weight: 800; color: #ffffff;">CARNÉ DIGITAL DEL APRENDIZ</div>
+                        </div>
+                    </div>
+                    <span class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50" style="font-size: 0.68rem;">
+                        EN FORMACIÓN
+                    </span>
+                </div>
+
+                <div class="pvc-body-grid">
+                    <div class="pvc-photo-box">
+                        {% if user.perfil.foto %}
+                            <img src="{{ user.perfil.foto.url }}" alt="{{ user.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <img src="{% static 'img/aprendiz_foto_2.jpg' %}" alt="{{ user.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="text-uppercase fw-extrabold text-dark text-truncate mb-1" style="font-size: 0.95rem;">
+                            {{ user.get_full_name|default:user.username }}
+                        </div>
+                        <div class="mb-1">
+                            <span class="badge bg-light text-dark border fw-bold" style="font-size: 0.78rem;">
+                                <i class="bi bi-person-vcard text-success me-1"></i>{{ perfil.get_tipo_documento_display|default:'CC' }} {{ perfil.numero_documento|default:'1002345678' }}
+                            </span>
+                        </div>
+                        <div class="small text-muted text-truncate mb-1" style="font-size: 0.75rem;">
+                            <i class="bi bi-mortarboard text-secondary me-1"></i>{% if ficha %}{{ ficha.programa.denominacion }}{% else %}ADSO · Tecnólogo{% endif %}
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge text-white px-2 py-1" style="background-color: #0F2942; font-size: 0.72rem;">
+                                CURSO: {{ ficha.codigo_ficha|default:'2501234' }}
+                            </span>
+                            <span class="badge bg-warning bg-opacity-25 text-dark border border-warning" style="font-size: 0.68rem;">
+                                RH: {{ perfil.tipo_sangre|default:'O+' }}
+                            </span>
+                        </div>
+                    </div>
+                    {% if qr_base64 %}
+                    <div class="pvc-qr-box flex-shrink-0 d-none d-sm-flex flex-column align-items-center">
+                        <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Dinámico" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="bg-light px-3 py-2 border-top d-flex justify-content-between align-items-center">
+                    <small class="text-muted" style="font-size: 0.72rem;">
+                        <i class="bi bi-shield-lock-fill text-success me-1"></i>Seguridad: <span class="fw-bold text-dark">{{ codigo_seguridad_dia|default:'SENA-2026' }}</span>
+                    </small>
+                    {% if user.perfil.pk %}
+                    <a href="{% url 'carnet_digital_id' user.perfil.pk %}" class="btn btn-sm btn-outline-success fw-bold py-1 px-3" style="font-size: 0.78rem;">
+                        <i class="bi bi-arrow-repeat me-1"></i> Ver Reverso 3D
+                    </a>
+                    {% endif %}
+                </div>
+                <div style="height: 5px; background: linear-gradient(90deg, #29AAE3 0%, #29AAE3 70%, #FF671B 70%, #FF671B 100%);"></div>
+            </div>
+
             <!-- Alertas Tempranas del Aprendiz -->
             {% if alertas %}
             <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-danger bg-white">

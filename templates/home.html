@@ -4,510 +4,551 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SINETEC · Una ficha, una ruta a un futuro | SENA Regional Magdalena</title>
+    <title>SINETEC | Sistema Administrativo Escolar</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Librería HTML5 QR Code para escaneo en tiempo real -->
+    <!-- HTML5 QR Code Library -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
     <style>
         :root {
-            --sena-green: #39A900;
-            --sena-dark: #107C41;
-            --sena-navy: #002233;
-            --sena-slate: #1D3325;
-            --sena-border: #DCE8DE;
-            --sena-bg: #F8FBF8;
-            --sena-muted: #5A7463;
+            --primary: #1E3A8A;
+            --primary-dark: #0F2942;
+            --primary-light: #3B82F6;
+            --accent: #2563EB;
+            --bg-light: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { box-sizing: border-box; }
 
         body {
-            background-color: var(--sena-bg);
             margin: 0;
             padding: 0;
-            font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-            color: var(--sena-navy);
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+            background: linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 50%, #F1F5F9 100%);
+            position: relative;
             overflow-x: hidden;
-            width: 100%;
-            padding-bottom: 75px; /* Espacio para barra flotante en celular */
+            padding-bottom: 75px;
         }
 
         @media (min-width: 769px) {
-            body {
-                padding-bottom: 0;
-            }
+            body { padding-bottom: 0; }
         }
 
-        /* 1. BARRA SUPERIOR INSTITUCIONAL FLOTANTE (CENTRADA) */
+        /* Abstract ambient gradient circles - Zero stock photos */
+        .ambient-glow-top {
+            position: absolute;
+            top: -120px;
+            right: -80px;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(248, 250, 252, 0) 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-glow-bottom {
+            position: absolute;
+            top: 450px;
+            left: -100px;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(248, 250, 252, 0) 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 1. Header */
         .sinetec-landing-header {
             width: 100%;
-            background: #FFFFFF;
-            border-bottom: 1px solid var(--sena-border);
-            padding: 14px clamp(16px, 4vw, 36px);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px clamp(16px, 4vw, 40px);
             position: sticky;
             top: 0;
             z-index: 1030;
-            box-shadow: 0 4px 20px rgba(0, 34, 51, 0.03);
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
             display: flex;
             justify-content: center;
         }
 
         .header-container {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1180px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
         .brand-logo-wrap {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 12px;
             text-decoration: none;
         }
 
-        .brand-icon-box {
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, var(--sena-dark), var(--sena-green));
-            color: #ffffff;
-            display: grid;
-            place-items: center;
+        .brand-logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
             font-size: 1.35rem;
-            box-shadow: 0 6px 16px rgba(57, 169, 0, 0.25);
-            flex-shrink: 0;
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+        }
+
+        .brand-title-group {
+            display: flex;
+            flex-direction: column;
         }
 
         .brand-name {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.35rem;
+            font-size: 1.22rem;
             font-weight: 800;
-            color: var(--sena-navy);
-            line-height: 1;
+            color: var(--primary-dark);
             letter-spacing: -0.02em;
+            line-height: 1.1;
         }
 
-        .brand-sub {
-            font-size: 0.74rem;
-            font-weight: 700;
-            color: var(--sena-muted);
+        .brand-subtitle {
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 3px;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 700;
         }
 
-        .header-btns {
+        .header-actions {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .btn-top-qr {
-            background: rgba(57, 169, 0, 0.1);
-            color: var(--sena-dark) !important;
-            border: 1px solid rgba(57, 169, 0, 0.3);
-            border-radius: 999px;
+        .btn-action-qr {
+            background: #EEF2FF;
+            color: var(--primary) !important;
+            border: 1px solid #C7D2FE;
+            border-radius: 10px;
             padding: 8px 18px;
             font-weight: 700;
-            font-size: 0.86rem;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             text-decoration: none;
             transition: all 0.2s ease;
-            cursor: pointer;
         }
 
-        .btn-top-qr:hover {
-            background: var(--sena-green);
-            color: #ffffff !important;
-            border-color: var(--sena-green);
+        .btn-action-qr:hover {
+            background: #E0E7FF;
+            color: var(--primary-dark) !important;
+            border-color: #A5B4FC;
             transform: translateY(-1px);
         }
 
-        .btn-top-auth {
-            background: linear-gradient(135deg, var(--sena-navy) 0%, var(--sena-dark) 100%);
-            color: #ffffff !important;
-            border-radius: 999px;
-            padding: 8px 22px;
+        .btn-action-auth {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: #FFFFFF !important;
+            border-radius: 10px;
+            padding: 9px 22px;
             font-weight: 700;
             font-size: 0.86rem;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             text-decoration: none;
-            box-shadow: 0 6px 14px rgba(0, 34, 51, 0.15);
+            box-shadow: 0 6px 16px rgba(15, 41, 66, 0.2);
             transition: all 0.2s ease;
             border: none;
-            cursor: pointer;
         }
 
-        .btn-top-auth:hover {
-            background: #001724;
+        .btn-action-auth:hover {
+            background: linear-gradient(135deg, #0A192F 0%, var(--primary-dark) 100%);
             transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(0, 34, 51, 0.25);
+            box-shadow: 0 8px 20px rgba(15, 41, 66, 0.3);
         }
 
-        /* 2. CONTENEDOR PRINCIPAL 100% CENTRADO */
-        .landing-main-center {
+        /* Main Hero Section */
+        .landing-main {
             width: 100%;
-            max-width: 960px;
-            padding: clamp(32px, 5vw, 56px) 20px 40px;
+            max-width: 1140px;
             margin: 0 auto;
-            text-align: center;
+            padding: clamp(36px, 5vw, 64px) 24px 40px;
+            position: relative;
+            z-index: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            flex-grow: 1;
+            text-align: center;
         }
 
-        /* Insignia Institucional */
-        .institutional-pill {
+        .badge-institution {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             background: #FFFFFF;
-            border: 1px solid rgba(57, 169, 0, 0.35);
-            color: var(--sena-dark);
-            font-size: clamp(0.72rem, 1.6vw, 0.8rem);
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            padding: 8px 22px;
+            border: 1px solid var(--border-color);
+            padding: 8px 20px;
             border-radius: 999px;
-            box-shadow: 0 4px 16px rgba(57, 169, 0, 0.08);
-            margin-bottom: 22px;
-        }
-
-        .pulse-radar-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--sena-green);
-            box-shadow: 0 0 0 0 rgba(57, 169, 0, 0.7);
-            animation: radarPulseDot 2.2s infinite;
-        }
-
-        @keyframes radarPulseDot {
-            0% { box-shadow: 0 0 0 0 rgba(57, 169, 0, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(57, 169, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(57, 169, 0, 0); }
-        }
-
-        /* Gran Título Centrado */
-        .hero-title-big {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: clamp(2.3rem, 5.2vw, 4rem);
-            font-weight: 800;
-            line-height: 1.12;
-            letter-spacing: -0.04em;
-            color: var(--sena-navy);
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .text-gradient-sena {
-            background: linear-gradient(135deg, var(--sena-dark) 0%, var(--sena-green) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
-        }
-
-        /* Subtítulo y Descripción Centrados */
-        .hero-subtitle-lead {
-            font-size: clamp(1rem, 2.1vw, 1.2rem);
-            font-weight: 700;
-            color: var(--sena-dark);
-            max-width: 760px;
-            margin: 0 auto 12px;
-            line-height: 1.45;
-            text-align: center;
-        }
-
-        .hero-description-lead {
-            font-size: clamp(0.9rem, 1.8vw, 1.02rem);
-            color: var(--sena-muted);
-            max-width: 720px;
-            margin: 0 auto 32px;
-            line-height: 1.6;
-            text-align: center;
-        }
-
-        /* PORTAL DE ACCESO DIRECTO INNOVADOR (SELECCIÓN POR ROL) */
-        .portal-entry-card {
-            width: 100%;
-            max-width: 860px;
-            background: #FFFFFF;
-            border: 1px solid var(--sena-border);
-            border-radius: 26px;
-            padding: clamp(22px, 3.5vw, 32px);
-            margin: 0 auto 36px;
-            box-shadow: 0 18px 45px rgba(0, 34, 51, 0.06);
-            text-align: center;
-        }
-
-        .portal-entry-title {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--sena-navy);
-            margin-bottom: 6px;
-        }
-
-        .portal-entry-sub {
-            font-size: 0.86rem;
-            color: var(--sena-muted);
-            margin-bottom: 22px;
-        }
-
-        .roles-portal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-            gap: 16px;
-        }
-
-        .role-access-item {
-            background: #F9FCF9;
-            border: 1.5px solid rgba(57, 169, 0, 0.2);
-            border-radius: 18px;
-            padding: 18px 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .role-access-item:hover {
-            background: #FFFFFF;
-            border-color: var(--sena-green);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 28px rgba(57, 169, 0, 0.15);
-            color: inherit;
-        }
-
-        .role-access-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            display: grid;
-            place-items: center;
-            font-size: 1.6rem;
-            margin-bottom: 12px;
-            transition: all 0.25s ease;
-        }
-
-        .role-aprendiz .role-access-icon { background: rgba(57, 169, 0, 0.12); color: var(--sena-dark); }
-        .role-instructor .role-access-icon { background: rgba(0, 101, 255, 0.12); color: #0065FF; }
-        .role-coordinacion .role-access-icon { background: rgba(222, 53, 11, 0.12); color: #DE350B; }
-
-        .role-access-item:hover .role-access-icon {
-            transform: scale(1.08);
-        }
-
-        .role-access-title {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1rem;
-            font-weight: 800;
-            color: var(--sena-navy);
-            margin-bottom: 4px;
-        }
-
-        .role-access-desc {
-            font-size: 0.78rem;
-            color: var(--sena-muted);
-            line-height: 1.35;
-            margin-bottom: 14px;
-            flex-grow: 1;
-        }
-
-        .role-access-btn {
-            width: 100%;
-            padding: 8px 14px;
-            border-radius: 12px;
             font-size: 0.82rem;
             font-weight: 700;
+            color: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .badge-institution i {
+            color: var(--primary-light);
+            font-size: 1rem;
+        }
+
+        .hero-headline {
+            font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: -0.035em;
+            color: var(--primary-dark);
+            max-width: 920px;
+            margin: 0 auto 18px;
+        }
+
+        .hero-headline .gradient-accent {
+            background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subhead {
+            font-size: clamp(1.05rem, 2vw, 1.2rem);
+            font-weight: 500;
+            color: #475569;
+            max-width: 760px;
+            margin: 0 auto 36px;
+            line-height: 1.6;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 50px;
+        }
+
+        .btn-cta-main {
+            background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+            color: #FFFFFF !important;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 24px -4px rgba(37, 99, 235, 0.35);
+            transition: all 0.2s ease;
             border: none;
+        }
+
+        .btn-cta-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.45);
+        }
+
+        .btn-cta-secondary {
+            background: #FFFFFF;
+            color: var(--primary-dark) !important;
+            border: 1px solid var(--border-color);
+            padding: 14px 26px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .btn-cta-secondary:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+            transform: translateY(-2px);
+        }
+
+        /* 3 Portals Grid */
+        .portal-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+            text-align: left;
+        }
+
+        .portal-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 32px 28px;
+            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.12);
+            border-color: #BFDBFE;
+        }
+
+        .portal-card-badge {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+        }
+
+        .portal-card.estudiantes .portal-card-badge {
+            background: #EFF6FF;
+            color: #2563EB;
+        }
+
+        .portal-card.docentes .portal-card-badge {
+            background: #EEF2FF;
+            color: #4F46E5;
+        }
+
+        .portal-card.rectoria .portal-card-badge {
+            background: #F0FDF4;
+            color: #16A34A;
+        }
+
+        .portal-card h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+
+        .portal-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .portal-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 24px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .portal-card ul li {
+            font-size: 0.84rem;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .portal-card ul li i {
+            color: #10B981;
+            font-size: 0.95rem;
+        }
+
+        .portal-card-link {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            transition: all 0.2s;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
         }
 
-        .role-aprendiz .role-access-btn { background: var(--sena-green); color: #ffffff; }
-        .role-instructor .role-access-btn { background: #0065FF; color: #ffffff; }
-        .role-coordinacion .role-access-btn { background: var(--sena-navy); color: #ffffff; }
+        .portal-card.estudiantes .portal-card-link {
+            background: #EFF6FF;
+            color: #1D4ED8;
+            border: 1px solid #BFDBFE;
+        }
+        .portal-card.estudiantes .portal-card-link:hover {
+            background: #DBEAFE;
+        }
 
-        /* 3. TERMINAL DE ASISTENCIA QR DIARIA */
+        .portal-card.docentes .portal-card-link {
+            background: #EEF2FF;
+            color: #4338CA;
+            border: 1px solid #C7D2FE;
+        }
+        .portal-card.docentes .portal-card-link:hover {
+            background: #E0E7FF;
+        }
+
+        .portal-card.rectoria .portal-card-link {
+            background: #F0FDF4;
+            color: #15803D;
+            border: 1px solid #BBF7D0;
+        }
+        .portal-card.rectoria .portal-card-link:hover {
+            background: #DCFCE7;
+        }
+
+        /* Attendance Terminal Card */
         .attendance-terminal-box {
             width: 100%;
-            max-width: 860px;
             background: #FFFFFF;
-            border: 2px solid var(--sena-green);
-            border-radius: 26px;
-            padding: clamp(22px, 3.5vw, 34px);
-            margin: 0 auto 36px;
-            box-shadow: 0 20px 50px rgba(57, 169, 0, 0.1), 0 0 0 5px rgba(57, 169, 0, 0.04);
+            border: 1px solid #C7D2FE;
+            border-radius: 24px;
+            padding: 36px 32px;
+            box-shadow: 0 16px 40px -10px rgba(30, 58, 138, 0.08);
+            margin-bottom: 48px;
             text-align: center;
         }
 
-        .terminal-badge {
+        .terminal-tag {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(57, 169, 0, 0.1);
-            color: var(--sena-dark);
-            font-size: 0.74rem;
+            background: #EEF2FF;
+            color: var(--primary);
+            font-size: 0.76rem;
             font-weight: 800;
             letter-spacing: 0.06em;
             text-transform: uppercase;
             padding: 6px 16px;
             border-radius: 999px;
-            margin-bottom: 14px;
-        }
-
-        .btn-cam-trigger {
-            background: linear-gradient(135deg, var(--sena-navy) 0%, var(--sena-dark) 100%);
-            color: #ffffff !important;
-            font-weight: 800;
-            padding: 15px 34px;
-            border-radius: 999px;
-            font-size: 1.02rem;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 10px 24px rgba(0, 34, 51, 0.2);
-            transition: all 0.22s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-cam-trigger:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 14px 32px rgba(0, 34, 51, 0.3);
+            margin-bottom: 12px;
         }
 
         .quick-doc-row {
-            max-width: 520px;
+            max-width: 500px;
             margin: 20px auto 0;
             display: flex;
             gap: 8px;
         }
 
         .quick-doc-field {
-            background: #F4F8F4;
-            border: 1px solid var(--sena-border);
-            border-radius: 14px;
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             padding: 12px 18px;
             font-size: 0.95rem;
             flex-grow: 1;
-            text-align: center;
+            outline: none;
+            transition: all 0.15s ease;
         }
 
         .quick-doc-field:focus {
-            border-color: var(--sena-green);
-            box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.15);
-            outline: none;
+            border-color: var(--primary-light);
             background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
         .quick-doc-btn-submit {
-            background: var(--sena-navy);
-            color: #ffffff;
+            background: var(--primary);
+            color: #FFFFFF;
             font-weight: 700;
-            border-radius: 14px;
-            padding: 12px 22px;
+            border-radius: 12px;
+            padding: 12px 24px;
             border: none;
-            transition: all 0.2s;
             cursor: pointer;
-            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
         }
 
         .quick-doc-btn-submit:hover {
-            background: #001724;
+            background: var(--primary-dark);
         }
 
-        /* 4. FRASE INSPIRADORA */
-        .quote-institutional-wrap {
-            width: 100%;
-            max-width: 860px;
-            background: linear-gradient(135deg, var(--sena-navy) 0%, #062316 100%);
-            color: #ffffff;
-            border-radius: 24px;
-            padding: 34px 24px;
-            margin: 0 auto 36px;
-            text-align: center;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-        }
-
-        .quote-lead-title {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: clamp(1.25rem, 2.4vw, 1.75rem);
-            font-weight: 700;
-            line-height: 1.35;
-            margin-bottom: 8px;
-        }
-
-        /* 5. FOOTER INSTITUCIONAL */
+        /* Footer */
         .sinetec-landing-footer {
             width: 100%;
             background: #FFFFFF;
-            border-top: 1px solid var(--sena-border);
-            padding: 26px 20px;
+            border-top: 1px solid var(--border-color);
+            padding: 32px 24px;
             text-align: center;
-            color: var(--sena-muted);
-            font-size: 0.85rem;
             margin-top: auto;
         }
 
-        /* 6. BARRA MÓVIL INFERIOR NATIVA (SOLO TELÉFONOS) */
+        .footer-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+
+        .footer-meta {
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Mobile Bottom Nav */
         .mobile-bottom-bar {
             display: none;
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(255, 255, 255, 0.94);
+            background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-top: 1px solid var(--sena-border);
+            border-top: 1px solid var(--border-color);
             padding: 8px 16px;
             z-index: 1040;
-            box-shadow: 0 -4px 20px rgba(0, 34, 51, 0.08);
+            box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
             justify-content: space-around;
             align-items: center;
         }
 
         @media (max-width: 768px) {
-            .mobile-bottom-bar {
-                display: flex;
-            }
+            .mobile-bottom-bar { display: flex; }
         }
 
         .mobile-nav-btn {
@@ -517,223 +558,199 @@
             gap: 2px;
             background: transparent;
             border: none;
-            color: var(--sena-muted);
+            color: var(--text-muted);
             font-size: 0.72rem;
             font-weight: 700;
             text-decoration: none;
-            padding: 4px 10px;
+            padding: 4px 8px;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .mobile-nav-btn i {
-            font-size: 1.25rem;
         }
 
         .mobile-nav-btn.active, .mobile-nav-btn:hover {
-            color: var(--sena-dark);
+            color: var(--primary);
         }
 
         .mobile-nav-qr-main {
-            background: linear-gradient(135deg, var(--sena-dark), var(--sena-green));
-            color: #ffffff !important;
-            width: 52px;
-            height: 52px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #FFFFFF !important;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: grid;
             place-items: center;
-            font-size: 1.5rem;
-            box-shadow: 0 6px 16px rgba(57, 169, 0, 0.35);
+            font-size: 1.4rem;
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
             margin-top: -24px;
-            border: 3px solid #ffffff;
+            border: 3px solid #FFFFFF;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .mobile-nav-qr-main:hover {
-            transform: scale(1.06);
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. BARRA SUPERIOR INSTITUCIONAL CENTRADA -->
+    <div class="ambient-glow-top"></div>
+    <div class="ambient-glow-bottom"></div>
+
+    <!-- 1. Header Navigation -->
     <header class="sinetec-landing-header">
         <div class="header-container">
-            <a href="{% url 'home' %}" class="brand-logo-wrap">
-                <div class="brand-icon-box">
-                    <i class="bi bi-grid-1x2-fill"></i>
+            <a href="{% url 'home' %}" class="brand-logo-wrap" title="SINETEC · Plataforma Escolar">
+                <div class="brand-logo-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
                 </div>
-                <div>
-                    <div class="brand-name">SINETEC</div>
-                    <div class="brand-sub">Media Técnica SENA · Magdalena</div>
+                <div class="brand-title-group">
+                    <span class="brand-name">SINETEC</span>
+                    <span class="brand-subtitle">{{ colegio.nombre|default:"Institución Educativa" }}</span>
                 </div>
             </a>
 
-            <div class="header-btns">
-                <button type="button" class="btn-top-qr" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
+            <div class="header-actions">
+                <button type="button" class="btn-action-qr" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
                     <i class="bi bi-qr-code-scan"></i> <span class="d-none d-sm-inline">Asistencia QR</span>
                 </button>
                 {% if user.is_authenticated %}
-                    <a href="{% url 'dashboard' %}" class="btn-top-auth">
-                        <i class="bi bi-person-check-fill"></i> <span class="d-none d-sm-inline">Mi Espacio</span>
+                    <a href="{% url 'dashboard' %}" class="btn-action-auth">
+                        <i class="bi bi-speedometer2"></i> <span>Mi Panel</span>
                     </a>
                 {% else %}
-                    <button type="button" class="btn-top-auth" data-bs-toggle="modal" data-bs-target="#loginModal">
-                        <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-                    </button>
+                    <a href="{% url 'login' %}" class="btn-action-auth">
+                        <i class="bi bi-box-arrow-in-right"></i> <span>Iniciar Sesión</span>
+                    </a>
                 {% endif %}
             </div>
         </div>
     </header>
 
-    <!-- 2. CONTENIDO HERO 100% CENTRADO -->
-    <main class="landing-main-center">
-
-        <!-- Insignia Institucional Centrada -->
-        <div class="institutional-pill">
-            <span class="pulse-radar-dot"></span>
-            SENA · Regional Magdalena · Centro de Logística y Promoción Ecoturística
+    <!-- 2. Main Hero Section -->
+    <main class="landing-main">
+        <div class="badge-institution">
+            <i class="bi bi-shield-check"></i>
+            <span>{{ colegio.nombre|default:"Institución Educativa Técnica" }} · Sede Principal</span>
         </div>
 
-        <!-- Título Principal Centrado -->
-        <h1 class="hero-title-big">
-            Una ficha. Una ruta. <br>
-            <span class="text-gradient-sena">Un futuro.</span>
+        <h1 class="hero-headline">
+            Gestión Escolar Inteligente,<br>
+            <span class="gradient-accent">Ágil y Conectada</span>
         </h1>
 
-        <!-- Subtítulo Institucional -->
-        <div class="hero-subtitle-lead">
-            SINETEC — Sistema de Información para el Seguimiento del Proceso de Integración con la Media Técnica
-        </div>
-
-        <!-- Descripción Oficial -->
-        <p class="hero-description-lead">
-            Un espacio digital institucional para acompañar, organizar y visualizar cada etapa del proceso formativo de nuestros aprendices, vinculando el rigor pedagógico del SENA con el futuro técnico y laboral.
+        <p class="hero-subhead">
+            Administración integral de matrículas, seguimiento por competencias con semáforo institucional, control de asistencia en tiempo real y comunicación continua con las familias.
         </p>
 
-        <!-- PORTAL INNOVADOR DE ENTRADA (CÓMO ENTRAN TODOS SEGÚN SU ROL) -->
-        <div class="portal-entry-card">
-            <h2 class="portal-entry-title">
-                <i class="bi bi-door-open-fill text-success me-1"></i> Portal de Acceso a la Formación
-            </h2>
-            <p class="portal-entry-sub">
-                Selecciona tu perfil o ingresa con tus credenciales oficiales del SENA
-            </p>
+        <div class="hero-cta-group">
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn-cta-main">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Acceder al Panel Administrativo</span>
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-cta-main">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Ingresar al Sistema</span>
+                </a>
+            {% endif %}
+            <button type="button" class="btn-cta-secondary" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
+                <i class="bi bi-camera"></i>
+                <span>Registrar Asistencia QR</span>
+            </button>
+        </div>
 
-            <div class="roles-portal-grid">
-                
-                <!-- Acceso Aprendiz -->
-                <div class="role-access-item role-aprendiz" data-bs-toggle="modal" data-bs-target="#loginModal" data-rol="aprendiz">
-                    <div class="role-access-icon">
-                        <i class="bi bi-mortarboard-fill"></i>
-                    </div>
-                    <div class="role-access-title">Aprendiz SENA</div>
-                    <div class="role-access-desc">
-                        Mi espacio formativo, portafolio de evidencias y carné digital QR.
-                    </div>
-                    <button type="button" class="role-access-btn">
-                        <i class="bi bi-box-arrow-in-right"></i> Entrar Aprendiz
-                    </button>
+        <!-- 3 Portals Cards Grid -->
+        <div class="portal-grid">
+            <!-- Portal Estudiante y Familia -->
+            <div class="portal-card estudiantes">
+                <div class="portal-card-badge">
+                    <i class="bi bi-people-fill"></i>
                 </div>
+                <h3>Estudiantes y Familias</h3>
+                <p>Consulta el rendimiento académico, seguimiento de competencias en semáforo y carnet estudiantil digital.</p>
+                <ul>
+                    <li><i class="bi bi-check-circle-fill"></i> Semáforo de Desempeño (🟢 🟡 🔴)</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Carnet Escolar con código QR</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Historial de asistencias</li>
+                </ul>
+                <a href="{% url 'login' %}" class="portal-card-link">
+                    <span>Acceso Estudiantes / Familias</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
 
-                <!-- Acceso Instructor -->
-                <div class="role-access-item role-instructor" data-bs-toggle="modal" data-bs-target="#loginModal" data-rol="instructor">
-                    <div class="role-access-icon">
-                        <i class="bi bi-person-workspace"></i>
-                    </div>
-                    <div class="role-access-title">Instructor Técnico</div>
-                    <div class="role-access-desc">
-                        Aula docente, control de asistencias diarias y calificación de RAPs.
-                    </div>
-                    <button type="button" class="role-access-btn">
-                        <i class="bi bi-box-arrow-in-right"></i> Entrar Instructor
-                    </button>
+            <!-- Portal Docente -->
+            <div class="portal-card docentes">
+                <div class="portal-card-badge">
+                    <i class="bi bi-person-workspace"></i>
                 </div>
+                <h3>Cuerpo Docente</h3>
+                <p>Pase de lista diario, calificación cualitativa por competencias y registro de observaciones del estudiante.</p>
+                <ul>
+                    <li><i class="bi bi-check-circle-fill"></i> Control de asistencia rápido</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Registro de competencias RAP</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Observador escolar del alumno</li>
+                </ul>
+                <a href="{% url 'login' %}" class="portal-card-link">
+                    <span>Acceso Docentes</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
 
-                <!-- Acceso Coordinador / Secretaría -->
-                <div class="role-access-item role-coordinacion" data-bs-toggle="modal" data-bs-target="#loginModal" data-rol="coordinador">
-                    <div class="role-access-icon">
-                        <i class="bi bi-shield-check"></i>
-                    </div>
-                    <div class="role-access-title">Coordinación / Secretaría</div>
-                    <div class="role-access-desc">
-                        Supervisión de fichas, alertas tempranas y expedición de reportes.
-                    </div>
-                    <button type="button" class="role-access-btn">
-                        <i class="bi bi-box-arrow-in-right"></i> Entrar Coordinación
-                    </button>
+            <!-- Gestión y Rectoría -->
+            <div class="portal-card rectoria">
+                <div class="portal-card-badge">
+                    <i class="bi bi-award-fill"></i>
                 </div>
-
+                <h3>Rectoría y Secretaría</h3>
+                <p>Matrícula institucional en 5 pasos, gestión de cupos, reportes consolidados en Excel/PDF y circulares.</p>
+                <ul>
+                    <li><i class="bi bi-check-circle-fill"></i> Proceso de matrícula guiado</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Estadísticas y alertas escolares</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Expedición de certificados</li>
+                </ul>
+                <a href="{% url 'login' %}" class="portal-card-link">
+                    <span>Acceso Administrativo</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
         </div>
 
-        <!-- 3. TERMINAL OFICIAL DE REGISTRO DE ASISTENCIA QR (CENTRADA) -->
+        <!-- 4. Asistencia QR Terminal -->
         <div class="attendance-terminal-box">
-            <div class="terminal-badge">
-                <i class="bi bi-patch-check-fill text-success"></i> Punto Digital de Registro Diario · Base de Datos Oficial
-            </div>
-            <h2 class="h4 fw-bold text-dark mb-2">Control de Asistencia Formativa</h2>
-            <p class="text-muted small mb-4" style="max-width: 600px; margin: 0 auto;">
-                Apunta la cámara de tu celular al código QR del carnet digital para registrar la asistencia de hoy como <strong>PRESENTE</strong> de manera inmediata.
+            <span class="terminal-tag">
+                <i class="bi bi-patch-check-fill"></i> Punto Digital de Registro Diario
+            </span>
+            <h2 class="h4 fw-bold text-dark mb-2">Control de Asistencia Escolar</h2>
+            <p class="text-muted small mb-4" style="max-width: 580px; margin: 0 auto;">
+                Apunta la cámara al carnet escolar digital para registrar la asistencia inmediatamente como <strong>PRESENTE</strong> en la base de datos institucional.
             </p>
 
-            <!-- Botón de Apertura de Cámara -->
-            <div>
-                <button type="button" class="btn-cam-trigger" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
-                    <i class="bi bi-camera-fill"></i> Abrir Cámara para Escanear
-                </button>
-            </div>
+            <button type="button" class="btn btn-primary fw-bold px-4 py-3 rounded-pill shadow-sm" style="background: linear-gradient(135deg, #1E3A8A, #2563EB); border: none;" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
+                <i class="bi bi-camera-fill me-2"></i> Abrir Cámara para Escaneo QR
+            </button>
 
-            <!-- Registro Manual Rápido por Documento -->
+            <!-- Manual document registration -->
             <div class="quick-doc-row">
-                <input type="text" id="landingDocInput" class="quick-doc-field" placeholder="O digita tu número de documento..." autocomplete="off">
+                <input type="text" id="landingDocInput" class="quick-doc-field" placeholder="O digita el número de documento escolar..." autocomplete="off">
                 <button id="btnLandingDocCheck" class="quick-doc-btn-submit" type="button">
-                    <i class="bi bi-check-circle-fill me-1"></i> Registrar
+                    <i class="bi bi-check-circle-fill"></i> Registrar
                 </button>
             </div>
             
-            <!-- Mensaje de Confirmación / Error -->
             <div id="landingDocFeedback" class="mt-3 small" style="display:none;"></div>
         </div>
-
-        <!-- 4. FRASE INSPIRADORA -->
-        <div class="quote-institutional-wrap">
-            <div class="quote-lead-title">
-                "Cada paso de tu formación construye el camino hacia tu futuro."
-            </div>
-            <div class="small text-uppercase fw-bold text-white-50 letter-spacing-2">
-                SINETEC · Formación Profesional Integral SENA
-            </div>
-        </div>
-
-        <!-- Bienvenida Contextual si el usuario ya inició sesión -->
-        {% if user.is_authenticated and usuario_resumen %}
-            <div class="d-inline-flex align-items-center gap-3 p-3 bg-white rounded-pill border shadow-sm mb-4">
-                <span class="badge bg-success text-white fw-bold px-3 py-1 rounded-pill">{{ usuario_resumen.rol }}</span>
-                <span class="text-dark fw-bold small">¡Hola, {{ usuario_resumen.nombre }}!</span>
-                <a href="{{ usuario_resumen.url_accion }}" class="btn btn-dark btn-sm rounded-pill px-3 fw-bold">
-                    Ir a Mi Espacio <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        {% endif %}
-
     </main>
 
-    <!-- 5. PIE DE PÁGINA INSTITUCIONAL CENTRADO -->
+    <!-- 5. Footer -->
     <footer class="sinetec-landing-footer">
-        <div class="mb-2 fw-bold text-dark">
-            <i class="bi bi-grid-1x2-fill text-success me-1"></i> SINETEC — Media Técnica SENA
+        <div class="footer-brand">
+            <i class="bi bi-mortarboard-fill text-primary"></i>
+            <span>SINETEC · {{ colegio.nombre|default:"Institución Educativa Técnica" }}</span>
         </div>
-        <div class="small text-muted mb-2">
-            Regional Magdalena · Centro de Logística y Promoción Ecoturística · Ficha 3173430 (ADSI)
-        </div>
-        <div class="small text-muted">
-            &copy; 2026 SINETEC. Plataforma de articulación formativa para la educación media técnica.
+        <div class="footer-meta">
+            Código DANE: {{ colegio.codigo_dane|default:"147189000123" }} · Rector: {{ colegio.rector|default:"Rectoría General" }}<br>
+            Plataforma Administrativa Escolar · &copy; 2026 SINETEC. Todos los derechos reservados.
         </div>
     </footer>
 
-    <!-- 6. BARRA DE NAVEGACIÓN INFERIOR NATIVA PARA CELULAR -->
+    <!-- 6. Mobile Bottom Bar -->
     <nav class="mobile-bottom-bar">
         <a href="{% url 'home' %}" class="mobile-nav-btn active">
             <i class="bi bi-house-door-fill"></i>
@@ -746,92 +763,33 @@
 
         {% if user.is_authenticated %}
             <a href="{% url 'dashboard' %}" class="mobile-nav-btn">
-                <i class="bi bi-person-check-fill"></i>
-                <span>Mi Panel</span>
+                <i class="bi bi-speedometer2"></i>
+                <span>Panel</span>
             </a>
         {% else %}
-            <button type="button" class="mobile-nav-btn" data-bs-toggle="modal" data-bs-target="#loginModal">
+            <a href="{% url 'login' %}" class="mobile-nav-btn">
                 <i class="bi bi-box-arrow-in-right"></i>
-                <span>Acceder</span>
-            </button>
+                <span>Ingresar</span>
+            </a>
         {% endif %}
     </nav>
 
-    <!-- ====================================================================
-         MODAL DE INICIO DE SESIÓN INTEGRADO (INNOVADOR Y RÁPIDO)
-         ==================================================================== -->
-    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-                <div class="modal-header border-0 bg-dark text-white py-3 px-4">
-                    <h5 class="modal-title fs-6 fw-bold d-flex align-items-center gap-2" id="loginModalLabel">
-                        <i class="bi bi-shield-lock-fill text-success"></i> Acceso Seguro a SINETEC
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 bg-white">
-                    <p class="small text-muted mb-3 text-center">
-                        Ingresa con tu usuario (o documento) y contraseña asignada para acceder a tu rol.
-                    </p>
-
-                    <form method="post" action="{% url 'login' %}">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark">Usuario o Documento</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-person text-muted"></i></span>
-                                <input type="text" name="username" class="form-control" placeholder="Ej. 1083400001 o usuario" required autofocus>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark">Contraseña</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
-                                <input type="password" id="modalPasswordInput" name="password" class="form-control" placeholder="••••••••" required>
-                                <button class="btn btn-outline-secondary" type="button" onclick="const p = document.getElementById('modalPasswordInput'); p.type = p.type === 'password' ? 'text' : 'password';">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-success fw-bold py-2 rounded-pill shadow-sm" style="background-color: #39A900; border-color: #39A900;">
-                                Iniciar Sesión <i class="bi bi-arrow-right ms-1"></i>
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="text-center mt-3 pt-3 border-top">
-                        <small class="text-muted">¿Necesitas soporte con tus credenciales?</small><br>
-                        <small class="text-success fw-bold">Comunícate con la coordinación de tu IED o sede SENA.</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====================================================================
-         MODAL DE ESCÁNER QR EN VIVO (CÁMARA DEL CELULAR O COMPUTADOR)
-         ==================================================================== -->
+    <!-- Modal Escáner QR en vivo -->
     <div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
                 <div class="modal-header border-0 bg-dark text-white py-3 px-4">
                     <h5 class="modal-title fs-6 fw-bold d-flex align-items-center gap-2" id="qrScannerModalLabel">
-                        <i class="bi bi-qr-code-scan text-success"></i> Escáner de Carnet Digital QR
+                        <i class="bi bi-qr-code-scan text-primary"></i> Escáner de Carnet Escolar QR
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="btnCloseScannerModal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar" id="btnCloseScannerModal"></button>
                 </div>
                 <div class="modal-body p-4 text-center bg-light">
                     <p class="small text-muted mb-3">
-                        Coloca el código QR de tu carné digital frente al lente. El sistema registrará tu asistencia automáticamente en la base de datos oficial.
+                        Coloca el código QR del carnet escolar frente al lente para registrar la asistencia automáticamente.
                     </p>
                     
-                    <!-- Contenedor del visor de cámara -->
                     <div id="qrReaderView" class="mx-auto border rounded-3 overflow-hidden shadow-sm bg-black" style="width: 100%; max-width: 360px; min-height: 280px;"></div>
-
-                    <!-- Mensaje de resultado en vivo en el modal -->
                     <div id="modalScanFeedback" class="mt-3 small" style="display: none;"></div>
                 </div>
                 <div class="modal-footer border-0 bg-white py-2 px-4 justify-content-between">
@@ -849,9 +807,9 @@
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Script de Registro de Asistencia (Manual y Cámara QR) -->
+    <!-- Scripts de Asistencia (Manual y Cámara QR) -->
     <script>
-        // 1. Registro Manual Rápido por Documento
+        // Registro Manual
         const btnDocCheck = document.getElementById('btnLandingDocCheck');
         const inputDoc = document.getElementById('landingDocInput');
         const feedback = document.getElementById('landingDocFeedback');
@@ -878,7 +836,7 @@
                 feedback.style.display = 'block';
                 if (data.success) {
                     feedback.className = 'mt-3 small text-success fw-bold p-3 bg-success bg-opacity-10 rounded-3 border border-success';
-                    feedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${data.mensaje}<br><span class="text-dark"><strong>${data.aprendiz}</strong> (Doc: ${data.documento}) · Ficha: ${data.ficha} · Hora: ${data.hora}</span>`;
+                    feedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${data.mensaje}<br><span class="text-dark"><strong>${data.aprendiz}</strong> (Doc: ${data.documento}) · Grado/Curso: ${data.ficha} · Hora: ${data.hora}</span>`;
                     inputDoc.value = '';
                 } else {
                     feedback.className = 'mt-3 small text-danger fw-bold p-3 bg-danger bg-opacity-10 rounded-3 border border-danger';
@@ -904,7 +862,7 @@
             });
         }
 
-        // 2. Escáner de Cámara QR en Vivo
+        // Escáner QR
         let html5QrCode = null;
         const qrModalEl = document.getElementById('qrScannerModal');
         const modalFeedback = document.getElementById('modalScanFeedback');
@@ -928,12 +886,12 @@
 
                 if (data.success) {
                     modalFeedback.className = 'mt-3 small text-success fw-bold p-3 bg-success bg-opacity-10 rounded border border-success';
-                    modalFeedback.innerHTML = `<i class="bi bi-check-circle-fill fs-5 d-block text-success mb-1"></i> ¡Asistencia Registrada!<br><strong>${data.aprendiz}</strong><br>Ficha: ${data.ficha} · Hora: ${data.hora}`;
+                    modalFeedback.innerHTML = `<i class="bi bi-check-circle-fill fs-5 d-block text-success mb-1"></i> ¡Asistencia Registrada!<br><strong>${data.aprendiz}</strong><br>Grado/Curso: ${data.ficha} · Hora: ${data.hora}`;
                     
                     if (feedback) {
                         feedback.style.display = 'block';
                         feedback.className = 'mt-3 small text-success fw-bold p-3 bg-success bg-opacity-10 rounded-3 border border-success';
-                        feedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Asistencia confirmada: <strong>${data.aprendiz}</strong> (Ficha: ${data.ficha})`;
+                        feedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Asistencia confirmada: <strong>${data.aprendiz}</strong>`;
                     }
                 } else {
                     modalFeedback.className = 'mt-3 small text-danger fw-bold p-3 bg-danger bg-opacity-10 rounded border border-danger';
@@ -962,7 +920,7 @@
                         console.warn("Error al iniciar cámara:", err);
                         modalFeedback.style.display = 'block';
                         modalFeedback.className = 'mt-3 small text-danger p-2 bg-danger bg-opacity-10 rounded';
-                        modalFeedback.innerHTML = '<i class="bi bi-camera-video-off me-1"></i> No se pudo activar la cámara. Verifica permisos o digita tu documento abajo.';
+                        modalFeedback.innerHTML = '<i class="bi bi-camera-video-off me-1"></i> No se pudo activar la cámara. Digita tu documento abajo.';
                     });
             });
 

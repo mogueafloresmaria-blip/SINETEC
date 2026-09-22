@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} · Convenios SENA{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-3">
+
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item"><a href="{% url 'convenios_catalogo' %}" class="text-decoration-none" style="color: #2196F3;">Catálogo de Convenios</a></li>
+            {% if institucion %}
+                <li class="breadcrumb-item"><a href="{% url 'institucion_convenio_detalle' institucion.pk %}" class="text-decoration-none" style="color: #2196F3;">{{ institucion.nombre }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ titulo }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-8">
+            <div class="sinetec-card-modern border-0 shadow-sm bg-white overflow-hidden">
+                <div class="p-4 border-bottom d-flex align-items-center justify-content-between" style="background: #F8FAFC;">
+                    <div>
+                        <div class="badge rounded-pill mb-1" style="background: #E3F2FD; color: #0D47A1;">Convenio SENA</div>
+                        <h1 class="h4 fw-bold text-dark mb-0">{{ titulo }}</h1>
+                        {% if institucion %}
+                            <small class="text-muted"><i class="bi bi-building me-1"></i>{{ institucion.nombre }}</small>
+                        {% endif %}
+                    </div>
+                    <a href="{% if institucion %}{% url 'institucion_convenio_detalle' institucion.pk %}{% else %}{% url 'convenios_catalogo' %}{% endif %}" class="btn btn-sm btn-outline-secondary rounded-3">
+                        <i class="bi bi-x-lg me-1"></i>Cancelar
+                    </a>
+                </div>
+
+                <form method="post" class="p-4">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger rounded-3 mb-4">
+                            <i class="bi bi-exclamation-octagon-fill me-2"></i>Por favor corrige los errores señalados en el formulario.
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Institución Educativa Asociada <span class="text-danger">*</span></label>
+                            {{ form.institucion }}
+                            {% if form.institucion.errors %}<div class="text-danger small mt-1">{{ form.institucion.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-5">
+                            <label class="form-label fw-semibold small">Número / Código del Convenio <span class="text-danger">*</span></label>
+                            {{ form.numero_convenio }}
+                            {% if form.numero_convenio.errors %}<div class="text-danger small mt-1">{{ form.numero_convenio.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-7">
+                            <label class="form-label fw-semibold small">Tipo de Convenio <span class="text-danger">*</span></label>
+                            {{ form.tipo_convenio }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Nombre Descriptivo del Convenio <span class="text-danger">*</span></label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}<div class="text-danger small mt-1">{{ form.nombre.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold small">Fecha de Inicio <span class="text-danger">*</span></label>
+                            {{ form.fecha_inicio }}
+                            {% if form.fecha_inicio.errors %}<div class="text-danger small mt-1">{{ form.fecha_inicio.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold small">Fecha de Finalización <span class="text-danger">*</span></label>
+                            {{ form.fecha_fin }}
+                            {% if form.fecha_fin.errors %}<div class="text-danger small mt-1">{{ form.fecha_fin.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-8">
+                            <label class="form-label fw-semibold small">Responsable SENA / Enlace <span class="text-danger">*</span></label>
+                            {{ form.responsable }}
+                            {% if form.responsable.errors %}<div class="text-danger small mt-1">{{ form.responsable.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold small">Estado Forzado (Opcional)</label>
+                            {{ form.estado_manual }}
+                            <small class="text-muted" style="font-size: 0.72rem;">Déjalo vacío para cálculo automático (Activo/Próximo/Vencido).</small>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Objetivo del Convenio</label>
+                            {{ form.objetivo }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Descripción y Alcance</label>
+                            {{ form.descripcion }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Observaciones Adicionales</label>
+                            {{ form.observaciones }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-4 border-top mt-4">
+                        <a href="{% if institucion %}{% url 'institucion_convenio_detalle' institucion.pk %}{% else %}{% url 'convenios_catalogo' %}{% endif %}" class="btn btn-light px-4 rounded-3 fw-semibold">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn text-white px-4 rounded-3 fw-semibold shadow-sm" style="background-color: #2196F3;">
+                            <i class="bi bi-check-lg me-1"></i>{{ boton_texto }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

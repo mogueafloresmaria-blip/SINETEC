@@ -2,12 +2,22 @@
 
 {% block title %}Control de Asistencia - SINETEC{% endblock %}
 
+{% block extra_css %}
+<style>
+    .row-highlight-scanned {
+        background-color: rgba(57, 169, 0, 0.15) !important;
+        transition: background-color 0.5s ease;
+    }
+</style>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
     <div>
         <div class="sinetec-eyebrow mb-1">Operación diaria</div>
         <h1 class="sinetec-page-title h3 mb-1">Control de Asistencia Diaria</h1>
-        <p class="text-muted small mb-0">Marque rápidamente el estado de cada aprendiz de la ficha seleccionada.</p>
+        <p class="text-muted small mb-0">Registro y supervisión en tiempo real de la asistencia de aprendices por ficha.</p>
     </div>
     <a href="{% url 'seguimiento_lista' %}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i> Volver a Seguimiento
@@ -43,12 +53,23 @@
     <form method="post">
         {% csrf_token %}
         <div class="sinetec-card">
-            <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <span class="badge bg-primary">Ficha {{ ficha.codigo_ficha }}</span>
                     <h2 class="h5 fw-bold mt-2 mb-1">{{ ficha.institucion.nombre }}</h2>
                     <p class="text-muted small mb-0">{{ fecha|date:'l, d \d\e F \d\e Y' }}</p>
                 </div>
+
+                <!-- Botones de Control QR en Aula -->
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="{% url 'seguimiento_qr_sesion' ficha.pk %}" target="_blank" class="btn btn-outline-success btn-sm rounded-pill fw-bold px-3">
+                        <i class="bi bi-qr-code-scan me-1"></i> Proyectar QR de Clase
+                    </a>
+                    <button type="button" class="btn btn-success btn-sm rounded-pill fw-bold px-3" data-bs-toggle="modal" data-bs-target="#modalEscanearAula" style="background-color: #29AAE3; border-color: #29AAE3;">
+                        <i class="bi bi-camera-fill me-1"></i> Escanear Carnets
+                    </button>
+                </div>
+
                 <div class="d-flex gap-2 small">
                     <span class="badge bg-success bg-opacity-10 text-success" id="total-presentes">0 presentes</span>
                     <span class="badge bg-danger bg-opacity-10 text-danger" id="total-ausentes">0 inasistencias</span>
@@ -57,22 +78,32 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-sinetec table-hover align-middle mb-0">
+                <table class="table table-sinetec table-hover align-middle mb-0" id="tablaAsistencia">
                     <thead>
                         <tr>
                             <th style="width: 55px">No.</th>
-                            <th>Aprendiz</th>
+                            <th>Estudiante</th>
                             <th>Documento</th>
+                            <th>Carnet Digital</th>
                             <th class="text-end">Estado de asistencia</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for fila in filas_asistencia %}
                             {% with matricula=fila.matricula estado=fila.estado %}
-                            <tr>
+                            <tr id="fila-aprendiz-{{ matricula.aprendiz.perfil.numero_documento }}" data-matricula-id="{{ matricula.pk }}" data-doc="{{ matricula.aprendiz.perfil.numero_documento }}">
                                 <td class="text-muted fw-bold">{{ forloop.counter }}</td>
                                 <td class="fw-semibold">{{ matricula.aprendiz.get_full_name|default:matricula.aprendiz.username }}</td>
                                 <td>{{ matricula.aprendiz.perfil.numero_documento }}</td>
+                                <td>
+                                    {% if matricula.aprendiz.perfil.pk %}
+                                        <a href="{% url 'carnet_digital_id' matricula.aprendiz.perfil.pk %}" target="_blank" class="btn btn-xs btn-outline-success rounded-pill px-2 py-0" style="font-size: 0.74rem;">
+                                            <i class="bi bi-qr-code me-1"></i> Ver Carné
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted small">-</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div class="d-flex justify-content-end gap-2 attendance-options">
                                         <input type="radio" class="btn-check attendance-input" name="asistencia_{{ matricula.pk }}" id="presente_{{ matricula.pk }}" value="P" {% if estado == 'P' or not estado %}checked{% endif %}>
@@ -86,7 +117,7 @@
                             </tr>
                             {% endwith %}
                         {% empty %}
-                            <tr><td colspan="4" class="text-center py-5 text-muted">No hay aprendices activos en esta ficha.</td></tr>
+                            <tr><td colspan="5" class="text-center py-5 text-muted">No hay aprendices activos en esta ficha.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -100,6 +131,34 @@
             {% endif %}
         </div>
     </form>
+
+    <!-- Modal de Escáner en Vivo para el Aula -->
+    <div class="modal fade" id="modalEscanearAula" tabindex="-1" aria-labelledby="modalEscanearAulaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header border-0 bg-dark text-white py-3 px-4">
+                    <h5 class="modal-title fs-6 fw-bold d-flex align-items-center gap-2" id="modalEscanearAulaLabel">
+                        <i class="bi bi-camera-video-fill text-success"></i> Escanear Carnets de Aula
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center bg-light">
+                    <p class="small text-muted mb-3">
+                        Apunta la cámara al carné digital del aprendiz. Al detectarlo, el sistema marcará <strong>Presente</strong> automáticamente en la tabla.
+                    </p>
+                    <div id="aulaReader" class="mx-auto border rounded-3 overflow-hidden shadow-sm bg-black" style="width: 100%; max-width: 340px; min-height: 260px;"></div>
+                    <div id="aulaFeedback" class="mt-3 small" style="display: none;"></div>
+                </div>
+                <div class="modal-footer border-0 bg-white py-2 px-4 justify-content-between">
+                    <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i> Rotación diaria activa</small>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">
+                        Cerrar Visor
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% else %}
     <div class="sinetec-card p-5 text-center text-muted">
         <i class="bi bi-clipboard-check fs-1 text-primary d-block mb-2"></i>
@@ -129,6 +188,99 @@
 
         inputs.forEach((input) => input.addEventListener('change', updateCounters));
         updateCounters();
+
+        // Control del Modal de Escaneo en Aula
+        let aulaQrScanner = null;
+        let isProcessing = false;
+        const modalAula = document.getElementById('modalEscanearAula');
+        const feedbackEl = document.getElementById('aulaFeedback');
+
+        function playBeepSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } catch(e) {}
+        }
+
+        async function onScanSuccess(decodedText) {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            feedbackEl.style.display = 'block';
+            feedbackEl.className = 'mt-3 small text-primary p-2 bg-primary bg-opacity-10 rounded border border-primary';
+            feedbackEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Verificando carnet...';
+
+            try {
+                const resp = await fetch("{% url 'api_registrar_asistencia_qr' %}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ raw_data: decodedText })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    playBeepSound();
+                    feedbackEl.className = 'mt-3 small text-success fw-bold p-3 bg-success bg-opacity-10 rounded border border-success';
+                    feedbackEl.innerHTML = `<i class="bi bi-check-circle-fill fs-5 d-block mb-1"></i> ¡Presente Registrado!<br><strong>${data.aprendiz}</strong> (Doc: ${data.documento})`;
+
+                    // Localizar y marcar en la tabla de la página
+                    const row = document.getElementById(`fila-aprendiz-${data.documento}`);
+                    if (row) {
+                        const matriculaId = row.getAttribute('data-matricula-id');
+                        const radioP = document.getElementById(`presente_${matriculaId}`);
+                        if (radioP) {
+                            radioP.checked = true;
+                            updateCounters();
+                        }
+                        row.classList.add('row-highlight-scanned');
+                        setTimeout(() => row.classList.remove('row-highlight-scanned'), 3000);
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                } else {
+                    feedbackEl.className = 'mt-3 small text-danger fw-bold p-3 bg-danger bg-opacity-10 rounded border border-danger';
+                    feedbackEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.mensaje}`;
+                }
+            } catch(e) {
+                feedbackEl.className = 'mt-3 small text-danger p-2 bg-danger bg-opacity-10 rounded';
+                feedbackEl.innerHTML = 'Error al comunicar con el servidor.';
+            }
+
+            setTimeout(() => {
+                isProcessing = false;
+            }, 2000);
+        }
+
+        if (modalAula) {
+            modalAula.addEventListener('shown.bs.modal', function() {
+                feedbackEl.style.display = 'none';
+                isProcessing = false;
+                if (!aulaQrScanner) {
+                    aulaQrScanner = new Html5Qrcode("aulaReader");
+                }
+                const config = { fps: 10, qrbox: { width: 230, height: 230 } };
+                aulaQrScanner.start({ facingMode: "environment" }, config, onScanSuccess)
+                    .catch(err => {
+                        feedbackEl.style.display = 'block';
+                        feedbackEl.className = 'mt-3 small text-danger p-2 bg-danger bg-opacity-10 rounded';
+                        feedbackEl.innerHTML = 'No se pudo activar la cámara. Verifique permisos.';
+                    });
+            });
+
+            modalAula.addEventListener('hidden.bs.modal', function() {
+                if (aulaQrScanner && aulaQrScanner.isScanning) {
+                    aulaQrScanner.stop().then(() => aulaQrScanner.clear()).catch(console.error);
+                }
+            });
+        }
     })();
 </script>
 {% endblock %}

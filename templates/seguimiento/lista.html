@@ -1,116 +1,337 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Seguimiento e Investigación Académica - SINETEC{% endblock %}
+{% block title %}Bitácoras de Seguimiento · SINETEC SENA{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">📋 Seguimiento e Investigación Académica SENA</h1>
-        <p class="text-muted small mb-0">Control riguroso de juicios Deficientes (D), inasistencias reglamentarias y compromisos formativos</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a href="{% url 'seguimiento_asistencia' %}" class="btn btn-success">
-            <i class="bi bi-check2-square me-1"></i> Control de Asistencia
-        </a>
-        <a href="{% url 'seguimiento_nuevo' %}" class="btn btn-sinetec-primary" style="background-color: #e91e63; border-color: #e91e63;">
-            <i class="bi bi-plus-lg me-1"></i> Registrar Nueva Novedad
-        </a>
-    </div>
-</div>
+<div class="container-fluid py-3">
 
-<!-- Filtros -->
-<div class="sinetec-card p-3 mb-4" style="background-color: #fff9fb; border-radius: 12px;">
-    <form method="get" class="row g-2 align-items-center">
-        <div class="col-md-9">
-            <select name="ficha" class="form-select">
-                <option value="">-- Filtrar por Ficha de Caracterización SENA --</option>
-                {% for f in fichas %}
-                    <option value="{{ f.id }}" {% if ficha_seleccionada == f.id|stringformat:"i" %}selected{% endif %}>
-                        Ficha {{ f.codigo_ficha }} — {{ f.programa.denominacion }}
-                    </option>
-                {% endfor %}
-            </select>
+    <!-- Encabezado Institucional SENA -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Articulación con la Media Técnica</span>
+                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-clipboard2-pulse text-success me-2"></i>Seguimiento y Acompañamiento a Fichas
+            </h1>
+            <p class="text-muted mb-0">Supervisión de compromisos formativos, acompañamiento pedagógico y bitácoras de visitas a colegios articulados.</p>
         </div>
-        <div class="col-md-3 d-flex gap-2">
-            <button type="submit" class="btn w-100 text-white fw-semibold" style="background-color: #4a2e35;">Filtrar</button>
-            {% if ficha_seleccionada %}
-                <a href="{% url 'seguimiento_lista' %}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
-            {% endif %}
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'seguimiento_asistencia' %}" class="btn btn-outline-secondary fw-semibold">
+                <i class="bi bi-calendar-check me-1"></i> Control de Asistencia
+            </a>
+            <a href="{% url 'seguimiento_nuevo' %}" class="btn text-white fw-semibold shadow-sm" style="background-color: #29AAE3;">
+                <i class="bi bi-plus-circle me-1"></i> + Registrar Seguimiento
+            </a>
         </div>
-    </form>
-</div>
+    </div>
 
-<!-- Tabla Detallada de Seguimiento e Investigación -->
-<div class="sinetec-card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead style="background-color: #f8ceec; color: #4a2e35;">
-                <tr>
-                    <th class="py-3 ps-3">Fecha / Ficha</th>
-                    <th class="py-3">Aprendiz / Destinatario</th>
-                    <th class="py-3">Instructor Responsable</th>
-                    <th class="py-3">Motivo de Investigación (Juicio D / Faltas)</th>
-                    <th class="py-3">Compromisos (RN-006)</th>
-                    <th class="py-3 text-end pe-3">Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for fila in seguimientos %}
-                    {% with b=fila.bitacora %}
+    <!-- Tarjetas de Métricas (4 KPIs) -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-primary h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Total Bitácoras</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_seguimientos }}</h3>
+                        <span class="text-primary small fw-semibold"><i class="bi bi-journal-check"></i> Registros de visita</span>
+                    </div>
+                    <div class="p-3 rounded-3 bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-clipboard2-data fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-warning h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Pendientes</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ seguimientos_pendientes }}</h3>
+                        <span class="text-warning small fw-semibold"><i class="bi bi-clock-history"></i> Por gestionar</span>
+                    </div>
+                    <div class="p-3 rounded-3 bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-hourglass-split fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-info h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">En Proceso</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ seguimientos_en_proceso }}</h3>
+                        <span class="text-info small fw-semibold"><i class="bi bi-arrow-repeat"></i> Con compromisos</span>
+                    </div>
+                    <div class="p-3 rounded-3 bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-gear-wide-connected fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4" style="border-color: #29AAE3 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold">Realizados</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ seguimientos_realizados }}</h3>
+                        <span class="text-success small fw-semibold"><i class="bi bi-check2-all"></i> Concluidos exitosamente</span>
+                    </div>
+                    <div class="p-3 rounded-3 bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-check-circle-fill fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros de Búsqueda Avanzados -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-secondary mb-1">
+                        <i class="bi bi-search me-1"></i> Búsqueda General:
+                    </label>
+                    <input type="text" name="q" value="{{ busqueda }}" class="form-control" placeholder="Ficha, colegio, instructor...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Institución:</label>
+                    <select name="institucion" class="form-select">
+                        <option value="">-- Todas --</option>
+                        {% for inst in instituciones %}
+                            <option value="{{ inst.id }}" {% if institucion_seleccionada == inst.id|stringformat:"s" %}selected{% endif %}>
+                                {{ inst.nombre|truncatechars:24 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Ficha:</label>
+                    <select name="ficha" class="form-select">
+                        <option value="">-- Todas --</option>
+                        {% for f in fichas %}
+                            <option value="{{ f.id }}" {% if ficha_seleccionada == f.id|stringformat:"s" %}selected{% endif %}>
+                                Ficha {{ f.codigo_ficha }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Instructor:</label>
+                    <select name="usuario" class="form-select">
+                        <option value="">-- Todos --</option>
+                        {% for inst in instructores %}
+                            <option value="{{ inst.id }}" {% if usuario_seleccionado == inst.id|stringformat:"s" %}selected{% endif %}>
+                                {{ inst.get_full_name|default:inst.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Estado:</label>
+                    <select name="estado" class="form-select">
+                        <option value="">-- Todos --</option>
+                        <option value="Pendiente" {% if estado_seleccionado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="En Proceso" {% if estado_seleccionado == 'En Proceso' %}selected{% endif %}>En Proceso</option>
+                        <option value="Realizado" {% if estado_seleccionado == 'Realizado' %}selected{% endif %}>Realizado</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn text-white fw-semibold w-100" style="background-color: #29AAE3;">
+                        <i class="bi bi-funnel-fill me-1"></i> Filtrar
+                    </button>
+                    {% if busqueda or institucion_seleccionada or ficha_seleccionada or usuario_seleccionado or estado_seleccionado or fecha_seleccionada %}
+                        <a href="{% url 'seguimiento_lista' %}" class="btn btn-outline-secondary" title="Limpiar filtros">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla Detallada de Seguimiento -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0">
+                <i class="bi bi-journal-text text-success me-2"></i>Historial de Bitácoras de Visita y Seguimiento
+            </h5>
+            <span class="badge bg-light text-muted border px-3 py-2">Registros encontrados: {{ total_registros }}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-uppercase small">
                     <tr>
-                        <td class="ps-3">
-                            <span class="fw-bold text-dark text-nowrap">{{ b.fecha_visita|date:"d/m/Y" }}</span><br>
-                            <small class="fw-semibold" style="color: #e91e63;">Ficha {{ b.ficha.codigo_ficha }}</small>
-                        </td>
-                        <td>
-                            {% if b.matricula %}
-                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">
-                                    <i class="bi bi-person-exclamation me-1"></i>{{ b.matricula.aprendiz.get_full_name|truncatechars:22 }}
-                                </span>
-                            {% else %}
-                                <span class="badge bg-secondary bg-opacity-10 text-secondary">
-                                    <i class="bi bi-people me-1"></i>Toda la Ficha
-                                </span>
-                            {% endif %}
-                        </td>
-                        <td>{{ b.instructor.get_full_name|default:b.instructor.username }}</td>
-                        <td>
-                            <!-- Indicador específico de investigación SENA -->
-                            <span class="badge bg-warning text-dark mb-1">Revisión Académica</span><br>
-                            <small class="text-muted">Seguimiento por bajo rendimiento o inasistencia.</small>
-                        </td>
-                        <td>
-                            {% if b.compromisos %}
-                                {% if fila.estado_compromiso == 'vencido' %}
-                                    <span class="badge bg-danger" title="Compromiso vencido">
-                                        <i class="bi bi-exclamation-octagon me-1"></i>Vencido: {{ b.fecha_verificacion|date:"d/m/Y" }}
+                        <th class="ps-4 py-3">Fecha / Ficha</th>
+                        <th class="py-3">Institución Educativa</th>
+                        <th class="py-3">Profesor Responsable</th>
+                        <th class="py-3">Destinatario</th>
+                        <th class="py-3">Observaciones / Compromisos</th>
+                        <th class="py-3 text-center">Estado</th>
+                        <th class="py-3 pe-4 text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fila in seguimientos %}
+                        {% with b=fila.bitacora %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-bold text-dark text-nowrap">{{ b.fecha_visita|date:"d/m/Y" }}</span>
+                                <a href="{% url 'fichas_detalle' b.ficha.id %}" class="d-block small text-success fw-semibold text-decoration-none">
+                                    Ficha {{ b.ficha.codigo_ficha }}
+                                </a>
+                                <span class="badge bg-light text-secondary border px-1" style="font-size: 0.7rem;">{{ b.get_tipo_seguimiento_display }}</span>
+                            </td>
+                            <td>
+                                <span class="small fw-semibold text-dark d-block">{{ b.ficha.institucion.nombre|truncatechars:30 }}</span>
+                                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ b.ficha.institucion.municipio }}</small>
+                            </td>
+                            <td>
+                                <span class="small text-dark fw-semibold">{{ b.instructor.get_full_name|default:b.instructor.username }}</span>
+                            </td>
+                            <td>
+                                {% if b.matricula %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
+                                        <i class="bi bi-person me-1"></i>{{ b.matricula.aprendiz.get_full_name|default:b.matricula.aprendiz.username|truncatechars:20 }}
                                     </span>
                                 {% else %}
-                                    <span class="badge bg-warning text-dark" title="Compromiso pendiente">
-                                        <i class="bi bi-clock me-1"></i>Pendiente: {{ b.fecha_verificacion|date:"d/m/Y" }}
+                                    <span class="badge bg-light text-secondary border px-2 py-1">
+                                        <i class="bi bi-people me-1"></i>Toda la cohorte
                                     </span>
                                 {% endif %}
-                            {% else %}
-                                <span class="text-muted small">Sin novedades críticas</span>
+                            </td>
+                            <td>
+                                <div class="small text-dark fw-semibold">{{ b.observaciones|truncatechars:45 }}</div>
+                                {% if b.compromisos %}
+                                    <small class="text-muted d-block"><i class="bi bi-check2-circle text-success me-1"></i>{{ b.compromisos|truncatechars:38 }}</small>
+                                    {% if b.fecha_verificacion %}
+                                        {% if fila.estado_compromiso == 'vencido' %}
+                                            <small class="text-danger fw-bold d-block">
+                                                <i class="bi bi-exclamation-octagon-fill me-1"></i>Vencido: {{ b.fecha_verificacion|date:"d/m/Y" }}
+                                            </small>
+                                        {% else %}
+                                            <small class="text-secondary d-block">
+                                                <i class="bi bi-calendar-event me-1"></i>Límite: {{ b.fecha_verificacion|date:"d/m/Y" }}
+                                            </small>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                                {% if b.archivo_adjunto %}
+                                    <small class="text-primary d-block"><i class="bi bi-paperclip me-1"></i>Evidencia adjunta</small>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if b.estado == 'Realizado' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                                        <i class="bi bi-check2-circle me-1"></i>Realizado
+                                    </span>
+                                {% elif b.estado == 'En Proceso' %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-50 px-2 py-1 text-dark">
+                                        <i class="bi bi-hourglass-split me-1"></i>En Proceso
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">
+                                        <i class="bi bi-clock me-1"></i>Pendiente
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i> Acciones
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                        <li><a class="dropdown-item py-2" href="{% url 'seguimiento_detalle' b.id %}"><i class="bi bi-eye text-primary me-2"></i> Ver Detalle Completo</a></li>
+                                        <li><a class="dropdown-item py-2" href="{% url 'seguimiento_editar' b.id %}"><i class="bi bi-pencil text-warning me-2"></i> Editar Bitácora</a></li>
+                                        <li><a class="dropdown-item py-2" href="{% url 'seguimiento_acta_pdf' b.id %}"><i class="bi bi-file-pdf text-danger me-2"></i> Descargar Acta (PDF)</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li class="dropdown-header small text-uppercase">Cambiar Estado</li>
+                                        {% if b.estado != 'Pendiente' %}
+                                            <li>
+                                                <form method="post" action="{% url 'cambiar_estado_seguimiento' b.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="nuevo_estado" value="Pendiente">
+                                                    <button type="submit" class="dropdown-item py-1 text-secondary"><i class="bi bi-clock me-2"></i> Marcar Pendiente</button>
+                                                </form>
+                                            </li>
+                                        {% endif %}
+                                        {% if b.estado != 'En Proceso' %}
+                                            <li>
+                                                <form method="post" action="{% url 'cambiar_estado_seguimiento' b.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="nuevo_estado" value="En Proceso">
+                                                    <button type="submit" class="dropdown-item py-1 text-warning"><i class="bi bi-hourglass-split me-2"></i> Marcar En Proceso</button>
+                                                </form>
+                                            </li>
+                                        {% endif %}
+                                        {% if b.estado != 'Realizado' %}
+                                            <li>
+                                                <form method="post" action="{% url 'cambiar_estado_seguimiento' b.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="nuevo_estado" value="Realizado">
+                                                    <button type="submit" class="dropdown-item py-1 text-success"><i class="bi bi-check2-circle me-2"></i> Marcar Realizado</button>
+                                                </form>
+                                            </li>
+                                        {% endif %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item py-2 text-danger" href="{% url 'seguimiento_eliminar' b.id %}"><i class="bi bi-trash3 me-2"></i> Eliminar Bitácora</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endwith %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-journal-x fs-2 d-block mb-2 text-secondary opacity-50"></i>
+                                No se encontraron registros de seguimiento con los filtros especificados.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+            <div class="card-footer bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }} ({{ total_registros }} registros)
+                </small>
+                <nav aria-label="Navegación de seguimiento">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if active_filters_querystring %}&{{ active_filters_querystring }}{% endif %}">Anterior</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active"><span class="page-link" style="background-color: #29AAE3; border-color: #29AAE3;">{{ num }}</span></li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if active_filters_querystring %}&{{ active_filters_querystring }}{% endif %}">{{ num }}</a></li>
                             {% endif %}
-                        </td>
-                        <td class="text-end pe-3">
-                            <a href="{% url 'seguimiento_detalle' b.id %}" class="btn btn-sm btn-outline-dark fw-semibold" title="Ver Detalle de Investigación">
-                                <i class="bi bi-search me-1"></i> Investigar
-                            </a>
-                        </td>
-                    </tr>
-                    {% endwith %}
-                {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
-                            No se encontraron registros de investigación o seguimiento activo.
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if active_filters_querystring %}&{{ active_filters_querystring }}{% endif %}">Siguiente</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
     </div>
+
 </div>
 {% endblock %}

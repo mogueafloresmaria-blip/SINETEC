@@ -1,108 +1,341 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Matricular Aprendiz - Ficha {{ ficha.codigo_ficha }}{% endblock %}
+{% block title %}Asistente de Matrícula Escolar · SINETEC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wizard-steps-nav {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    .wizard-steps-nav::before {
+        content: '';
+        position: absolute;
+        top: 24px;
+        left: 30px;
+        right: 30px;
+        height: 3px;
+        background: #E2E8F0;
+        z-index: 1;
+    }
+    .wizard-step-indicator {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: transparent;
+        cursor: pointer;
+    }
+    .wizard-step-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #FFFFFF;
+        border: 3px solid #CBD5E1;
+        color: #64748B;
+        font-weight: 800;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
+    }
+    .wizard-step-indicator.active .wizard-step-circle {
+        background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+        border-color: #3B82F6;
+        color: #FFFFFF;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        transform: scale(1.08);
+    }
+    .wizard-step-indicator.completed .wizard-step-circle {
+        background: #10B981;
+        border-color: #10B981;
+        color: #FFFFFF;
+    }
+    .wizard-step-title {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: #64748B;
+        margin-top: 8px;
+        text-align: center;
+        max-width: 90px;
+    }
+    .wizard-step-indicator.active .wizard-step-title {
+        color: #1E3A8A;
+        font-weight: 800;
+    }
+    .wizard-pane {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+    .wizard-pane.active {
+        display: block;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="mb-3">
-            <a href="{% url 'fichas_detalle' ficha.id %}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Volver a Ficha {{ ficha.codigo_ficha }}
+<div class="row justify-content-center py-3">
+    <div class="col-lg-10 col-xl-9">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{% url 'fichas_detalle' ficha.id %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Volver al Curso {{ ficha.codigo_ficha }}
             </a>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1.5 fw-semibold">
+                {{ colegio.nombre|default:"Institución Educativa Técnica" }}
+            </span>
         </div>
 
-        <div class="sinetec-card p-4 p-md-5">
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-primary">Ficha {{ ficha.codigo_ficha }}</span>
-                <span class="badge bg-light text-dark border">{{ ficha.institucion.nombre }}</span>
+        <!-- Tarjeta Principal del Asistente -->
+        <div class="sinetec-card-modern p-4 p-md-5 bg-white rounded-4 shadow-sm border mb-4">
+            
+            <div class="text-center mb-4">
+                <span class="badge bg-primary px-3 py-1 rounded-pill mb-2">Vigencia Escolar 2026</span>
+                <h2 class="h3 fw-bold text-dark mb-1">Asistente de Matrícula Escolar</h2>
+                <p class="text-muted small mb-0">
+                    Proceso guiado de 5 pasos para el ingreso oficial de estudiantes en el Grupo <strong>{{ ficha.codigo_ficha }}</strong> ({{ ficha.institucion.nombre }}).
+                </p>
             </div>
-            <h2 class="h4 fw-bold mb-1 text-dark">Matrícula de Aprendiz en Media Técnica</h2>
-            <p class="text-muted small mb-4">
-                Diligencie los datos personales y escolares del estudiante para vincularlo formalmente a la ficha.
-            </p>
 
-            <form method="post">
+            <!-- Navegación de los 5 Pasos -->
+            <div class="wizard-steps-nav">
+                <div class="wizard-step-indicator active" id="step-btn-1" onclick="goToStep(1)">
+                    <div class="wizard-step-circle">01</div>
+                    <span class="wizard-step-title">Datos Personales</span>
+                </div>
+                <div class="wizard-step-indicator" id="step-btn-2" onclick="goToStep(2)">
+                    <div class="wizard-step-circle">02</div>
+                    <span class="wizard-step-title">Núcleo Familiar</span>
+                </div>
+                <div class="wizard-step-indicator" id="step-btn-3" onclick="goToStep(3)">
+                    <div class="wizard-step-circle">03</div>
+                    <span class="wizard-step-title">Documentos</span>
+                </div>
+                <div class="wizard-step-indicator" id="step-btn-4" onclick="goToStep(4)">
+                    <div class="wizard-step-circle">04</div>
+                    <span class="wizard-step-title">Académico</span>
+                </div>
+                <div class="wizard-step-indicator" id="step-btn-5" onclick="goToStep(5)">
+                    <div class="wizard-step-circle">05</div>
+                    <span class="wizard-step-title">Confirmación</span>
+                </div>
+            </div>
+
+            <!-- Formulario con los 5 Paneles -->
+            <form method="post" id="formMatriculaWizard">
                 {% csrf_token %}
 
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-semibold">Tipo Documento *</label>
-                        {{ form.tipo_documento }}
+                <!-- PASO 1: DATOS PERSONALES -->
+                <div class="wizard-pane active" id="wizard-step-1">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-person-lines-fill text-primary me-2"></i>Paso 1: Identificación y Datos Personales
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Tipo de Documento *</label>
+                            {{ form.tipo_documento }}
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold">Número de Identificación *</label>
+                            {{ form.numero_documento }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nombres Completos *</label>
+                            {{ form.nombres }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Apellidos Completos *</label>
+                            {{ form.apellidos }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Correo Electrónico *</label>
+                            {{ form.correo }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Teléfono Celular</label>
+                            {{ form.telefono }}
+                        </div>
                     </div>
-
-                    <div class="col-md-8">
-                        <label class="form-label small fw-semibold">Número de Documento * (RN-001)</label>
-                        {{ form.numero_documento }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold">Nombres Completos *</label>
-                        {{ form.nombres }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold">Apellidos Completos *</label>
-                        {{ form.apellidos }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold">Correo Electrónico *</label>
-                        {{ form.correo }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold">Teléfono Celular</label>
-                        {{ form.telefono }}
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label small fw-semibold">Grado Escolar * (RN-007)</label>
-                        {{ form.grado_escolar }}
-                    </div>
-
-                    <div class="col-md-5">
-                        <label class="form-label small fw-semibold">Nombre Padre / Acudiente</label>
-                        {{ form.acudiente_nombre }}
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label small fw-semibold">Teléfono Acudiente</label>
-                        {{ form.acudiente_telefono }}
+                    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-primary px-4 fw-semibold" onclick="nextStep(2)">
+                            Siguiente: Núcleo Familiar <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
-                    <a href="{% url 'fichas_detalle' ficha.id %}" class="btn btn-light px-4">Cancelar</a>
-                    <button type="submit" class="btn btn-sinetec-primary px-4 fw-semibold">
-                        <i class="bi bi-person-check-fill me-1"></i> Confirmar Matrícula
-                    </button>
+                <!-- PASO 2: NÚCLEO FAMILIAR -->
+                <div class="wizard-pane" id="wizard-step-2">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-people-fill text-primary me-2"></i>Paso 2: Núcleo Familiar y Acudiente Responsable
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nombre Completo del Acudiente</label>
+                            {{ form.acudiente_nombre }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Teléfono de Emergencia / Acudiente</label>
+                            {{ form.acudiente_telefono }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Parentesco</label>
+                            <select class="form-select">
+                                <option value="Madre">Madre</option>
+                                <option value="Padre">Padre</option>
+                                <option value="Abuelo/a">Abuelo / Abuela</option>
+                                <option value="Tio/a">Tío / Tía</option>
+                                <option value="Hermano/a">Hermano / Hermana</option>
+                                <option value="Tutor Legal">Tutor Legal</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Dirección de Residencia Familiar</label>
+                            <input type="text" class="form-control" placeholder="Ej. Calle 12 # 4-50, Barrio Centro">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-outline-secondary px-4" onclick="prevStep(1)">
+                            <i class="bi bi-arrow-left me-1"></i> Anterior
+                        </button>
+                        <button type="button" class="btn btn-primary px-4 fw-semibold" onclick="nextStep(3)">
+                            Siguiente: Documentación <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
                 </div>
+
+                <!-- PASO 3: DOCUMENTACIÓN -->
+                <div class="wizard-pane" id="wizard-step-3">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-file-earmark-check-fill text-primary me-2"></i>Paso 3: Documentación y Antecedentes Escolares
+                    </h5>
+                    <div class="alert alert-light border small mb-3">
+                        <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                        Verifica que el estudiante cuente con documento de identidad legible y certificado de notas del año anterior.
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Copia de Documento de Identidad</label>
+                            <input type="file" class="form-control" accept=".pdf,.png,.jpg">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Certificado de Afiliación a Salud (EPS)</label>
+                            <input type="file" class="form-control" accept=".pdf,.png,.jpg">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Observaciones Médicas / Alergias / Requerimientos</label>
+                            <textarea class="form-control" rows="2" placeholder="Indicar si el alumno tiene alguna condición de salud relevante o ninguna."></textarea>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-outline-secondary px-4" onclick="prevStep(2)">
+                            <i class="bi bi-arrow-left me-1"></i> Anterior
+                        </button>
+                        <button type="button" class="btn btn-primary px-4 fw-semibold" onclick="nextStep(4)">
+                            Siguiente: Asignación Académica <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PASO 4: ASIGNACIÓN ACADÉMICA -->
+                <div class="wizard-pane" id="wizard-step-4">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-mortarboard-fill text-primary me-2"></i>Paso 4: Asignación Académica y Jornada
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Grado Escolar Asignado *</label>
+                            {{ form.grado_escolar }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Jornada Escolar</label>
+                            <select class="form-select">
+                                <option value="Mañana">Jornada Mañana</option>
+                                <option value="Tarde">Jornada Tarde</option>
+                                <option value="Única">Jornada Única</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <div class="small text-muted text-uppercase fw-bold mb-1">Curso Asignado:</div>
+                                <h6 class="fw-bold text-dark mb-0">Grupo {{ ficha.codigo_ficha }} — {{ ficha.programa.nombre }}</h6>
+                                <small class="text-muted">{{ ficha.institucion.nombre }} · Sede Oficial</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-outline-secondary px-4" onclick="prevStep(3)">
+                            <i class="bi bi-arrow-left me-1"></i> Anterior
+                        </button>
+                        <button type="button" class="btn btn-primary px-4 fw-semibold" onclick="prepareConfirmation()">
+                            Siguiente: Resumen y Confirmación <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PASO 5: CONFIRMACIÓN FINAL -->
+                <div class="wizard-pane" id="wizard-step-5">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>Paso 5: Resumen y Confirmación Oficial
+                    </h5>
+                    
+                    <div class="card border rounded-3 p-3 bg-light mb-4">
+                        <div class="row g-2 small" id="summaryBox">
+                            <div class="col-sm-6"><strong>Estudiante:</strong> <span id="sumNombre">-</span></div>
+                            <div class="col-sm-6"><strong>Documento:</strong> <span id="sumDoc">-</span></div>
+                            <div class="col-sm-6"><strong>Correo:</strong> <span id="sumCorreo">-</span></div>
+                            <div class="col-sm-6"><strong>Curso / Grupo:</strong> Grupo {{ ficha.codigo_ficha }}</div>
+                            <div class="col-sm-6"><strong>Acudiente:</strong> <span id="sumAcudiente">-</span></div>
+                            <div class="col-sm-6"><strong>Institución:</strong> {{ ficha.institucion.nombre }}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="checkAceptoTerminos" required checked>
+                        <label class="form-check-label small text-muted" for="checkAceptoTerminos">
+                            Certifico que los datos diligenciados corresponden con los documentos oficiales del estudiante para asentar la matrícula escolar 2026.
+                        </label>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-3 border-top">
+                        <button type="button" class="btn btn-outline-secondary px-4" onclick="prevStep(4)">
+                            <i class="bi bi-arrow-left me-1"></i> Anterior
+                        </button>
+                        <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm">
+                            <i class="bi bi-person-check-fill me-1"></i> Confirmar y Asentar Matrícula
+                        </button>
+                    </div>
+                </div>
+
             </form>
         </div>
 
-        <div class="sinetec-card p-4 p-md-5 mt-4">
+        <!-- Tarjeta de Importación Masiva Excel -->
+        <div class="sinetec-card-modern p-4 p-md-5 bg-white rounded-4 shadow-sm border">
             <div class="d-flex align-items-center gap-2 mb-1">
-                <i class="bi bi-file-earmark-spreadsheet text-success fs-4"></i>
-                <h2 class="h5 fw-bold mb-0">Importar aprendices desde Excel o CSV</h2>
+                <i class="bi bi-file-earmark-spreadsheet text-primary fs-4"></i>
+                <h3 class="h5 fw-bold mb-0 text-dark">Importación Masiva de Matrículas (Excel)</h3>
             </div>
             <p class="text-muted small mb-3">
-                Cargue varios aprendices de {{ ficha.institucion.nombre }} en una sola operación. La importación es atómica: si hay errores, no se crea ningún registro.
+                Carga múltiples estudiantes para el Grupo {{ ficha.codigo_ficha }} simultáneamente mediante archivo .xlsx o .csv.
             </p>
 
-            <div class="alert alert-light border small">
-                <strong>Columnas obligatorias:</strong>
-                <code>tipo_documento</code>, <code>numero_documento</code>, <code>nombres</code>,
-                <code>apellidos</code>, <code>correo</code> y <code>grado_escolar</code>.
-                <br>
-                <strong>Opcionales:</strong>
-                <code>telefono</code>, <code>acudiente_nombre</code> y <code>acudiente_telefono</code>.
-                <br>
-                <span class="text-muted">Use valores de tipo de documento CC, TI, CE, PEP o PPT y grado 10 u 11.</span>
+            <div class="alert alert-light border small mb-3">
+                <strong>Columnas requeridas:</strong> <code>tipo_documento</code>, <code>numero_documento</code>, <code>nombres</code>, <code>apellidos</code>, <code>correo</code>, <code>grado_escolar</code>.
             </div>
 
             {% if import_errors %}
                 <div class="alert alert-danger" role="alert">
-                    <strong>No se pudo completar la importación:</strong>
+                    <strong>Error en la importación:</strong>
                     <ul class="mb-0 mt-2">
                         {% for error in import_errors %}<li>{{ error }}</li>{% endfor %}
                     </ul>
@@ -112,18 +345,72 @@
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" name="accion" value="importar">
-                <label for="id_archivo" class="form-label small fw-semibold">Archivo de aprendices</label>
-                {{ import_form.archivo }}
-                {% if import_form.archivo.errors %}
-                    <div class="text-danger small mt-1">{{ import_form.archivo.errors|striptags }}</div>
-                {% endif %}
-                <div class="mt-3 d-flex justify-content-end">
-                    <button type="submit" class="btn btn-success fw-semibold">
-                        <i class="bi bi-upload me-1"></i> Importar aprendices
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Seleccionar archivo Excel</label>
+                    {{ import_form.archivo }}
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-outline-primary fw-semibold">
+                        <i class="bi bi-upload me-1"></i> Procesar Archivo Excel
                     </button>
                 </div>
             </form>
         </div>
+
     </div>
 </div>
+
+<script>
+    let currentStep = 1;
+
+    function goToStep(step) {
+        if (step < 1 || step > 5) return;
+        
+        // Hide all panes
+        for (let i = 1; i <= 5; i++) {
+            const pane = document.getElementById(`wizard-step-${i}`);
+            const btn = document.getElementById(`step-btn-${i}`);
+            if (pane) pane.classList.remove('active');
+            if (btn) {
+                btn.classList.remove('active');
+                if (i < step) {
+                    btn.classList.add('completed');
+                } else {
+                    btn.classList.remove('completed');
+                }
+            }
+        }
+
+        // Show target pane
+        const targetPane = document.getElementById(`wizard-step-${step}`);
+        const targetBtn = document.getElementById(`step-btn-${step}`);
+        if (targetPane) targetPane.classList.add('active');
+        if (targetBtn) targetBtn.classList.add('active');
+
+        currentStep = step;
+    }
+
+    function nextStep(step) {
+        goToStep(step);
+    }
+
+    function prevStep(step) {
+        goToStep(step);
+    }
+
+    function prepareConfirmation() {
+        const nombres = document.querySelector('input[name="nombres"]')?.value || '';
+        const apellidos = document.querySelector('input[name="apellidos"]')?.value || '';
+        const doc = document.querySelector('input[name="numero_documento"]')?.value || '';
+        const correo = document.querySelector('input[name="correo"]')?.value || '';
+        const acudiente = document.querySelector('input[name="acudiente_nombre"]')?.value || 'No asignado';
+
+        document.getElementById('sumNombre').textContent = `${nombres} ${apellidos}`.trim() || 'Estudiante';
+        document.getElementById('sumDoc').textContent = doc || 'Sin documento';
+        document.getElementById('sumCorreo').textContent = correo || 'Sin correo';
+        document.getElementById('sumAcudiente').textContent = acudiente;
+
+        goToStep(5);
+    }
+</script>
 {% endblock %}

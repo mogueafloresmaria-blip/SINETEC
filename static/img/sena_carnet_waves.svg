@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none">
+    <!-- Onda 1: Verde Bosque Oscuro SENA -->
+    <path d="M70,0 C105,5 135,25 150,60 C156,74 159,92 160,110 L160,0 Z" fill="#107C41" />
+    
+    <!-- Onda 2: Verde Esmeralda SENA -->
+    <path d="M40,0 C80,10 120,35 140,80 C148,96 152,110 154,120 L160,120 L160,50 C145,20 115,5 70,0 Z" fill="#29AAE3" />
+    
+    <!-- Onda 3: Naranja Oficial SENA -->
+    <path d="M20,0 C60,15 105,45 125,95 C132,108 136,120 138,120 L146,120 C143,108 138,92 130,78 C110,38 72,12 35,0 Z" fill="#FF671B" />
+</svg>

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Directorio de Familias y Acudientes · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2 px-md-3">
+
+    <!-- Encabezado Institucional Escolar -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge badge-lavender-soft">Gestión Administrativa Escolar</span>
+                <span class="text-muted small">{{ colegio.nombre|default:"Institución Educativa" }}</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-people-fill text-primary me-2"></i>Directorio de Familias y Acudientes
+            </h1>
+            <p class="text-muted small mb-0">Gestión de padres de familia, tutores legales, información de contacto y vinculación con estudiantes matriculados.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-light text-secondary border px-3 py-2 fs-6 align-self-center">
+                <i class="bi bi-person-hearts me-1 text-danger"></i> {{ total_familias }} Núcleos Familiares
+            </span>
+        </div>
+    </div>
+
+    <!-- Buscador de Familias -->
+    <div class="sinetec-card p-3 mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-9 col-lg-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" name="q" value="{{ q|default:'' }}" class="form-control border-start-0" placeholder="Buscar por nombre de acudiente, teléfono, correo o estudiante a cargo...">
+                </div>
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <button type="submit" class="btn btn-sinetec-primary w-100 fw-semibold">
+                    <i class="bi bi-funnel me-1"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tarjetas de Familias -->
+    <div class="row g-4">
+        {% for fam in familias %}
+        <div class="col-md-6 col-xl-4">
+            <div class="sinetec-card h-100 d-flex flex-column p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle bg-light d-grid place-items-center text-primary" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">{{ fam.nombre_acudiente }}</h6>
+                            <span class="badge badge-lavender-soft mt-1">{{ fam.parentesco }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="small text-muted mb-3 flex-grow-1">
+                    <div class="mb-1.5"><i class="bi bi-telephone text-secondary me-2"></i><strong>{{ fam.telefono }}</strong></div>
+                    {% if fam.email %}
+                    <div class="mb-1.5"><i class="bi bi-envelope text-secondary me-2"></i>{{ fam.email }}</div>
+                    {% endif %}
+                    {% if fam.direccion %}
+                    <div class="mb-1.5"><i class="bi bi-geo-alt text-secondary me-2"></i>{{ fam.direccion }}</div>
+                    {% endif %}
+                    {% if fam.ocupacion %}
+                    <div><i class="bi bi-briefcase text-secondary me-2"></i>{{ fam.ocupacion }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Estudiantes Relacionados -->
+                <div class="pt-3 border-top mt-auto">
+                    <div class="small text-muted mb-2 fw-semibold">
+                        <i class="bi bi-mortarboard me-1 text-primary"></i> Estudiantes Vinculados:
+                    </div>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for est in fam.estudiantes.all %}
+                            <a href="{% url 'estudiante_detalle' est.id %}" class="badge bg-light text-dark border text-decoration-none py-1.5 px-2">
+                                <i class="bi bi-person-fill me-1 text-primary"></i>{{ est.get_full_name|default:est.username }}
+                            </a>
+                        {% empty %}
+                            <span class="text-muted small fst-italic">Sin estudiantes asignados</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-people fs-1 opacity-50 d-block mb-3"></i>
+            <h5>No se encontraron registros de familias</h5>
+            <p class="small">Prueba con otro término de búsqueda o registra nuevos estudiantes con acudientes.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-4 d-flex justify-content-center">
+        <ul class="pagination pagination-sm">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">Anterior</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Siguiente</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+{% endblock %}

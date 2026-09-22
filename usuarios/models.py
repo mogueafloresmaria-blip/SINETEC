@@ -19,7 +19,7 @@ from django.dispatch import receiver
 class Rol(models.Model):
     """
     Representa los perfiles de seguridad institucional en SINETEC.
-    Ejemplos: Administrador, Coordinador, Instructor SENA, Docente I.E., Estudiante.
+    Ejemplos: Administrador, Coordinador, Profesor / Docente, Estudiante.
     """
     nombre = models.CharField(
         max_length=50,
@@ -178,14 +178,14 @@ class ResultadoAprendizaje(models.Model):
 
 
 class EvidenciaTaller(models.Model):
-    """Guía o Taller asignado al aprendiz dentro de la formación SENA"""
+    """Guía o Taller asignado al estudiante dentro de la formación académica"""
     rap = models.ForeignKey(ResultadoAprendizaje, on_delete=models.CASCADE, related_name='evidencias', null=True, blank=True)
     rap_curricular = models.ForeignKey('academico.ResultadoAprendizaje', on_delete=models.SET_NULL, null=True, blank=True, related_name='evidencias_talleres', verbose_name="RAP Curricular SOFIA")
     ficha = models.ForeignKey('academico.Ficha', on_delete=models.SET_NULL, null=True, blank=True, related_name='actividades_formativas', verbose_name="Ficha Asociada")
-    instructor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='actividades_publicadas', verbose_name="Instructor Asignador")
+    instructor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='actividades_publicadas', verbose_name="Profesor Asignador")
     titulo = models.CharField(max_length=200, verbose_name="Título del Taller / Evidencia")
     descripcion = models.TextField(verbose_name="Instrucciones de la Guía de Aprendizaje")
-    material_apoyo = models.FileField(upload_to='material_talleres/%Y/%m/', blank=True, null=True, verbose_name="Material Proporcionado por el Instructor")
+    material_apoyo = models.FileField(upload_to='material_talleres/%Y/%m/', blank=True, null=True, verbose_name="Material Proporcionado por el Profesor")
     fecha_asignacion = models.DateTimeField(auto_now_add=True, null=True, verbose_name="Fecha de Asignación")
     fecha_limite = models.DateTimeField(verbose_name="Fecha y Hora Límite de Entrega")
 
@@ -236,3 +236,64 @@ class CalificacionEvidencia(models.Model):
     @property
     def rap_codigo(self):
         return self.evidencia.rap_codigo
+
+
+class ConfiguracionColegio(models.Model):
+    """Configuración de identidad institucional del colegio para SINETEC."""
+    nombre = models.CharField(max_length=200, default="Institución Educativa Técnica", verbose_name="Nombre de la Institución")
+    lema = models.CharField(max_length=255, default="Ciencia, Innovación y Liderazgo para el Futuro", blank=True, verbose_name="Lema Institucional")
+    codigo_dane = models.CharField(max_length=50, blank=True, default="147001000234", verbose_name="Código DANE")
+    nit = models.CharField(max_length=50, blank=True, default="891.780.123-4", verbose_name="NIT")
+    resolucion = models.CharField(max_length=150, blank=True, default="Resolución Oficial No. 0482 MEN", verbose_name="Resolución de Aprobación")
+    rector = models.CharField(max_length=150, blank=True, default="Dr. Roberto Carlos Mendoza", verbose_name="Nombre del Rector")
+    direccion = models.CharField(max_length=255, blank=True, default="Avenida Principal # 12-45", verbose_name="Dirección")
+    telefono = models.CharField(max_length=50, blank=True, default="(605) 421-9988", verbose_name="Teléfono")
+    email = models.EmailField(blank=True, default="contacto@colegio.edu.co", verbose_name="Correo Electrónico")
+    sitio_web = models.URLField(blank=True, default="https://www.colegio.edu.co", verbose_name="Sitio Web")
+    color_primario = models.CharField(max_length=20, default="#0F2942", verbose_name="Color Principal (Azul Petróleo)")
+    color_secundario = models.CharField(max_length=20, default="#3B82F6", verbose_name="Color Secundario (Azul Suave)")
+    color_acento = models.CharField(max_length=20, default="#EEF2FF", verbose_name="Color Acento (Lavanda Suave)")
+    logo = models.ImageField(upload_to='colegio/', blank=True, null=True, verbose_name="Escudo o Logo del Colegio")
+
+    class Meta:
+        verbose_name = "Identidad y Configuración del Colegio"
+        verbose_name_plural = "Identidad y Configuración del Colegio"
+
+    def __str__(self):
+        return self.nombre
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(id=1)
+        return obj
+
+
+class FamiliaAcudiente(models.Model):
+    """Núcleo familiar y acudientes de estudiantes de la institución."""
+    nombre_acudiente = models.CharField(max_length=150, verbose_name="Nombre Completo del Acudiente")
+    parentesco = models.CharField(max_length=50, default="Madre", choices=[
+        ('Madre', 'Madre'),
+        ('Padre', 'Padre'),
+        ('Tutor Legal', 'Tutor Legal'),
+        ('Abuelo/a', 'Abuelo/a'),
+        ('Tío/a', 'Tío/a'),
+        ('Hermano/a', 'Hermano/a'),
+        ('Otro', 'Otro')
+    ], verbose_name="Parentesco")
+    documento = models.CharField(max_length=30, blank=True, null=True, verbose_name="Documento de Identidad")
+    telefono = models.CharField(max_length=50, verbose_name="Teléfono de Contacto")
+    telefono_secundario = models.CharField(max_length=50, blank=True, null=True, verbose_name="Teléfono Secundario")
+    email = models.EmailField(blank=True, null=True, verbose_name="Correo Electrónico")
+    direccion = models.CharField(max_length=255, blank=True, null=True, verbose_name="Dirección de Residencia")
+    ocupacion = models.CharField(max_length=100, blank=True, null=True, verbose_name="Ocupación / Profesión")
+    estudiantes = models.ManyToManyField(User, related_name='nucleo_familiar', blank=True, verbose_name="Estudiantes a Cargo")
+    observaciones = models.TextField(blank=True, null=True, verbose_name="Observaciones Familiares")
+    fecha_registro = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Registro")
+
+    class Meta:
+        verbose_name = "Familia y Acudiente"
+        verbose_name_plural = "Familias y Acudientes"
+        ordering = ['nombre_acudiente']
+
+    def __str__(self):
+        return f"{self.nombre_acudiente} ({self.parentesco})"

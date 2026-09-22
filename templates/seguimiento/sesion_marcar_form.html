@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Confirmar Asistencia a Clase · Ficha {{ ficha.codigo_ficha }} · SENA{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="sinetec-card p-4 mx-auto shadow-sm" style="max-width: 520px; border-radius: 24px;">
+        <div class="text-center mb-4">
+            <div class="d-inline-flex p-3 rounded-circle bg-success bg-opacity-10 text-success mb-2">
+                <i class="bi bi-qr-code-scan fs-1"></i>
+            </div>
+            <h2 class="h4 fw-bold text-dark mb-1">Confirmar Asistencia en Aula</h2>
+            <p class="text-muted small mb-0">
+                Ficha <strong>{{ ficha.codigo_ficha }}</strong> — {{ ficha.programa.denominacion }}
+            </p>
+            <span class="badge bg-light text-dark border mt-2">
+                <i class="bi bi-calendar-check text-success me-1"></i> Sesión de Hoy: {{ hoy|date:'d/m/Y' }}
+            </span>
+        </div>
+
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-danger small p-2 text-center rounded-3">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" action="{% url 'marcar_asistencia_sesion' ficha.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="fecha" value="{{ fecha_param }}">
+            <input type="hidden" name="token" value="{{ token_param }}">
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-dark">Número de Documento del Aprendiz</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-person-vcard text-muted"></i></span>
+                    <input type="text" name="documento" class="form-control" placeholder="Ej. 1083400001" required autofocus>
+                </div>
+                <div class="form-text small">
+                    Digita el número de documento con el que te encuentras matriculado en SOFIA Plus.
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-success fw-bold py-2 rounded-pill shadow-sm" style="background-color: #29AAE3; border-color: #29AAE3;">
+                    <i class="bi bi-check-circle-fill me-1"></i> Registrar Mi Asistencia
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-4 pt-3 border-top">
+            <a href="{% url 'login' %}" class="small text-decoration-none text-muted">
+                ¿Prefieres iniciar sesión con tu usuario? <strong class="text-success">Ingresar aquí</strong>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

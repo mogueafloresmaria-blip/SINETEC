@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% block title %}Convenio {{ convenio.numero_convenio }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3 px-md-4">
+
+    <!-- BREADCRUMB Y ACCIONES -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'convenios_catalogo' %}" class="text-decoration-none text-muted">Convenios</a></li>
+                <li class="breadcrumb-item active fw-semibold text-dark">{{ convenio.numero_convenio }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex gap-2">
+            <a href="{% url 'convenios_catalogo' %}" class="btn btn-sm btn-outline-secondary rounded-3">
+                <i class="bi bi-arrow-left me-1"></i> Volver a Convenios
+            </a>
+            {% if can_manage %}
+            <a href="{% url 'convenio_editar' convenio.pk %}" class="btn btn-sm btn-outline-secondary rounded-3">
+                <i class="bi bi-pencil me-1"></i> Editar Convenio
+            </a>
+            <button class="btn btn-sm btn-primary rounded-3 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNuevoBeneficio">
+                <i class="bi bi-plus-circle me-1"></i> + Beneficio
+            </button>
+            <a href="{% url 'documento_convenio_subir' convenio.pk %}" class="btn btn-sm btn-outline-primary rounded-3 fw-semibold">
+                <i class="bi bi-upload me-1"></i> + Subir PDF
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- CABECERA DEL CONVENIO -->
+    <div class="card border-0 shadow-sm rounded-3 p-4 mb-4 bg-white">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3">
+            <div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span class="badge bg-light text-dark border font-monospace fw-bold fs-6">
+                        {{ convenio.numero_convenio }}
+                    </span>
+                    <span class="badge bg-light text-primary border fw-semibold">
+                        {{ convenio.tipo_convenio }}
+                    </span>
+                    {% if convenio.estado_calculado == 'Vigente' %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold">
+                            <i class="bi bi-check-circle-fill me-1"></i> Vigente
+                        </span>
+                    {% elif convenio.estado_calculado == 'Por Vencer' %}
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle fw-semibold">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Por Vencer
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-semibold">
+                            <i class="bi bi-x-circle-fill me-1"></i> Vencido
+                        </span>
+                    {% endif %}
+
+                    {% if convenio.dias_para_vencer is not None %}
+                        {% if convenio.dias_para_vencer > 0 %}
+                            <span class="badge {% if convenio.dias_para_vencer <= 30 %}bg-warning text-dark{% else %}bg-light text-muted border{% endif %}">
+                                <i class="bi bi-clock-history me-1"></i> {{ convenio.dias_para_vencer }} días restantes
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger text-white">Vencido hace {{ convenio.dias_para_vencer|stringformat:"+d"|slice:"1:" }} días</span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <h2 class="h4 fw-bold text-dark mb-2">{{ convenio.nombre }}</h2>
+                <div class="text-muted small mb-2">
+                    <i class="bi bi-building text-primary me-1"></i>
+                    <strong>Institución Educativa:</strong> 
+                    <a href="{% url 'institucion_convenio_detalle' convenio.institucion.pk %}" class="text-decoration-none fw-bold text-dark hover-primary">
+                        {{ convenio.institucion.nombre }}
+                    </a>
+                    · Municipio: {{ convenio.institucion.municipio }}, Magdalena
+                </div>
+                {% if convenio.objetivo %}
+                <p class="text-muted small mb-0">{{ convenio.objetivo }}</p>
+                {% endif %}
+            </div>
+
+            <div class="p-3 bg-light rounded-3 border text-lg-end" style="min-width: 240px;">
+                <div class="small text-muted mb-1">Vigencia Oficial SENA:</div>
+                <div class="fw-bold text-dark small"><i class="bi bi-calendar-check text-primary me-1"></i> Inicio: {{ convenio.fecha_inicio|date:"d/m/Y" }}</div>
+                <div class="fw-bold text-dark small"><i class="bi bi-calendar-x text-danger me-1"></i> Fin: {{ convenio.fecha_fin|date:"d/m/Y" }}</div>
+                {% if convenio.responsable %}
+                <div class="small text-muted mt-2 border-top pt-2">
+                    <i class="bi bi-person text-secondary me-1"></i> Responsable: {{ convenio.responsable }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 1: BENEFICIOS ARTICULADOS -->
+    <div class="card border-0 shadow-sm rounded-3 p-4 mb-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <div>
+                <h5 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-gift-fill text-primary"></i> Beneficios y Programas Articulados
+                </h5>
+                <p class="text-muted small mb-0">Cursos cortos, cupos prioritarios, talleres y certificaciones pactadas en este acuerdo.</p>
+            </div>
+            {% if can_manage %}
+            <button class="btn btn-sm btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNuevoBeneficio">
+                <i class="bi bi-plus-circle me-1"></i> Agregar Beneficio
+            </button>
+            {% endif %}
+        </div>
+
+        <div class="row g-3">
+            {% for ben in beneficios %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card border rounded-3 p-3 bg-light h-100 position-relative">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                        <div>
+                            <span class="badge bg-white text-primary border small mb-1">{{ ben.tipo }}</span>
+                            <h6 class="fw-bold text-dark mb-0">{{ ben.nombre }}</h6>
+                        </div>
+                        {% if can_manage %}
+                        <form method="post" action="{% url 'beneficio_eliminar' ben.pk %}" onsubmit="return confirm('¿Desea retirar este beneficio del convenio?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-1" title="Eliminar beneficio">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% if ben.descripcion %}
+                    <p class="text-muted small mb-2">{{ ben.descripcion }}</p>
+                    {% endif %}
+                    <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center small text-secondary">
+                        <span><i class="bi bi-people me-1"></i> {{ ben.cantidad_cupos }} cupos</span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">{{ ben.estado }}</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-4 text-muted">
+                <i class="bi bi-gift fs-2 opacity-50 d-block mb-2"></i>
+                No hay beneficios registrados para este convenio actualmente.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- SECCIÓN 2: EXPEDIENTE DOCUMENTAL -->
+    <div class="card border-0 shadow-sm rounded-3 p-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <div>
+                <h5 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-folder2-open text-primary"></i> Expediente Documental del Convenio
+                </h5>
+                <p class="text-muted small mb-0">Minutas firmadas, resoluciones de apertura y anexos técnicos formalizados.</p>
+            </div>
+            {% if can_manage %}
+            <a href="{% url 'documento_convenio_subir' convenio.pk %}" class="btn btn-sm btn-outline-primary fw-semibold">
+                <i class="bi bi-upload me-1"></i> Cargar Documento
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase">
+                    <tr>
+                        <th class="ps-3 py-2">Documento</th>
+                        <th class="py-2">Tipo</th>
+                        <th class="py-2">Fecha de Carga</th>
+                        <th class="py-2">Cargado Por</th>
+                        <th class="py-2 pe-3 text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documentos %}
+                    <tr>
+                        <td class="ps-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ doc.nombre }}</div>
+                                    {% if doc.descripcion %}
+                                    <div class="text-muted small text-truncate" style="max-width: 300px;">{{ doc.descripcion }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ doc.tipo }}</span></td>
+                        <td class="small text-muted">{{ doc.fecha_carga|date:"d/m/Y H:i" }}</td>
+                        <td class="small fw-semibold text-dark">{% if doc.usuario_carga %}{{ doc.usuario_carga.get_full_name|default:doc.usuario_carga.username }}{% else %}Equipo Administrativo{% endif %}</td>
+                        <td class="pe-3 text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'documento_convenio_descargar' doc.pk %}" class="btn btn-primary" title="Descargar PDF">
+                                    <i class="bi bi-download me-1"></i> Descargar
+                                </a>
+                                {% if can_manage %}
+                                <a href="{% url 'documento_convenio_eliminar' doc.pk %}" class="btn btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <i class="bi bi-file-earmark-x fs-2 opacity-50 d-block mb-2"></i>
+                            No hay archivos PDF anexos a este convenio todavía.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL NUEVO BENEFICIO -->
+{% if can_manage %}
+<div class="modal fade" id="modalNuevoBeneficio" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-gift text-primary me-2"></i>Agregar Beneficio al Convenio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'beneficio_crear' convenio.pk %}">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Nombre del Beneficio <span class="text-danger">*</span></label>
+                            {{ form_beneficio.nombre }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Tipo de Beneficio</label>
+                            {{ form_beneficio.tipo }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Cupos Disponibles</label>
+                            {{ form_beneficio.cantidad_cupos }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Fecha de Inicio</label>
+                            {{ form_beneficio.fecha_inicio }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Fecha de Fin</label>
+                            {{ form_beneficio.fecha_fin }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Estado</label>
+                            {{ form_beneficio.estado }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Descripción</label>
+                            {{ form_beneficio.descripcion }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-circle me-1"></i> Guardar Beneficio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

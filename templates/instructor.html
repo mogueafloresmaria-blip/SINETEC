@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
     .instructor-hero {
-        background: linear-gradient(135deg, #1A382B 0%, #2A5C45 60%, #39A900 100%);
+        background: linear-gradient(135deg, #1A382B 0%, #2A5C45 60%, #29AAE3 100%);
         color: #ffffff;
         border-radius: 20px;
         padding: clamp(20px, 3.5vw, 32px);
@@ -37,7 +37,7 @@
         box-shadow: 0 10px 24px rgba(23, 34, 29, 0.08);
     }
     .today-agenda-item {
-        border-left: 4px solid #39A900;
+        border-left: 4px solid #29AAE3;
         background: #F8FAF7;
         border-radius: 12px;
         padding: 14px 16px;
@@ -51,7 +51,7 @@
         transition: all 0.2s ease;
     }
     .ficha-card-item:hover {
-        border-color: #39A900;
+        border-color: #29AAE3;
         box-shadow: 0 8px 22px rgba(57, 169, 0, 0.09);
     }
     .risk-indicator-pill {
@@ -273,14 +273,14 @@
             </div>
             <form method="get" class="d-flex gap-2" style="max-width: 380px; width: 100%;">
                 <input type="text" name="q_aprendiz" value="{{ q_aprendiz|default:'' }}" class="form-control form-control-sm" placeholder="Buscar por nombre o cédula...">
-                <button type="submit" class="btn btn-sm btn-success fw-semibold" style="background-color: #39A900;">Buscar</button>
+                <button type="submit" class="btn btn-sm btn-success fw-semibold" style="background-color: #29AAE3;">Buscar</button>
             </form>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light small text-uppercase">
                     <tr>
-                        <th class="ps-3 py-3">Aprendiz</th>
+                        <th class="ps-3 py-3">Estudiante</th>
                         <th class="py-3">Ficha Formativa</th>
                         <th class="py-3">Asistencia</th>
                         <th class="py-3">Evidencias</th>

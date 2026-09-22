@@ -1,279 +1,315 @@
 /* ==============================================================================
-   PROYECTO FORMATIVO: SISTEMAS DE INFORMACIÓN Y DESARROLLO DE SOFTWARE EN EL MAGDALENA
-   SOFTWARE: SINETEC (Sistema de Integración Técnica Education)
-   CENTRO: Centro de Logística y Promoción Ecoturística del Magdalena - ADSI 228106
-   HOJA DE ESTILOS PERSONALIZADA - SISTEMA DE DISEÑO SINETEC
-============================================================================== */
+   SINETEC · SOFTWARE ADMINISTRATIVO ESCOLAR
+   ESTILOS PERSONALIZADOS, COMPONENTES Y VISTAS ESPECÍFICAS
+   ============================================================================== */
 
 :root {
-  --sinetec-primary: #39A900;
-  --sinetec-primary-dark: #1F5E2D;
-  --sinetec-secondary: #8CCB65;
-  --sinetec-accent: #DCEFD1;
-  --sinetec-success: #059669;
-  --sinetec-warning: #D97706;
-  --sinetec-danger: #DC2626;
-  --sinetec-bg-light: #F3F7F0;
+  --sinetec-primary: #0F2942;
+  --sinetec-primary-dark: #0A1D30;
+  --sinetec-secondary: #3B82F6;
+  --sinetec-accent: #EEF2FF;
+  --sinetec-success: #10B981;
+  --sinetec-warning: #F59E0B;
+  --sinetec-danger: #EF4444;
+  --sinetec-bg-light: #F8FAFC;
   --sinetec-card-bg: #FFFFFF;
-  --sinetec-border: #E2EDE0;
-  --sinetec-text-main: #1E2D26;
-  --sinetec-text-muted: #5B6E64;
+  --sinetec-border: #E2E8F0;
+  --sinetec-text-main: #0F172A;
+  --sinetec-text-muted: #64748B;
   --sinetec-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Colores Escolares Suaves */
+  --sinetec-blue: #3B82F6;
+  --sinetec-blue-hover: #2563EB;
+  --sinetec-blue-soft: #EFF6FF;
+  --sinetec-blue-border: #BFDBFE;
+  --sinetec-blue-deep: #0F2942;
+
+  --sinetec-lavender: #EEF2FF;
+  --sinetec-lavender-border: #C7D2FE;
+  --sinetec-lavender-text: #4F46E5;
+
+  --sinetec-rose: #F43F5E;
+  --sinetec-rose-hover: #E11D48;
+  --sinetec-rose-soft: #FFF1F2;
+  --sinetec-rose-border: #FECDD3;
+
+  --sinetec-card-radius: 16px;
+  --sinetec-soft-shadow: 0 4px 20px -2px rgba(15, 41, 66, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  --sinetec-soft-shadow-hover: 0 10px 25px -4px rgba(15, 41, 66, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
 }
 
-body {
-  font-family: var(--sinetec-font);
-  background-color: var(--sinetec-bg-light);
-  color: var(--sinetec-text-main);
-  min-height: 100vh;
+/* Tarjetas Modernas */
+.sinetec-card-modern {
+  background: #ffffff;
+  border: 1px solid var(--sinetec-border);
+  border-radius: var(--sinetec-card-radius);
+  box-shadow: var(--sinetec-soft-shadow);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sinetec-card-modern:hover {
+  box-shadow: var(--sinetec-soft-shadow-hover);
+}
+
+/* Badges Pastel */
+.badge-rose-soft {
+  background-color: var(--sinetec-rose-soft) !important;
+  color: #BE123C !important;
+  border: 1px solid var(--sinetec-rose-border) !important;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+}
+
+.badge-blue-soft {
+  background-color: var(--sinetec-blue-soft) !important;
+  color: var(--sinetec-blue-hover) !important;
+  border: 1px solid var(--sinetec-blue-border) !important;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+}
+
+.badge-lavender-soft {
+  background-color: var(--sinetec-lavender) !important;
+  color: var(--sinetec-lavender-text) !important;
+  border: 1px solid var(--sinetec-lavender-border) !important;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+}
+
+/* Wizard de Matrícula (5 Pasos) */
+.wizard-steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin-bottom: 2rem;
+  padding: 0 10px;
+}
+
+.wizard-steps::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #E2E8F0;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.wizard-step {
+  position: relative;
+  z-index: 2;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 0 8px;
 }
 
-a { color: var(--sinetec-primary); }
-a:hover { color: var(--sinetec-primary-dark); }
-:root { --bs-link-color: #39A900; --bs-link-hover-color: #1F5E2D; }
-
-/* Barra de navegación superior */
-.navbar-sinetec {
-  background: linear-gradient(135deg, var(--sinetec-primary), var(--sinetec-secondary));
-  box-shadow: 0 4px 12px rgba(111, 61, 73, 0.18);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-}
-
-.navbar-sinetec .navbar-brand {
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: #FFFFFF !important;
-}
-
-.badge-sena-institution {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: #FFFFFF;
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Tarjetas y Contenedores */
-.sinetec-card {
-  background-color: var(--sinetec-card-bg);
-  border: 1px solid var(--sinetec-border);
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.sinetec-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-}
-
-.sinetec-card-header {
-  background-color: #FFFFFF;
-  border-bottom: 1px solid var(--sinetec-border);
-  padding: 1.25rem 1.5rem;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-  font-weight: 600;
-}
-
-/* Botones con estilo propio */
-.btn-sinetec-primary {
-  background-color: var(--sinetec-primary);
-  border-color: var(--sinetec-primary);
-  color: #FFFFFF;
-  font-weight: 500;
-  border-radius: 8px;
-  padding: 0.6rem 1.25rem;
-  transition: all 0.2s;
-}
-
-.btn-sinetec-primary:hover {
-  background-color: var(--sinetec-primary-dark);
-  border-color: var(--sinetec-primary-dark);
-  color: #FFFFFF;
-  transform: translateY(-1px);
-}
-
-.btn-sinetec-success {
-  background-color: var(--sinetec-success);
-  border-color: var(--sinetec-success);
-  color: #FFFFFF;
-  font-weight: 500;
-  border-radius: 8px;
-}
-
-/* Identidad visual institucional y mapeo de colores funcionales con soporte de opacidad */
-:root {
-  --sinetec-brand-mauve: #5E2B3C;
-  --sinetec-brand-rose: #8E5266;
-  --sinetec-brand-blue: #1D4ED8;
-  --sinetec-brand-cyan: #0284C7;
-
-  --bs-primary: #5E2B3C;
-  --bs-primary-rgb: 94, 43, 60;
-  --bs-success: #39A900;
-  --bs-success-rgb: 57, 169, 0;
-  --bs-warning: #D97706;
-  --bs-warning-rgb: 217, 119, 6;
-  --bs-danger: #DC2626;
-  --bs-danger-rgb: 220, 38, 38;
-  --bs-info: #0284C7;
-  --bs-info-rgb: 2, 132, 199;
-}
-
-.bg-opacity-10 {
-  --bs-bg-opacity: 0.12 !important;
-}
-
-.bg-opacity-25 {
-  --bs-bg-opacity: 0.25 !important;
-}
-
-.bg-opacity-50 {
-  --bs-bg-opacity: 0.5 !important;
-}
-
-.text-primary {
-  color: #5E2B3C !important;
-}
-
-.bg-primary {
-  --bs-bg-opacity: 1;
-  background-color: rgba(94, 43, 60, var(--bs-bg-opacity)) !important;
-}
-
-.border-primary {
-  border-color: #8E5266 !important;
-}
-
-.text-info {
-  color: #0284C7 !important;
-}
-
-.bg-info {
-  --bs-bg-opacity: 1;
-  background-color: rgba(2, 132, 199, var(--bs-bg-opacity)) !important;
-}
-
-.border-info {
-  border-color: #0284C7 !important;
-}
-
-.text-success {
-  color: #1F5E2D !important;
-}
-
-.bg-success {
-  --bs-bg-opacity: 1;
-  background-color: rgba(57, 169, 0, var(--bs-bg-opacity)) !important;
-}
-
-.border-success {
-  border-color: #39A900 !important;
-}
-
-.text-warning {
-  color: #B45309 !important;
-}
-
-.bg-warning {
-  --bs-bg-opacity: 1;
-  background-color: rgba(217, 119, 6, var(--bs-bg-opacity)) !important;
-}
-
-.border-warning {
-  border-color: #D97706 !important;
-}
-
-.text-danger {
-  color: #B91C1C !important;
-}
-
-.bg-danger {
-  --bs-bg-opacity: 1;
-  background-color: rgba(220, 38, 38, var(--bs-bg-opacity)) !important;
-}
-
-.border-danger {
-  border-color: #DC2626 !important;
-}
-
-.chatbot-launcher {
-  position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
-  z-index: 1050;
-  width: 3.5rem;
-  height: 3.5rem;
-  border: 0;
+.wizard-step-circle {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
+  background: #F1F5F9;
+  border: 2px solid #CBD5E1;
+  color: #64748B;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+}
+
+.wizard-step.active .wizard-step-circle {
   background: var(--sinetec-primary);
-  color: #FFFFFF;
-  box-shadow: 0 8px 24px rgba(57, 169, 0, 0.35);
+  border-color: var(--sinetec-primary);
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(15, 41, 66, 0.15);
 }
 
-.chatbot-panel {
-  position: fixed;
-  right: 1.25rem;
-  bottom: 5.5rem;
-  z-index: 1049;
-  width: min(22rem, calc(100vw - 2rem));
-  background: #FFFFFF;
-  border: 1px solid var(--sinetec-border);
-  border-radius: 1rem;
-  box-shadow: 0 12px 32px rgba(74, 58, 64, 0.2);
+.wizard-step.completed .wizard-step-circle {
+  background: var(--sinetec-success);
+  border-color: var(--semaforo-aprobado);
+  color: #ffffff;
 }
 
-.chatbot-panel[hidden] { display: none; }
-.chatbot-header { background: var(--sinetec-primary); color: #FFFFFF; border-radius: 1rem 1rem 0 0; }
-.chatbot-message { background: var(--sinetec-bg-light); color: var(--sinetec-text-main); border-radius: .75rem; }
-
-.border-primary {
-  border-color: var(--sinetec-primary) !important;
-}
-
-/* Tablas con diseño ergonómico */
-.table-sinetec {
-  background-color: #FFFFFF;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid var(--sinetec-border);
-}
-
-.table-sinetec thead th {
-  background-color: #FBECEF;
-  color: #67434C;
-  font-weight: 600;
-  text-transform: uppercase;
+.wizard-step-label {
   font-size: 0.75rem;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid var(--sinetec-border);
-  padding: 0.85rem 1rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
-.table-sinetec tbody td {
-  padding: 0.85rem 1rem;
-  vertical-align: middle;
-  border-bottom: 1px solid #FBECEF;
+.wizard-step.active .wizard-step-label {
+  color: var(--sinetec-primary);
 }
 
-/* Pie de página */
-.footer-sinetec {
-  background-color: #FFFFFF;
-  border-top: 1px solid var(--sinetec-border);
-  padding: 1.5rem 0;
-  margin-top: auto;
-  font-size: 0.85rem;
-  color: var(--sinetec-text-muted);
+/* Carnet Escolar Digital Moderno */
+.carnet-escolar-wrapper {
+  perspective: 1000px;
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
 }
 
-/* Campos de selección y controles de formulario */
-.form-select {
-  padding-right: 2.5rem !important;
-  background-position: right 0.85rem center !important;
+.carnet-escolar-card {
+  width: 360px;
+  height: 540px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 20px 40px -10px rgba(15, 41, 66, 0.2);
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.carnet-header {
+  background: linear-gradient(135deg, #0A1E32 0%, #0F2942 60%, #1E3A8A 100%);
+  color: #ffffff;
+  padding: 22px 20px 18px;
+  text-align: center;
+  position: relative;
+}
+
+.carnet-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3B82F6 0%, #60A5FA 50%, #F43F5E 100%);
+}
+
+.carnet-colegio-nombre {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.carnet-colegio-lema {
+  font-size: 0.68rem;
+  color: #94A3B8;
+  margin-top: 2px;
+}
+
+.carnet-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.carnet-photo-container {
+  width: 105px;
+  height: 125px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
+  background: #E2E8F0;
+  display: grid;
+  place-items: center;
+  margin-top: -10px;
+  margin-bottom: 12px;
+}
+
+.carnet-photo-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carnet-student-name {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0F172A;
+  text-align: center;
+  margin: 0 0 4px;
+}
+
+.carnet-student-role {
+  display: inline-block;
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+.carnet-info-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  font-size: 0.78rem;
+  margin-bottom: 14px;
+  background: #F8FAFC;
+  padding: 10px 14px;
   border-radius: 10px;
+  border: 1px solid #F1F5F9;
 }
 
+.carnet-info-item span {
+  display: block;
+  color: #64748B;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.carnet-info-item strong {
+  color: #0F172A;
+}
+
+.carnet-qr-area {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  padding: 6px 12px;
+  border-radius: 12px;
+}
+
+.carnet-qr-area img {
+  width: 58px;
+  height: 58px;
+}
+
+/* Reglas de impresión para carnet */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .carnet-escolar-wrapper, .carnet-escolar-wrapper * {
+    visibility: visible;
+  }
+  .carnet-escolar-wrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+  }
+}

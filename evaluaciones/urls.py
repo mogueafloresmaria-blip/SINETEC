@@ -2,6 +2,15 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Semáforo de Competencias (3 colores: 🟢 Aprobado, 🟡 En proceso, 🔴 Por recuperar)
+    path('semaforo/', views.semaforo_competencias, name='semaforo_competencias'),
+    path('semaforo/api/actualizar/', views.api_actualizar_semaforo, name='api_actualizar_semaforo'),
+    path('semaforo/exportar-excel/', views.exportar_semaforo_excel, name='exportar_semaforo_excel'),
+    path('semaforo/exportar/excel/', views.exportar_semaforo_excel),
+    path('semaforo/exportar-pdf/', views.exportar_semaforo_pdf, name='exportar_semaforo_pdf'),
+    path('semaforo/exportar/pdf/', views.exportar_semaforo_pdf),
+
+    # Sábana de Juicios RAP institucional SENA (A y D)
     path('raps/', views.raps_por_ficha, name='evaluaciones_raps'),
     path('aprendices/', views.aprendices_por_rap, name='evaluaciones_aprendices'),
     path('exportar-excel/', views.exportar_sabana_excel, name='evaluaciones_exportar_excel'),

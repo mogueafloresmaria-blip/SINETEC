@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ proyecto.titulo }} · SENNOVA SINETEC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .project-header-hero {
+        border-radius: 24px;
+        padding: clamp(24px, 4vw, 40px);
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 16px 36px rgba(4, 50, 77, 0.15);
+    }
+    .project-header-hero.Software-TIC {
+        background: linear-gradient(135deg, #092330 0%, #0d4457 50%, #0284c7 100%);
+    }
+    .project-header-hero.Agroecologia {
+        background: linear-gradient(135deg, #062e15 0%, #166534 50%, #22c55e 100%);
+    }
+    .project-header-hero.Ecoturismo {
+        background: linear-gradient(135deg, #042f2e 0%, #0d9488 50%, #14b8a6 100%);
+    }
+    .project-header-hero.Logistica {
+        background: linear-gradient(135deg, #451a03 0%, #b45309 50%, #f59e0b 100%);
+    }
+    .project-header-hero.Emprendimiento {
+        background: linear-gradient(135deg, #3b0764 0%, #7e22ce 50%, #a855f7 100%);
+    }
+
+    .pipeline-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+    }
+    .pipeline-step::after {
+        content: '';
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        width: 100%;
+        height: 3px;
+        background: #e2e8f0;
+        z-index: 1;
+    }
+    .pipeline-step:last-child::after {
+        display: none;
+    }
+    .pipeline-dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 3px solid #cbd5e1;
+        display: grid;
+        place-items: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #64748b;
+        margin: 0 auto 6px;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+    .pipeline-step.active .pipeline-dot {
+        border-color: #29AAE3;
+        background: #29AAE3;
+        color: #ffffff;
+        box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.2);
+    }
+    .pipeline-step.completed .pipeline-dot {
+        border-color: #107C41;
+        background: #107C41;
+        color: #ffffff;
+    }
+    .pipeline-step.completed::after {
+        background: #107C41;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-3">
+
+    <!-- Navegación y Volver -->
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'innovacion_dashboard' %}" class="text-decoration-none text-muted">Banco SENNOVA</a></li>
+                <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">{{ proyecto.titulo|truncatechars:35 }}</li>
+            </ol>
+        </nav>
+        <a href="{% url 'innovacion_dashboard' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Volver a Proyectos SENNOVA
+        </a>
+    </div>
+
+    <!-- Hero Header del Proyecto -->
+    <div class="project-header-hero {{ proyecto.categoria|slugify|title }} mb-4 position-relative">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 rounded-pill">
+                <i class="bi bi-stars text-warning me-1"></i> SENNOVA · Investigación Aplicada
+            </span>
+            <span class="badge bg-black bg-opacity-30 text-white rounded-pill px-3 py-1">
+                <i class="bi bi-tag-fill me-1"></i> {{ proyecto.get_categoria_display }}
+            </span>
+            <span class="badge bg-success text-white border border-success rounded-pill px-3 py-1">
+                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> {{ proyecto.get_estado_display }}
+            </span>
+        </div>
+
+        <h1 class="h2 fw-bold text-white mb-3" style="letter-spacing: -0.02em;">
+            {{ proyecto.titulo }}
+        </h1>
+
+        <p class="text-white-50 mb-4" style="max-width: 820px; font-size: 1.02rem; line-height: 1.6;">
+            {{ proyecto.descripcion }}
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 align-items-center pt-3 border-top border-white border-opacity-15 small text-white-50">
+            <div>
+                <i class="bi bi-patch-check-fill text-warning me-1"></i>
+                Semillero SENNOVA · Regional Magdalena
+            </div>
+            <div>
+                <i class="bi bi-calendar-event me-1"></i>
+                Registrado: {{ proyecto.fecha_creacion|date:"d M Y" }}
+            </div>
+            <div>
+                <i class="bi bi-shield-check me-1"></i>
+                Centro de Logística y Promoción Ecoturística
+            </div>
+        </div>
+    </div>
+
+    <!-- Pipeline de Madurez Tecnológica del Proyecto -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-diagram-3-fill text-success me-2"></i>Línea de Madurez Formativa e Investigativa (SENNOVA)</h6>
+        <div class="d-flex justify-content-between align-items-center position-relative">
+            <div class="pipeline-step completed">
+                <div class="pipeline-dot"><i class="bi bi-check-lg"></i></div>
+                <div class="small fw-bold text-dark">Idea</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Conceptualización</div>
+            </div>
+            <div class="pipeline-step {% if proyecto.estado != 'IDEA' %}completed{% else %}active{% endif %}">
+                <div class="pipeline-dot">{% if proyecto.estado != 'IDEA' %}<i class="bi bi-check-lg"></i>{% else %}2{% endif %}</div>
+                <div class="small fw-bold text-dark">Propuesta</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Radicada SENA</div>
+            </div>
+            <div class="pipeline-step {% if proyecto.estado == 'EN_DESARROLLO' or proyecto.estado == 'FINALIZADO' %}completed{% elif proyecto.estado == 'EN_EVALUACION' %}active{% endif %}">
+                <div class="pipeline-dot">{% if proyecto.estado == 'EN_DESARROLLO' or proyecto.estado == 'FINALIZADO' %}<i class="bi bi-check-lg"></i>{% else %}3{% endif %}</div>
+                <div class="small fw-bold text-dark">Evaluación</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Comité Técnico</div>
+            </div>
+            <div class="pipeline-step {% if proyecto.estado == 'EN_DESARROLLO' or proyecto.estado == 'DESARROLLO' %}active{% elif proyecto.estado == 'FINALIZADO' %}completed{% endif %}">
+                <div class="pipeline-dot">{% if proyecto.estado == 'FINALIZADO' %}<i class="bi bi-check-lg"></i>{% else %}4{% endif %}</div>
+                <div class="small fw-bold text-dark">Desarrollo</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Prototipado Activo</div>
+            </div>
+            <div class="pipeline-step {% if proyecto.estado == 'FINALIZADO' %}active completed{% endif %}">
+                <div class="pipeline-dot">{% if proyecto.estado == 'FINALIZADO' %}<i class="bi bi-check-lg"></i>{% else %}5{% endif %}</div>
+                <div class="small fw-bold text-dark">Transferencia</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Concluido / Transferido</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido en Dos Columnas -->
+    <div class="row g-4">
+        
+        <!-- Columna Izquierda: Detalles Técnicos, Justificación e Impacto -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-journal-text text-success me-2"></i>Planteamiento del Problema y Justificación Regional
+                </h5>
+                <p class="text-muted" style="line-height: 1.7;">
+                    {{ proyecto.descripcion }}
+                </p>
+                <div class="p-3 bg-light rounded-3 mt-3 border-start border-4 border-success">
+                    <div class="small fw-bold text-success text-uppercase mb-1">Impacto Territorial en Magdalena y el Caribe</div>
+                    <p class="small text-muted mb-0">
+                        Esta iniciativa responde directamente a los desafíos del sector productivo local, fortaleciendo competencias técnicas avanzadas en los aprendices y facilitando transferencia tecnológica a empresas de la región.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Ficha Técnica de Entregables -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-boxes text-primary me-2"></i>Componentes Técnicos y Entregables del Semillero
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-cpu-fill text-info fs-5"></i>
+                                <span class="fw-bold small text-dark">Línea Tecnológica</span>
+                            </div>
+                            <p class="text-muted small mb-0">{{ proyecto.get_categoria_display }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-check2-circle text-success fs-5"></i>
+                                <span class="fw-bold small text-dark">Resultados de Aprendizaje (RAP)</span>
+                            </div>
+                            <p class="text-muted small mb-0">Articulación curricular y evaluación por competencias aplicadas en aula.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if proyecto.archivo_soporte %}
+                <div class="mt-4 p-3 bg-light rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-3"></i>
+                        <div>
+                            <div class="fw-bold small text-dark">Documento Técnico / Propuesta SENNOVA</div>
+                            <small class="text-muted">Ficha oficial aprobada en PDF</small>
+                        </div>
+                    </div>
+                    <a href="{{ proyecto.archivo_soporte.url }}" target="_blank" class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3">
+                        <i class="bi bi-download me-1"></i> Descargar Documento
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Aprendices Colaboradores -->
+            {% if aprendices_ficha %}
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-people-fill text-success me-2"></i>Aprendices del Equipo Formativo
+                </h5>
+                <div class="row g-2">
+                    {% for mat in aprendices_ficha %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center gap-2 p-2 border rounded-3 bg-light">
+                            <div class="sinetec-avatar bg-success text-white small" style="width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; font-weight: bold;">
+                                {{ mat.aprendiz.first_name|slice:':1'|default:mat.aprendiz.username|slice:':1'|upper }}
+                            </div>
+                            <div class="overflow-hidden">
+                                <div class="small fw-bold text-dark text-truncate">{{ mat.aprendiz.get_full_name|default:mat.aprendiz.username }}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">Aprendiz · Ficha {{ mat.ficha.codigo_ficha }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Columna Derecha: Ficha Formativa, Asesor y Acciones -->
+        <div class="col-lg-4">
+            
+            <!-- Tarjeta del Equipo Líder -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-badge-fill text-success me-2"></i>Liderazgo del Proyecto</h6>
+                
+                <div class="mb-3">
+                    <span class="text-muted small text-uppercase d-block mb-1">Instructor Asesor Técnico</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="sinetec-avatar bg-primary text-white" style="width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: bold;">
+                            <i class="bi bi-person-workspace"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark">{{ proyecto.instructor_asesor.get_full_name|default:proyecto.instructor_asesor.username|default:'Sin asignar' }}</div>
+                            <small class="text-muted">Instructor SENA · Regional Magdalena</small>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-3">
+
+                <div class="mb-3">
+                    <span class="text-muted small text-uppercase d-block mb-1">Aprendiz / Profesor Líder</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="sinetec-avatar bg-success text-white" style="width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: bold;">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark">{{ proyecto.lider.get_full_name|default:proyecto.lider.username }}</div>
+                            <small class="text-muted">Líder de Investigación Formativa</small>
+                        </div>
+                    </div>
+                </div>
+
+                {% if proyecto.ficha %}
+                <hr class="my-3">
+                <div>
+                    <span class="text-muted small text-uppercase d-block mb-1">Ficha Articulada</span>
+                    <div class="fw-bold text-dark">{{ proyecto.ficha.codigo_ficha }}</div>
+                    <div class="small text-muted">{{ proyecto.ficha.programa.denominacion }}</div>
+                    {% if proyecto.ficha.institucion %}
+                    <div class="small text-muted mt-1"><i class="bi bi-geo-alt me-1"></i>{{ proyecto.ficha.institucion.nombre }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Datos Institucionales SENNOVA -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-building-check text-success me-2"></i>Entidad y Adscripción</h6>
+                <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-muted">
+                    <li><strong class="text-dark">Entidad:</strong> Servicio Nacional de Aprendizaje (SENA)</li>
+                    <li><strong class="text-dark">Regional:</strong> Regional Magdalena</li>
+                    <li><strong class="text-dark">Centro:</strong> Centro de Logística y Promoción Ecoturística</li>
+                    <li><strong class="text-dark">Línea SENNOVA:</strong> Investigación Aplicada y Semilleros</li>
+                    <li><strong class="text-dark">Vigencia:</strong> 2025 - 2026</li>
+                </ul>
+            </div>
+
+            <!-- Acciones -->
+            <div class="d-grid gap-2">
+                <a href="{% url 'innovacion_dashboard' %}" class="btn btn-outline-success fw-bold rounded-pill py-2">
+                    <i class="bi bi-grid-fill me-1"></i> Explorar Otros Proyectos
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

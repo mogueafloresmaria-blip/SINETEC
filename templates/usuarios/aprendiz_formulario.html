@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Estudiante · {{ usuario.get_full_name }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2 px-md-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'estudiantes_lista' %}" class="text-decoration-none text-muted">Estudiantes</a></li>
+                        <li class="breadcrumb-item active fw-semibold text-dark">Editar Estudiante</li>
+                    </ol>
+                </nav>
+                <a href="{% url 'estudiante_detalle' usuario.id %}" class="btn btn-outline-secondary btn-sm rounded-3">
+                    <i class="bi bi-arrow-left me-1"></i> Cancelar
+                </a>
+            </div>
+
+            <div class="sinetec-card-modern p-4 p-md-5 bg-white">
+                <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                    <div class="p-3 rounded-3 fs-3" style="background: #F0F9FD; color: #29AAE3;">
+                        <i class="bi bi-person-gear"></i>
+                    </div>
+                    <div>
+                        <h2 class="h4 fw-bold mb-1 text-dark">Editar Datos del Aprendiz</h2>
+                        <p class="text-muted small mb-0">Actualice la ficha personal y la asignación técnica de Media Técnica.</p>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Nombres *</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ usuario.first_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Apellidos *</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ usuario.last_name }}" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-dark">Tipo Documento</label>
+                            <select name="tipo_documento" class="form-select">
+                                <option value="TI" {% if perfil.tipo_documento == 'TI' %}selected{% endif %}>TI - Tarjeta de Identidad</option>
+                                <option value="CC" {% if perfil.tipo_documento == 'CC' %}selected{% endif %}>CC - Cédula de Ciudadanía</option>
+                                <option value="PPT" {% if perfil.tipo_documento == 'PPT' %}selected{% endif %}>PPT - Permiso Protección Temporal</option>
+                                <option value="CE" {% if perfil.tipo_documento == 'CE' %}selected{% endif %}>CE - Cédula de Extranjería</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-semibold text-dark">Número de Documento *</label>
+                            <input type="text" name="numero_documento" class="form-control" value="{{ perfil.numero_documento }}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Correo Electrónico *</label>
+                            <input type="email" name="email" class="form-control" value="{{ usuario.email }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Teléfono / Celular</label>
+                            <input type="text" name="telefono" class="form-control" value="{{ perfil.telefono|default:'' }}">
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-dark text-uppercase small mb-3 pb-2 border-bottom">
+                        <i class="bi bi-mortarboard me-1 text-success"></i> Asignación Académica y Ficha
+                    </h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-8">
+                            <label class="form-label small fw-semibold text-dark">Ficha Técnica Asignada</label>
+                            <select name="ficha_id" class="form-select">
+                                <option value="">-- Sin Ficha Asignada --</option>
+                                {% for f in fichas %}
+                                    <option value="{{ f.id }}" {% if matricula and matricula.ficha_id == f.id %}selected{% endif %}>
+                                        {{ f.codigo_ficha }} - {{ f.programa.denominacion }} ({{ f.institucion.nombre }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-dark">Grado Escolar</label>
+                            <select name="grado_escolar" class="form-select">
+                                <option value="10" {% if matricula and matricula.grado_escolar == '10' %}selected{% endif %}>Grado 10°</option>
+                                <option value="11" {% if matricula and matricula.grado_escolar == '11' %}selected{% endif %}>Grado 11°</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-top d-flex justify-content-end gap-2">
+                        <a href="{% url 'estudiante_detalle' usuario.id %}" class="btn btn-light px-4 rounded-3">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-sinetec-primary px-4 fw-semibold rounded-3">
+                            <i class="bi bi-check-lg me-1"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

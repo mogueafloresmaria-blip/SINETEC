@@ -1,80 +1,120 @@
 {% extends 'base.html' %}
 
-{% block title %}Fichas técnicas - SINETEC | SENA Regional Magdalena{% endblock %}
+{% block title %}Cursos y Grupos - SINETEC{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-3">
+<div class="container-fluid py-2 px-md-3">
 
-    <!-- Encabezado Institucional SENA -->
-    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #1e3a29 0%, #153020 100%); color: #ffffff; padding: 2rem; border-radius: 1rem;">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-            <div>
-                <div class="sinetec-eyebrow text-success-subtle mb-1" style="color: #6ee7b7 !important; font-weight: 600;">
-                    <i class="bi bi-shield-check me-1"></i> Regional Magdalena · Centro de Logística y Promoción Ecoturística
-                </div>
-                <h1 class="h2 fw-bold mb-1 text-white">Fichas técnicas</h1>
-                <p class="mb-0 text-white-50 small">
-                    Gestión académica de cohortes articuladas con la Media Técnica, seguimiento a la formación y control operativo SENA.
-                </p>
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-                {% if puede_crear %}
-                    <a href="{% url 'fichas_crear' %}" class="btn btn-success fw-bold px-3 shadow-sm" style="background-color: #39A900; border-color: #39A900;">
-                        <i class="bi bi-plus-circle me-1"></i> Abrir Nueva Ficha
-                    </a>
-                {% endif %}
-                <a href="{% url 'programas_lista' %}" class="btn btn-outline-light px-3">
-                    <i class="bi bi-journal-bookmark me-1"></i> Ver Programas
+    <!-- 1. ENCABEZADO Y ACCIÓN PRINCIPAL -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+                <i class="bi bi-layers text-primary"></i> Cursos y Grupos Formativos
+            </h1>
+            <p class="text-muted small mb-0">Gestión de cursos, grupos escolares y cohortes formativas institucionales</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'programas_lista' %}" class="btn btn-outline-secondary btn-sm rounded-3">
+                <i class="bi bi-journal-text me-1"></i> Programas
+            </a>
+            {% if puede_crear %}
+                <a href="{% url 'fichas_crear' %}" class="btn btn-sinetec-primary btn-sm rounded-3">
+                    <i class="bi bi-plus-lg me-1"></i> Aperturar Ficha
                 </a>
-            </div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Indicadores Rápidos -->
+    <!-- 2. CUATRO KPIS CLAVE DE FORMACIÓN -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="sinetec-card p-3 h-100 border-start border-4 border-success">
-                <div class="text-muted small fw-semibold text-uppercase">Total Fichas</div>
-                <div class="h3 fw-bold mb-0 text-dark">{{ total_fichas|default:0 }}</div>
-                <small class="text-muted">Cohortes registradas</small>
+            <div class="sinetec-card-modern p-3 border-start border-4 border-primary h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Total Fichas</div>
+                        <div class="h3 fw-bold text-dark my-1">{{ total_fichas|default:0 }}</div>
+                        <div class="text-primary small fw-semibold">Cohortes registradas</div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-primary bg-opacity-10 text-primary fs-4">
+                        <i class="bi bi-layers-fill"></i>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="sinetec-card p-3 h-100 border-start border-4 border-primary">
-                <div class="text-muted small fw-semibold text-uppercase">En Ejecución</div>
-                <div class="h3 fw-bold mb-0 text-primary">{{ fichas_ejecucion|default:0 }}</div>
-                <small class="text-success fw-semibold"><i class="bi bi-play-circle me-1"></i>Activas en aula</small>
+            <div class="sinetec-card-modern p-3 border-start border-4 border-success h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">En Ejecución</div>
+                        <div class="h3 fw-bold text-success my-1">{{ fichas_ejecucion|default:0 }}</div>
+                        <div class="text-success small fw-semibold">Activas en aula</div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-success bg-opacity-10 text-success fs-4">
+                        <i class="bi bi-play-circle-fill"></i>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="sinetec-card p-3 h-100 border-start border-4 border-secondary">
-                <div class="text-muted small fw-semibold text-uppercase">Terminadas</div>
-                <div class="h3 fw-bold mb-0 text-secondary">{{ fichas_terminadas|default:0 }}</div>
-                <small class="text-muted">Ciclo finalizado</small>
+            <div class="sinetec-card-modern p-3 border-start border-4 border-secondary h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Terminadas</div>
+                        <div class="h3 fw-bold text-secondary my-1">{{ fichas_terminadas|default:0 }}</div>
+                        <div class="text-muted small fw-semibold">Etapa culminada</div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-secondary bg-opacity-10 text-secondary fs-4">
+                        <i class="bi bi-check-all"></i>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="sinetec-card p-3 h-100 border-start border-4 border-warning">
-                <div class="text-muted small fw-semibold text-uppercase">Ficha Principal</div>
-                <div class="h3 fw-bold mb-0 text-dark">3173430</div>
-                <small class="text-success fw-semibold"><i class="bi bi-star-fill text-warning me-1"></i>ADSI en Formación</small>
+            <div class="sinetec-card-modern p-3 border-start border-4 border-danger h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Canceladas</div>
+                        <div class="h3 fw-bold text-danger my-1">{{ fichas_canceladas|default:0 }}</div>
+                        <div class="text-muted small fw-semibold">Sin actividad</div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-danger bg-opacity-10 text-danger fs-4">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Buscador y Filtros Avanzados -->
-    <div class="sinetec-card p-4 mb-4">
-        <form method="get" class="row g-3 align-items-end">
-            <div class="col-md-5">
-                <label class="form-label small fw-semibold text-secondary">
-                    <i class="bi bi-search me-1"></i> Buscar por número de ficha, programa o sede:
-                </label>
-                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Ej. 3173430, ADSI, Normal Superior...">
+    <!-- 3. BARRA DE FILTROS Y BÚSQUEDA -->
+    <div class="sinetec-card-modern p-3 mb-4 bg-white">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-md-4 col-lg-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="{{ query }}" class="form-control border-start-0" placeholder="Código ficha, programa, sede...">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold text-secondary">
-                    <i class="bi bi-funnel me-1"></i> Estado:
-                </label>
+            <div class="col-6 col-md-4 col-lg-3">
+                <select name="institucion" class="form-select">
+                    <option value="">-- Todas las Instituciones --</option>
+                    {% for inst in instituciones %}
+                        <option value="{{ inst.id }}" {% if institucion_filtro == inst.id|stringformat:"s" %}selected{% endif %}>
+                            {{ inst.nombre|truncatechars:30 }} ({{ inst.municipio }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <select name="programa" class="form-select">
+                    <option value="">-- Todos los Programas --</option>
+                    {% for prog in programas %}
+                        <option value="{{ prog.id }}" {% if programa_filtro == prog.id|stringformat:"s" %}selected{% endif %}>
+                            {{ prog.denominacion|truncatechars:28 }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
                 <select name="estado" class="form-select">
                     <option value="">-- Todos los Estados --</option>
                     <option value="En Ejecucion" {% if estado_filtro == 'En Ejecucion' %}selected{% endif %}>En Ejecución</option>
@@ -82,148 +122,190 @@
                     <option value="Cancelada" {% if estado_filtro == 'Cancelada' %}selected{% endif %}>Cancelada</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-semibold text-secondary">
-                    <i class="bi bi-person-badge me-1"></i> Instructor:
-                </label>
-                <select name="instructor" class="form-select">
-                    <option value="">-- Todos --</option>
-                    {% for inst in instructores %}
-                        <option value="{{ inst.id }}" {% if instructor_filtro == inst.id|stringformat:"s" %}selected{% endif %}>
-                            {{ inst.get_full_name|default:inst.username }}
-                        </option>
-                    {% endfor %}
+            <div class="col-6 col-md-3 col-lg-2">
+                <select name="orden" class="form-select">
+                    <option value="recientes" {% if orden == 'recientes' %}selected{% endif %}>Más Recientes</option>
+                    <option value="codigo_asc" {% if orden == 'codigo_asc' %}selected{% endif %}>Código Ficha (A-Z)</option>
+                    <option value="codigo_desc" {% if orden == 'codigo_desc' %}selected{% endif %}>Código Ficha (Z-A)</option>
+                    <option value="aprendices_desc" {% if orden == 'aprendices_desc' %}selected{% endif %}>Más Aprendices</option>
                 </select>
             </div>
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-success fw-semibold w-100" style="background-color: #39A900; border-color: #39A900;">
-                    Filtrar
-                </button>
-                {% if query or estado_filtro or instructor_filtro %}
-                    <a href="{% url 'fichas_lista' %}" class="btn btn-outline-secondary" title="Limpiar filtros">
-                        <i class="bi bi-x-lg"></i>
+            <div class="col-12 d-flex justify-content-end gap-2 mt-2 pt-2 border-top">
+                {% if query or institucion_filtro or programa_filtro or estado_filtro or orden != 'recientes' %}
+                    <a href="{% url 'fichas_lista' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i> Limpiar Filtros
                     </a>
                 {% endif %}
+                <button type="submit" class="btn btn-sm btn-sinetec-primary px-3">
+                    <i class="bi bi-filter me-1"></i> Aplicar Filtros
+                </button>
             </div>
         </form>
     </div>
 
-    <!-- Bloques Visuales y Tarjetas de Fichas -->
-    <div class="row g-4 mb-4">
+    <!-- 4. CATÁLOGO DE FICHAS TÉCNICAS -->
+    <div class="row g-3">
         {% for f in fichas %}
-            <div class="col-12 col-xl-6">
-                <div class="card h-100 border-0 shadow-sm rounded-4 position-relative" style="background: #ffffff; border-left: 5px solid {% if f.codigo_ficha == '3173430' %}#39A900{% elif f.estado == 'En Ejecucion' %}#0284c7{% else %}#94a3b8{% endif %} !important;">
-                    <div class="card-body p-4 d-flex flex-column">
-                        
-                        <!-- Encabezado de la Tarjeta -->
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
-                            <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="badge fs-6 fw-bold text-white px-3 py-1 rounded-pill" style="background-color: {% if f.codigo_ficha == '3173430' %}#39A900{% else %}#1e293b{% endif %};">
-                                        Ficha {{ f.codigo_ficha }}
-                                    </span>
-                                    {% if f.codigo_ficha == '3173430' %}
-                                        <span class="badge bg-warning text-dark fw-bold rounded-pill">
-                                            <i class="bi bi-star-fill me-1"></i> Ficha Principal
-                                        </span>
-                                    {% endif %}
-                                </div>
-                                <h2 class="h5 fw-bold text-dark mb-0">
-                                    <a href="{% url 'fichas_detalle' f.id %}" class="text-decoration-none text-dark hover-success">
-                                        {{ f.programa.denominacion }}
-                                    </a>
-                                </h2>
-                            </div>
-                            <span class="badge {% if f.estado == 'En Ejecucion' %}bg-success bg-opacity-10 text-success border border-success border-opacity-25{% elif f.estado == 'Terminada' %}bg-secondary bg-opacity-10 text-secondary border{% else %}bg-danger bg-opacity-10 text-danger border{% endif %} px-3 py-2 rounded-pill fw-semibold">
-                                <i class="bi bi-circle-fill fs-8 me-1"></i> {{ f.get_estado_display }}
+            <div class="col-12 col-lg-6">
+                <div class="sinetec-card-modern p-3.5 bg-white h-100 d-flex flex-column border-top border-4 {% if f.estado == 'En Ejecucion' %}border-success{% elif f.estado == 'Terminada' %}border-secondary{% else %}border-danger{% endif %}">
+                    
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                        <div>
+                            <span class="badge bg-light text-dark border font-monospace fs-6 px-2.5 py-1">
+                                <i class="bi bi-hash text-muted"></i>{{ f.codigo_ficha }}
+                            </span>
+                            <span class="badge ms-1 {% if f.estado == 'En Ejecucion' %}bg-success bg-opacity-10 text-success border border-success border-opacity-25{% elif f.estado == 'Terminada' %}bg-secondary bg-opacity-10 text-secondary border{% else %}bg-danger bg-opacity-10 text-danger border{% endif %}">
+                                {{ f.get_estado_display }}
                             </span>
                         </div>
-
-                        <!-- Metadatos Oficiales SENA -->
-                        <div class="bg-light p-3 rounded-3 mb-3 text-secondary small">
-                            <div class="row g-2">
-                                <div class="col-sm-6">
-                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    <strong>Regional:</strong> Regional Magdalena
-                                </div>
-                                <div class="col-sm-6">
-                                    <i class="bi bi-building text-primary me-1"></i>
-                                    <strong>Centro:</strong> Centro de Logística y Promoción Ecoturística
-                                </div>
-                                <div class="col-sm-6">
-                                    <i class="bi bi-mortarboard text-success me-1"></i>
-                                    <strong>Sede / Institución:</strong> {{ f.institucion.nombre }} ({{ f.institucion.municipio }})
-                                </div>
-                                <div class="col-sm-6">
-                                    <i class="bi bi-person-badge text-warning me-1"></i>
-                                    <strong>Instructor Líder:</strong> {{ f.instructor_lider.get_full_name|default:f.instructor_lider.username }}
-                                </div>
-                                <div class="col-sm-6">
-                                    <i class="bi bi-people-fill text-info me-1"></i>
-                                    <strong>Aprendices Matriculados:</strong> <span class="fw-bold text-dark">{{ f.num_aprendices }}</span>
-                                </div>
-                                <div class="col-sm-6">
-                                    <i class="bi bi-calendar3 text-muted me-1"></i>
-                                    <strong>Periodo Lectivo:</strong> {{ f.fecha_inicio|date:"d/m/Y" }} — {{ f.fecha_fin|date:"d/m/Y" }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 8 Botones de Acción Funcionales -->
-                        <div class="mt-auto pt-3 border-top d-flex flex-wrap gap-2">
-                            <a href="{% url 'fichas_detalle' f.id %}" class="btn btn-sm btn-outline-dark fw-semibold" title="Abrir expediente completo">
-                                <i class="bi bi-eye me-1"></i> VER
-                            </a>
-                            <a href="{% url 'ficha_editar' f.id %}" class="btn btn-sm btn-outline-secondary" title="Editar metadatos de la ficha">
-                                <i class="bi bi-pencil me-1"></i> EDITAR
-                            </a>
-                            <a href="{% url 'estudiantes_lista' %}?ficha={{ f.id }}" class="btn btn-sm btn-outline-success fw-semibold" title="Ver lista de aprendices matriculados">
-                                <i class="bi bi-people me-1"></i> APRENDICES ({{ f.num_aprendices }})
-                            </a>
-                            <a href="{% url 'horarios_tablero' %}?ficha={{ f.id }}" class="btn btn-sm btn-outline-primary" title="Ver cronograma y ambientes formativos">
-                                <i class="bi bi-calendar-week me-1"></i> HORARIO
-                            </a>
-                            <a href="{% url 'seguimiento_lista' %}?ficha={{ f.id }}" class="btn btn-sm btn-outline-warning text-dark" title="Ver historial de acompañamientos y visitas">
-                                <i class="bi bi-clipboard2-pulse me-1"></i> SEGUIMIENTO
-                            </a>
-                            <a href="{% url 'evaluaciones_calificar' %}?ficha={{ f.id }}" class="btn btn-sm btn-outline-success" title="Ver y registrar juicios evaluativos RAP">
-                                <i class="bi bi-award me-1"></i> EVALUACIONES
-                            </a>
-                            <a href="{% url 'aula_instructor' %}?ficha={{ f.id }}" class="btn btn-sm btn-outline-info text-dark" title="Ver actividades y evidencias del programa">
-                                <i class="bi bi-file-earmark-check me-1"></i> EVIDENCIAS
-                            </a>
-                            <a href="{% url 'ficha_reporte_pdf' f.id %}" class="btn btn-sm btn-outline-danger" title="Descargar informe oficial en PDF">
-                                <i class="bi bi-file-pdf me-1"></i> REPORTES
-                            </a>
-                        </div>
-
+                        <span class="badge bg-light text-muted border small">
+                            <i class="bi bi-calendar3 me-1"></i>{{ f.fecha_inicio|date:"d M Y" }} - {{ f.fecha_fin|date:"d M Y" }}
+                        </span>
                     </div>
+
+                    <h5 class="fw-bold text-dark mb-1">
+                        <a href="{% url 'fichas_detalle' f.id %}" class="text-decoration-none text-dark hover-primary">
+                            {{ f.programa.denominacion }}
+                        </a>
+                    </h5>
+
+                    <p class="text-muted small mb-3">
+                        <i class="bi bi-building text-success me-1"></i><strong>Colegio:</strong> {{ f.institucion.nombre }} ({{ f.institucion.municipio }})
+                    </p>
+
+                    <div class="row g-2 p-2.5 rounded-3 bg-light border mb-3 small">
+                        <div class="col-6">
+                            <i class="bi bi-person-badge text-warning me-1"></i>
+                            <strong>Profesor Líder:</strong><br>
+                            <span class="text-dark">{{ f.instructor_lider.get_full_name|default:f.instructor_lider.username|default:"Sin asignar" }}</span>
+                        </div>
+                        <div class="col-6">
+                            <i class="bi bi-mortarboard text-danger me-1"></i>
+                            <strong>Estudiantes Matriculados:</strong><br>
+                            <span class="fw-bold fs-6 text-dark">{{ f.num_aprendices }}</span> estudiantes
+                        </div>
+                    </div>
+
+                    <!-- BOTONES DE ACCIÓN FUNCIONALES -->
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'fichas_detalle' f.id %}" class="btn btn-sm btn-outline-dark fw-semibold" title="Abrir expediente completo">
+                                <i class="bi bi-eye me-1"></i> Ver Ficha
+                            </a>
+                            <a href="{% url 'ficha_editar' f.id %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'ficha_reporte_pdf' f.id %}" class="btn btn-sm btn-outline-danger" title="Exportar PDF">
+                                <i class="bi bi-file-pdf"></i>
+                            </a>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Acciones
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li>
+                                    <a class="dropdown-item py-1.5" href="{% url 'fichas_detalle' f.id %}">
+                                        <i class="bi bi-file-earmark-person text-primary me-2"></i> Expediente Completo
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-1.5" href="{% url 'estudiantes_lista' %}?ficha={{ f.id }}">
+                                        <i class="bi bi-people text-success me-2"></i> Ver Aprendices ({{ f.num_aprendices }})
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-1.5" href="{% url 'seguimiento_lista' %}?ficha={{ f.id }}">
+                                        <i class="bi bi-clipboard2-pulse text-warning me-2"></i> Seguimientos
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <a class="dropdown-item py-1.5" href="{% url 'ficha_cambiar_estado' f.id %}?next={{ request.get_full_path|urlencode }}">
+                                        {% if f.estado == 'En Ejecucion' %}
+                                            <i class="bi bi-check-circle text-secondary me-2"></i> Marcar como Terminada
+                                        {% else %}
+                                            <i class="bi bi-play-circle text-success me-2"></i> Marcar En Ejecución
+                                        {% endif %}
+                                    </a>
+                                </li>
+                                <li>
+                                    {% if f.num_aprendices > 0 %}
+                                        <button class="dropdown-item py-1.5 text-muted" onclick="alert('No es posible eliminar la Ficha {{ f.codigo_ficha }} porque tiene {{ f.num_aprendices }} aprendiz(ces) vinculado(s). Para desactivarla, use la opción de cambiar estado.')">
+                                            <i class="bi bi-trash text-muted me-2"></i> Eliminar (Protegido)
+                                        </button>
+                                    {% else %}
+                                        <a class="dropdown-item py-1.5 text-danger" href="{% url 'ficha_eliminar' f.id %}">
+                                            <i class="bi bi-trash text-danger me-2"></i> Eliminar Ficha
+                                        </a>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         {% empty %}
-            <!-- Estado Vacío Profesional Requerido -->
             <div class="col-12">
-                <div class="sinetec-card p-5 text-center my-4">
+                <div class="sinetec-card-modern p-5 text-center my-4 bg-white">
                     <div class="rounded-circle bg-light d-inline-flex p-4 mb-3 text-muted">
-                        <i class="bi bi-inbox fs-1 text-secondary"></i>
+                        <i class="bi bi-layers-slash fs-1 opacity-50"></i>
                     </div>
-                    <h3 class="h5 fw-bold text-dark mb-2">Esta ficha aún no tiene información registrada.</h3>
-                    <p class="text-muted max-w-md mx-auto mb-4" style="max-width: 520px;">
-                        No se encontraron registros de fichas técnicas para los criterios seleccionados. Verifique el filtro ingresado o registre una nueva ficha institucional.
+                    <h4 class="h5 fw-bold text-dark mb-2">No se encontraron fichas técnicas</h4>
+                    <p class="text-muted small max-w-md mx-auto mb-4" style="max-width: 480px;">
+                        No existen registros de fichas para los filtros seleccionados. Pruebe restableciendo los criterios o registre una nueva ficha técnica.
                     </p>
                     {% if puede_crear %}
-                        <a href="{% url 'fichas_crear' %}" class="btn btn-success fw-semibold px-4 py-2" style="background-color: #39A900; border-color: #39A900;">
-                            <i class="bi bi-plus-circle me-1"></i> AGREGAR INFORMACIÓN
-                        </a>
-                    {% else %}
-                        <a href="{% url 'fichas_lista' %}" class="btn btn-outline-secondary px-4 py-2">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i> Restablecer Filtros
+                        <a href="{% url 'fichas_crear' %}" class="btn btn-sinetec-primary px-4 py-2">
+                            <i class="bi bi-plus-lg me-1"></i> Aperturar Ficha
                         </a>
                     {% endif %}
                 </div>
             </div>
         {% endfor %}
     </div>
+
+    <!-- 5. PAGINACIÓN -->
+    {% if page_obj.has_other_pages %}
+        <div class="sinetec-card-modern bg-white p-3 mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span class="text-muted small">
+                Mostrando página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} fichas técnicas)
+            </span>
+            <nav aria-label="Paginación fichas">
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&institucion={{ institucion_filtro }}&programa={{ programa_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">
+                                &laquo; Anterior
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}&q={{ query }}&institucion={{ institucion_filtro }}&programa={{ programa_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&institucion={{ institucion_filtro }}&programa={{ programa_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">
+                                Siguiente &raquo;
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
 
 </div>
 {% endblock %}

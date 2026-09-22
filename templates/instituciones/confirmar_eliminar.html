@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar Eliminación · {{ institucion.nombre }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-lg-6 col-md-8">
+        <div class="sinetec-card p-4 p-md-5 border-danger border-top border-4">
+            <div class="d-flex align-items-center gap-3 mb-3 text-danger">
+                <div class="p-3 bg-danger bg-opacity-10 rounded-circle fs-3">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div>
+                    <h2 class="h4 fw-bold mb-0 text-dark">¿Eliminar Institución Educativa?</h2>
+                    <span class="text-muted small">Esta acción requiere confirmación administrativa</span>
+                </div>
+            </div>
+
+            <div class="alert alert-warning border-0 bg-light p-3 my-3">
+                <p class="mb-1 fw-semibold text-dark">{{ institucion.nombre }}</p>
+                <div class="small text-muted">
+                    <span><strong>DANE:</strong> {{ institucion.codigo_dane }}</span> · 
+                    <span><strong>Municipio:</strong> {{ institucion.municipio }}</span>
+                </div>
+            </div>
+
+            <p class="text-muted small">
+                Se verificó que esta institución <strong>no tiene fichas técnicas activas</strong> asociadas. 
+                Si confirma la eliminación, el registro se removerá de la base de datos y quedará constancia en la bitácora de auditoría.
+            </p>
+
+            <form method="post" class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                {% csrf_token %}
+                <a href="{% url 'instituciones_detalle' institucion.id %}" class="btn btn-light px-4">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-danger px-4 fw-semibold">
+                    <i class="bi bi-trash me-1"></i> Sí, Eliminar Institución
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,152 +1,481 @@
 {% extends 'base.html' %}
 
-{% block title %}Estudiantes - SINETEC{% endblock %}
+{% block title %}Directorio de Alumnos · DYL SCHOOL{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <!-- Tarjeta Superior Institucional -->
-    <div class="hero-card-verde p-4 mb-4 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #1b4d3e 0%, #11382c 100%); color: white;">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-people-fill fs-3 me-2 text-success bg-white p-2 rounded-3"></i>
-                    <h2 class="h3 fw-bold mb-0">Listado de Estudiantes</h2>
+<div class="container-fluid py-4 px-4">
+    <!-- TÍTULO PRINCIPAL -->
+    <div class="mb-3">
+        <h2 class="h4 fw-bold text-dark mb-1" style="font-size: 1.35rem; color: #0F172A;">Directorio de Alumnos</h2>
+    </div>
+
+    <!-- 1. CABECERA Y CONTADORES (3 indicadores en tarjetas arriba) -->
+    <div class="row g-3 mb-4">
+        <!-- Indicador 1: TOTAL (tarjeta con borde gris) -->
+        <div class="col-12 col-md-4">
+            <div class="p-3 d-flex align-items-center justify-content-between" style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px;">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="h4 fw-bold mb-0 text-dark" style="font-size: 1.45rem; color: #0F172A;">10</span>
+                    <span class="fw-bold small text-muted text-uppercase" style="letter-spacing: 0.05em; font-size: 0.85rem;">TOTAL</span>
                 </div>
-                <p class="text-light small mb-0">Directorio completo de aprendices matriculados clasificados por programa de formación y colegio aliado.</p>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: #F1F5F9; color: #475569;">
+                    <i class="bi bi-people-fill"></i>
+                </div>
             </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <button class="btn btn-light text-success fw-bold shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAgregarEstudiante">
-                    <i class="bi bi-person-plus-fill me-1"></i> Agregar Nuevo Aprendiz
+        </div>
+
+        <!-- Indicador 2: ACTIVOS (tarjeta con borde y texto verde esmeralda) -->
+        <div class="col-12 col-md-4">
+            <div class="p-3 d-flex align-items-center justify-content-between" style="background: #F0FDF4; border: 1px solid #10B981; border-radius: 8px;">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="h4 fw-bold mb-0" style="font-size: 1.45rem; color: #047857;">10</span>
+                    <span class="fw-bold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.85rem; color: #059669;">ACTIVOS</span>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: #D1FAE5; color: #059669;">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicador 3: DE BAJA (tarjeta con borde y texto rojo) -->
+        <div class="col-12 col-md-4">
+            <div class="p-3 d-flex align-items-center justify-content-between" style="background: #FEF2F2; border: 1px solid #EF4444; border-radius: 8px;">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="h4 fw-bold mb-0" style="font-size: 1.45rem; color: #B91C1C;">0</span>
+                    <span class="fw-bold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.85rem; color: #DC2626;">DE BAJA</span>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: #FEE2E2; color: #DC2626;">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. BARRA SUPERIOR DE ACCIÓN -->
+    <div class="card p-3 mb-4" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <!-- Lado izquierdo: Input de búsqueda con icono de lupa -->
+            <div class="flex-grow-1" style="max-width: 440px;">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #CBD5E1;">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="buscadorAlumnos" class="form-control border-start-0 ps-0" placeholder="Buscar alumno..." onkeyup="filtrarTablaAlumnos()" style="border-color: #CBD5E1; font-size: 0.9rem;">
+                </div>
+            </div>
+            <!-- Lado derecho: Botón destacado en color azul/morado: "+ Nuevo Alumno" -->
+            <div>
+                <button type="button" class="btn text-white fw-semibold px-3 py-2 d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoAlumno" style="background-color: #4F46E5; border-radius: 8px; font-size: 0.9rem; border: none;">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>+ Nuevo Alumno</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Secciones Separadas por Columnas (Programas / Niveles) -->
-    <div class="row g-4">
-        
-        <!-- Columna 1: Tecnólogo ADSI -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
-                <div class="card-header bg-success text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background-color: #39A900 !important;">
-                    <span><i class="bi bi-code-slash me-2"></i> Tecnólogo ADSI</span>
-                    <span class="badge bg-white text-success">2 Aprendices</span>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item px-0 py-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-success">1082938471</span>
-                                <span class="badge bg-success bg-opacity-10 text-success">Ficha 3173430</span>
+    <!-- 3. TABLA DE ALUMNOS (Contenedor blanco con esquinas redondeadas y sombra suave) -->
+    <div class="card overflow-hidden mb-4" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tablaAlumnos">
+                <thead style="background-color: #F8FAFC; border-bottom: 1px solid #E2E8F0;">
+                    <tr class="small text-muted text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                        <th class="ps-4 py-3">ALUMNO</th>
+                        <th class="py-3">DNI / PASAPORTE</th>
+                        <th class="py-3">CORREO</th>
+                        <th class="text-center py-3">ESTADO</th>
+                        <th class="text-end pe-4 py-3">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Mock Data Exacta Solicitada -->
+                    <!-- Alumno 1 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #6366F1, #4F46E5); font-size: 0.85rem; flex-shrink: 0;">
+                                    J
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">admin</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Joseph Admin</div>
+                                </div>
                             </div>
-                            <h6 class="mb-1 fw-semibold text-dark">Juan Camilo Torres</h6>
-                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. Normal María Auxiliadora</p>
-                        </div>
-                        <div class="list-group-item px-0 py-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-success">1082945123</span>
-                                <span class="badge bg-success bg-opacity-10 text-success">Ficha 3173430</span>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">75849302</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">admin@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
                             </div>
-                            <h6 class="mb-1 fw-semibold text-dark">María Alejandra Pérez</h6>
-                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. Normal María Auxiliadora</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        </td>
+                    </tr>
 
-        <!-- Columna 2: Técnico en Sistemas -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
-                <div class="card-header text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background-color: #11382c !important;">
-                    <span><i class="bi bi-laptop me-2"></i> Técnico en Sistemas</span>
-                    <span class="badge bg-light text-dark">2 Aprendices</span>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item px-0 py-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-dark">1082912345</span>
-                                <span class="badge bg-secondary bg-opacity-10 text-dark">Ficha 2654102</span>
+                    <!-- Alumno 2 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #EC4899, #D946EF); font-size: 0.85rem; flex-shrink: 0;">
+                                    C
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">74125896</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Camila Morales</div>
+                                </div>
                             </div>
-                            <h6 class="mb-1 fw-semibold text-dark">Carlos Andrés Ruiz</h6>
-                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. San Juan Bautista</p>
-                        </div>
-                        <div class="list-group-item px-0 py-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-dark">1082956789</span>
-                                <span class="badge bg-secondary bg-opacity-10 text-dark">Ficha 2654102</span>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">74125896</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">camila.m@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
                             </div>
-                            <h6 class="mb-1 fw-semibold text-dark">Laura Sofía Meza</h6>
-                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. San Juan Bautista</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        </td>
+                    </tr>
 
-        <!-- Columna 3: Gestión Administrativa -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
-                <div class="card-header bg-secondary text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-briefcase-fill me-2"></i> Gestión Administrativa</span>
-                    <span class="badge bg-light text-dark">1 Aprendiz</span>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item px-0 py-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-secondary">1082998765</span>
-                                <span class="badge bg-warning bg-opacity-10 text-warning">Ficha 2789123</span>
+                    <!-- Alumno 3 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #06B6D4, #3B82F6); font-size: 0.85rem; flex-shrink: 0;">
+                                    M
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">71234567</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Mateo Torres</div>
+                                </div>
                             </div>
-                            <h6 class="mb-1 fw-semibold text-dark">Andrés Felipe Castro</h6>
-                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> I.E.D. Liceo Ciénaga</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">71234567</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">mateo.t@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
+                            </div>
+                        </td>
+                    </tr>
 
+                    <!-- Alumno 4 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #10B981, #059669); font-size: 0.85rem; flex-shrink: 0;">
+                                    L
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">79845612</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Lucía Mendoza</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">79845612</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">lucia.m@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Alumno 5 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #F59E0B, #D97706); font-size: 0.85rem; flex-shrink: 0;">
+                                    J
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">72345678</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Joaquín Silva</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">72345678</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">joaquin.s@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Alumno 6 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #8B5CF6, #7C3AED); font-size: 0.85rem; flex-shrink: 0;">
+                                    V
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">73456789</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Valentina Ramos</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">73456789</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">valentina.r@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Alumno 7 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #14B8A6, #0D9488); font-size: 0.85rem; flex-shrink: 0;">
+                                    S
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">74567890</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Sebastián Quispe</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">74567890</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">sebastian.q@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Alumno 8 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #F43F5E, #E11D48); font-size: 0.85rem; flex-shrink: 0;">
+                                    A
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">75678901</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Andrea Flores</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">75678901</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">andrea.f@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Alumno 9 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #64748B, #475569); font-size: 0.85rem; flex-shrink: 0;">
+                                    R
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">76789012</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Rodrigo Castro</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">76789012</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">rodrigo.c@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Alumno 10 -->
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #8B5CF6, #6366F1); font-size: 0.85rem; flex-shrink: 0;">
+                                    D
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.1;">77890123</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem; line-height: 1.25;">Daniela Romero</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3"><span class="font-monospace fw-semibold text-dark" style="font-size: 0.88rem;">77890123</span></td>
+                        <td class="py-3 text-muted small" style="font-size: 0.85rem;">daniela.r@colegio.edu.pe</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill" style="background-color: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border: 1px solid #86EFAC;">Active</span>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex gap-1.5">
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px;" title="Editar"><i class="bi bi-pencil-fill" style="font-size: 0.85rem;"></i></button>
+                                <button class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 6px;" title="Dar de Baja"><i class="bi bi-person-x-fill" style="font-size: 0.9rem;"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<!-- Modal para Registrar Nuevo Aprendiz -->
-<div class="modal fade" id="modalAgregarEstudiante" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow">
-            <div class="modal-header bg-success text-white" style="background-color: #39A900 !important;">
-                <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i> Registrar Nuevo Aprendiz</h5>
+<!-- 5. MODAL FORMULARIO "+ Nuevo Alumno" -->
+<div class="modal fade" id="modalNuevoAlumno" tabindex="-1" aria-labelledby="modalNuevoAlumnoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #4F46E5; padding: 18px 24px;">
+                <h5 class="modal-title fw-bold fs-6 d-flex align-items-center gap-2" id="modalNuevoAlumnoLabel">
+                    <i class="bi bi-person-plus-fill"></i> Registrar Nuevo Alumno
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
-                <form>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Documento de Identidad</label>
-                        <input type="text" class="form-control" placeholder="Ej. 1082938471">
+            
+            <form onsubmit="event.preventDefault(); alert('¡Alumno registrado exitosamente!'); bootstrap.Modal.getInstance(document.getElementById('modalNuevoAlumno')).hide();">
+                <div class="modal-body p-4" style="background-color: #F8FAFC;">
+                    <!-- 1. DATOS PERSONALES -->
+                    <div class="card p-3 mb-3 border-0 shadow-xs" style="background: #FFFFFF; border-radius: 8px;">
+                        <h6 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: #4F46E5; font-size: 0.85rem;">
+                            <i class="bi bi-person-vcard-fill"></i> 1. DATOS PERSONALES
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Nombres <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" placeholder="Ej. Juan Carlos" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Apellidos <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" placeholder="Ej. Pérez Gómez" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Fecha de Nacimiento (dd/mm/aaaa)</label>
+                                <input type="date" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Género</label>
+                                <select class="form-select form-select-sm">
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-dark mb-1">Foto de Perfil</label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div id="modalDjangoFotoPreview" class="rounded-circle border d-flex align-items-center justify-content-center bg-light text-muted" style="width: 48px; height: 48px; overflow: hidden; flex-shrink: 0;">
+                                        <i class="bi bi-person fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <input type="file" class="form-control form-control-sm" accept="image/*" onchange="previewFoto(this, 'modalDjangoFotoPreview')">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Nombre Completo del Aprendiz</label>
-                        <input type="text" class="form-control" placeholder="Ej. Ana Sofía Martínez">
+
+                    <!-- 2. IDENTIFICACIÓN Y CUENTA -->
+                    <div class="card p-3 mb-3 border-0 shadow-xs" style="background: #FFFFFF; border-radius: 8px;">
+                        <h6 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: #4F46E5; font-size: 0.85rem;">
+                            <i class="bi bi-shield-lock-fill"></i> 2. IDENTIFICACIÓN Y CUENTA
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-dark mb-1">DNI / Documento <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm font-monospace" placeholder="Ej. 75849302" required>
+                                <div class="form-text small fw-semibold mt-1" style="color: #4F46E5;">
+                                    <i class="bi bi-info-circle me-1"></i> Será el Usuario de acceso. El DNI será la contraseña inicial.
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Número de Ficha / Programa</label>
-                        <select class="form-select">
-                            <option value="3173430">3173430 - Tecnólogo ADSI</option>
-                            <option value="2654102">2654102 - Técnico en Sistemas</option>
-                            <option value="2789123">2789123 - Gestión Administrativa</option>
-                        </select>
+
+                    <!-- 3. CONTACTO -->
+                    <div class="card p-3 border-0 shadow-xs" style="background: #FFFFFF; border-radius: 8px;">
+                        <h6 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: #4F46E5; font-size: 0.85rem;">
+                            <i class="bi bi-telephone-fill"></i> 3. CONTACTO
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Correo Institucional</label>
+                                <input type="email" class="form-control form-control-sm" placeholder="joseph@colegio.edu.pe">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Teléfono del Apoderado</label>
+                                <input type="text" class="form-control form-control-sm" placeholder="+51 999 000 000">
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Colegio Aliado</label>
-                        <input type="text" class="form-control" placeholder="Ej. I.E.D. Normal María Auxiliadora">
-                    </div>
-                    <div class="text-end">
-                        <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-success btn-sm px-4" onclick="alert('¡Aprendiz registrado exitosamente!'); window.location.reload();">Guardar Aprendiz</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-between py-2.5 px-4" style="background: #FFFFFF; border-top: 1px solid #E2E8F0;">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border: 1px solid #CBD5E1; font-size: 0.9rem;">Cancelar</button>
+                    <button type="submit" class="btn text-white px-4" style="background-color: #4F46E5; font-size: 0.9rem;">
+                        <i class="bi bi-check-lg me-1"></i> Registrar Alumno
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<script>
+function filtrarTablaAlumnos() {
+    const input = document.getElementById("buscadorAlumnos");
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById("tablaAlumnos");
+    const tr = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < tr.length; i++) {
+        let text = tr[i].textContent || tr[i].innerText;
+        if (text.toLowerCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+        }
+    }
+}
+
+function previewFoto(input, previewId) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const container = document.getElementById(previewId);
+            container.innerHTML = '<img src="' + e.target.result + '" style="width:100%; height:100%; object-fit:cover;">';
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 {% endblock %}

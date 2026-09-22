@@ -7,6 +7,7 @@ Reglas de Negocio Asociadas: RN-005 (Restricción por Ficha Asignada), RN-006 (C
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from academico.models import Ficha, Matricula
 
 
@@ -59,6 +60,12 @@ class BitacoraSeguimiento(models.Model):
         ('Comite', 'Comité de Seguimiento Formativo'),
     ]
 
+    ESTADOS_SEGUIMIENTO = [
+        ('Pendiente', 'Pendiente'),
+        ('En Proceso', 'En Proceso'),
+        ('Realizado', 'Realizado'),
+    ]
+
     ficha = models.ForeignKey(
         Ficha,
         on_delete=models.CASCADE,
@@ -89,6 +96,12 @@ class BitacoraSeguimiento(models.Model):
         choices=TIPO_SEGUIMIENTO_CHOICES,
         default='Presencial Aula',
         verbose_name="Tipo de Seguimiento"
+    )
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADOS_SEGUIMIENTO,
+        default='Realizado',
+        verbose_name="Estado del Seguimiento"
     )
     observaciones = models.TextField(
         verbose_name="Diagnóstico y Observaciones Pedagógicas / Técnicas"
@@ -737,3 +750,240 @@ class BitacoraEtapaProductiva(models.Model):
 
     def __str__(self):
         return f"Visita {self.numero_visita} · {self.etapa_productiva.matricula.aprendiz.get_full_name()} ({self.fecha_visita})"
+
+
+class SeguimientoAdministrativo(models.Model):
+    """
+    Seguimiento de tareas, compromisos y gestiones administrativas entre el SENA y las Instituciones Educativas.
+    Alimenta los filtros de seguimientos atrasados, para hoy y próximos.
+    """
+    PRIORIDAD_CHOICES = [
+        ('Baja', 'Baja'),
+        ('Media', 'Media'),
+        ('Alta', 'Alta'),
+        ('Urgente', 'Urgente'),
+    ]
+
+    ESTADO_CHOICES = [
+        ('Pendiente', 'Pendiente'),
+        ('En Proceso', 'En Proceso'),
+        ('Completado', 'Completado'),
+        ('Atrasado', 'Atrasado'),
+        ('Cancelado', 'Cancelado'),
+    ]
+
+    institucion = models.ForeignKey(
+        'instituciones.InstitucionEducativa',
+        on_delete=models.CASCADE,
+        related_name='seguimientos_admin',
+        verbose_name="Colegio / Institución Educativa"
+    )
+    convenio = models.ForeignKey(
+        'convenios.ConvenioSENA',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='seguimientos_admin',
+        verbose_name="Convenio Asociado (Opcional)"
+    )
+    responsable = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='seguimientos_admin_asignados',
+        verbose_name="Funcionario Responsable"
+    )
+    asunto = models.CharField(max_length=200, verbose_name="Asunto del Seguimiento")
+    descripcion = models.TextField(verbose_name="Descripción y Contexto de la Tarea")
+    prioridad = models.CharField(max_length=20, choices=PRIORIDAD_CHOICES, default='Media', verbose_name="Prioridad")
+    estado = models.CharField(max_length=25, choices=ESTADO_CHOICES, default='Pendiente', verbose_name="Estado Actual")
+    fecha = models.DateField(default=timezone.localdate, verbose_name="Fecha de Registro")
+    fecha_limite = models.DateField(blank=True, null=True, verbose_name="Fecha Límite de Cumplimiento")
+    resultado = models.TextField(blank=True, null=True, verbose_name="Resultado / Gestión Lograda")
+    proxima_accion = models.CharField(max_length=255, blank=True, null=True, verbose_name="Próxima Acción Inmediata")
+    fecha_registro = models.DateTimeField(auto_now_add=True, verbose_name="Fecha y Hora de Creación")
+
+    class Meta:
+        verbose_name = "Seguimiento Administrativo"
+        verbose_name_plural = "Seguimientos Administrativos"
+        ordering = ['-fecha_limite', '-fecha_registro']
+
+    def __str__(self):
+        return f"[{self.prioridad}] {self.asunto} - {self.institucion.nombre}"
+
+    @property
+    def esta_atrasado(self):
+        if self.estado not in ['Completado', 'Cancelado'] and self.fecha_limite:
+            return self.fecha_limite < timezone.localdate()
+        return False
+
+    @property
+    def dias_restantes(self):
+        if self.fecha_limite:
+            return (self.fecha_limite - timezone.localdate()).days
+        return None
+
+    @property
+    def prioridad_badge_class(self):
+        if self.prioridad == 'Urgente':
+            return 'bg-danger text-white'
+        elif self.prioridad == 'Alta':
+            return 'bg-warning text-dark'
+        elif self.prioridad == 'Media':
+            return 'bg-primary text-white'
+        return 'bg-secondary text-white'
+
+    @property
+    def estado_badge_class(self):
+        if self.estado == 'Completado':
+            return 'bg-success text-white'
+        elif self.estado == 'En Proceso':
+            return 'bg-info text-white'
+        elif self.estado == 'Atrasado' or self.esta_atrasado:
+            return 'bg-danger text-white'
+        elif self.estado == 'Cancelado':
+            return 'bg-dark text-white'
+        return 'bg-warning text-dark'
+
+
+class EventoCalendario(models.Model):
+    """
+    Agenda y calendario administrativo para programar reuniones, seguimientos,
+    visitas y vencimientos importantes con las Instituciones Educativas.
+    """
+    TIPO_CHOICES = [
+        ('Reunión', 'Reunión Institucional'),
+        ('Seguimiento', 'Seguimiento Administrativo'),
+        ('Vencimiento', 'Vencimiento de Convenio'),
+        ('Actividad', 'Actividad Pedagógica / Visita'),
+        ('Comité', 'Comité de Evaluación'),
+        ('Capacitación', 'Jornada de Capacitación'),
+        ('Otro', 'Otro Evento'),
+    ]
+
+    ESTADO_CHOICES = [
+        ('Programado', 'Programado'),
+        ('En Curso', 'En Curso'),
+        ('Realizado', 'Realizado'),
+        ('Cancelado', 'Cancelado'),
+    ]
+
+    titulo = models.CharField(max_length=200, verbose_name="Título del Evento")
+    tipo_evento = models.CharField(max_length=50, choices=TIPO_CHOICES, default='Reunión', verbose_name="Tipo de Evento")
+    fecha = models.DateField(verbose_name="Fecha del Evento")
+    hora = models.TimeField(blank=True, null=True, verbose_name="Hora del Evento")
+    institucion = models.ForeignKey(
+        'instituciones.InstitucionEducativa',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='eventos_calendario',
+        verbose_name="Colegio / Institución Vinculada"
+    )
+    convenio = models.ForeignKey(
+        'convenios.ConvenioSENA',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='eventos_calendario',
+        verbose_name="Convenio Vinculado (Opcional)"
+    )
+    responsable = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='eventos_organizados',
+        verbose_name="Funcionario Responsable"
+    )
+    descripcion = models.TextField(blank=True, null=True, verbose_name="Detalles o Agenda del Evento")
+    estado = models.CharField(max_length=30, choices=ESTADO_CHOICES, default='Programado', verbose_name="Estado")
+    fecha_registro = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
+
+    class Meta:
+        verbose_name = "Evento de Calendario"
+        verbose_name_plural = "Eventos de Calendario"
+        ordering = ['fecha', 'hora']
+
+    def __str__(self):
+        return f"{self.fecha.strftime('%d/%m/%Y')} · {self.titulo}"
+
+
+class DocumentoAdministrativo(models.Model):
+    """
+    Biblioteca y repositorio documental administrativo: permite almacenar, clasificar,
+    vincular a colegios, convenios o programas, buscar y descargar digitalmente.
+    """
+    TIPO_CHOICES = [
+        ('Convenio', 'Convenio Formal y Anexos'),
+        ('Acta', 'Acta de Reunión / Visita'),
+        ('Certificación', 'Certificación Institucional'),
+        ('Formato Oficial SENA', 'Formato Oficial SENA (PE-04 / F023)'),
+        ('Guía Pedagógica', 'Guía de Aprendizaje Pedagógica'),
+        ('Ficha Técnica', 'Ficha Técnica del Programa'),
+        ('Resolución', 'Resolución Rectoral o SENA'),
+        ('Reglamento', 'Reglamento y Circulares'),
+        ('Otro', 'Otro Documento'),
+    ]
+
+    institucion = models.ForeignKey(
+        'instituciones.InstitucionEducativa',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='documentos_admin',
+        verbose_name="Colegio / Institución Asociada"
+    )
+    convenio = models.ForeignKey(
+        'convenios.ConvenioSENA',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='documentos_admin',
+        verbose_name="Convenio Asociado"
+    )
+    programa = models.ForeignKey(
+        'academico.ProgramaFormacion',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='documentos_admin',
+        verbose_name="Programa Técnico Asociado"
+    )
+    nombre = models.CharField(max_length=200, verbose_name="Nombre del Documento")
+    tipo = models.CharField(max_length=60, choices=TIPO_CHOICES, default='Acta', verbose_name="Clasificación del Documento")
+    archivo = models.FileField(upload_to='documentos_admin/%Y/%m/', verbose_name="Archivo Digital")
+    descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción del Contenido")
+    fecha_documento = models.DateField(default=timezone.localdate, verbose_name="Fecha del Documento")
+    subido_por = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='documentos_admin_subidos',
+        verbose_name="Funcionario que Cargó el Archivo"
+    )
+    fecha_subida = models.DateTimeField(auto_now_add=True, verbose_name="Fecha y Hora de Carga")
+
+    class Meta:
+        verbose_name = "Documento Administrativo"
+        verbose_name_plural = "Biblioteca Documental Administrativa"
+        ordering = ['-fecha_subida']
+
+    def __str__(self):
+        return f"[{self.tipo}] {self.nombre}"
+
+    @property
+    def extension(self):
+        if self.archivo and self.archivo.name:
+            return self.archivo.name.split('.')[-1].upper()
+        return "DOC"
+
+    @property
+    def es_pdf(self):
+        return self.extension == 'PDF'
+
+    @property
+    def es_imagen(self):
+        return self.extension in ['JPG', 'JPEG', 'PNG', 'WEBP', 'GIF']

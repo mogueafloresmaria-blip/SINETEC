@@ -9,7 +9,7 @@
         --act-border: #F0D9E5;
         --act-accent: #8E5266;
         --act-dark: #4A2834;
-        --sena-green: #39A900;
+        --sena-green: #29AAE3;
     }
 
     .act-header {
@@ -110,7 +110,7 @@
                         {% if actividad.rap_curricular %}{{ actividad.rap_curricular.codigo }}{% elif actividad.rap %}{{ actividad.rap.codigo }}{% else %}ADSI{% endif %}
                     </span>
                     <span class="text-muted small">
-                        Ficha {{ actividad.ficha.codigo_ficha|default:'3173430' }} · Media Técnica SENA
+                        Curso {{ actividad.ficha.codigo_ficha|default:'11-A' }} · Programa Técnico Escolar
                     </span>
                 </div>
                 <h1 class="h3 fw-bold text-dark mb-2">{{ actividad.titulo }}</h1>

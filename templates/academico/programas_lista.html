@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 
-{% block title %}Programas de Formación - SINETEC | SENA Regional Magdalena{% endblock %}
+{% block title %}Programas de Formación - SINETEC{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-3">
 
-    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #1b4d3e 0%, #11382c 100%); color: white; padding: 2rem; border-radius: 1rem;">
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #0F2942 0%, #1E3A8A 100%); color: white; padding: 2rem; border-radius: 1rem;">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div>
-                <div class="sinetec-eyebrow text-success-subtle mb-1" style="color: #86efac !important; font-weight: 600;">
-                    <i class="bi bi-award-fill me-1"></i> Catálogo Curricular Institucional SENA
+                <div class="sinetec-eyebrow text-info mb-1" style="font-weight: 600;">
+                    <i class="bi bi-award-fill me-1"></i> Catálogo Curricular Institucional
                 </div>
-                <h1 class="h2 fw-bold text-white mb-1">Programas de Formación</h1>
-                <p class="mb-0 text-white-50 small">Diseños curriculares oficiales articulados con la Media Técnica en el Magdalena.</p>
+                <h1 class="h2 fw-bold text-white mb-1">Programas y Énfasis Formativos</h1>
+                <p class="mb-0 text-white-50 small">Diseños curriculares y planes de estudio oficiales de la institución educativa.</p>
             </div>
             <a href="{% url 'fichas_lista' %}" class="btn btn-outline-light px-3">
-                <i class="bi bi-layers me-1"></i> Ver Fichas Técnicas
+                <i class="bi bi-layers me-1"></i> Ver Cursos y Grupos
             </a>
         </div>
     </div>
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-success w-100 fw-semibold" style="background-color: #39A900; border-color: #39A900;">Buscar</button>
+                <button type="submit" class="btn btn-success w-100 fw-semibold" style="background-color: #29AAE3; border-color: #29AAE3;">Buscar</button>
             </div>
         </form>
     </div>
@@ -39,7 +39,7 @@
     <div class="row g-4">
         {% for prog in programas %}
             <div class="col-12 col-lg-6">
-                <div class="card h-100 border-0 shadow-sm rounded-4 p-4" style="border-top: 4px solid #39A900 !important;">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4" style="border-top: 4px solid #29AAE3 !important;">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <span class="badge bg-light text-dark border fw-bold">Código SOFIA: {{ prog.codigo_programa }}</span>
                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill">Versión {{ prog.version }} · Activo</span>

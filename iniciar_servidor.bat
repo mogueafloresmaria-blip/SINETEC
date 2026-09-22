@@ -6,7 +6,7 @@ echo             SISTEMA SINETEC - SERVIDOR LOCAL Y MÓVIL
 echo ===================================================================
 echo.
 echo  • Desde tu computadora:    http://localhost:8000
-echo  • Desde tu celular (Wi-Fi): http://192.168.40.23:8000
+echo  • Desde tu celular (Wi-Fi): http://192.168.40.6:8000
 echo.
 echo Iniciando servidor en segundo plano...
 start "" "venv\Scripts\pythonw.exe" manage.py runserver 0.0.0.0:8000

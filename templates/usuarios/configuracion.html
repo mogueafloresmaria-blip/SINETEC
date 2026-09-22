@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configuración del Sistema · SINETEC SENA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <!-- Encabezado Institucional -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
+                <span class="text-muted small">{{ centro }}</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-sliders text-success me-2"></i>Configuración y Perfil de Acceso
+            </h1>
+            <p class="text-muted mb-0">Gestión de datos de cuenta del administrador, seguridad de acceso y parámetros del entorno SINETEC.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'gestion_usuarios' %}" class="btn btn-outline-secondary fw-semibold">
+                <i class="bi bi-people me-1"></i> Gestión de Usuarios
+            </a>
+            <a href="{% url 'auditoria_lista' %}" class="btn btn-outline-dark fw-semibold">
+                <i class="bi bi-clock-history me-1"></i> Auditoría
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Columna Izquierda: Datos del Perfil y Seguridad -->
+        <div class="col-lg-8">
+            <!-- 1. Actualización de Perfil -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                    <div class="p-2 rounded-3 bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-person-gear fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">Información del Perfil</h5>
+                        <small class="text-muted">Actualice sus datos de contacto y nombres oficiales</small>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="perfil">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Nombre de Usuario:</label>
+                            <input type="text" class="form-control bg-light" value="{{ user.username }}" readonly disabled>
+                            <small class="text-muted" style="font-size: 0.75rem;">El nombre de usuario institucional no es modificable.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Rol en el Sistema:</label>
+                            <input type="text" class="form-control bg-light" value="{{ perfil.rol.nombre|default:'Administrador' }}" readonly disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Nombres:</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Apellidos:</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Correo Institucional:</label>
+                            <input type="email" name="email" class="form-control" value="{{ user.email }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Teléfono de Contacto:</label>
+                            <input type="text" name="telefono" class="form-control" value="{{ perfil.telefono|default:'' }}" placeholder="Ej: 3001234567">
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-2 d-flex justify-content-end">
+                        <button type="submit" class="btn text-white fw-semibold px-4 rounded-3" style="background-color: #29AAE3;">
+                            <i class="bi bi-check-circle me-1"></i> Guardar Cambios de Perfil
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 2. Seguridad y Cambio de Contraseña -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                    <div class="p-2 rounded-3 text-white" style="background-color: #29AAE3;">
+                        <i class="bi bi-shield-lock fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">Seguridad y Cambio de Contraseña</h5>
+                        <small class="text-muted">Proteja el acceso a su cuenta administrativa</small>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="clave">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-semibold text-secondary">Contraseña Actual:</label>
+                            <input type="password" name="password_actual" class="form-control" placeholder="Ingrese su clave actual..." required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Nueva Contraseña:</label>
+                            <input type="password" name="password_nueva" class="form-control" placeholder="Mínimo 6 caracteres..." required minlength="6">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Confirmar Nueva Contraseña:</label>
+                            <input type="password" name="password_confirmar" class="form-control" placeholder="Repita la nueva clave..." required minlength="6">
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-2 d-flex justify-content-end">
+                        <button type="submit" class="btn text-white fw-semibold px-4 rounded-3" style="background-color: #29AAE3;">
+                            <i class="bi bi-key me-1"></i> Actualizar Contraseña
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Información del Entorno Institucional -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+                <h6 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-info-circle text-primary me-2"></i>Entorno SINETEC
+                </h6>
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Plataforma:</span>
+                        <strong class="text-dark">SINETEC v2.5</strong>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Entidad:</span>
+                        <span>SENA · Media Técnica</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Regional:</span>
+                        <span>{{ regional }}</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Centro:</span>
+                        <span class="text-end" style="max-width: 170px;">{{ centro }}</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Vigencia:</span>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">{{ vigencia }}</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span class="text-muted">Estado del Sistema:</span>
+                        <span class="badge bg-success text-white"><i class="bi bi-check-circle me-1"></i> Operativo</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Accesos Rápidos de Administración -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <h6 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-lightning-charge text-warning me-2"></i>Accesos de Gestión
+                </h6>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'instituciones_lista' %}" class="btn btn-outline-success btn-sm text-start py-2">
+                        <i class="bi bi-building me-2"></i> Directorio de Instituciones
+                    </a>
+                    <a href="{% url 'fichas_lista' %}" class="btn btn-outline-primary btn-sm text-start py-2">
+                        <i class="bi bi-layers me-2"></i> Fichas Técnicas Articuladas
+                    </a>
+                    <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-danger btn-sm text-start py-2">
+                        <i class="bi bi-mortarboard me-2"></i> Padrón de Aprendices
+                    </a>
+                    <a href="{% url 'seguimiento_lista' %}" class="btn btn-outline-warning btn-sm text-start py-2">
+                        <i class="bi bi-clipboard2-pulse me-2"></i> Bitácoras de Seguimiento
+                    </a>
+                    <a href="{% url 'centro_reportes' %}" class="btn btn-outline-dark btn-sm text-start py-2">
+                        <i class="bi bi-file-earmark-bar-graph me-2"></i> Centro de Reportes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

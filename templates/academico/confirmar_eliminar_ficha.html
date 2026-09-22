@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar Eliminación · Ficha {{ ficha.codigo_ficha }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-lg-6 col-md-8">
+        <div class="sinetec-card p-4 p-md-5 border-danger border-top border-4">
+            <div class="d-flex align-items-center gap-3 mb-3 text-danger">
+                <div class="p-3 bg-danger bg-opacity-10 rounded-circle fs-3">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div>
+                    <h2 class="h4 fw-bold mb-0 text-dark">¿Eliminar Ficha Técnica?</h2>
+                    <span class="text-muted small">Esta acción requiere confirmación administrativa</span>
+                </div>
+            </div>
+
+            <div class="alert alert-warning border-0 bg-light p-3 my-3">
+                <p class="mb-1 fw-bold text-dark">Ficha: {{ ficha.codigo_ficha }} - {{ ficha.programa.denominacion }}</p>
+                <div class="small text-muted">
+                    <span><strong>Institución:</strong> {{ ficha.institucion.nombre }} ({{ ficha.institucion.municipio }})</span><br>
+                    <span><strong>Profesor Líder:</strong> {{ ficha.instructor_lider.get_full_name|default:ficha.instructor_lider.username|default:"No asignado" }}</span>
+                </div>
+            </div>
+
+            <p class="text-muted small">
+                Se verificó que esta ficha técnica <strong>no tiene estudiantes matriculados ni seguimientos vinculados</strong>. 
+                Si confirma la eliminación, el registro se eliminará definitivamente de la base de datos y quedará constancia en la bitácora de auditoría.
+            </p>
+
+            <form method="post" class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                {% csrf_token %}
+                <a href="{% url 'fichas_detalle' ficha.id %}" class="btn btn-light px-4">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-danger px-4 fw-semibold">
+                    <i class="bi bi-trash me-1"></i> Sí, Eliminar Ficha
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

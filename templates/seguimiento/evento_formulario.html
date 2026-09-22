@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2 px-md-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'calendario_administrativo' %}" class="text-decoration-none text-muted">Calendario</a></li>
+                        <li class="breadcrumb-item active fw-semibold text-dark">{{ titulo }}</li>
+                    </ol>
+                </nav>
+                <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'calendario_administrativo' %}{% endif %}" class="btn btn-outline-secondary btn-sm rounded-3">
+                    <i class="bi bi-arrow-left me-1"></i> Cancelar y Volver
+                </a>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-3 p-4 p-md-5 bg-white">
+                <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                    <div class="p-3 rounded-3 fs-3 text-primary" style="background: rgba(225, 29, 72, 0.08);">
+                        <i class="bi bi-calendar-plus"></i>
+                    </div>
+                    <div>
+                        <h2 class="h4 fw-bold mb-1 text-dark">{{ titulo }}</h2>
+                        <p class="text-muted small mb-0">Agende reuniones bilaterales con rectores, comités de evaluación o visitas técnicas.</p>
+                    </div>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if request.GET.next %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}">
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Título del Evento <span class="text-danger">*</span></label>
+                            {{ form.titulo }}
+                            {% if form.titulo.errors %}
+                                <div class="text-danger small mt-1">{{ form.titulo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Tipo de Evento <span class="text-danger">*</span></label>
+                            {{ form.tipo_evento }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Estado</label>
+                            {{ form.estado }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Fecha <span class="text-danger">*</span></label>
+                            {{ form.fecha }}
+                            {% if form.fecha.errors %}
+                                <div class="text-danger small mt-1">{{ form.fecha.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Hora (Opcional)</label>
+                            {{ form.hora }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Institución Educativa (Opcional)</label>
+                            {{ form.institucion }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Convenio SENA (Opcional)</label>
+                            {{ form.convenio }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Detalles y Agenda de la Reunión</label>
+                            {{ form.descripcion }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-4 border-top mt-4">
+                        <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'calendario_administrativo' %}{% endif %}" class="btn btn-light px-4">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-calendar-check me-1"></i> Agendar en Calendario
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

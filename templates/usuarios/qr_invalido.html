@@ -1,1 +1,39 @@
-{% extends 'base.html' %}{% block title %}QR no vigente - SINETEC{% endblock %}{% block content %}<div class="sinetec-card p-5 text-center mx-auto" style="max-width:620px"><i class="bi bi-qr-code-scan text-warning" style="font-size:4rem"></i><h1 class="sinetec-page-title h4 mt-3">Código QR no vigente</h1><p class="text-muted">Este carnet debe escanearse desde el control diario y solo es válido para la jornada actual. Solicita al aprendiz mostrar el código actualizado.</p><a href="{% url 'estudiantes_lista' %}" class="btn sinetec-btn sinetec-btn-primary">Volver al control</a></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Código QR Expirado · Seguridad Institucional SENA{% endblock %}
+
+{% block content %}
+<div class="sinetec-card p-5 text-center mx-auto shadow-sm border-danger border-opacity-25" style="max-width: 640px; border-radius: 24px;">
+    <div class="d-inline-flex p-3 rounded-circle bg-danger bg-opacity-10 text-danger mb-3">
+        <i class="bi bi-shield-x" style="font-size: 3.5rem;"></i>
+    </div>
+    <h1 class="sinetec-page-title h4 fw-bold text-dark mb-2">Código QR Expirado o No Vigente</h1>
+    
+    <div class="alert alert-warning text-dark text-start small mb-4 rounded-3 border-warning">
+        <i class="bi bi-exclamation-triangle-fill text-warning me-2 fs-5 align-middle"></i>
+        <strong>Control de Seguridad y Asistencia en Aula:</strong>
+        <p class="mb-0 mt-2">
+            {{ mensaje|default:"Este código QR no corresponde a la jornada formativa de hoy o ha caducado. Por protocolo antifraude y control de asistencia en aula, los códigos QR institucionales rotan cada 24 horas y no se admiten capturas de pantalla ni fotos de días anteriores." }}
+        </p>
+    </div>
+
+    <div class="bg-light p-3 rounded-3 text-start small mb-4 border">
+        <div class="fw-bold text-muted text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+            <i class="bi bi-info-circle-fill text-success me-1"></i> ¿Cómo solucionar esto?
+        </div>
+        <ul class="mb-0 ps-3 text-muted">
+            <li class="mb-1">El aprendiz debe ingresar a su cuenta de <strong>SINETEC</strong> desde su celular hoy (<strong>{{ hoy|default:"hoy" }}</strong>).</li>
+            <li class="mb-1">Abrir su <strong>Carné Digital</strong>: el sistema renovará automáticamente su código QR criptográfico para la sesión actual.</li>
+            <li>El docente o escáner registrará su presencia de manera inmediata sin fotos intermedias.</li>
+        </ul>
+    </div>
+
+    <div class="d-flex justify-content-center gap-2">
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary px-4 rounded-pill">
+            <i class="bi bi-house-door-fill me-1"></i> Ir al Inicio
+        </a>
+        <a href="{% url 'escanear_asistencia_camara' %}" class="btn btn-success px-4 rounded-pill fw-bold" style="background-color: #29AAE3; border-color: #29AAE3;">
+            <i class="bi bi-camera-fill me-1"></i> Abrir Escáner de Cámara
+        </a>
+    </div>
+</div>
+{% endblock %}

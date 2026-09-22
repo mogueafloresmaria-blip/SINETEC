@@ -1,6 +1,48 @@
 {% extends 'base.html' %}
-{% block title %}Registrar aprendiz - SINETEC{% endblock %}
+{% load static %}
+
+{% block title %}Matricular Estudiante - Seleccionar Curso · SINETEC{% endblock %}
+
 {% block content %}
-<div class="mb-4"><div class="sinetec-eyebrow mb-2">Gestión de aprendices</div><h1 class="sinetec-page-title h3 mb-1">Registrar nuevo aprendiz</h1><p class="text-muted mb-0">Selecciona la ficha SENA donde se realizará la matrícula.</p></div>
-<div class="row g-3">{% for ficha in fichas %}<div class="col-md-6 col-xl-4"><a href="{% url 'fichas_matricular' ficha.pk %}" class="sinetec-card sinetec-route d-block p-4 text-decoration-none"><span class="sinetec-status sinetec-status-success">Ficha {{ ficha.codigo_ficha }}</span><h2 class="h6 fw-bold text-dark mt-3">{{ ficha.programa.denominacion }}</h2><p class="small text-muted mb-3">{{ ficha.institucion.nombre }}</p><span class="text-success small fw-bold">Abrir matrícula <i class="bi bi-arrow-right"></i></span></a></div>{% empty %}<div class="col-12"><div class="sinetec-card p-5 text-center text-muted">No hay fichas en ejecución. Primero debes crear o activar una ficha.</div></div>{% endfor %}</div>
+<div class="py-3">
+    <div class="mb-4">
+        <div class="sinetec-eyebrow mb-1">
+            <i class="bi bi-mortarboard-fill me-1"></i> Gestión de Matrícula Escolar
+        </div>
+        <h1 class="h3 fw-bold text-dark mb-1">Seleccionar Curso o Grupo</h1>
+        <p class="text-muted mb-0">Selecciona el grupo o cohorte donde se asentará la matrícula escolar del nuevo estudiante.</p>
+    </div>
+
+    <div class="row g-3">
+        {% for ficha in fichas %}
+            <div class="col-md-6 col-xl-4">
+                <div class="sinetec-card-modern p-4 bg-white rounded-4 shadow-sm border h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-bold">
+                                Grupo {{ ficha.codigo_ficha }}
+                            </span>
+                            <span class="badge bg-light text-muted border small">{{ ficha.estado }}</span>
+                        </div>
+                        <h2 class="h6 fw-bold text-dark mb-1">{{ ficha.programa.nombre }}</h2>
+                        <p class="small text-muted mb-3">{{ ficha.institucion.nombre }}</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'fichas_matricular' ficha.pk %}" class="btn btn-primary w-100 fw-semibold rounded-3" style="background: #1E3A8A; border: none;">
+                            <i class="bi bi-person-plus-fill me-1"></i> Abrir Asistente de Matrícula
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-4">
+                    <i class="bi bi-layers fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                    <h5 class="fw-bold text-dark">No hay cursos activos disponibles</h5>
+                    <p class="text-muted small">Crea o activa un grupo escolar para iniciar matrículas.</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

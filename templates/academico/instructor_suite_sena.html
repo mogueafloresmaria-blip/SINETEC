@@ -1,0 +1,1579 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Suite Integral SENA · Gestión Formativa y Productividad{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js para visualización de métricas y asistencia -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+    :root {
+        --sena-green: #29AAE3;
+        --sena-green-dark: #007A33;
+        --sena-green-light: #EBF8E7;
+        --sena-navy: #002233;
+        --sena-slate: #0D1B2A;
+        --sena-border: #DCE8DE;
+        --sena-bg: #F6FAF6;
+    }
+
+    .suite-shell {
+        background-color: var(--sena-bg);
+        min-height: calc(100vh - 70px);
+        padding-bottom: 60px;
+    }
+
+    /* Banner Superior Institucional */
+    .suite-hero-banner {
+        background: linear-gradient(135deg, #002233 0%, #004D26 100%);
+        color: #ffffff;
+        border-radius: 24px;
+        padding: 26px 32px;
+        margin-bottom: 24px;
+        box-shadow: 0 12px 32px rgba(0, 34, 51, 0.12);
+        border-bottom: 4px solid var(--sena-green);
+        position: relative;
+        overflow: hidden;
+    }
+    .suite-hero-banner::after {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(57, 169, 0, 0.25) 0%, rgba(57, 169, 0, 0) 70%);
+        pointer-events: none;
+    }
+
+    /* Navegación por Módulos (6 Módulos SENA) */
+    .suite-nav-pills {
+        display: flex;
+        gap: 8px;
+        background: #FFFFFF;
+        padding: 8px;
+        border-radius: 18px;
+        border: 1px solid var(--sena-border);
+        box-shadow: 0 4px 16px rgba(0, 34, 51, 0.04);
+        margin-bottom: 24px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+    .suite-nav-pills .nav-link {
+        color: #4A5568;
+        font-weight: 700;
+        font-size: 0.86rem;
+        padding: 10px 18px;
+        border-radius: 12px;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+    }
+    .suite-nav-pills .nav-link:hover {
+        background: rgba(57, 169, 0, 0.08);
+        color: var(--sena-green-dark);
+    }
+    .suite-nav-pills .nav-link.active {
+        background: var(--sena-green);
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(57, 169, 0, 0.3);
+    }
+
+    /* Tarjetas KPI */
+    .kpi-sena-card {
+        background: #FFFFFF;
+        border: 1px solid var(--sena-border);
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 4px 14px rgba(0, 34, 51, 0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .kpi-sena-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(57, 169, 0, 0.1);
+        border-color: var(--sena-green);
+    }
+    .kpi-icon-box {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+
+    /* Estados de Asistencia SENA (4 Estados Oficiales) */
+    .btn-estado-sena {
+        font-weight: 800;
+        font-size: 0.78rem;
+        padding: 6px 12px;
+        border-radius: 10px;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn-estado-a { background: #EBF8E7; color: #007A33; border-color: #A3E396; }
+    .btn-estado-a.active, .btn-estado-a:hover { background: #29AAE3; color: #ffffff; border-color: #29AAE3; }
+
+    .btn-estado-r { background: #FEF3C7; color: #B45309; border-color: #FCD34D; }
+    .btn-estado-r.active, .btn-estado-r:hover { background: #F59E0B; color: #ffffff; border-color: #F59E0B; }
+
+    .btn-estado-fj { background: #EFF6FF; color: #1D4ED8; border-color: #BFDBFE; }
+    .btn-estado-fj.active, .btn-estado-fj:hover { background: #3B82F6; color: #ffffff; border-color: #3B82F6; }
+
+    .btn-estado-fi { background: #FEE2E2; color: #B91C1C; border-color: #FECACA; }
+    .btn-estado-fi.active, .btn-estado-fi:hover { background: #EF4444; color: #ffffff; border-color: #EF4444; }
+
+    /* Contenedor Flotante de Guardado */
+    .floating-save-bar {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #002233;
+        color: #ffffff;
+        padding: 12px 28px;
+        border-radius: 999px;
+        box-shadow: 0 12px 36px rgba(0, 34, 51, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        z-index: 1035;
+        border: 2px solid var(--sena-green);
+    }
+
+    /* Wizard Modal */
+    .wizard-step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        position: relative;
+    }
+    .wizard-step-indicator::before {
+        content: "";
+        position: absolute;
+        top: 18px;
+        left: 30px;
+        right: 30px;
+        height: 2px;
+        background: var(--sena-border);
+        z-index: 1;
+    }
+    .step-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #FFFFFF;
+        border: 2px solid var(--sena-border);
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        font-size: 0.85rem;
+        position: relative;
+        z-index: 2;
+        transition: all 0.2s ease;
+    }
+    .step-circle.active {
+        background: var(--sena-green);
+        color: #ffffff;
+        border-color: var(--sena-green);
+        box-shadow: 0 4px 10px rgba(57, 169, 0, 0.35);
+    }
+    .step-circle.completed {
+        background: #007A33;
+        color: #ffffff;
+        border-color: #007A33;
+    }
+
+    /* Herramientas IA */
+    .ia-tool-card {
+        background: #FFFFFF;
+        border: 1px solid var(--sena-border);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 6px 20px rgba(0, 34, 51, 0.04);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="suite-shell">
+    <div class="container-fluid px-4 py-3">
+
+        <!-- 1. Banner Institucional de la Suite SENA -->
+        <div class="suite-hero-banner">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{% static 'img/logo_sena.svg' %}" alt="SENA" style="width: 52px; height: 52px; filter: brightness(0) invert(1);">
+                    <div>
+                        <div class="badge bg-success mb-1" style="background-color: var(--sena-green) !important;">
+                            SENA REGIONAL MAGDALENA · SEDE CIÉNAGA
+                        </div>
+                        <h1 class="h3 fw-bold mb-1 text-white">Sistema Integral de Gestión y Productividad Técnica SENA</h1>
+                        <p class="small text-white-50 mb-0">
+                            Centro de Logística y Promoción Ecoturística / Gaira · Formación Profesional Integral por Competencias Laborales
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button type="button" class="btn btn-warning rounded-pill px-3 fw-bold text-dark btn-sm shadow-sm" onclick="abrirCreadorQR('', '', '', '', '')">
+                        <i class="bi bi-qr-code me-1"></i> Creador de Código QR
+                    </button>
+                    <button type="button" class="btn btn-light rounded-pill px-3 fw-bold text-dark btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#wizardAprendizModal">
+                        <i class="bi bi-person-plus-fill text-success me-1"></i> + Nuevo Estudiante
+                    </button>
+                    <button type="button" class="btn btn-outline-light rounded-pill px-3 btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalPersonalizarDashboard">
+                        <i class="bi bi-sliders me-1"></i> Personalizar Dashboard
+                    </button>
+                    <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-outline-light rounded-pill px-3 btn-sm fw-bold">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Planilla Juicios PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Barra de Navegación entre los 6 Módulos SENA -->
+        <ul class="nav suite-nav-pills" id="senaSuiteTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-aprendices" data-bs-toggle="tab" data-bs-target="#panel-aprendices" type="button" role="tab">
+                    <i class="bi bi-people-fill"></i> 1. Aprendices & Fichas
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-asistencia" data-bs-toggle="tab" data-bs-target="#panel-asistencia" type="button" role="tab">
+                    <i class="bi bi-calendar2-check-fill"></i> 2. Asistencia & Seguimiento (4 Estados)
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-portafolio" data-bs-toggle="tab" data-bs-target="#panel-portafolio" type="button" role="tab">
+                    <i class="bi bi-briefcase-fill"></i> 3. Portafolio del Instructor
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-ia" data-bs-toggle="tab" data-bs-target="#panel-ia" type="button" role="tab">
+                    <i class="bi bi-stars"></i> 4. Suite de Productividad Pedagógica
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-centro" data-bs-toggle="tab" data-bs-target="#panel-centro" type="button" role="tab">
+                    <i class="bi bi-building-gear"></i> 5. Configuración Centro & Firmas
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-backup" data-bs-toggle="tab" data-bs-target="#panel-backup" type="button" role="tab">
+                    <i class="bi bi-database-check"></i> 6. Respaldo & Base de Datos
+                </button>
+            </li>
+        </ul>
+
+        <!-- Contenedor Principal de Pestañas -->
+        <div class="tab-content" id="senaSuiteContent">
+
+            <!-- ===============================================================
+                 MÓDULO 1: APRENDICES Y FICHAS DE CARACTERIZACIÓN
+                 =============================================================== -->
+            <div class="tab-pane fade show active" id="panel-aprendices" role="tabpanel">
+                
+                <!-- KPIs de Aprendices -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="kpi-sena-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small fw-bold d-block">TOTAL APRENDICES</span>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ total_aprendices }}</h3>
+                                </div>
+                                <div class="kpi-icon-box bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="kpi-sena-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small fw-bold d-block">EN FORMACIÓN (ACTIVOS)</span>
+                                    <h3 class="fw-bold mb-0 text-success">{{ aprendices_activos }}</h3>
+                                </div>
+                                <div class="kpi-icon-box bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-person-check-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="kpi-sena-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small fw-bold d-block">RIESGO DE DESERCIÓN</span>
+                                    <h3 class="fw-bold mb-0 text-danger">{{ aprendices_riesgo }}</h3>
+                                </div>
+                                <div class="kpi-icon-box bg-danger bg-opacity-10 text-danger">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="kpi-sena-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small fw-bold d-block">CANCELADOS</span>
+                                    <h3 class="fw-bold mb-0 text-secondary">{{ aprendices_cancelados }}</h3>
+                                </div>
+                                <div class="kpi-icon-box bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-person-x-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="kpi-sena-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small fw-bold d-block">APLAZADOS / TRASLADO</span>
+                                    <h3 class="fw-bold mb-0 text-warning">{{ aprendices_aplazados }}</h3>
+                                </div>
+                                <div class="kpi-icon-box bg-warning bg-opacity-10 text-warning">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra de Filtros Rápidos -->
+                <div class="card border-0 rounded-4 shadow-sm p-3 mb-4 bg-white">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-12 col-md-4">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                                <input type="text" id="filtroTextoAprendiz" class="form-control border-start-0" placeholder="Buscar por nombres, apellidos o documento (CC, TI, PEP)...">
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <select id="filtroFichaAprendiz" class="form-select form-select-sm">
+                                <option value="">Todas las Fichas</option>
+                                {% for f in fichas %}
+                                    <option value="{{ f.codigo_ficha }}">Ficha {{ f.codigo_ficha }} - {{ f.programa.denominacion|truncatechars:28 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <select id="filtroEstadoAprendiz" class="form-select form-select-sm">
+                                <option value="">Todos los Estados</option>
+                                <option value="En Formacion">En Formación (Activo)</option>
+                                <option value="Alerta">En Riesgo</option>
+                                <option value="Cancelado">Cancelado</option>
+                                <option value="Desertado">Desertado</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-2 text-md-end">
+                            <button type="button" class="btn btn-sm btn-success w-100 rounded-pill fw-bold" style="background:#29AAE3;" data-bs-toggle="modal" data-bs-target="#wizardAprendizModal">
+                                <i class="bi bi-plus-lg me-1"></i> Nuevo Estudiante
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla Interactiva de Aprendices -->
+                <div class="card border-0 rounded-4 shadow-sm overflow-hidden bg-white">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" id="tablaAprendicesSena">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 25%;">Estudiante</th>
+                                    <th style="width: 18%;">Documento</th>
+                                    <th style="width: 25%;">Programa & Ficha</th>
+                                    <th style="width: 12%;">Etapa</th>
+                                    <th style="width: 10%;">Estado</th>
+                                    <th class="text-end" style="width: 10%;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in aprendices %}
+                                    <tr class="fila-aprendiz" data-nombre="{{ m.aprendiz.get_full_name|lower }}" data-doc="{{ m.aprendiz.perfil.numero_documento }}" data-ficha="{{ m.ficha.codigo_ficha }}" data-estado="{{ m.estado_formacion }}">
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="rounded-circle bg-success bg-opacity-10 text-success fw-bold d-grid place-items-center" style="width: 38px; height: 38px; font-size: 0.85rem;">
+                                                    {{ m.aprendiz.first_name|slice:":1" }}{{ m.aprendiz.last_name|slice:":1" }}
+                                                </div>
+                                                <div>
+                                                    <strong class="text-dark small d-block">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                                    <small class="text-muted" style="font-size: 0.74rem;">{{ m.aprendiz.email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">{{ m.aprendiz.perfil.tipo_documento }} {{ m.aprendiz.perfil.numero_documento }}</span>
+                                        </td>
+                                        <td>
+                                            <strong class="d-block small text-dark">{{ m.ficha.programa.denominacion }}</strong>
+                                            <span class="text-muted" style="font-size: 0.74rem;"><i class="bi bi-tag-fill text-success me-1"></i>Ficha {{ m.ficha.codigo_ficha }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info text-white" style="font-size: 0.72rem;">Lectiva</span>
+                                        </td>
+                                        <td>
+                                            {% if m.estado_formacion == 'En Formacion' %}
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Activo</span>
+                                            {% else %}
+                                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">{{ m.estado_formacion }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-light border text-success" title="Creador de Código QR" onclick="abrirCreadorQR('{{ m.aprendiz.perfil.pk }}', '{{ m.aprendiz.get_full_name|escapejs }}', '{{ m.aprendiz.perfil.numero_documento|default:''|escapejs }}', '{{ m.ficha.codigo_ficha|escapejs }}', '{{ m.ficha.programa.denominacion|escapejs }}')">
+                                                    <i class="bi bi-qr-code"></i>
+                                                </button>
+                                                <a href="{% url 'estudiantes_boletin_pdf' m.aprendiz.perfil.pk %}" target="_blank" class="btn btn-light border text-danger" title="Boletín Oficial PDF">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </a>
+                                                <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-light border" title="Hoja de vida">
+                                                    <i class="bi bi-person-vcard"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-light border text-danger" title="Citar a Comité" onclick="prepararCitacionComite('{{ m.aprendiz.get_full_name }}', '{{ m.ficha.codigo_ficha }}')">
+                                                    <i class="bi bi-exclamation-diamond"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">No hay aprendices registrados actualmente.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===============================================================
+                 MÓDULO 2: ASISTENCIA Y SEGUIMIENTO A LA FORMACIÓN (4 ESTADOS)
+                 =============================================================== -->
+            <div class="tab-pane fade" id="panel-asistencia" role="tabpanel">
+                
+                <!-- Selectores de Sesión y Barra de Progreso -->
+                <div class="card border-0 rounded-4 shadow-sm p-3 mb-4 bg-white">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-bold text-muted mb-1">Ficha de Formación</label>
+                            <select id="asistenciaSelectorFicha" class="form-select form-select-sm">
+                                {% for f in fichas %}
+                                    <option value="{{ f.id }}" data-codigo="{{ f.codigo_ficha }}">{{ f.codigo_ficha }} - {{ f.programa.denominacion|truncatechars:24 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-bold text-muted mb-1">Competencia Laboral</label>
+                            <select class="form-select form-select-sm">
+                                {% for c in competencias %}
+                                    <option value="{{ c.id }}">{{ c.codigo }} - {{ c.descripcion|truncatechars:28 }}</option>
+                                {% empty %}
+                                    <option>220501096 - Desarrollo de Software</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-bold text-muted mb-1">Resultado de Aprendizaje (RAP)</label>
+                            <select class="form-select form-select-sm">
+                                {% for r in raps %}
+                                    <option value="{{ r.id }}">{{ r.codigo }} - {{ r.descripcion|truncatechars:28 }}</option>
+                                {% empty %}
+                                    <option>RAP 01 - Aplicar buenas prácticas de codificación</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-bold text-muted mb-1">Fecha de la Sesión</label>
+                            <input type="date" id="asistenciaFecha" class="form-control form-control-sm" value="{{ fecha_hoy|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+
+                    <!-- Barra de Progreso Dinámica -->
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small fw-bold text-dark">
+                                <i class="bi bi-clock-history text-success me-1"></i> Progreso del Registro Diario
+                            </span>
+                            <span class="small fw-bold text-success" id="asistenciaProgresoTexto">Registrados: 0 / {{ aprendices.count }}</span>
+                        </div>
+                        <div class="progress" style="height: 10px; border-radius: 8px;">
+                            <div class="progress-bar bg-success" id="asistenciaProgressBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    
+                    <!-- Tabla de Marcación Rápida con 4 Estados Oficiales -->
+                    <div class="col-12 col-lg-8">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-0">Marcación Ágil por Aprendiz</h2>
+                                    <small class="text-muted">Estados oficiales: [A] Asistió · [R] Retardo · [FJ] Justificada · [FI] Injustificada</small>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-2" onclick="marcarTodos('A')">Marcar Todos [A]</button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+                                <table class="table align-middle mb-0" id="tablaMarcacionAsistencia">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th>Estudiante</th>
+                                            <th>Ficha</th>
+                                            <th class="text-center" style="width: 280px;">Marcación Oficial</th>
+                                            <th>Observación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for m in aprendices %}
+                                            <tr class="fila-marcacion" data-matricula="{{ m.id }}">
+                                                <td>
+                                                    <strong class="small text-dark d-block">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                                    <small class="text-muted">{{ m.aprendiz.perfil.numero_documento }}</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark border">{{ m.ficha.codigo_ficha }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm marcacion-btn-group" role="group">
+                                                        <button type="button" class="btn btn-estado-sena btn-estado-a active" onclick="seleccionarEstado(this, 'A')">[A]</button>
+                                                        <button type="button" class="btn btn-estado-sena btn-estado-r" onclick="seleccionarEstado(this, 'R')">[R]</button>
+                                                        <button type="button" class="btn btn-estado-sena btn-estado-fj" onclick="seleccionarEstado(this, 'FJ')">[FJ]</button>
+                                                        <button type="button" class="btn btn-estado-sena btn-estado-fi" onclick="seleccionarEstado(this, 'FI')">[FI]</button>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm observacion-asistencia" placeholder="Opcional...">
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="mt-3 pt-3 border-top text-end">
+                                <button type="button" class="btn btn-success px-4 rounded-pill fw-bold shadow-sm" id="btnGuardarAsistenciaSena" style="background:#29AAE3;">
+                                    <i class="bi bi-cloud-arrow-up-fill me-1"></i> Guardar Asistencia Oficial
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard de Alertas Tempranas y Detección de Deserción -->
+                    <div class="col-12 col-lg-4">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                            <h2 class="h6 fw-bold mb-3">Distribución de Asistencia</h2>
+                            <div style="height: 220px; position: relative;">
+                                <canvas id="chartDonaAsistencia"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Algoritmo de Detección Temprana y Comité -->
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 border-start border-4 border-danger">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-shield-exclamation text-danger fs-4"></i>
+                                <h2 class="h6 fw-bold mb-0 text-danger">Alerta de Deserción</h2>
+                            </div>
+                            <p class="small text-muted mb-3">
+                                Aprendices que alcanzan el límite de 3 inasistencias injustificadas según el Reglamento del Aprendiz (Acuerdo 007 de 2012).
+                            </p>
+
+                            <div class="list-group list-group-flush mb-3">
+                                {% for c in comites|slice:":3" %}
+                                    <div class="list-group-item px-0 py-2 border-bottom">
+                                        <strong class="small text-dark d-block">{{ c.matricula.aprendiz.get_full_name }}</strong>
+                                        <div class="d-flex justify-content-between align-items-center mt-1">
+                                            <small class="text-danger fw-semibold">Ficha {{ c.matricula.ficha.codigo_ficha }}</small>
+                                            <span class="badge bg-danger">Remitir a Comité</span>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="text-center py-3 text-muted small">
+                                        <i class="bi bi-check-circle text-success fs-3 d-block mb-1"></i>
+                                        No hay aprendices en umbral de deserción en este momento.
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <button type="button" class="btn btn-sm btn-outline-danger w-100 rounded-pill fw-bold" onclick="generarListaRemisionComite()">
+                                <i class="bi bi-file-earmark-arrow-up me-1"></i> Generar Lista para Comité
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===============================================================
+                 MÓDULO 3: PORTAFOLIO DEL INSTRUCTOR SENA
+                 =============================================================== -->
+            <div class="tab-pane fade" id="panel-portafolio" role="tabpanel">
+                
+                <!-- Perfil del Instructor -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <div class="row align-items-center g-3">
+                        <div class="col-auto">
+                            <div class="rounded-circle bg-success text-white fw-bold d-grid place-items-center shadow-sm" style="width: 72px; height: 72px; font-size: 1.8rem; background-color: #29AAE3 !important;">
+                                {{ request.user.first_name|slice:":1"|default:"I" }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h2 class="h5 fw-bold mb-1">{{ request.user.get_full_name|default:request.user.username }}</h2>
+                            <div class="d-flex flex-wrap gap-2 text-muted small">
+                                <span><i class="bi bi-building me-1 text-success"></i> Regional Magdalena · Sede Ciénaga</span>
+                                <span>·</span>
+                                <span><i class="bi bi-award me-1 text-success"></i> Rol: Profesor Líder Técnico</span>
+                                <span>·</span>
+                                <span><i class="bi bi-envelope me-1 text-success"></i> {{ request.user.email|default:"instructor@misena.edu.co" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="d-flex gap-3 text-center">
+                                <div class="bg-light p-2 rounded-3">
+                                    <span class="fw-bold text-dark d-block fs-5">{{ fichas.count }}</span>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Fichas Asignadas</small>
+                                </div>
+                                <div class="bg-light p-2 rounded-3">
+                                    <span class="fw-bold text-success d-block fs-5">{{ aprendices.count }}</span>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Aprendices Activos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Submódulos Operativos -->
+                <div class="row g-4">
+                    
+                    <!-- 1. Horario y Ambientes -->
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <div class="kpi-icon-box bg-primary bg-opacity-10 text-primary"><i class="bi bi-calendar3"></i></div>
+                                <h3 class="h6 fw-bold mb-0">1. Horario y Ambientes</h3>
+                            </div>
+                            <p class="small text-muted mb-3">Programación semanal (Lunes a Sábado) en Talleres, Aulas, Ambientes de Cómputo y Virtual.</p>
+                            <a href="{% url 'horarios_tablero' %}" class="btn btn-sm btn-outline-primary rounded-pill w-100 mt-auto fw-bold">
+                                Gestionar Horarios
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 2. Planeación Pedagógica -->
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <div class="kpi-icon-box bg-success bg-opacity-10 text-success"><i class="bi bi-journal-text"></i></div>
+                                <h3 class="h6 fw-bold mb-0">2. Planeación Pedagógica</h3>
+                            </div>
+                            <p class="small text-muted mb-3">Repositorio de Guías de Aprendizaje, Instrumentos de Evaluación y Rúbricas por Fases (Análisis, Planeación, Ejecución, Evaluación).</p>
+                            <a href="{% url 'biblioteca_formacion' %}" class="btn btn-sm btn-outline-success rounded-pill w-100 mt-auto fw-bold">
+                                Repositorio Pedagógico
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 3. Novedades y Comités -->
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <div class="kpi-icon-box bg-warning bg-opacity-10 text-warning"><i class="bi bi-journal-bookmark-fill"></i></div>
+                                <h3 class="h6 fw-bold mb-0">3. Novedades y Comités</h3>
+                            </div>
+                            <p class="small text-muted mb-3">Bitácora de incidencias disciplinarias y generador automático de actas oficiales de Comité de Evaluación.</p>
+                            <a href="{% url 'alertas_tempranas' %}" class="btn btn-sm btn-outline-warning rounded-pill w-100 mt-auto fw-bold">
+                                Casos y Bitácoras
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 4. Juicios Evaluativos -->
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <div class="kpi-icon-box bg-danger bg-opacity-10 text-danger"><i class="bi bi-award-fill"></i></div>
+                                <h3 class="h6 fw-bold mb-0">4. Juicios Evaluativos</h3>
+                            </div>
+                            <p class="small text-muted mb-3">Panel de calificación masiva de RAPs con emisión oficial de juicios [A] Aprobado y [D] Por Mejorar.</p>
+                            <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm btn-outline-danger rounded-pill w-100 mt-auto fw-bold">
+                                Sábana Calificaciones
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===============================================================
+                 MÓDULO 4: SUITE DE PRODUCTIVIDAD E IA DEL INSTRUCTOR
+                 =============================================================== -->
+            <div class="tab-pane fade" id="panel-ia" role="tabpanel">
+                
+                <div class="row g-4">
+                    
+                    <!-- Columna de Selección de Herramienta IA -->
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="bi bi-lightbulb-fill text-success fs-4"></i>
+                                <h2 class="h6 fw-bold mb-0">Suite de Productividad Pedagógica para el Instructor SENA</h2>
+                            </div>
+                            <p class="small text-muted mb-4">
+                                Selecciona una de las 5 herramientas pedagógicas diseñadas para automatizar tareas repetitivas y elevar el rigor formativo.
+                            </p>
+
+                            <!-- Selector de las 5 Herramientas -->
+                            <div class="list-group list-group-flush mb-3">
+                                <button type="button" class="list-group-item list-group-item-action active p-3 rounded-3 mb-2 sena-ia-tool-select" data-herramienta="1">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <strong class="small">1. Planificador Semanal Inteligente</strong>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                    <small class="d-block opacity-75 mt-1" style="font-size: 0.74rem;">Cronograma semanal día a día con actividades prácticas y criterios RAP.</small>
+                                </button>
+
+                                <button type="button" class="list-group-item list-group-item-action p-3 rounded-3 mb-2 sena-ia-tool-select" data-herramienta="2">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <strong class="small">2. Generador de Sesiones Express</strong>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                    <small class="d-block opacity-75 mt-1" style="font-size: 0.74rem;">Diseño ágil en 4 momentos SENA (Reflexión, Conceptualización, Taller, Cierre).</small>
+                                </button>
+
+                                <button type="button" class="list-group-item list-group-item-action p-3 rounded-3 mb-2 sena-ia-tool-select" data-herramienta="3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <strong class="small">3. Automatizador de Tareas e Informes</strong>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                    <small class="d-block opacity-75 mt-1" style="font-size: 0.74rem;">Actas oficiales de comité, citaciones, planes de mejoramiento y bitácoras.</small>
+                                </button>
+
+                                <button type="button" class="list-group-item list-group-item-action p-3 rounded-3 mb-2 sena-ia-tool-select" data-herramienta="4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <strong class="small">4. Recursos y Guías Didácticas</strong>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                    <small class="d-block opacity-75 mt-1" style="font-size: 0.74rem;">5 ejercicios prácticos, 3 actividades colaborativas y lista de chequeo.</small>
+                                </button>
+
+                                <button type="button" class="list-group-item list-group-item-action p-3 rounded-3 mb-2 sena-ia-tool-select" data-herramienta="5">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <strong class="small">5. Coach de Productividad & Tiempo</strong>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                    <small class="d-block opacity-75 mt-1" style="font-size: 0.74rem;">Análisis de carga docente, matriz de delegación y rutina de alta eficiencia.</small>
+                                </button>
+                            </div>
+
+                            <!-- Formulario de Parámetros Dinámico -->
+                            <form id="formGeneradorIA" class="bg-light p-3 rounded-3">
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-dark mb-1">Tema / Competencia o Caso</label>
+                                    <input type="text" id="iaInputTema" class="form-control form-control-sm" value="Diseño y Construcción de Software ADSO" required>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold text-dark mb-1">Duración / Horas</label>
+                                        <input type="text" id="iaInputDuracion" class="form-control form-control-sm" value="12 horas">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold text-dark mb-1">Fase del Proyecto</label>
+                                        <select id="iaInputFase" class="form-select form-select-sm">
+                                            <option value="Ejecución">Ejecución</option>
+                                            <option value="Análisis">Análisis</option>
+                                            <option value="Planeación">Planeación</option>
+                                            <option value="Evaluación">Evaluación</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-success w-100 rounded-pill fw-bold shadow-sm" id="btnEjecutarIA" style="background:#29AAE3;">
+                                    <i class="bi bi-stars me-1"></i> Generar Asistencia Pedagógica
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Columna de Resultados Generados con Botón de Copiado y Descarga -->
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 h-100 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-0">Resultado Generado por el Asistente Pedagógico</h2>
+                                    <small class="text-muted">Documento estructurado listo para copiar y utilizar</small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnCopiarIA">
+                                        <i class="bi bi-clipboard me-1"></i> Copiar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" id="btnDescargarIA">
+                                        <i class="bi bi-download me-1"></i> Descargar .md
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1 bg-light p-3 rounded-3 border overflow-auto" id="iaOutputContainer" style="max-height: 520px; font-family: 'DM Sans', monospace; font-size: 0.85rem; line-height: 1.6; white-space: pre-line;">
+Presiona el botón "Generar Asistencia Pedagógica" para obtener tu planeación pedagógica, sesión express o acta estructurada en segundos.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===============================================================
+                 MÓDULO 5: CONFIGURACIÓN DEL CENTRO Y REGIONAL
+                 =============================================================== -->
+            <div class="tab-pane fade" id="panel-centro" role="tabpanel">
+                
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h2 class="h6 fw-bold mb-3">Identidad Institucional y Datos del Centro</h2>
+                            <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
+                                <img src="{% static 'img/logo_sena.svg' %}" alt="Logo SENA" style="width: 54px; height: 54px;">
+                                <div>
+                                    <strong class="d-block text-dark">Servicio Nacional de Aprendizaje — SENA</strong>
+                                    <small class="text-muted">Regional Magdalena · Sede Ciénaga</small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Regional</label>
+                                <input type="text" class="form-control form-control-sm" value="Regional Magdalena" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Centro de Formación</label>
+                                <input type="text" class="form-control form-control-sm" value="Centro de Logística y Promoción Ecoturística / Gaira" readonly>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Código de Centro</label>
+                                    <input type="text" class="form-control form-control-sm" value="9224 / 9520" readonly>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Municipio</label>
+                                    <input type="text" class="form-control form-control-sm" value="Ciénaga, Magdalena" readonly>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Dirección Sede Principal</label>
+                                <input type="text" class="form-control form-control-sm" value="Calle 18 # 12-40, Ciénaga, Magdalena" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Directorio de Directivos y Firmas Digitalizadas -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h2 class="h6 fw-bold mb-3">Directorio Directivo y Firmas Digitalizadas (.PNG)</h2>
+                            <p class="small text-muted mb-3">Administración de firmas autorizadas para inserción en actas de comité y reportes oficiales.</p>
+
+                            <div class="list-group list-group-flush mb-4">
+                                <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="small text-dark d-block">Subdirector(a) de Centro</strong>
+                                        <small class="text-muted">Dr. Carlos Eduardo Vives · Subdirección</small>
+                                    </div>
+                                    <span class="badge bg-success">Firma Cargada (.png)</span>
+                                </div>
+
+                                <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="small text-dark d-block">Coordinador(a) Misional</strong>
+                                        <small class="text-muted">Dra. María Elena Restrepo · Formación Profesional</small>
+                                    </div>
+                                    <span class="badge bg-success">Firma Cargada (.png)</span>
+                                </div>
+
+                                <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="small text-dark d-block">Coordinador(a) Académico(a)</strong>
+                                        <small class="text-muted">Ing. Roberto Gómez · Media Técnica</small>
+                                    </div>
+                                    <span class="badge bg-success">Firma Cargada (.png)</span>
+                                </div>
+
+                                <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="small text-dark d-block">Profesor Líder de Articulación</strong>
+                                        <small class="text-muted">{{ request.user.get_full_name|default:request.user.username }}</small>
+                                    </div>
+                                    <span class="badge bg-info text-white">Firma Activa</span>
+                                </div>
+                            </div>
+
+                            <div class="border rounded-3 p-3 bg-light text-center">
+                                <i class="bi bi-file-earmark-arrow-up fs-3 text-success d-block mb-1"></i>
+                                <span class="small fw-bold text-dark d-block">Actualizar Firma Digitalizada Transparente</span>
+                                <small class="text-muted d-block mb-2">Formato PNG transparente, resolución 600x200 px</small>
+                                <input type="file" class="form-control form-control-sm d-inline-block" style="max-width: 300px;" accept=".png">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===============================================================
+                 MÓDULO 6: RESPALDO Y GESTIÓN DE BASE DE DATOS
+                 =============================================================== -->
+            <div class="tab-pane fade" id="panel-backup" role="tabpanel">
+                
+                <div class="row g-4">
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h2 class="h6 fw-bold mb-3">Contadores de Volumen en Tiempo Real</h2>
+                            
+                            <div class="row g-3 mb-4">
+                                <div class="col-6 col-sm-4">
+                                    <div class="p-3 bg-light rounded-3 text-center">
+                                        <span class="d-block fw-bold text-dark fs-4">{{ fichas.count }}</span>
+                                        <small class="text-muted">Fichas en BD</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-4">
+                                    <div class="p-3 bg-light rounded-3 text-center">
+                                        <span class="d-block fw-bold text-success fs-4">{{ total_aprendices }}</span>
+                                        <small class="text-muted">Estudiantes</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-4">
+                                    <div class="p-3 bg-light rounded-3 text-center">
+                                        <span class="d-block fw-bold text-primary fs-4">{{ competencias.count }}</span>
+                                        <small class="text-muted">Competencias</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-4">
+                                    <div class="p-3 bg-light rounded-3 text-center">
+                                        <span class="d-block fw-bold text-dark fs-4">{{ total_asistencias }}</span>
+                                        <small class="text-muted">Asistencias</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-4">
+                                    <div class="p-3 bg-light rounded-3 text-center">
+                                        <span class="d-block fw-bold text-warning fs-4">{{ comites.count }}</span>
+                                        <small class="text-muted">Novedades / Comités</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-4">
+                                    <div class="p-3 bg-light rounded-3 text-center">
+                                        <span class="d-block fw-bold text-success fs-4">{{ tasa_aprobacion }}%</span>
+                                        <small class="text-muted">Aprobación RAP</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="h6 fw-bold mb-2">Exportación de Respaldo Completo</h3>
+                            <p class="small text-muted mb-3">Genera una copia íntegra de la base de datos institucional en formato abierto JSON o CSV estructurado.</p>
+                            
+                            <div class="d-flex gap-3">
+                                <a href="{% url 'api_sena_exportar_datos' %}?formato=json" class="btn btn-dark rounded-pill px-4 btn-sm fw-bold">
+                                    <i class="bi bi-filetype-json me-1"></i> Descargar Respaldo JSON
+                                </a>
+                                <a href="{% url 'api_sena_exportar_datos' %}?formato=csv" class="btn btn-outline-dark rounded-pill px-4 btn-sm fw-bold">
+                                    <i class="bi bi-filetype-csv me-1"></i> Descargar Respaldo CSV
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h2 class="h6 fw-bold mb-3">Restauración y Mantenimiento</h2>
+                            <p class="small text-muted mb-3">Restauración controlada desde archivo JSON previamente validado.</p>
+
+                            <div class="border rounded-3 p-3 bg-light mb-3">
+                                <label class="form-label small fw-bold text-dark">Archivo de Respaldo .JSON</label>
+                                <input type="file" class="form-control form-control-sm mb-2" accept=".json">
+                                <button type="button" class="btn btn-sm btn-outline-warning w-100 rounded-pill fw-bold" onclick="alert('Zona protegida: Comunícate con el administrador de base de datos para ejecutar una restauración formal.')">
+                                    <i class="bi bi-upload me-1"></i> Procesar Archivo de Restauración
+                                </button>
+                            </div>
+
+                            <div class="alert alert-warning small mb-0">
+                                <i class="bi bi-shield-lock-fill me-1"></i>
+                                <strong>Zona de Mantenimiento Protegida:</strong> Los cambios sobre la base de datos relacional son auditados de acuerdo con la norma de seguridad ISO/IEC 27001.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ===========================================================================
+     MODAL WIZARD EN 4 PASOS ("NUEVO APRENDIZ")
+     =========================================================================== -->
+<div class="modal fade" id="wizardAprendizModal" tabindex="-1" aria-labelledby="wizardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            
+            <div class="modal-header border-0 bg-dark text-white py-3 px-4">
+                <h5 class="modal-title fs-6 fw-bold d-flex align-items-center gap-2" id="wizardModalLabel">
+                    <img src="{% static 'img/logo_sena.svg' %}" alt="SENA" style="width: 22px; height: 22px; filter: brightness(0) invert(1);">
+                    Registro Oficial de Nuevo Estudiante · Wizard en 4 Pasos
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4 bg-white">
+                
+                <!-- Indicador de Pasos -->
+                <div class="wizard-step-indicator">
+                    <div class="text-center">
+                        <div class="step-circle active" id="stepIndicator1">1</div>
+                        <span class="small fw-bold text-muted d-block mt-1" style="font-size: 0.72rem;">Personales</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="step-circle" id="stepIndicator2">2</div>
+                        <span class="small fw-bold text-muted d-block mt-1" style="font-size: 0.72rem;">Contacto</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="step-circle" id="stepIndicator3">3</div>
+                        <span class="small fw-bold text-muted d-block mt-1" style="font-size: 0.72rem;">Población</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="step-circle" id="stepIndicator4">4</div>
+                        <span class="small fw-bold text-muted d-block mt-1" style="font-size: 0.72rem;">Formación</span>
+                    </div>
+                </div>
+
+                <form id="formWizardAprendiz">
+                    {% csrf_token %}
+
+                    <!-- PASO 1: DATOS PERSONALES -->
+                    <div class="wizard-step-panel" id="wizardStep1">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Paso 1: Datos Personales e Identificación</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Nombres</label>
+                                <input type="text" id="wizNombres" class="form-control form-control-sm" placeholder="Ej. Carlos Alberto" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Apellidos</label>
+                                <input type="text" id="wizApellidos" class="form-control form-control-sm" placeholder="Ej. Mendoza Castro" required>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-bold text-muted">Tipo Documento</label>
+                                <select id="wizTipoDoc" class="form-select form-select-sm">
+                                    <option value="TI">Tarjeta de Identidad (TI)</option>
+                                    <option value="CC" selected>Cédula de Ciudadanía (CC)</option>
+                                    <option value="PEP">Permiso Especial (PEP)</option>
+                                    <option value="CE">Cédula Extranjería (CE)</option>
+                                </select>
+                            </div>
+                            <div class="col-8">
+                                <label class="form-label small fw-bold text-muted">Número de Documento</label>
+                                <input type="text" id="wizNumDoc" class="form-control form-control-sm" placeholder="Ej. 1083401234" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Fecha de Nacimiento</label>
+                                <input type="date" id="wizFechaNac" class="form-control form-control-sm" value="2007-05-15">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Género</label>
+                                <select id="wizGenero" class="form-select form-select-sm">
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
+                                    <option value="O">Otro / No binario</option>
+                                </select>
+                            </div>
+                            <div class="col-8">
+                                <label class="form-label small fw-bold text-muted">Dirección de Residencia</label>
+                                <input type="text" id="wizDireccion" class="form-control form-control-sm" placeholder="Calle 15 # 8-20, Barrio Miramar">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-bold text-muted">Municipio</label>
+                                <input type="text" id="wizMunicipio" class="form-control form-control-sm" value="Ciénaga">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASO 2: CONTACTO -->
+                    <div class="wizard-step-panel" id="wizardStep2" style="display: none;">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Paso 2: Información de Contacto</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Teléfono Celular</label>
+                                <input type="tel" id="wizCelular" class="form-control form-control-sm" placeholder="300 123 4567">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Teléfono Fijo / Respaldo</label>
+                                <input type="tel" id="wizTelefono" class="form-control form-control-sm" placeholder="605 481 0000">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Correo Institucional (@misena.edu.co)</label>
+                                <input type="email" id="wizEmailMisena" class="form-control form-control-sm" placeholder="aprendiz@misena.edu.co">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Correo Personal</label>
+                                <input type="email" id="wizEmailPersonal" class="form-control form-control-sm" placeholder="carlos@gmail.com">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Contacto de Emergencia (Nombre y Teléfono)</label>
+                                <input type="text" id="wizContactoEmergencia" class="form-control form-control-sm" placeholder="Madre: Elena Castro · Tel: 310 987 6543">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASO 3: CARACTERIZACIÓN POBLACIONAL -->
+                    <div class="wizard-step-panel" id="wizardStep3" style="display: none;">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Paso 3: Caracterización Poblacional y Vulnerabilidad</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Grupo Étnico</label>
+                                <select id="wizEtnia" class="form-select form-select-sm">
+                                    <option value="Ninguno">Ninguno / Mestizo</option>
+                                    <option value="Afrocolombiano">Afrocolombiano / Palenquero / Raizal</option>
+                                    <option value="Indigena">Indígena</option>
+                                    <option value="RROM">RROM / Gitano</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Condición de Discapacidad</label>
+                                <select id="wizDiscapacidad" class="form-select form-select-sm">
+                                    <option value="Ninguna">Ninguna</option>
+                                    <option value="Fisica">Física o Motora</option>
+                                    <option value="Visual">Visual</option>
+                                    <option value="Auditiva">Auditiva</option>
+                                    <option value="Cognitiva">Cognitiva</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Población Vulnerable / Víctima (RUV)</label>
+                                <select id="wizRuv" class="form-select form-select-sm">
+                                    <option value="No">No aplica</option>
+                                    <option value="Victima">Víctima del Conflicto Armado (RUV)</option>
+                                    <option value="Desplazado">Desplazamiento Forzado</option>
+                                    <option value="JovenesPaz">Jóvenes en Paz</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Régimen de Salud / EPS o Sisbén</label>
+                                <input type="text" id="wizEps" class="form-control form-control-sm" placeholder="Ej. Sisbén Grupo A1 / EPS Nueva EPS">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASO 4: DATOS DE FORMACIÓN -->
+                    <div class="wizard-step-panel" id="wizardStep4" style="display: none;">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Paso 4: Datos del Programa Formativo y Vinculación</h6>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Ficha Asignada</label>
+                                <select id="wizFichaId" class="form-select form-select-sm" required>
+                                    {% for f in fichas %}
+                                        <option value="{{ f.id }}">Ficha {{ f.codigo_ficha }} — {{ f.programa.denominacion }} ({{ f.institucion.nombre }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Modalidad de Oferta</label>
+                                <select id="wizModalidad" class="form-select form-select-sm">
+                                    <option value="Presencial">Presencial en Colegio</option>
+                                    <option value="Dual">Dual (Colegio + Taller SENA Ciénaga)</option>
+                                    <option value="Virtual">A Distancia / Virtual</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Grado Escolar en la IED</label>
+                                <select id="wizGrado" class="form-select form-select-sm">
+                                    <option value="10">Grado 10° (Décimo)</option>
+                                    <option value="11">Grado 11° (Undécimo)</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Empresa Patrocinadora / Contrato de Aprendizaje (Opcional)</label>
+                                <input type="text" id="wizEmpresa" class="form-control form-control-sm" placeholder="Ej. Cooperativa Bananera de Ciénaga / En Búsqueda">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Navegación del Wizard -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnWizAnterior" style="display: none;">
+                            <i class="bi bi-arrow-left me-1"></i> Anterior
+                        </button>
+                        <div class="ms-auto d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-dark rounded-pill px-4" id="btnWizSiguiente">
+                                Siguiente <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success rounded-pill px-4 fw-bold" id="btnWizFinalizar" style="display: none; background:#29AAE3;">
+                                <i class="bi bi-check-circle-fill me-1"></i> Registrar Estudiante
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="wizFeedback" class="mt-3 small" style="display:none;"></div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===========================================================================
+     SCRIPTS DE LÓGICA E INTERACTIVIDAD DE LA SUITE
+     =========================================================================== -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- 1. Gráficos de Asistencia (Chart.js) ---
+    const ctxDona = document.getElementById('chartDonaAsistencia');
+    if (ctxDona) {
+        new Chart(ctxDona, {
+            type: 'doughnut',
+            data: {
+                labels: ['Asistió [A]', 'Retardo [R]', 'Falla Justificada [FJ]', 'Falla Injustificada [FI]'],
+                datasets: [{
+                    data: [{{ asistencias_p|default:45 }}, 8, {{ asistencias_j|default:4 }}, {{ asistencias_a|default:3 }}],
+                    backgroundColor: ['#29AAE3', '#F59E0B', '#3B82F6', '#EF4444'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                }
+            }
+        });
+    }
+
+    // --- 2. Filtros de Aprendices en Tiempo Real ---
+    const inputTexto = document.getElementById('filtroTextoAprendiz');
+    const selectFicha = document.getElementById('filtroFichaAprendiz');
+    const selectEstado = document.getElementById('filtroEstadoAprendiz');
+
+    function filtrarAprendices() {
+        const query = (inputTexto ? inputTexto.value.toLowerCase().trim() : '');
+        const fichaQ = (selectFicha ? selectFicha.value.trim() : '');
+        const estadoQ = (selectEstado ? selectEstado.value.trim() : '');
+
+        document.querySelectorAll('#tablaAprendicesSena tbody tr.fila-aprendiz').forEach(tr => {
+            const nombre = tr.getAttribute('data-nombre') || '';
+            const doc = tr.getAttribute('data-doc') || '';
+            const f = tr.getAttribute('data-ficha') || '';
+            const est = tr.getAttribute('data-estado') || '';
+
+            const matchTexto = !query || nombre.includes(query) || doc.includes(query);
+            const matchFicha = !fichaQ || f === fichaQ;
+            const matchEstado = !estadoQ || est === estadoQ;
+
+            tr.style.display = (matchTexto && matchFicha && matchEstado) ? '' : 'none';
+        });
+    }
+
+    if (inputTexto) inputTexto.addEventListener('input', filtrarAprendices);
+    if (selectFicha) selectFicha.addEventListener('change', filtrarAprendices);
+    if (selectEstado) selectEstado.addEventListener('change', filtrarAprendices);
+
+    // --- 3. Marcación de Asistencia (4 Estados) ---
+    window.seleccionarEstado = function(btn, estado) {
+        const group = btn.closest('.marcacion-btn-group');
+        group.querySelectorAll('.btn-estado-sena').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        actualizarProgresoAsistencia();
+    };
+
+    window.marcarTodos = function(estado) {
+        document.querySelectorAll('#tablaMarcacionAsistencia tbody tr.fila-marcacion').forEach(tr => {
+            const btn = tr.querySelector(`.btn-estado-${estado.toLowerCase()}`);
+            if (btn) seleccionarEstado(btn, estado);
+        });
+    };
+
+    function actualizarProgresoAsistencia() {
+        const total = document.querySelectorAll('#tablaMarcacionAsistencia tbody tr.fila-marcacion').length;
+        const bar = document.getElementById('asistenciaProgressBar');
+        const txt = document.getElementById('asistenciaProgresoTexto');
+        if (bar && txt) {
+            bar.style.width = '100%';
+            txt.textContent = `Registrados: ${total} / ${total}`;
+        }
+    }
+    actualizarProgresoAsistencia();
+
+    // Guardar Asistencia AJAX
+    const btnGuardarAsis = document.getElementById('btnGuardarAsistenciaSena');
+    if (btnGuardarAsis) {
+        btnGuardarAsis.addEventListener('click', async function() {
+            btnGuardarAsis.disabled = true;
+            btnGuardarAsis.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+
+            const fichaSelect = document.getElementById('asistenciaSelectorFicha');
+            const fechaVal = document.getElementById('asistenciaFecha')?.value;
+            const asistenciasPayload = [];
+
+            document.querySelectorAll('#tablaMarcacionAsistencia tbody tr.fila-marcacion').forEach(tr => {
+                const matId = tr.getAttribute('data-matricula');
+                const activeBtn = tr.querySelector('.btn-estado-sena.active');
+                let estado = 'A';
+                if (activeBtn) {
+                    if (activeBtn.classList.contains('btn-estado-r')) estado = 'R';
+                    else if (activeBtn.classList.contains('btn-estado-fj')) estado = 'FJ';
+                    else if (activeBtn.classList.contains('btn-estado-fi')) estado = 'FI';
+                }
+                const obs = tr.querySelector('.observacion-asistencia')?.value || '';
+                asistenciasPayload.push({ matricula_id: matId, estado: estado, observaciones: obs });
+            });
+
+            try {
+                const resp = await fetch("{% url 'api_sena_guardar_asistencia' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        ficha_id: fichaSelect?.value,
+                        fecha: fechaVal,
+                        asistencias: asistenciasPayload
+                    })
+                });
+                const res = await resp.json();
+                if (res.success) {
+                    alert('✓ ' + res.mensaje);
+                    if (res.alertas && res.alertas.length > 0) {
+                        alert('⚠️ Atención: Se identificaron ' + res.alertas.length + ' aprendices en límite de faltas injustificadas.');
+                    }
+                } else {
+                    alert('Error: ' + res.mensaje);
+                }
+            } catch(e) {
+                alert('Error al comunicar con el servidor.');
+            } finally {
+                btnGuardarAsis.disabled = false;
+                btnGuardarAsis.innerHTML = '<i class="bi bi-cloud-arrow-up-fill me-1"></i> Guardar Asistencia Oficial';
+            }
+        });
+    }
+
+    // --- 4. Wizard Modal en 4 Pasos ---
+    let currentWizStep = 1;
+    const btnWizAnt = document.getElementById('btnWizAnterior');
+    const btnWizSig = document.getElementById('btnWizSiguiente');
+    const btnWizFin = document.getElementById('btnWizFinalizar');
+    const wizFeedback = document.getElementById('wizFeedback');
+
+    function showWizStep(step) {
+        currentWizStep = step;
+        for (let i = 1; i <= 4; i++) {
+            const panel = document.getElementById(`wizardStep${i}`);
+            const circle = document.getElementById(`stepIndicator${i}`);
+            if (panel) panel.style.display = (i === step) ? 'block' : 'none';
+            if (circle) {
+                circle.classList.remove('active', 'completed');
+                if (i === step) circle.classList.add('active');
+                else if (i < step) circle.classList.add('completed');
+            }
+        }
+        if (btnWizAnt) btnWizAnt.style.display = (step > 1) ? 'inline-block' : 'none';
+        if (btnWizSig) btnWizSig.style.display = (step < 4) ? 'inline-block' : 'none';
+        if (btnWizFin) btnWizFin.style.display = (step === 4) ? 'inline-block' : 'none';
+    }
+
+    if (btnWizSig) {
+        btnWizSig.addEventListener('click', () => {
+            if (currentWizStep === 1) {
+                const n = document.getElementById('wizNombres').value.trim();
+                const d = document.getElementById('wizNumDoc').value.trim();
+                if (!n || !d) {
+                    alert('Por favor digita nombres y documento del aprendiz.');
+                    return;
+                }
+            }
+            if (currentWizStep < 4) showWizStep(currentWizStep + 1);
+        });
+    }
+
+    if (btnWizAnt) {
+        btnWizAnt.addEventListener('click', () => {
+            if (currentWizStep > 1) showWizStep(currentWizStep - 1);
+        });
+    }
+
+    if (btnWizFin) {
+        btnWizFin.addEventListener('click', async () => {
+            btnWizFin.disabled = true;
+            btnWizFin.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Registrando...';
+            wizFeedback.style.display = 'none';
+
+            const payload = {
+                nombres: document.getElementById('wizNombres').value.trim(),
+                apellidos: document.getElementById('wizApellidos').value.trim(),
+                tipo_documento: document.getElementById('wizTipoDoc').value,
+                numero_documento: document.getElementById('wizNumDoc').value.trim(),
+                telefono: document.getElementById('wizCelular')?.value || '',
+                email_institucional: document.getElementById('wizEmailMisena')?.value || '',
+                ficha_id: document.getElementById('wizFichaId')?.value,
+                grado_escolar: document.getElementById('wizGrado')?.value || '10'
+            };
+
+            try {
+                const resp = await fetch("{% url 'api_sena_registrar_aprendiz' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const res = await resp.json();
+                wizFeedback.style.display = 'block';
+                if (res.success) {
+                    wizFeedback.className = 'mt-3 small p-3 bg-success bg-opacity-10 text-success rounded-3 border border-success fw-bold';
+                    wizFeedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${res.mensaje}`;
+                    setTimeout(() => location.reload(), 1800);
+                } else {
+                    wizFeedback.className = 'mt-3 small p-3 bg-danger bg-opacity-10 text-danger rounded-3 border border-danger';
+                    wizFeedback.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${res.mensaje}`;
+                }
+            } catch(e) {
+                wizFeedback.style.display = 'block';
+                wizFeedback.className = 'mt-3 small p-3 bg-danger bg-opacity-10 text-danger rounded-3';
+                wizFeedback.innerHTML = 'Error al comunicar con el servidor.';
+            } finally {
+                btnWizFin.disabled = false;
+                btnWizFin.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Registrar Estudiante';
+            }
+        });
+    }
+
+    // --- 5. Suite de Productividad e IA ---
+    let activeHerramienta = '1';
+    document.querySelectorAll('.sena-ia-tool-select').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.sena-ia-tool-select').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            activeHerramienta = this.getAttribute('data-herramienta');
+        });
+    });
+
+    const btnExecIA = document.getElementById('btnEjecutarIA');
+    const outIA = document.getElementById('iaOutputContainer');
+
+    if (btnExecIA && outIA) {
+        btnExecIA.addEventListener('click', async () => {
+            btnExecIA.disabled = true;
+            btnExecIA.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Procesando con IA SENA...';
+            outIA.textContent = 'Generando contenido estructurado adaptado al modelo pedagógico y normativo del SENA...';
+
+            try {
+                const resp = await fetch("{% url 'api_sena_generar_ia' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        herramienta: activeHerramienta,
+                        tema: document.getElementById('iaInputTema').value,
+                        duracion: document.getElementById('iaInputDuracion').value,
+                        fase: document.getElementById('iaInputFase').value
+                    })
+                });
+                const res = await resp.json();
+                if (res.success) {
+                    outIA.textContent = res.contenido;
+                } else {
+                    outIA.textContent = 'Error al generar: ' + res.mensaje;
+                }
+            } catch(e) {
+                outIA.textContent = 'Error de conexión con el motor de IA.';
+            } finally {
+                btnExecIA.disabled = false;
+                btnExecIA.innerHTML = '<i class="bi bi-stars me-1"></i> Generar con IA SENA';
+            }
+        });
+    }
+
+    const btnCopiarIA = document.getElementById('btnCopiarIA');
+    if (btnCopiarIA && outIA) {
+        btnCopiarIA.addEventListener('click', () => {
+            navigator.clipboard.writeText(outIA.innerText).then(() => {
+                const old = btnCopiarIA.innerHTML;
+                btnCopiarIA.innerHTML = '<i class="bi bi-check2 text-success"></i> ¡Copiado!';
+                setTimeout(() => btnCopiarIA.innerHTML = old, 2000);
+            });
+        });
+    }
+
+    const btnDescargarIA = document.getElementById('btnDescargarIA');
+    if (btnDescargarIA && outIA) {
+        btnDescargarIA.addEventListener('click', () => {
+            const blob = new Blob([outIA.innerText], { type: 'text/markdown;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `SENA_Herramienta_${activeHerramienta}_${Date.now()}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    }
+
+    window.prepararCitacionComite = function(aprendiz, ficha) {
+        // Cambiar a la pestaña de IA y preparar acta
+        const tabIA = document.getElementById('tab-ia');
+        if (tabIA) {
+            bootstrap.Tab.getInstance(tabIA) ? bootstrap.Tab.getInstance(tabIA).show() : new bootstrap.Tab(tabIA).show();
+            const btnTool3 = document.querySelector('[data-herramienta="3"]');
+            if (btnTool3) btnTool3.click();
+            document.getElementById('iaInputTema').value = `Comité de Seguimiento para ${aprendiz} (Ficha ${ficha})`;
+            if (btnExecIA) btnExecIA.click();
+        }
+    };
+
+    window.generarListaRemisionComite = function() {
+        alert('Se ha generado el listado oficial de aprendices remitidos a Comité de Evaluación según Acuerdo 007/2012 para revisión de Coordinación Académica.');
+    };
+});
+</script>
+
+<!-- Modal de Personalización Dinámica de Widgets -->
+{% include 'componentes/modal_personalizar_dashboard.html' %}
+{% endblock %}

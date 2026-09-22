@@ -42,7 +42,7 @@
         height: 4px;
         background: #8E5266;
     }
-    .kpi-card.kpi-success::before { background: #39A900; }
+    .kpi-card.kpi-success::before { background: #29AAE3; }
     .kpi-card.kpi-warning::before { background: #FFAB00; }
     .kpi-card.kpi-danger::before { background: #DE350B; }
     .kpi-card.kpi-info::before { background: #0065FF; }
@@ -88,7 +88,7 @@
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge" style="background-color: #39A900; color: #ffffff;">SENA · Regional Magdalena</span>
+                        <span class="badge" style="background-color: #29AAE3; color: #ffffff;">SENA · Regional Magdalena</span>
                         <span class="text-white-50 small">Centro de Logística y Promoción Ecoturística</span>
                     </div>
                     <h1 class="h2 fw-bold text-white mb-2">Panel del Coordinador Académico</h1>
@@ -98,7 +98,7 @@
                     </p>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
-                    <a href="{% url 'fichas_crear' %}" class="btn text-white fw-bold rounded-pill px-3 shadow-sm" style="background-color: #39A900;">
+                    <a href="{% url 'fichas_crear' %}" class="btn text-white fw-bold rounded-pill px-3 shadow-sm" style="background-color: #29AAE3;">
                         <i class="bi bi-plus-lg me-1"></i> Nueva Ficha
                     </a>
                     <a href="{% url 'horarios_tablero' %}" class="btn btn-outline-light rounded-pill px-3">
@@ -123,14 +123,14 @@
         </div>
         <div class="col-6 col-md-4 col-xl-2">
             <div class="kpi-card kpi-info">
-                <div class="text-muted small fw-semibold text-uppercase">Aprendices</div>
+                <div class="text-muted small fw-semibold text-uppercase">Estudiantes</div>
                 <div class="kpi-value mt-1">{{ total_aprendices|default:0 }}</div>
                 <small class="text-success fw-medium">Matrículas vigentes</small>
             </div>
         </div>
         <div class="col-6 col-md-4 col-xl-2">
             <div class="kpi-card">
-                <div class="text-muted small fw-semibold text-uppercase">Instructores</div>
+                <div class="text-muted small fw-semibold text-uppercase">Profesores</div>
                 <div class="kpi-value mt-1">{{ total_instructores|default:0 }}</div>
                 <small class="text-muted">Equipo técnico SENA</small>
             </div>
@@ -191,7 +191,7 @@
     {% endif %}
 
     <!-- Contenido Principal: 2 Columnas -->
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mb-4 align-items-start">
         
         <!-- Columna Izquierda: Fichas Técnicas Bajo Coordinación -->
         <div class="col-12 col-lg-7 col-xl-8">
@@ -233,8 +233,8 @@
                             <tr>
                                 <th style="width: 14%;">Ficha</th>
                                 <th style="width: 38%;">Programa de Formación / Sede IED</th>
-                                <th style="width: 22%;">Instructor Líder</th>
-                                <th class="text-center" style="width: 10%;">Aprendices</th>
+                                <th style="width: 22%;">Profesor Líder</th>
+                                <th class="text-center" style="width: 10%;">Estudiantes</th>
                                 <th style="width: 11%;">Estado</th>
                                 <th class="text-end" style="width: 5%;">Acción</th>
                             </tr>
@@ -261,7 +261,7 @@
                                     </td>
                                     <td>
                                         {% if f.instructor_lider %}
-                                            <span class="text-dark small fw-medium">{{ f.instructor_lider.get_full_name|default:f.instructor_lider.username }}</span>
+                                             <span class="text-dark small fw-medium">{{ f.instructor_lider.get_full_name|default:f.instructor_lider.username }}</span>
                                         {% else %}
                                             <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Sin asignar</span>
                                         {% endif %}
@@ -295,68 +295,119 @@
             </section>
         </div>
 
-        <!-- Columna Derecha: Balance RAP, Trámites Radicados y Seguimientos -->
-        <div class="col-12 col-lg-5 col-xl-4 d-flex flex-column gap-4">
+        <!-- Columna Derecha: Evaluaciones y Aprendizaje, Trámites y Métricas Operativas -->
+        <div class="col-12 col-lg-5 col-xl-4 d-flex flex-column gap-3">
             
-            <!-- Balance Cualitativo de Evaluación RAP -->
-            <section class="sinetec-card p-4 shadow-sm">
+            <!-- 1. MÓDULO: EVALUACIONES Y APRENDIZAJE (RAP) -->
+            <section class="sinetec-card p-4 shadow-sm bg-white">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h2 class="h6 fw-bold mb-0">Balance de Juicios Evaluativos RAP</h2>
-                        <small class="text-muted">Resultados oficiales de la formación</small>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-success bg-opacity-10 text-success fw-bold" style="font-size: 0.68rem; letter-spacing: 0.04em;">
+                                <i class="bi bi-patch-check-fill me-1"></i> SEGUIMIENTO ACADÉMICO
+                            </span>
+                        </div>
+                        <h2 class="h6 fw-bold mb-0 text-dark">Evaluaciones y Aprendizaje</h2>
+                        <small class="text-muted">Juicios evaluativos RAP (Aprobados / Por Mejorar)</small>
                     </div>
-                    <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
-                        Sábana RAP
+                    <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">
+                        <i class="bi bi-table me-1"></i> Sábana RAP
                     </a>
                 </div>
 
+                <!-- Métricas Visuales de Desempeño RAP -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="p-3 rounded-3 border bg-success bg-opacity-10 text-center">
+                            <span class="text-success small fw-semibold text-uppercase d-block" style="font-size: 0.72rem;">Juicios 'A' (Aprobados)</span>
+                            <div class="h4 fw-bold text-success mb-0 mt-1">{{ juicios_aprobados }}</div>
+                            <small class="text-success fw-semibold" style="font-size: 0.72rem;">{{ tasa_aprobacion }}% del total</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 rounded-3 border bg-warning bg-opacity-10 text-center">
+                            <span class="text-warning text-dark small fw-semibold text-uppercase d-block" style="font-size: 0.72rem;">Juicios 'D' (Por Mejorar)</span>
+                            <div class="h4 fw-bold text-warning mb-0 mt-1">{{ juicios_por_mejorar }}</div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Requieren plan de mejora</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barras de Progreso Visuales -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between small mb-1">
-                        <span class="fw-semibold text-success"><i class="bi bi-check-circle-fill me-1"></i> Aprobados ('A')</span>
-                        <strong class="text-success">{{ juicios_aprobados }} ({{ tasa_aprobacion }}%)</strong>
+                        <span class="fw-semibold text-dark"><i class="bi bi-graph-up-arrow text-success me-1"></i> Cumplimiento Global de RAPs</span>
+                        <strong class="text-success">{{ tasa_aprobacion }}%</strong>
                     </div>
                     <div class="progress" style="height: 10px; border-radius: 8px;">
                         <div class="progress-bar bg-success" style="width: {{ tasa_aprobacion }}%;"></div>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span class="fw-semibold text-warning"><i class="bi bi-exclamation-circle-fill me-1"></i> Por Mejorar ('D')</span>
-                        <strong class="text-warning">{{ juicios_por_mejorar }}</strong>
+                <!-- Feed Visual: Últimos Juicios Asentados -->
+                <div class="border-top pt-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-uppercase fw-bold text-muted small" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                            <i class="bi bi-clock-history me-1"></i> Últimas Calificaciones Registradas
+                        </span>
+                        <span class="badge bg-light text-muted border">{{ total_juicios }} Asentados</span>
                     </div>
-                    <div class="progress" style="height: 10px; border-radius: 8px;">
-                        <div class="progress-bar bg-warning" style="width: {% if total_juicios > 0 %}{% widthratio juicios_por_mejorar total_juicios 100 %}{% else %}0{% endif %}%;"></div>
+                    <div class="list-group list-group-flush">
+                        {% for j in juicios_recientes %}
+                            <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between align-items-center">
+                                <div class="overflow-hidden pe-2" style="min-width: 0;">
+                                    <strong class="d-block small text-dark text-truncate">{{ j.matricula.aprendiz.get_full_name|default:j.matricula.aprendiz.username }}</strong>
+                                    <span class="text-muted" style="font-size: 0.72rem;">
+                                        <i class="bi bi-tag me-1"></i>{{ j.resultado_aprendizaje.codigo }} · {{ j.fecha_evaluacion|date:'d/m/Y' }}
+                                    </span>
+                                </div>
+                                <span class="badge flex-shrink-0 {% if j.juicio_valor == 'A' %}bg-success{% else %}bg-warning text-dark{% endif %} px-2 py-1">
+                                    {% if j.juicio_valor == 'A' %}<i class="bi bi-check-circle me-1"></i>Aprobado{% else %}<i class="bi bi-exclamation-triangle me-1"></i>Por Mejorar{% endif %}
+                                </span>
+                            </div>
+                        {% empty %}
+                            <div class="text-center text-muted small py-2">
+                                <i class="bi bi-journal-check me-1"></i> Sin juicios asentados recientemente.
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
 
-                <div class="bg-light p-3 rounded-3 mt-3">
-                    <small class="text-muted d-block" style="font-size: 0.78rem;">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Para la certificación oficial técnica se exige el 100% de RAPs aprobados con juicio 'A' y cumplimiento del 80% de asistencia.
-                    </small>
+                <!-- Botones y Acciones de Evaluación -->
+                <div class="d-flex gap-2">
+                    <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm btn-success w-100 fw-semibold rounded-pill py-2" style="background-color: #29AAE3; border-color: #29AAE3;">
+                        <i class="bi bi-award-fill me-1"></i> Registrar Calificaciones
+                    </a>
+                    <a href="{% url 'centro_reportes' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-2" title="Exportar Reportes">
+                        <i class="bi bi-download"></i>
+                    </a>
                 </div>
             </section>
 
-            <!-- Trámites Radicados en Secretaría Recientes -->
-            <section class="sinetec-card p-4 flex-grow-1 shadow-sm">
+            <!-- 2. MÓDULO: TRÁMITES Y SOLICITUDES EN SECRETARÍA -->
+            <section class="sinetec-card p-4 shadow-sm bg-white">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h2 class="h6 fw-bold mb-0">Trámites Recientes en Secretaría</h2>
-                        <small class="text-muted">Peticiones, constancias y novedades</small>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" style="font-size: 0.68rem; letter-spacing: 0.04em;">
+                                <i class="bi bi-folder-check me-1"></i> GESTIÓN DOCUMENTAL
+                            </span>
+                        </div>
+                        <h2 class="h6 fw-bold mb-0 text-dark">Trámites en Secretaría</h2>
+                        <small class="text-muted">Peticiones, certificados y novedades de aprendices</small>
                     </div>
-                    <a href="{% url 'secretaria_bandeja' %}" class="btn btn-sm btn-light border rounded-pill px-3">
+                    <a href="{% url 'secretaria_bandeja' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
                         Ver Bandeja
                     </a>
                 </div>
 
-                <div class="list-group list-group-flush">
+                <div class="list-group list-group-flush mb-2">
                     {% for t in tramites_recientes %}
                         <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between align-items-center gap-2">
                             <div class="overflow-hidden" style="min-width: 0;">
                                 <span class="badge bg-light text-dark border me-1">#{{ t.id }}</span>
-                                <strong class="small text-dark text-truncate d-inline-block align-middle" style="max-width: 220px;" title="{{ t.asunto }}">{{ t.asunto }}</strong>
-                                <div class="text-muted" style="font-size: 0.75rem;">
+                                <strong class="small text-dark text-truncate d-inline-block align-middle" style="max-width: 190px;" title="{{ t.asunto }}">{{ t.asunto }}</strong>
+                                <div class="text-muted" style="font-size: 0.72rem;">
                                     {{ t.aprendiz.get_full_name|default:t.aprendiz.username }} · {{ t.fecha_creacion|date:'d/m/Y' }}
                                 </div>
                             </div>
@@ -369,8 +420,61 @@
                             </span>
                         </div>
                     {% empty %}
-                        <div class="text-center text-muted py-3 small">No hay trámites recientes.</div>
+                        <div class="text-center text-muted py-3 small">
+                            <i class="bi bi-inbox fs-4 d-block text-secondary mb-1 opacity-50"></i>
+                            No hay trámites pendientes en secretaría.
+                        </div>
                     {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <span class="text-muted small" style="font-size: 0.75rem;">
+                        <i class="bi bi-info-circle me-1 text-primary"></i> {{ tramites_pendientes|default:0 }} caso(s) en espera
+                    </span>
+                    <a href="{% url 'nueva_solicitud' %}" class="btn btn-sm btn-link text-primary text-decoration-none fw-semibold p-0" style="font-size: 0.78rem;">
+                        <i class="bi bi-plus-circle me-1"></i> Radicar Petición
+                    </a>
+                </div>
+            </section>
+
+            <!-- 3. MÓDULO: RESUMEN OPERATIVO INSTITUCIONAL -->
+            <section class="sinetec-card p-3 shadow-sm bg-white border" style="border-left: 4px solid #29AAE3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-circle p-2 bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-building-check"></i>
+                        </span>
+                        <div>
+                            <h3 class="h6 fw-bold mb-0" style="font-size: 0.85rem;">Centro de Formación · Sede Regional</h3>
+                            <small class="text-muted" style="font-size: 0.7rem;">Operatividad y Consolidado en Línea</small>
+                        </div>
+                    </div>
+                    <span class="badge bg-success" style="font-size: 0.65rem;">Activo</span>
+                </div>
+                <div class="row g-2 text-center pt-2 border-top">
+                    <div class="col-4">
+                        <div class="bg-light p-2 rounded-2">
+                            <span class="d-block fw-bold text-dark" style="font-size: 0.95rem;">{{ fichas_activas|default:total_fichas }}</span>
+                            <small class="text-muted" style="font-size: 0.68rem;">Fichas Activas</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light p-2 rounded-2">
+                            <span class="d-block fw-bold text-success" style="font-size: 0.95rem;">{{ total_aprendices }}</span>
+                            <small class="text-muted" style="font-size: 0.68rem;">Estudiantes</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light p-2 rounded-2">
+                            <span class="d-block fw-bold text-primary" style="font-size: 0.95rem;">{{ tasa_aprobacion }}%</span>
+                            <small class="text-muted" style="font-size: 0.68rem;">Aprobación</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 text-center">
+                    <a href="{% url 'centro_reportes' %}" class="btn btn-sm btn-link text-success text-decoration-none fw-semibold p-0" style="font-size: 0.75rem;">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Descargar Consolidado Oficial
+                    </a>
                 </div>
             </section>
 
@@ -388,7 +492,7 @@
                     <small class="text-muted">Inasistencias reiteradas o juicios deficientes que requieren acompañamiento tutorial</small>
                 </div>
                 <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                    Directorio de Aprendices
+                    Directorio de Estudiantes
                 </a>
             </div>
 
@@ -396,7 +500,7 @@
                 <table class="table sinetec-table align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Aprendiz</th>
+                            <th>Estudiante</th>
                             <th>Ficha</th>
                             <th>Motivo de Alerta</th>
                             <th class="text-end">Expediente</th>

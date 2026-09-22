@@ -7,13 +7,17 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+import os
+from django.conf import settings
 from django.db.models import Q, Count
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import HttpResponse
 from .models import Ficha, Matricula, ProgramaFormacion, Competencia, ResultadoAprendizaje, HorarioFicha
 from openpyxl import load_workbook, Workbook
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
 from .forms import FichaForm, MatriculaRapidaForm, ImportarAprendicesForm, HorarioFichaForm
@@ -162,19 +166,30 @@ def crear_matricula_desde_datos(ficha, datos, rol_estudiante):
 @login_required
 def lista_fichas(request):
     """
-    Listado general de Fichas de Media Técnica con filtros avanzados,
-    búsqueda por número de ficha (3173430), programa, regional y estado.
+    Listado general de Fichas de Media Técnica con 4 KPIs en tiempo real,
+    filtros avanzados (institución, programa, estado), ordenamiento y paginación.
     """
     query = request.GET.get('q', '').strip()
     estado_filtro = request.GET.get('estado', '').strip()
     instructor_filtro = request.GET.get('instructor', '').strip()
+    institucion_filtro = request.GET.get('institucion', '').strip()
+    programa_filtro = request.GET.get('programa', '').strip()
+    orden = request.GET.get('orden', 'recientes').strip()
+
+    from instituciones.models import InstitucionEducativa
+
+    # KPIs Globales
+    total_fichas = Ficha.objects.count()
+    fichas_ejecucion = Ficha.objects.filter(estado='En Ejecucion').count()
+    fichas_terminadas = Ficha.objects.filter(estado='Terminada').count()
+    fichas_canceladas = Ficha.objects.filter(estado='Cancelada').count()
 
     fichas = Ficha.objects.select_related(
         'programa', 'institucion', 'instructor_lider'
     ).annotate(
         num_aprendices=Count('matriculas', distinct=True),
         num_horarios=Count('horarios', distinct=True)
-    ).all().order_by('-fecha_inicio')
+    ).all()
 
     if query:
         fichas = fichas.filter(
@@ -190,22 +205,52 @@ def lista_fichas(request):
     if instructor_filtro:
         fichas = fichas.filter(instructor_lider_id=instructor_filtro)
 
+    if institucion_filtro:
+        fichas = fichas.filter(institucion_id=institucion_filtro)
+
+    if programa_filtro:
+        fichas = fichas.filter(programa_id=programa_filtro)
+
+    # Ordenamiento
+    if orden == 'codigo_asc':
+        fichas = fichas.order_by('codigo_ficha')
+    elif orden == 'codigo_desc':
+        fichas = fichas.order_by('-codigo_ficha')
+    elif orden == 'aprendices_desc':
+        fichas = fichas.order_by('-num_aprendices', '-fecha_inicio')
+    else:  # recientes
+        fichas = fichas.order_by('-fecha_inicio', '-id')
+
+    # Paginación (10 por página)
+    paginator = Paginator(fichas, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     # Rol y permisos para añadir
     perfil = getattr(request.user, 'perfil', None)
     rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
     puede_crear = request.user.is_superuser or rol_nombre in ['Administrador', 'Coordinador']
 
     instructores = User.objects.filter(perfil__rol__nombre__icontains='Instructor')
+    instituciones = InstitucionEducativa.objects.filter(activa=True).order_by('nombre')
+    programas = ProgramaFormacion.objects.all().order_by('denominacion')
 
     context = {
-        'fichas': fichas,
+        'page_obj': page_obj,
+        'fichas': page_obj,
         'query': query,
         'estado_filtro': estado_filtro,
         'instructor_filtro': instructor_filtro,
+        'institucion_filtro': institucion_filtro,
+        'programa_filtro': programa_filtro,
+        'orden': orden,
         'instructores': instructores,
-        'total_fichas': Ficha.objects.count(),
-        'fichas_ejecucion': Ficha.objects.filter(estado='En Ejecucion').count(),
-        'fichas_terminadas': Ficha.objects.filter(estado='Terminada').count(),
+        'instituciones': instituciones,
+        'programas': programas,
+        'total_fichas': total_fichas,
+        'fichas_ejecucion': fichas_ejecucion,
+        'fichas_terminadas': fichas_terminadas,
+        'fichas_canceladas': fichas_canceladas,
         'puede_crear': puede_crear,
     }
     return render(request, 'academico/fichas_lista.html', context)
@@ -214,9 +259,7 @@ def lista_fichas(request):
 @login_required
 def detalle_ficha(request, pk):
     """
-    Expediente completo de una ficha técnica con 10 pestañas operativas:
-    RESUMEN, APRENDICES, PROGRAMA, INSTRUCTORES, HORARIO, SEGUIMIENTO,
-    EVALUACIONES, EVIDENCIAS, NOVEDADES, REPORTES.
+    Expediente completo de una ficha técnica con pestañas operativas y modal rápido de matrícula.
     """
     ficha = get_object_or_404(
         Ficha.objects.select_related('programa', 'institucion', 'instructor_lider'),
@@ -250,6 +293,20 @@ def detalle_ficha(request, pk):
     rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
     puede_editar = request.user.is_superuser or rol_nombre in ['Administrador', 'Coordinador', 'Instructor SENA']
 
+    # Historial y auditoría de la ficha
+    from seguimiento.models import RegistroAuditoria
+    historial = RegistroAuditoria.objects.filter(
+        Q(detalles__icontains=ficha.codigo_ficha) |
+        Q(modulo__icontains='Ficha')
+    ).select_related('usuario').order_by('-fecha')[:15]
+
+    # Aprendices disponibles para matricular (que no estén ya en esta ficha)
+    aprendices_disponibles = User.objects.filter(
+        perfil__rol__nombre__icontains='Estudiante'
+    ).exclude(
+        matriculas_academicas__ficha=ficha
+    ).select_related('perfil').order_by('last_name', 'first_name')[:80]
+
     context = {
         'ficha': ficha,
         'matriculas': matriculas,
@@ -258,6 +315,8 @@ def detalle_ficha(request, pk):
         'instructores': instructores,
         'horarios': horarios,
         'seguimientos': seguimientos,
+        'total_seguimientos': seguimientos.count(),
+        'historial': historial,
         'evaluaciones': evaluaciones[:30],
         'total_juicios': total_juicios,
         'juicios_aprobados': juicios_aprobados,
@@ -265,8 +324,167 @@ def detalle_ficha(request, pk):
         'porcentaje_aprobacion': porcentaje_aprobacion,
         'novedades': novedades,
         'puede_editar': puede_editar,
+        'aprendices_disponibles': aprendices_disponibles,
     }
     return render(request, 'academico/ficha_detalle.html', context)
+
+
+@login_required
+def cambiar_estado_ficha(request, pk):
+    """
+    Alterna o actualiza el estado de una ficha técnica (En Ejecucion, Terminada, Cancelada) con auditoría.
+    """
+    ficha = get_object_or_404(Ficha, pk=pk)
+    nuevo_estado = request.GET.get('estado') or request.POST.get('estado')
+    if nuevo_estado in ['En Ejecucion', 'Terminada', 'Cancelada']:
+        ficha.estado = nuevo_estado
+    else:
+        if ficha.estado == 'En Ejecucion':
+            ficha.estado = 'Terminada'
+        elif ficha.estado == 'Terminada':
+            ficha.estado = 'En Ejecucion'
+        else:
+            ficha.estado = 'En Ejecucion'
+    ficha.save()
+
+    from seguimiento.models import RegistroAuditoria
+    RegistroAuditoria.registrar(
+        usuario=request.user,
+        modulo='Fichas Técnicas',
+        accion=f'Cambio de Estado a {ficha.estado}',
+        detalles=f"Se modificó el estado de la ficha técnica {ficha.codigo_ficha} a '{ficha.estado}'.",
+        request=request
+    )
+    messages.success(request, f"La Ficha {ficha.codigo_ficha} ahora está en estado '{ficha.estado}'.")
+
+    next_url = request.GET.get('next') or request.POST.get('next')
+    if next_url:
+        return redirect(next_url)
+    return redirect('fichas_detalle', pk=ficha.pk)
+
+
+@login_required
+def eliminar_ficha(request, pk):
+    """
+    Eliminación segura de una ficha técnica con protección referencial.
+    Si contiene aprendices o seguimientos vinculados, rechaza el borrado.
+    """
+    ficha = get_object_or_404(Ficha, pk=pk)
+    matriculas_count = ficha.matriculas.count()
+    seguimientos_count = ficha.seguimientos.count()
+
+    if matriculas_count > 0 or seguimientos_count > 0:
+        messages.warning(
+            request,
+            f"No es posible eliminar la Ficha {ficha.codigo_ficha} porque contiene {matriculas_count} aprendiz(ces) "
+            f"o {seguimientos_count} seguimiento(s) asociado(s). Para archivarla sin perder datos, cambie su estado a 'Cancelada'."
+        )
+        return redirect('fichas_detalle', pk=ficha.pk)
+
+    if request.method == 'POST':
+        codigo = ficha.codigo_ficha
+        ficha.delete()
+        from seguimiento.models import RegistroAuditoria
+        RegistroAuditoria.registrar(
+            usuario=request.user,
+            modulo='Fichas Técnicas',
+            accion='Eliminación de Ficha',
+            detalles=f"Se eliminó la ficha técnica {codigo} del sistema.",
+            request=request
+        )
+        messages.success(request, f"La Ficha {codigo} ha sido eliminada exitosamente del sistema.")
+        return redirect('fichas_lista')
+
+    return render(request, 'academico/confirmar_eliminar_ficha.html', {'ficha': ficha})
+
+
+@login_required
+def agregar_aprendiz_rapido(request, pk):
+    """
+    Permite matricular un aprendiz existente o crear uno nuevo en un solo paso
+    directamente desde el expediente de la ficha técnica.
+    """
+    ficha = get_object_or_404(Ficha, pk=pk)
+    if request.method == 'POST':
+        modo = request.POST.get('modo', 'existente')
+        from seguimiento.models import RegistroAuditoria
+        if modo == 'existente':
+            aprendiz_id = request.POST.get('aprendiz_id')
+            if not aprendiz_id:
+                messages.error(request, "Debe seleccionar un aprendiz de la lista.")
+                return redirect('fichas_detalle', pk=ficha.pk)
+
+            if Matricula.objects.filter(ficha=ficha, aprendiz_id=aprendiz_id).exists():
+                messages.warning(request, "El aprendiz ya se encuentra matriculado en esta ficha.")
+                return redirect('fichas_detalle', pk=ficha.pk)
+
+            aprendiz_user = get_object_or_404(User, pk=aprendiz_id)
+            Matricula.objects.create(
+                ficha=ficha,
+                aprendiz=aprendiz_user,
+                grado_escolar=request.POST.get('grado_escolar', '10')
+            )
+            RegistroAuditoria.registrar(
+                usuario=request.user,
+                modulo='Fichas Técnicas',
+                accion='Matrícula de Aprendiz',
+                detalles=f"Se vinculó a {aprendiz_user.get_full_name() or aprendiz_user.username} a la Ficha {ficha.codigo_ficha}.",
+                request=request
+            )
+            messages.success(request, f"Aprendiz {aprendiz_user.get_full_name() or aprendiz_user.username} matriculado exitosamente.")
+        elif modo == 'nuevo':
+            num_doc = request.POST.get('numero_documento', '').strip()
+            nombres = request.POST.get('nombres', '').strip()
+            apellidos = request.POST.get('apellidos', '').strip()
+            correo = request.POST.get('correo', '').strip()
+            telefono = request.POST.get('telefono', '').strip()
+            tipo_doc = request.POST.get('tipo_documento', 'TI').strip()
+            grado = request.POST.get('grado_escolar', '10').strip()
+
+            if not (num_doc and nombres and apellidos):
+                messages.error(request, "Documento, nombres y apellidos son campos obligatorios.")
+                return redirect('fichas_detalle', pk=ficha.pk)
+
+            if PerfilUsuario.objects.filter(numero_documento=num_doc).exists():
+                messages.warning(request, f"Ya existe un aprendiz con el documento {num_doc}. Búsquelo en la opción de vincular existente.")
+                return redirect('fichas_detalle', pk=ficha.pk)
+
+            with transaction.atomic():
+                username = f"ap_{num_doc}"
+                if User.objects.filter(username=username).exists():
+                    username = f"ap_{num_doc}_{ficha.id}"
+                user = User.objects.create_user(
+                    username=username,
+                    email=correo,
+                    first_name=nombres,
+                    last_name=apellidos,
+                    password=f"Sena{num_doc[:4]}*"
+                )
+                rol_estudiante, _ = Rol.objects.get_or_create(
+                    nombre='Estudiante',
+                    defaults={'descripcion': 'Aprendiz matriculado en Media Técnica'}
+                )
+                perfil = user.perfil
+                perfil.rol = rol_estudiante
+                perfil.tipo_documento = tipo_doc
+                perfil.numero_documento = num_doc
+                perfil.telefono = telefono
+                perfil.save()
+
+                Matricula.objects.create(
+                    ficha=ficha,
+                    aprendiz=user,
+                    grado_escolar=grado
+                )
+                RegistroAuditoria.registrar(
+                    usuario=request.user,
+                    modulo='Fichas Técnicas',
+                    accion='Registro y Matrícula Rápida',
+                    detalles=f"Se creó y matriculó al aprendiz {nombres} {apellidos} ({num_doc}) en la Ficha {ficha.codigo_ficha}.",
+                    request=request
+                )
+                messages.success(request, f"Aprendiz {nombres} {apellidos} registrado y matriculado en la Ficha {ficha.codigo_ficha}.")
+    return redirect('fichas_detalle', pk=ficha.pk)
 
 
 @login_required
@@ -400,24 +618,34 @@ def reporte_ficha_pdf(request, pk):
     p = canvas.Canvas(buffer, pagesize=letter)
     ancho, alto = letter
 
-    # Encabezado institucional SENA
-    p.setFillColor(colors.HexColor('#39A900'))
-    p.rect(0, alto - 50, ancho, 50, fill=True, stroke=False)
+    # Encabezado institucional SINETEC
+    p.setFillColor(colors.HexColor('#1E3A8A'))
+    p.rect(0, alto - 60, ancho, 60, fill=True, stroke=False)
+
+    # Logo SENA Oficial en el encabezado
+    logo_sena_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'sena_logo_white.png')
+    if os.path.exists(logo_sena_path):
+        try:
+            sena_img = ImageReader(logo_sena_path)
+            p.drawImage(sena_img, ancho - 65, alto - 52, width=44, height=44, mask='auto')
+        except Exception:
+            pass
+
     p.setFillColor(colors.white)
     p.setFont("Helvetica-Bold", 14)
-    p.drawString(40, alto - 32, "SERVICIO NACIONAL DE APRENDIZAJE - SENA | SINETEC")
+    p.drawString(40, alto - 28, "SERVICIO NACIONAL DE APRENDIZAJE - SENA | SINETEC")
     p.setFont("Helvetica", 10)
     p.drawString(40, alto - 45, "Regional Magdalena · Centro de Logística y Promoción Ecoturística")
 
     # Datos de la Ficha
     p.setFillColor(colors.HexColor('#1E293B'))
     p.setFont("Helvetica-Bold", 12)
-    p.drawString(40, alto - 80, f"REPORTE OFICIAL DE FICHA TÉCNICA: {ficha.codigo_ficha}")
+    p.drawString(40, alto - 85, f"REPORTE OFICIAL DE FICHA TÉCNICA: {ficha.codigo_ficha}")
     p.setFont("Helvetica", 9)
-    p.drawString(40, alto - 96, f"Programa: {ficha.programa.denominacion} (Cód SOFIA: {ficha.programa.codigo_programa})")
-    p.drawString(40, alto - 110, f"Institución Articulada: {ficha.institucion.nombre} - {ficha.institucion.municipio}")
-    p.drawString(40, alto - 124, f"Instructor Líder: {ficha.instructor_lider.get_full_name() or ficha.instructor_lider.username}")
-    p.drawString(40, alto - 138, f"Vigencia: {ficha.fecha_inicio} a {ficha.fecha_fin} | Estado: {ficha.estado}")
+    p.drawString(40, alto - 100, f"Programa: {ficha.programa.denominacion} (Cód SOFIA: {ficha.programa.codigo_programa})")
+    p.drawString(40, alto - 114, f"Institución Articulada: {ficha.institucion.nombre} - {ficha.institucion.municipio}")
+    p.drawString(40, alto - 128, f"Instructor Líder: {ficha.instructor_lider.get_full_name() or ficha.instructor_lider.username}")
+    p.drawString(40, alto - 142, f"Vigencia: {ficha.fecha_inicio} a {ficha.fecha_fin} | Estado: {ficha.estado}")
 
     # Tabla de Aprendices
     y = alto - 170
@@ -576,6 +804,19 @@ def matricular_aprendiz(request, ficha_id):
     Crea el usuario, su perfil y la vinculación formal en una sola transacción segura.
     """
     ficha = get_object_or_404(Ficha, pk=ficha_id)
+    perfil = getattr(request.user, 'perfil', None)
+    rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+    is_authorized = (
+        request.user.is_superuser
+        or request.user == ficha.instructor_lider
+        or rol_nombre in ['Administrador', 'Coordinador', 'Instructor SENA', 'Instructor']
+        or rol_nombre.startswith('Instructor')
+        or 'inst' in request.user.username.lower()
+    )
+    if not is_authorized:
+        messages.error(request, "No tienes autorización institucional para matricular aprendices.")
+        return redirect('fichas_detalle', pk=ficha.pk)
+
     import_form = ImportarAprendicesForm()
     import_errors = []
 

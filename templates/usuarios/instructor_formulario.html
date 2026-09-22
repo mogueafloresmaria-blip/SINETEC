@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2 px-md-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'instructores_lista' %}" class="text-decoration-none text-muted">Profesores</a></li>
+                        <li class="breadcrumb-item active fw-semibold text-dark">{{ titulo }}</li>
+                    </ol>
+                </nav>
+                <a href="{% url 'instructores_lista' %}" class="btn btn-outline-secondary btn-sm rounded-3">
+                    <i class="bi bi-arrow-left me-1"></i> Cancelar
+                </a>
+            </div>
+
+            <div class="sinetec-card-modern p-4 p-md-5 bg-white">
+                <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                    <div class="p-3 rounded-3 fs-3" style="background: #F0F9FD; color: #29AAE3;">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <div>
+                        <h2 class="h4 fw-bold mb-1 text-dark">{{ titulo }}</h2>
+                        <p class="text-muted small mb-0">Ficha oficial de vinculación de formadores SENA y docentes enlace en convenio.</p>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Nombres Completos *</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ instructor.first_name|default:'' }}" placeholder="Ej. Juan Carlos" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Apellidos Completos *</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ instructor.last_name|default:'' }}" placeholder="Ej. Pérez Mendoza" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-dark">Tipo Documento</label>
+                            <select name="tipo_documento" class="form-select">
+                                <option value="CC" {% if perfil.tipo_documento == 'CC' %}selected{% endif %}>Cédula de Ciudadanía (CC)</option>
+                                <option value="CE" {% if perfil.tipo_documento == 'CE' %}selected{% endif %}>Cédula de Extranjería (CE)</option>
+                                <option value="PEP" {% if perfil.tipo_documento == 'PEP' %}selected{% endif %}>PEP</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-semibold text-dark">Número de Documento *</label>
+                            <input type="text" name="numero_documento" class="form-control" value="{{ perfil.numero_documento|default:'' }}" placeholder="Ej. 12589632" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Correo Electrónico *</label>
+                            <input type="email" name="email" class="form-control" value="{{ instructor.email|default:'' }}" placeholder="instructor@sena.edu.co" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Teléfono / WhatsApp</label>
+                            <input type="text" name="telefono" class="form-control" value="{{ perfil.telefono|default:'' }}" placeholder="Ej. 3109876543">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold text-dark">Rol Institucional *</label>
+                            <select name="rol" class="form-select">
+                                <option value="Instructor SENA" {% if perfil.rol.nombre == 'Instructor SENA' or not perfil %}selected{% endif %}>Instructor SENA (Líder / Técnico)</option>
+                                <option value="Docente I.E." {% if perfil.rol.nombre == 'Docente I.E.' %}selected{% endif %}>Docente Enlace de la Institución Educativa</option>
+                                <option value="Coordinador" {% if perfil.rol.nombre == 'Coordinador' %}selected{% endif %}>Coordinador Académico</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {% if not instructor %}
+                        <div class="alert alert-light border small text-muted mb-4">
+                            <i class="bi bi-info-circle text-primary me-1"></i> Se creará la cuenta con usuario <code>inst_{documento}</code> y clave temporal <code>Sena{primeros_4_digitos}*</code>.
+                        </div>
+                    {% endif %}
+
+                    <div class="pt-3 border-top d-flex justify-content-end gap-2">
+                        <a href="{% url 'instructores_lista' %}" class="btn btn-light px-4 rounded-3">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-sinetec-primary px-4 fw-semibold rounded-3">
+                            <i class="bi bi-check-lg me-1"></i> Guardar Instructor
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

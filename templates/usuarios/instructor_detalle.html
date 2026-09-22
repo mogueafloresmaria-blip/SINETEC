@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ instructor.get_full_name|default:instructor.username }} · Ficha de Instructor · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2 px-md-3">
+
+    <!-- BREADCRUMB -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'instructores_lista' %}" class="text-decoration-none text-muted">Profesores</a></li>
+                <li class="breadcrumb-item active fw-semibold text-dark">{{ instructor.get_full_name|default:instructor.username }}</li>
+            </ol>
+        </nav>
+        <a href="{% url 'instructores_lista' %}" class="btn btn-outline-secondary btn-sm rounded-3">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+
+    <!-- CABECERA PRINCIPAL -->
+    <div class="sinetec-card-modern p-4 mb-4 bg-white">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center shadow-sm"
+                     style="width: 58px; height: 58px; background: linear-gradient(135deg, #0A2540 0%, #2196F3 100%); font-size: 1.4rem;">
+                    {{ instructor.first_name|slice:':1'|default:instructor.username|slice:':1' }}{{ instructor.last_name|slice:':1' }}
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                            {{ perfil.rol.nombre|default:'Profesor / Docente' }}
+                        </span>
+                        {% if instructor.is_active %}
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-check-circle me-1"></i> Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border"><i class="bi bi-pause-circle me-1"></i> Inactivo</span>
+                        {% endif %}
+                    </div>
+                    <h1 class="h3 fw-bold text-dark mb-0">
+                        {{ instructor.get_full_name|default:instructor.username }}
+                    </h1>
+                    <p class="text-muted small mb-0">
+                        Doc: <strong>{{ perfil.tipo_documento }} {{ perfil.numero_documento }}</strong> · 
+                        Correo: <strong>{{ instructor.email|default:"Sin registrar" }}</strong>
+                    </p>
+                </div>
+            </div>
+
+            <!-- BOTONES DE ACCIÓN -->
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'instructor_editar' instructor.id %}" class="btn btn-sm btn-outline-secondary rounded-3 fw-semibold px-3 py-2">
+                    <i class="bi bi-pencil-square me-1"></i> Editar Datos
+                </a>
+                <a href="{% url 'instructor_cambiar_estado' instructor.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-warning rounded-3 fw-semibold px-3 py-2">
+                    {% if instructor.is_active %}
+                        <i class="bi bi-pause-circle me-1"></i> Desactivar Cuenta
+                    {% else %}
+                        <i class="bi bi-play-circle me-1"></i> Activar Cuenta
+                    {% endif %}
+                </a>
+                <a href="{% url 'seguimiento_nuevo' %}" class="btn btn-sm text-white rounded-3 fw-semibold px-3 py-2" style="background-color: #29AAE3;">
+                    <i class="bi bi-clipboard-plus me-1"></i> Registrar Seguimiento
+                </a>
+                {% if perfil.telefono %}
+                    <a href="https://wa.me/{{ perfil.telefono|cut:' '|cut:'-' }}" target="_blank" class="btn btn-sm btn-outline-success rounded-3 fw-semibold px-3 py-2">
+                        <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 3 KPIS INTERACTIVOS RESUMEN -->
+    <div class="row g-3 mb-4">
+        <!-- KPI 1: Cursos asignados -->
+        <div class="col-6 col-md-4">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-primary h-100" 
+                 role="button" tabindex="0" onclick="mostrarSeccionDocente('cursos')"
+                 title="Haga clic para desplegar los cursos asignados" style="cursor: pointer; transition: all 0.2s ease;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Cursos asignados</div>
+                        <div class="h3 fw-bold text-dark my-1">{{ total_fichas }}</div>
+                        <div class="text-primary small fw-semibold d-flex align-items-center gap-1">
+                            <span>Ver cursos</span> <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-primary bg-opacity-10 text-primary fs-4">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 2: Estudiantes a cargo -->
+        <div class="col-6 col-md-4">
+            <div class="sinetec-card-modern p-3 border-start border-4 h-100" 
+                 style="border-left-color: #2196F3 !important; cursor: pointer; transition: all 0.2s ease;"
+                 role="button" tabindex="0" onclick="mostrarSeccionDocente('estudiantes')"
+                 title="Haga clic para desplegar los estudiantes a cargo">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Estudiantes a cargo</div>
+                        <div class="h3 fw-bold text-dark my-1">{{ total_estudiantes }}</div>
+                        <div class="small fw-semibold d-flex align-items-center gap-1" style="color: #2196F3;">
+                            <span>Ver estudiantes</span> <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-3 fs-4" style="background: #F0F9FD; color: #2196F3;">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 3: Seguimiento -->
+        <div class="col-12 col-md-4">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-warning h-100"
+                 role="button" tabindex="0" onclick="mostrarSeccionDocente('seguimiento')"
+                 title="Haga clic para desplegar las bitácoras de seguimiento" style="cursor: pointer; transition: all 0.2s ease;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Seguimiento</div>
+                        <div class="h3 fw-bold text-warning my-1">{{ total_seguimientos }}</div>
+                        <div class="text-muted small fw-semibold d-flex align-items-center gap-1">
+                            <span>Ver bitácoras</span> <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-warning bg-opacity-10 text-warning fs-4">
+                        <i class="bi bi-clipboard2-pulse-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS Y SECCIONES DESPLEGABLES DE DETALLE -->
+    <div class="sinetec-card-modern p-4 mb-4 bg-white" id="panelDetalleDocente">
+        <ul class="nav nav-tabs nav-tabs-sinetec mb-4" id="instructorTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="cursos-tab" data-bs-toggle="tab" data-bs-target="#cursos-pane" type="button" role="tab" aria-selected="true">
+                    <i class="bi bi-journal-bookmark me-1.5" style="color: #2196F3;"></i> 1. Cursos Asignados ({{ total_fichas }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="estudiantes-tab" data-bs-toggle="tab" data-bs-target="#estudiantes-pane" type="button" role="tab" aria-selected="false">
+                    <i class="bi bi-people-fill me-1.5" style="color: #2196F3;"></i> 2. Estudiantes a Cargo ({{ total_estudiantes }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="seguimiento-tab" data-bs-toggle="tab" data-bs-target="#seguimiento-pane" type="button" role="tab" aria-selected="false">
+                    <i class="bi bi-clipboard2-pulse me-1.5" style="color: #2196F3;"></i> 3. Seguimiento ({{ total_seguimientos }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="historial-tab" data-bs-toggle="tab" data-bs-target="#historial-pane" type="button" role="tab" aria-selected="false">
+                    <i class="bi bi-clock-history me-1.5"></i> 4. Historial de Auditoría
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="instructorTabsContent">
+            <!-- TAB 1: CURSOS ASIGNADOS -->
+            <div class="tab-pane fade show active" id="cursos-pane" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Cursos y Fichas Técnicas Bajo su Liderazgo</h6>
+                        <small class="text-muted">Cohortes en las que este docente figura como líder o responsable formativo</small>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sinetec table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3">Código Curso / Ficha</th>
+                                <th>Programa de Formación</th>
+                                <th>Institución Educativa</th>
+                                <th class="text-center">Estado</th>
+                                <th class="pe-3 text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in fichas %}
+                                <tr>
+                                    <td class="ps-3"><code class="fw-bold fs-6">{{ f.codigo_ficha }}</code></td>
+                                    <td class="fw-semibold text-dark">{{ f.programa.denominacion }}</td>
+                                    <td>{{ f.institucion.nombre }} ({{ f.institucion.municipio }})</td>
+                                    <td class="text-center">
+                                        <span class="badge {% if f.estado == 'En Ejecucion' %}bg-success bg-opacity-15 text-success border border-success border-opacity-25{% else %}bg-secondary text-white{% endif %}">
+                                            {{ f.get_estado_display }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <a href="{% url 'fichas_detalle' f.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="bi bi-eye me-1"></i> Ver Curso
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-journal-x fs-2 d-block mb-2 opacity-50"></i>
+                                        No tiene cursos o fichas asignadas actualmente.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: ESTUDIANTES A CARGO -->
+            <div class="tab-pane fade" id="estudiantes-pane" role="tabpanel">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Listado de Estudiantes a Cargo ({{ total_estudiantes }})</h6>
+                        <small class="text-muted">Estudiantes inscritos en los cursos impartidos por este profesor</small>
+                    </div>
+                    <div style="max-width: 280px; width: 100%;">
+                        <input type="text" id="filtroEstudiantesDocente" class="form-control form-control-sm rounded-pill" 
+                               placeholder="Filtrar por nombre o documento..." onkeyup="filtrarTablaEstudiantes(this.value)">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sinetec table-hover align-middle mb-0" id="tablaEstudiantesDocente">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3">Documento</th>
+                                <th>Estudiante</th>
+                                <th>Curso / Ficha</th>
+                                <th>Institución Educativa</th>
+                                <th>Contacto</th>
+                                <th class="text-center">Estado</th>
+                                <th class="pe-3 text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in estudiantes %}
+                                <tr class="fila-estudiante" data-buscar="{{ m.aprendiz.get_full_name|lower }} {{ m.aprendiz.perfil.numero_documento|lower }} {{ m.ficha.codigo_ficha|lower }}">
+                                    <td class="ps-3">
+                                        <span class="badge bg-light text-dark border font-monospace">
+                                            {{ m.aprendiz.perfil.tipo_documento }} {{ m.aprendiz.perfil.numero_documento }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ m.aprendiz.get_full_name }}</div>
+                                        <small class="text-muted">{{ m.aprendiz.email|default:"Sin correo" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill" style="background: #F0F9FD; color: #2196F3; font-weight: 600;">
+                                            {{ m.ficha.codigo_ficha }}
+                                        </span>
+                                        <div class="small text-muted text-truncate" style="max-width: 180px;">{{ m.ficha.programa.denominacion }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-dark">{{ m.ficha.institucion.nombre|truncatechars:30 }}</div>
+                                        <small class="text-muted">{{ m.ficha.institucion.municipio }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="small">{{ m.aprendiz.perfil.telefono|default:"No registrado" }}</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge {% if m.estado_formacion == 'En Formacion' or m.estado_formacion == 'Activo' %}bg-success bg-opacity-15 text-success border border-success border-opacity-25{% else %}bg-secondary text-white{% endif %}">
+                                            {{ m.get_estado_formacion_display|default:m.estado_formacion }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <a href="{% url 'carnet_digital_id' m.aprendiz.perfil.id %}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-2 py-1 px-2" title="Carnet Digital">
+                                            <i class="bi bi-person-vcard"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <i class="bi bi-people fs-2 d-block mb-2 opacity-50"></i>
+                                        No hay estudiantes registrados en los cursos asignados a este docente.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: SEGUIMIENTO DESPLEGABLE -->
+            <div class="tab-pane fade" id="seguimiento-pane" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Bitácoras y Visitas de Seguimiento Realizadas</h6>
+                        <small class="text-muted">Actas de articulación técnica y seguimiento pedagógico en aula</small>
+                    </div>
+                    <a href="{% url 'seguimiento_nuevo' %}" class="btn btn-sm btn-sinetec-primary rounded-3">
+                        <i class="bi bi-plus-lg me-1"></i> Nueva Visita
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sinetec table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3">Fecha</th>
+                                <th>Curso / Ficha</th>
+                                <th>Institución</th>
+                                <th>Tipo de Seguimiento</th>
+                                <th>Estado</th>
+                                <th class="pe-3 text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in seguimientos %}
+                                <tr>
+                                    <td class="ps-3 fw-bold text-dark">{{ s.fecha_visita|date:"d M Y" }}</td>
+                                    <td><code class="fw-bold">{{ s.ficha.codigo_ficha }}</code></td>
+                                    <td>{{ s.ficha.institucion.nombre }}</td>
+                                    <td><span class="badge bg-light text-dark border">{{ s.tipo_seguimiento }}</span></td>
+                                    <td>
+                                        <span class="badge {% if s.estado == 'Realizado' %}bg-success bg-opacity-15 text-success border border-success border-opacity-25{% elif s.estado == 'En Proceso' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %}">
+                                            {{ s.estado|default:'Realizado' }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <a href="{% url 'seguimiento_detalle' s.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="bi bi-eye me-1"></i> Ver Acta
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-clipboard-x fs-2 d-block mb-2 opacity-50"></i>
+                                        No hay bitácoras de seguimiento registradas por este docente aún.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 4: AUDITORIA -->
+            <div class="tab-pane fade" id="historial-pane" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-sinetec table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3">Fecha y Hora</th>
+                                <th>Acción</th>
+                                <th>Módulo</th>
+                                <th>Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in historial %}
+                                <tr>
+                                    <td class="ps-3 font-monospace small text-muted">{{ h.fecha|date:"d M Y, H:i" }}</td>
+                                    <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ h.accion }}</span></td>
+                                    <td>{{ h.modulo }}</td>
+                                    <td class="small text-dark">{{ h.detalles|default:"-" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-clock-history fs-2 d-block mb-2 opacity-50"></i>
+                                        No hay eventos de auditoría registrados para este usuario.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- JAVASCRIPT DE INTERACCIÓN DOCENTE -->
+<script>
+    function mostrarSeccionDocente(seccion) {
+        let tabId = 'cursos-tab';
+        if (seccion === 'estudiantes') tabId = 'estudiantes-tab';
+        else if (seccion === 'seguimiento') tabId = 'seguimiento-tab';
+
+        const btn = document.getElementById(tabId);
+        if (btn) {
+            const trigger = new bootstrap.Tab(btn);
+            trigger.show();
+        }
+
+        const panel = document.getElementById('panelDetalleDocente');
+        if (panel) {
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function filtrarTablaEstudiantes(texto) {
+        const query = (texto || '').toLowerCase().trim();
+        const filas = document.querySelectorAll('.fila-estudiante');
+        filas.forEach(fila => {
+            const textoFila = fila.getAttribute('data-buscar') || '';
+            if (textoFila.includes(query)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

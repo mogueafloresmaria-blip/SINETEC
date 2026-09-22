@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar Eliminación de Bitácora #{{ bitacora.id }} · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-danger text-white py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0">Confirmar Eliminación de Bitácora</h5>
+                            <small class="opacity-75">Esta acción no se puede deshacer</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <div class="avatar-circle mx-auto mb-3 bg-danger bg-opacity-10 text-danger d-flex align-items-center justify-content-center rounded-circle" style="width: 70px; height: 70px;">
+                        <i class="bi bi-trash3-fill fs-2"></i>
+                    </div>
+
+                    <h5 class="fw-bold text-dark mb-2">¿Desea eliminar la bitácora #{{ bitacora.id }}?</h5>
+                    <p class="text-muted small mb-4">
+                        Se eliminará el registro de visita del <strong>{{ bitacora.fecha_visita|date:"d/m/Y" }}</strong> de la Ficha <strong>{{ bitacora.ficha.codigo_ficha }}</strong> ({{ bitacora.ficha.institucion.nombre }}).
+                    </p>
+
+                    <div class="p-3 bg-light rounded-3 text-start small mb-4 border">
+                        <div class="row g-2">
+                            <div class="col-6 text-muted">Instructor:</div>
+                            <div class="col-6 fw-semibold text-dark">{{ bitacora.instructor.get_full_name|default:bitacora.instructor.username }}</div>
+                            <div class="col-6 text-muted">Tipo de sesión:</div>
+                            <div class="col-6 fw-semibold text-dark">{{ bitacora.get_tipo_seguimiento_display }}</div>
+                            <div class="col-6 text-muted">Estado actual:</div>
+                            <div class="col-6">
+                                <span class="badge {% if bitacora.estado == 'Realizado' %}bg-success{% elif bitacora.estado == 'En Proceso' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ bitacora.estado }}
+                                </span>
+                            </div>
+                            {% if bitacora.archivo_adjunto %}
+                                <div class="col-6 text-muted">Soporte adjunto:</div>
+                                <div class="col-6 text-danger fw-semibold"><i class="bi bi-paperclip me-1"></i>Sí (se eliminará)</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <form method="post" class="d-flex gap-2 justify-content-center">
+                        {% csrf_token %}
+                        <a href="{% url 'seguimiento_detalle' bitacora.pk %}" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4 py-2 rounded-3 fw-semibold">
+                            <i class="bi bi-trash3 me-1"></i> Sí, Eliminar Definitivamente
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

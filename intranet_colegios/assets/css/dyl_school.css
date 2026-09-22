@@ -1,0 +1,491 @@
+/* assets/css/dyl_school.css - Estilos Oficiales DYL SCHOOL */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --dyl-bg: #F8FAFC;
+    --dyl-sidebar: #0F172A;
+    --dyl-sidebar-hover: #1E293B;
+    --dyl-sidebar-active: #4F46E5;
+    --dyl-primary: #4F46E5;
+    --dyl-primary-hover: #4338CA;
+    --dyl-primary-light: #EEF2FF;
+    --dyl-cyan: #06B6D4;
+    --dyl-cyan-hover: #0891B2;
+    --dyl-cyan-light: #ECFEFF;
+    --dyl-green: #10B981;
+    --dyl-green-light: #ECFDF5;
+    --dyl-amber: #F59E0B;
+    --dyl-amber-light: #FFFBEB;
+    --dyl-red: #EF4444;
+    --dyl-red-light: #FEF2F2;
+    --dyl-text-main: #0F172A;
+    --dyl-text-muted: #64748B;
+    --dyl-border: #E2E8F0;
+    --dyl-card-bg: #FFFFFF;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--dyl-bg);
+    color: var(--dyl-text-main);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar moderno */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}
+
+/* Layout Principal */
+.dyl-wrapper {
+    display: flex !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+}
+
+.dyl-sidebar {
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    height: 100vh !important;
+    background-color: var(--dyl-sidebar) !important;
+    color: #F8FAFC !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 1050 !important;
+    transition: all 0.3s ease;
+    overflow-y: auto !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.dyl-brand {
+    padding: 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dyl-brand-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+}
+
+.dyl-brand-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: #FFFFFF;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.dyl-brand-badge {
+    font-size: 0.65rem;
+    background: rgba(99, 102, 241, 0.25);
+    color: #A5B4FC;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.dyl-menu {
+    list-style: none;
+    padding: 14px 10px;
+    margin: 0;
+    flex: 1;
+}
+
+.dyl-menu-category {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #64748B;
+    text-transform: uppercase;
+    padding: 12px 14px 6px 14px;
+    user-select: none;
+}
+
+.dyl-menu-item {
+    margin-bottom: 3px;
+}
+
+
+.dyl-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 14px;
+    color: #94A3B8;
+    text-decoration: none;
+    font-size: 0.86rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.15s ease-in-out;
+}
+
+.dyl-menu-link i {
+    font-size: 1.05rem;
+    width: 20px;
+    text-align: center;
+    color: #64748B;
+    transition: color 0.15s ease-in-out;
+}
+
+.dyl-menu-link:hover {
+    background-color: var(--dyl-sidebar-hover);
+    color: #F8FAFC;
+}
+
+.dyl-menu-link:hover i {
+    color: #A5B4FC;
+}
+
+.dyl-menu-link.active {
+    background: linear-gradient(90deg, #4F46E5 0%, #4338CA 100%);
+    color: #FFFFFF;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.dyl-menu-link.active i {
+    color: #FFFFFF;
+}
+
+.dyl-sidebar-footer {
+    padding: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dyl-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 14px;
+    background: rgba(239, 68, 68, 0.12);
+    color: #F87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.dyl-logout-btn:hover {
+    background: #EF4444;
+    color: white;
+    border-color: #EF4444;
+}
+
+/* Área de Contenido Principal */
+.dyl-main {
+    margin-left: 260px !important;
+    width: calc(100% - 260px) !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    background-color: var(--dyl-bg) !important;
+}
+
+/* Header Superior (Navbar) */
+.dyl-header {
+    height: 64px;
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--dyl-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.dyl-header-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--dyl-text-main);
+    margin: 0;
+}
+
+.dyl-header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.dyl-date-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #F1F5F9;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    border: 1px solid #E2E8F0;
+}
+
+.dyl-user-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.dyl-user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: 2px solid #EEF2FF;
+}
+
+.dyl-user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.dyl-user-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--dyl-text-main);
+    line-height: 1.1;
+}
+
+.dyl-user-role {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #6366F1;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Contenido de Página */
+.dyl-content {
+    padding: 24px 28px;
+    flex: 1;
+}
+
+/* Tarjetas y Contenedores */
+.dyl-card {
+    background-color: var(--dyl-card-bg);
+    border: 1px solid var(--dyl-border);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dyl-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
+}
+
+/* Botones con colores institucionales */
+.btn-dyl-primary {
+    background-color: var(--dyl-primary);
+    color: #FFFFFF;
+    border: 1px solid var(--dyl-primary);
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+.btn-dyl-primary:hover {
+    background-color: var(--dyl-primary-hover);
+    color: #FFFFFF;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+}
+
+.btn-dyl-cyan {
+    background-color: var(--dyl-cyan);
+    color: #FFFFFF;
+    border: 1px solid var(--dyl-cyan);
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+.btn-dyl-cyan:hover {
+    background-color: var(--dyl-cyan-hover);
+    color: #FFFFFF;
+    box-shadow: 0 4px 10px rgba(6, 182, 212, 0.3);
+}
+
+.btn-dyl-green {
+    background-color: var(--dyl-green);
+    color: #FFFFFF;
+    border: 1px solid var(--dyl-green);
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+.btn-dyl-green:hover {
+    background-color: #059669;
+    color: #FFFFFF;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* Badges oficiales */
+.badge-dyl-green {
+    background-color: var(--dyl-green-light);
+    color: #065F46;
+    border: 1px solid #A7F3D0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+}
+
+.badge-dyl-blue {
+    background-color: #EFF6FF;
+    color: #1E40AF;
+    border: 1px solid #BFDBFE;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+}
+
+.badge-dyl-purple {
+    background-color: #EEF2FF;
+    color: #3730A3;
+    border: 1px solid #C7D2FE;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+}
+
+.badge-dyl-amber {
+    background-color: var(--dyl-amber-light);
+    color: #92400E;
+    border: 1px solid #FDE68A;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+}
+
+.badge-dyl-red {
+    background-color: var(--dyl-red-light);
+    color: #991B1B;
+    border: 1px solid #FECACA;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+}
+
+.badge-dyl-gray {
+    background-color: #F1F5F9;
+    color: #475569;
+    border: 1px solid #E2E8F0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+}
+
+/* Banner de Bienvenida del Dashboard */
+.dyl-hero-banner {
+    background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%);
+    color: white;
+    border-radius: 14px;
+    padding: 26px 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(49, 46, 129, 0.25);
+}
+
+.dyl-hero-banner::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+/* Formatos de Impresión: Ticket Térmico POS 80mm */
+@media print {
+    body.pos-ticket-body {
+        background-color: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .pos-ticket-container {
+        width: 80mm !important;
+        margin: 0 auto !important;
+        padding: 4mm !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+}

@@ -1,90 +1,90 @@
 {% extends 'base.html' %}
 
-{% block title %}Personal y Coordinación - SINETEC{% endblock %}
+{% block title %}Personal y Coordinación Escolar - {{ colegio.nombre_institucion|default:'SINETEC' }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <!-- Tarjeta Superior Institucional -->
-    <div class="hero-card-verde p-4 mb-4 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #1b4d3e 0%, #11382c 100%); color: white;">
+    <div class="hero-card-institucional p-4 mb-4 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #0F2942 0%, #1E3A8A 100%); color: white;">
         <div class="row align-items-center">
             <div class="col-md-8">
                 <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-person-badge-fill fs-3 me-2 text-success bg-white p-2 rounded-3"></i>
-                    <h2 class="h3 fw-bold mb-0">Instructores y Personal Administrativo</h2>
+                    <i class="bi bi-person-badge-fill fs-3 me-2 p-2 rounded-3 text-primary bg-white shadow-sm"></i>
+                    <h2 class="h3 fw-bold mb-0">Docentes y Personal Administrativo</h2>
                 </div>
-                <p class="text-light small mb-0">Directorio del equipo de coordinación académica, instructores técnicos y personal de apoyo institucional.</p>
+                <p class="text-white-50 small mb-0">Directorio del equipo directivo, docentes titulares, tutores de técnica y secretaría institucional.</p>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <button class="btn btn-light text-success fw-bold shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAgregarPersonal">
+                <button class="btn btn-light text-primary fw-bold shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAgregarPersonal">
                     <i class="bi bi-person-plus-fill me-1"></i> Registrar Personal
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Secciones Separadas por Columnas (Coordinadores, Instructores, Administrativos) -->
+    <!-- Secciones Separadas por Columnas (Directivos, Docentes, Administrativos) -->
     <div class="row g-4">
         
-        <!-- Columna 1: Coordinadores -->
+        <!-- Columna 1: Directivos y Coordinación -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
-                <div class="card-header text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background-color: #11382c !important;">
-                    <span><i class="bi bi-shield-check me-2"></i> Coordinadores</span>
+                <div class="card-header text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background: #0F2942 !important;">
+                    <span><i class="bi bi-shield-check me-2"></i> Coordinación Académica</span>
                     <span class="badge bg-light text-dark">1 Registrado</span>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
                         <div class="list-group-item px-0 py-3 border-bottom">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-success">CC 12.543.876</span>
-                                <span class="badge bg-success bg-opacity-10 text-success">Planta</span>
+                                <span class="fw-bold text-primary">CC 12.543.876</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary">Directivo</span>
                             </div>
-                            <h6 class="mb-1 fw-semibold text-dark">Dr. Alberto Mendoza</h6>
-                            <p class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> amendoza@sena.edu.co</p>
-                            <p class="small text-muted mb-0"><i class="bi bi-diagram-3 me-1"></i> Coordinación Académica Media Técnica</p>
+                            <h6 class="mb-1 fw-semibold text-dark">Lic. Alberto Mendoza</h6>
+                            <p class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> amendoza@institucion.edu.co</p>
+                            <p class="small text-muted mb-0"><i class="bi bi-diagram-3 me-1"></i> Coordinación Media Técnica y Bachillerato</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Columna 2: Instructores -->
+        <!-- Columna 2: Docentes e Instructores -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
-                <div class="card-header bg-success text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background-color: #39A900 !important;">
-                    <span><i class="bi bi-easel-fill me-2"></i> Instructores</span>
-                    <span class="badge bg-white text-success">2 Registrados</span>
+                <div class="card-header text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background: #2563EB !important;">
+                    <span><i class="bi bi-easel-fill me-2"></i> Docentes e Instructores</span>
+                    <span class="badge bg-white text-primary">2 Registrados</span>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
                         <div class="list-group-item px-0 py-3 border-bottom">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-success">CC 72.123.456</span>
-                                <span class="badge bg-success bg-opacity-10 text-success">Tecnología</span>
+                                <span class="fw-bold text-primary">CC 72.123.456</span>
+                                <span class="badge bg-info bg-opacity-10 text-info">Sistemas</span>
                             </div>
                             <h6 class="mb-1 fw-semibold text-dark">Ing. Carlos Payares</h6>
-                            <p class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> cpayares@sena.edu.co</p>
-                            <p class="small text-muted mb-0"><i class="bi bi-journal-code me-1"></i> Ficha 3173430 (ADSI)</p>
+                            <p class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> cpayares@institucion.edu.co</p>
+                            <p class="small text-muted mb-0"><i class="bi bi-journal-code me-1"></i> Grado 11-A (Desarrollo Web)</p>
                         </div>
                         <div class="list-group-item px-0 py-3 border-bottom">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-success">CC 55.432.112</span>
-                                <span class="badge bg-success bg-opacity-10 text-success">Sistemas</span>
+                                <span class="fw-bold text-primary">CC 55.432.112</span>
+                                <span class="badge bg-info bg-opacity-10 text-info">Electrónica</span>
                             </div>
                             <h6 class="mb-1 fw-semibold text-dark">Esp. Marcela Blanco</h6>
-                            <p class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> mblanco@sena.edu.co</p>
-                            <p class="small text-muted mb-0"><i class="bi bi-tools me-1"></i> Ficha 2654102 (Sistemas)</p>
+                            <p class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> mblanco@institucion.edu.co</p>
+                            <p class="small text-muted mb-0"><i class="bi bi-tools me-1"></i> Grado 10-B (Robótica)</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Columna 3: Personal Administrativo -->
+        <!-- Columna 3: Personal Administrativo y Secretaría -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
-                <div class="card-header bg-secondary text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-briefcase-fill me-2"></i> Administrativos</span>
+                <div class="card-header text-white fw-bold py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background: #475569 !important;">
+                    <span><i class="bi bi-briefcase-fill me-2"></i> Secretaría y Apoyo</span>
                     <span class="badge bg-light text-dark">1 Registrado</span>
                 </div>
                 <div class="card-body">
@@ -92,10 +92,10 @@
                         <div class="list-group-item px-0 py-3 border-bottom">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="fw-bold text-secondary">CC 39.876.543</span>
-                                <span class="badge bg-secondary bg-opacity-10 text-secondary">Apoyo TIC</span>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">Secretaría</span>
                             </div>
                             <h6 class="mb-1 fw-semibold text-dark">Lic. Carmen Rosa Dávila</h6>
-                            <p class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> cdavila@sena.edu.co</p>
+                            <p class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> cdavila@institucion.edu.co</p>
                             <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i> Registro y Control Académico</p>
                         </div>
                     </div>
@@ -110,7 +110,7 @@
 <div class="modal fade" id="modalAgregarPersonal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow">
-            <div class="modal-header bg-success text-white" style="background-color: #39A900 !important;">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #0F2942, #1E3A8A);">
                 <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i> Registrar Personal</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -126,23 +126,23 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold small">Correo Electrónico Institucional</label>
-                        <input type="email" class="form-control" placeholder="Ej. jperez@sena.edu.co">
+                        <input type="email" class="form-control" placeholder="Ej. jperez@institucion.edu.co">
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold small">Rol en la Institución</label>
                         <select class="form-select">
-                            <option value="coordinador">Coordinador</option>
-                            <option value="instructor">Instructor Técnico / Tecnólogo</option>
-                            <option value="administrativo">Personal Administrativo</option>
+                            <option value="coordinador">Coordinador Académico</option>
+                            <option value="docente">Docente / Tutor de Media Técnica</option>
+                            <option value="administrativo">Personal Administrativo / Secretaría</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold small">Programa o Área Asignada</label>
-                        <input type="text" class="form-control" placeholder="Ej. Análisis y Desarrollo de Software">
+                        <label class="form-label fw-semibold small">Especialidad o Área Asignada</label>
+                        <input type="text" class="form-control" placeholder="Ej. Informática y Programación">
                     </div>
                     <div class="text-end">
                         <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-success btn-sm px-4" onclick="alert('¡Personal registrado exitosamente!'); window.location.reload();">Guardar Registro</button>
+                        <button type="button" class="btn btn-primary btn-sm px-4" style="background: #1E3A8A; border: none;" onclick="alert('¡Personal registrado exitosamente!'); window.location.reload();">Guardar Registro</button>
                     </div>
                 </form>
             </div>

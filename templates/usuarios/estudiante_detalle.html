@@ -1,113 +1,134 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ estudiante.usuario.get_full_name|default:estudiante.usuario.username }} · Expediente del Aprendiz SENA{% endblock %}
+{% block title %}{{ estudiante.usuario.get_full_name|default:estudiante.usuario.username }} · Expediente Escolar SINETEC{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-3">
 
-    <!-- Encabezado del Expediente -->
+    <!-- Encabezado del Expediente Escolar -->
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
         <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center shadow" style="width: 58px; height: 58px; font-size: 1.5rem; background-color: #39A900 !important;">
+            <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center shadow-sm" 
+                 style="width: 60px; height: 60px; font-size: 1.5rem; background: linear-gradient(135deg, #1E3A8A, #3B82F6);">
                 {{ estudiante.usuario.first_name|slice:":1" }}{{ estudiante.usuario.last_name|slice:":1" }}
             </div>
             <div>
                 <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Aprendiz SENA</span>
-                    <span class="text-muted small">Regional Magdalena · Centro de Logística y Promoción Ecoturística</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-semibold">
+                        <i class="bi bi-mortarboard-fill me-1"></i> {{ colegio.nombre|default:"Institución Educativa Técnica" }}
+                    </span>
+                    <span class="text-muted small">Expediente Escolar Unificado</span>
                 </div>
                 <h1 class="h3 fw-bold text-dark mb-0">
                     {{ estudiante.usuario.get_full_name|default:estudiante.usuario.username }}
                 </h1>
                 <p class="text-muted small mb-0">
                     {{ estudiante.get_tipo_documento_display }}: <strong>{{ estudiante.numero_documento }}</strong> · 
-                    {% if ficha %}Ficha <strong>{{ ficha.codigo_ficha }}</strong> ({{ ficha.programa.denominacion }}){% else %}Sin ficha asignada{% endif %}
+                    {% if ficha %}Curso / Grupo: <strong>Grupo {{ ficha.codigo_ficha }}</strong> ({{ ficha.programa.nombre }}){% else %}Sin grupo asignado{% endif %}
                 </p>
             </div>
         </div>
         <div class="d-flex flex-wrap gap-2">
-            <a href="{% url 'carnet_digital_id' estudiante.pk %}" class="btn text-white fw-semibold" style="background-color: #39A900;">
-                <i class="bi bi-qr-code-scan me-1"></i> Ver Carnet Digital
+            <a href="{% url 'estudiante_editar' estudiante.usuario.id %}" class="btn btn-sm btn-outline-secondary rounded-3 fw-semibold px-3 py-2">
+                <i class="bi bi-pencil-square me-1"></i> Editar Alumno
             </a>
-            <a href="{% url 'estudiantes_boletin_pdf' estudiante.pk %}" class="btn btn-outline-danger fw-semibold">
-                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Boletín PDF
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-sm btn-outline-primary rounded-3 fw-semibold px-3 py-2 dropdown-toggle text-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-arrow-repeat me-1"></i> Estado: {{ matricula.estado_formacion|default:"En Formacion" }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li><h6 class="dropdown-header small">Cambiar Estado de Matrícula</h6></li>
+                    <li>
+                        <a class="dropdown-item py-1.5 text-success" href="{% url 'estudiante_cambiar_estado' estudiante.usuario.id %}?estado=En Formacion&next={{ request.get_full_path|urlencode }}">
+                            <i class="bi bi-check-circle me-2"></i> Activo / En Formación
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-1.5 text-primary" href="{% url 'estudiante_cambiar_estado' estudiante.usuario.id %}?estado=Certificado&next={{ request.get_full_path|urlencode }}">
+                            <i class="bi bi-award me-2"></i> Graduado / Certificado
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-1.5 text-warning" href="{% url 'estudiante_cambiar_estado' estudiante.usuario.id %}?estado=Retirado&next={{ request.get_full_path|urlencode }}">
+                            <i class="bi bi-dash-circle me-2"></i> Retirado / Traslado
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-1.5 text-danger" href="{% url 'estudiante_cambiar_estado' estudiante.usuario.id %}?estado=Desertado&next={{ request.get_full_path|urlencode }}">
+                            <i class="bi bi-x-circle me-2"></i> Baja Definitiva
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <a href="{% url 'carnet_digital_id' estudiante.pk %}" class="btn btn-sm btn-primary rounded-3 fw-semibold px-3 py-2" style="background: #1E3A8A; border: none;">
+                <i class="bi bi-qr-code-scan me-1"></i> Carnet Digital
             </a>
-            <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Volver al Listado
+            <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-2">
+                <i class="bi bi-arrow-left me-1"></i> Volver
             </a>
         </div>
     </div>
 
-    <!-- Barra de Métricas Rápidas -->
+    <!-- 4 Métricas Rápidas del Alumno -->
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4" style="border-color: #39A900 !important;">
-                <span class="text-muted small text-uppercase fw-semibold">Tasa de Aprobación RAP</span>
-                <h3 class="fw-bold text-success mb-0 mt-1">{{ porcentaje_aprobacion|default:0 }}%</h3>
-                <small class="text-muted">{{ juicios_aprobados|default:0 }} de {{ total_juicios|default:0 }} resultados aprobados</small>
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-primary">
+                <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Asistencia Escolar</span>
+                <h3 class="fw-bold text-primary mb-0 mt-1">{{ porcentaje_asistencia }}%</h3>
+                <small class="text-muted">{{ total_asistencias }} sesiones registradas</small>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-primary">
-                <span class="text-muted small text-uppercase fw-semibold">Juicios Registrados</span>
-                <h3 class="fw-bold text-primary mb-0 mt-1">{{ total_juicios|default:0 }}</h3>
-                <small class="text-muted">{{ juicios_deficientes|default:0 }} deficientes / por mejorar</small>
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-success">
+                <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Semáforo: Aprobadas</span>
+                <h3 class="fw-bold text-success mb-0 mt-1">{{ semaforo_aprobados }} 🟢</h3>
+                <small class="text-muted">Competencias con desempeño óptimo</small>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-warning">
-                <span class="text-muted small text-uppercase fw-semibold">Evidencias Entregadas</span>
-                <h3 class="fw-bold text-dark mb-0 mt-1">{{ calificaciones_evidencias|length|default:0 }}</h3>
-                <small class="text-muted">Talleres y productos formativos</small>
+                <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">En Proceso / Recuperación</span>
+                <h3 class="fw-bold text-warning mb-0 mt-1">{{ semaforo_en_proceso }} 🟡 / {{ semaforo_recuperar }} 🔴</h3>
+                <small class="text-muted">Competencias pendientes</small>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-info">
-                <span class="text-muted small text-uppercase fw-semibold">Sesiones de Seguimiento</span>
-                <h3 class="fw-bold text-info mb-0 mt-1">{{ seguimientos|length|default:0 }}</h3>
-                <small class="text-muted">Visitas de acompañamiento</small>
+                <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Tasa de Aprobación RAP</span>
+                <h3 class="fw-bold text-info mb-0 mt-1">{{ porcentaje_aprobacion|default:0 }}%</h3>
+                <small class="text-muted">{{ juicios_aprobados|default:0 }} de {{ total_juicios|default:0 }} evaluados</small>
             </div>
         </div>
     </div>
 
-    <!-- Navegación de las 10 Pestañas Obligatorias -->
+    <!-- Navegación de las 10 Pestañas Escolares Oficiales -->
     <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
         <div class="card-header bg-white border-bottom p-0">
             <ul class="nav nav-tabs nav-fill border-0 flex-nowrap overflow-auto" id="perfilTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active fw-semibold text-nowrap py-3 px-3" id="tab-personales-btn" data-bs-toggle="tab" data-bs-target="#tab-personales" type="button" role="tab">
-                        <i class="bi bi-person-fill me-1"></i> Datos Personales
+                        <i class="bi bi-person-fill me-1"></i> Información General
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-formacion-btn" data-bs-toggle="tab" data-bs-target="#tab-formacion" type="button" role="tab">
-                        <i class="bi bi-mortarboard-fill me-1"></i> Formación
+                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-matricula-btn" data-bs-toggle="tab" data-bs-target="#tab-matricula" type="button" role="tab">
+                        <i class="bi bi-mortarboard-fill me-1"></i> Matrícula y Curso
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-ficha-btn" data-bs-toggle="tab" data-bs-target="#tab-ficha" type="button" role="tab">
-                        <i class="bi bi-layers-fill me-1"></i> Ficha
+                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-familia-btn" data-bs-toggle="tab" data-bs-target="#tab-familia" type="button" role="tab">
+                        <i class="bi bi-people-fill me-1"></i> Familia y Acudiente
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-seguimiento-btn" data-bs-toggle="tab" data-bs-target="#tab-seguimiento" type="button" role="tab">
-                        <i class="bi bi-clipboard2-pulse-fill me-1"></i> Seguimiento
+                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-asistencia-btn" data-bs-toggle="tab" data-bs-target="#tab-asistencia" type="button" role="tab">
+                        <i class="bi bi-clipboard-check-fill me-1"></i> Asistencia Escolar
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-evidencias-btn" data-bs-toggle="tab" data-bs-target="#tab-evidencias" type="button" role="tab">
-                        <i class="bi bi-award-fill me-1"></i> Evidencias
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-evaluaciones-btn" data-bs-toggle="tab" data-bs-target="#tab-evaluaciones" type="button" role="tab">
-                        <i class="bi bi-check2-circle me-1"></i> Evaluaciones
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-horario-btn" data-bs-toggle="tab" data-bs-target="#tab-horario" type="button" role="tab">
-                        <i class="bi bi-calendar3 me-1"></i> Horario
+                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-semaforo-btn" data-bs-toggle="tab" data-bs-target="#tab-semaforo" type="button" role="tab">
+                        <i class="bi bi-traffic-light me-1 text-warning"></i> Semáforo Competencias
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -117,7 +138,17 @@
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-mensajes-btn" data-bs-toggle="tab" data-bs-target="#tab-mensajes" type="button" role="tab">
-                        <i class="bi bi-chat-dots-fill me-1"></i> Mensajes
+                        <i class="bi bi-chat-dots-fill me-1"></i> Comunicaciones
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-observador-btn" data-bs-toggle="tab" data-bs-target="#tab-observador" type="button" role="tab">
+                        <i class="bi bi-journal-bookmark-fill me-1"></i> Observador
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-carnet-btn" data-bs-toggle="tab" data-bs-target="#tab-carnet" type="button" role="tab">
+                        <i class="bi bi-qr-code-scan me-1"></i> Carnet Escolar
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -131,9 +162,9 @@
         <div class="card-body p-4">
             <div class="tab-content" id="perfilTabsContent">
 
-                <!-- 1. PESTAÑA DATOS PERSONALES -->
+                <!-- 1. PESTAÑA INFORMACIÓN GENERAL -->
                 <div class="tab-pane fade show active" id="tab-personales" role="tabpanel">
-                    <h5 class="fw-bold text-dark mb-3">Información del Expediente Personal</h5>
+                    <h5 class="fw-bold text-dark mb-3">Información General del Alumno</h5>
                     <div class="row g-4">
                         <div class="col-md-7">
                             <dl class="row mb-0">
@@ -146,17 +177,14 @@
                                 <dt class="col-sm-5 text-muted">Número de Documento:</dt>
                                 <dd class="col-sm-7 fw-bold">{{ estudiante.numero_documento }}</dd>
 
-                                <dt class="col-sm-5 text-muted">Correo Institucional:</dt>
+                                <dt class="col-sm-5 text-muted">Correo Electrónico:</dt>
                                 <dd class="col-sm-7">{{ estudiante.usuario.email|default:"Sin registrar" }}</dd>
 
-                                <dt class="col-sm-5 text-muted">Teléfono de Contacto:</dt>
+                                <dt class="col-sm-5 text-muted">Teléfono Móvil:</dt>
                                 <dd class="col-sm-7">{{ estudiante.telefono|default:"Sin registrar" }}</dd>
 
-                                <dt class="col-sm-5 text-muted">Municipio y Regional:</dt>
-                                <dd class="col-sm-7">Santa Marta · Magdalena</dd>
-
-                                <dt class="col-sm-5 text-muted">Rol en Plataforma:</dt>
-                                <dd class="col-sm-7"><span class="badge bg-success">{{ estudiante.rol.nombre|default:'Estudiante' }}</span></dd>
+                                <dt class="col-sm-5 text-muted">Institución Educativa:</dt>
+                                <dd class="col-sm-7">{{ colegio.nombre|default:"Institución Educativa Técnica" }}</dd>
 
                                 <dt class="col-sm-5 text-muted">Estado de Usuario:</dt>
                                 <dd class="col-sm-7">
@@ -166,20 +194,13 @@
                                         <span class="badge bg-danger">Inactivo</span>
                                     {% endif %}
                                 </dd>
-
-                                {% if matricula.acudiente_nombre %}
-                                    <dt class="col-sm-5 text-muted">Nombre del Acudiente:</dt>
-                                    <dd class="col-sm-7 fw-bold">{{ matricula.acudiente_nombre }}</dd>
-                                    <dt class="col-sm-5 text-muted">Teléfono del Acudiente:</dt>
-                                    <dd class="col-sm-7">{{ matricula.acudiente_telefono|default:"Sin registrar" }}</dd>
-                                {% endif %}
                             </dl>
                         </div>
                         <div class="col-md-5">
                             <div class="p-4 bg-light rounded-4 text-center border">
-                                <h6 class="fw-bold text-dark mb-2">Carnet Institucional</h6>
-                                <p class="text-muted small mb-3">Credencial con código QR dinámico de acceso al centro de formación.</p>
-                                <a href="{% url 'carnet_digital_id' estudiante.pk %}" class="btn text-white fw-bold px-4" style="background-color: #39A900;">
+                                <h6 class="fw-bold text-dark mb-2">Credencial Escolar Digital</h6>
+                                <p class="text-muted small mb-3">Carnet digital con código QR de acceso al aula y control de asistencia.</p>
+                                <a href="{% url 'carnet_digital_id' estudiante.pk %}" class="btn btn-primary fw-bold px-4" style="background: #1E3A8A; border: none;">
                                     <i class="bi bi-qr-code me-1"></i> Abrir Carnet Digital
                                 </a>
                             </div>
@@ -187,29 +208,29 @@
                     </div>
                 </div>
 
-                <!-- 2. PESTAÑA FORMACIÓN -->
-                <div class="tab-pane fade" id="tab-formacion" role="tabpanel">
-                    <h5 class="fw-bold text-dark mb-3">Ruta de Formación y Articulación</h5>
+                <!-- 2. PESTAÑA MATRÍCULA Y CURSO -->
+                <div class="tab-pane fade" id="tab-matricula" role="tabpanel">
+                    <h5 class="fw-bold text-dark mb-3">Matrícula Escolar y Asignación de Curso</h5>
                     {% if matricula %}
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="p-3 border rounded-3 bg-light">
-                                    <span class="text-muted small text-uppercase fw-semibold d-block">Programa Académico:</span>
-                                    <h6 class="fw-bold text-dark mb-1">{{ matricula.ficha.programa.denominacion }}</h6>
-                                    <small class="text-muted">Código SOFIA: {{ matricula.ficha.programa.codigo_programa }} · Versión {{ matricula.ficha.programa.version }}</small>
+                                    <span class="text-muted small text-uppercase fw-semibold d-block">Programa / Énfasis:</span>
+                                    <h6 class="fw-bold text-dark mb-1">{{ matricula.ficha.programa.nombre }}</h6>
+                                    <small class="text-muted">Código: {{ matricula.ficha.programa.codigo_programa }}</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="p-3 border rounded-3 bg-light">
-                                    <span class="text-muted small text-uppercase fw-semibold d-block">Institución Educativa Articulada:</span>
+                                    <span class="text-muted small text-uppercase fw-semibold d-block">Sede / Institución:</span>
                                     <h6 class="fw-bold text-dark mb-1">{{ matricula.ficha.institucion.nombre }}</h6>
-                                    <small class="text-muted">{{ matricula.ficha.institucion.municipio }} · Media Técnica</small>
+                                    <small class="text-muted">{{ matricula.ficha.institucion.municipio }}</small>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="p-3 border rounded-3">
-                                    <span class="text-muted small d-block">Nivel de Formación:</span>
-                                    <strong>{{ matricula.ficha.programa.get_nivel_display|default:'Técnico Laboral' }}</strong>
+                                    <span class="text-muted small d-block">Curso / Grupo:</span>
+                                    <strong>Grupo {{ matricula.ficha.codigo_ficha }}</strong>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -220,7 +241,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="p-3 border rounded-3">
-                                    <span class="text-muted small d-block">Estado de Formación:</span>
+                                    <span class="text-muted small d-block">Estado de Matrícula:</span>
                                     <span class="badge bg-success">{{ matricula.get_estado_formacion_display }}</span>
                                 </div>
                             </div>
@@ -228,199 +249,171 @@
                     {% else %}
                         <div class="text-center py-5 text-muted">
                             <i class="bi bi-mortarboard fs-1 d-block mb-2 opacity-50"></i>
-                            Actualmente no hay matrícula activa registrada para este aprendiz.
+                            No hay matrícula activa registrada para este estudiante.
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- 3. PESTAÑA FICHA -->
-                <div class="tab-pane fade" id="tab-ficha" role="tabpanel">
-                    <h5 class="fw-bold text-dark mb-3">Ficha Técnica de Matriculación</h5>
-                    {% if ficha %}
-                        <div class="card border rounded-4 p-4 bg-light">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div>
-                                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">Ficha Técnica SENA</span>
-                                    <h4 class="fw-bold text-dark mb-0 mt-1">Ficha {{ ficha.codigo_ficha }}</h4>
-                                </div>
-                                <a href="{% url 'fichas_detalle' ficha.id %}" class="btn btn-sm btn-outline-success">
-                                    <i class="bi bi-box-arrow-up-right me-1"></i> Abrir Detalle de Ficha
-                                </a>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <span class="text-muted small d-block">Instructor Líder:</span>
-                                    <strong>{{ ficha.instructor_lider.get_full_name|default:ficha.instructor_lider.username }}</strong>
-                                    <small class="d-block text-muted">{{ ficha.instructor_lider.email }}</small>
-                                </div>
-                                <div class="col-md-3">
-                                    <span class="text-muted small d-block">Fecha Inicio:</span>
-                                    <strong>{{ ficha.fecha_inicio|date:"d/m/Y"|default:"-" }}</strong>
-                                </div>
-                                <div class="col-md-3">
-                                    <span class="text-muted small d-block">Fecha Fin:</span>
-                                    <strong>{{ ficha.fecha_fin|date:"d/m/Y"|default:"-" }}</strong>
-                                </div>
-                            </div>
-                        </div>
-                    {% else %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-layers fs-1 d-block mb-2 opacity-50"></i>
-                            El aprendiz no está asignado a ninguna cohorte formativa.
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- 4. PESTAÑA SEGUIMIENTO -->
-                <div class="tab-pane fade" id="tab-seguimiento" role="tabpanel">
+                <!-- 3. PESTAÑA NÚCLEO FAMILIAR -->
+                <div class="tab-pane fade" id="tab-familia" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Línea de Tiempo y Bitácoras de Seguimiento</h5>
-                        <a href="{% url 'seguimiento_nuevo' %}" class="btn btn-sm text-white" style="background-color: #39A900;">
-                            <i class="bi bi-plus-circle me-1"></i> Nueva Visita
+                        <h5 class="fw-bold text-dark mb-0">Núcleo Familiar y Acudientes</h5>
+                        <a href="{% url 'familias_lista' %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-people me-1"></i> Directorio Familiar
                         </a>
                     </div>
-                    {% if seguimientos %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light small">
-                                    <tr>
-                                        <th>Fecha Visita</th>
-                                        <th>Tipo Seguimiento</th>
-                                        <th>Instructor</th>
-                                        <th>Observaciones y Retroalimentación</th>
-                                        <th>Compromisos</th>
-                                        <th>Adjunto</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for s in seguimientos %}
-                                        <tr>
-                                            <td><strong>{{ s.fecha_visita|date:"d/m/Y" }}</strong></td>
-                                            <td><span class="badge bg-light text-dark border">{{ s.get_tipo_seguimiento_display }}</span></td>
-                                            <td>{{ s.instructor.get_full_name|default:s.instructor.username }}</td>
-                                            <td><small>{{ s.observaciones|truncatechars:120 }}</small></td>
-                                            <td><small class="text-secondary">{{ s.compromisos|default:"Sin compromisos registrados" }}</small></td>
-                                            <td>
-                                                {% if s.archivo_adjunto %}
-                                                    <a href="{{ s.archivo_adjunto.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                                        <i class="bi bi-download"></i>
-                                                    </a>
-                                                {% else %}
-                                                    <span class="text-muted small">-</span>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                    {% if familias %}
+                        <div class="row g-3">
+                            {% for fam in familias %}
+                                <div class="col-md-6">
+                                    <div class="card border rounded-3 p-3 bg-light">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="fw-bold text-dark mb-0">{{ fam.nombre_acudiente }}</h6>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary">{{ fam.parentesco }}</span>
+                                            </div>
+                                            <span class="badge bg-light text-dark border">{{ fam.tipo_documento }} {{ fam.numero_documento }}</span>
+                                        </div>
+                                        <div class="small text-muted mb-1"><i class="bi bi-telephone me-1"></i> {{ fam.telefono_principal }} {% if fam.telefono_secundario %}/ {{ fam.telefono_secundario }}{% endif %}</div>
+                                        <div class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> {{ fam.correo|default:"Sin correo" }}</div>
+                                        <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i> {{ fam.direccion }} ({{ fam.barrio }})</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif matricula.acudiente_nombre %}
+                        <div class="p-3 border rounded-3 bg-light">
+                            <h6 class="fw-bold text-dark mb-1">Acudiente de Matrícula:</h6>
+                            <p class="mb-1"><strong>{{ matricula.acudiente_nombre }}</strong></p>
+                            <p class="text-muted small mb-0"><i class="bi bi-telephone me-1"></i> Teléfono: {{ matricula.acudiente_telefono|default:"No especificado" }}</p>
                         </div>
                     {% else %}
                         <div class="text-center py-5 text-muted">
-                            <i class="bi bi-clipboard2-pulse fs-1 d-block mb-2 opacity-50"></i>
-                            Actualmente no hay bitácoras de seguimiento individuales para este aprendiz.
+                            <i class="bi bi-people fs-1 d-block mb-2 opacity-50"></i>
+                            Sin información de acudiente asociada. Puedes vincularlo desde el directorio de familias.
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- 5. PESTAÑA EVIDENCIAS -->
-                <div class="tab-pane fade" id="tab-evidencias" role="tabpanel">
-                    <h5 class="fw-bold text-dark mb-3">Evidencias Formativas y Entregas</h5>
-                    {% if calificaciones_evidencias %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light small">
-                                    <tr>
-                                        <th>Evidencia / Actividad</th>
-                                        <th>Resultado Asociado</th>
-                                        <th>Fecha Entrega</th>
-                                        <th>Juicio</th>
-                                        <th>Observaciones</th>
-                                        <th>Archivo</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for ce in calificaciones_evidencias %}
-                                        <tr>
-                                            <td><strong>{{ ce.evidencia.titulo }}</strong></td>
-                                            <td><span class="badge bg-light text-dark border">{{ ce.evidencia.rap_codigo }}</span></td>
-                                            <td>{{ ce.fecha_entrega|date:"d/m/Y H:i" }}</td>
-                                            <td>
-                                                {% if ce.juicio_evaluativo == 'A' %}
-                                                    <span class="badge bg-success">Aprobada</span>
-                                                {% elif ce.juicio_evaluativo == 'D' %}
-                                                    <span class="badge bg-danger">Por Mejorar</span>
-                                                {% else %}
-                                                    <span class="badge bg-warning text-dark">Pendiente</span>
-                                                {% endif %}
-                                            </td>
-                                            <td><small>{{ ce.observaciones|default:"Sin observaciones registradas" }}</small></td>
-                                            <td>
-                                                {% if ce.archivo_entregado %}
-                                                    <a href="{{ ce.archivo_entregado.url }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                                        <i class="bi bi-file-earmark-arrow-down"></i>
-                                                    </a>
-                                                {% else %}
-                                                    -
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-award fs-1 d-block mb-2 opacity-50"></i>
-                            El aprendiz no registra evidencias entregadas en los talleres del aula.
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- 6. PESTAÑA EVALUACIONES -->
-                <div class="tab-pane fade" id="tab-evaluaciones" role="tabpanel">
+                <!-- 4. PESTAÑA ASISTENCIA ESCOLAR -->
+                <div class="tab-pane fade" id="tab-asistencia" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Juicios Evaluativos de Resultados de Aprendizaje (RAP)</h5>
-                        {% if ficha %}
-                            <a href="{% url 'evaluaciones_calificar' %}?ficha={{ ficha.id }}" class="btn btn-sm text-white" style="background-color: #39A900;">
-                                <i class="bi bi-pencil-square me-1"></i> Ir a Calificar
-                            </a>
-                        {% endif %}
+                        <h5 class="fw-bold text-dark mb-0">Control de Asistencia Escolar</h5>
+                        <span class="badge bg-primary px-3 py-2 fw-semibold">
+                            Tasa de Asistencia: {{ porcentaje_asistencia }}%
+                        </span>
                     </div>
-                    {% if juicios %}
+                    {% if asistencias %}
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light small">
                                     <tr>
                                         <th>Fecha</th>
-                                        <th>Resultado de Aprendizaje (RAP)</th>
+                                        <th>Estado</th>
+                                        <th>Docente Responsable</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for a in asistencias %}
+                                        <tr>
+                                            <td><strong>{{ a.fecha|date:"d/m/Y" }}</strong></td>
+                                            <td>
+                                                {% if a.estado == 'P' %}
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Presente</span>
+                                                {% elif a.estado == 'A' %}
+                                                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Ausente</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> Justificada</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ a.registrado_por.get_full_name|default:a.registrado_por.username }}</td>
+                                            <td><small class="text-muted">{{ a.observaciones|default:"-" }}</small></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-clipboard-check fs-1 d-block mb-2 opacity-50"></i>
+                            No hay registros de asistencia aún para este estudiante.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- 5. PESTAÑA SEMÁFORO DE COMPETENCIAS (🟢 🟡 🔴) -->
+                <div class="tab-pane fade" id="tab-semaforo" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Semáforo de Competencias del Estudiante</h5>
+                            <small class="text-muted">Estado pedagógico según los 3 niveles de logro escolar</small>
+                        </div>
+                        <a href="{% url 'semaforo_competencias' %}" class="btn btn-sm btn-primary" style="background: #1E3A8A; border: none;">
+                            <i class="bi bi-traffic-light me-1"></i> Ir al Semáforo General
+                        </a>
+                    </div>
+
+                    {% if semaforos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>Código</th>
                                         <th>Competencia</th>
-                                        <th>Juicio de Valor</th>
-                                        <th>Retroalimentación</th>
+                                        <th>Estado Semáforo</th>
+                                        <th>Profesor Evaluador</th>
+                                        <th>Observaciones Pedagógicas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in semaforos %}
+                                        <tr>
+                                            <td><strong>{{ s.competencia.codigo }}</strong></td>
+                                            <td>{{ s.competencia.nombre }}</td>
+                                            <td>
+                                                {% if s.estado == 'APROBADO' %}
+                                                    <span class="badge bg-success px-3 py-2 fw-bold">🟢 Aprobado</span>
+                                                {% elif s.estado == 'EN_PROCESO' %}
+                                                    <span class="badge bg-warning text-dark px-3 py-2 fw-bold">🟡 En proceso</span>
+                                                {% elif s.estado == 'RECUPERAR' %}
+                                                    <span class="badge bg-danger px-3 py-2 fw-bold">🔴 Por recuperar</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary px-3 py-2">Sin evaluar</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ s.profesor.get_full_name|default:s.profesor.username }}</td>
+                                            <td><small class="text-muted">{{ s.observaciones|default:"-" }}</small></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% elif juicios %}
+                        <!-- Fallback con juicios RAP -->
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>RAP</th>
+                                        <th>Descripción</th>
+                                        <th>Juicio</th>
+                                        <th>Observaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for j in juicios %}
                                         <tr>
-                                            <td>{{ j.fecha_evaluacion|date:"d/m/Y" }}</td>
-                                            <td>
-                                                <strong class="text-success">{{ j.resultado_aprendizaje.codigo }}</strong><br>
-                                                <small class="text-muted">{{ j.resultado_aprendizaje.descripcion|truncatechars:65 }}</small>
-                                            </td>
-                                            <td>
-                                                <small class="text-secondary">{{ j.resultado_aprendizaje.competencia.nombre|default:"Competencia Técnica"|truncatechars:45 }}</small>
-                                            </td>
+                                            <td><strong>{{ j.resultado_aprendizaje.codigo }}</strong></td>
+                                            <td><small>{{ j.resultado_aprendizaje.descripcion }}</small></td>
                                             <td>
                                                 {% if j.juicio_valor == 'A' %}
-                                                    <span class="badge bg-success px-3 py-2">
-                                                        <i class="bi bi-check-circle-fill me-1"></i> APROBADO (A)
-                                                    </span>
+                                                    <span class="badge bg-success">🟢 Aprobado (A)</span>
                                                 {% else %}
-                                                    <span class="badge bg-danger px-3 py-2">
-                                                        <i class="bi bi-exclamation-octagon-fill me-1"></i> DEFICIENTE (D)
-                                                    </span>
+                                                    <span class="badge bg-danger">🔴 No alcanzado (D)</span>
                                                 {% endif %}
                                             </td>
-                                            <td><small>{{ j.observaciones|default:"Sin observaciones" }}</small></td>
+                                            <td><small class="text-muted">{{ j.observaciones|default:"-" }}</small></td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -428,63 +421,27 @@
                         </div>
                     {% else %}
                         <div class="text-center py-5 text-muted">
-                            <i class="bi bi-check2-circle fs-1 d-block mb-2 opacity-50"></i>
-                            No se han emitido juicios de evaluación definitivos para este aprendiz.
+                            <i class="bi bi-traffic-light fs-1 d-block mb-2 opacity-50"></i>
+                            No se han asentado evaluaciones de semáforo para este estudiante aún.
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- 7. PESTAÑA HORARIO -->
-                <div class="tab-pane fade" id="tab-horario" role="tabpanel">
-                    <h5 class="fw-bold text-dark mb-3">Cronograma de Formación en Aula / Ambiente</h5>
-                    {% if horarios %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light small">
-                                    <tr>
-                                        <th>Día</th>
-                                        <th>Jornada / Horas</th>
-                                        <th>Ambiente de Aprendizaje</th>
-                                        <th>Instructor</th>
-                                        <th>Competencia</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for h in horarios %}
-                                        <tr>
-                                            <td><span class="badge bg-light text-dark border">{{ h.get_dia_display }}</span></td>
-                                            <td><strong>{{ h.hora_inicio|time:"H:i" }} - {{ h.hora_fin|time:"H:i" }}</strong></td>
-                                            <td>{{ h.ambiente|default:"Ambiente de Sistemas" }}</td>
-                                            <td>{{ h.instructor.get_full_name|default:h.instructor.username }}</td>
-                                            <td><small class="text-muted">{{ h.competencia.nombre|default:"Formación Técnica" }}</small></td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-calendar3 fs-1 d-block mb-2 opacity-50"></i>
-                            No hay bloques de horario registrados para la ficha asignada.
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- 8. PESTAÑA DOCUMENTOS -->
+                <!-- 6. PESTAÑA DOCUMENTOS -->
                 <div class="tab-pane fade" id="tab-documentos" role="tabpanel">
-                    <h5 class="fw-bold text-dark mb-3">Documentos y Evidencias Asociadas</h5>
+                    <h5 class="fw-bold text-dark mb-3">Documentos y Expediente Digital</h5>
                     {% if documentos %}
                         <div class="list-group">
                             {% for d in documentos %}
                                 <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <i class="bi bi-file-earmark-arrow-down-fill text-success fs-3"></i>
+                                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-3"></i>
                                         <div>
                                             <h6 class="mb-0 fw-bold">{{ d.nombre }}</h6>
                                             <small class="text-muted">{{ d.tipo }} · {{ d.origen }} · {{ d.fecha|date:"d/m/Y" }}</small>
                                         </div>
                                     </div>
-                                    <a href="{{ d.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                    <a href="{{ d.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-download me-1"></i> Descargar
                                     </a>
                                 </div>
@@ -493,17 +450,17 @@
                     {% else %}
                         <div class="text-center py-5 text-muted">
                             <i class="bi bi-folder fs-1 d-block mb-2 opacity-50"></i>
-                            No hay archivos adjuntos en el expediente de este aprendiz.
+                            No hay documentos adjuntos en el expediente.
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- 9. PESTAÑA MENSAJES -->
+                <!-- 7. PESTAÑA COMUNICACIONES -->
                 <div class="tab-pane fade" id="tab-mensajes" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Comunicaciones y Trámites de Secretaría</h5>
-                        <a href="{% url 'nueva_solicitud' %}" class="btn btn-sm text-white" style="background-color: #39A900;">
-                            <i class="bi bi-envelope-plus me-1"></i> Radicar Solicitud
+                        <h5 class="fw-bold text-dark mb-0">Comunicaciones y Circulares Escolares</h5>
+                        <a href="{% url 'mensajeria' %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-chat-dots me-1"></i> Centro de Mensajería
                         </a>
                     </div>
                     {% if solicitudes %}
@@ -513,7 +470,6 @@
                                     <tr>
                                         <th>Radicado</th>
                                         <th>Asunto</th>
-                                        <th>Categoría</th>
                                         <th>Fecha</th>
                                         <th>Estado</th>
                                         <th>Acción</th>
@@ -524,18 +480,9 @@
                                         <tr>
                                             <td><strong>{{ s.radicado }}</strong></td>
                                             <td>{{ s.asunto }}</td>
-                                            <td><span class="badge bg-light text-dark border">{{ s.get_categoria_display }}</span></td>
                                             <td>{{ s.fecha_creacion|date:"d/m/Y" }}</td>
-                                            <td>
-                                                <span class="badge bg-success bg-opacity-10 text-success border border-success">
-                                                    {{ s.get_estado_display }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <a href="{% url 'secretaria_detalle' s.id %}" class="btn btn-sm btn-outline-primary">
-                                                    Ver Detalle
-                                                </a>
-                                            </td>
+                                            <td><span class="badge bg-info text-dark">{{ s.get_estado_display }}</span></td>
+                                            <td><a href="{% url 'secretaria_detalle' s.id %}" class="btn btn-sm btn-light border">Ver</a></td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -544,12 +491,62 @@
                     {% else %}
                         <div class="text-center py-5 text-muted">
                             <i class="bi bi-chat-dots fs-1 d-block mb-2 opacity-50"></i>
-                            No hay trámites ni solicitudes radicadas ante secretaría para este usuario.
+                            Sin comunicaciones registradas para este estudiante.
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- 10. PESTAÑA HISTORIAL -->
+                <!-- 8. PESTAÑA OBSERVADOR DEL ALUMNO -->
+                <div class="tab-pane fade" id="tab-observador" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0">Observador Escolar del Alumno</h5>
+                        <a href="{% url 'observaciones_lista' %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-journal-plus me-1"></i> Ver Anotaciones Generales
+                        </a>
+                    </div>
+                    {% if seguimientos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Docente / Orientador</th>
+                                        <th>Observaciones Convivenciales y Pedagógicas</th>
+                                        <th>Compromisos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in seguimientos %}
+                                        <tr>
+                                            <td><strong>{{ s.fecha_visita|date:"d/m/Y" }}</strong></td>
+                                            <td>{{ s.instructor.get_full_name|default:s.instructor.username }}</td>
+                                            <td><small>{{ s.observaciones|truncatechars:140 }}</small></td>
+                                            <td><small class="text-secondary">{{ s.compromisos|default:"Sin compromisos registrados" }}</small></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-journal-bookmark fs-1 d-block mb-2 opacity-50"></i>
+                            El alumno no registra faltas ni observaciones convivenciales en su observador.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- 9. PESTAÑA CARNET ESCOLAR DIGITAL -->
+                <div class="tab-pane fade" id="tab-carnet" role="tabpanel">
+                    <div class="text-center py-4">
+                        <h5 class="fw-bold text-dark mb-2">Credencial Escolar de Identificación</h5>
+                        <p class="text-muted small mb-4">Código QR único para el control de asistencia y verificación institucional en línea.</p>
+                        <a href="{% url 'carnet_digital_id' estudiante.pk %}" target="_blank" class="btn btn-primary fw-bold px-4 py-2" style="background: #1E3A8A; border: none;">
+                            <i class="bi bi-box-arrow-up-right me-2"></i> Abrir Carnet Escolar Completo
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 10. PESTAÑA HISTORIAL Y AUDITORÍA -->
                 <div class="tab-pane fade" id="tab-historial" role="tabpanel">
                     <h5 class="fw-bold text-dark mb-3">Registro Histórico de Auditoría y Trazabilidad</h5>
                     {% if historial %}
@@ -568,7 +565,7 @@
                                     {% for h in historial %}
                                         <tr>
                                             <td>{{ h.fecha|date:"d/m/Y H:i:s" }}</td>
-                                            <td><span class="badge bg-dark">{{ h.modulo }}</span></td>
+                                            <td><span class="badge bg-light text-dark border">{{ h.modulo }}</span></td>
                                             <td><code>{{ h.accion }}</code></td>
                                             <td>{{ h.usuario.get_full_name|default:h.usuario.username }}</td>
                                             <td><small>{{ h.detalles }}</small></td>
@@ -592,7 +589,6 @@
 </div>
 
 <script>
-    // Manejo de anclas hash para abrir pestañas directamente (e.g. #tab-evidencias)
     document.addEventListener('DOMContentLoaded', function() {
         const hash = window.location.hash;
         if (hash) {

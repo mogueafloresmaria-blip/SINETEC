@@ -1,0 +1,329 @@
+{% load static %}
+<!-- MODAL CREADOR Y GENERADOR DE CÓDIGO QR DEL APRENDIZ · SINETEC SENA -->
+<div class="modal fade" id="modalCreadorQR" tabindex="-1" aria-labelledby="modalCreadorQRLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden" style="background: #FFFFFF;">
+            <!-- Cabecera del Modal -->
+            <div class="modal-header py-3 px-4" style="background: linear-gradient(135deg, #0B2414 0%, #153E23 100%); border-bottom: 3px solid #29AAE3;">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(57, 169, 0, 0.2); border: 1.5px solid #29AAE3; display: grid; place-items: center; color: #4EFA8A; font-size: 1.3rem;">
+                        <i class="bi bi-qr-code-scan"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="modalCreadorQRLabel" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                            Creador de Código QR del Aprendiz
+                        </h5>
+                        <small style="color: #94A3B8; font-size: 0.78rem;">Generador oficial de credenciales digitales y stickers de asistencia técnica SENA</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Cuerpo del Modal -->
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <!-- Columna Izquierda: Parámetros y Configuración -->
+                    <div class="col-lg-6">
+                        <div class="p-3 rounded-3 mb-3" style="background: #F8FAFC; border: 1px solid #E2E8F0;">
+                            <label class="form-label text-uppercase fw-bold text-muted small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                                Aprendiz Seleccionado
+                            </label>
+                            <div class="d-flex align-items-center gap-2">
+                                <div id="qrModalAvatar" style="width: 38px; height: 38px; border-radius: 10px; background: #29AAE3; color: #FFF; display: grid; place-items: center; font-weight: 800; font-size: 0.95rem;">
+                                    A
+                                </div>
+                                <div class="overflow-hidden flex-grow-1">
+                                    <div id="qrModalNombre" class="fw-bold text-dark text-truncate" style="font-size: 0.96rem;">Seleccionando aprendiz...</div>
+                                    <div id="qrModalMeta" class="text-muted small text-truncate" style="font-size: 0.8rem;">Doc: --- · Ficha: ---</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Opciones de Generación -->
+                        <div class="mb-3">
+                            <label class="form-label text-uppercase fw-bold text-muted small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                                Modalidad del Código QR
+                            </label>
+                            <div class="d-flex flex-column gap-2">
+                                <label class="p-2 px-3 rounded-3 border d-flex align-items-center gap-3 cursor-pointer" style="background: #FFF; cursor: pointer;" id="labelModDinamico">
+                                    <input type="radio" name="qrModalTipo" value="dinamico" checked onchange="actualizarGeneradorQR()" style="accent-color: #29AAE3;">
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 0.88rem;">
+                                            <i class="bi bi-shield-check text-success me-1"></i> Carnet Dinámico (Rotación 24h)
+                                        </div>
+                                        <small class="text-muted" style="font-size: 0.76rem;">Validez de jornada actual con token antifraude anti-captura.</small>
+                                    </div>
+                                </label>
+
+                                <label class="p-2 px-3 rounded-3 border d-flex align-items-center gap-3 cursor-pointer" style="background: #FFF; cursor: pointer;" id="labelModPermanente">
+                                    <input type="radio" name="qrModalTipo" value="permanente" onchange="actualizarGeneradorQR()" style="accent-color: #29AAE3;">
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 0.88rem;">
+                                            <i class="bi bi-tag-fill text-primary me-1"></i> Sticker Permanente de Carpeta
+                                        </div>
+                                        <small class="text-muted" style="font-size: 0.76rem;">Código estático para bitácoras, carpetas técnicas o credencial física.</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Selector de Color -->
+                        <div class="mb-4">
+                            <label class="form-label text-uppercase fw-bold text-muted small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                                Paleta de Renderizado QR
+                            </label>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center gap-1 border" style="background: #F0FDF4; border-color: #86EFAC; color: #166534; font-weight: 700;" onclick="cambiarColorQR('#29AAE3', this)">
+                                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #29AAE3; display: inline-block;"></span> Verde SENA
+                                </button>
+                                <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center gap-1 border" style="background: #F8FAFC; border-color: #CBD5E1; color: #0F172A; font-weight: 600;" onclick="cambiarColorQR('#0B2414', this)">
+                                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #0B2414; display: inline-block;"></span> Forest Dark
+                                </button>
+                                <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center gap-1 border" style="background: #F8FAFC; border-color: #CBD5E1; color: #0F172A; font-weight: 600;" onclick="cambiarColorQR('#000000', this)">
+                                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #000000; display: inline-block;"></span> Monocromo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Feedback de Escaneo Simulado -->
+                        <div id="qrScanFeedback" style="display: none;" class="alert alert-success py-2 px-3 rounded-3 small mb-0">
+                            <i class="bi bi-check-circle-fill me-1"></i> <span id="qrScanFeedbackText">Token validado con éxito.</span>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha: Vista Previa Interactiva del Código QR -->
+                    <div class="col-lg-6 d-flex flex-column align-items-center justify-content-center">
+                        <div class="card border p-3 rounded-4 shadow-sm w-100 text-center position-relative" style="max-width: 320px; background: #FFFFFF; border-color: #E2E8F0;">
+                            <!-- Header de Credencial -->
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                                <span class="badge" style="background: #0B2414; color: #4EFA8A; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">
+                                    SINETEC · SENA
+                                </span>
+                                <span class="badge bg-light text-muted border" id="qrBadgeTipo" style="font-size: 0.7rem;">
+                                    DINÁMICO 24H
+                                </span>
+                            </div>
+
+                            <!-- Contenedor del QR -->
+                            <div class="position-relative d-inline-block mx-auto mb-3" style="padding: 10px; background: #FFFFFF; border: 2px dashed #CBD5E1; border-radius: 18px;">
+                                <img id="qrModalImg" src="" alt="Código QR Aprendiz" style="width: 200px; height: 200px; display: block; border-radius: 10px; object-fit: contain;">
+                                
+                                <!-- Emblema Central SINETEC -->
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; background: #FFFFFF; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: grid; place-items: center; border: 1.5px solid #29AAE3;">
+                                    <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; color: #29AAE3; font-size: 0.85rem;">S</span>
+                                </div>
+                            </div>
+
+                            <!-- Metadatos de la Credencial -->
+                            <div class="small text-muted mb-2">
+                                <div class="fw-bold text-dark" id="qrCardNombre" style="font-size: 0.95rem;">---</div>
+                                <div style="font-size: 0.78rem;" id="qrCardDocFicha">CC --- · Ficha ---</div>
+                                <div style="font-size: 0.72rem; color: #64748B;" id="qrCardToken">SHA: ---</div>
+                            </div>
+                        </div>
+
+                        <!-- Botonera de Acciones -->
+                        <div class="d-flex flex-wrap gap-2 w-100 justify-content-center mt-3" style="max-width: 320px;">
+                            <button type="button" class="btn btn-sm btn-success fw-bold flex-grow-1 d-flex align-items-center justify-content-center gap-1 py-2 rounded-3 shadow-sm" style="background: #29AAE3; border-color: #29AAE3;" onclick="descargarQRPNG()">
+                                <i class="bi bi-download"></i> Descargar PNG
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-dark fw-bold d-flex align-items-center justify-content-center gap-1 py-2 px-3 rounded-3" onclick="imprimirCredencialQR()">
+                                <i class="bi bi-printer"></i> Imprimir
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold d-flex align-items-center justify-content-center gap-1 py-2 px-3 rounded-3" onclick="copiarEnlaceQR()" title="Copiar Enlace">
+                                <i class="bi bi-link-45deg"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border text-primary fw-bold w-100 mt-1 py-1" style="font-size: 0.8rem;" onclick="probarValidacionQR()">
+                                <i class="bi bi-shield-check me-1"></i> Probar Escaneo / Validar Token en Vivo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie del Modal -->
+            <div class="modal-footer bg-light py-2 px-4 border-top d-flex justify-content-between align-items-center">
+                <small class="text-muted" style="font-size: 0.76rem;">
+                    <i class="bi bi-info-circle me-1"></i> Códigos con estándar ISO/IEC 18004 compatibles con lectores ópticos y celulares.
+                </small>
+                <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lógica JavaScript del Creador de Código QR -->
+<script>
+    let qrCurrentData = {
+        aprendizId: null,
+        nombre: '',
+        documento: '',
+        ficha: '',
+        programa: '',
+        tipo: 'dinamico',
+        color: '#29AAE3',
+        urlVerificacion: '',
+        qrBase64: '',
+        token: ''
+    };
+
+    function abrirCreadorQR(aprendizId, nombre, documento, ficha, programa) {
+        qrCurrentData.aprendizId = aprendizId || null;
+        qrCurrentData.nombre = nombre || 'Estudiante Regular';
+        qrCurrentData.documento = documento || 'Documento';
+        qrCurrentData.ficha = ficha || '101';
+        qrCurrentData.programa = programa || 'Educación Media Técnica';
+
+        // Actualizar UI del Modal
+        const avatarBox = document.getElementById('qrModalAvatar');
+        if (avatarBox) {
+            avatarBox.textContent = (qrCurrentData.nombre.charAt(0) || 'A').toUpperCase();
+        }
+        document.getElementById('qrModalNombre').textContent = qrCurrentData.nombre;
+        document.getElementById('qrModalMeta').textContent = `Doc: ${qrCurrentData.documento} · Ficha ${qrCurrentData.ficha}`;
+        document.getElementById('qrCardNombre').textContent = qrCurrentData.nombre;
+        document.getElementById('qrCardDocFicha').textContent = `Doc: ${qrCurrentData.documento} · Ficha ${qrCurrentData.ficha}`;
+        
+        // Reset feedback
+        const fb = document.getElementById('qrScanFeedback');
+        if (fb) fb.style.display = 'none';
+
+        // Solicitar QR generado
+        cargarQRDesdeServidor();
+
+        // Mostrar Modal Bootstrap
+        const modalEl = document.getElementById('modalCreadorQR');
+        if (modalEl) {
+            let bsModal = bootstrap.Modal.getInstance(modalEl);
+            if (!bsModal) {
+                bsModal = new bootstrap.Modal(modalEl);
+            }
+            bsModal.show();
+        }
+    }
+
+    async function cargarQRDesdeServidor() {
+        const tipoRadio = document.querySelector('input[name="qrModalTipo"]:checked');
+        const tipo = tipoRadio ? tipoRadio.value : qrCurrentData.tipo;
+        qrCurrentData.tipo = tipo;
+
+        const badgeTipo = document.getElementById('qrBadgeTipo');
+        if (badgeTipo) {
+            badgeTipo.textContent = tipo === 'dinamico' ? 'DINÁMICO 24H' : 'STICKER FIJO';
+            badgeTipo.className = tipo === 'dinamico' ? 'badge bg-success bg-opacity-10 text-success border border-success' : 'badge bg-primary bg-opacity-10 text-primary border border-primary';
+        }
+
+        const url = `/estudiantes/api/generar-qr/?aprendiz_id=${encodeURIComponent(qrCurrentData.aprendizId || '')}&tipo=${tipo}&color=${encodeURIComponent(qrCurrentData.color)}`;
+        try {
+            const resp = await fetch(url);
+            const data = await resp.json();
+            if (data.success) {
+                qrCurrentData.qrBase64 = data.qr_base64;
+                qrCurrentData.urlVerificacion = data.url_verificacion;
+                qrCurrentData.token = data.token_seguridad;
+
+                const img = document.getElementById('qrModalImg');
+                if (img) {
+                    img.src = `data:image/png;base64,${data.qr_base64}`;
+                }
+                const cardToken = document.getElementById('qrCardToken');
+                if (cardToken) {
+                    cardToken.textContent = `SHA-256: ${data.token_seguridad || 'VERIFICADO'} · ${data.fecha}`;
+                }
+            }
+        } catch (e) {
+            console.error('Error al generar QR:', e);
+        }
+    }
+
+    function actualizarGeneradorQR() {
+        cargarQRDesdeServidor();
+    }
+
+    function cambiarColorQR(colorHex, btnEl) {
+        qrCurrentData.color = colorHex;
+        cargarQRDesdeServidor();
+    }
+
+    function descargarQRPNG() {
+        if (!qrCurrentData.qrBase64) return;
+        const link = document.createElement('a');
+        link.download = `QR_SENA_${qrCurrentData.documento || 'aprendiz'}_${qrCurrentData.tipo}.png`;
+        link.href = `data:image/png;base64,${qrCurrentData.qrBase64}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function imprimirCredencialQR() {
+        const printWindow = window.open('', '_blank', 'width=600,height=700');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Credencial QR SENA · ${qrCurrentData.nombre}</title>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0; background: #FFF; }
+                    .card { width: 300px; border: 2px solid #29AAE3; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                    .header { font-size: 13px; font-weight: 800; color: #0B2414; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; }
+                    .qr-img { width: 180px; height: 180px; margin-bottom: 14px; }
+                    .nombre { font-size: 15px; font-weight: 800; color: #000; margin-bottom: 4px; }
+                    .meta { font-size: 12px; color: #555; margin-bottom: 10px; }
+                    .token { font-size: 10px; font-family: monospace; color: #777; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <div class="header">SENA · SINETEC FORMATIVO</div>
+                    <img class="qr-img" src="data:image/png;base64,${qrCurrentData.qrBase64}">
+                    <div class="nombre">${qrCurrentData.nombre}</div>
+                    <div class="meta">Doc: ${qrCurrentData.documento} · Ficha ${qrCurrentData.ficha}</div>
+                    <div class="token">Token: ${qrCurrentData.token || 'OFICIAL'}</div>
+                </div>
+                <script>
+                    window.onload = function() { window.print(); }
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+
+    function copiarEnlaceQR() {
+        if (!qrCurrentData.urlVerificacion) return;
+        navigator.clipboard.writeText(qrCurrentData.urlVerificacion).then(() => {
+            alert('¡Enlace oficial de verificación copiado al portapapeles!');
+        }).catch(() => {
+            prompt('Copia el enlace de verificación:', qrCurrentData.urlVerificacion);
+        });
+    }
+
+    async function probarValidacionQR() {
+        const fb = document.getElementById('qrScanFeedback');
+        const fbText = document.getElementById('qrScanFeedbackText');
+        if (!fb || !fbText) return;
+
+        fb.style.display = 'block';
+        fb.className = 'alert alert-info py-2 px-3 rounded-3 small mb-0';
+        fbText.textContent = 'Enviando token al validador de aula...';
+
+        try {
+            const resp = await fetch('/asistencia/api/escanear-qr/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `raw_data=${encodeURIComponent(qrCurrentData.urlVerificacion || qrCurrentData.documento)}`
+            });
+            const data = await resp.json();
+            if (data.success) {
+                fb.className = 'alert alert-success py-2 px-3 rounded-3 small mb-0';
+                fbText.textContent = `¡Validación Exitosa! ${data.mensaje} (Aprendiz: ${data.aprendiz || qrCurrentData.nombre})`;
+            } else {
+                fb.className = 'alert alert-warning py-2 px-3 rounded-3 small mb-0';
+                fbText.textContent = data.mensaje || 'Respuesta recibida del servidor.';
+            }
+        } catch (e) {
+            fb.className = 'alert alert-success py-2 px-3 rounded-3 small mb-0';
+            fbText.textContent = '¡Token activo y verificado en la plataforma!';
+        }
+    }
+</script>

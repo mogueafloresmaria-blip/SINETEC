@@ -1,24 +1,379 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Búsqueda global - SINETEC{% endblock %}
+{% block title %}Búsqueda Global Administrativa · SINETEC SENA{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <div class="sinetec-eyebrow mb-2">Explorador institucional</div>
-    <h1 class="sinetec-page-title h3 mb-1">Búsqueda global</h1>
-    <p class="text-muted mb-0">Consulta aprendices, fichas, instituciones y registros de seguimiento desde un solo lugar.</p>
+<div class="container-fluid py-2 px-md-3">
+
+    <!-- Encabezado de Búsqueda -->
+    <div class="sinetec-card-modern p-4 mb-4 bg-white">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="badge badge-rose-soft mb-2">Motor de Exploración SINETEC</span>
+                <h1 class="h3 fw-bold text-dark mb-1">
+                    <i class="bi bi-search text-success me-2"></i>Búsqueda Global del Sistema
+                </h1>
+                <p class="text-muted small mb-0">
+                    Búsqueda transversal e instantánea en Instituciones, Fichas Técnicas, Aprendices, Instructores y Seguimientos.
+                </p>
+            </div>
+            {% if query %}
+                <div>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 fs-6">
+                        {{ total_encontrados }} resultado{{ total_encontrados|pluralize }} encontrado{{ total_encontrados|pluralize }}
+                    </span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Input de Búsqueda -->
+        <form class="mt-4" method="get" action="{% url 'busqueda_global' %}">
+            <div class="input-group input-group-lg shadow-sm rounded-4 overflow-hidden border">
+                <span class="input-group-text bg-white border-0 ps-3">
+                    <i class="bi bi-search text-success fs-5"></i>
+                </span>
+                <input type="text" class="form-control border-0 ps-2" name="q" value="{{ query }}" 
+                       placeholder="Escribe el nombre de un colegio, código DANE, número de ficha, aprendiz o instructor..." 
+                       autofocus style="box-shadow: none;">
+                <button class="btn btn-sinetec-rose px-4 fw-semibold" type="submit">
+                    Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if query %}
+        <!-- 5 CATEGORÍAS EN TARJETAS LIMPIAS -->
+        <div class="row g-4">
+
+            <!-- 1. INSTITUCIONES EDUCATIVAS -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-building text-success me-2"></i>Instituciones Educativas ({{ instituciones|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Colegios</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for inst in instituciones %}
+                            <a href="{% url 'instituciones_detalle' inst.id %}" class="list-group-item list-group-item-action p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">{{ inst.nombre }}</strong>
+                                    {% if inst.activa %}
+                                        <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25">Activa</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactiva</span>
+                                    {% endif %}
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    <span><i class="bi bi-geo-alt me-1"></i>{{ inst.municipio }}</span> · 
+                                    <span>DANE: <code>{{ inst.codigo_dane }}</code></span>
+                                </div>
+                                {% if inst.rector_nombre %}
+                                    <small class="text-muted d-block mt-0.5">Rector: {{ inst.rector_nombre }}</small>
+                                {% endif %}
+                            </a>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-building-slash fs-3 d-block mb-1 opacity-50"></i>
+                                Sin instituciones que coincidan con la búsqueda.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. FICHAS TÉCNICAS -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-layers-fill text-primary me-2"></i>Fichas Técnicas ({{ fichas|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Programas</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for f in fichas %}
+                            <a href="{% url 'fichas_detalle' f.id %}" class="list-group-item list-group-item-action p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">Ficha {{ f.codigo_ficha }}</strong>
+                                    <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25">
+                                        {{ f.estado }}
+                                    </span>
+                                </div>
+                                <div class="small text-dark fw-semibold mt-1">{{ f.programa.denominacion }}</div>
+                                <small class="text-muted d-block mt-0.5">
+                                    <i class="bi bi-building me-1"></i>{{ f.institucion.nombre }} ({{ f.institucion.municipio }})
+                                </small>
+                            </a>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-layers fs-3 d-block mb-1 opacity-50"></i>
+                                Sin fichas técnicas coincidentes.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. APRENDICES -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0" style="color: #29AAE3;">
+                            <i class="bi bi-people-fill me-2"></i>Aprendices ({{ aprendices|length }})
+                        </h6>
+                        <span class="badge badge-rose-soft">Estudiantes</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for m in aprendices %}
+                            <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="list-group-item list-group-item-action p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                    <span class="badge bg-light text-dark border">Doc: {{ m.aprendiz.perfil.numero_documento|default:'N/A' }}</span>
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    <span>Ficha {{ m.ficha.codigo_ficha }} · {{ m.ficha.programa.denominacion|truncatechars:35 }}</span>
+                                </div>
+                                <small class="text-muted d-block mt-0.5">
+                                    <i class="bi bi-envelope me-1"></i>{{ m.aprendiz.email|default:'Sin correo' }}
+                                </small>
+                            </a>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-person-slash fs-3 d-block mb-1 opacity-50"></i>
+                                Sin aprendices coincidentes.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. INSTRUCTORES -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-person-badge-fill text-warning me-2"></i>Instructores ({{ instructores|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Docentes SENA</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for inst in instructores %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">{{ inst.get_full_name|default:inst.username }}</strong>
+                                    <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25">
+                                        {{ inst.perfil.rol.nombre|default:'Instructor' }}
+                                    </span>
+                                </div>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="bi bi-envelope me-1"></i>{{ inst.email|default:'Sin correo' }} · Usuario: {{ inst.username }}
+                                </small>
+                            </div>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-person-x fs-3 d-block mb-1 opacity-50"></i>
+                                Sin instructores coincidentes.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONVENIOS SENA -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-file-earmark-text text-primary me-2"></i>Convenios SENA ({{ convenios|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Acuerdos</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for conv in convenios %}
+                            <a href="{% url 'convenio_detalle' conv.id %}" class="list-group-item list-group-item-action p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">{{ conv.nombre }}</strong>
+                                    {% if conv.estado_calculado == 'Vigente' %}
+                                        <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25">Vigente</span>
+                                    {% elif conv.estado_calculado == 'Por vencer' %}
+                                        <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25">Por vencer</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Vencido</span>
+                                    {% endif %}
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    <span>N°: <code>{{ conv.numero_convenio }}</code></span> · 
+                                    <span>Tipo: {{ conv.tipo_convenio }}</span>
+                                </div>
+                                {% if conv.institucion_educativa %}
+                                    <small class="text-muted d-block mt-0.5"><i class="bi bi-building me-1"></i>{{ conv.institucion_educativa.nombre }}</small>
+                                {% endif %}
+                            </a>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-file-earmark-x fs-3 d-block mb-1 opacity-50"></i>
+                                Sin convenios SENA coincidentes.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTACTOS INSTITUCIONALES -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-person-lines-fill text-info me-2"></i>Contactos y Enlaces ({{ contactos|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Directorio</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for c in contactos %}
+                            <a href="{% url 'instituciones_detalle' c.institucion.id %}?tab=contactos" class="list-group-item list-group-item-action p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">{{ c.nombre }}</strong>
+                                    <span class="badge bg-light text-dark border">{{ c.cargo }}</span>
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    <i class="bi bi-building me-1"></i>{{ c.institucion.nombre }}
+                                </div>
+                                <small class="text-muted d-block mt-0.5">
+                                    <i class="bi bi-envelope me-1"></i>{{ c.correo|default:'Sin correo' }} · <i class="bi bi-telephone me-1"></i>{{ c.telefono|default:'Sin teléfono' }}
+                                </small>
+                            </a>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-person-x fs-3 d-block mb-1 opacity-50"></i>
+                                Sin contactos coincidentes.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- DOCUMENTOS ADMINISTRATIVOS -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-folder2-open text-warning me-2"></i>Repositorio Documental ({{ documentos_admin|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Archivos Digitales</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for doc in documentos_admin %}
+                            <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong class="text-dark">{{ doc.nombre }}</strong>
+                                    <span class="badge bg-light text-dark border ms-1">{{ doc.tipo }}</span>
+                                    <div class="small text-muted mt-1">
+                                        {% if doc.institucion %}<i class="bi bi-building me-1"></i>{{ doc.institucion.nombre }} · {% endif %}
+                                        <span>{{ doc.fecha_subida|date:'d/m/Y' }}</span>
+                                    </div>
+                                </div>
+                                <a href="{% url 'documento_admin_descargar' doc.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <i class="bi bi-download me-1"></i> Descargar
+                                </a>
+                            </div>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-folder-x fs-3 d-block mb-1 opacity-50"></i>
+                                Sin documentos coincidentes.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEGUIMIENTOS ADMINISTRATIVOS -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-kanban text-secondary me-2"></i>Seguimientos Administrativos ({{ seguimientos_admin|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Compromisos Institucionales</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for sa in seguimientos_admin %}
+                            <a href="{% url 'instituciones_detalle' sa.institucion.id %}?tab=seguimientos" class="list-group-item list-group-item-action p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">{{ sa.asunto }}</strong>
+                                    <span class="badge {% if sa.estado == 'Completado' %}bg-success{% elif sa.estado == 'En proceso' %}bg-primary{% else %}bg-warning text-dark{% endif %}">
+                                        {{ sa.estado }}
+                                    </span>
+                                </div>
+                                <div class="small text-muted mt-1">{{ sa.descripcion|truncatechars:90 }}</div>
+                                <small class="text-muted d-block mt-0.5">
+                                    <i class="bi bi-building me-1"></i>{{ sa.institucion.nombre }} · Vence: {{ sa.fecha_limite|date:'d/m/Y' }}
+                                </small>
+                            </a>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-check2-circle fs-3 d-block mb-1 opacity-50"></i>
+                                Sin tareas administrativas coincidentes.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. SEGUIMIENTOS Y BITÁCORAS -->
+            <div class="col-12">
+                <div class="sinetec-card-modern p-0 overflow-hidden">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-clipboard2-pulse-fill text-success me-2"></i>Bitácoras de Visitas Técnicas ({{ seguimientos|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Visitas en Terreno</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for s in seguimientos %}
+                            <a href="{% url 'seguimiento_detalle' s.id %}" class="list-group-item list-group-item-action p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">Ficha {{ s.ficha.codigo_ficha }} · {{ s.fecha_visita|date:'d M Y' }}</strong>
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">{{ s.tipo_seguimiento }}</span>
+                                </div>
+                                <div class="small text-dark mt-1">{{ s.observaciones|truncatechars:120 }}</div>
+                                <small class="text-muted d-block mt-0.5">
+                                    Instructor: {{ s.instructor.get_full_name|default:s.instructor.username }} · {{ s.ficha.institucion.nombre }}
+                                </small>
+                            </a>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-clipboard2-x fs-3 d-block mb-1 opacity-50"></i>
+                                Sin registros de seguimiento coincidentes con los términos buscados.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    {% else %}
+        <!-- ESTADO INICIAL VACÍO -->
+        <div class="sinetec-card-modern text-center p-5 bg-white">
+            <div class="rounded-circle p-4 bg-light d-inline-flex text-success mb-3 fs-1">
+                <i class="bi bi-search"></i>
+            </div>
+            <h4 class="fw-bold text-dark">Empieza a explorar el sistema SINETEC</h4>
+            <p class="text-muted mx-auto" style="max-width: 540px;">
+                Ingresa en la barra superior cualquier término de búsqueda: nombre de institución educativa, código DANE, número de ficha, nombre de aprendiz o instructor.
+            </p>
+            <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+                <a href="{% url 'instituciones_lista' %}" class="btn btn-sm btn-outline-secondary rounded-3">Catálogo de Instituciones</a>
+                <a href="{% url 'fichas_lista' %}" class="btn btn-sm btn-outline-secondary rounded-3">Listado de Fichas</a>
+                <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm btn-outline-secondary rounded-3">Nómina de Aprendices</a>
+                <a href="{% url 'instructores_lista' %}" class="btn btn-sm btn-outline-secondary rounded-3">Directorio de Profesores</a>
+            </div>
+        </div>
+    {% endif %}
+
 </div>
-<form class="sinetec-card p-3 mb-4 d-flex gap-2" method="get">
-    <input class="form-control" name="q" value="{{ query }}" placeholder="Escribe un nombre, ficha, colegio o palabra clave..." autofocus>
-    <button class="btn sinetec-btn sinetec-btn-primary px-4" type="submit"><i class="bi bi-search me-1"></i> Buscar</button>
-</form>
-{% if query %}
-<div class="row g-4">
-    <div class="col-xl-6"><section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h6 fw-bold mb-0"><i class="bi bi-people me-2 text-success"></i>Aprendices</h2></div><div class="list-group list-group-flush">{% for item in aprendices %}<a class="list-group-item list-group-item-action" href="{% url 'estudiante_detalle' item.aprendiz.perfil.pk %}"><strong>{{ item.aprendiz.get_full_name|default:item.aprendiz.username }}</strong><small class="d-block text-muted">Ficha {{ item.ficha.codigo_ficha }} · {{ item.aprendiz.perfil.numero_documento }}</small></a>{% empty %}<div class="p-4 text-muted small">Sin resultados de aprendices.</div>{% endfor %}</div></section></div>
-    <div class="col-xl-6"><section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h6 fw-bold mb-0"><i class="bi bi-layers me-2 text-success"></i>Fichas</h2></div><div class="list-group list-group-flush">{% for item in fichas %}<a class="list-group-item list-group-item-action" href="{% url 'fichas_detalle' item.pk %}"><strong>Ficha {{ item.codigo_ficha }}</strong><small class="d-block text-muted">{{ item.programa.denominacion }} · {{ item.institucion.nombre }}</small></a>{% empty %}<div class="p-4 text-muted small">Sin resultados de fichas.</div>{% endfor %}</div></section></div>
-    <div class="col-xl-6"><section class="sinetec-card h-100"><div class="sinetec-card-header"><h2 class="h6 fw-bold mb-0"><i class="bi bi-clipboard2-pulse me-2 text-success"></i>Seguimientos</h2></div><div class="list-group list-group-flush">{% for item in seguimientos %}<a class="list-group-item list-group-item-action" href="{% url 'seguimiento_detalle' item.pk %}"><strong>Ficha {{ item.ficha.codigo_ficha }} · {{ item.fecha_visita|date:'d/m/Y' }}</strong><small class="d-block text-muted">{{ item.observaciones|truncatechars:100 }}</small></a>{% empty %}<div class="p-4 text-muted small">Sin resultados de seguimiento.</div>{% endfor %}</div></section></div>
-</div>
-{% else %}
-<div class="sinetec-card text-center p-5"><i class="bi bi-search fs-1 text-success d-block mb-3"></i><h2 class="h5 fw-bold">Empieza una búsqueda</h2><p class="text-muted mb-0">Usa la barra superior o escribe una palabra clave para consultar todo SINETEC.</p></div>
-{% endif %}
 {% endblock %}

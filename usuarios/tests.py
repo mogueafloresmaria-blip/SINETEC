@@ -254,3 +254,123 @@ class UsuarioModelTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Alertas Tempranas y Deserción')
         self.assertContains(response, "dos o más juicios 'D'")
+
+    def test_descargar_plantilla_instructores(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/usuarios/plantilla-instructores/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        self.assertIn('plantilla_registro_masivo_instructores_sena.xlsx', response['Content-Disposition'])
+
+    def test_importar_instructores_masivo_excel(self):
+        self.client.force_login(self.user)
+        wb = Workbook()
+        ws = wb.active
+        ws.append(["tipo_documento", "numero_documento", "nombres", "apellidos", "correo", "telefono", "especialidad"])
+        ws.append(["CC", "1098765432", "Marcos", "Pacheco", "mpacheco@sena.edu.co", "3015554433", "Sistemas"])
+
+        archivo_bytes = BytesIO()
+        wb.save(archivo_bytes)
+        archivo_bytes.seek(0)
+        archivo = SimpleUploadedFile(
+            "instructores_test.xlsx",
+            archivo_bytes.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+        response = self.client.post('/usuarios/importar-instructores/', {'archivo': archivo}, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        # Verificar que el usuario e instructor existen
+        user_inst = User.objects.get(username="inst_1098765432")
+        self.assertEqual(user_inst.first_name, "Marcos")
+        self.assertEqual(user_inst.last_name, "Pacheco")
+        self.assertEqual(user_inst.email, "mpacheco@sena.edu.co")
+        self.assertTrue(user_inst.check_password("Sena5432*"))
+
+        perfil = user_inst.perfil
+        self.assertEqual(perfil.numero_documento, "1098765432")
+        self.assertEqual(perfil.tipo_documento, "CC")
+        self.assertIn("Instructor", perfil.rol.nombre)
+
+    def test_importar_instructores_masivo_duplicado_rn001(self):
+        self.client.force_login(self.user)
+        # Intentar importar el mismo documento de self.user ("1082999888")
+        wb = Workbook()
+        ws = wb.active
+        ws.append(["tipo_documento", "numero_documento", "nombres", "apellidos", "correo", "telefono", "especialidad"])
+        ws.append(["CC", "1082999888", "Carlos Duplicado", "Mendoza", "cdup@sena.edu.co", "3000000000", "ADSO"])
+
+        archivo_bytes = BytesIO()
+        wb.save(archivo_bytes)
+        archivo_bytes.seek(0)
+        archivo = SimpleUploadedFile(
+            "instructores_dup.xlsx",
+            archivo_bytes.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+        response = self.client.post('/usuarios/importar-instructores/', {'archivo': archivo}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "RN-001")
+        self.assertFalse(User.objects.filter(username="inst_1082999888").exists())
+
+    def test_aprendiz_restringido_de_coordinacion_y_usuarios(self):
+        rol_aprendiz, _ = Rol.objects.get_or_create(nombre='Aprendiz')
+        user_aprendiz = User.objects.create_user(
+            username='aprendiz_seguro',
+            password='Password123*',
+            first_name='Pedro',
+            last_name='Segura'
+        )
+        perfil_ap = user_aprendiz.perfil
+        perfil_ap.rol = rol_aprendiz
+        perfil_ap.numero_documento = '1033445566'
+        perfil_ap.save()
+
+        self.client.force_login(user_aprendiz)
+        # Intentar acceder al panel de coordinación
+        res_coord = self.client.get('/coordinacion/')
+        self.assertRedirects(res_coord, '/aprendiz/')
+
+        # Intentar acceder a la lista de estudiantes
+        res_est = self.client.get('/estudiantes/')
+        self.assertRedirects(res_est, '/aprendiz/')
+
+    def test_qr_antifraude_rotacion_diaria(self):
+        from django.utils import timezone
+        hoy = timezone.localdate()
+        rol_estudiante, _ = Rol.objects.get_or_create(nombre='Estudiante')
+        user_ap = User.objects.create_user(
+            username='aprendiz_antifraude',
+            first_name='Ana',
+            last_name='Fraude'
+        )
+        perfil_ap = user_ap.perfil
+        perfil_ap.rol = rol_estudiante
+        perfil_ap.numero_documento = '1099887766'
+        perfil_ap.save()
+
+        # 1. Escaneo con fecha anterior (simula foto de ayer tomada en casa)
+        ayer = hoy - timezone.timedelta(days=1)
+        res_ayer = self.client.get(f'/estudiantes/qr/{perfil_ap.qr_token}/?dia={ayer}')
+        self.assertEqual(res_ayer.status_code, 410)
+        self.assertContains(res_ayer, 'Código QR vencido o fotografía estática no admitida', status_code=410)
+
+        # 2. Escaneo con fecha de hoy
+        res_hoy = self.client.get(f'/estudiantes/qr/{perfil_ap.qr_token}/?dia={hoy}')
+        self.assertEqual(res_hoy.status_code, 200)
+
+    def test_convocatorias_incluyen_alimentacion_transporte_contrato(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('convocatorias', response.context)
+        convs = response.context['convocatorias']
+        keys = [c['id'] for c in convs]
+        self.assertIn('alimentacion', keys)
+        self.assertIn('transporte', keys)
+        self.assertIn('contrato', keys)
+

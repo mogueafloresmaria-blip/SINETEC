@@ -4,18 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistencia Confirmada · SENA Regional Magdalena · SINETEC</title>
+    <title>Asistencia Confirmada · SINETEC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="{% static 'js/antigravity_color.js' %}"></script>
     <style>
         :root {
-            --sena-green: #39A900;
-            --sena-dark: #00324D;
-            --sena-emerald: #107C41;
-            --sena-light: #F3F8F2;
+            --sena-green: #2196F3;
+            --sena-dark: #0A2540;
+            --sena-emerald: #1976D2;
+            --sena-light: #F4F9FD;
         }
 
         * {
@@ -24,7 +25,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0A2316 0%, #001E13 50%, #05160E 100%);
+            background: linear-gradient(135deg, #071927 0%, #0A2540 50%, #0d273d 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -39,8 +40,8 @@
             background: #ffffff;
             border-radius: 28px;
             overflow: hidden;
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
-            color: #1a2e22;
+            box-shadow: 0 30px 70px rgba(10, 37, 64, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            color: #0A2540;
             animation: popIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -50,7 +51,7 @@
         }
 
         .attendance-header {
-            background: linear-gradient(135deg, #00324D 0%, #107C41 50%, #39A900 100%);
+            background: linear-gradient(135deg, #0A2540 0%, #1976D2 50%, #2196F3 100%);
             padding: 34px 24px 26px;
             text-align: center;
             color: #ffffff;
@@ -62,7 +63,7 @@
             height: 76px;
             border-radius: 50%;
             background: #ffffff;
-            color: var(--sena-emerald);
+            color: #2196F3;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -100,9 +101,9 @@
             align-items: center;
             gap: 16px;
             padding: 16px;
-            background: #F4F8F4;
+            background: #F4F9FD;
             border-radius: 20px;
-            border: 1px solid #DFEBE1;
+            border: 1px solid #D0E3F5;
             margin-bottom: 22px;
         }
 
@@ -110,14 +111,14 @@
             width: 58px;
             height: 58px;
             border-radius: 16px;
-            background: linear-gradient(135deg, #107C41, #39A900);
+            background: linear-gradient(135deg, #1976D2, #2196F3);
             color: #ffffff;
             display: grid;
             place-items: center;
             font-size: 1.5rem;
             font-weight: 800;
             flex-shrink: 0;
-            box-shadow: 0 6px 14px rgba(16, 124, 65, 0.25);
+            box-shadow: 0 6px 14px rgba(33, 150, 243, 0.25);
         }
 
         .info-grid {
@@ -132,7 +133,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid #EEF3EE;
+            border-bottom: 1px solid #EEF3F8;
             font-size: 0.88rem;
         }
 
@@ -141,7 +142,7 @@
         }
 
         .info-label {
-            color: #6A7E71;
+            color: #566E80;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -150,7 +151,7 @@
 
         .info-val {
             font-weight: 700;
-            color: #172D20;
+            color: #0A2540;
             text-align: right;
         }
 
@@ -162,8 +163,8 @@
         }
 
         .stat-pill {
-            background: #F9FCF9;
-            border: 1px solid #E1EBE2;
+            background: #F8FAFD;
+            border: 1px solid #D0E3F5;
             border-radius: 16px;
             padding: 12px 14px;
             text-align: center;
@@ -178,14 +179,14 @@
 
         .stat-pill-label {
             font-size: 0.72rem;
-            color: #6C8273;
+            color: #566E80;
             text-transform: uppercase;
             font-weight: 600;
             margin-top: 4px;
         }
 
         .btn-action-main {
-            background: linear-gradient(135deg, #107C41 0%, #39A900 100%);
+            background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
             color: #ffffff;
             font-weight: 700;
             padding: 12px 20px;
@@ -195,7 +196,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 8px 20px rgba(57, 169, 0, 0.25);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.25);
             transition: all 0.2s ease;
             border: none;
         }
@@ -203,12 +204,12 @@
         .btn-action-main:hover {
             transform: translateY(-2px);
             color: #ffffff;
-            box-shadow: 0 12px 26px rgba(57, 169, 0, 0.35);
+            box-shadow: 0 12px 26px rgba(33, 150, 243, 0.35);
         }
 
         .btn-action-secondary {
-            background: #F0F4F1;
-            color: #2D4436;
+            background: #F4F9FD;
+            color: #0A2540;
             font-weight: 600;
             padding: 10px 16px;
             border-radius: 14px;
@@ -222,17 +223,17 @@
         }
 
         .btn-action-secondary:hover {
-            background: #E4ECE5;
-            color: #172D20;
+            background: #E3F2FD;
+            color: #1976D2;
         }
 
         .attendance-footer {
-            background: #F8FBF8;
-            border-top: 1px solid #EEF3EE;
+            background: #F8FAFD;
+            border-top: 1px solid #EEF3F8;
             padding: 14px 20px;
             text-align: center;
             font-size: 0.76rem;
-            color: #7A8E81;
+            color: #566E80;
         }
     </style>
 </head>
@@ -240,6 +241,9 @@
 
 <div class="attendance-card">
     <div class="attendance-header">
+        <div class="mb-3 text-center">
+            <img src="{% static 'img/sinetec_logo_oficial.png' %}" alt="SINETEC" style="height: 48px; width: auto; max-width: 90%; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35));">
+        </div>
         <div class="check-circle">
             <i class="bi bi-check-lg"></i>
         </div>
@@ -271,7 +275,7 @@
                     {{ perfil.get_tipo_documento_display }} {{ perfil.numero_documento }}
                 </div>
                 <span class="badge bg-success bg-opacity-10 text-success fw-bold" style="font-size: 0.7rem;">
-                    <i class="bi bi-person-check-fill me-1"></i> Aprendiz SENA Activo
+                    <i class="bi bi-person-check-fill me-1"></i> Estudiante SENA Activo
                 </span>
             </div>
         </div>
@@ -291,9 +295,9 @@
         <!-- Datos Institucionales -->
         <div class="info-grid">
             <div class="info-item">
-                <span class="info-label"><i class="bi bi-layers text-success"></i> Ficha SENA</span>
+                <span class="info-label"><i class="bi bi-layers text-primary"></i> Curso / Grupo</span>
                 <span class="info-val">
-                    {% if matricula %}Ficha {{ matricula.ficha.codigo_ficha }}{% else %}Ficha 3173430{% endif %}
+                    {% if matricula %}Grupo {{ matricula.ficha.codigo_ficha }}{% else %}Grupo Principal{% endif %}
                 </span>
             </div>
             <div class="info-item">
@@ -325,7 +329,7 @@
         <!-- Botones de Acción -->
         <div class="d-flex flex-column gap-2">
             <a href="{% url 'escanear_asistencia_camara' %}" class="btn-action-main">
-                <i class="bi bi-camera-fill"></i> Escanear Otro Aprendiz
+                <i class="bi bi-camera-fill"></i> Escanear Otro Estudiante
             </a>
             <div class="row g-2">
                 <div class="col-6">
@@ -343,7 +347,7 @@
     </div>
 
     <div class="attendance-footer">
-        <i class="bi bi-patch-check-fill text-success me-1"></i> SINETEC · Registro Oficial de Asistencia en Base de Datos · SENA Regional Magdalena
+        <i class="bi bi-patch-check-fill text-success me-1"></i> SINETEC · Registro Oficial de Asistencia Escolar en Base de Datos
     </div>
 </div>
 

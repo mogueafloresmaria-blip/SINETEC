@@ -15,6 +15,14 @@ class ProgramaFormacion(models.Model):
     Programas de formación técnica curricular que imparte el Centro en articulación.
     Ejemplo: Técnico en Sistemas, Técnico en Asistencia Administrativa.
     """
+    TIPO_CHOICES = [
+        ('Técnico', 'Técnico Laboral / Media Técnica'),
+        ('Tecnólogo', 'Tecnólogo'),
+        ('Curso Especial', 'Curso Especial'),
+        ('Formación Complementaria', 'Formación Complementaria'),
+        ('Otro', 'Otro Programa'),
+    ]
+
     codigo_programa = models.CharField(
         max_length=20,
         unique=True,
@@ -29,6 +37,57 @@ class ProgramaFormacion(models.Model):
         max_length=10,
         default="1",
         verbose_name="Versión Curricular"
+    )
+    tipo_programa = models.CharField(
+        max_length=50,
+        choices=TIPO_CHOICES,
+        default='Técnico',
+        verbose_name="Tipo de Formación"
+    )
+    duracion_meses = models.PositiveIntegerField(
+        default=12,
+        verbose_name="Duración Estimada (Meses)"
+    )
+    duracion_horas = models.PositiveIntegerField(
+        default=880,
+        verbose_name="Intensidad Horaria Total (Horas)"
+    )
+    institucion = models.ForeignKey(
+        'instituciones.InstitucionEducativa',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='programas_articulados',
+        verbose_name="Colegio / Institución Sede"
+    )
+    convenio = models.ForeignKey(
+        'convenios.ConvenioSENA',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='programas_asociados',
+        verbose_name="Convenio SENA Vinculado"
+    )
+    responsable = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name="Responsable / Instructor Líder"
+    )
+    observaciones = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Observaciones Curriculares"
+    )
+    fecha_inicio = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Fecha de Inicio"
+    )
+    fecha_fin = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Fecha de Finalización"
     )
     activo = models.BooleanField(
         default=True,
@@ -101,7 +160,7 @@ class ResultadoAprendizaje(models.Model):
 
 class Ficha(models.Model):
     """
-    Grupo o cohorte de aprendices de Media Técnica en un colegio bajo la guía de un instructor líder.
+    Grupo o cohorte de estudiantes de Media Técnica en un colegio bajo la guía de un profesor líder.
     """
     ESTADOS_FICHA = [
         ('En Ejecucion', 'En Ejecución'),
@@ -131,7 +190,7 @@ class Ficha(models.Model):
         User,
         on_delete=models.PROTECT,
         related_name='fichas_asignadas',
-        verbose_name="Instructor Líder Responsable"
+        verbose_name="Profesor Líder Responsable"
     )
     fecha_inicio = models.DateField(
         verbose_name="Fecha de Inicio Lectivo"
@@ -195,7 +254,7 @@ class Matricula(models.Model):
         User,
         on_delete=models.PROTECT,
         related_name='matriculas_academicas',
-        verbose_name="Aprendiz"
+        verbose_name="Estudiante"
     )
     fecha_matricula = models.DateField(
         auto_now_add=True,
@@ -419,4 +478,97 @@ class DocumentoInstitucional(models.Model):
 
     def __str__(self):
         return f"[{self.version}] {self.titulo} ({self.get_categoria_display()})"
+
+
+class SemaforoCompetencia(models.Model):
+    """
+    Semáforo de Competencias y Logros para el seguimiento formativo del estudiante.
+    Permite al profesor calificar y monitorear visualmente con 3 estados:
+    🟢 Aprobado (APROBADO)
+    🟡 En proceso (EN_PROCESO)
+    🔴 Por recuperar (RECUPERAR)
+    """
+    ESTADOS = [
+        ('APROBADO', 'Aprobado'),         # 🟢 Verde
+        ('EN_PROCESO', 'En proceso'),     # 🟡 Amarillo
+        ('RECUPERAR', 'Por recuperar'),   # 🔴 Rojo
+    ]
+
+    matricula = models.ForeignKey(
+        Matricula,
+        on_delete=models.CASCADE,
+        related_name='semaforo_competencias',
+        verbose_name="Estudiante Matriculado"
+    )
+    competencia = models.ForeignKey(
+        Competencia,
+        on_delete=models.CASCADE,
+        related_name='evaluaciones_semaforo',
+        verbose_name="Competencia Laboral"
+    )
+    resultado_aprendizaje = models.ForeignKey(
+        ResultadoAprendizaje,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='evaluaciones_semaforo',
+        verbose_name="Resultado de Aprendizaje (RAP)"
+    )
+    profesor = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='calificaciones_semaforo',
+        verbose_name="Profesor / Evaluador"
+    )
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADOS,
+        default='EN_PROCESO',
+        verbose_name="Estado del Semáforo"
+    )
+    observaciones = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Observaciones Pedagógicas / Plan de Mejora"
+    )
+    fecha_actualizacion = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Última Actualización"
+    )
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha de Asignación"
+    )
+
+    class Meta:
+        verbose_name = "Semáforo de Competencia"
+        verbose_name_plural = "Semáforo de Competencias"
+        unique_together = ('matricula', 'competencia', 'resultado_aprendizaje')
+        ordering = ['matricula', 'competencia', 'resultado_aprendizaje']
+
+    def __str__(self):
+        rap_str = f" - RAP {self.resultado_aprendizaje.codigo}" if self.resultado_aprendizaje else ""
+        return f"{self.matricula.aprendiz.get_full_name()} · {self.competencia.codigo}{rap_str}: [{self.get_estado_display()}]"
+
+    @property
+    def color_badge(self):
+        if self.estado == 'APROBADO':
+            return 'bg-success text-white'
+        elif self.estado == 'EN_PROCESO':
+            return 'bg-warning text-dark'
+        elif self.estado == 'RECUPERAR':
+            return 'bg-danger text-white'
+        return 'bg-secondary text-white'
+
+    @property
+    def color_icono(self):
+        if self.estado == 'APROBADO':
+            return '🟢'
+        elif self.estado == 'EN_PROCESO':
+            return '🟡'
+        elif self.estado == 'RECUPERAR':
+            return '🔴'
+        return '⚪'
 

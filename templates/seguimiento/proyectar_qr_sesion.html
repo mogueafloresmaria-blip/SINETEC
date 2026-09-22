@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Proyector de Asistencia QR · Ficha {{ ficha.codigo_ficha }} · SENA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .projector-wrapper {
+        max-width: 820px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .projector-card {
+        background: #ffffff;
+        border-radius: 28px;
+        border: 2px solid #29AAE3;
+        box-shadow: 0 20px 60px rgba(0, 34, 51, 0.12), 0 0 0 8px rgba(57, 169, 0, 0.05);
+        overflow: hidden;
+        padding: clamp(24px, 4vw, 44px);
+        position: relative;
+    }
+
+    .qr-projector-box {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 18px;
+        display: inline-block;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+        border: 1px solid #DCE8DE;
+        margin: 20px 0;
+        position: relative;
+    }
+
+    .qr-projector-box img {
+        width: 100%;
+        max-width: 320px;
+        height: auto;
+        display: block;
+        border-radius: 14px;
+    }
+
+    .live-clock-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #002233;
+        color: #79f244;
+        font-family: monospace;
+        font-size: 1.1rem;
+        font-weight: 700;
+        padding: 8px 22px;
+        border-radius: 999px;
+        box-shadow: 0 4px 14px rgba(0, 34, 51, 0.2);
+    }
+
+    .pulse-dot-green {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #29AAE3;
+        box-shadow: 0 0 0 0 rgba(57, 169, 0, 0.7);
+        animation: pulseAnimation 1.6s infinite;
+    }
+
+    @keyframes pulseAnimation {
+        0% { box-shadow: 0 0 0 0 rgba(57, 169, 0, 0.7); }
+        70% { box-shadow: 0 0 0 12px rgba(57, 169, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(57, 169, 0, 0); }
+    }
+
+    .anti-photo-notice {
+        background: #FFFDF0;
+        border: 1.5px solid #F5D97E;
+        color: #7A5500;
+        border-radius: 14px;
+        padding: 12px 18px;
+        font-size: 0.84rem;
+        max-width: 620px;
+        margin: 0 auto;
+        text-align: left;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="projector-wrapper py-3">
+
+    <!-- Barra de Control Superior -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <a href="{% url 'seguimiento_asistencia' %}?ficha={{ ficha.pk }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Volver a Lista de Asistencia
+        </a>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-dark btn-sm rounded-pill px-3" onclick="toggleFullscreen()">
+                <i class="bi bi-arrows-fullscreen me-1"></i> Pantalla Completa
+            </button>
+            <button class="btn btn-success btn-sm rounded-pill px-3" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+            </button>
+        </div>
+    </div>
+
+    <div class="projector-card" id="projectorCard">
+        <!-- Membrete Institucional SENA -->
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-success bg-opacity-10 text-success fw-bold small text-uppercase mb-2">
+            <span class="pulse-dot-green"></span>
+            SENA · Regional Magdalena · Centro de Logística y Promoción Ecoturística
+        </div>
+
+        <h1 class="h3 fw-bold text-dark mb-1">Registro de Asistencia en Aula</h1>
+        <p class="text-muted mb-3">
+            Ficha <strong>{{ ficha.codigo_ficha }}</strong> — {{ ficha.programa.denominacion }}
+        </p>
+
+        <!-- Reloj Dinámico en Vivo -->
+        <div class="mb-2">
+            <div class="live-clock-badge">
+                <i class="bi bi-broadcast text-success"></i>
+                <span id="projectorClock">{{ ahora|time:'H:i:s' }}</span>
+                <span class="text-white-50 small ms-1">({{ hoy|date:'d/m/Y' }})</span>
+            </div>
+        </div>
+
+        <!-- Caja Central con el Código QR de Alta Resolución -->
+        <div class="qr-projector-box">
+            <img src="data:image/png;base64,{{ qr_base64 }}" alt="Código QR de Asistencia Diaria SENA">
+            <div class="mt-2 small fw-bold text-dark">
+                <i class="bi bi-camera-fill text-success me-1"></i> Apunta tu cámara para registrarte
+            </div>
+        </div>
+
+        <!-- Indicador de Asistencias en Vivo -->
+        <div class="d-flex justify-content-center gap-3 align-items-center my-3">
+            <span class="badge bg-success bg-opacity-15 text-success fs-6 py-2 px-3 rounded-pill">
+                <i class="bi bi-check-circle-fill me-1"></i> {{ asistencias_hoy }} Registrados hoy
+            </span>
+            <span class="badge bg-secondary bg-opacity-15 text-dark fs-6 py-2 px-3 rounded-pill">
+                <i class="bi bi-people-fill me-1"></i> {{ total_matriculados }} Total ficha
+            </span>
+        </div>
+
+        <!-- Aviso Oficial Anti-Foto / Seguridad Diaria -->
+        <div class="anti-photo-notice">
+            <div class="d-flex gap-2">
+                <i class="bi bi-shield-lock-fill text-warning fs-5 flex-shrink-0"></i>
+                <div>
+                    <strong>Control Antifraude y Rotación Diaria:</strong>
+                    <div class="small mt-1">
+                        Este código QR se regenera cada 24 horas y valida la presencia en el aula de clase. No se aceptan fotografías ni capturas tomadas en sesiones anteriores. El sistema verifica la fecha exacta en tiempo real.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Reloj dinámico en vivo con actualización cada segundo
+    function updateClock() {
+        const now = new Date();
+        const hrs = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const sec = String(now.getSeconds()).padStart(2, '0');
+        const clockEl = document.getElementById('projectorClock');
+        if (clockEl) {
+            clockEl.textContent = `${hrs}:${min}:${sec}`;
+        }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Pantalla completa
+    function toggleFullscreen() {
+        const el = document.getElementById('projectorCard');
+        if (!document.fullscreenElement) {
+            if (el.requestFullscreen) {
+                el.requestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+</script>
+{% endblock %}

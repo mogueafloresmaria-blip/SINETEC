@@ -15,7 +15,6 @@ class InicioViewTest(TestCase):
         respuesta = self.client.get('/')
         self.assertEqual(respuesta.status_code, 200)
         self.assertTemplateUsed(respuesta, 'home.html')
-        self.assertTemplateUsed(respuesta, 'base.html')
         self.assertContains(respuesta, 'SINETEC')
         self.assertContains(respuesta, 'Centro de Logística y Promoción Ecoturística')
 

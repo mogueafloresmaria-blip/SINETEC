@@ -1,206 +1,693 @@
+/* ==============================================================================
+   SINETEC · SOFTWARE ADMINISTRATIVO ESCOLAR
+   SISTEMA DE DISEÑO VISUAL INSTITUCIONAL MODERNO
+   ============================================================================== */
+
 :root {
-    --sinetec-ink: #17221d;
-    --sinetec-muted: #6b7870;
-    --sinetec-green: #39a900;
-    --sinetec-green-dark: #1f5e2d;
-    --sinetec-lime: #b9d950;
-    --sinetec-cream: #f5f7f2;
-    --sinetec-line: #e2e8df;
+    /* Paleta Institucional Escolar */
+    --sinetec-bg: #F8FAFC;
+    --sinetec-card-bg: #FFFFFF;
+    --sinetec-border: #E2E8F0;
+    --sinetec-border-subtle: #F1F5F9;
+    --sinetec-text-main: #0F172A;
+    --sinetec-text-body: #334155;
+    --sinetec-text-muted: #64748B;
+    --sinetec-text-light: #94A3B8;
+
+    /* Azul Petróleo / Deep Navy (Estructura y Autoridad) */
+    --sinetec-petroleum: #0F2942;
+    --sinetec-petroleum-hover: #163B5F;
+    --sinetec-petroleum-dark: #0A1D30;
+    --sinetec-petroleum-gradient: linear-gradient(180deg, #0A1E32 0%, #0F2942 55%, #15385B 100%);
+
+    /* Azul Tecnológico y Amigable (Acción y Enlaces) */
+    --sinetec-blue: #3B82F6;
+    --sinetec-blue-hover: #2563EB;
+    --sinetec-blue-light: #EFF6FF;
+    --sinetec-blue-soft: #DBEAFE;
+    --sinetec-blue-border: #BFDBFE;
+
+    /* Lavanda y Lila Suave (Elegancia y Organización) */
+    --sinetec-lavender: #EEF2FF;
+    --sinetec-lavender-border: #C7D2FE;
+    --sinetec-lavender-text: #4F46E5;
+    --sinetec-lavender-soft: #F5F3FF;
+
+    /* Rosa Sutil como Acento Refinado */
+    --sinetec-rose: #F43F5E;
+    --sinetec-rose-hover: #E11D48;
+    --sinetec-rose-soft: #FFF1F2;
+    --sinetec-rose-border: #FECDD3;
+    --sinetec-rose-text: #BE123C;
+
+    /* Semáforo Oficial de Competencias (🟢 🟡 🔴) */
+    --semaforo-aprobado: #10B981;
+    --semaforo-aprobado-soft: #ECFDF5;
+    --semaforo-aprobado-border: #A7F3D0;
+    --semaforo-proceso: #F59E0B;
+    --semaforo-proceso-soft: #FFFBEB;
+    --semaforo-proceso-border: #FDE68A;
+    --semaforo-recuperar: #EF4444;
+    --semaforo-recuperar-soft: #FEF2F2;
+    --semaforo-recuperar-border: #FECACA;
+
+    /* Sombras y Radios */
+    --sinetec-radius: 16px;
+    --sinetec-radius-sm: 10px;
+    --sinetec-shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+    --sinetec-shadow: 0 4px 20px -2px rgba(15, 41, 66, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+    --sinetec-shadow-hover: 0 10px 25px -4px rgba(15, 41, 66, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+
+    /* Tipografías */
+    --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+    /* Aliases de compatibilidad */
+    --sinetec-primary: var(--sinetec-petroleum);
+    --sinetec-primary-dark: var(--sinetec-petroleum-dark);
+    --sinetec-secondary: var(--sinetec-blue);
+    --sinetec-cream: var(--sinetec-bg);
+    --sinetec-line: var(--sinetec-border);
     --sinetec-white: #ffffff;
-    --sinetec-shadow: 0 16px 40px rgba(23, 34, 29, .08);
-    --sinetec-primary: #39a900;
-    --sinetec-primary-dark: #1f5e2d;
-    --sinetec-secondary: #8ecb62;
+    --sinetec-ink: var(--sinetec-text-main);
+    --sinetec-muted: var(--sinetec-text-muted);
 }
 
-* { box-sizing: border-box; }
-body {
-    background: var(--sinetec-cream);
-    color: var(--sinetec-ink);
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    letter-spacing: 0;
+* {
+    box-sizing: border-box;
 }
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--sinetec-bg);
+    color: var(--sinetec-text-body);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .sinetec-heading {
+    font-family: var(--font-heading);
+    color: var(--sinetec-text-main);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+a {
+    color: var(--sinetec-blue);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+a:hover {
+    color: var(--sinetec-blue-hover);
+}
+
+/* ==============================================================================
+   ESTRUCTURA PRINCIPAL Y SIDEBAR ESCOLAR
+   ============================================================================== */
 
 .sinetec-shell {
     min-height: 100vh;
     display: flex;
-    background:
-        radial-gradient(circle at top left, rgba(57, 169, 0, 0.08), transparent 30%),
-        var(--sinetec-cream);
+    width: 100%;
+    position: relative;
+    background: var(--sinetec-bg);
 }
+
+/* Sidebar Fijo Desktop */
 .sinetec-sidebar {
-    background: linear-gradient(180deg, #0f2319 0%, #112b1d 100%);
-    color: #dbe8dc;
+    background: var(--sinetec-petroleum-gradient);
+    color: #E2E8F0;
     width: 264px;
-    flex: 0 0 264px;
-    min-height: 100vh;
-    max-height: 100vh;
-    padding: 22px 16px 18px;
-    position: sticky;
-    top: 0;
-    align-self: flex-start;
+    min-width: 264px;
+    max-width: 264px;
     height: 100vh;
-    z-index: 1040;
-    overflow: hidden;
-    box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
-    border-right: 1px solid rgba(255,255,255,0.05);
-}
-.sinetec-brand { color: #fff; text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 0 12px 26px; }
-.sinetec-brand-mark { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, var(--sinetec-green), #6ec243); color: #fff; font-size: 1.25rem; box-shadow: 0 10px 22px rgba(57, 169, 0, 0.35); }
-.sinetec-brand small { display: block; color: #99ae9d; font-weight: 500; font-size: .68rem; margin-top: 2px; }
-.sinetec-nav-label { color: #849a8a; text-transform: uppercase; font-size: .66rem; font-weight: 800; letter-spacing: .08em; padding: 15px 12px 7px; }
-.sinetec-nav {
-    flex: 1 1 auto;
-    min-height: 0;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1025;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 4px;
-    margin-right: -4px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 20px rgba(10, 30, 50, 0.25);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease;
 }
-.sinetec-nav .nav-link {
-    color: #b7c9bb;
-    border-radius: 12px;
-    padding: 11px 12px;
+
+.sinetec-brand {
+    padding: 20px 18px;
     display: flex;
     align-items: center;
-    gap: 11px;
-    margin: 3px 0;
-    font-size: .9rem;
+    gap: 12px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.sinetec-brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    flex-shrink: 0;
+}
+
+.sinetec-brand-text {
+    line-height: 1.2;
+}
+
+.sinetec-brand-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sinetec-brand-subtitle {
+    font-size: 0.72rem;
+    color: #94A3B8;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+}
+
+.sinetec-nav {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 14px 12px 24px;
+}
+
+.sinetec-nav-label {
+    color: #94A3B8;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 16px 10px 6px;
+    margin-top: 4px;
+}
+
+.sinetec-nav .nav-link {
+    color: #CBD5E1;
+    border-radius: 10px;
+    padding: 9px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2px 0;
+    font-size: 0.88rem;
     font-weight: 600;
-    transition: all .2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid transparent;
 }
-.sinetec-nav .nav-link i { width: 18px; text-align: center; color: #8fa997; }
-.sinetec-nav .nav-link:hover, .sinetec-nav .nav-link.active {
-    color: #fff;
-    background: linear-gradient(135deg, rgba(57, 169, 0, .18), rgba(57, 169, 0, .08));
-    border-color: rgba(137, 206, 93, 0.18);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+
+.sinetec-nav .nav-link i {
+    width: 20px;
+    text-align: center;
+    color: #94A3B8;
+    font-size: 1.05rem;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
-.sinetec-nav .nav-link.active i, .sinetec-nav .nav-link:hover i { color: var(--sinetec-lime); }
+
+.sinetec-nav .nav-link:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateX(2px);
+}
+
+.sinetec-nav .nav-link:hover i {
+    color: #60A5FA;
+}
+
+.sinetec-nav .nav-link.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.2) 100%);
+    border-color: rgba(96, 165, 250, 0.4);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.sinetec-nav .nav-link.active i {
+    color: #60A5FA;
+}
+
 .sinetec-sidebar-footer {
-    position: static;
-    margin-top: auto;
-    flex-shrink: 0;
-    border-top: 1px solid rgba(255,255,255,.08);
-    padding: 14px 10px 0;
-    color: #91a696;
-    font-size: .75rem;
-    background: rgba(255,255,255,0.01);
-    border-radius: 10px 10px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.18);
+    font-size: 0.75rem;
+    color: #94A3B8;
 }
-.sinetec-sidebar-footer strong { color: #e7f1e9; display: block; font-size: .82rem; }
+
+.sinetec-sidebar-footer strong {
+    color: #F1F5F9;
+    display: block;
+    font-size: 0.82rem;
+    margin-bottom: 2px;
+}
+
+/* Área Principal */
 .sinetec-main {
     min-width: 0;
-    flex: 1;
-    background: var(--sinetec-cream);
+    margin-left: 264px;
+    width: calc(100% - 264px);
+    max-width: calc(100% - 264px);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--sinetec-bg);
+    transition: margin-left 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease;
 }
+
+/* Estado Colapsado en Desktop */
+.sinetec-shell.is-collapsed .sinetec-sidebar {
+    transform: translateX(-264px);
+}
+
+.sinetec-shell.is-collapsed .sinetec-main {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ==============================================================================
+   TOPBAR ESCOLAR
+   ============================================================================== */
+
 .sinetec-topbar {
-    background: rgba(255,255,255,0.9);
-    border-bottom: 1px solid var(--sinetec-line);
-    min-height: 72px;
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--sinetec-border);
+    min-height: 68px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 18px;
-    padding: 0 34px;
+    gap: 16px;
+    padding: 0 28px;
     position: sticky;
     top: 0;
-    z-index: 1030;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 10px 30px rgba(23, 34, 29, 0.03);
-}
-.sinetec-search { max-width: 430px; width: 100%; background: #f2f5ef; border: 1px solid transparent; border-radius: 12px; display: flex; align-items: center; padding: 0 13px; color: #839087; transition: all .2s ease; }
-.sinetec-search:focus-within { border-color: #b8d29a; background: #fff; box-shadow: 0 0 0 4px rgba(57,169,0,.06); }
-.sinetec-search input { border: 0; outline: 0; background: transparent; padding: 10px 9px; width: 100%; font-size: .86rem; }
-.sinetec-icon-btn { border: 1px solid var(--sinetec-line); width: 38px; height: 38px; border-radius: 10px; background: #fff; color: var(--sinetec-muted); display: grid; place-items: center; transition: all .2s ease; }
-.sinetec-icon-btn:hover { color: var(--sinetec-green-dark); border-color: #b8d29a; box-shadow: 0 8px 18px rgba(57,169,0,.08); }
-.sinetec-user { display: flex; align-items: center; gap: 10px; color: var(--sinetec-ink); text-decoration: none; }
-.sinetec-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #dceccf, #eef7e6); color: var(--sinetec-green-dark); display: grid; place-items: center; font-weight: 800; box-shadow: 0 8px 18px rgba(57,169,0,.12); }
-.sinetec-content { padding: 24px 32px; width: 100%; max-width: 100%; }
-.sinetec-eyebrow { color: var(--sinetec-green-dark); text-transform: uppercase; font-size: .7rem; font-weight: 800; letter-spacing: .1em; }
-.sinetec-page-title { font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; font-weight: 800; letter-spacing: -.03em; }
-.sinetec-dashboard-hero {
-    background: linear-gradient(135deg, rgba(57,169,0,0.12), rgba(255,255,255,0.9));
-    border: 1px solid rgba(57,169,0,0.12);
-    border-radius: 22px;
-    padding: 28px 28px 24px;
-    box-shadow: 0 18px 36px rgba(23,34,29,0.04);
-}
-.hero-card-verde {
-    background: linear-gradient(135deg, #1b4d3e 0%, #11382c 100%);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 18px 36px rgba(17, 56, 44, 0.12);
-    border-radius: 22px;
+    z-index: 1020;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
 }
 
-.card,
-.sinetec-card {
-    background: var(--sinetec-white);
-    border: 1px solid var(--sinetec-line);
-    border-radius: 18px;
-    box-shadow: 0 14px 30px rgba(23, 34, 29, 0.05);
+.sinetec-search {
+    max-width: 420px;
+    width: 100%;
+    background: #F1F5F9;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    color: var(--sinetec-text-muted);
+    transition: all 0.2s ease;
 }
 
-.card-header,
-.sinetec-card-header {
-    border-bottom: 1px solid var(--sinetec-line);
+.sinetec-search:focus-within {
+    border-color: var(--sinetec-blue);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.sinetec-search input {
+    border: 0;
+    outline: 0;
+    background: transparent;
+    padding: 9px 8px;
+    width: 100%;
+    font-size: 0.88rem;
+    color: var(--sinetec-text-main);
+}
+
+.sinetec-icon-btn {
+    border: 1px solid var(--sinetec-border);
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--sinetec-text-body);
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.sinetec-icon-btn:hover {
+    color: var(--sinetec-blue);
+    border-color: var(--sinetec-blue);
+    background: var(--sinetec-blue-light);
+}
+
+.sinetec-user-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 12px 5px 6px;
+    border-radius: 9999px;
+    background: #F8FAFC;
+    border: 1px solid var(--sinetec-border);
+    color: var(--sinetec-text-main);
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.sinetec-user-pill:hover {
+    background: #F1F5F9;
+    color: var(--sinetec-text-main);
+}
+
+.sinetec-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sinetec-petroleum) 0%, #1E3A8A 100%);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.sinetec-content {
+    padding: 28px 32px;
+    width: 100%;
+    max-width: 100%;
+    flex: 1 0 auto;
+}
+
+/* ==============================================================================
+   TARJETAS, COMPONENTES Y TABLAS
+   ============================================================================== */
+
+.sinetec-card,
+.card {
+    background: var(--sinetec-card-bg);
+    border: 1px solid var(--sinetec-border);
+    border-radius: var(--sinetec-radius);
+    box-shadow: var(--sinetec-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sinetec-card:hover {
+    box-shadow: var(--sinetec-shadow-hover);
+}
+
+.sinetec-card-header,
+.card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--sinetec-border);
+    padding: 16px 22px;
+    font-weight: 700;
+    color: var(--sinetec-text-main);
+}
+
+.sinetec-card-body,
+.card-body {
+    padding: 22px;
+}
+
+/* Tarjetas de Métricas de Dashboard */
+.metric-card {
+    background: #ffffff;
+    border: 1px solid var(--sinetec-border);
+    border-radius: 14px;
     padding: 18px 20px;
-}
-
-.list-group-item {
-    border-color: rgba(23, 34, 29, 0.06);
-    background-color: transparent;
-}
-
-.sinetec-card-header { border-bottom: 1px solid var(--sinetec-line); padding: 18px 20px; }
-.sinetec-metric {
-    padding: 20px;
-    min-height: 142px;
+    box-shadow: var(--sinetec-shadow-sm);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
-    transition: transform .2s ease, box-shadow .2s ease;
 }
-.sinetec-metric:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(23,34,29,0.07); }
-.sinetec-metric::after { content: ''; position: absolute; width: 90px; height: 90px; border-radius: 50%; right: -28px; bottom: -32px; background: #eff6e7; }
-.sinetec-metric-value { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -.05em; }
-.sinetec-metric-label { color: var(--sinetec-muted); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-.sinetec-table thead th { color: #758078; font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 800; border-bottom-width: 1px; }
-.sinetec-table td { padding-top: 15px; padding-bottom: 15px; border-color: #edf1eb; vertical-align: middle; }
-.table-sinetec { --bs-table-bg: transparent; color: var(--sinetec-ink); }
-.table-sinetec thead th { color: #758078; background: #f7f9f5; border-bottom: 1px solid var(--sinetec-line); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 800; white-space: nowrap; }
-.table-sinetec td { padding: 14px 12px; border-color: #edf1eb; vertical-align: middle; }
-.btn-sinetec-primary { background: var(--sinetec-green); border-color: var(--sinetec-green); color: #fff; border-radius: 10px; font-weight: 700; }
-.btn-sinetec-primary:hover { background: var(--sinetec-green-dark); border-color: var(--sinetec-green-dark); color: #fff; }
-.nav-tabs { border-bottom-color: var(--sinetec-line); }
-.nav-tabs .nav-link { color: var(--sinetec-muted); border: 0; border-bottom: 2px solid transparent; padding: 12px 14px; }
-.nav-tabs .nav-link.active { color: var(--sinetec-green-dark); background: transparent; border-bottom-color: var(--sinetec-green); }
-.form-control, .form-select { border-color: var(--sinetec-line); border-radius: 10px; padding: 10px 12px; }
-.form-control:focus, .form-select:focus { border-color: #a8c988; box-shadow: 0 0 0 .2rem rgba(57, 169, 0, .1); }
-.sinetec-status { border-radius: 99px; padding: 5px 9px; font-size: .68rem; font-weight: 800; }
-.sinetec-status-success { background: #e8f5df; color: #32751d; }
-.sinetec-status-warning { background: #fff3d8; color: #996b15; }
-.sinetec-status-danger { background: #fde8e5; color: #a24034; }
-.sinetec-btn { border-radius: 10px; font-weight: 700; padding: 10px 15px; }
-.sinetec-btn-primary { background: var(--sinetec-green); border-color: var(--sinetec-green); color: #fff; }
-.sinetec-btn-primary:hover { background: var(--sinetec-green-dark); border-color: var(--sinetec-green-dark); color: #fff; }
-.btn-outline-secondary { color: #385344; border-color: #b9cbb9; background: #fff; font-weight: 700; }
-.btn-outline-secondary:hover { color: #fff; background: var(--sinetec-green-dark); border-color: var(--sinetec-green-dark); }
-.sinetec-sidebar-footer {
-    position: static;
-    margin-top: auto;
-    flex-shrink: 0;
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sinetec-shadow);
 }
-.sinetec-sidebar { display: flex; flex-direction: column; }
-.sinetec-mobile-toggle { display: none; }
-@media (max-width: 991px) {
-    .sinetec-sidebar { position: fixed; transform: translateX(-100%); transition: transform .2s ease; }
-    .sinetec-sidebar.is-open { transform: translateX(0); }
-    .sinetec-mobile-toggle { display: grid; }
-    .sinetec-topbar { padding: 0 18px; }
-    .sinetec-content { padding: 24px 18px; }
+
+.metric-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
 }
-@media (max-width: 576px) {
-    .sinetec-search { max-width: 190px; }
-    .sinetec-user-meta { display: none; }
+
+.metric-card-val {
+    font-family: var(--font-heading);
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--sinetec-text-main);
+    line-height: 1.1;
+    margin: 8px 0 2px;
+}
+
+.metric-card-lbl {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--sinetec-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Tablas Modernas */
+.sinetec-table-wrap {
+    background: #ffffff;
+    border: 1px solid var(--sinetec-border);
+    border-radius: var(--sinetec-radius);
+    overflow: hidden;
+    box-shadow: var(--sinetec-shadow-sm);
+}
+
+.sinetec-table,
+.table {
+    margin-bottom: 0;
+    color: var(--sinetec-text-body);
+}
+
+.sinetec-table thead th,
+.table thead th {
+    background: #F8FAFC;
+    color: var(--sinetec-text-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    border-bottom: 1px solid var(--sinetec-border);
+    padding: 14px 16px;
+    white-space: nowrap;
+}
+
+.sinetec-table tbody td,
+.table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--sinetec-border-subtle);
+    vertical-align: middle;
+    font-size: 0.88rem;
+}
+
+.sinetec-table tbody tr:hover,
+.table-hover tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+/* Botones Modernos */
+.btn-sinetec-primary {
+    background: var(--sinetec-petroleum);
+    border-color: var(--sinetec-petroleum);
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: var(--sinetec-radius-sm);
+    padding: 8px 18px;
+    transition: all 0.2s ease;
+}
+
+.btn-sinetec-primary:hover {
+    background: var(--sinetec-petroleum-hover);
+    border-color: var(--sinetec-petroleum-hover);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-sinetec-blue {
+    background: var(--sinetec-blue);
+    border-color: var(--sinetec-blue);
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: var(--sinetec-radius-sm);
+    padding: 8px 18px;
+    transition: all 0.2s ease;
+}
+
+.btn-sinetec-blue:hover {
+    background: var(--sinetec-blue-hover);
+    border-color: var(--sinetec-blue-hover);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-sinetec-rose {
+    background: var(--sinetec-rose);
+    border-color: var(--sinetec-rose);
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: var(--sinetec-radius-sm);
+    padding: 8px 18px;
+    transition: all 0.2s ease;
+}
+
+.btn-sinetec-rose:hover {
+    background: var(--sinetec-rose-hover);
+    border-color: var(--sinetec-rose-hover);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35);
+    transform: translateY(-1px);
+}
+
+/* Badges y Pastillas */
+.badge-soft-blue {
+    background-color: var(--sinetec-blue-light);
+    color: var(--sinetec-blue-hover);
+    border: 1px solid var(--sinetec-blue-border);
+}
+
+.badge-soft-lavender {
+    background-color: var(--sinetec-lavender);
+    color: var(--sinetec-lavender-text);
+    border: 1px solid var(--sinetec-lavender-border);
+}
+
+.badge-soft-rose {
+    background-color: var(--sinetec-rose-soft);
+    color: var(--sinetec-rose-text);
+    border: 1px solid var(--sinetec-rose-border);
+}
+
+.badge-soft-success {
+    background-color: var(--semaforo-aprobado-soft);
+    color: #065F46;
+    border: 1px solid var(--semaforo-aprobado-border);
+}
+
+.badge-soft-warning {
+    background-color: var(--semaforo-proceso-soft);
+    color: #92400E;
+    border: 1px solid var(--semaforo-proceso-border);
+}
+
+.badge-soft-danger {
+    background-color: var(--semaforo-recuperar-soft);
+    color: #991B1B;
+    border: 1px solid var(--semaforo-recuperar-border);
+}
+
+/* Formularios */
+.form-control, .form-select {
+    border-color: var(--sinetec-border);
+    border-radius: var(--sinetec-radius-sm);
+    padding: 9px 13px;
+    font-size: 0.9rem;
+    color: var(--sinetec-text-main);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--sinetec-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+/* Pestañas (Tabs) */
+.nav-tabs {
+    border-bottom: 1px solid var(--sinetec-border);
+}
+
+.nav-tabs .nav-link {
+    color: var(--sinetec-text-muted);
+    font-weight: 600;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 12px 18px;
+    transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--sinetec-text-main);
+    border-bottom-color: #CBD5E1;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--sinetec-petroleum);
+    background: transparent;
+    border-bottom: 2px solid var(--sinetec-petroleum);
+    font-weight: 700;
+}
+
+/* Backdrop para Móviles */
+.sinetec-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 1040;
+    backdrop-filter: blur(4px);
+}
+
+.sinetec-backdrop.is-visible {
+    display: block;
+}
+
+/* ==============================================================================
+   RESPONSIVE DESIGN (TABLETS Y MÓVILES)
+   ============================================================================== */
+
+@media (max-width: 991.98px) {
+    .sinetec-sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        max-width: 85vw;
+        z-index: 1050;
+        visibility: hidden;
+    }
+
+    .sinetec-sidebar.is-open {
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    .sinetec-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .sinetec-topbar {
+        padding: 0 16px;
+        min-height: 60px;
+    }
+
+    .sinetec-content {
+        padding: 18px 16px;
+    }
 }

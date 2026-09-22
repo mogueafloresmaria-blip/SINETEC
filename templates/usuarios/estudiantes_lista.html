@@ -1,57 +1,71 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Directorio y Carnés de Aprendices · SINETEC{% endblock %}
+{% block title %}Directorio Escolar de Estudiantes · SINETEC{% endblock %}
 
 {% block extra_css %}
 <style>
-    .sena-carnet-card {
-        background: linear-gradient(145deg, #0d2c18 0%, #174828 55%, #0e2e1a 100%);
-        color: #ffffff;
-        border-radius: 20px;
-        padding: 20px;
+    .school-student-card {
+        background: #FFFFFF;
+        color: #0F172A;
+        border-radius: 18px;
+        padding: 0;
         position: relative;
         overflow: hidden;
-        border: 2px solid rgba(57, 169, 0, 0.4);
-        box-shadow: 0 12px 28px rgba(11, 36, 20, 0.25);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     }
-    .sena-carnet-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 18px 36px rgba(11, 36, 20, 0.35);
-        border-color: #39a900;
+    .school-student-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.1);
+        border-color: #BFDBFE;
     }
-    .sena-carnet-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image: radial-gradient(#39a900 0.75px, transparent 0.75px);
-        background-size: 8px 8px;
-        opacity: 0.15;
-        pointer-events: none;
+    .student-card-header {
+        background: linear-gradient(135deg, #0F2942 0%, #1E3A8A 100%);
+        padding: 12px 16px;
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
-    .carnet-avatar-box {
-        width: 80px;
-        height: 80px;
-        border-radius: 16px;
-        background: #ffffff;
-        color: #174828;
+    .student-body-content {
+        padding: 16px;
+    }
+    .student-photo-frame {
+        width: 78px;
+        height: 98px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid #3B82F6;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+        flex-shrink: 0;
+        background-color: #F1F5F9;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.2rem;
-        font-weight: 800;
-        border: 3px solid #39a900;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-        flex-shrink: 0;
     }
-    .carnet-chip {
-        font-size: 0.68rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        padding: 2px 8px;
-        border-radius: 6px;
+    .student-photo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .student-avatar-fallback {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+        color: #1E3A8A;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.3rem;
+    }
+    .student-card-accent {
+        height: 4px;
+        background: linear-gradient(90deg, #1E3A8A 0%, #3B82F6 100%);
     }
 </style>
 {% endblock %}
@@ -59,24 +73,26 @@
 {% block content %}
 <div class="container-fluid py-3">
 
-    <!-- Encabezado Institucional SENA -->
+    <!-- Encabezado Institucional Escolar -->
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
-                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-semibold">
+                    <i class="bi bi-mortarboard-fill me-1"></i> {{ colegio.nombre|default:"Institución Educativa Técnica" }}
+                </span>
+                <span class="text-muted small">Control y Registro Escolar</span>
             </div>
             <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-people-fill text-success me-2"></i>Directorio y Carnetización de Aprendices
+                <i class="bi bi-people-fill text-primary me-2"></i>Directorio Escolar de Estudiantes
             </h1>
-            <p class="text-muted mb-0">Gestión de expedientes formativos, consulta de carnet digital y seguimiento académico integral.</p>
+            <p class="text-muted mb-0">Expedientes académicos, estado de matrícula, seguimiento por semáforo y credenciales escolares.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
-            <button class="btn btn-outline-success fw-semibold" data-bs-toggle="modal" data-bs-target="#modalImportar">
-                <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Importar XLSX
+            <button class="btn btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalImportar">
+                <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Importar Excel
             </button>
-            <a href="{% url 'registrar_aprendiz' %}" class="btn text-white fw-semibold" style="background-color: #39A900;">
-                <i class="bi bi-person-plus-fill me-1"></i> Registrar Aprendiz
+            <a href="{% url 'registrar_aprendiz' %}" class="btn btn-primary fw-semibold shadow-sm" style="background: linear-gradient(135deg, #1E3A8A, #2563EB); border: none;">
+                <i class="bi bi-person-plus-fill me-1"></i> Matricular Estudiante
             </a>
         </div>
     </div>
@@ -87,60 +103,60 @@
         </div>
     {% endif %}
 
-    <!-- Tarjetas Métricas Reales -->
+    <!-- Tarjetas Métricas Escolares Reales -->
     <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4" style="border-color: #39A900 !important;">
+        <div class="col-6 col-md-3">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-primary h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-muted small text-uppercase fw-semibold">Aprendices Activos</span>
+                        <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Total Estudiantes</span>
                         <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_aprendices }}</h3>
-                        <span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill"></i> Matrículas registradas</span>
+                        <span class="text-primary small fw-semibold">Censo general</span>
                     </div>
-                    <div class="p-3 rounded-3 bg-success bg-opacity-10 text-success">
-                        <i class="bi bi-mortarboard-fill fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-primary">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-muted small text-uppercase fw-semibold">Ficha Principal</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">3173430</h3>
-                        <span class="text-primary small fw-semibold">ADSI · En Ejecución</span>
-                    </div>
-                    <div class="p-3 rounded-3 bg-primary bg-opacity-10 text-primary">
-                        <i class="bi bi-layers-fill fs-4"></i>
+                    <div class="p-2.5 rounded-3 bg-primary bg-opacity-10 text-primary fs-4">
+                        <i class="bi bi-people-fill"></i>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-warning">
+        <div class="col-6 col-md-3">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-success h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-muted small text-uppercase fw-semibold">Carnet Digital QR</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">Seguridad 24h</h3>
-                        <span class="text-warning small fw-semibold">Rotación Criptográfica</span>
+                        <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Matriculados Activos</span>
+                        <h3 class="fw-bold text-success mb-0 mt-1">{{ total_activos }}</h3>
+                        <span class="text-success small fw-semibold">Asistiendo a clases</span>
                     </div>
-                    <div class="p-3 rounded-3 bg-warning bg-opacity-10 text-warning">
-                        <i class="bi bi-qr-code-scan fs-4"></i>
+                    <div class="p-2.5 rounded-3 bg-success bg-opacity-10 text-success fs-4">
+                        <i class="bi bi-person-check-fill"></i>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-info">
+        <div class="col-6 col-md-3">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-danger h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-muted small text-uppercase fw-semibold">Institución Articulada</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1 fs-5">Escuela Normal</h3>
-                        <span class="text-info small fw-semibold">Santa Marta · Magdalena</span>
+                        <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Retirados / Traslado</span>
+                        <h3 class="fw-bold text-danger mb-0 mt-1">{{ total_retirados }}</h3>
+                        <span class="text-danger small fw-semibold">Bajas registradas</span>
                     </div>
-                    <div class="p-3 rounded-3 bg-info bg-opacity-10 text-info">
-                        <i class="bi bi-building fs-4"></i>
+                    <div class="p-2.5 rounded-3 bg-danger bg-opacity-10 text-danger fs-4">
+                        <i class="bi bi-person-x-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-info h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Graduados / Aprobados</span>
+                        <h3 class="fw-bold text-info mb-0 mt-1">{{ total_certificados }}</h3>
+                        <span class="text-info small fw-semibold">Ciclo culminado</span>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-info bg-opacity-10 text-info fs-4">
+                        <i class="bi bi-award-fill"></i>
                     </div>
                 </div>
             </div>
@@ -151,164 +167,160 @@
     <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
         <div class="card-body p-3">
             <form method="get" class="row g-2 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label small fw-semibold text-secondary mb-1">
-                        <i class="bi bi-search me-1"></i> Búsqueda por Nombre, Documento o Correo:
+                        <i class="bi bi-search me-1"></i> Búsqueda de estudiante:
                     </label>
-                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Ej: Juan Camilo, 1082934001, @soy.sena...">
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Nombre, documento, correo...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Sede / Institución:</label>
+                    <select name="institucion" class="form-select">
+                        <option value="">-- Todas las Sedes --</option>
+                        {% for inst in instituciones_disponibles %}
+                            <option value="{{ inst.id }}" {% if institucion_filtro == inst.id|stringformat:"s" %}selected{% endif %}>
+                                {{ inst.nombre|truncatechars:30 }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Ficha Técnica:</label>
+                    <label class="form-label small fw-semibold text-secondary mb-1">Curso / Grupo:</label>
                     <select name="ficha" class="form-select">
-                        <option value="">-- Todas las fichas --</option>
+                        <option value="">-- Todos los Grupos --</option>
                         {% for f in fichas_disponibles %}
                             <option value="{{ f.codigo_ficha }}" {% if ficha_filtro == f.codigo_ficha %}selected{% endif %}>
-                                {{ f.codigo_ficha }} ({{ f.programa.denominacion|truncatechars:20 }})
+                                Grupo {{ f.codigo_ficha }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Programa:</label>
-                    <select name="programa" class="form-select">
-                        <option value="">-- Todos los programas --</option>
-                        {% for p in programas_disponibles %}
-                            <option value="{{ p.id }}" {% if programa_filtro == p.id|stringformat:"s" %}selected{% endif %}>
-                                {{ p.denominacion|truncatechars:25 }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Estado:</label>
+                    <label class="form-label small fw-semibold text-secondary mb-1">Estado de Matrícula:</label>
                     <select name="estado" class="form-select">
-                        <option value="">-- Todos --</option>
+                        <option value="">-- Todos los Estados --</option>
                         {% for val, nom in estados_disponibles %}
                             <option value="{{ val }}" {% if estado_filtro == val %}selected{% endif %}>{{ nom }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn text-white fw-semibold w-100" style="background-color: #39A900;">
+                    <button type="submit" class="btn btn-primary fw-semibold w-100" style="background: #1E3A8A; border: none;">
                         <i class="bi bi-funnel-fill me-1"></i> Filtrar
                     </button>
-                    <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary" title="Limpiar filtros">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                    </a>
+                    {% if query or institucion_filtro or ficha_filtro or estado_filtro %}
+                        <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary" title="Limpiar filtros">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    {% endif %}
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Barra de Pestañas de Vista: Carnés Ampliados vs Tabla -->
+    <!-- Pestañas de Vista: Tarjetas vs Tabla -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <ul class="nav nav-pills" id="viewTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active fw-semibold" id="carnets-tab" data-bs-toggle="pill" data-bs-target="#carnets-view" type="button" role="tab">
-                    <i class="bi bi-person-vcard-fill me-1"></i> Carnés Ampliados ({{ total_aprendices }})
+                    <i class="bi bi-grid-fill me-1"></i> Tarjetas Escolares ({{ total_aprendices }})
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link fw-semibold" id="table-tab" data-bs-toggle="pill" data-bs-target="#table-view" type="button" role="tab">
-                    <i class="bi bi-table me-1"></i> Vista Tabla Detallada
+                    <i class="bi bi-table me-1"></i> Vista de Tabla
                 </button>
             </li>
         </ul>
-        <span class="text-muted small">Total coincidencias: <strong>{{ total_aprendices }}</strong></span>
+        <span class="text-muted small">Total registros: <strong>{{ total_aprendices }}</strong></span>
     </div>
 
     <!-- Contenido de las Vistas -->
     <div class="tab-content" id="viewTabsContent">
 
-        <!-- 1. VISTA CARNÉS AMPLIADOS -->
+        <!-- 1. VISTA TARJETAS ESCOLARES -->
         <div class="tab-pane fade show active" id="carnets-view" role="tabpanel">
             <div class="row g-4">
                 {% for m in matriculas %}
                     <div class="col-md-6 col-xl-4">
-                        <div class="sena-carnet-card h-100 d-flex flex-column justify-content-between">
+                        <div class="school-student-card h-100 d-flex flex-column justify-content-between">
                             <div>
-                                <!-- Encabezado del Carné -->
-                                <div class="d-flex justify-content-between align-items-start border-bottom border-white border-opacity-10 pb-2 mb-3">
+                                <div class="student-card-header">
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="bg-white rounded p-1" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-mortarboard-fill text-success fs-5"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-white opacity-75 fw-bold" style="font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;">SENA · REGIONAL MAGDALENA</div>
-                                            <div class="text-white fw-extrabold" style="font-size: 0.82rem;">CARNET DE APRENDIZ</div>
-                                        </div>
+                                        <i class="bi bi-mortarboard-fill text-info"></i>
+                                        <span style="font-size: 0.78rem; font-weight: 700; color: #FFFFFF;">
+                                            {{ colegio.nombre|default:"Institución Educativa"|truncatechars:28 }}
+                                        </span>
                                     </div>
-                                    <span class="carnet-chip bg-success bg-opacity-25 text-white border border-success">
-                                        {{ m.get_estado_formacion_display }}
+                                    <span class="badge bg-light text-dark fw-bold" style="font-size: 0.68rem;">
+                                        {{ m.get_estado_formacion_display|default:'ACTIVO' }}
                                     </span>
                                 </div>
 
-                                <!-- Cuerpo: Avatar + Datos -->
-                                <div class="d-flex gap-3 align-items-center mb-3">
-                                    <div class="carnet-avatar-box">
-                                        <span>{{ m.aprendiz.first_name|slice:":1" }}{{ m.aprendiz.last_name|slice:":1" }}</span>
-                                    </div>
-                                    <div class="overflow-hidden">
-                                        <h5 class="fw-bold text-white mb-1 text-truncate" title="{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}">
-                                            {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
-                                        </h5>
-                                        <div class="mb-1">
-                                            <span class="badge bg-warning text-dark fw-bold px-2 py-1 shadow-sm" style="font-size: 0.82rem;">
-                                                <i class="bi bi-person-vcard-fill me-1"></i> {{ m.aprendiz.perfil.get_tipo_documento_display }} {{ m.aprendiz.perfil.numero_documento }}
-                                            </span>
+                                <div class="student-body-content">
+                                    <div class="d-flex gap-3 align-items-center mb-3">
+                                        <div class="student-photo-frame">
+                                            {% if m.aprendiz.perfil.foto %}
+                                                <img src="{{ m.aprendiz.perfil.foto.url }}" alt="{{ m.aprendiz.get_full_name }}" class="student-photo-img">
+                                            {% else %}
+                                                <div class="student-avatar-fallback">
+                                                    <span>{{ m.aprendiz.first_name|default:m.aprendiz.username|slice:':1'|upper }}{{ m.aprendiz.last_name|default:''|slice:':1'|upper }}</span>
+                                                    <small style="font-size: 0.6rem; color: #64748B;">ESTUDIANTE</small>
+                                                </div>
+                                            {% endif %}
                                         </div>
-                                        <div class="text-white opacity-75 small text-truncate">
-                                            <i class="bi bi-envelope me-1"></i>{{ m.aprendiz.email|default:'Sin correo institucional' }}
+                                        <div class="overflow-hidden flex-grow-1">
+                                            <h5 class="fw-bold text-dark mb-1 text-truncate" title="{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}" style="font-size: 0.98rem;">
+                                                {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
+                                            </h5>
+                                            <div class="mb-1">
+                                                <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.78rem;">
+                                                    <i class="bi bi-person-vcard text-primary me-1"></i> {{ m.aprendiz.perfil.get_tipo_documento_display|default:'TI' }} {{ m.aprendiz.perfil.numero_documento }}
+                                                </span>
+                                            </div>
+                                            <div class="text-muted small text-truncate" style="font-size: 0.75rem;">
+                                                <i class="bi bi-envelope text-secondary me-1"></i>{{ m.aprendiz.email|default:'Sin correo registrado' }}
+                                            </div>
+                                            <div class="text-muted small text-truncate" style="font-size: 0.72rem;">
+                                                <i class="bi bi-geo-alt text-secondary me-1"></i>{{ m.ficha.institucion.nombre|default:"Sede Principal" }}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Detalles Formativos -->
-                                <div class="bg-black bg-opacity-25 rounded-3 p-2 mb-3 border border-white border-opacity-10 small">
-                                    <div class="row g-1">
-                                        <div class="col-6">
-                                            <span class="text-white opacity-50 d-block" style="font-size: 0.65rem;">FICHA TÉCNICA:</span>
-                                            <strong class="text-white">{{ m.ficha.codigo_ficha }}</strong>
-                                        </div>
-                                        <div class="col-6">
-                                            <span class="text-white opacity-50 d-block" style="font-size: 0.65rem;">NIVEL / GRADO:</span>
-                                            <span class="text-white">{{ m.grado_escolar|default:'Media Técnica' }}</span>
-                                        </div>
-                                        <div class="col-12 mt-1">
-                                            <span class="text-white opacity-50 d-block" style="font-size: 0.65rem;">PROGRAMA:</span>
-                                            <span class="badge {% if 'Tecnólogo' in m.ficha.programa.denominacion or 'Tecnologo' in m.ficha.programa.denominacion %}bg-info text-white{% else %}bg-success text-white{% endif %} me-1" style="font-size: 0.65rem;">
-                                                {% if 'Tecnólogo' in m.ficha.programa.denominacion or 'Tecnologo' in m.ficha.programa.denominacion %}TECNÓLOGO{% else %}TÉCNICO{% endif %}
+                                    <!-- Curso / Grupo y Programa -->
+                                    <div class="bg-light rounded-3 p-2 mb-1 border border-light-subtle">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="text-muted text-uppercase" style="font-size: 0.68rem; font-weight: 700;">CURSO / GRUPO:</span>
+                                            <span class="badge bg-primary text-white px-2 py-1" style="font-size: 0.72rem;">
+                                                Grupo {{ m.ficha.codigo_ficha }}
                                             </span>
-                                            <span class="text-white small fw-semibold">{{ m.ficha.programa.denominacion }}</span>
+                                        </div>
+                                        <div class="text-truncate">
+                                            <span class="text-dark fw-semibold small" style="font-size: 0.78rem;">
+                                                <i class="bi bi-book me-1 text-primary"></i>{{ m.ficha.programa.nombre }}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Botones de Acción Obligatorios -->
-                            <div class="pt-2 border-top border-white border-opacity-10">
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <a href="{% url 'carnet_digital_id' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-light w-100 fw-bold text-dark shadow-sm">
-                                            <i class="bi bi-qr-code-scan text-success me-1"></i> Ver Carné
-                                        </a>
-                                    </div>
-                                    <div class="col-6">
-                                        <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-sm text-white w-100 fw-bold" style="background-color: #39A900;">
-                                            <i class="bi bi-person-badge me-1"></i> Ver Perfil
-                                        </a>
-                                    </div>
-                                    <div class="col-6">
-                                        <a href="{% url 'seguimiento_lista' %}?ficha={{ m.ficha.pk }}" class="btn btn-sm btn-outline-light w-100">
-                                            <i class="bi bi-clipboard2-pulse me-1"></i> Seguimiento
-                                        </a>
-                                    </div>
-                                    <div class="col-6">
-                                        <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}#tab-evidencias" class="btn btn-sm btn-outline-light w-100">
-                                            <i class="bi bi-award me-1"></i> Evidencias
-                                        </a>
+                            <!-- Botones de Acción -->
+                            <div>
+                                <div class="px-3 pb-3">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <a href="{% url 'carnet_digital_id' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-primary w-100 fw-semibold">
+                                                <i class="bi bi-qr-code-scan me-1"></i> Carnet
+                                            </a>
+                                        </div>
+                                        <div class="col-6">
+                                            <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-primary w-100 fw-semibold" style="background: #1E3A8A; border-color: #1E3A8A;">
+                                                <i class="bi bi-person-badge me-1"></i> Expediente
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="student-card-accent"></div>
                             </div>
                         </div>
                     </div>
@@ -317,14 +329,14 @@
                         <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
                             <div class="mb-3 text-muted">
                                 <i class="bi bi-people fs-1 d-block text-secondary opacity-50 mb-2"></i>
-                                <h4 class="fw-bold text-dark">Actualmente no hay aprendices que coincidan con la búsqueda</h4>
-                                <p class="text-muted mb-4">No se encontraron registros con los filtros aplicados. Puedes restablecer los criterios o registrar un nuevo aprendiz.</p>
+                                <h4 class="fw-bold text-dark">No se encontraron estudiantes con los filtros aplicados</h4>
+                                <p class="text-muted mb-4">Puedes restablecer los filtros de búsqueda o realizar una nueva matrícula escolar.</p>
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary">
-                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Ver Todos los Aprendices
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Ver Todos
                                     </a>
-                                    <a href="{% url 'registrar_aprendiz' %}" class="btn text-white fw-semibold" style="background-color: #39A900;">
-                                        <i class="bi bi-person-plus-fill me-1"></i> Registrar Nuevo Aprendiz
+                                    <a href="{% url 'registrar_aprendiz' %}" class="btn btn-primary fw-semibold" style="background: #1E3A8A; border: none;">
+                                        <i class="bi bi-person-plus-fill me-1"></i> Matricular Estudiante
                                     </a>
                                 </div>
                             </div>
@@ -334,17 +346,17 @@
             </div>
         </div>
 
-        <!-- 2. VISTA TABLA DETALLADA -->
+        <!-- 2. VISTA TABLA ESCOLAR -->
         <div class="tab-pane fade" id="table-view" role="tabpanel">
             <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light text-uppercase small">
                             <tr>
-                                <th class="ps-3 py-3">Aprendiz</th>
-                                <th class="py-3">Tipo y N° Documento</th>
-                                <th class="py-3">Ficha Técnica</th>
-                                <th class="py-3">Programa de Formación</th>
+                                <th class="ps-3 py-3">Estudiante</th>
+                                <th class="py-3">Documento</th>
+                                <th class="py-3">Curso / Grupo</th>
+                                <th class="py-3">Programa / Énfasis</th>
                                 <th class="py-3">Estado</th>
                                 <th class="py-3 pe-3 text-end">Acciones</th>
                             </tr>
@@ -354,7 +366,7 @@
                                 <tr>
                                     <td class="ps-3">
                                         <div class="d-flex align-items-center gap-2">
-                                            <div class="rounded-circle bg-success bg-opacity-10 text-success fw-bold d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
                                                 {{ m.aprendiz.first_name|slice:":1" }}{{ m.aprendiz.last_name|slice:":1" }}
                                             </div>
                                             <div>
@@ -364,24 +376,18 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-dark text-white fw-bold px-2 py-1">
-                                            <i class="bi bi-person-vcard me-1 text-warning"></i>{{ m.aprendiz.perfil.get_tipo_documento_display }} {{ m.aprendiz.perfil.numero_documento }}
+                                        <span class="badge bg-light text-dark border px-2 py-1">
+                                            <i class="bi bi-person-vcard text-primary me-1"></i>{{ m.aprendiz.perfil.get_tipo_documento_display }} {{ m.aprendiz.perfil.numero_documento }}
                                         </span>
-                                        <small class="text-success d-block fw-semibold mt-1" style="font-size: 0.75rem;">
-                                            <i class="bi bi-shield-check me-1"></i>Acceso directo con cédula
-                                        </small>
                                     </td>
                                     <td>
-                                        <a href="{% url 'fichas_detalle' m.ficha.id %}" class="fw-bold text-decoration-none text-success">
-                                            Ficha {{ m.ficha.codigo_ficha }}
+                                        <a href="{% url 'fichas_detalle' m.ficha.id %}" class="fw-bold text-decoration-none text-primary">
+                                            Grupo {{ m.ficha.codigo_ficha }}
                                         </a>
                                         <small class="d-block text-muted">{{ m.ficha.institucion.nombre }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge {% if 'Tecnólogo' in m.ficha.programa.denominacion or 'Tecnologo' in m.ficha.programa.denominacion %}bg-info text-white{% else %}bg-success text-white{% endif %} me-1" style="font-size: 0.7rem;">
-                                            {% if 'Tecnólogo' in m.ficha.programa.denominacion or 'Tecnologo' in m.ficha.programa.denominacion %}TECNÓLOGO{% else %}TÉCNICO{% endif %}
-                                        </span>
-                                        <span class="small fw-semibold text-secondary d-block mt-1">{{ m.ficha.programa.denominacion }}</span>
+                                        <span class="small fw-semibold text-secondary d-block">{{ m.ficha.programa.nombre }}</span>
                                     </td>
                                     <td>
                                         <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
@@ -389,16 +395,39 @@
                                         </span>
                                     </td>
                                     <td class="pe-3 text-end">
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{% url 'carnet_digital_id' m.aprendiz.perfil.pk %}" class="btn btn-outline-success" title="Ver Carné Digital">
-                                                <i class="bi bi-qr-code"></i>
-                                            </a>
-                                            <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-outline-primary" title="Ver Expediente Completo">
-                                                <i class="bi bi-person-vcard"></i>
-                                            </a>
-                                            <a href="{% url 'seguimiento_lista' %}?ficha={{ m.ficha.pk }}" class="btn btn-outline-secondary" title="Ver Seguimiento">
-                                                <i class="bi bi-clipboard2-pulse"></i>
-                                            </a>
+                                        <div class="dropdown d-inline-block">
+                                            <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                <li>
+                                                    <a class="dropdown-item py-1.5" href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}">
+                                                        <i class="bi bi-eye text-primary me-2"></i> Expediente
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item py-1.5" href="{% url 'carnet_digital_id' m.aprendiz.perfil.pk %}" target="_blank">
+                                                        <i class="bi bi-person-badge text-info me-2"></i> Carnet Escolar
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider my-1"></li>
+                                                <li><h6 class="dropdown-header small">Estado de Matrícula</h6></li>
+                                                <li>
+                                                    <a class="dropdown-item py-1 text-success" href="{% url 'estudiante_cambiar_estado' m.aprendiz.id %}?estado=En Formacion&next={{ request.get_full_path|urlencode }}">
+                                                        <i class="bi bi-check-circle me-2"></i> Activo
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item py-1 text-primary" href="{% url 'estudiante_cambiar_estado' m.aprendiz.id %}?estado=Certificado&next={{ request.get_full_path|urlencode }}">
+                                                        <i class="bi bi-award me-2"></i> Graduado
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item py-1 text-danger" href="{% url 'estudiante_cambiar_estado' m.aprendiz.id %}?estado=Retirado&next={{ request.get_full_path|urlencode }}">
+                                                        <i class="bi bi-dash-circle me-2"></i> Retirado
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </td>
                                 </tr>
@@ -406,7 +435,7 @@
                                 <tr>
                                     <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="bi bi-people fs-2 d-block mb-2 text-secondary opacity-50"></i>
-                                        No hay aprendices registrados con los filtros especificados.
+                                        No hay estudiantes registrados con los filtros aplicados.
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -418,6 +447,46 @@
 
     </div>
 
+    <!-- Paginación -->
+    {% if page_obj.has_other_pages %}
+        <div class="sinetec-card-modern bg-white p-3 mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span class="text-muted small">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} estudiantes)
+            </span>
+            <nav aria-label="Paginación estudiantes">
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&institucion={{ institucion_filtro }}&ficha={{ ficha_filtro }}&estado={{ estado_filtro }}">
+                                &laquo; Anterior
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}&q={{ query }}&institucion={{ institucion_filtro }}&ficha={{ ficha_filtro }}&estado={{ estado_filtro }}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&institucion={{ institucion_filtro }}&ficha={{ ficha_filtro }}&estado={{ estado_filtro }}">
+                                Siguiente &raquo;
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+
 </div>
 
 <!-- Modal para Importación Masiva Excel -->
@@ -426,18 +495,18 @@
         <div class="modal-content rounded-4 border-0 shadow">
             <div class="modal-header bg-light">
                 <h5 class="modal-title fw-bold text-dark">
-                    <i class="bi bi-file-earmark-spreadsheet-fill text-success me-2"></i> Importación Masiva de Aprendices
+                    <i class="bi bi-file-earmark-spreadsheet-fill text-primary me-2"></i> Importación Masiva de Estudiantes
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body p-4">
                     <p class="text-muted small mb-3">
-                        Carga una plantilla XLSX con las columnas requeridas para vincular automáticamente los aprendices a su Ficha Técnica SENA.
+                        Carga una plantilla XLSX con las columnas requeridas para vincular automáticamente los estudiantes a su curso escolar.
                     </p>
                     <div class="alert alert-info py-2 small mb-3">
-                        <strong>Columnas obligatorias en fila 1:</strong><br>
+                        <strong>Columnas requeridas en la fila 1:</strong><br>
                         <code>numero_documento, nombres, apellidos, correo, grado_escolar, codigo_ficha</code>
                     </div>
                     <div class="mb-3">
@@ -447,16 +516,12 @@
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn text-white fw-semibold" style="background-color: #39A900;">
+                    <button type="submit" class="btn btn-primary fw-semibold" style="background: #1E3A8A; border: none;">
                         <i class="bi bi-upload me-1"></i> Procesar Archivo
                     </button>
                 </div>
             </form>
         </div>
     </div>
-</div>
-
-<div class="visually-hidden">
-    Escanear carnet QR · html5-qrcode · <a href="{% static 'manifest.webmanifest' %}">manifest.webmanifest</a>
 </div>
 {% endblock %}

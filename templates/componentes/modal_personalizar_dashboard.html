@@ -1,0 +1,236 @@
+<!-- MODAL PERSONALIZADOR DINÁMICO DE WIDGETS · SINETEC SENA -->
+<div class="modal fade" id="modalPersonalizarDashboard" tabindex="-1" aria-labelledby="modalPersonalizarDashboardLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden" style="background: #FFFFFF;">
+            <!-- Header -->
+            <div class="modal-header py-3 px-4" style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border-bottom: 3px solid #29AAE3;">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(57, 169, 0, 0.18); border: 1.5px solid #29AAE3; display: grid; place-items: center; color: #4EFA8A; font-size: 1.2rem;">
+                        <i class="bi bi-sliders"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="modalPersonalizarDashboardLabel" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                            Personalizar Dashboard Operativo
+                        </h5>
+                        <small style="color: #94A3B8; font-size: 0.78rem;">Activa o desactiva módulos según tu flujo de trabajo como instructor técnico</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Body con Toggles Animados -->
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-3">
+                    Configura la visibilidad de los widgets técnicos en tu panel. Los cambios se sincronizan en tiempo real y se almacenan automáticamente en tu dispositivo.
+                </p>
+
+                <div class="row g-3" id="listaWidgetsConfig">
+                    <!-- Widget 1: Sesiones Técnicas y Ambientes del Día -->
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between h-100" style="background: #F8FAFC;">
+                            <div class="d-flex align-items-center gap-3 pe-2">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #ECFDF5; color: #059669; display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0;">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Sesiones y Ambientes del Día</div>
+                                    <small class="text-muted" style="font-size: 0.74rem;">Horarios, ambientes de taller y fichas asignadas.</small>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input toggle-widget" type="checkbox" role="switch" id="toggle-sesiones" data-widget="widget-sesiones" checked style="width: 2.5em; height: 1.3em; cursor: pointer; accent-color: #29AAE3;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 2: Control Rápido de Asistencia por Ficha -->
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between h-100" style="background: #F8FAFC;">
+                            <div class="d-flex align-items-center gap-3 pe-2">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; color: #2563EB; display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0;">
+                                    <i class="bi bi-check2-square"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Control Rápido de Asistencia</div>
+                                    <small class="text-muted" style="font-size: 0.74rem;">Botonera 4 estados (A, R, FJ, FI) por ficha.</small>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input toggle-widget" type="checkbox" role="switch" id="toggle-asistencia" data-widget="widget-asistencia" checked style="width: 2.5em; height: 1.3em; cursor: pointer; accent-color: #29AAE3;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 3: Monitor de Alertas de Deserción y Casos Críticos -->
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between h-100" style="background: #F8FAFC;">
+                            <div class="d-flex align-items-center gap-3 pe-2">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #FEF2F2; color: #DC2626; display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0;">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Monitor de Alertas de Deserción</div>
+                                    <small class="text-muted" style="font-size: 0.74rem;">Detección temprana por fallas injustificadas.</small>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input toggle-widget" type="checkbox" role="switch" id="toggle-alertas" data-widget="widget-alertas" checked style="width: 2.5em; height: 1.3em; cursor: pointer; accent-color: #29AAE3;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 4: Evidencias Técnicas Pendientes por Calificar -->
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between h-100" style="background: #F8FAFC;">
+                            <div class="d-flex align-items-center gap-3 pe-2">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #FFFBEB; color: #D97706; display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0;">
+                                    <i class="bi bi-pencil-square"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Evidencias Pendientes por Calificar</div>
+                                    <small class="text-muted" style="font-size: 0.74rem;">Talleres y actividades técnicas recibidas.</small>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input toggle-widget" type="checkbox" role="switch" id="toggle-evidencias" data-widget="widget-evidencias" checked style="width: 2.5em; height: 1.3em; cursor: pointer; accent-color: #29AAE3;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 5: Planificación de RAPs Activos -->
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between h-100" style="background: #F8FAFC;">
+                            <div class="d-flex align-items-center gap-3 pe-2">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #FAF5FF; color: #9333EA; display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0;">
+                                    <i class="bi bi-diagram-3"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Planificación de RAPs Activos</div>
+                                    <small class="text-muted" style="font-size: 0.74rem;">Resultados de aprendizaje de la fase formativa.</small>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input toggle-widget" type="checkbox" role="switch" id="toggle-raps" data-widget="widget-raps" checked style="width: 2.5em; height: 1.3em; cursor: pointer; accent-color: #29AAE3;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 6: Casos Remitidos a Comité -->
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between h-100" style="background: #F8FAFC;">
+                            <div class="d-flex align-items-center gap-3 pe-2">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #FFF1F2; color: #E11D48; display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0;">
+                                    <i class="bi bi-briefcase"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Casos Remitidos a Comité</div>
+                                    <small class="text-muted" style="font-size: 0.74rem;">Actas, planes de mejoramiento y citaciones.</small>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input toggle-widget" type="checkbox" role="switch" id="toggle-comites" data-widget="widget-comites" checked style="width: 2.5em; height: 1.3em; cursor: pointer; accent-color: #29AAE3;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 7: Juicios Evaluativos Recientes -->
+                    <div class="col-12">
+                        <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between h-100" style="background: #F8FAFC;">
+                            <div class="d-flex align-items-center gap-3 pe-2">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #F0FDF4; color: #16A34A; display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0;">
+                                    <i class="bi bi-award"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Juicios Evaluativos Recientes (Sofia Plus / Zajuna)</div>
+                                    <small class="text-muted" style="font-size: 0.74rem;">Historial de valoraciones emitidas ([A] Aprobado / [D] No Aprobado).</small>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input toggle-widget" type="checkbox" role="switch" id="toggle-juicios" data-widget="widget-juicios" checked style="width: 2.5em; height: 1.3em; cursor: pointer; accent-color: #29AAE3;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer bg-light py-2 px-4 border-top d-flex justify-content-between">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="restablecerWidgetsDefault()">
+                    Restablecer Todos
+                </button>
+                <button type="button" class="btn btn-sm btn-success rounded-pill px-4 fw-bold shadow-sm" style="background: #29AAE3; border-color: #29AAE3;" data-bs-dismiss="modal" onclick="guardarConfiguracionWidgets()">
+                    <i class="bi bi-check2 me-1"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuración persistente de Widgets de Dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarConfiguracionWidgets();
+
+        // Listeners para toggles
+        document.querySelectorAll('.toggle-widget').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const widgetId = this.dataset.widget;
+                aplicarVisibilidadWidget(widgetId, this.checked);
+            });
+        });
+    });
+
+    function cargarConfiguracionWidgets() {
+        const saved = localStorage.getItem('sinetec_instructor_widgets');
+        if (saved) {
+            try {
+                const config = JSON.parse(saved);
+                Object.keys(config).forEach(widgetId => {
+                    const toggle = document.querySelector(`.toggle-widget[data-widget="${widgetId}"]`);
+                    if (toggle) {
+                        toggle.checked = config[widgetId];
+                    }
+                    aplicarVisibilidadWidget(widgetId, config[widgetId]);
+                });
+            } catch (e) {
+                console.warn('Error al leer widgets:', e);
+            }
+        }
+    }
+
+    function guardarConfiguracionWidgets() {
+        const config = {};
+        document.querySelectorAll('.toggle-widget').forEach(toggle => {
+            config[toggle.dataset.widget] = toggle.checked;
+        });
+        localStorage.setItem('sinetec_instructor_widgets', JSON.stringify(config));
+    }
+
+    function aplicarVisibilidadWidget(widgetId, visible) {
+        const el = document.getElementById(widgetId);
+        if (el) {
+            el.style.transition = 'all 0.3s ease';
+            if (visible) {
+                el.style.display = '';
+                el.style.opacity = '1';
+                el.style.transform = 'scale(1)';
+            } else {
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    if (!document.querySelector(`.toggle-widget[data-widget="${widgetId}"]`).checked) {
+                        el.style.display = 'none';
+                    }
+                }, 200);
+            }
+        }
+    }
+
+    function restablecerWidgetsDefault() {
+        document.querySelectorAll('.toggle-widget').forEach(toggle => {
+            toggle.checked = true;
+            aplicarVisibilidadWidget(toggle.dataset.widget, true);
+        });
+        localStorage.removeItem('sinetec_instructor_widgets');
+    }
+</script>

@@ -1,475 +1,468 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Carnet Digital Institucional SENA · SINETEC{% endblock %}
+{% block title %}Carnet Escolar Digital · SINETEC{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Estilos de Seguridad Criptográfica y Anti-Foto */
-    .carnet-wrapper {
-        max-width: 640px;
+    .carnet-page-container {
+        max-width: 860px;
         margin: 0 auto;
-        position: relative;
     }
 
-    /* Tarjeta Principal del Carnet con Proporción Oficial Ampliada */
-    .sena-carnet {
-        background: linear-gradient(145deg, #0b2414 0%, #153e24 45%, #0a2012 100%);
-        color: #ffffff;
-        border-radius: 28px;
-        padding: 30px 28px;
+    /* 3D Perspective Flip Scene */
+    .card-perspective-scene {
+        perspective: 1000px;
+        margin: 24px auto;
+        max-width: 520px;
+        width: 100%;
+    }
+
+    .card-flip-object {
+        width: 100%;
+        min-height: 330px;
+        position: relative;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+    }
+
+    .card-flip-object.is-flipped {
+        transform: rotateY(180deg);
+    }
+
+    /* CARA FRONTAL: CARNET ESCOLAR PVC */
+    .school-pvc-card {
+        background: #FFFFFF;
+        width: 100%;
+        min-height: 330px;
+        border-radius: 18px;
+        border: 1px solid #CBD5E1;
+        box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(15, 23, 42, 0.04);
         position: relative;
         overflow: hidden;
-        box-shadow: 0 24px 50px rgba(11, 36, 20, 0.45), 0 2px 8px rgba(0,0,0,0.2);
-        border: 2px solid rgba(57, 169, 0, 0.45);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 16px 20px 22px 20px;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
         user-select: none;
-        -webkit-user-select: none;
     }
 
-    /* Moiré Anti-Foto */
-    .sena-carnet::before {
-        content: "";
+    /* Franja inferior institucional */
+    .pvc-bottom-strip {
         position: absolute;
-        inset: 0;
-        background-image: radial-gradient(#39a900 0.75px, transparent 0.75px), radial-gradient(#ffffff 0.5px, transparent 0.5px);
-        background-size: 8px 8px, 12px 12px;
-        background-position: 0 0, 4px 4px;
-        opacity: 0.13;
-        pointer-events: none;
-        z-index: 1;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 12px;
+        background: linear-gradient(90deg, #0F2942 0%, #1E3A8A 50%, #3B82F6 100%);
+        overflow: hidden;
+        z-index: 5;
     }
 
-    /* Haz Holográfico Dinámico Continuo */
-    .holographic-sheen {
-        position: absolute;
-        top: -120%;
-        left: -120%;
-        width: 340%;
-        height: 340%;
-        background: linear-gradient(
-            45deg,
-            transparent 35%,
-            rgba(57, 169, 0, 0.12) 42%,
-            rgba(255, 255, 255, 0.32) 48%,
-            rgba(0, 220, 180, 0.22) 53%,
-            transparent 62%
-        );
-        transform: rotate(25deg);
-        animation: holoMove 3.5s infinite linear;
-        pointer-events: none;
-        z-index: 2;
-    }
-
-    @keyframes holoMove {
-        0% { transform: translateY(-30%) rotate(25deg); }
-        100% { transform: translateY(30%) rotate(25deg); }
-    }
-
-    .watermark-dynamic {
-        position: absolute;
-        bottom: 10px;
-        right: 16px;
-        font-size: 0.7rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.35);
-        font-weight: 700;
-        z-index: 3;
-    }
-
-    .carnet-content {
-        position: relative;
-        z-index: 4;
-    }
-
-    /* Encabezado del Carnet */
-    .carnet-header {
+    /* Encabezado del Carnet Escolar */
+    .pvc-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        padding-bottom: 16px;
-        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+        border-bottom: 1.5px solid #E2E8F0;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
     }
 
-    .sena-badge-logo {
+    .pvc-brand-box {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }
 
-    .sena-icon-box {
-        width: 50px;
-        height: 50px;
-        border-radius: 14px;
-        background: #39a900;
-        color: #ffffff;
+    .pvc-brand-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+        color: #FFFFFF;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.8rem;
-        box-shadow: 0 4px 12px rgba(57, 169, 0, 0.4);
+        font-size: 1.25rem;
     }
 
-    .carnet-entity {
-        font-size: 0.8rem;
+    .pvc-brand-text {
+        font-weight: 800;
+        font-size: 0.88rem;
+        line-height: 1.2;
+        color: #0F2942;
+        text-transform: uppercase;
+        letter-spacing: -0.01em;
+    }
+
+    .pvc-tag-year {
+        background: #EEF2FF;
+        color: #1E3A8A;
+        border: 1px solid #C7D2FE;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 999px;
+    }
+
+    /* Grid del cuerpo */
+    .pvc-body-grid {
+        display: grid;
+        grid-template-columns: 120px 1fr 95px;
+        gap: 14px;
+        align-items: start;
+        position: relative;
+        z-index: 2;
+    }
+
+    @media (max-width: 520px) {
+        .pvc-body-grid {
+            grid-template-columns: 105px 1fr 85px;
+            gap: 10px;
+        }
+    }
+
+    /* Foto del estudiante */
+    .pvc-photo-frame {
+        width: 120px;
+        height: 150px;
+        border: 2px solid #3B82F6;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+        background: #F8FAFC;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @media (max-width: 520px) {
+        .pvc-photo-frame {
+            width: 105px;
+            height: 135px;
+        }
+    }
+
+    .pvc-photo-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .pvc-avatar-fallback {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #EEF2FF 0%, #DBEAFE 100%);
+        color: #1E3A8A;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.7rem;
+        font-weight: 800;
+    }
+
+    .pvc-student-role {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #2563EB;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #cde88e;
-        font-weight: 800;
+        margin-bottom: 2px;
     }
 
-    .carnet-main-title {
-        font-size: 1.25rem;
+    .pvc-student-name {
+        font-size: 1.05rem;
         font-weight: 800;
-        color: #ffffff;
-        margin: 0;
+        color: #0F172A;
+        line-height: 1.25;
+        margin-bottom: 6px;
     }
 
-    /* Reloj de Seguridad en Vivo */
-    .security-clock {
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(57, 169, 0, 0.5);
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-family: monospace;
-        font-size: 0.85rem;
-        color: #79f244;
+    .pvc-data-item {
+        margin-bottom: 4px;
+        font-size: 0.78rem;
+        line-height: 1.35;
+        color: #334155;
+    }
+
+    .pvc-data-item strong {
+        color: #0F172A;
+    }
+
+    /* Contenedor QR */
+    .pvc-qr-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .pvc-qr-code-img {
+        width: 92px;
+        height: 92px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 3px;
+        background: #FFFFFF;
+    }
+
+    .pvc-qr-label {
+        font-size: 0.62rem;
+        color: #64748B;
+        font-weight: 700;
+        margin-top: 4px;
+        text-transform: uppercase;
+    }
+
+    /* CARA TRASERA */
+    .school-pvc-card-back {
+        background: #FFFFFF;
+        width: 100%;
+        min-height: 330px;
+        border-radius: 18px;
+        border: 1px solid #CBD5E1;
+        box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12);
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transform: rotateY(180deg);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+
+    .back-header-title {
+        font-size: 0.86rem;
+        font-weight: 800;
+        color: #0F2942;
+        text-transform: uppercase;
+        border-bottom: 1.5px solid #E2E8F0;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
         gap: 8px;
     }
 
-    .pulse-dot {
-        width: 10px;
-        height: 10px;
-        background: #39a900;
-        border-radius: 50%;
-        animation: pulseAnimation 1.2s infinite;
-    }
-
-    @keyframes pulseAnimation {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.3; transform: scale(0.7); }
-    }
-
-    /* Cuerpo del Carnet: Foto, Datos y QR */
-    .carnet-body {
-        display: grid;
-        grid-template-columns: 1fr 165px;
-        gap: 20px;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .student-name {
-        font-size: 1.35rem;
-        font-weight: 800;
-        color: #ffffff;
-        line-height: 1.2;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-    }
-
-    .student-role-tag {
-        display: inline-block;
-        background: rgba(57, 169, 0, 0.25);
-        color: #92ec66;
-        border: 1px solid #39a900;
-        font-size: 0.72rem;
-        font-weight: 800;
-        padding: 3px 10px;
-        border-radius: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+    .back-terms-text {
+        font-size: 0.73rem;
+        line-height: 1.5;
+        color: #475569;
         margin-bottom: 12px;
     }
 
-    .info-item {
-        margin-bottom: 8px;
-    }
-
-    .info-item-label {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: #a4beab;
-        display: block;
-        margin-bottom: 1px;
-    }
-
-    .info-item-val {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #ffffff;
-    }
-
-    /* Contenedor del QR */
-    .qr-container {
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 10px;
-        text-align: center;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    }
-
-    .qr-container img {
-        width: 100%;
-        height: auto;
-        display: block;
+    .back-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        font-size: 0.75rem;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
         border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 12px;
     }
 
-    .qr-subtext {
-        font-size: 0.68rem;
-        color: #1b3824;
-        font-weight: 800;
-        margin-top: 6px;
-        line-height: 1.1;
+    .back-barcode {
+        height: 36px;
+        background: repeating-linear-gradient(90deg, #0F172A, #0F172A 2px, transparent 2px, transparent 4px, #0F172A 4px, #0F172A 7px, transparent 7px, transparent 8px);
+        width: 80%;
+        margin: 0 auto;
     }
 
-    /* Pie del Carnet */
-    .carnet-footer {
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-        padding-top: 14px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.8rem;
-        color: #c0d4c5;
-    }
-
-    .security-token-pill {
-        font-family: monospace;
-        font-size: 0.82rem;
-        background: rgba(255, 255, 255, 0.1);
-        padding: 3px 10px;
-        border-radius: 6px;
-        border: 1px dashed rgba(255, 255, 255, 0.4);
-        color: #f7ffbf;
-    }
-
-    /* Pantalla de bloqueo anti-captura */
-    #antiCaptureShield {
-        display: none;
-        position: absolute;
-        inset: 0;
-        background: #0b1a10;
-        color: #ff5252;
-        border-radius: 28px;
-        z-index: 100;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 30px;
-    }
-
+    /* Reglas de impresión */
     @media print {
-        body * {
-            visibility: hidden !important;
-        }
-        .carnet-wrapper, .carnet-wrapper * {
-            visibility: visible !important;
-        }
-        .carnet-wrapper {
+        body * { visibility: hidden; }
+        .card-perspective-scene, .card-perspective-scene * { visibility: visible; }
+        .card-perspective-scene {
             position: absolute;
             left: 0;
             top: 0;
-            width: 100%;
+            margin: 0;
+            width: 85.6mm;
+            height: 53.98mm;
         }
-        .no-print {
-            display: none !important;
+        .school-pvc-card {
+            box-shadow: none !important;
+            border: 1px solid #94A3B8 !important;
         }
+        .btn-print-controls { display: none !important; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container-fluid py-4">
+    <div class="carnet-page-container">
 
-    <!-- Encabezado de Página -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 no-print">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
-                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+        <!-- Barra Superior de Herramientas -->
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-3">
+            <div>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-semibold">
+                    <i class="bi bi-mortarboard-fill me-1"></i> {{ colegio.nombre|default:"Institución Educativa Técnica" }}
+                </span>
+                <h1 class="h4 fw-bold text-dark mb-0 mt-1">Carnet Escolar Digital</h1>
             </div>
-            <h1 class="h3 fw-bold text-dark mb-1">Carnet Digital de Identificación</h1>
-            <p class="text-muted mb-0">Credencial institucional ampliada con rotación criptográfica de seguridad y validación en tiempo real.</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
-                <i class="bi bi-printer-fill me-1"></i> Imprimir Carnet
-            </button>
-            <a href="{% url 'estudiantes_lista' %}" class="btn btn-light border btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Volver a la Lista
-            </a>
-        </div>
-    </div>
-
-    <!-- Contenedor del Carnet Ampliado -->
-    <div class="carnet-wrapper">
-        <div class="sena-carnet" id="carnetCard" oncontextmenu="return false;">
-            <!-- Capa Holográfica -->
-            <div class="holographic-sheen"></div>
-
-            <!-- Marca de agua dinámica con fecha y hora -->
-            <div class="watermark-dynamic" id="liveWatermark">
-                SINETEC · {{ hoy }} · <span id="clockSecWatermark">{{ ahora|time:'H:i:s' }}</span>
-            </div>
-
-            <!-- Pantalla de bloqueo anti-captura -->
-            <div id="antiCaptureShield">
-                <i class="bi bi-shield-slash-fill fs-1 mb-2"></i>
-                <h5 class="fw-bold mb-1">CREDENCIAL INSTITUCIONAL PROTEGIDA</h5>
-                <p class="small text-white opacity-75 mb-0">
-                    Por normativas de seguridad institucional SENA, esta credencial cuenta con rotación dinámica diaria y protección activa.
-                </p>
-                <button class="btn btn-sm btn-outline-light mt-3" onclick="restaurarCarnet()">Restaurar vista</button>
-            </div>
-
-            <!-- Contenido Oficial del Carnet -->
-            <div class="carnet-content">
-                <div class="carnet-header">
-                    <div class="sena-badge-logo">
-                        <div class="sena-icon-box">
-                            <i class="bi bi-mortarboard-fill"></i>
-                        </div>
-                        <div>
-                            <div class="carnet-entity">SENA · Regional Magdalena</div>
-                            <h2 class="carnet-main-title">CARNET DE APRENDIZ</h2>
-                            <small class="text-white opacity-75" style="font-size: 0.68rem;">Centro de Logística y Promoción Ecoturística</small>
-                        </div>
-                    </div>
-                    <!-- Reloj en vivo de segundos -->
-                    <div class="security-clock">
-                        <span class="pulse-dot"></span>
-                        <span id="liveClockDisplay">{{ ahora|time:'H:i:s' }}</span>
-                    </div>
-                </div>
-
-                <div class="carnet-body">
-                    <!-- Datos del Aprendiz -->
-                    <div>
-                        <div class="student-role-tag">
-                            <i class="bi bi-check-circle-fill me-1"></i> Vigente Hoy · {{ hoy|date:"d M Y" }}
-                        </div>
-                        <div class="student-name">
-                            {{ perfil.usuario.get_full_name|default:perfil.usuario.username }}
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-item-label">Documento de Identidad</span>
-                            <span class="info-item-val">{{ perfil.get_tipo_documento_display }} {{ perfil.numero_documento }}</span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-item-label">Ficha Técnica SENA</span>
-                            <span class="info-item-val">
-                                {% if matricula %}Ficha {{ matricula.ficha.codigo_ficha }}{% else %}Ficha 3173430{% endif %}
-                            </span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-item-label">Programa de Formación</span>
-                            <span class="info-item-val small">
-                                {% if matricula %}{{ matricula.ficha.programa.denominacion }}{% else %}Análisis y Desarrollo de Sistemas de Información{% endif %}
-                            </span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-item-label">Institución Articulada</span>
-                            <span class="info-item-val small text-truncate d-block" style="max-width: 320px;">
-                                {% if matricula %}{{ matricula.ficha.institucion.nombre }}{% else %}I.E.D. Escuela Normal Superior María Auxiliadora{% endif %}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Código QR Dinámico del Día -->
-                    <div class="qr-container">
-                        <img src="data:image/png;base64,{{ qr_base64 }}" alt="Código QR de Verificación">
-                        <div class="qr-subtext">
-                            <i class="bi bi-qr-code-scan text-success me-1"></i> ESCANEAR PARA VALIDAR
-                        </div>
-                    </div>
-                </div>
-
-                <div class="carnet-footer">
-                    <div>
-                        <small class="d-block text-white opacity-75">Token Criptográfico Diario:</small>
-                        <span class="security-token-pill">{{ codigo_seguridad_dia }}</span>
-                    </div>
-                    <div class="text-end">
-                        <span class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50 px-2 py-1">
-                            <i class="bi bi-shield-fill-check me-1"></i> Oficial SENA · Activo
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4 Botones de Acción Obligatorios -->
-        <div class="card border-0 shadow-sm rounded-4 mt-3 p-3 bg-white no-print">
-            <div class="row g-2">
-                <div class="col-md-3">
-                    <a href="{% url 'estudiante_detalle' perfil.pk %}" class="btn text-white w-100 fw-semibold" style="background-color: #39A900;">
-                        <i class="bi bi-person-badge-fill me-1"></i> Ver Perfil Completo
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="{% url 'estudiante_detalle' perfil.pk %}#tab-seguimiento" class="btn btn-outline-success w-100 fw-semibold">
-                        <i class="bi bi-clipboard2-pulse-fill me-1"></i> Ver Seguimiento
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="{% url 'estudiante_detalle' perfil.pk %}#tab-evidencias" class="btn btn-outline-primary w-100 fw-semibold">
-                        <i class="bi bi-award-fill me-1"></i> Ver Evidencias
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <button class="btn btn-outline-secondary w-100 fw-semibold" onclick="window.print()">
-                        <i class="bi bi-printer me-1"></i> Imprimir Carnet
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tarjeta Informativa de Funcionamiento -->
-        <div class="card border-0 shadow-sm rounded-4 mt-3 p-3 bg-white no-print">
-            <h6 class="fw-bold mb-2"><i class="bi bi-shield-check text-success me-1"></i> Protocolo de Seguridad y Rotación</h6>
-            <p class="text-muted small mb-2">
-                El código QR institucional contiene una firma digital con validez de 24 horas. Los verificadores y porterías escanean el código para constatar de inmediato en el servidor de SINETEC la condición de matrícula activa del aprendiz.
-            </p>
-            <div class="text-center mt-2">
-                <a href="{{ url_verificacion }}" target="_blank" class="btn btn-sm btn-outline-success">
-                    <i class="bi bi-box-arrow-up-right me-1"></i> Abrir vista pública de verificación QR (Portería)
+            <div class="d-flex gap-2 btn-print-controls">
+                <button type="button" class="btn btn-outline-primary fw-semibold" id="btnFlipCard" onclick="toggleCardFlip()">
+                    <i class="bi bi-arrow-repeat me-1"></i> Girar Tarjeta
+                </button>
+                <button type="button" class="btn btn-primary fw-semibold" onclick="window.print()" style="background: #1E3A8A; border: none;">
+                    <i class="bi bi-printer-fill me-1"></i> Imprimir Carnet
+                </button>
+                <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Volver
                 </a>
             </div>
+        </div>
+
+        <!-- Escena 3D del Carnet -->
+        <div class="card-perspective-scene">
+            <div class="card-flip-object" id="carnetFlipObject">
+
+                <!-- CARA FRONTAL -->
+                <div class="school-pvc-card">
+                    <!-- Franja inferior -->
+                    <div class="pvc-bottom-strip"></div>
+
+                    <!-- Header -->
+                    <div class="pvc-header">
+                        <div class="pvc-brand-box">
+                            <div class="pvc-brand-icon">
+                                <i class="bi bi-mortarboard-fill"></i>
+                            </div>
+                            <div class="pvc-brand-text">
+                                <div>{{ colegio.nombre|default:"Institución Educativa" }}</div>
+                                <div style="font-size: 0.68rem; color: #64748B; font-weight: 700;">Credencial Estudiantil</div>
+                            </div>
+                        </div>
+                        <span class="pvc-tag-year">2026</span>
+                    </div>
+
+                    <!-- Grid de contenido -->
+                    <div class="pvc-body-grid">
+                        <!-- Foto -->
+                        <div class="pvc-photo-frame">
+                            {% if perfil.foto %}
+                                <img src="{{ perfil.foto.url }}" alt="{{ perfil.usuario.get_full_name }}">
+                            {% else %}
+                                <div class="pvc-avatar-fallback">
+                                    <span>{{ perfil.usuario.first_name|default:perfil.usuario.username|slice:':1'|upper }}{{ perfil.usuario.last_name|default:''|slice:':1'|upper }}</span>
+                                    <small style="font-size: 0.58rem; color: #64748B; margin-top: 4px;">ESTUDIANTE</small>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Información del Estudiante -->
+                        <div>
+                            <div class="pvc-student-role">ESTUDIANTE REGULAR</div>
+                            <div class="pvc-student-name">
+                                {{ perfil.usuario.get_full_name|default:perfil.usuario.username }}
+                            </div>
+                            <div class="pvc-data-item">
+                                <strong>Doc:</strong> {{ perfil.get_tipo_documento_display|default:'TI' }} {{ perfil.numero_documento }}
+                            </div>
+                            <div class="pvc-data-item">
+                                <strong>Curso:</strong> {% if matricula %}Grupo {{ matricula.ficha.codigo_ficha }}{% else %}Grupo Principal{% endif %}
+                            </div>
+                            <div class="pvc-data-item">
+                                <strong>Programa:</strong> {% if matricula %}{{ matricula.ficha.programa.nombre|truncatechars:26 }}{% else %}Educación Media{% endif %}
+                            </div>
+                            <div class="pvc-data-item">
+                                <strong>Sede:</strong> {{ colegio.nombre|default:"Sede Principal"|truncatechars:24 }}
+                            </div>
+                        </div>
+
+                        <!-- Código QR Dinámico -->
+                        <div class="pvc-qr-box">
+                            {% if qr_base64 %}
+                                <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Escolar" class="pvc-qr-code-img">
+                            {% else %}
+                                <div class="pvc-qr-code-img d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-qr-code fs-3 text-primary"></i>
+                                </div>
+                            {% endif %}
+                            <span class="pvc-qr-label">Asistencia QR</span>
+                        </div>
+                    </div>
+
+                    <!-- Pie del carnet -->
+                    <div class="d-flex justify-content-between align-items-center" style="font-size: 0.68rem; color: #64748B; position: relative; z-index: 2; margin-top: 8px;">
+                        <span>DANE: {{ colegio.codigo_dane|default:"147189000123" }}</span>
+                        <span>Válido Vigencia 2026</span>
+                    </div>
+                </div>
+
+                <!-- CARA TRASERA -->
+                <div class="school-pvc-card-back">
+                    <div>
+                        <div class="back-header-title">
+                            <i class="bi bi-shield-check text-primary"></i>
+                            <span>{{ colegio.nombre|default:"Institución Educativa Técnica" }}</span>
+                        </div>
+
+                        <p class="back-terms-text">
+                            Este carnet es un documento personal e intransferible que acredita al portador como estudiante formalmente matriculado. Debe presentarse al ingresar a la institución y para el registro de asistencia mediante código QR.
+                        </p>
+
+                        <div class="back-info-grid">
+                            <div>
+                                <span class="text-muted d-block">Contacto Emergencia:</span>
+                                <strong>{{ perfil.telefono|default:"(605) 480-1200" }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-muted d-block">Rectoría:</span>
+                                <strong>{{ colegio.rector|default:"Rectoría General" }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-muted d-block">Correo Institucional:</span>
+                                <strong>{{ perfil.usuario.email|default:"estudiante@colegio.edu.co"|truncatechars:22 }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-muted d-block">Verificación Web:</span>
+                                <strong>sinetec.edu.co/verificar</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="back-barcode mb-1"></div>
+                        <div class="text-center" style="font-size: 0.62rem; color: #64748B; letter-spacing: 0.1em;">
+                            *{{ perfil.numero_documento }}*
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Instrucciones y Enlace de Verificación -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mt-4 text-center">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1 text-primary"></i>
+                Haz clic en <strong>Girar Tarjeta</strong> para ver el reverso o usa <strong>Imprimir Carnet</strong> para generar tu credencial física.
+                El código QR enlaza directamente al punto de verificación y asistencia rápida.
+            </small>
         </div>
 
     </div>
 </div>
 
 <script>
-    function updateClock() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        const timeStr = `${hours}:${minutes}:${seconds}`;
-
-        const clockElem = document.getElementById('liveClockDisplay');
-        const waterElem = document.getElementById('clockSecWatermark');
-        if (clockElem) clockElem.textContent = timeStr;
-        if (waterElem) waterElem.textContent = timeStr;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    function restaurarCarnet() {
-        const shield = document.getElementById('antiCaptureShield');
-        if (shield) shield.style.display = 'none';
+    function toggleCardFlip() {
+        const cardObj = document.getElementById('carnetFlipObject');
+        if (cardObj) {
+            cardObj.classList.toggle('is-flipped');
+        }
     }
 </script>
 {% endblock %}

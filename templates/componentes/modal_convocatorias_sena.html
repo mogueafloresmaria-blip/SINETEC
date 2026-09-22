@@ -1,0 +1,97 @@
+<!-- Modal Detallado de Convocatorias y Apoyos de Sostenimiento SENA -->
+<div class="modal fade" id="modalConvocatoriasSena" tabindex="-1" aria-labelledby="modalConvocatoriasSenaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #107C41 0%, #1e3a29 100%); border-bottom: none; padding: 1.25rem 1.75rem;">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-white text-success fw-bold px-2 py-1 rounded-pill">SENA · 2026</span>
+                    <h5 class="modal-title fw-bold text-white mb-0" id="modalConvocatoriasSenaLabel">
+                        <i class="bi bi-award-fill me-1 text-warning"></i> Convocatorias y Apoyos de Sostenimiento
+                    </h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <p class="text-muted small mb-3">
+                    El SENA Regional Magdalena ofrece programas de bienestar y permanencia formativa para aprendices activos en etapa lectiva y productiva. Consulta los términos y postúlate directamente.
+                </p>
+
+                <ul class="nav nav-pills gap-2 mb-4 justify-content-start" id="convocatoriasTabs" role="tablist">
+                    {% for c in convocatorias %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill py-2 px-3 fw-bold small border {% if forloop.first %}active bg-success text-white border-success{% else %}bg-white text-dark{% endif %}"
+                                id="tab-conv-{{ c.id }}"
+                                data-bs-toggle="pill"
+                                data-bs-target="#pane-conv-{{ c.id }}"
+                                type="button"
+                                role="tab">
+                            {{ c.categoria }} · {{ c.id|upper }}
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <div class="tab-content" id="convocatoriasTabsContent">
+                    {% for c in convocatorias %}
+                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="pane-conv-{{ c.id }}" role="tabpanel">
+                        <div class="card border-0 shadow-sm rounded-3 p-4 bg-white">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                                <div>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 rounded-pill small mb-2">
+                                        {{ c.categoria }}
+                                    </span>
+                                    <h5 class="fw-bold text-dark mb-1">{{ c.titulo }}</h5>
+                                </div>
+                                <span class="badge bg-success text-white px-3 py-2 rounded-pill fw-bold">
+                                    <i class="bi bi-check-circle-fill me-1"></i> {{ c.estado_texto }}
+                                </span>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <small class="text-muted d-block fw-bold mb-1"><i class="bi bi-people-fill text-success me-1"></i> Cobertura y Perfil</small>
+                                        <div class="small text-dark">{{ c.cobertura }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <small class="text-muted d-block fw-bold mb-1"><i class="bi bi-cash-stack text-success me-1"></i> Beneficio Asignado</small>
+                                        <div class="small text-dark">{{ c.beneficio }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-check2-square text-success me-1"></i> Requisitos de Postulación:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    {% for req in c.requisitos %}
+                                    <li class="small text-muted py-1 d-flex align-items-start gap-2">
+                                        <i class="bi bi-check-circle text-success flex-shrink-0 mt-1"></i>
+                                        <span>{{ req }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 border-top">
+                                <div class="small text-muted">
+                                    <i class="bi bi-clock me-1 text-danger"></i> Cierre: <strong>{{ c.cierre }}</strong> 
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 ms-2">Quedan {{ c.dias_restantes }} días</span>
+                                </div>
+                                <a href="{% url 'login' %}?next={% url 'dashboard' %}" class="btn btn-success btn-sm rounded-pill fw-bold px-4">
+                                    <i class="bi bi-pencil-square me-1"></i> Postularme a esta Convocatoria
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer bg-white border-0 py-3 px-4 d-flex justify-content-between">
+                <span class="small text-muted">Centro de Logística y Promoción Ecoturística · SENA</span>
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

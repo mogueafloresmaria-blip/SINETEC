@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Catálogo de Convenios SENA · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-3">
+
+    <!-- Encabezado de Página -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge rounded-pill" style="background: #E3F2FD; color: #0D47A1; font-weight: 600;">
+                    <i class="bi bi-briefcase-fill me-1" style="color: #2196F3;"></i> Módulo Administrativo Independiente
+                </span>
+                <span class="text-muted small">| Articulación y Cooperación</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-0">Catálogo de Instituciones y Convenios SENA</h1>
+            <p class="text-muted small mb-0">Gestión centralizada de acuerdos marco, articulación con la educación media y pasantías institucionales.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            {% if can_manage %}
+                <a href="{% url 'institucion_convenio_crear' %}" class="btn text-white fw-semibold rounded-3 px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2" style="background-color: #2196F3;">
+                    <i class="bi bi-building-add fs-6"></i>
+                    <span>Registrar Institución</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Panel de Estadísticas (Números extraídos directamente de la BD) -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Total Instituciones -->
+        <div class="col-6 col-md-3">
+            <div class="sinetec-card-modern p-3 h-100 border-0 shadow-sm" style="border-left: 4px solid #2196F3 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Instituciones</div>
+                        <div class="h3 fw-bold text-dark my-1">{{ total_instituciones }}</div>
+                        <div class="small fw-semibold" style="color: #2196F3;">
+                            <i class="bi bi-building-check me-1"></i>Registradas en catálogo
+                        </div>
+                    </div>
+                    <div class="rounded-circle d-grid place-items-center p-3" style="background: #E3F2FD; color: #2196F3; width: 48px; height: 48px;">
+                        <i class="bi bi-building fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Convenios Activos -->
+        <div class="col-6 col-md-3">
+            <div class="sinetec-card-modern p-3 h-100 border-0 shadow-sm" style="border-left: 4px solid #059669 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Convenios Activos</div>
+                        <div class="h3 fw-bold text-dark my-1">{{ total_activos }}</div>
+                        <div class="small fw-semibold text-success">
+                            <i class="bi bi-check-circle-fill me-1"></i>Vigentes y en ejecución
+                        </div>
+                    </div>
+                    <div class="rounded-circle d-grid place-items-center p-3" style="background: #D1FAE5; color: #059669; width: 48px; height: 48px;">
+                        <i class="bi bi-patch-check-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Próximos a Vencer (< 30 días) -->
+        <div class="col-6 col-md-3">
+            <div class="sinetec-card-modern p-3 h-100 border-0 shadow-sm" style="border-left: 4px solid #D97706 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Próximos a Vencer</div>
+                        <div class="h3 fw-bold text-dark my-1">{{ total_proximos }}</div>
+                        <div class="small fw-semibold text-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Plazo &le; 30 días
+                        </div>
+                    </div>
+                    <div class="rounded-circle d-grid place-items-center p-3" style="background: #FEF3C7; color: #D97706; width: 48px; height: 48px;">
+                        <i class="bi bi-hourglass-split fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Convenios Vencidos -->
+        <div class="col-6 col-md-3">
+            <div class="sinetec-card-modern p-3 h-100 border-0 shadow-sm" style="border-left: 4px solid #DC2626 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Convenios Vencidos</div>
+                        <div class="h3 fw-bold text-dark my-1">{{ total_vencidos }}</div>
+                        <div class="small fw-semibold text-danger">
+                            <i class="bi bi-calendar-x-fill me-1"></i>Requieren renovación
+                        </div>
+                    </div>
+                    <div class="rounded-circle d-grid place-items-center p-3" style="background: #FEE2E2; color: #DC2626; width: 48px; height: 48px;">
+                        <i class="bi bi-clock-history fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de Filtros y Búsqueda en Tiempo Real -->
+    <div class="sinetec-card-modern p-3 mb-4 border-0 shadow-sm">
+        <form method="get" action="{% url 'convenios_catalogo' %}" class="row g-2 align-items-center">
+            <!-- Buscador por texto -->
+            <div class="col-12 col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q" value="{{ filtro_q }}" class="form-control bg-light border-start-0" placeholder="Buscar por institución, DANE, código de convenio..." aria-label="Búsqueda">
+                </div>
+            </div>
+
+            <!-- Filtro por Estado -->
+            <div class="col-6 col-md-2">
+                <select name="estado" class="form-select bg-light" onchange="this.form.submit()">
+                    <option value="">Estado del Convenio</option>
+                    <option value="Activo" {% if filtro_estado == 'Activo' %}selected{% endif %}>Activo</option>
+                    <option value="Próximo a vencer" {% if filtro_estado == 'Próximo a vencer' %}selected{% endif %}>Próximo a vencer</option>
+                    <option value="Vencido" {% if filtro_estado == 'Vencido' %}selected{% endif %}>Vencido</option>
+                    <option value="Suspendido" {% if filtro_estado == 'Suspendido' %}selected{% endif %}>Suspendido</option>
+                    <option value="Finalizado" {% if filtro_estado == 'Finalizado' %}selected{% endif %}>Finalizado</option>
+                </select>
+            </div>
+
+            <!-- Filtro por Municipio -->
+            <div class="col-6 col-md-3">
+                <select name="municipio" class="form-select bg-light" onchange="this.form.submit()">
+                    <option value="">Todos los Municipios</option>
+                    {% for mun in municipios_disponibles %}
+                        <option value="{{ mun }}" {% if filtro_municipio == mun %}selected{% endif %}>{{ mun }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Filtro por Tipo de Convenio -->
+            <div class="col-8 col-md-2">
+                <select name="tipo" class="form-select bg-light" onchange="this.form.submit()">
+                    <option value="">Tipo de Convenio</option>
+                    {% for val, label in tipos_disponibles %}
+                        <option value="{{ val }}" {% if filtro_tipo == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="col-4 col-md-1 d-flex gap-1 justify-content-end">
+                <button type="submit" class="btn text-white w-100 fw-semibold" style="background-color: #2196F3;" title="Buscar">
+                    <i class="bi bi-funnel-fill"></i>
+                </button>
+                {% if filtro_q or filtro_estado or filtro_municipio or filtro_tipo %}
+                    <a href="{% url 'convenios_catalogo' %}" class="btn btn-outline-secondary" title="Limpiar Filtros">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Catálogo Visual de Instituciones (Formato Tarjetas Elegantes) -->
+    {% if instituciones %}
+        <div class="row g-3 g-xl-4">
+            {% for inst in instituciones %}
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 position-relative overflow-hidden" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                        <!-- Franja Superior de Color según Estado -->
+                        <div style="height: 4px; background: {% if inst.estado_convenio_resumen == 'Activo' %}#059669{% elif inst.estado_convenio_resumen == 'Próximo a vencer' %}#D97706{% elif inst.estado_convenio_resumen == 'Vencido' %}#DC2626{% else %}#64748B{% endif %};"></div>
+                        
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <!-- Cabecera de la Tarjeta con Logo/Placeholder y Badges -->
+                                <div class="d-flex align-items-start gap-3 mb-3">
+                                    {% if inst.logo %}
+                                        <img src="{{ inst.logo.url }}" alt="{{ inst.nombre }}" class="rounded-3 object-fit-cover shadow-sm" style="width: 54px; height: 54px;">
+                                    {% else %}
+                                        <!-- Placeholder Elegante Institucional -->
+                                        <div class="rounded-3 d-grid place-items-center text-white fw-bold shadow-sm" style="width: 54px; height: 54px; background: linear-gradient(135deg, #0D47A1 0%, #2196F3 100%); font-size: 1.3rem;">
+                                            {{ inst.nombre|slice:":2"|upper }}
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="flex-grow-1 min-w-0">
+                                        <span class="badge {{ inst.estado_badge_class }} mb-1 px-2.5 py-1 fw-semibold" style="font-size: 0.72rem;">
+                                            <i class="bi bi-circle-fill me-1" style="font-size: 0.55rem;"></i>{{ inst.estado_convenio_resumen }}
+                                        </span>
+                                        <h2 class="h5 fw-bold text-dark text-truncate mb-0" title="{{ inst.nombre }}">{{ inst.nombre }}</h2>
+                                        <div class="text-muted small">
+                                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ inst.municipio }}, {{ inst.departamento }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Datos del Convenio Asociado -->
+                                <div class="p-2.5 rounded-3 mb-3" style="background: #F8FAFC; border: 1px solid #E2E8F0;">
+                                    {% if inst.convenio_activo %}
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="text-muted small fw-semibold">Convenio:</span>
+                                            <span class="fw-bold small font-monospace" style="color: #2196F3;">{{ inst.convenio_activo.numero_convenio }}</span>
+                                        </div>
+                                        <div class="small text-dark fw-semibold text-truncate mb-1" title="{{ inst.convenio_activo.nombre }}">
+                                            {{ inst.convenio_activo.nombre }}
+                                        </div>
+                                        <div class="d-flex justify-content-between text-muted" style="font-size: 0.76rem;">
+                                            <span><i class="bi bi-calendar3 me-1"></i>Vence: {{ inst.convenio_activo.fecha_fin|date:"d M Y" }}</span>
+                                            <span><i class="bi bi-paperclip me-1"></i>{{ inst.convenio_activo.documentos.count }} doc(s)</span>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-2 text-muted small">
+                                            <i class="bi bi-info-circle me-1"></i>Sin convenios registrados aún.
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Información de Contacto Clave -->
+                                <div class="small text-muted mb-3">
+                                    {% if inst.nombre_contacto %}
+                                        <div class="text-truncate mb-1"><i class="bi bi-person-badge me-1"></i><strong>Contacto:</strong> {{ inst.nombre_contacto }}</div>
+                                    {% endif %}
+                                    {% if inst.telefono %}
+                                        <div class="text-truncate mb-1"><i class="bi bi-telephone me-1"></i>{{ inst.telefono }}</div>
+                                    {% endif %}
+                                    {% if inst.codigo_dane %}
+                                        <div class="text-truncate"><i class="bi bi-upc me-1"></i><strong>DANE:</strong> {{ inst.codigo_dane }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Botón de Acción Principal -->
+                            <div class="pt-2 border-top border-light d-flex justify-content-between align-items-center">
+                                <span class="badge rounded-pill bg-light text-secondary border px-2 py-1" style="font-size: 0.72rem;">
+                                    {{ inst.convenios.count }} convenio(s)
+                                </span>
+                                <a href="{% url 'institucion_convenio_detalle' inst.pk %}" class="btn btn-sm text-white fw-semibold rounded-3 px-3 py-1.5 d-inline-flex align-items-center gap-1.5" style="background-color: #2196F3;">
+                                    <span>Ver información</span>
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Estado Vacío Elegante -->
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center my-4 bg-white">
+            <div class="mb-3">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 72px; height: 72px; background: #E3F2FD; color: #2196F3;">
+                    <i class="bi bi-search fs-2"></i>
+                </div>
+            </div>
+            <h2 class="h4 fw-bold text-dark mb-1">No se encontraron instituciones o convenios</h2>
+            <p class="text-muted small mx-auto mb-4" style="max-width: 480px;">
+                {% if filtro_q or filtro_estado or filtro_municipio or filtro_tipo %}
+                    No hay registros que coincidan con los filtros aplicados. Intenta restablecer la búsqueda o modificar los parámetros.
+                {% else %}
+                    Aún no hay instituciones registradas en el módulo de convenios SENA.
+                {% endif %}
+            </p>
+            <div class="d-flex justify-content-center gap-2">
+                {% if filtro_q or filtro_estado or filtro_municipio or filtro_tipo %}
+                    <a href="{% url 'convenios_catalogo' %}" class="btn btn-outline-secondary rounded-3 px-3 py-2 fw-semibold">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar filtros
+                    </a>
+                {% endif %}
+                {% if can_manage %}
+                    <a href="{% url 'institucion_convenio_crear' %}" class="btn text-white rounded-3 px-4 py-2 fw-semibold" style="background-color: #2196F3;">
+                        <i class="bi bi-plus-circle me-1"></i>Registrar Institución
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

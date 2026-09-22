@@ -13,13 +13,13 @@
     .scanner-card {
         background: #ffffff;
         border-radius: 24px;
-        border: 1px solid rgba(57, 169, 0, 0.2);
-        box-shadow: 0 16px 40px rgba(0, 50, 77, 0.08);
+        border: 1px solid rgba(33, 150, 243, 0.2);
+        box-shadow: 0 16px 40px rgba(10, 37, 64, 0.08);
         overflow: hidden;
     }
 
     .scanner-header {
-        background: linear-gradient(135deg, #00324D 0%, #107C41 100%);
+        background: linear-gradient(135deg, #0A2540 0%, #1976D2 100%);
         color: #ffffff;
         padding: 24px;
         text-align: center;
@@ -52,7 +52,7 @@
         position: absolute;
         width: 200px;
         height: 200px;
-        border: 3px solid rgba(57, 169, 0, 0.85);
+        border: 3px solid rgba(33, 150, 243, 0.85);
         border-radius: 18px;
         box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
         pointer-events: none;
@@ -60,7 +60,7 @@
     }
 
     @keyframes reticlePulse {
-        0%, 100% { border-color: rgba(57, 169, 0, 0.85); transform: scale(1); }
+        0%, 100% { border-color: rgba(33, 150, 243, 0.85); transform: scale(1); }
         50% { border-color: rgba(255, 255, 255, 0.9); transform: scale(1.03); }
     }
 
@@ -68,8 +68,8 @@
         position: absolute;
         width: 100%;
         height: 3px;
-        background: linear-gradient(90deg, transparent, #39A900, #39A900, transparent);
-        box-shadow: 0 0 8px #39A900;
+        background: linear-gradient(90deg, transparent, #2196F3, #2196F3, transparent);
+        box-shadow: 0 0 8px #2196F3;
         top: 0;
         animation: laserScan 2.4s infinite linear;
     }
@@ -103,8 +103,8 @@
         <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
             <i class="bi bi-arrow-left me-1"></i> Volver al Inicio
         </a>
-        <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill">
-            <i class="bi bi-circle-fill text-success small me-1"></i> Sistema de Asistencia Activo
+        <span class="badge bg-primary bg-opacity-10 fw-bold px-3 py-2 rounded-pill" style="color: #2196F3 !important;">
+            <i class="bi bi-circle-fill small me-1" style="color: #2196F3 !important;"></i> Sistema de Asistencia Activo
         </span>
     </div>
 
@@ -120,6 +120,12 @@
         </div>
 
         <div class="p-4">
+            <!-- Aviso de Seguridad Institucional Anti-Foto -->
+            <div class="alert alert-light border border-success border-opacity-25 rounded-3 py-2 px-3 small text-muted text-center mb-3">
+                <i class="bi bi-shield-lock-fill text-success me-1"></i>
+                <strong>Seguridad Institucional SENA:</strong> Escaneo exclusivo mediante sensor óptico de cámara en tiempo real. No se admite carga de fotos ni capturas estáticas por prevención de fraude.
+            </div>
+
             <!-- Mensaje de resultado en vivo -->
             <div id="resultContainer" class="result-alert mb-3"></div>
 

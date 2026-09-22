@@ -11,6 +11,7 @@ urlpatterns = [
     path('academico/', include('academico.urls')),
     path('seguimiento/', include('seguimiento.urls')),
     path('evaluaciones/', include('evaluaciones.urls')),
+    path('convenios/', include('convenios.urls')),
     path('login/', views_usuarios.custom_login_view, name='login_short'),
     path('accounts/login/', views_usuarios.custom_login_view, name='login'),
     path('accounts/logout/', views_usuarios.custom_logout_view, name='logout'),

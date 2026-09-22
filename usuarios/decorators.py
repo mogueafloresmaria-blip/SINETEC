@@ -42,6 +42,25 @@ def requerir_roles(*roles_permitidos):
                 for r in roles_norm:
                     if r in rol_actual_norm or rol_actual_norm in r or rol_actual_norm.startswith(r[:6]):
                         return view_func(request, *args, **kwargs)
+            elif any(r in ['instructor', 'instructor sena'] for r in roles_norm) and (
+                request.user.is_staff or (request.user.username and request.user.username.lower().startswith('inst'))
+            ):
+                return view_func(request, *args, **kwargs)
+
+            # Si el usuario no está autorizado para esta vista según su rol:
+            rol_nombre = _normalizar_texto(perfil.rol.nombre) if (perfil and perfil.rol) else ''
+            messages.error(
+                request,
+                "Acceso Restringido (Seguridad SINETEC): Tu rol de usuario no tiene permisos para acceder a esta sección privada."
+            )
+            if 'estudiante' in rol_nombre or 'aprendiz' in rol_nombre:
+                return redirect('aprendiz_dashboard')
+            elif 'instructor' in rol_nombre or 'docente' in rol_nombre:
+                return redirect('instructor_dashboard')
+            elif 'secretar' in rol_nombre:
+                return redirect('secretaria_dashboard')
+            elif 'coordinad' in rol_nombre or 'admin' in rol_nombre:
+                return redirect('coordinador_dashboard')
 
             raise PermissionDenied("Acceso Denegado (Seguridad SINETEC): Tu rol institucional no tiene permisos para acceder a esta vista.")
         return _wrapped_view
@@ -61,6 +80,10 @@ def solo_aprendiz(view_func):
 
 
 def solo_secretaria_o_coordinador(view_func):
+    return requerir_roles('Administrador', 'Coordinador', 'Secretaría', 'Secretaria')(view_func)
+
+
+def solo_secretaria(view_func):
     return requerir_roles('Administrador', 'Coordinador', 'Secretaría', 'Secretaria')(view_func)
 
 

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Evento de Agenda - SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 text-center">
+                    <div class="text-danger mb-3">
+                        <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">¿Retirar evento de la agenda?</h4>
+                    <p class="text-muted mb-4">
+                        Está a punto de cancelar o eliminar el evento programado:
+                        <br>
+                        <strong class="text-dark fs-5">{{ evento.titulo }}</strong>
+                        <br>
+                        <span class="badge bg-light text-secondary border mt-2">
+                            <i class="bi bi-clock me-1"></i> {{ evento.fecha_inicio|date:"d/m/Y H:i" }}
+                        </span>
+                        {% if evento.institucion %}
+                        <br>
+                        <span class="small text-muted mt-1 d-inline-block">
+                            <i class="bi bi-building me-1"></i> {{ evento.institucion.nombre }}
+                        </span>
+                        {% endif %}
+                    </p>
+
+                    <div class="alert alert-warning text-start small mb-4">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Esta acción removerá el compromiso del calendario institucional y notificará al equipo de seguimiento.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                        {% endif %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'calendario_administrativo' %}{% endif %}" class="btn btn-light px-4">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger px-4 fw-semibold">
+                                <i class="bi bi-trash me-1"></i> Eliminar Evento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

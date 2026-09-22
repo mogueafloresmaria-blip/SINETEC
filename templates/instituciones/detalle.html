@@ -1,112 +1,1209 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ institucion.nombre }} - SINETEC{% endblock %}
+{% block title %}{{ institucion.nombre }} · Ficha Integral Institucional · SINETEC SENA{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <a href="{% url 'instituciones_lista' %}" class="btn btn-outline-secondary btn-sm mb-3">
-        <i class="bi bi-arrow-left me-1"></i> Volver al Directorio
-    </a>
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <span class="badge bg-primary bg-opacity-10 text-primary mb-1">DANE: {{ institucion.codigo_dane }}</span>
-            <h1 class="h3 fw-bold mb-1 text-dark">{{ institucion.nombre }}</h1>
-            <p class="text-muted small mb-0">
-                <i class="bi bi-geo-alt me-1"></i>{{ institucion.municipio }}, Magdalena · Dirección: {{ institucion.direccion|default:"No registrada" }}
-            </p>
-        </div>
-        <div>
-            <a href="{% url 'instituciones_editar' institucion.id %}" class="btn btn-outline-secondary me-2">
-                <i class="bi bi-pencil me-1"></i> Editar Datos
+<div class="container-fluid py-2 px-md-3">
+
+    <!-- 1. BREADCRUMB & ACCIONES SUPERIORES -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'instituciones_lista' %}" class="text-decoration-none text-muted">Instituciones</a></li>
+                <li class="breadcrumb-item active fw-semibold text-dark" aria-current="page">{{ institucion.nombre|truncatechars:35 }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex gap-2">
+            <a href="{% url 'instituciones_lista' %}" class="btn btn-sm btn-outline-secondary rounded-3">
+                <i class="bi bi-arrow-left me-1"></i> Volver al Directorio
             </a>
-            <a href="{% url 'fichas_crear' %}" class="btn btn-sinetec-primary">
-                <i class="bi bi-plus-lg me-1"></i> Abrir Ficha Técnica
-            </a>
+            <button onclick="window.print()" class="btn btn-sm btn-light border rounded-3 fw-semibold">
+                <i class="bi bi-printer me-1"></i> Imprimir Expediente
+            </button>
         </div>
     </div>
-</div>
 
-<div class="row g-4 mb-4">
-    <!-- Tarjeta de Contactos -->
-    <div class="col-md-4">
-        <div class="sinetec-card p-4 h-100">
-            <h6 class="fw-bold mb-3 border-bottom pb-2 text-primary">Información Institucional</h6>
-            <div class="mb-3">
-                <small class="text-muted d-block">Rector(a):</small>
-                <strong>{{ institucion.rector_nombre|default:"No registrado" }}</strong>
-                {% if institucion.rector_email %}<br><a href="mailto:{{ institucion.rector_email }}" class="small">{{ institucion.rector_email }}</a>{% endif %}
-            </div>
-            <div class="mb-3">
-                <small class="text-muted d-block">Docente Enlace / Coordinador:</small>
-                <strong>{{ institucion.enlace_nombre|default:"No registrado" }}</strong>
-                {% if institucion.enlace_email %}<br><a href="mailto:{{ institucion.enlace_email }}" class="small">{{ institucion.enlace_email }}</a>{% endif %}
-            </div>
-            <div class="mb-3">
-                <small class="text-muted d-block">Teléfono de Enlace:</small>
-                <span>{{ institucion.enlace_telefono|default:"No registrado" }}</span>
-            </div>
+    <!-- 2. ENCABEZADO EJECUTIVO DE LA INSTITUCIÓN -->
+    <div class="card border-0 shadow-sm rounded-3 p-4 mb-4 bg-white">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
             <div>
-                <small class="text-muted d-block">Estado del Convenio:</small>
-                {% if institucion.activa %}
-                    <span class="badge bg-success">Convenio Vigente</span>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span class="badge bg-light text-dark border px-2.5 py-1.5 fw-semibold font-monospace">
+                        <i class="bi bi-upc-scan me-1 text-primary"></i> DANE: {{ institucion.codigo_dane }}
+                    </span>
+                    <span class="badge bg-light text-secondary border px-2.5 py-1.5">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ institucion.municipio }}, Magdalena
+                    </span>
+                    {% if institucion.activa %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 fw-bold">
+                            <i class="bi bi-check-circle-fill me-1"></i> Convenio Activo y Vigente
+                        </span>
+                    {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1.5 fw-bold">
+                            <i class="bi bi-pause-circle me-1"></i> Convenio Inactivo / Suspendido
+                        </span>
+                    {% endif %}
+                </div>
+                <h1 class="h3 fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-building text-primary"></i> {{ institucion.nombre }}
+                </h1>
+                <p class="text-muted mb-0 small">
+                    <i class="bi bi-pin-map me-1"></i> {{ institucion.direccion|default:"Dirección pendiente por registrar" }}
+                    {% if institucion.telefono %}<span class="mx-2">·</span><i class="bi bi-telephone me-1"></i> {{ institucion.telefono }}{% endif %}
+                    {% if institucion.correo %}<span class="mx-2">·</span><i class="bi bi-envelope me-1"></i> {{ institucion.correo }}{% endif %}
+                </p>
+            </div>
+
+            <!-- Botones de Acción Operativa -->
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'instituciones_editar' institucion.id %}" class="btn btn-sm btn-outline-secondary rounded-3 fw-semibold px-3 py-2">
+                    <i class="bi bi-pencil-square me-1"></i> Editar Colegio
+                </a>
+                <a href="{% url 'instituciones_cambiar_estado' institucion.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm {% if institucion.activa %}btn-outline-warning{% else %}btn-outline-success{% endif %} rounded-3 fw-semibold px-3 py-2">
+                    {% if institucion.activa %}
+                        <i class="bi bi-pause-circle me-1"></i> Suspender
+                    {% else %}
+                        <i class="bi bi-play-circle me-1"></i> Reactivar
+                    {% endif %}
+                </a>
+                <button type="button" class="btn btn-sm btn-primary rounded-3 fw-semibold px-3 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoContacto">
+                    <i class="bi bi-person-plus me-1"></i> + Contacto
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary rounded-3 fw-semibold px-3 py-2" data-bs-toggle="modal" data-bs-target="#modalSubirDocumento">
+                    <i class="bi bi-upload me-1"></i> + Documento
+                </button>
+                <a href="{% url 'semaforo_competencias' %}" class="btn btn-sm btn-outline-success rounded-3 fw-semibold px-3 py-2">
+                    <i class="bi bi-traffic-light me-1"></i> Semáforo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. SEIS INDICADORES EJECUTIVOS (KPIS) -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-primary">
+                <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Convenios</div>
+                <div class="h3 fw-bold text-dark my-1">{{ total_convenios }}</div>
+                <div class="small fw-semibold text-primary">Formalizados</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-info">
+                <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Programas</div>
+                <div class="h3 fw-bold text-dark my-1">{{ programas_colegio.count }}</div>
+                <div class="small fw-semibold text-info">{{ total_fichas }} Fichas activas</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-success">
+                <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Estudiantes</div>
+                <div class="h3 fw-bold text-dark my-1">{{ total_aprendices }}</div>
+                <div class="small fw-semibold text-success">Media Técnica</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-warning">
+                <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Contactos</div>
+                <div class="h3 fw-bold text-dark my-1">{{ contactos.count }}</div>
+                <div class="small fw-semibold text-warning">Interlocutores</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-danger">
+                <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Seguimientos</div>
+                <div class="h3 fw-bold text-dark my-1">{{ seguimientos_admin.count }}</div>
+                <div class="small fw-semibold text-danger">Acciones y tareas</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-secondary">
+                <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Documentos</div>
+                <div class="h3 fw-bold text-dark my-1">{{ documentos_colegio.count }}</div>
+                <div class="small fw-semibold text-secondary">Archivos digitales</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. LAS 9 PESTAÑAS INTEGRALES DE GESTIÓN ADMINISTRATIVA -->
+    <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 mb-4 bg-white">
+        <ul class="nav nav-tabs nav-tabs-sinetec mb-4 flex-nowrap overflow-auto" id="institucionTabs" role="tablist">
+            <li class="nav-item text-nowrap" role="presentation">
+                <button class="nav-link {% if tab_activa == 'general' %}active{% endif %}" id="tab-general" data-bs-toggle="tab" data-bs-target="#pane-general" type="button" role="tab">
+                    <i class="bi bi-info-circle me-1.5"></i> 1. Información General
+                </button>
+            </li>
+            <li class="nav-item text-nowrap" role="presentation">
+                <button class="nav-link {% if tab_activa == 'convenios' %}active{% endif %}" id="tab-convenios" data-bs-toggle="tab" data-bs-target="#pane-convenios" type="button" role="tab">
+                    <i class="bi bi-file-earmark-check me-1.5"></i> 2. Convenios ({{ total_convenios }})
+                </button>
+            </li>
+            <li class="nav-item text-nowrap" role="presentation">
+                <button class="nav-link {% if tab_activa == 'programas' %}active{% endif %}" id="tab-programas" data-bs-toggle="tab" data-bs-target="#pane-programas" type="button" role="tab">
+                    <i class="bi bi-award me-1.5"></i> 3. Programas & Fichas ({{ total_fichas }})
+                </button>
+            </li>
+            <li class="nav-item text-nowrap" role="presentation">
+                <button class="nav-link {% if tab_activa == 'contactos' %}active{% endif %}" id="tab-contactos" data-bs-toggle="tab" data-bs-target="#pane-contactos" type="button" role="tab">
+                    <i class="bi bi-person-lines-fill me-1.5"></i> 4. Contactos ({{ contactos.count }})
+                </button>
+            </li>
+            <li class="nav-item text-nowrap" role="presentation">
+                <button class="nav-link {% if tab_activa == 'documentos' %}active{% endif %}" id="tab-documentos" data-bs-toggle="tab" data-bs-target="#pane-documentos" type="button" role="tab">
+                    <i class="bi bi-folder2-open me-1.5"></i> 5. Documentos ({{ documentos_colegio.count }})
+                </button>
+            </li>
+            <li class="nav-item text-nowrap" role="presentation">
+                <button class="nav-link {% if tab_activa == 'seguimientos' %}active{% endif %}" id="tab-seguimientos" data-bs-toggle="tab" data-bs-target="#pane-seguimientos" type="button" role="tab">
+                    <i class="bi bi-card-checklist me-1.5"></i> 6. Seguimientos ({{ seguimientos_admin.count }})
+                </button>
+            </li>
+            <li class="nav-item text-nowrap" role="presentation">
+                <button class="nav-link {% if tab_activa == 'observaciones' %}active{% endif %}" id="tab-observaciones" data-bs-toggle="tab" data-bs-target="#pane-observaciones" type="button" role="tab">
+                    <i class="bi bi-chat-left-dots me-1.5"></i> 7. Observaciones ({{ observaciones_colegio.count }})
+                </button>
+            </li>
+            <li class="nav-item text-nowrap" role="presentation">
+                <button class="nav-link {% if tab_activa == 'antecedentes' %}active{% endif %}" id="tab-antecedentes" data-bs-toggle="tab" data-bs-target="#pane-antecedentes" type="button" role="tab">
+                    <i class="bi bi-archive me-1.5"></i> 8. Antecedentes ({{ antecedentes_colegio.count }})
+                </button>
+            </li>
+            <li class="nav-item text-nowrap" role="presentation">
+                <button class="nav-link {% if tab_activa == 'historial' %}active{% endif %}" id="tab-historial" data-bs-toggle="tab" data-bs-target="#pane-historial" type="button" role="tab">
+                    <i class="bi bi-clock-history me-1.5"></i> 9. Historial
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="institucionTabsContent">
+
+            <!-- PESTAÑA 1: INFORMACIÓN GENERAL -->
+            <div class="tab-pane fade {% if tab_activa == 'general' %}show active{% endif %}" id="pane-general" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-3 bg-light border h-100">
+                            <h6 class="fw-bold text-dark mb-3 border-bottom pb-2 d-flex align-items-center gap-2">
+                                <i class="bi bi-building-gear text-primary"></i> Datos Oficiales del Plantel
+                            </h6>
+                            <dl class="row mb-0 small">
+                                <dt class="col-sm-4 text-muted">Nombre Oficial:</dt>
+                                <dd class="col-sm-8 fw-bold text-dark">{{ institucion.nombre }}</dd>
+
+                                <dt class="col-sm-4 text-muted">Código DANE:</dt>
+                                <dd class="col-sm-8"><code class="fw-bold fs-6">{{ institucion.codigo_dane }}</code></dd>
+
+                                <dt class="col-sm-4 text-muted">Municipio / Sede:</dt>
+                                <dd class="col-sm-8 fw-semibold text-dark">{{ institucion.municipio }}, Magdalena</dd>
+
+                                <dt class="col-sm-4 text-muted">Dirección Física:</dt>
+                                <dd class="col-sm-8 text-dark">{{ institucion.direccion|default:"No registrada" }}</dd>
+
+                                <dt class="col-sm-4 text-muted">Teléfono Central:</dt>
+                                <dd class="col-sm-8 text-dark">{{ institucion.telefono|default:"No registrado" }}</dd>
+
+                                <dt class="col-sm-4 text-muted">Correo Institucional:</dt>
+                                <dd class="col-sm-8 text-dark">{{ institucion.correo|default:"No registrado" }}</dd>
+
+                                <dt class="col-sm-4 text-muted">Fecha Vinculación:</dt>
+                                <dd class="col-sm-8 text-dark">{{ institucion.fecha_registro|date:"d/m/Y"|default:"Histórico" }}</dd>
+
+                                <dt class="col-sm-4 text-muted">Estado Actual:</dt>
+                                <dd class="col-sm-8">
+                                    {% if institucion.activa %}
+                                        <span class="badge bg-success">Convenio Activo y Vigente</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactivo / Suspendido</span>
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                            {% if institucion.observaciones %}
+                                <div class="mt-3 pt-3 border-top">
+                                    <div class="small fw-bold text-dark mb-1"><i class="bi bi-card-text me-1 text-primary"></i> Observaciones Generales:</div>
+                                    <div class="small text-muted bg-white p-2.5 rounded border">{{ institucion.observaciones|linebreaksbr }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-3 bg-light border h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                                <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                    <i class="bi bi-person-lines-fill text-primary"></i> Contactos Directivos y Enlaces
+                                </h6>
+                                <button class="btn btn-xs btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoContacto">
+                                    <i class="bi bi-plus-circle me-1"></i> Agregar
+                                </button>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="small text-muted mb-1 fw-semibold">Rector(a) Titular Registrado:</div>
+                                <div class="p-2.5 rounded bg-white border">
+                                    <strong class="text-dark d-block">{{ institucion.rector_nombre|default:"Pendiente por registrar en ficha básica" }}</strong>
+                                    {% if institucion.rector_email %}
+                                        <div class="small text-muted"><i class="bi bi-envelope me-1"></i>{{ institucion.rector_email }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="small text-muted mb-1 fw-semibold">Docente Enlace de Media Técnica:</div>
+                                <div class="p-2.5 rounded bg-white border">
+                                    <strong class="text-dark d-block">{{ institucion.enlace_nombre|default:"Pendiente por registrar en ficha básica" }}</strong>
+                                    {% if institucion.enlace_email %}
+                                        <div class="small text-muted"><i class="bi bi-envelope me-1"></i>{{ institucion.enlace_email }}</div>
+                                    {% endif %}
+                                    {% if institucion.enlace_telefono %}
+                                        <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ institucion.enlace_telefono }}</div>
+                                        <div class="mt-2">
+                                            <a href="https://wa.me/{{ institucion.enlace_telefono|cut:' '|cut:'-' }}?text=SINETEC%20-%20Articulacion%20SENA%20{{ institucion.nombre|urlencode }}" 
+                                               target="_blank" rel="noopener" class="btn btn-sm btn-outline-success fw-semibold py-1 px-2.5">
+                                                <i class="bi bi-whatsapp me-1"></i> Chat de Enlace por WhatsApp
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info small mb-0 d-flex align-items-center gap-2 py-2">
+                                <i class="bi bi-info-circle-fill fs-5"></i>
+                                <div>Para ver y gestionar todos los contactos oficiales o añadir nuevos, consulte la pestaña <strong>4. Contactos</strong>.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 2: CONVENIOS SENA -->
+            <div class="tab-pane fade {% if tab_activa == 'convenios' %}show active{% endif %}" id="pane-convenios" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">
+                            <i class="bi bi-file-earmark-check-fill text-primary me-2"></i>Convenios SENA Formalizados con este Plantel
+                        </h6>
+                        <p class="text-muted small mb-0">Contratos, actas de compromiso, resoluciones y fechas límites de vigencia.</p>
+                    </div>
+                    <a href="{% url 'convenio_crear' %}" class="btn btn-sm btn-primary fw-semibold">
+                        <i class="bi bi-plus-circle me-1"></i> Nuevo Convenio SENA
+                    </a>
+                </div>
+
+                {% if convenios_colegio %}
+                    <div class="row g-3">
+                        {% for conv in convenios_colegio %}
+                            <div class="col-12">
+                                <div class="p-4 border rounded-3 bg-white shadow-sm">
+                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-2 mb-3 pb-3 border-bottom">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                                <span class="badge bg-light text-dark border font-monospace fw-bold">{{ conv.codigo_convenio }}</span>
+                                                {% if conv.estado == 'Vigente' %}
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Vigente</span>
+                                                {% elif conv.estado == 'Por Vencer' %}
+                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle fw-semibold"><i class="bi bi-exclamation-triangle-fill me-1"></i>Por Vencer</span>
+                                                {% elif conv.estado == 'En Tramite' %}
+                                                    <span class="badge bg-info-subtle text-info border border-info-subtle fw-semibold"><i class="bi bi-hourglass-split me-1"></i>En Trámite</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-semibold">{{ conv.estado }}</span>
+                                                {% endif %}
+                                                {% if conv.numero_resolucion %}
+                                                    <span class="badge bg-light text-secondary border">Resolución: {{ conv.numero_resolucion }}</span>
+                                                {% endif %}
+                                                {% if conv.dias_para_vencer is not None %}
+                                                    {% if conv.dias_para_vencer > 0 %}
+                                                        <span class="badge {% if conv.dias_para_vencer <= 30 %}bg-warning text-dark{% else %}bg-light text-muted border{% endif %}">
+                                                            <i class="bi bi-clock-history me-1"></i>{{ conv.dias_para_vencer }} días restantes
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger text-white">Vencido hace {{ conv.dias_para_vencer|stringformat:"+d"|slice:"1:" }} días</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                            <h5 class="fw-bold text-dark mb-1">{{ conv.nombre }}</h5>
+                                            {% if conv.objeto %}
+                                                <p class="text-muted small mb-0">{{ conv.objeto }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="d-flex gap-2 text-nowrap">
+                                            <a href="{% url 'convenio_editar' conv.id %}" class="btn btn-sm btn-outline-secondary rounded-2">
+                                                <i class="bi bi-pencil-square me-1"></i> Editar
+                                            </a>
+                                            <a href="{% url 'documento_convenio_subir' conv.id %}" class="btn btn-sm btn-outline-primary rounded-2">
+                                                <i class="bi bi-upload me-1"></i> Subir Doc
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 py-2 small mb-3">
+                                        <div class="col-sm-6 col-md-3">
+                                            <span class="text-muted d-block">Fecha de Inicio:</span>
+                                            <strong class="text-dark"><i class="bi bi-calendar-check text-primary me-1"></i>{{ conv.fecha_inicio|date:"d/m/Y" }}</strong>
+                                        </div>
+                                        <div class="col-sm-6 col-md-3">
+                                            <span class="text-muted d-block">Fecha de Finalización:</span>
+                                            <strong class="text-dark"><i class="bi bi-calendar-x text-danger me-1"></i>{{ conv.fecha_fin|date:"d/m/Y" }}</strong>
+                                        </div>
+                                        <div class="col-sm-6 col-md-3">
+                                            <span class="text-muted d-block">Coordinador SENA:</span>
+                                            <strong class="text-dark"><i class="bi bi-person text-secondary me-1"></i>{{ conv.coordinador_lider|default:"Coordinación Media Técnica" }}</strong>
+                                        </div>
+                                        <div class="col-sm-6 col-md-3">
+                                            <span class="text-muted d-block">Cupos Autorizados:</span>
+                                            <strong class="text-dark">{{ conv.cupos_autorizados|default:"No limitados" }}</strong>
+                                        </div>
+                                    </div>
+
+                                    <!-- BENEFICIOS DEL CONVENIO -->
+                                    <div class="mt-2 pt-3 border-top">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-bold text-dark small"><i class="bi bi-gift-fill text-primary me-1"></i> Beneficios y Programas Articulados ({{ conv.beneficios.count }}):</span>
+                                        </div>
+                                        <div class="row g-2">
+                                            {% for ben in conv.beneficios.all %}
+                                                <div class="col-md-6 col-lg-4">
+                                                    <div class="p-2.5 rounded-2 bg-light border">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <strong class="text-dark small">{{ ben.nombre }}</strong>
+                                                            <span class="badge bg-white text-primary border small">{{ ben.tipo }}</span>
+                                                        </div>
+                                                        <div class="text-muted small mt-1">{{ ben.descripcion|truncatechars:65 }}</div>
+                                                        <div class="small mt-1 text-secondary">
+                                                            <i class="bi bi-person-check me-1"></i>{{ ben.cupos }} cupos · <span class="badge bg-success-subtle text-success py-0 px-1">{{ ben.estado }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% empty %}
+                                                <div class="col-12">
+                                                    <span class="text-muted small fst-italic">No hay beneficios específicos configurados aún en este convenio.</span>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <!-- DOCUMENTOS DIGITALES DEL CONVENIO -->
+                                    <div class="mt-3 pt-2 border-top">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-bold text-dark small"><i class="bi bi-folder2-open text-primary me-1"></i> Documentos Oficiales del Convenio ({{ conv.documentos.count }}):</span>
+                                        </div>
+                                        <div class="row g-2">
+                                            {% for doc in conv.documentos.all %}
+                                                <div class="col-md-6 col-lg-4">
+                                                    <div class="p-2.5 rounded-2 bg-light border d-flex justify-content-between align-items-center">
+                                                        <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-5 flex-shrink-0"></i>
+                                                            <div class="text-truncate">
+                                                                <div class="fw-semibold text-dark text-truncate" style="font-size: 0.82rem;" title="{{ doc.titulo }}">{{ doc.titulo }}</div>
+                                                                <div class="text-muted" style="font-size: 0.72rem;">{{ doc.tipo_documento }} · {{ doc.fecha_subida|date:"d/m/Y" }}</div>
+                                                            </div>
+                                                        </div>
+                                                        <a href="{% url 'documento_convenio_descargar' doc.id %}" target="_blank" class="btn btn-sm btn-primary py-1 px-2 text-nowrap rounded-2 ms-2" style="font-size: 0.75rem;">
+                                                            <i class="bi bi-download me-1"></i> Descargar
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            {% empty %}
+                                                <div class="col-12">
+                                                    <span class="text-muted small fst-italic">No hay archivos PDF anexos a este convenio.</span>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% else %}
-                    <span class="badge bg-danger">Inactivo</span>
+                    <div class="text-center py-5 bg-light rounded-3 border">
+                        <i class="bi bi-folder-x fs-1 text-muted opacity-50 d-block mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">No hay convenios formalizados registrados para este colegio</h6>
+                        <p class="text-muted small mb-3">Vincule el acuerdo formal de articulación SENA para registrar vigencias, resoluciones y documentos.</p>
+                        <a href="{% url 'convenio_crear' %}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i> Registrar Convenio para este Colegio
+                        </a>
+                    </div>
                 {% endif %}
             </div>
-            {% if institucion.enlace_telefono %}
-                <a href="https://wa.me/{{ institucion.enlace_telefono|cut:' '|cut:'-' }}?text=Reporte%20de%20avance%20SINETEC%20-%20{{ institucion.nombre|urlencode }}" target="_blank" rel="noopener" class="btn btn-success btn-sm mt-3">
-                    <i class="bi bi-whatsapp me-1"></i> Contactar por WhatsApp
-                </a>
-            {% endif %}
+
+            <!-- PESTAÑA 3: PROGRAMAS Y FICHAS -->
+            <div class="tab-pane fade {% if tab_activa == 'programas' %}show active{% endif %}" id="pane-programas" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Programas de Formación y Fichas Técnicas Activas</h6>
+                        <p class="text-muted small mb-0">Oferta formativa del SENA implementada en los grados 10° y 11° de esta institución.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'semaforo_competencias' %}" class="btn btn-sm btn-outline-success fw-semibold">
+                            <i class="bi bi-traffic-light me-1"></i> Ver Semáforo de Competencias
+                        </a>
+                        <a href="{% url 'fichas_crear' %}" class="btn btn-sm btn-primary fw-semibold">
+                            <i class="bi bi-plus-lg me-1"></i> Aperturar Ficha
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase">
+                            <tr>
+                                <th class="ps-3 py-2">Ficha Técnica</th>
+                                <th class="py-2">Programa de Formación</th>
+                                <th class="py-2">Profesor Líder</th>
+                                <th class="py-2 text-center">Jornada</th>
+                                <th class="py-2 text-center">Estado</th>
+                                <th class="py-2 pe-3 text-end">Gestión</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in fichas %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <a href="{% url 'fichas_detalle' f.id %}" class="fw-bold text-primary text-decoration-none">
+                                            Ficha {{ f.codigo_ficha }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">{{ f.programa.denominacion }}</div>
+                                        <small class="text-muted">Inicio: {{ f.fecha_inicio|date:'d/m/Y'|default:'N/A' }} · Fin: {{ f.fecha_fin|date:'d/m/Y'|default:'N/A' }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="small fw-semibold text-dark">
+                                            {{ f.instructor_lider.get_full_name|default:f.instructor_lider.username|default:'Sin asignar' }}
+                                        </div>
+                                    </td>
+                                    <td class="text-center small">{{ f.jornada|default:'Diurna' }}</td>
+                                    <td class="text-center">
+                                        {% if f.estado == 'En Ejecucion' %}
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">En Ejecución</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary">{{ f.estado }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <a href="{% url 'fichas_detalle' f.id %}" class="btn btn-sm btn-outline-primary fw-semibold py-1 px-2.5">
+                                            Ver Ficha <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-layers fs-2 d-block mb-2 text-muted opacity-50"></i>
+                                        Esta institución no tiene fichas vinculadas actualmente.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 4: CONTACTOS INSTITUCIONALES -->
+            <div class="tab-pane fade {% if tab_activa == 'contactos' %}show active{% endif %}" id="pane-contactos" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Directorio de Contactos Clave del Colegio</h6>
+                        <p class="text-muted small mb-0">Rectores, coordinadores académicos, enlaces y secretaría para la coordinación bilateral.</p>
+                    </div>
+                    <button class="btn btn-sm btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNuevoContacto">
+                        <i class="bi bi-person-plus me-1"></i> + Nuevo Contacto
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase">
+                            <tr>
+                                <th class="ps-3 py-2">Contacto</th>
+                                <th class="py-2">Cargo / Rol</th>
+                                <th class="py-2">Tipo de Interlocutor</th>
+                                <th class="py-2">Correo Electrónico</th>
+                                <th class="py-2">Teléfono / Celular</th>
+                                <th class="py-2">Estado</th>
+                                <th class="py-2 pe-3 text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in contactos %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-bold text-dark">{{ c.nombre_completo }}</div>
+                                        {% if c.observaciones %}
+                                            <div class="text-muted small text-truncate" style="max-width: 220px;" title="{{ c.observaciones }}">
+                                                <i class="bi bi-chat-left-text me-1"></i>{{ c.observaciones }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="fw-semibold text-dark">{{ c.cargo }}</span></td>
+                                    <td><span class="badge bg-light text-dark border">{{ c.tipo }}</span></td>
+                                    <td>
+                                        {% if c.correo %}
+                                            <a href="mailto:{{ c.correo }}" class="text-decoration-none text-dark small">
+                                                <i class="bi bi-envelope text-primary me-1"></i>{{ c.correo }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted small">No registrado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if c.telefono %}
+                                            <a href="tel:{{ c.telefono }}" class="text-decoration-none text-dark small">
+                                                <i class="bi bi-telephone text-success me-1"></i>{{ c.telefono }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted small">No registrado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if c.estado == 'Activo' %}bg-success-subtle text-success border border-success-subtle{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                                            {{ c.estado }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'contacto_editar' c.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline-secondary" title="Editar Contacto">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'contacto_eliminar' c.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline-danger" title="Eliminar Contacto">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <i class="bi bi-person-x fs-2 d-block mb-2 opacity-50"></i>
+                                        No hay contactos registrados aún en el directorio de esta institución.
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoContacto">
+                                                <i class="bi bi-plus-circle me-1"></i> Registrar Primer Contacto
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 5: DOCUMENTOS ADMINISTRATIVOS -->
+            <div class="tab-pane fade {% if tab_activa == 'documentos' %}show active{% endif %}" id="pane-documentos" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Archivos y Expediente Digital Institucional</h6>
+                        <p class="text-muted small mb-0">Actas, cartas de intención, pólizas, resoluciones y soportes PDF oficiales.</p>
+                    </div>
+                    <button class="btn btn-sm btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalSubirDocumento">
+                        <i class="bi bi-upload me-1"></i> + Cargar Documento
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase">
+                            <tr>
+                                <th class="ps-3 py-2">Documento</th>
+                                <th class="py-2">Tipo</th>
+                                <th class="py-2">Convenio Vinculado</th>
+                                <th class="py-2">Fecha de Carga</th>
+                                <th class="py-2">Responsable</th>
+                                <th class="py-2 pe-3 text-end">Descarga / Gestión</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documentos_colegio %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                                            <div>
+                                                <div class="fw-bold text-dark">{{ doc.nombre }}</div>
+                                                {% if doc.descripcion %}
+                                                    <div class="text-muted small text-truncate" style="max-width: 250px;">{{ doc.descripcion }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border">{{ doc.tipo }}</span></td>
+                                    <td>
+                                        {% if doc.convenio %}
+                                            <span class="badge bg-light text-secondary border font-monospace">{{ doc.convenio.codigo_convenio }}</span>
+                                        {% else %}
+                                            <span class="text-muted small">Institución General</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="small text-muted">{{ doc.fecha_subida|date:"d/m/Y H:i" }}</td>
+                                    <td class="small fw-semibold text-dark">
+                                        {{ doc.subido_por.get_full_name|default:doc.subido_por.username|default:"Sistema" }}
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <a href="{{ doc.archivo.url }}" target="_blank" download class="btn btn-sm btn-primary py-1 px-2.5">
+                                            <i class="bi bi-download me-1"></i> Descargar
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-file-earmark-x fs-2 d-block mb-2 opacity-50"></i>
+                                        No hay documentos administrativos cargados aún en el expediente de esta institución.
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalSubirDocumento">
+                                                <i class="bi bi-upload me-1"></i> Subir Primer Documento
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 6: SEGUIMIENTOS ADMINISTRATIVOS -->
+            <div class="tab-pane fade {% if tab_activa == 'seguimientos' %}show active{% endif %}" id="pane-seguimientos" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Seguimientos Administrativos y Compromisos</h6>
+                        <p class="text-muted small mb-0">Tareas de gestión interinstitucional, auditorías internas y compromisos con fechas límites.</p>
+                    </div>
+                    <button class="btn btn-sm btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNuevoSeguimiento">
+                        <i class="bi bi-clipboard-plus me-1"></i> + Nuevo Seguimiento
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase">
+                            <tr>
+                                <th class="ps-3 py-2">Asunto / Tarea</th>
+                                <th class="py-2">Prioridad</th>
+                                <th class="py-2">Fecha Límite</th>
+                                <th class="py-2">Estado</th>
+                                <th class="py-2">Responsable</th>
+                                <th class="py-2 pe-3 text-end">Acción de Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for seg in seguimientos_admin %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-bold text-dark">{{ seg.asunto }}</div>
+                                        <div class="text-muted small text-truncate" style="max-width: 320px;">{{ seg.descripcion }}</div>
+                                    </td>
+                                    <td>
+                                        {% if seg.prioridad == 'Urgente' %}
+                                            <span class="badge bg-danger"><i class="bi bi-exclamation-octagon-fill me-1"></i>Urgente</span>
+                                        {% elif seg.prioridad == 'Alta' %}
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>Alta</span>
+                                        {% elif seg.prioridad == 'Media' %}
+                                            <span class="badge bg-info text-dark">Media</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border">Baja</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if seg.fecha_limite %}
+                                            <div class="small fw-semibold {% if seg.esta_atrasado %}text-danger{% else %}text-dark{% endif %}">
+                                                <i class="bi bi-calendar-event me-1"></i>{{ seg.fecha_limite|date:"d/m/Y" }}
+                                                {% if seg.esta_atrasado %}
+                                                    <span class="badge bg-danger-subtle text-danger ms-1">Atrasado</span>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted small">Sin fecha fija</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if seg.estado == 'Completado' %}bg-success-subtle text-success border border-success-subtle
+                                            {% elif seg.estado == 'En Progreso' %}bg-info-subtle text-info border border-info-subtle
+                                            {% elif seg.estado == 'Pendiente' %}bg-warning-subtle text-warning border border-warning-subtle
+                                            {% else %}bg-secondary-subtle text-secondary{% endif %}">
+                                            {{ seg.estado }}
+                                        </span>
+                                    </td>
+                                    <td class="small fw-semibold text-dark">
+                                        {{ seg.responsable.get_full_name|default:seg.responsable.username }}
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <form method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="accion" value="cambiar_estado_seguimiento">
+                                            <input type="hidden" name="seguimiento_id" value="{{ seg.id }}">
+                                            {% if seg.estado != 'Completado' %}
+                                                <input type="hidden" name="nuevo_estado" value="Completado">
+                                                <button type="submit" class="btn btn-sm btn-outline-success py-1 px-2" title="Marcar como Completado">
+                                                    <i class="bi bi-check-lg me-1"></i> Completar
+                                                </button>
+                                            {% else %}
+                                                <input type="hidden" name="nuevo_estado" value="Pendiente">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Reabrir Seguimiento">
+                                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reabrir
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-check-all fs-2 d-block mb-2 opacity-50"></i>
+                                        No hay seguimientos administrativos registrados para esta institución.
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoSeguimiento">
+                                                <i class="bi bi-clipboard-plus me-1"></i> Crear Primer Seguimiento
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 7: OBSERVACIONES Y ACUERDOS -->
+            <div class="tab-pane fade {% if tab_activa == 'observaciones' %}show active{% endif %}" id="pane-observaciones" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Observaciones, Novedades y Reuniones de Articulación</h6>
+                        <p class="text-muted small mb-0">Registro y bitácora de incidencias, visitas institucionales y compromisos acordados.</p>
+                    </div>
+                    <button class="btn btn-sm btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNuevaObservacion">
+                        <i class="bi bi-chat-left-text me-1"></i> + Nueva Observación
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase">
+                            <tr>
+                                <th class="ps-3 py-2">Tipo & Fecha</th>
+                                <th class="py-2">Título & Resumen</th>
+                                <th class="py-2">Compromiso / Resultado</th>
+                                <th class="py-2">Prioridad</th>
+                                <th class="py-2">Estado</th>
+                                <th class="py-2">Responsable</th>
+                                <th class="py-2 pe-3 text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for obs in observaciones_colegio %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <span class="badge bg-light text-dark border">{{ obs.tipo }}</span>
+                                        <div class="text-muted small mt-1"><i class="bi bi-calendar3 me-1"></i>{{ obs.fecha|date:"d/m/Y" }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ obs.titulo }}</div>
+                                        <div class="text-muted small text-truncate" style="max-width: 250px;">{{ obs.descripcion }}</div>
+                                    </td>
+                                    <td>
+                                        {% if obs.resultado %}
+                                            <span class="small text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>{{ obs.resultado|truncatechars:45 }}</span>
+                                        {% else %}
+                                            <span class="text-muted small">Sin acuerdos</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if obs.prioridad == 'Urgente' %}<span class="badge bg-danger">Urgente</span>
+                                        {% elif obs.prioridad == 'Alta' %}<span class="badge bg-warning text-dark">Alta</span>
+                                        {% else %}<span class="badge bg-light text-muted border">{{ obs.prioridad }}</span>{% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">{{ obs.estado }}</span>
+                                    </td>
+                                    <td class="small fw-semibold text-dark">
+                                        {{ obs.responsable.get_full_name|default:obs.responsable.username }}
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'observacion_editar' obs.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline-secondary" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'observacion_eliminar' obs.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline-danger" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <i class="bi bi-chat-left-dots fs-2 d-block mb-2 opacity-50"></i>
+                                        No hay observaciones registradas aún para este colegio.
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevaObservacion">
+                                                <i class="bi bi-plus-circle me-1"></i> Registrar Primera Observación
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 8: ANTECEDENTES -->
+            <div class="tab-pane fade {% if tab_activa == 'antecedentes' %}show active{% endif %}" id="pane-antecedentes" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Antecedentes Históricos de Articulación SENA</h6>
+                        <p class="text-muted small mb-0">Hitos históricos, actas de compromiso fundacionales y acuerdos previos con esta institución.</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNuevaObservacion">
+                        <i class="bi bi-archive me-1"></i> + Registrar Antecedente
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase">
+                            <tr>
+                                <th class="ps-3 py-2">Fecha</th>
+                                <th class="py-2">Antecedente / Hito</th>
+                                <th class="py-2">Detalles del Antecedente</th>
+                                <th class="py-2">Convenio</th>
+                                <th class="py-2">Registrado Por</th>
+                                <th class="py-2 pe-3 text-end">Gestión</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ant in antecedentes_colegio %}
+                                <tr>
+                                    <td class="ps-3 fw-bold small text-dark"><i class="bi bi-calendar-event text-primary me-1"></i>{{ ant.fecha|date:"d/m/Y" }}</td>
+                                    <td><strong class="text-dark">{{ ant.titulo }}</strong></td>
+                                    <td class="small text-muted">{{ ant.descripcion|truncatechars:70 }}</td>
+                                    <td>
+                                        {% if ant.convenio %}
+                                            <span class="badge bg-light text-dark border font-monospace">{{ ant.convenio.codigo_convenio }}</span>
+                                        {% else %}
+                                            <span class="text-muted small">Institucional</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="small text-dark">{{ ant.responsable.get_full_name|default:ant.responsable.username }}</td>
+                                    <td class="pe-3 text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'observacion_editar' ant.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline-secondary" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'observacion_eliminar' ant.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline-danger" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-archive fs-2 d-block mb-2 opacity-50"></i>
+                                        No hay antecedentes históricos específicos registrados aún.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 9: HISTORIAL Y AUDITORÍA -->
+            <div class="tab-pane fade {% if tab_activa == 'historial' %}show active{% endif %}" id="pane-historial" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark mb-0">Trazabilidad y Auditoría de Operaciones en este Colegio</h6>
+                    <span class="badge bg-light text-secondary border small">{{ historial.count }} eventos registrados</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase">
+                            <tr>
+                                <th class="ps-3" style="width: 170px;">Fecha y Hora</th>
+                                <th style="width: 150px;">Usuario</th>
+                                <th style="width: 180px;">Acción</th>
+                                <th>Detalles del Registro</th>
+                                <th class="pe-3 text-end" style="width: 110px;">IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in historial %}
+                                <tr>
+                                    <td class="ps-3 small font-monospace text-muted">{{ log.fecha|date:"d M Y, H:i" }}</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border fw-semibold">
+                                            <i class="bi bi-person me-1 text-secondary"></i>{{ log.usuario.get_full_name|default:log.usuario.username|default:"Sistema" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-semibold">
+                                            {{ log.accion }}
+                                        </span>
+                                    </td>
+                                    <td class="small text-dark">{{ log.detalles|default:"-" }}</td>
+                                    <td class="pe-3 text-end font-monospace small text-muted">{{ log.ip_address|default:"127.0.0.1" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-clock-history fs-2 d-block mb-2 opacity-50"></i>
+                                        No hay registros de auditoría vinculados a esta institución todavía.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Fichas Técnicas del Colegio -->
-    <div class="col-md-8">
-        <div class="sinetec-card h-100">
-            <div class="sinetec-card-header d-flex justify-content-between align-items-center">
-                <span class="h6 mb-0 fw-bold"><i class="bi bi-collection text-primary me-2"></i>Fichas Técnicas Articuladas</span>
-                <span class="badge bg-light text-dark border">{{ fichas.count }} Fichas</span>
+</div>
+
+<!-- ============================================================================== -->
+<!-- MODALES PARA OPERACIONES RÁPIDAS DIRECTAS EN LA FICHA INSTITUCIONAL -->
+<!-- ============================================================================== -->
+
+<!-- 1. MODAL NUEVO CONTACTO -->
+<div class="modal fade" id="modalNuevoContacto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-plus text-primary me-2"></i>Nuevo Contacto Institucional</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="table-responsive">
-                <table class="table table-sinetec table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Ficha</th>
-                            <th>Programa Técnico</th>
-                            <th>Instructor Líder</th>
-                            <th>Estado</th>
-                            <th class="text-end">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for f in fichas %}
-                            <tr>
-                                <td class="fw-bold text-primary">Ficha {{ f.codigo_ficha }}</td>
-                                <td>{{ f.programa.denominacion }}</td>
-                                <td>{{ f.instructor_lider.get_full_name|default:f.instructor_lider.username }}</td>
-                                <td>
-                                    <span class="badge {% if f.estado == 'En Ejecucion' %}bg-success{% else %}bg-secondary{% endif %}">
-                                        {{ f.estado }}
-                                    </span>
-                                </td>
-                                <td class="text-end">
-                                    <a href="{% url 'fichas_detalle' f.id %}" class="btn btn-sm btn-outline-primary">
-                                        Gestionar &rarr;
-                                    </a>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">
-                                    Este colegio no tiene fichas técnicas abiertas actualmente.
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="crear_contacto">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Nombre(s) <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre" class="form-control" placeholder="Ej. Carlos" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Apellido(s) <span class="text-danger">*</span></label>
+                            <input type="text" name="apellido" class="form-control" placeholder="Ej. Mendoza" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Cargo <span class="text-danger">*</span></label>
+                            <input type="text" name="cargo" class="form-control" placeholder="Ej. Rector, Coordinador" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Tipo</label>
+                            <select name="tipo" class="form-select">
+                                <option value="Rector">Rector(a)</option>
+                                <option value="Coordinador" selected>Coordinador(a) Académico</option>
+                                <option value="Encargado Convenio">Encargado del Convenio</option>
+                                <option value="Docente Enlace">Docente Enlace</option>
+                                <option value="Secretaria">Secretaría</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Correo Electrónico</label>
+                            <input type="email" name="correo" class="form-control" placeholder="contacto@colegio.edu.co">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Teléfono / Celular</label>
+                            <input type="text" name="telefono" class="form-control" placeholder="300 123 4567">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Observaciones</label>
+                            <textarea name="observaciones" class="form-control" rows="2" placeholder="Horario de atención, días de contacto..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-circle me-1"></i> Guardar Contacto</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<!-- 2. MODAL NUEVA OBSERVACIÓN / ANTECEDENTE -->
+<div class="modal fade" id="modalNuevaObservacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-chat-left-text text-primary me-2"></i>Registrar Observación / Antecedente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="crear_observacion">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Tipo de Registro <span class="text-danger">*</span></label>
+                            <select name="tipo" class="form-select">
+                                <option value="Reunión" selected>Reunión</option>
+                                <option value="Acuerdo">Acuerdo</option>
+                                <option value="Antecedente">Antecedente Histórico</option>
+                                <option value="Novedad">Novedad</option>
+                                <option value="Incidencia">Incidencia</option>
+                                <option value="Visita">Visita</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Nivel de Prioridad</label>
+                            <select name="prioridad" class="form-select">
+                                <option value="Baja">Baja</option>
+                                <option value="Media" selected>Media</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Urgente">Urgente</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Título / Asunto Principal <span class="text-danger">*</span></label>
+                            <input type="text" name="titulo" class="form-control" placeholder="Ej. Reunión de apertura de cupos técnicos" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Descripción Detallada <span class="text-danger">*</span></label>
+                            <textarea name="descripcion" class="form-control" rows="3" placeholder="Detalles de los hechos, participantes o contexto..." required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Acuerdos o Conclusiones</label>
+                            <textarea name="resultado" class="form-control" rows="2" placeholder="Compromisos asumidos o resultado final..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Convenio Relacionado (Opcional)</label>
+                            <select name="convenio" class="form-select">
+                                <option value="">Ninguno / General</option>
+                                {% for conv in convenios_colegio %}
+                                    <option value="{{ conv.id }}">{{ conv.codigo_convenio }} - {{ conv.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Fecha Límite / Seguimiento (Opcional)</label>
+                            <input type="date" name="fecha_seguimiento" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-circle me-1"></i> Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 3. MODAL NUEVO SEGUIMIENTO -->
+<div class="modal fade" id="modalNuevoSeguimiento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-card-checklist text-primary me-2"></i>Nuevo Seguimiento Administrativo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="crear_seguimiento">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Asunto del Seguimiento <span class="text-danger">*</span></label>
+                            <input type="text" name="asunto" class="form-control" placeholder="Ej. Solicitar firmas del acta de articulación" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Descripción <span class="text-danger">*</span></label>
+                            <textarea name="descripcion" class="form-control" rows="3" placeholder="Detalles de la tarea o gestión requerida..." required></textarea>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Nivel de Prioridad</label>
+                            <select name="prioridad" class="form-select">
+                                <option value="Baja">Baja</option>
+                                <option value="Media" selected>Media</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Urgente">Urgente</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Fecha Límite</label>
+                            <input type="date" name="fecha_limite" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Convenio Vinculado (Opcional)</label>
+                            <select name="convenio" class="form-select">
+                                <option value="">Ninguno / General</option>
+                                {% for conv in convenios_colegio %}
+                                    <option value="{{ conv.id }}">{{ conv.codigo_convenio }} - {{ conv.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-circle me-1"></i> Registrar Seguimiento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 4. MODAL SUBIR DOCUMENTO ADMINISTRATIVO -->
+<div class="modal fade" id="modalSubirDocumento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-upload text-primary me-2"></i>Cargar Documento al Expediente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="subir_documento">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Nombre del Documento <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre" class="form-control" placeholder="Ej. Acta de Inicio Articulación 2026" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Tipo de Archivo</label>
+                            <select name="tipo" class="form-select">
+                                <option value="Acta" selected>Acta</option>
+                                <option value="Resolución">Resolución</option>
+                                <option value="Carta">Carta / Oficio</option>
+                                <option value="Póliza">Póliza</option>
+                                <option value="Convenio Firmado">Convenio Firmado</option>
+                                <option value="Informe">Informe</option>
+                                <option value="Otro">Otro Documento</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Convenio Vinculado</label>
+                            <select name="convenio" class="form-select">
+                                <option value="">Expediente General</option>
+                                {% for conv in convenios_colegio %}
+                                    <option value="{{ conv.id }}">{{ conv.codigo_convenio }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Archivo Digital (PDF, Word, Excel, Imagen) <span class="text-danger">*</span></label>
+                            <input type="file" name="archivo" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Descripción o Observación</label>
+                            <textarea name="descripcion" class="form-control" rows="2" placeholder="Notas sobre vigencia, firmas o anexos..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-cloud-arrow-up me-1"></i> Cargar Archivo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

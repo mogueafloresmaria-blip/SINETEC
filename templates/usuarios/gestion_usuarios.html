@@ -18,20 +18,23 @@
             </h1>
             <p class="text-muted mb-0">Control de accesos, perfiles de seguridad y directorio de la comunidad SINETEC.</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
             <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> Volver al Panel
             </a>
             <a href="{% url 'auditoria_lista' %}" class="btn btn-outline-dark">
                 <i class="bi bi-journal-text me-1"></i> Registro de Auditoría
             </a>
+            <button type="button" class="btn text-white fw-semibold shadow-sm" style="background-color: #29AAE3;" data-bs-toggle="modal" data-bs-target="#modalImportarInstructores">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Carga Masiva de Instructores
+            </button>
         </div>
     </div>
 
     <!-- Métricas Reales desde la BD -->
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4" style="border-color: #39A900 !important;">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4" style="border-color: #29AAE3 !important;">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <span class="text-muted small text-uppercase fw-semibold">Total Usuarios</span>
@@ -48,7 +51,7 @@
             <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-primary">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-muted small text-uppercase fw-semibold">Aprendices</span>
+                        <span class="text-muted small text-uppercase fw-semibold">Estudiantes</span>
                         <h3 class="fw-bold text-primary mb-0 mt-1">{{ total_aprendices }}</h3>
                         <span class="text-muted small">En formación activa</span>
                     </div>
@@ -62,7 +65,7 @@
             <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-warning">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-muted small text-uppercase fw-semibold">Instructores</span>
+                        <span class="text-muted small text-uppercase fw-semibold">Profesores</span>
                         <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_instructores }}</h3>
                         <span class="text-warning small fw-semibold">Líderes y técnicos SENA</span>
                     </div>
@@ -101,13 +104,13 @@
                 <div class="col-md-5 d-flex flex-wrap gap-1">
                     <a href="?rol=todos" class="btn btn-sm {% if not rol_filtro or rol_filtro == 'todos' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Todos</a>
                     <a href="?rol=coordinador" class="btn btn-sm {% if rol_filtro == 'coordinador' %}btn-danger{% else %}btn-outline-danger{% endif %}">Coordinación</a>
-                    <a href="?rol=instructor" class="btn btn-sm {% if rol_filtro == 'instructor' %}btn-primary{% else %}btn-outline-primary{% endif %}">Instructores</a>
+                    <a href="?rol=instructor" class="btn btn-sm {% if rol_filtro == 'instructor' %}btn-primary{% else %}btn-outline-primary{% endif %}">Profesores</a>
                     <a href="?rol=secretaria" class="btn btn-sm {% if rol_filtro == 'secretaria' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">Secretaría</a>
-                    <a href="?rol=aprendiz" class="btn btn-sm {% if rol_filtro == 'aprendiz' %}btn-success text-white{% else %}btn-outline-success{% endif %}">Aprendices</a>
+                    <a href="?rol=aprendiz" class="btn btn-sm {% if rol_filtro == 'aprendiz' %}btn-success text-white{% else %}btn-outline-success{% endif %}">Estudiantes</a>
                     <a href="?rol=admin" class="btn btn-sm {% if rol_filtro == 'admin' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">Admins</a>
                 </div>
                 <div class="col-md-2 text-end">
-                    <button type="submit" class="btn text-white w-100 fw-semibold" style="background-color: #39A900;">
+                    <button type="submit" class="btn text-white w-100 fw-semibold" style="background-color: #29AAE3;">
                         <i class="bi bi-filter me-1"></i> Buscar
                     </button>
                 </div>
@@ -163,7 +166,7 @@
                                 {% elif 'Secretar' in u.perfil.rol.nombre %}
                                     <span class="badge bg-warning text-dark px-2 py-1">Secretaría Académica</span>
                                 {% elif u.perfil.rol.nombre in 'Estudiante Aprendiz' %}
-                                    <span class="badge bg-success px-2 py-1">Aprendiz</span>
+                                    <span class="badge bg-success px-2 py-1">Estudiante</span>
                                 {% else %}
                                     <span class="badge bg-secondary px-2 py-1">{{ u.perfil.rol.nombre|default:'Usuario' }}</span>
                                 {% endif %}
@@ -209,5 +212,104 @@
         </div>
     </div>
 
+</div>
+
+<!-- Modal Institucional para Registro Masivo de Instructores -->
+<div class="modal fade" id="modalImportarInstructores" tabindex="-1" aria-labelledby="modalImportarInstructoresLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header text-white px-4 py-3" style="background-color: #04324D;">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="p-2 rounded-3 bg-white bg-opacity-10 text-white">
+                        <i class="bi bi-file-earmark-spreadsheet-fill fs-5" style="color: #29AAE3;"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalImportarInstructoresLabel">
+                            Registro Masivo de Instructores SENA
+                        </h5>
+                        <small class="text-white-50">Articulación con la Media Técnica · SINETEC</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <form method="post" action="{% url 'importar_instructores_masivo' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <!-- Paso 1: Descargar Plantilla Oficial -->
+                    <div class="card border border-success border-opacity-25 bg-success bg-opacity-10 rounded-3 p-3 mb-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div>
+                                <h6 class="fw-bold text-success mb-1">
+                                    <i class="bi bi-download me-1"></i> 1. Descargue la Plantilla Oficial Excel
+                                </h6>
+                                <p class="text-muted small mb-0">
+                                    Utilice el formato estandarizado para evitar errores en las columnas y datos obligatorios.
+                                </p>
+                            </div>
+                            <div>
+                                <a href="{% url 'plantilla_instructores' %}" class="btn btn-sm text-white fw-semibold px-3 py-2 text-nowrap" style="background-color: #29AAE3;">
+                                    <i class="bi bi-file-earmark-excel-fill me-1"></i> Descargar Plantilla .XLSX
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 2: Instrucciones y Reglas de Negocio -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 h-100 bg-light">
+                                <h6 class="fw-bold text-dark mb-2 small text-uppercase">
+                                    <i class="bi bi-check2-circle text-success me-1"></i> Columnas Requeridas
+                                </h6>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li><strong>tipo_documento:</strong> CC, CE, PEP, PPT</li>
+                                    <li><strong>numero_documento:</strong> Documento único (RN-001)</li>
+                                    <li><strong>nombres:</strong> Nombres del instructor</li>
+                                    <li><strong>apellidos:</strong> Apellidos del instructor</li>
+                                    <li><strong>correo:</strong> Correo institucional o personal</li>
+                                    <li><strong>telefono:</strong> Opcional</li>
+                                    <li><strong>especialidad:</strong> Área técnica asignada</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 h-100 bg-light">
+                                <h6 class="fw-bold text-dark mb-2 small text-uppercase">
+                                    <i class="bi bi-shield-lock-fill text-primary me-1"></i> Seguridad y Acceso
+                                </h6>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li>Se asigna automáticamente el rol <strong>Instructor SENA</strong>.</li>
+                                    <li>Usuario generado: <code>inst_&lt;documento&gt;</code></li>
+                                    <li>Contraseña inicial: <code>Sena&lt;4_últimos_dígitos&gt;*</code></li>
+                                    <li>Verificación atómica en base de datos MySQL.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 3: Selección del Archivo -->
+                    <div class="mb-3">
+                        <label for="archivoInstructores" class="form-label fw-bold text-dark">
+                            2. Seleccione el archivo diligenciado (.xlsx o .csv):
+                        </label>
+                        <input class="form-control form-control-lg border-2" type="file" id="archivoInstructores" name="archivo" accept=".xlsx,.csv,.txt" required>
+                        <div class="form-text small">
+                            Formatos aceptados: Libros de Excel (.xlsx) o archivos delimitados por comas (.csv).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn text-white fw-bold px-4" style="background-color: #29AAE3;">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Procesar e Importar Instructores
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

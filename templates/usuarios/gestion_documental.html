@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
     .documental-hero {
-        background: linear-gradient(135deg, #1c2d27 0%, #2b473d 50%, #39A900 100%);
+        background: linear-gradient(135deg, #1c2d27 0%, #2b473d 50%, #29AAE3 100%);
         color: #ffffff;
         border-radius: 20px;
         padding: clamp(24px, 3.5vw, 36px);
@@ -32,7 +32,7 @@
         transition: all 0.2s ease;
     }
     .doc-item-card:hover {
-        border-color: #39A900;
+        border-color: #29AAE3;
         box-shadow: 0 6px 18px rgba(57, 169, 0, 0.08);
         transform: translateY(-2px);
     }
@@ -53,7 +53,7 @@
                     </div>
                     <h1 class="h2 fw-bold text-white mb-2">Repositorio Documental y Normatividad</h1>
                     <p class="text-white-50 mb-0" style="font-size: 0.95rem; max-width: 780px;">
-                        Archivo institucional oficial clasificado: resoluciones de apertura de fichas, formatos F023 de etapa productiva,
+                        Archivo normativo oficial clasificado: resoluciones de apertura de fichas, formatos F023 de etapa productiva,
                         guías de aprendizaje SOFIA Plus, actas de comité y circulares vigentes.
                     </p>
                 </div>
@@ -73,13 +73,13 @@
                     <option value="GUIA_APRENDIZAJE" {% if categoria_filtro == 'GUIA_APRENDIZAJE' %}selected{% endif %}>Guías de Aprendizaje</option>
                     <option value="FORMATO_F023" {% if categoria_filtro == 'FORMATO_F023' %}selected{% endif %}>Formatos F023 (Bitácoras)</option>
                     <option value="RESOLUCION" {% if categoria_filtro == 'RESOLUCION' %}selected{% endif %}>Resoluciones y Actos</option>
-                    <option value="CIRCULAR" {% if categoria_filtro == 'CIRCULAR' %}selected{% endif %}>Circulares Institucionales</option>
+                    <option value="CIRCULAR" {% if categoria_filtro == 'CIRCULAR' %}selected{% endif %}>Circulares de Centro</option>
                     <option value="ACTA_COMITE" {% if categoria_filtro == 'ACTA_COMITE' %}selected{% endif %}>Actas de Comité Evaluador</option>
                     <option value="OTRO" {% if categoria_filtro == 'OTRO' %}selected{% endif %}>Otros Documentos</option>
                 </select>
             </div>
             <div class="col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-success fw-semibold w-100" style="background-color: #39A900;">
+                <button type="submit" class="btn btn-success fw-semibold w-100" style="background-color: #29AAE3;">
                     <i class="bi bi-funnel me-1"></i> Filtrar
                 </button>
                 <a href="{% url 'gestion_documental_lista' %}" class="btn btn-light border">Limpiar</a>
@@ -103,19 +103,101 @@
                         {% if doc.codigo %}
                             <small class="text-muted d-block mb-2"><i class="bi bi-tag me-1"></i>Código: {{ doc.codigo }}</small>
                         {% endif %}
-                        <p class="text-muted small mb-3">{{ doc.descripcion|truncatechars:120 }}</p>
+                        <p class="text-muted small mb-3">{{ doc.descripcion|truncatechars:140 }}</p>
                     </div>
-                    <div class="pt-2 border-top d-flex justify-content-between align-items-center">
-                        <small class="text-muted">{{ doc.fecha_actualizacion|date:'d/m/Y' }}</small>
-                        {% if doc.archivo %}
-                            <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                <i class="bi bi-download me-1"></i> Descargar
-                            </a>
-                        {% else %}
-                            <span class="badge bg-light text-muted">Disponible en Sede</span>
-                        {% endif %}
+                    <div class="pt-2 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ doc.fecha_actualizacion|date:'d/m/Y' }}</small>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalDoc{{ doc.id }}">
+                                <i class="bi bi-eye me-1"></i> Ver Contenido
+                            </button>
+                            {% if doc.archivo %}
+                                <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm btn-success rounded-pill px-3 fw-bold">
+                                    <i class="bi bi-download me-1"></i>
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+
+                <!-- Modal de Detalle y Contenido Completo del Documento -->
+                <div class="modal fade" id="modalDoc{{ doc.id }}" tabindex="-1" aria-labelledby="modalDocLabel{{ doc.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                            <div class="modal-header text-white" style="background: linear-gradient(135deg, #107C41 0%, #1e3a29 100%);">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="badge bg-white text-success fw-bold">{{ doc.get_categoria_display }}</span>
+                                        <span class="badge bg-warning text-dark fw-bold">Versión {{ doc.version }}</span>
+                                    </div>
+                                    <h5 class="modal-title fw-bold text-white mb-0" id="modalDocLabel{{ doc.id }}">
+                                        {{ doc.titulo }}
+                                    </h5>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body p-4 bg-light">
+                                <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-3">
+                                    <div class="row g-2 small">
+                                        <div class="col-sm-4">
+                                            <span class="text-muted d-block">Código Oficial:</span>
+                                            <strong class="text-dark">{{ doc.codigo|default:"SGC-SENA-V1" }}</strong>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <span class="text-muted d-block">Última Actualización:</span>
+                                            <strong class="text-dark">{{ doc.fecha_actualizacion|date:"d de F de Y" }}</strong>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <span class="text-muted d-block">Vigencia y Validez:</span>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Documento Oficial Vigente</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 shadow-sm rounded-3 p-4 bg-white mb-3">
+                                    <h6 class="fw-bold text-dark mb-2">
+                                        <i class="bi bi-file-text-fill text-success me-2"></i>Descripción y Propósito Normativo
+                                    </h6>
+                                    <p class="text-dark small leading-relaxed mb-3">
+                                        {{ doc.descripcion }}
+                                    </p>
+
+                                    <h6 class="fw-bold text-dark mb-2">
+                                        <i class="bi bi-list-check text-success me-2"></i>Instrucciones de Uso y Diligenciamiento
+                                    </h6>
+                                    <ul class="list-unstyled small text-muted mb-0">
+                                        <li class="py-1 d-flex align-items-start gap-2">
+                                            <i class="bi bi-check-circle-fill text-success flex-shrink-0 mt-1"></i>
+                                            <span><strong>Aplicación en Media Técnica:</strong> Este documento rige los lineamientos pedagógicos y de seguimiento entre el Centro de Formación y las Instituciones articuladas.</span>
+                                        </li>
+                                        <li class="py-1 d-flex align-items-start gap-2">
+                                            <i class="bi bi-check-circle-fill text-success flex-shrink-0 mt-1"></i>
+                                            <span><strong>Firma y Legalización:</strong> Debe ser validado con visto bueno del instructor técnico asignado y radicado digitalmente en la carpeta de la ficha.</span>
+                                        </li>
+                                        <li class="py-1 d-flex align-items-start gap-2">
+                                            <i class="bi bi-check-circle-fill text-success flex-shrink-0 mt-1"></i>
+                                            <span><strong>Custodia de Evidencias:</strong> Se integra al portafolio del aprendiz en SINETEC como soporte verificable de etapa lectiva o productiva.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-white border-0 py-3 px-4 d-flex justify-content-between">
+                                <button type="button" class="btn btn-light border btn-sm rounded-pill px-4" onclick="window.print()">
+                                    <i class="bi bi-printer me-1"></i> Imprimir Ficha
+                                </button>
+                                <div class="d-flex gap-2">
+                                    {% if doc.archivo %}
+                                        <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-success btn-sm rounded-pill px-4 fw-bold">
+                                            <i class="bi bi-download me-1"></i> Descargar Documento
+                                        </a>
+                                    {% endif %}
+                                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         {% empty %}
             <div class="col-12">

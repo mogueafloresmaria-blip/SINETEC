@@ -4,82 +4,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificación de Credencial Digital · SENA Regional Magdalena</title>
+    <title>Verificación de Credencial Escolar · SINETEC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background-color: #f2f6f2;
-            color: #14251b;
+            background-color: #F8FAFC;
+            color: #0F172A;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px 14px;
+            padding: 24px 16px;
         }
 
         .verify-card {
             width: 100%;
-            max-width: 460px;
-            background: #ffffff;
-            border-radius: 22px;
-            box-shadow: 0 20px 50px rgba(15, 36, 23, 0.12);
-            border: 1px solid #dbe6dc;
+            max-width: 480px;
+            background: #FFFFFF;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.12);
+            border: 1px solid #E2E8F0;
             overflow: hidden;
-            animation: slideUp 0.4s ease;
+            animation: slideUp 0.35s ease;
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .verify-top-banner {
-            padding: 26px 20px;
+            padding: 28px 24px;
             text-align: center;
-            color: #ffffff;
+            color: #FFFFFF;
         }
 
         .banner-valid {
-            background: linear-gradient(135deg, #155724 0%, #28a745 100%);
+            background: linear-gradient(135deg, #0F2942 0%, #1E3A8A 60%, #2563EB 100%);
         }
 
         .banner-invalid {
-            background: linear-gradient(135deg, #721c24 0%, #dc3545 100%);
+            background: linear-gradient(135deg, #881337 0%, #E11D48 100%);
         }
 
         .badge-status-icon {
             width: 64px;
             height: 64px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.2rem;
             margin: 0 auto 12px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.35);
         }
 
         .verify-body {
-            padding: 24px;
+            padding: 28px;
         }
 
         .data-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #edf2ed;
+            padding: 11px 0;
+            border-bottom: 1px solid #F1F5F9;
             font-size: 0.88rem;
         }
 
@@ -88,25 +88,25 @@
         }
 
         .data-label {
-            color: #607366;
+            color: #64748B;
             font-weight: 600;
         }
 
         .data-value {
             font-weight: 700;
-            color: #162b1d;
+            color: #0F172A;
             text-align: right;
         }
 
         .security-badge {
-            background: #f0f7ef;
-            border: 1px dashed #39a900;
-            border-radius: 12px;
-            padding: 12px;
+            background: #F8FAFC;
+            border: 1px dashed #3B82F6;
+            border-radius: 14px;
+            padding: 14px;
             text-align: center;
-            margin-top: 18px;
-            font-size: 0.8rem;
-            color: #1e4526;
+            margin-top: 20px;
+            font-size: 0.82rem;
+            color: #334155;
         }
     </style>
 </head>
@@ -119,17 +119,17 @@
             <div class="badge-status-icon">
                 <i class="bi bi-shield-check"></i>
             </div>
-            <h4 class="fw-bold mb-1">CREDENCIAL VIGENTE Y AUTÉNTICA</h4>
-            <div class="small opacity-90">Servicio Nacional de Aprendizaje SENA · Media Técnica</div>
-            <div class="badge bg-white text-success fw-bold px-3 py-1 mt-2 rounded-pill shadow-sm">
-                <i class="bi bi-calendar-check me-1"></i> Válido para ingreso hoy: {{ hoy|date:"d" }} de {{ hoy|date:"F" }}, {{ hoy|date:"Y" }}
+            <h4 class="fw-bold mb-1">CREDENCIAL ESCOLAR AUTÉNTICA</h4>
+            <div class="small opacity-90">{{ colegio.nombre|default:"Institución Educativa Técnica" }}</div>
+            <div class="badge bg-white fw-bold px-3 py-1 mt-2 rounded-pill shadow-sm" style="color: #1E3A8A !important;">
+                <i class="bi bi-calendar-check me-1"></i> Estado: Matrícula Activa 2026
             </div>
         </div>
 
         <div class="verify-body">
             <div class="text-center mb-3">
                 <h5 class="fw-bold text-dark mb-0">{{ perfil.usuario.get_full_name|default:perfil.usuario.username|upper }}</h5>
-                <span class="badge bg-success bg-opacity-10 text-success fw-bold mt-1">Aprendiz SENA Activo</span>
+                <span class="badge bg-success bg-opacity-10 text-success fw-bold mt-1">Estudiante Regular</span>
             </div>
 
             <div class="data-row">
@@ -138,70 +138,56 @@
             </div>
 
             <div class="data-row">
-                <span class="data-label"><i class="bi bi-layers me-1"></i> Ficha Técnica</span>
+                <span class="data-label"><i class="bi bi-layers me-1"></i> Curso / Grupo</span>
                 <span class="data-value">
-                    {% if matricula %}Ficha {{ matricula.ficha.codigo_ficha }}{% else %}Ficha 2501234{% endif %}
+                    {% if matricula %}Grupo {{ matricula.ficha.codigo_ficha }}{% else %}Grupo Principal{% endif %}
                 </span>
             </div>
 
             <div class="data-row">
                 <span class="data-label"><i class="bi bi-book me-1"></i> Programa</span>
                 <span class="data-value small">
-                    {% if matricula %}{{ matricula.ficha.programa.denominacion }}{% else %}Técnico en Programación de Software{% endif %}
+                    {% if matricula %}{{ matricula.ficha.programa.nombre }}{% else %}Educación Media Técnica{% endif %}
                 </span>
             </div>
 
             <div class="data-row">
-                <span class="data-label"><i class="bi bi-building me-1"></i> Institución</span>
+                <span class="data-label"><i class="bi bi-building me-1"></i> Sede Escolar</span>
                 <span class="data-value small">
-                    {% if matricula %}{{ matricula.ficha.institucion.nombre }}{% else %}I.E. Técnica Departamental de Ciénaga{% endif %}
+                    {{ colegio.nombre|default:"Sede Principal" }}
                 </span>
-            </div>
-
-            <div class="data-row">
-                <span class="data-label"><i class="bi bi-geo-alt me-1"></i> Regional</span>
-                <span class="data-value">Regional Magdalena</span>
-            </div>
-
-            <div class="data-row">
-                <span class="data-label"><i class="bi bi-clock-history me-1"></i> Verificación</span>
-                <span class="data-value">{{ ahora|time:"H:i:s" }} (Hora Colombia)</span>
             </div>
 
             <div class="security-badge">
-                <div class="fw-bold text-success"><i class="bi bi-lock-fill"></i> Validación Criptográfica Exitosa</div>
-                <div class="small font-monospace text-muted mt-1">Token: {{ codigo_seguridad_dia }}</div>
+                <i class="bi bi-patch-check-fill text-primary me-1"></i>
+                Verificación en tiempo real conectada a la base de datos de SINETEC.
+            </div>
+
+            <div class="text-center mt-3">
+                <a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-house me-1"></i> Volver al Portal
+                </a>
             </div>
         </div>
     {% else %}
-        <!-- Encabezado EXPIRADO O NO VÁLIDO -->
+        <!-- Encabezado NO VÁLIDO -->
         <div class="verify-top-banner banner-invalid">
             <div class="badge-status-icon">
-                <i class="bi bi-shield-x"></i>
+                <i class="bi bi-exclamation-triangle"></i>
             </div>
-            <h4 class="fw-bold mb-1">CREDENCIAL NO VÁLIDA O EXPIRADA</h4>
-            <div class="small opacity-90">SINETEC · Verificación de Seguridad SENA</div>
+            <h4 class="fw-bold mb-1">CREDENCIAL NO VIGENTE</h4>
+            <div class="small opacity-90">{{ colegio.nombre|default:"Institución Educativa Técnica" }}</div>
         </div>
 
         <div class="verify-body text-center">
-            <div class="alert alert-warning py-3 text-start small">
-                <strong><i class="bi bi-exclamation-triangle-fill me-1"></i> Motivo del rechazo:</strong>
-                <p class="mb-0 mt-1">
-                    Esta credencial digital cuenta con rotación criptográfica obligatoria cada 24 horas. El código QR exhibido corresponde a una fecha anterior o a una captura estática no autorizada.
-                </p>
-            </div>
-            <p class="text-muted small">
-                Solicite al aprendiz abrir su plataforma institucional SINETEC en vivo para generar el carnet con el código vigente del día.
+            <p class="text-muted small mb-4">
+                El código QR escaneado no corresponde a un estudiante con matrícula activa para la vigencia actual.
             </p>
-            <a href="{% url 'login' %}" class="btn btn-dark btn-sm px-4">Ir a portal SINETEC</a>
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-house me-1"></i> Ir al Inicio
+            </a>
         </div>
     {% endif %}
-
-    <div class="bg-light p-3 text-center border-top">
-        <small class="text-muted">
-            <i class="bi bi-shield-check text-success"></i> Sistema Oficial SINETEC · SENA Regional Magdalena
-        </small>
-    </div>
 </div>
 
 </body>

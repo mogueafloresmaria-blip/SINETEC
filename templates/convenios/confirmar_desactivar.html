@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar Desactivación · Convenios SENA{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-xl-5">
+            <div class="sinetec-card-modern p-4 text-center border-0 shadow-sm bg-white">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3" style="background: #FEF2F2; color: #DC2626;">
+                    <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                </div>
+                <h1 class="h5 fw-bold text-dark mb-2">
+                    {% if institucion.activo %}¿Desactivar Institución Educativa?{% else %}¿Activar Institución Educativa?{% endif %}
+                </h1>
+                <p class="text-muted small mb-4">
+                    {% if institucion.activo %}
+                        Estás a punto de desactivar del catálogo a <strong>{{ institucion.nombre }}</strong>. Esta acción mantendrá todo el historial y convenios intactos en la base de datos (borrado lógico).
+                    {% else %}
+                        Estás a punto de reactivar a <strong>{{ institucion.nombre }}</strong> en el catálogo público de convenios.
+                    {% endif %}
+                </p>
+                <form method="post" class="d-flex justify-content-center gap-2">
+                    {% csrf_token %}
+                    <a href="{% url 'institucion_convenio_detalle' institucion.pk %}" class="btn btn-light px-4 rounded-3 fw-semibold">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn {% if institucion.activo %}btn-danger{% else %}btn-success{% endif %} px-4 rounded-3 fw-semibold shadow-sm">
+                        {% if institucion.activo %}Sí, Desactivar{% else %}Sí, Activar{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

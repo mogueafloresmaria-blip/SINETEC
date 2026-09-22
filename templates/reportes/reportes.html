@@ -1,252 +1,224 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Centro Integral de Reportes SENA · SINETEC{% endblock %}
+{% block title %}Centro Oficial de Reportes y Certificaciones · SINETEC{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-3">
+<div class="container-fluid py-3 px-md-4">
 
-    <!-- Encabezado Institucional -->
+    <!-- Encabezado Institucional SINETEC -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
-                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+                <span class="badge px-3 py-1.5 rounded-pill text-white" style="background: #1E3A8A;">
+                    <i class="bi bi-mortarboard-fill me-1"></i> {{ colegio.nombre|default:"Institución Educativa Técnica" }}
+                </span>
+                <span class="text-muted small">Módulo de Estadísticas y Certificaciones</span>
             </div>
             <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-file-earmark-bar-graph-fill text-success me-2"></i>Centro Integral de Reportes y Auditoría
+                <i class="bi bi-file-earmark-bar-graph-fill me-2 text-primary"></i>Centro de Reportes y Exportaciones Escolares
             </h1>
-            <p class="text-muted mb-0">Generación y exportación de informes oficiales en PDF y Excel para evaluación, seguimiento y cohorte.</p>
+            <p class="text-muted mb-0">Generación y descarga de consolidados oficiales en formatos Excel (.xlsx) y PDF (.pdf) para auditoría, boletines y secretaría.</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{% url 'indicadores_dashboard' %}" class="btn btn-outline-success fw-semibold">
-                <i class="bi bi-speedometer2 me-1"></i> Ver Cuadro de Mando (KPIs)
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">
+                <i class="bi bi-speedometer2 me-1"></i> Panel Principal
             </a>
-            <button class="btn btn-outline-secondary" onclick="window.print()">
+            <button class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i> Imprimir Catálogo
             </button>
         </div>
     </div>
 
-    <!-- Métricas Resumen -->
-    <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4" style="border-color: #39A900 !important;">
-                <span class="text-muted small text-uppercase fw-semibold">Total Fichas Activas</span>
-                <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_fichas|default:0 }}</h3>
-                <span class="text-success small fw-semibold">Disponibles para reportes</span>
+    <!-- SECCIÓN PRINCIPAL: CONSOLIDADOS OFICIALES DIRECTOS -->
+    <div class="sinetec-card-modern p-4 mb-4 bg-white rounded-4 shadow-sm border">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h5 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-cloud-arrow-down-fill me-2 text-primary"></i>Catálogo de Exportaciones Oficiales
+                </h5>
+                <p class="text-muted small mb-0">Selecciona cualquiera de los formatos para descargar la información actualizada en tiempo real.</p>
             </div>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill small fw-semibold">
+                <i class="bi bi-database-check me-1"></i> Base de Datos en Vivo
+            </span>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-primary">
-                <span class="text-muted small text-uppercase fw-semibold">Total Aprendices</span>
-                <h3 class="fw-bold text-primary mb-0 mt-1">{{ total_aprendices|default:0 }}</h3>
-                <span class="text-muted small">En formación articulada</span>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-warning">
-                <span class="text-muted small text-uppercase fw-semibold">Juicios Evaluativos</span>
-                <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_juicios|default:0 }}</h3>
-                <span class="text-warning small fw-semibold">Calificaciones RAP</span>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-info">
-                <span class="text-muted small text-uppercase fw-semibold">Trámites Secretaría</span>
-                <h3 class="fw-bold text-info mb-0 mt-1">{{ total_solicitudes|default:0 }}</h3>
-                <span class="text-muted small">Solicitudes registradas</span>
-            </div>
-        </div>
-    </div>
 
-    <!-- Catálogo de Reportes Disponibles -->
-    <div class="row g-4">
-
-        <!-- 1. Reporte Oficial por Ficha -->
-        <div class="col-md-6 col-xl-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="p-3 rounded-3 bg-success bg-opacity-10 text-success">
-                            <i class="bi bi-people-fill fs-3"></i>
+        <div class="row g-4">
+            <!-- 1. Instituciones y Sedes -->
+            <div class="col-md-6 col-xl-4">
+                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #1E3A8A; font-size: 0.72rem;">SEDES ESCOLARES</span>
+                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                                <i class="bi bi-buildings-fill fs-5"></i>
+                            </div>
                         </div>
-                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">PDF & EXCEL</span>
+                        <h6 class="fw-bold text-dark mb-1">Sedes Institucionales</h6>
+                        <p class="small text-muted mb-3">Directorio oficial de planteles, sedes, códigos DANE, municipios, convenios vigentes, rectores y enlaces.</p>
                     </div>
-                    <h5 class="fw-bold text-dark mb-2">Consolidado de Aprendices por Ficha</h5>
-                    <p class="text-muted small mb-3">
-                        Informe detallado con número de documento, nombres, apellidos, correo, estado formativo y contacto de acudiente para la cohorte seleccionada.
-                    </p>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">Seleccionar Ficha:</label>
-                        <select class="form-select form-select-sm" id="select-ficha-aprendices">
-                            {% for f in fichas %}
-                                <option value="{{ f.id }}" {% if f.codigo_ficha == '3173430' %}selected{% endif %}>
-                                    Ficha {{ f.codigo_ficha }} — {{ f.programa.denominacion|truncatechars:28 }}
-                                </option>
-                            {% endfor %}
-                        </select>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <a href="{% url 'exportar_reporte_excel' %}?entidad=instituciones" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                        </a>
+                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=instituciones" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                        </a>
                     </div>
-                </div>
-                <div class="d-flex gap-2 pt-2 border-top">
-                    <button class="btn btn-sm btn-outline-danger flex-fill fw-semibold" onclick="descargarReporte('pdf', 'select-ficha-aprendices')">
-                        <i class="bi bi-file-earmark-pdf me-1"></i> Exportar PDF
-                    </button>
-                    <button class="btn btn-sm btn-outline-success flex-fill fw-semibold" onclick="descargarReporte('excel', 'select-ficha-aprendices')">
-                        <i class="bi bi-file-earmark-excel me-1"></i> Exportar Excel
-                    </button>
                 </div>
             </div>
-        </div>
 
-        <!-- 2. Sábana de Juicios RAP -->
-        <div class="col-md-6 col-xl-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="p-3 rounded-3 bg-primary bg-opacity-10 text-primary">
-                            <i class="bi bi-award-fill fs-3"></i>
+            <!-- 2. Cursos y Grupos -->
+            <div class="col-md-6 col-xl-4">
+                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #1E3A8A !important;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0F2942; font-size: 0.72rem;">CURSOS Y GRUPOS</span>
+                            <div class="p-2 rounded-3 bg-white text-dark shadow-xs">
+                                <i class="bi bi-journal-bookmark-fill fs-5"></i>
+                            </div>
                         </div>
-                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">EVALUACIÓN</span>
-                    </div>
-                    <h5 class="fw-bold text-dark mb-2">Sábana de Juicios Evaluativos (RAP)</h5>
-                    <p class="text-muted small mb-3">
-                        Matriz de evaluación con el estado de aprobación (A / D) de cada Resultado de Aprendizaje para la cohorte técnica.
-                    </p>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">Seleccionar Ficha:</label>
-                        <select class="form-select form-select-sm" id="select-ficha-rap">
-                            {% for f in fichas %}
-                                <option value="{{ f.id }}">
-                                    Ficha {{ f.codigo_ficha }} ({{ f.programa.denominacion|truncatechars:25 }})
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div class="d-flex gap-2 pt-2 border-top">
-                    <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm text-white w-100 fw-semibold" style="background-color: #39A900;">
-                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Consultar y Exportar Matriz
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Bitácoras y Visitas de Seguimiento -->
-        <div class="col-md-6 col-xl-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="p-3 rounded-3 bg-warning bg-opacity-10 text-warning">
-                            <i class="bi bi-clipboard2-pulse-fill fs-3"></i>
+                        <h6 class="fw-bold text-dark mb-1">Cursos y Grupos Formativos</h6>
+                        <p class="small text-muted mb-2">Consolidado general o grupo específico con programas, sedes y docentes titulares a cargo.</p>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-muted" style="font-size: 0.75rem;">Filtrar por grupo específico (opcional):</label>
+                            <select class="form-select form-select-sm" id="select-ficha-reporte">
+                                <option value="">-- Todos los Grupos (Consolidado) --</option>
+                                {% for f in fichas %}
+                                    <option value="{{ f.id }}">Grupo {{ f.codigo_ficha }} — {{ f.programa.nombre|truncatechars:26 }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <span class="badge bg-warning bg-opacity-25 text-dark border border-warning">SEGUIMIENTO</span>
                     </div>
-                    <h5 class="fw-bold text-dark mb-2">Historial de Bitácoras y Visitas</h5>
-                    <p class="text-muted small mb-3">
-                        Registro cronológico de las sesiones de acompañamiento pedagógico, observaciones del instructor y compromisos del aprendiz.
-                    </p>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">Ficha Objetivo:</label>
-                        <select class="form-select form-select-sm" id="select-ficha-seguimiento">
-                            {% for f in fichas %}
-                                <option value="{{ f.id }}">
-                                    Ficha {{ f.codigo_ficha }}
-                                </option>
-                            {% endfor %}
-                        </select>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <button class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3" onclick="exportarCursos('excel')">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3" onclick="exportarCursos('pdf')">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                        </button>
                     </div>
-                </div>
-                <div class="d-flex gap-2 pt-2 border-top">
-                    <a href="{% url 'seguimiento_lista' %}" class="btn btn-sm btn-outline-dark w-100 fw-semibold">
-                        <i class="bi bi-journal-text me-1"></i> Abrir Bitácoras de Visitas
-                    </a>
                 </div>
             </div>
-        </div>
 
-        <!-- 4. Auditoría de Requisitos de Certificación -->
-        <div class="col-md-6 col-xl-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="p-3 rounded-3 bg-info bg-opacity-10 text-info">
-                            <i class="bi bi-patch-check-fill fs-3"></i>
+            <!-- 3. Estudiantes Matriculados -->
+            <div class="col-md-6 col-xl-4">
+                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #2563EB; font-size: 0.72rem;">ESTUDIANTES</span>
+                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                                <i class="bi bi-mortarboard-fill fs-5"></i>
+                            </div>
                         </div>
-                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">CERTIFICACIÓN</span>
+                        <h6 class="fw-bold text-dark mb-1">Estudiantes Matriculados</h6>
+                        <p class="small text-muted mb-3">Padrón escolar oficial: número de documento, nombres, acudiente, grado, grupo y estado de matrícula.</p>
                     </div>
-                    <h5 class="fw-bold text-dark mb-2">Estado de Paz y Salvo para Certificación</h5>
-                    <p class="text-muted small mb-3">
-                        Auditoría de requisitos formativos: 100% de RAP aprobados, paz y salvo académico interno y verificación documental.
-                    </p>
-                </div>
-                <div class="pt-2 border-top">
-                    <a href="{% url 'consulta_certificacion' %}" class="btn btn-sm btn-outline-info text-dark w-100 fw-semibold">
-                        <i class="bi bi-shield-check me-1"></i> Consultar Estado de Certificación
-                    </a>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <a href="{% url 'exportar_reporte_excel' %}?entidad=aprendices" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                        </a>
+                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=aprendices" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 5. Trámites y Novedades de Secretaría -->
-        <div class="col-md-6 col-xl-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="p-3 rounded-3 bg-danger bg-opacity-10 text-danger">
-                            <i class="bi bi-inboxes-fill fs-3"></i>
+            <!-- 4. Cuerpo Docente -->
+            <div class="col-md-6 col-xl-4">
+                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #4F46E5; font-size: 0.72rem;">DOCENTES</span>
+                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                                <i class="bi bi-person-workspace fs-5"></i>
+                            </div>
                         </div>
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">SECRETARÍA</span>
+                        <h6 class="fw-bold text-dark mb-1">Cuerpo Docente y Directivos</h6>
+                        <p class="small text-muted mb-3">Directorio de docentes, roles pedagógicos asignados, correos electrónicos y grupos a cargo.</p>
                     </div>
-                    <h5 class="fw-bold text-dark mb-2">Reporte de Novedades y Solicitudes</h5>
-                    <p class="text-muted small mb-3">
-                        Consolidado de casos radicados por aprendices, tiempos de respuesta, estado de atención y trazabilidad institucional.
-                    </p>
-                </div>
-                <div class="pt-2 border-top">
-                    <a href="{% url 'secretaria_bandeja' %}" class="btn btn-sm btn-outline-danger w-100 fw-semibold">
-                        <i class="bi bi-inbox me-1"></i> Bandeja General de Secretaría
-                    </a>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <a href="{% url 'exportar_reporte_excel' %}?entidad=instructores" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                        </a>
+                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=instructores" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 6. Horarios y Ambientes de Aprendizaje -->
-        <div class="col-md-6 col-xl-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="p-3 rounded-3 bg-secondary bg-opacity-10 text-dark">
-                            <i class="bi bi-calendar3-range-fill fs-3"></i>
+            <!-- 5. Seguimientos y Observador -->
+            <div class="col-md-6 col-xl-4">
+                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0284C7; font-size: 0.72rem;">SEGUIMIENTO</span>
+                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                                <i class="bi bi-clipboard2-pulse-fill fs-5"></i>
+                            </div>
                         </div>
-                        <span class="badge bg-light text-dark border">HORARIOS</span>
+                        <h6 class="fw-bold text-dark mb-1">Bitácoras y Acompañamiento</h6>
+                        <p class="small text-muted mb-3">Historial de visitas en aula, observaciones pedagógicas, acuerdos y seguimiento de compromisos.</p>
                     </div>
-                    <h5 class="fw-bold text-dark mb-2">Distribución de Horarios y Ambientes</h5>
-                    <p class="text-muted small mb-3">
-                        Malla horaria semanal por cohorte, asignación de instructores técnicos e infraestructura de ambientes formativos.
-                    </p>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <a href="{% url 'exportar_reporte_excel' %}?entidad=seguimientos" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                        </a>
+                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=seguimientos" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                        </a>
+                    </div>
                 </div>
-                <div class="pt-2 border-top">
-                    <a href="{% url 'horarios_tablero' %}" class="btn btn-sm btn-outline-secondary w-100 fw-semibold">
-                        <i class="bi bi-calendar3 me-1"></i> Ver Tablero de Horarios
-                    </a>
+            </div>
+
+            <!-- 6. Semáforo de Competencias (3 Colores Oficiales) -->
+            <div class="col-md-6 col-xl-4">
+                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #10B981 !important;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #10B981; font-size: 0.72rem;">SEMÁFORO ESCOLAR</span>
+                            <div class="p-2 rounded-3 bg-white text-success shadow-xs">
+                                <i class="bi bi-traffic-light-fill fs-5"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Sábana del Semáforo de Competencias</h6>
+                        <p class="small text-muted mb-3">Consolidado general de calificaciones (🟢 Aprobado, 🟡 En proceso, 🔴 Por recuperar) por estudiante y grupo.</p>
+                    </div>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <a href="{% url 'exportar_semaforo_excel' %}" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                        </a>
+                        <a href="{% url 'exportar_semaforo_pdf' %}" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 
 </div>
 
 <script>
-    function descargarReporte(formato, selectId) {
-        const select = document.getElementById(selectId);
-        const fichaId = select.value;
-        if (!fichaId) return;
-        if (formato === 'pdf') {
-            window.open(`/academico/fichas/${fichaId}/reporte/pdf/`, '_blank');
-        } else if (formato === 'excel') {
-            window.location.href = `/academico/fichas/${fichaId}/reporte/excel/`;
+    function exportarCursos(formato) {
+        const select = document.getElementById('select-ficha-reporte');
+        const fichaId = select ? select.value : '';
+        if (fichaId) {
+            if (formato === 'pdf') {
+                window.open(`/academico/fichas/${fichaId}/reporte/pdf/`, '_blank');
+            } else {
+                window.location.href = `/academico/fichas/${fichaId}/reporte/excel/`;
+            }
+        } else {
+            if (formato === 'pdf') {
+                window.open("{% url 'exportar_reporte_pdf' %}?entidad=fichas", '_blank');
+            } else {
+                window.location.href = "{% url 'exportar_reporte_excel' %}?entidad=fichas";
+            }
         }
     }
 </script>

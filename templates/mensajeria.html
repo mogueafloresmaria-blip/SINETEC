@@ -1,49 +1,56 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Mensajería y Alertas - SINETEC | Regional Magdalena{% endblock %}
+{% block title %}Centro de Comunicaciones Escolares · SINETEC{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-3">
     
-    <!-- Alerta visual si se envió un mensaje con éxito -->
+    <!-- Alerta visual de confirmación -->
     {% if mensaje_enviado %}
-    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i> ¡Mensaje o alerta institucional enviada y registrada con éxito en el sistema SINETEC!
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4 rounded-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> ¡Comunicación escolar enviada y registrada con éxito en el sistema!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
     </div>
     {% endif %}
 
     <!-- Encabezado de la Sección -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-chat-square-text-fill text-danger me-2"></i> Centro de Mensajería y Comunicaciones SENA
-            </h2>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-semibold">
+                    <i class="bi bi-envelope-paper-fill me-1"></i> {{ colegio.nombre|default:"Institución Educativa Técnica" }}
+                </span>
+                <span class="text-muted small">Canal Oficial de Notificaciones</span>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-chat-square-text-fill text-primary me-2"></i>Centro de Comunicaciones y Circulares
+            </h1>
             <p class="text-muted mb-0">
-                Envío de notificaciones y alertas entre Instructores, Coordinadores, Secretaría y Aprendices.
+                Envío de notificaciones, circulares institucionales y avisos directos a docentes, familias y estudiantes.
             </p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary fw-semibold bg-white">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary fw-semibold bg-white rounded-3">
                 <i class="bi bi-arrow-left me-1"></i> Volver al Panel
             </a>
-            <button class="btn btn-primary fw-semibold shadow-sm text-white" style="background-color: #39A900; border-color: #39A900;" data-bs-toggle="modal" data-bs-target="#nuevoMensajeModal">
-                <i class="bi bi-send-fill me-1"></i> Redactar Nuevo Mensaje
+            <button class="btn btn-primary fw-semibold shadow-sm text-white rounded-3" style="background: #1E3A8A; border: none;" data-bs-toggle="modal" data-bs-target="#nuevoMensajeModal">
+                <i class="bi bi-send-fill me-1"></i> Redactar Circular o Aviso
             </button>
         </div>
     </div>
 
-    <!-- Fila de Estadísticas de Mensajería -->
+    <!-- Métricas de Comunicaciones -->
     <div class="row g-4 mb-4">
         <div class="col-xl-4 col-md-6">
-            <div class="card shadow-sm p-3 bg-white border-start border-4 border-danger">
+            <div class="sinetec-card-modern p-3 bg-white border-start border-4 border-primary rounded-4 shadow-sm">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-uppercase text-muted fw-semibold small">Mensajes Enviados</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">18</h3>
-                        <span class="text-success small fw-semibold"><i class="bi bi-check-all"></i> Entregados a tiempo</span>
+                        <span class="text-uppercase text-muted fw-semibold small" style="font-size: 0.72rem;">Comunicaciones Enviadas</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">24</h3>
+                        <span class="text-primary small fw-semibold"><i class="bi bi-check-all"></i> Circulares y citaciones</span>
                     </div>
-                    <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
+                    <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-envelope-paper fs-4"></i>
                     </div>
                 </div>
@@ -51,27 +58,27 @@
         </div>
 
         <div class="col-xl-4 col-md-6">
-            <div class="card shadow-sm p-3 bg-white border-start border-4 border-warning">
+            <div class="sinetec-card-modern p-3 bg-white border-start border-4 border-warning rounded-4 shadow-sm">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-uppercase text-muted fw-semibold small">Alertas Académicas</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">5 Activas</h3>
+                        <span class="text-uppercase text-muted fw-semibold small" style="font-size: 0.72rem;">Avisos Académicos</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">6 Activos</h3>
                         <span class="text-warning text-dark small fw-semibold">Requieren lectura</span>
                     </div>
                     <div class="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
-                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                        <i class="bi bi-bell fs-4"></i>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="col-xl-4 col-md-12">
-            <div class="card shadow-sm p-3 bg-white border-start border-4 border-success">
+            <div class="sinetec-card-modern p-3 bg-white border-start border-4 border-success rounded-4 shadow-sm">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-uppercase text-muted fw-semibold small">Canales Habilitados</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">4 Roles</h3>
-                        <span class="text-success small fw-semibold">Instructor, Coord, Sec, Alumno</span>
+                        <span class="text-uppercase text-muted fw-semibold small" style="font-size: 0.72rem;">Canales Vinculados</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">4 Estamentos</h3>
+                        <span class="text-success small fw-semibold">Rectoría, Docentes, Familias, Alumnos</span>
                     </div>
                     <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success">
                         <i class="bi bi-people-fill fs-4"></i>
@@ -81,59 +88,56 @@
         </div>
     </div>
 
-    <!-- Historial de Mensajes Recientes -->
-    <div class="card shadow-sm border-0 rounded-3 mb-4">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <!-- Bandeja de Comunicaciones -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white overflow-hidden">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
             <h5 class="fw-bold text-dark mb-0 fs-6">
                 <i class="bi bi-inbox-fill text-primary me-2"></i> Bandeja de Comunicaciones Institucionales
             </h5>
-            <span class="badge bg-light text-secondary border">SINETEC Magdalena</span>
+            <span class="badge bg-light text-secondary border">SINETEC Escolar</span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 text-secondary small">
                     <thead class="table-light text-uppercase fs-7">
                         <tr>
-                            <th class="py-3 ps-3">Remitente (Rol)</th>
-                            <th class="py-3">Destinatario</th>
-                            <th class="py-3">Asunto / Motivo</th>
-                            <th class="py-3">Institución / Ficha</th>
+                            <th class="py-3 ps-3">Remitente</th>
+                            <th class="py-3">Destinatario / Estamento</th>
+                            <th class="py-3">Asunto</th>
+                            <th class="py-3">Curso / Grupo</th>
                             <th class="py-3">Fecha y Hora</th>
                             <th class="py-3 pe-3 text-end">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="ps-3"><span class="badge bg-danger">Coordinador SENA</span><br><strong class="text-dark">Alberto Pizarro</strong></td>
-                            <td>Juan Camilo Torres <span class="badge bg-light text-dark border">Aprendiz</span></td>
-                            <td class="fw-semibold text-dark">Llamado de atención por inasistencia al ambiente</td>
-                            <td>I.E.D. Normal María Auxiliadora (Ficha 2654102)</td>
-                            <td>15 Sep 2026, 08:30 AM</td>
+                            <td class="ps-3"><span class="badge bg-primary">Rectoría</span><br><strong class="text-dark">Rectoría Institucional</strong></td>
+                            <td>Comunidad Educativa <span class="badge bg-light text-dark border">General</span></td>
+                            <td class="fw-semibold text-dark">Circular informativa sobre cronograma de evaluaciones bimestrales</td>
+                            <td>Todos los Cursos</td>
+                            <td>Hoy, 08:30 AM</td>
                             <td class="pe-3 text-end">
-                                <button class="btn btn-sm btn-outline-primary py-1 px-2" title="Leer Mensaje"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-sm btn-outline-success py-1 px-2" title="Responder"><i class="bi bi-reply-fill"></i></button>
+                                <button class="btn btn-sm btn-outline-primary py-1 px-2" title="Leer"><i class="bi bi-eye"></i></button>
                             </td>
                         </tr>
                         <tr>
-                            <td class="ps-3"><span class="badge bg-primary">Instructor SENA</span><br><strong class="text-dark">Carlos Mario Gómez</strong></td>
-                            <td>Luisa Fernanda Daza <span class="badge bg-light text-dark border">Aprendiz</span></td>
-                            <td class="fw-semibold text-dark">Entrega pendiente de evidencia de sistemas</td>
-                            <td>I.E.D. Normal María Auxiliadora (Ficha 2654102)</td>
-                            <td>14 Sep 2026, 02:15 PM</td>
+                            <td class="ps-3"><span class="badge bg-info text-dark">Coordinación</span><br><strong class="text-dark">Coordinación Académica</strong></td>
+                            <td>Acudientes y Familias <span class="badge bg-light text-dark border">Familias</span></td>
+                            <td class="fw-semibold text-dark">Reunión de entrega de boletines e informes de semáforo</td>
+                            <td>Grados 10° y 11°</td>
+                            <td>Ayer, 02:15 PM</td>
                             <td class="pe-3 text-end">
-                                <button class="btn btn-sm btn-outline-primary py-1 px-2" title="Leer Mensaje"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-sm btn-outline-success py-1 px-2" title="Responder"><i class="bi bi-reply-fill"></i></button>
+                                <button class="btn btn-sm btn-outline-primary py-1 px-2" title="Leer"><i class="bi bi-eye"></i></button>
                             </td>
                         </tr>
                         <tr>
-                            <td class="ps-3"><span class="badge bg-warning text-dark">Secretaría Académica</span><br><strong class="text-dark">Martha Lucía Pérez</strong></td>
-                            <td>Coordinación y Profesores <span class="badge bg-light text-dark border">Grupo</span></td>
-                            <td class="fw-semibold text-dark">Actualización de horarios de acceso en portería</td>
-                            <td>I.E.D. Técnica Industrial</td>
-                            <td>14 Sep 2026, 09:00 AM</td>
+                            <td class="ps-3"><span class="badge bg-secondary">Docente Titular</span><br><strong class="text-dark">Prof. Carlos Gómez</strong></td>
+                            <td>Estudiantes Grupo 10-A <span class="badge bg-light text-dark border">Alumnos</span></td>
+                            <td class="fw-semibold text-dark">Plan de recuperación de competencias en estado por recuperar</td>
+                            <td>Grupo 10-A</td>
+                            <td>18 Sep 2026</td>
                             <td class="pe-3 text-end">
-                                <button class="btn btn-sm btn-outline-primary py-1 px-2" title="Leer Mensaje"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-sm btn-outline-success py-1 px-2" title="Responder"><i class="bi bi-reply-fill"></i></button>
+                                <button class="btn btn-sm btn-outline-primary py-1 px-2" title="Leer"><i class="bi bi-eye"></i></button>
                             </td>
                         </tr>
                     </tbody>
@@ -141,89 +145,67 @@
             </div>
         </div>
         <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
-            <span class="text-muted small">Mostrando mensajes y notificaciones oficiales del sistema</span>
-            <span class="text-muted small">SINETEC v2.0 - SENA</span>
+            <span class="text-muted small">Canal oficial de notificaciones y circulares escolares</span>
+            <span class="text-muted small">SINETEC · Plataforma Escolar</span>
         </div>
     </div>
 
 </div>
 
-<!-- Modal para Redactar Nuevo Mensaje / Alerta -->
+<!-- Modal para Redactar Nueva Circular / Aviso -->
 <div class="modal fade" id="nuevoMensajeModal" tabindex="-1" aria-labelledby="nuevoMensajeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
             <form method="POST" action="{% url 'mensajeria' %}">
                 {% csrf_token %}
-                <div class="modal-header text-white" style="background-color: #39A900;">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #0F2942, #1E3A8A);">
                     <h5 class="modal-title fw-bold" id="nuevoMensajeModalLabel">
-                        <i class="bi bi-send-fill me-2"></i> Enviar Mensaje o Alerta Institucional (SINETEC)
+                        <i class="bi bi-send-fill me-2"></i> Redactar Circular o Aviso Escolar
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="row g-3">
-                        <!-- Quién envía -->
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold small text-muted">Remitente (Su Rol Actual)</label>
-                            <select name="remitente" class="form-select form-select-sm" required>
-                                <option value="">Seleccione su rol...</option>
-                                <option value="Instructor">Instructor / Profesor SENA</option>
-                                <option value="Coordinador">Coordinador Académico</option>
-                                <option value="Secretaria">Secretaría Académica</option>
-                                <option value="Aprendiz">Aprendiz</option>
+                            <label class="form-label small fw-bold">Estamento Destinatario *</label>
+                            <select class="form-select" name="destinatario_tipo" required>
+                                <option value="Familias">Acudientes y Familias</option>
+                                <option value="Estudiantes">Estudiantes</option>
+                                <option value="Docentes">Cuerpo Docente</option>
+                                <option value="Toda">Toda la Comunidad Educativa</option>
                             </select>
                         </div>
-
-                        <!-- A quién se le envía -->
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold small text-muted">Destinatario (Seleccione Rol y Persona)</label>
-                            <select name="destinatario" class="form-select form-select-sm" required>
-                                <option value="">Seleccionar destinatario...</option>
-                                <optgroup label="Coordinación Regional">
-                                    <option value="Alberto Pizarro (Coordinador)">Alberto Pizarro (Coordinador Académico)</option>
-                                </optgroup>
-                                <optgroup label="Instructores / Profesores">
-                                    <option value="Carlos Mario Gómez (Instructor)">Carlos Mario Gómez (Instructor de Sistemas)</option>
-                                    <option value="Diana Patricia Ruiz (Instructora)">Diana Patricia Ruiz (Instructora Agroindustria)</option>
-                                </optgroup>
-                                <optgroup label="Secretaría">
-                                    <option value="Martha Lucía Pérez (Secretaría)">Martha Lucía Pérez (Secretaría Académica)</option>
-                                </optgroup>
-                                <optgroup label="Aprendices (Alumnos)">
-                                    <option value="Juan Camilo Torres (Aprendiz)">Juan Camilo Torres (Aprendiz - Ficha 2654102)</option>
-                                    <option value="Luisa Fernanda Daza (Aprendiz)">Luisa Fernanda Daza (Aprendiz - Ficha 2654102)</option>
-                                    <option value="Carlos Andrés Pérez (Aprendiz)">Carlos Andrés Pérez (Aprendiz - Ficha 2654105)</option>
-                                </optgroup>
+                            <label class="form-label small fw-bold">Curso o Grupo Específico</label>
+                            <select class="form-select" name="curso_id">
+                                <option value="">-- Todos los Cursos --</option>
+                                {% for ficha in fichas %}
+                                    <option value="{{ ficha.id }}">Grupo {{ ficha.codigo_ficha }} ({{ ficha.institucion.nombre }})</option>
+                                {% endfor %}
                             </select>
                         </div>
-
-                        <!-- Colegio Asociado -->
                         <div class="col-12">
-                            <label class="form-label fw-semibold small text-muted">Institución Educativa (Colegio)</label>
-                            <select name="institucion" class="form-select form-select-sm">
-                                <option value="I.E.D. Normal María Auxiliadora">I.E.D. Normal María Auxiliadora</option>
-                                <option value="I.E.D. Simón Bolívar">I.E.D. Simón Bolívar</option>
-                                <option value="I.E.D. Técnica Industrial">I.E.D. Técnica Industrial</option>
-                            </select>
+                            <label class="form-label small fw-bold">Asunto de la Circular *</label>
+                            <input type="text" name="asunto" class="form-control" placeholder="Ej. Convocatoria a Escuela de Padres y entrega de informes" required>
                         </div>
-
-                        <!-- Asunto -->
                         <div class="col-12">
-                            <label class="form-label fw-semibold small text-muted">Asunto o Motivo</label>
-                            <input type="text" name="asunto" class="form-control form-control-sm" placeholder="Ej. Llamado de atención por inasistencia, reporte de notas, novedad..." required>
+                            <label class="form-label small fw-bold">Contenido del Mensaje *</label>
+                            <textarea name="mensaje" class="form-control" rows="5" placeholder="Redacta los detalles de la comunicación oficial..." required></textarea>
                         </div>
-
-                        <!-- Mensaje -->
-                        <div class="col-12">
-                            <label class="form-label fw-semibold small text-muted">Mensaje / Alerta</label>
-                            <textarea name="contenido" class="form-control" rows="4" placeholder="Escriba aquí el mensaje detallado para el profesor, coordinador o alumno..." required></textarea>
+                        <div class="col-md-6">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="urgenteCheck" name="urgente">
+                                <label class="form-check-label small fw-bold text-danger" for="urgenteCheck">
+                                    <i class="bi bi-exclamation-circle-fill me-1"></i> Marcar como Notificación Prioritaria
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary btn-sm text-white px-4" style="background-color: #39A900; border-color: #39A900;">
-                        <i class="bi bi-send me-1"></i> Enviar Mensaje
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-semibold px-4" style="background: #1E3A8A; border: none;">
+                        <i class="bi bi-send-fill me-1"></i> Enviar Comunicación
                     </button>
                 </div>
             </form>

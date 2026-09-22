@@ -1,0 +1,557 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Semáforo de Competencias · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3 px-md-4">
+
+    <!-- BREADCRUMB & HEADER -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Inicio</a></li>
+                    <li class="breadcrumb-item text-muted">Evaluaciones</li>
+                    <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Semáforo de Competencias</li>
+                </ol>
+            </nav>
+            <h1 class="h3 fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                <span class="d-inline-flex align-items-center justify-content-center rounded-3 px-2 py-1" style="background: #FFF0F3; color: #E11D48; border: 1px solid #FFE4E6;">
+                    <i class="bi bi-traffic-light-fill"></i>
+                </span>
+                Semáforo de Competencias Laborales
+            </h1>
+            <p class="text-muted small mb-0">
+                Monitoreo formativo cualitativo y semaforización en tiempo real: 
+                <span class="fw-bold text-success">🟢 Aprobado</span> · 
+                <span class="fw-bold text-warning">🟡 En proceso</span> · 
+                <span class="fw-bold text-danger">🔴 Por recuperar</span>
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            {% if ficha_actual and competencia_actual %}
+                <a href="{% url 'exportar_semaforo_excel' %}?ficha={{ ficha_actual.id }}&competencia={{ competencia_actual.id }}&estado={{ estado_filtro }}" class="btn btn-sm btn-outline-success rounded-3 fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-file-earmark-excel-fill"></i> Exportar Excel
+                </a>
+                <a href="{% url 'exportar_semaforo_pdf' %}?ficha={{ ficha_actual.id }}&competencia={{ competencia_actual.id }}&estado={{ estado_filtro }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-3 fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Descargar PDF
+                </a>
+            {% endif %}
+            <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm btn-light border rounded-3 fw-semibold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-1">
+                <i class="bi bi-table"></i> Sábana Oficial RAP
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 TARJETAS INDICADORAS DE ESTADO (KPIS) -->
+    <div class="row g-3 mb-4">
+        <!-- TOTAL EVALUADOS -->
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border-left: 4px solid #64748B !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Estudiantes Evaluados</div>
+                        <div class="h3 fw-bolder text-dark my-1" id="kpi-total">{{ total_evaluados }}</div>
+                        <div class="small text-muted">Grupo Ficha {{ ficha_actual.codigo_ficha|default:'--' }}</div>
+                    </div>
+                    <div class="rounded-3 p-3 fs-4" style="background: #F1F5F9; color: #475569;">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🟢 APROBADOS -->
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%); border-left: 4px solid #10B981 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-success small fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">🟢 Aprobados</div>
+                        <div class="h3 fw-bolder text-success my-1" id="kpi-aprobados">{{ total_aprobados }}</div>
+                        <div class="small fw-semibold text-success opacity-75" id="kpi-aprobados-pct">{{ pct_aprobados }}% del grupo</div>
+                    </div>
+                    <div class="rounded-3 p-3 fs-4" style="background: #DCFCE7; color: #15803D;">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🟡 EN PROCESO -->
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%); border-left: 4px solid #F59E0B !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-warning small fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">🟡 En Proceso</div>
+                        <div class="h3 fw-bolder text-warning my-1" id="kpi-en-proceso">{{ total_en_proceso }}</div>
+                        <div class="small fw-semibold text-warning opacity-75" id="kpi-en-proceso-pct">{{ pct_en_proceso }}% en desarrollo</div>
+                    </div>
+                    <div class="rounded-3 p-3 fs-4" style="background: #FEF3C7; color: #B45309;">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔴 POR RECUPERAR -->
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%); border-left: 4px solid #EF4444 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-danger small fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">🔴 Por Recuperar</div>
+                        <div class="h3 fw-bolder text-danger my-1" id="kpi-recuperar">{{ total_recuperar }}</div>
+                        <div class="small fw-semibold text-danger opacity-75" id="kpi-recuperar-pct">{{ pct_recuperar }}% plan de mejora</div>
+                    </div>
+                    <div class="rounded-3 p-3 fs-4" style="background: #FEE2E2; color: #B91C1C;">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL DE CONTROL Y FILTROS -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3 p-md-4">
+            <form method="get" class="row g-3 align-items-end">
+                <!-- Selector de Ficha -->
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-layers text-primary me-1"></i>Ficha Técnica / Colegio</label>
+                    <select name="ficha" class="form-select rounded-3 shadow-none border" onchange="this.form.submit();">
+                        {% for f in fichas %}
+                            <option value="{{ f.id }}" {% if ficha_actual and ficha_actual.id == f.id %}selected{% endif %}>
+                                Ficha {{ f.codigo_ficha }} · {{ f.programa.denominacion|truncatechars:26 }} ({{ f.institucion.nombre|truncatechars:22 }})
+                            </option>
+                        {% empty %}
+                            <option value="">No hay fichas técnicas asignadas</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Selector de Competencia -->
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-award text-success me-1"></i>Competencia Curricular</label>
+                    <select name="competencia" class="form-select rounded-3 shadow-none border" onchange="this.form.submit();">
+                        {% for c in competencias %}
+                            <option value="{{ c.id }}" {% if competencia_actual and competencia_actual.id == c.id %}selected{% endif %}>
+                                {{ c.codigo }} - {{ c.descripcion|truncatechars:55 }}
+                            </option>
+                        {% empty %}
+                            <option value="">Sin competencias asociadas</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Búsqueda rápida de Aprendiz -->
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-search me-1"></i>Buscar Estudiante</label>
+                    <div class="input-group">
+                        <input type="text" name="q" value="{{ query|default:'' }}" class="form-control rounded-start-3 shadow-none border" placeholder="Nombre, apellido o documento...">
+                        <button type="submit" class="btn btn-primary rounded-end-3 px-3">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filtros rápidos por estado de semáforo -->
+                <div class="col-12 d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top">
+                    <div class="d-flex flex-wrap align-items-center gap-1">
+                        <span class="small fw-semibold text-muted me-2"><i class="bi bi-funnel-fill me-1"></i>Filtrar por Color:</span>
+                        <a href="?ficha={{ ficha_actual.id|default:'' }}&competencia={{ competencia_actual.id|default:'' }}&q={{ query|default:'' }}" class="btn btn-sm {% if not estado_filtro %}btn-dark text-white{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1">
+                            Todos ({{ total_evaluados }})
+                        </a>
+                        <a href="?ficha={{ ficha_actual.id|default:'' }}&competencia={{ competencia_actual.id|default:'' }}&estado=APROBADO&q={{ query|default:'' }}" class="btn btn-sm {% if estado_filtro == 'APROBADO' %}btn-success text-white{% else %}btn-outline-success{% endif %} rounded-pill px-3 py-1 fw-bold">
+                            🟢 Aprobado ({{ total_aprobados }})
+                        </a>
+                        <a href="?ficha={{ ficha_actual.id|default:'' }}&competencia={{ competencia_actual.id|default:'' }}&estado=EN_PROCESO&q={{ query|default:'' }}" class="btn btn-sm {% if estado_filtro == 'EN_PROCESO' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %} rounded-pill px-3 py-1 fw-bold">
+                            🟡 En proceso ({{ total_en_proceso }})
+                        </a>
+                        <a href="?ficha={{ ficha_actual.id|default:'' }}&competencia={{ competencia_actual.id|default:'' }}&estado=RECUPERAR&q={{ query|default:'' }}" class="btn btn-sm {% if estado_filtro == 'RECUPERAR' %}btn-danger text-white{% else %}btn-outline-danger{% endif %} rounded-pill px-3 py-1 fw-bold">
+                            🔴 Por recuperar ({{ total_recuperar }})
+                        </a>
+                    </div>
+
+                    {% if not es_estudiante %}
+                        <div class="small text-muted d-flex align-items-center gap-1">
+                            <i class="bi bi-lightning-charge-fill text-warning"></i>
+                            Haz clic en <strong>🟢</strong>, <strong>🟡</strong> o <strong>🔴</strong> para guardar en 1 clic.
+                        </div>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BANNER DE INFORMACIÓN DE COMPETENCIA ACTIVA -->
+    {% if competencia_actual %}
+        <div class="card border-0 shadow-sm rounded-4 mb-4 p-3" style="background: linear-gradient(135deg, #FFF0F3 0%, #FFFFFF 100%); border-left: 4px solid #E11D48 !important;">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <div>
+                    <span class="badge px-2.5 py-1 text-white rounded-pill fw-bold" style="background: #E11D48; font-size: 0.72rem;">Norma de Competencia</span>
+                    <strong class="text-dark ms-2">{{ competencia_actual.codigo }}</strong> · <span class="text-secondary">{{ competencia_actual.descripcion }}</span>
+                </div>
+                <div class="text-muted small">
+                    Colegio: <strong>{{ ficha_actual.institucion.nombre }}</strong> · Ficha <strong>{{ ficha_actual.codigo_ficha }}</strong>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- TABLA PRINCIPAL DE EVALUACIÓN SEMAFORIZADA -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="card-title h6 fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <i class="bi bi-card-checklist text-primary"></i>
+                Matriz de Aprendices y Semáforo Cualitativo
+            </h5>
+            <span class="badge bg-light text-muted border px-2.5 py-1.5 fw-semibold">
+                {{ aprendices_datos|length }} Estudiantes en vista
+            </span>
+        </div>
+
+        <form method="post" action="" id="formSemaforoMasivo">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="guardar_masivo">
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="tablaSemaforo">
+                    <thead class="table-light">
+                        <tr class="small text-uppercase text-secondary fw-bold">
+                            <th class="ps-4" style="width: 50px;">No.</th>
+                            <th style="min-width: 240px;">Estudiante</th>
+                            <th style="width: 140px;">Documento</th>
+                            <th style="width: 170px;" class="text-center">Estado Semáforo</th>
+                            {% if not es_estudiante %}
+                                <th style="min-width: 220px;" class="text-center">Semáforo Rápido (1 Clic)</th>
+                                <th style="min-width: 250px;">Observaciones / Plan de Mejora</th>
+                            {% else %}
+                                <th>Retroalimentación del Docente</th>
+                            {% endif %}
+                            <th style="width: 120px;" class="text-center">Actualizado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in aprendices_datos %}
+                            <tr id="fila-{{ item.matricula.id }}" class="border-bottom">
+                                <!-- Consecutivo -->
+                                <td class="ps-4 text-muted small fw-bold">{{ forloop.counter }}</td>
+
+                                <!-- Estudiante -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 38px; height: 38px; background: #FFF0F3; color: #E11D48; border: 1px solid #FFE4E6; flex-shrink: 0; font-size: 0.85rem;">
+                                            {{ item.matricula.aprendiz.first_name|default:item.matricula.aprendiz.username|slice:':1'|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark small mb-0">{{ item.matricula.aprendiz.get_full_name|default:item.matricula.aprendiz.username }}</div>
+                                            <div class="text-muted" style="font-size: 0.72rem;">{{ item.matricula.aprendiz.email|default:'Sin correo institucional' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Documento -->
+                                <td>
+                                    <span class="badge bg-light text-dark border px-2 py-1 fw-semibold small">
+                                        {{ item.matricula.aprendiz.perfil.tipo_documento|default:'CC' }} {{ item.matricula.aprendiz.perfil.numero_documento|default:'--' }}
+                                    </span>
+                                </td>
+
+                                <!-- Estado Badge Actual -->
+                                <td class="text-center" id="badge-container-{{ item.matricula.id }}">
+                                    {% if item.estado_actual == 'APROBADO' %}
+                                        <span class="badge bg-success text-white px-3 py-1.5 rounded-pill shadow-xs fw-bold">
+                                            🟢 Aprobado
+                                        </span>
+                                    {% elif item.estado_actual == 'EN_PROCESO' %}
+                                        <span class="badge bg-warning text-dark px-3 py-1.5 rounded-pill shadow-xs fw-bold">
+                                            🟡 En proceso
+                                        </span>
+                                    {% elif item.estado_actual == 'RECUPERAR' %}
+                                        <span class="badge bg-danger text-white px-3 py-1.5 rounded-pill shadow-xs fw-bold">
+                                            🔴 Por recuperar
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary text-white px-3 py-1.5 rounded-pill shadow-xs fw-semibold">
+                                            ⚪ Sin Calificar
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Selector de 3 Colores en 1 Clic (Para Instructores/Coordinadores) -->
+                                {% if not es_estudiante %}
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm rounded-pill p-1 shadow-xs border bg-light" role="group" aria-label="Semáforo 3 Colores">
+                                            <!-- 🟢 APROBADO -->
+                                            <button type="button" 
+                                                    class="btn btn-sm rounded-pill px-2.5 py-1 fw-bold {% if item.estado_actual == 'APROBADO' %}btn-success text-white shadow-xs{% else %}btn-outline-light text-dark border-0{% endif %}"
+                                                    onclick="cambiarSemaforoRapido('{{ item.matricula.id }}', '{{ competencia_actual.id }}', 'APROBADO');"
+                                                    title="Calificar como Aprobado (🟢)">
+                                                🟢 Aprobado
+                                            </button>
+                                            
+                                            <!-- 🟡 EN PROCESO -->
+                                            <button type="button" 
+                                                    class="btn btn-sm rounded-pill px-2.5 py-1 fw-bold {% if item.estado_actual == 'EN_PROCESO' %}btn-warning text-dark shadow-xs{% else %}btn-outline-light text-dark border-0{% endif %}"
+                                                    onclick="cambiarSemaforoRapido('{{ item.matricula.id }}', '{{ competencia_actual.id }}', 'EN_PROCESO');"
+                                                    title="Marcar como En Proceso (🟡)">
+                                                🟡 En Proceso
+                                            </button>
+
+                                            <!-- 🔴 POR RECUPERAR -->
+                                            <button type="button" 
+                                                    class="btn btn-sm rounded-pill px-2.5 py-1 fw-bold {% if item.estado_actual == 'RECUPERAR' %}btn-danger text-white shadow-xs{% else %}btn-outline-light text-dark border-0{% endif %}"
+                                                    onclick="cambiarSemaforoRapido('{{ item.matricula.id }}', '{{ competencia_actual.id }}', 'RECUPERAR');"
+                                                    title="Asignar Plan de Mejoramiento (🔴)">
+                                                🔴 Recuperar
+                                            </button>
+                                        </div>
+
+                                        <!-- Hidden input para guardado masivo tradicional -->
+                                        <input type="hidden" name="estado_{{ item.matricula.id }}" id="input-estado-{{ item.matricula.id }}" value="{{ item.estado_actual }}">
+                                    </td>
+
+                                    <!-- Campo de Observaciones / Plan de Mejora -->
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" 
+                                                   name="obs_{{ item.matricula.id }}" 
+                                                   id="obs-{{ item.matricula.id }}" 
+                                                   value="{{ item.observacion_actual|default:'' }}" 
+                                                   class="form-control rounded-3 border small shadow-none" 
+                                                   placeholder="Plan de mejora u observación..." 
+                                                   onblur="guardarObservacionRapida('{{ item.matricula.id }}', '{{ competencia_actual.id }}');">
+                                        </div>
+                                    </td>
+                                {% else %}
+                                    <td>
+                                        <small class="text-secondary">{{ item.observacion_actual|default:"Sin observaciones registradas." }}</small>
+                                    </td>
+                                {% endif %}
+
+                                <!-- Última Actualización -->
+                                <td class="text-center small text-muted" id="fecha-container-{{ item.matricula.id }}">
+                                    {{ item.fecha_actualizacion|date:"d/m/y"|default:"Pendiente" }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <div class="py-4">
+                                        <i class="bi bi-inbox fs-1 d-block text-secondary opacity-50 mb-2"></i>
+                                        <h6 class="fw-bold text-dark">No se encontraron estudiantes para los filtros seleccionados</h6>
+                                        <p class="small text-muted mb-0">Verifica la selección de Ficha Técnica, Competencia o término de búsqueda.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if not es_estudiante and aprendices_datos %}
+                <div class="card-footer bg-light py-3 px-4 border-top d-flex justify-content-between align-items-center">
+                    <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i>Los cambios realizados se guardan instantáneamente.</small>
+                    <button type="submit" class="btn btn-sm btn-primary rounded-3 fw-bold px-4 py-2 shadow-sm">
+                        <i class="bi bi-save2-fill me-1"></i> Guardar Todos los Cambios
+                    </button>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+
+</div>
+
+<!-- TOAST FLOTANTE PARA FEEDBACK EN TIEMPO REAL -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    <div id="toastSemaforo" class="toast align-items-center text-white border-0 shadow-lg rounded-4" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2 py-3 px-3">
+                <span id="toastIcono" class="fs-5"></span>
+                <span id="toastMensaje" class="small fw-semibold"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function getCsrfToken() {
+        const cookies = document.cookie.split(';');
+        for (let c of cookies) {
+            c = c.trim();
+            if (c.startsWith('csrftoken=')) {
+                return decodeURIComponent(c.substring('csrftoken='.length));
+            }
+        }
+        return '';
+    }
+
+    function mostrarToast(mensaje, icono, tipo) {
+        const toastEl = document.getElementById('toastSemaforo');
+        const iconoEl = document.getElementById('toastIcono');
+        const mensajeEl = document.getElementById('toastMensaje');
+        
+        toastEl.className = 'toast align-items-center text-white border-0 shadow-lg rounded-4';
+        if (tipo === 'success') {
+            toastEl.classList.add('bg-success');
+        } else if (tipo === 'warning') {
+            toastEl.classList.add('bg-warning', 'text-dark');
+        } else if (tipo === 'danger') {
+            toastEl.classList.add('bg-danger');
+        } else {
+            toastEl.classList.add('bg-dark');
+        }
+
+        iconoEl.textContent = icono;
+        mensajeEl.textContent = mensaje;
+
+        const toast = new bootstrap.Toast(toastEl, { delay: 2500 });
+        toast.show();
+    }
+
+    function cambiarSemaforoRapido(matriculaId, competenciaId, nuevoEstado) {
+        if (!competenciaId) {
+            alert('Por favor selecciona una competencia válida.');
+            return;
+        }
+
+        const inputEstado = document.getElementById(`input-estado-${matriculaId}`);
+        const obsEl = document.getElementById(`obs-${matriculaId}`);
+        const obs = obsEl ? obsEl.value : '';
+
+        const formData = new FormData();
+        formData.append('matricula_id', matriculaId);
+        formData.append('competencia_id', competenciaId);
+        formData.append('estado', nuevoEstado);
+        formData.append('observaciones', obs);
+
+        fetch("{% url 'api_actualizar_semaforo' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en el servidor al actualizar');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                // Actualizar input oculto
+                if (inputEstado) inputEstado.value = nuevoEstado;
+
+                // Actualizar Badge en la tabla
+                const badgeContainer = document.getElementById(`badge-container-${matriculaId}`);
+                if (badgeContainer) {
+                    badgeContainer.innerHTML = `<span class="badge ${data.badge_class} px-3 py-1.5 rounded-pill shadow-xs fw-bold">${data.texto_estado}</span>`;
+                }
+
+                // Actualizar botones de la fila
+                const fila = document.getElementById(`fila-${matriculaId}`);
+                if (fila) {
+                    const botones = fila.querySelectorAll('button[type="button"]');
+                    botones.forEach(btn => {
+                        btn.className = 'btn btn-sm rounded-pill px-2.5 py-1 fw-bold btn-outline-light text-dark border-0';
+                    });
+                    
+                    // Resaltar el botón presionado
+                    botones.forEach(btn => {
+                        if (nuevoEstado === 'APROBADO' && btn.textContent.includes('Aprobado')) {
+                            btn.className = 'btn btn-sm rounded-pill px-2.5 py-1 fw-bold btn-success text-white shadow-xs';
+                        } else if (nuevoEstado === 'EN_PROCESO' && btn.textContent.includes('En Proceso')) {
+                            btn.className = 'btn btn-sm rounded-pill px-2.5 py-1 fw-bold btn-warning text-dark shadow-xs';
+                        } else if (nuevoEstado === 'RECUPERAR' && btn.textContent.includes('Recuperar')) {
+                            btn.className = 'btn btn-sm rounded-pill px-2.5 py-1 fw-bold btn-danger text-white shadow-xs';
+                        }
+                    });
+                }
+
+                // Actualizar fecha
+                const fechaContainer = document.getElementById(`fecha-container-${matriculaId}`);
+                if (fechaContainer) {
+                    fechaContainer.textContent = data.fecha.split(' ')[0];
+                }
+
+                // Actualizar contadores de KPI en la cabecera
+                recalcularKpisEnPantalla();
+
+                // Mostrar notificación Toast
+                const tipoToast = nuevoEstado === 'APROBADO' ? 'success' : (nuevoEstado === 'EN_PROCESO' ? 'warning' : 'danger');
+                mostrarToast(`${data.aprendiz}: ${data.texto_estado}`, data.icono, tipoToast);
+            } else {
+                alert(data.message || 'Error al actualizar el semáforo');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('No se pudo guardar la calificación. Revisa tu conexión.');
+        });
+    }
+
+    function guardarObservacionRapida(matriculaId, competenciaId) {
+        const inputEstado = document.getElementById(`input-estado-${matriculaId}`);
+        const estado = inputEstado ? inputEstado.value : 'EN_PROCESO';
+        const obsEl = document.getElementById(`obs-${matriculaId}`);
+        const obs = obsEl ? obsEl.value : '';
+
+        const formData = new FormData();
+        formData.append('matricula_id', matriculaId);
+        formData.append('competencia_id', competenciaId);
+        formData.append('estado', estado);
+        formData.append('observaciones', obs);
+
+        fetch("{% url 'api_actualizar_semaforo' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                mostrarToast('Observación guardada correctamente', '📝', 'success');
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function recalcularKpisEnPantalla() {
+        const badges = document.querySelectorAll('#tablaSemaforo tbody td[id^="badge-container-"] span');
+        let apr = 0, proc = 0, rec = 0;
+        badges.forEach(b => {
+            const t = b.textContent;
+            if (t.includes('Aprobado')) apr++;
+            else if (t.includes('En proceso')) proc++;
+            else if (t.includes('recuperar')) rec++;
+        });
+        const total = apr + proc + rec;
+
+        const elTotal = document.getElementById('kpi-total');
+        const elApr = document.getElementById('kpi-aprobados');
+        const elAprPct = document.getElementById('kpi-aprobados-pct');
+        const elProc = document.getElementById('kpi-en-proceso');
+        const elProcPct = document.getElementById('kpi-en-proceso-pct');
+        const elRec = document.getElementById('kpi-recuperar');
+        const elRecPct = document.getElementById('kpi-recuperar-pct');
+
+        if (elTotal) elTotal.textContent = total;
+        if (elApr) elApr.textContent = apr;
+        if (elProc) elProc.textContent = proc;
+        if (elRec) elRec.textContent = rec;
+
+        if (total > 0) {
+            if (elAprPct) elAprPct.textContent = `${Math.round((apr / total) * 1000) / 10}% del grupo`;
+            if (elProcPct) elProcPct.textContent = `${Math.round((proc / total) * 1000) / 10}% en desarrollo`;
+            if (elRecPct) elRecPct.textContent = `${Math.round((rec / total) * 1000) / 10}% plan de mejora`;
+        }
+    }
+</script>
+{% endblock %}
+{% endblock %}

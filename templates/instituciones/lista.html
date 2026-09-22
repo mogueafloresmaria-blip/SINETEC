@@ -1,100 +1,556 @@
 {% extends 'base.html' %}
 
-{% block title %}Colegios Articulados - SINETEC{% endblock %}
+{% block title %}Instituciones Educativas - SINETEC{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">Instituciones Educativas Articuladas</h1>
-        <p class="text-muted small mb-0">Directorio oficial de colegios con convenio en el Departamento del Magdalena</p>
-    </div>
-    <a href="{% url 'instituciones_crear' %}" class="btn btn-sinetec-primary">
-        <i class="bi bi-plus-lg me-1"></i> Vincular Nueva Institución
-    </a>
-</div>
+<div class="container-fluid py-2 px-md-3">
 
-<!-- Barra de Filtros y Búsqueda -->
-<div class="sinetec-card p-3 mb-4">
-    <form method="get" class="row g-2 align-items-center">
-        <div class="col-md-6">
-            <div class="input-group">
-                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre, código DANE o rector...">
+    <!-- 1. ENCABEZADO Y ACCIÓN PRINCIPAL -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+                <i class="bi bi-buildings text-primary"></i> Instituciones Educativas
+            </h1>
+            <p class="text-muted small mb-0">Gestión administrativa, convenios y seguimiento a planteles educativos del Magdalena</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'reportes' %}?entidad=instituciones" class="btn btn-outline-secondary btn-sm rounded-3">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Reporte
+            </a>
+            <a href="{% url 'instituciones_crear' %}" class="btn btn-sinetec-primary btn-sm rounded-3">
+                <i class="bi bi-plus-lg me-1"></i> Vincular Institución
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. CINCO KPIS METRICAS INTERACTIVAS CON DESPLIEGUE -->
+    <div class="row g-3 mb-3">
+        <!-- KPI 1: Total Colegios -->
+        <div class="col-6 col-md-4 col-xl">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-primary h-100 kpi-interactive-card" 
+                 role="button" tabindex="0" onclick="explorarColegios('todos')" id="kpi-card-todos"
+                 title="Haga clic para ver todos los colegios" style="cursor: pointer; transition: all 0.25s ease;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Total Colegios</div>
+                        <div class="h3 fw-bold text-dark my-1">{{ total_instituciones }}</div>
+                        <div class="text-primary small fw-semibold d-flex align-items-center gap-1">
+                            <span>Ver listado</span> <i class="bi bi-chevron-down" id="arrow-todos"></i>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-primary bg-opacity-10 text-primary fs-4">
+                        <i class="bi bi-buildings-fill"></i>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <select name="municipio" class="form-select">
-                <option value="">-- Todos los Municipios --</option>
-                {% for m in municipios %}
-                    <option value="{{ m }}" {% if municipio_filtro == m %}selected{% endif %}>{{ m }}</option>
-                {% endfor %}
-            </select>
+
+        <!-- KPI 2: Activas -->
+        <div class="col-6 col-md-4 col-xl">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-success h-100 kpi-interactive-card" 
+                 role="button" tabindex="0" onclick="explorarColegios('activas')" id="kpi-card-activas"
+                 title="Haga clic para ver colegios activos" style="cursor: pointer; transition: all 0.25s ease;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Activas</div>
+                        <div class="h3 fw-bold text-success my-1">{{ total_activas }}</div>
+                        <div class="text-success small fw-semibold d-flex align-items-center gap-1">
+                            <span>Ver activas</span> <i class="bi bi-chevron-down" id="arrow-activas"></i>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-success bg-opacity-10 text-success fs-4">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-sinetec-primary w-100">Filtrar</button>
-            {% if query or municipio_filtro %}
-                <a href="{% url 'instituciones_lista' %}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
-            {% endif %}
+
+        <!-- KPI 3: Inactivas -->
+        <div class="col-6 col-md-4 col-xl">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-secondary h-100 kpi-interactive-card" 
+                 role="button" tabindex="0" onclick="explorarColegios('inactivas')" id="kpi-card-inactivas"
+                 title="Haga clic para ver colegios inactivos" style="cursor: pointer; transition: all 0.25s ease;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Inactivas</div>
+                        <div class="h3 fw-bold text-secondary my-1">{{ total_inactivas }}</div>
+                        <div class="text-muted small fw-semibold d-flex align-items-center gap-1">
+                            <span>Ver inactivas</span> <i class="bi bi-chevron-down" id="arrow-inactivas"></i>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-secondary bg-opacity-10 text-secondary fs-4">
+                        <i class="bi bi-dash-circle"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-    </form>
+
+        <!-- KPI 4: Con Fichas -->
+        <div class="col-6 col-md-6 col-xl">
+            <div class="sinetec-card-modern p-3 border-start border-4 h-100 kpi-interactive-card" 
+                 style="border-left-color: #2196F3 !important; cursor: pointer; transition: all 0.25s ease;"
+                 role="button" tabindex="0" onclick="explorarColegios('con_fichas')" id="kpi-card-con_fichas"
+                 title="Haga clic para ver colegios con fichas técnicas">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Con Fichas</div>
+                        <div class="h3 fw-bold text-dark my-1">{{ con_fichas }}</div>
+                        <div class="small fw-semibold d-flex align-items-center gap-1" style="color: #2196F3;">
+                            <span>Ver con fichas</span> <i class="bi bi-chevron-down" id="arrow-con_fichas"></i>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-3 fs-4" style="background: #F0F9FD; color: #2196F3;">
+                        <i class="bi bi-layers-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 5: Sin Fichas -->
+        <div class="col-12 col-md-6 col-xl">
+            <div class="sinetec-card-modern p-3 border-start border-4 border-warning h-100 kpi-interactive-card" 
+                 role="button" tabindex="0" onclick="explorarColegios('sin_fichas')" id="kpi-card-sin_fichas"
+                 title="Haga clic para ver colegios sin fichas técnicas" style="cursor: pointer; transition: all 0.25s ease;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Sin Fichas</div>
+                        <div class="h3 fw-bold text-warning my-1">{{ sin_fichas }}</div>
+                        <div class="text-muted small fw-semibold d-flex align-items-center gap-1">
+                            <span>Ver sin fichas</span> <i class="bi bi-chevron-down" id="arrow-sin_fichas"></i>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-3 bg-warning bg-opacity-10 text-warning fs-4">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL DESPLEGABLE INTERACTIVO DE COLEGIOS SEGÚN KPI SELECCIONADO -->
+    <div id="panelExploradorColegios" class="sinetec-card-modern p-3 mb-4 bg-white border shadow-sm" style="display: none; border-radius: 16px;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-2 border-bottom">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge px-3 py-2 fs-6 rounded-pill" id="badgePanelTipo" style="background-color: #2196F3; color: #ffffff;">
+                    Colegios
+                </span>
+                <span class="text-muted small" id="subtituloPanelTipo">Explorando colegios según la métrica seleccionada</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <input type="text" id="buscadorRapidoPanel" class="form-control form-control-sm" placeholder="Buscar en esta lista..." style="max-width: 240px;" onkeyup="filtrarColegiosPanel(this.value)">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="cerrarExploradorColegios()">
+                    <i class="bi bi-x-lg me-1"></i> Cerrar
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenedores de Listas para cada categoría -->
+        <div id="contenedorListaColegios" class="row g-2" style="max-height: 420px; overflow-y: auto;">
+            <!-- Renderizado dinámico vía JavaScript usando los datos preparados en data-attributes -->
+        </div>
+    </div>
+
+    <!-- DATOS JSON OCULTOS PARA RENDERIZADO REACTIVO DEL EXPLORADOR -->
+    <script id="datos-colegios-json" type="application/json">
+    {
+        "todos": [
+            {% for c in colegios_todos %}
+                {"id": {{ c.id }}, "nombre": "{{ c.nombre|escapejs }}", "dane": "{{ c.codigo_dane|escapejs }}", "municipio": "{{ c.municipio|escapejs }}", "activa": {{ c.activa|yesno:"true,false" }}, "fichas": {{ c.num_fichas|default:0 }}, "url": "{% url 'instituciones_detalle' c.id %}"}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        "activas": [
+            {% for c in colegios_activas %}
+                {"id": {{ c.id }}, "nombre": "{{ c.nombre|escapejs }}", "dane": "{{ c.codigo_dane|escapejs }}", "municipio": "{{ c.municipio|escapejs }}", "activa": true, "fichas": {{ c.num_fichas|default:0 }}, "url": "{% url 'instituciones_detalle' c.id %}"}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        "inactivas": [
+            {% for c in colegios_inactivas %}
+                {"id": {{ c.id }}, "nombre": "{{ c.nombre|escapejs }}", "dane": "{{ c.codigo_dane|escapejs }}", "municipio": "{{ c.municipio|escapejs }}", "activa": false, "fichas": {{ c.num_fichas|default:0 }}, "url": "{% url 'instituciones_detalle' c.id %}"}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        "con_fichas": [
+            {% for c in colegios_con_fichas %}
+                {"id": {{ c.id }}, "nombre": "{{ c.nombre|escapejs }}", "dane": "{{ c.codigo_dane|escapejs }}", "municipio": "{{ c.municipio|escapejs }}", "activa": {{ c.activa|yesno:"true,false" }}, "fichas": {{ c.num_fichas|default:0 }}, "url": "{% url 'instituciones_detalle' c.id %}"}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        "sin_fichas": [
+            {% for c in colegios_sin_fichas %}
+                {"id": {{ c.id }}, "nombre": "{{ c.nombre|escapejs }}", "dane": "{{ c.codigo_dane|escapejs }}", "municipio": "{{ c.municipio|escapejs }}", "activa": {{ c.activa|yesno:"true,false" }}, "fichas": 0, "url": "{% url 'instituciones_detalle' c.id %}"}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    }
+    </script>
+
+    <!-- 3. BARRA DE FILTROS, BÚSQUEDA Y ORDENAMIENTO -->
+    <div class="sinetec-card-modern p-3 mb-4 bg-white">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="{{ query }}" class="form-control border-start-0" placeholder="Buscar por nombre, DANE, rector o municipio...">
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <select name="municipio" class="form-select">
+                    <option value="">-- Todos los Municipios --</option>
+                    {% for m in municipios %}
+                        <option value="{{ m }}" {% if municipio_filtro == m %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <select name="estado" class="form-select">
+                    <option value="">-- Todos los Estados --</option>
+                    <option value="activas" {% if estado_filtro == 'activas' %}selected{% endif %}>Solo Activas</option>
+                    <option value="inactivas" {% if estado_filtro == 'inactivas' %}selected{% endif %}>Solo Inactivas</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <select name="fichas" class="form-select">
+                    <option value="">-- Fichas --</option>
+                    <option value="con_fichas" {% if fichas_filtro == 'con_fichas' %}selected{% endif %}>Con Fichas</option>
+                    <option value="sin_fichas" {% if fichas_filtro == 'sin_fichas' %}selected{% endif %}>Sin Fichas</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <select name="orden" class="form-select">
+                    <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre (A-Z)</option>
+                    <option value="nombre_desc" {% if orden == 'nombre_desc' %}selected{% endif %}>Nombre (Z-A)</option>
+                    <option value="fichas_desc" {% if orden == 'fichas_desc' %}selected{% endif %}>Más Fichas</option>
+                    <option value="recientes" {% if orden == 'recientes' %}selected{% endif %}>Más Recientes</option>
+                </select>
+            </div>
+            <div class="col-12 d-flex justify-content-end gap-2 mt-2 pt-2 border-top">
+                {% if query or municipio_filtro or estado_filtro or fichas_filtro or orden != 'nombre_asc' %}
+                    <a href="{% url 'instituciones_lista' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i> Limpiar Filtros
+                    </a>
+                {% endif %}
+                <button type="submit" class="btn btn-sm btn-sinetec-primary px-3">
+                    <i class="bi bi-filter me-1"></i> Aplicar Filtros
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 4. TABLA DE INSTITUCIONES -->
+    <div class="sinetec-card-modern bg-white">
+        <div class="table-responsive">
+            <table class="table table-sinetec table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-3" style="width: 130px;">Código DANE</th>
+                        <th>Institución Educativa</th>
+                        <th>Municipio</th>
+                        <th>Rector / Contacto</th>
+                        <th class="text-center">Fichas</th>
+                        <th class="text-center">Estudiantes</th>
+                        <th class="text-center">Estado</th>
+                        <th class="pe-3 text-end" style="width: 140px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for col in instituciones %}
+                        <tr>
+                            <td class="ps-3">
+                                <span class="badge bg-light text-dark border font-monospace">{{ col.codigo_dane }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'instituciones_detalle' col.id %}" class="text-decoration-none fw-bold text-dark d-block">
+                                    {{ col.nombre }}
+                                </a>
+                                <small class="text-muted">{{ col.direccion|default:"Sin dirección registrada"|truncatechars:40 }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-geo-alt text-danger me-1"></i>{{ col.municipio }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="small fw-semibold text-dark">{{ col.rector_nombre|default:"Rector no registrado" }}</div>
+                                <div class="small text-muted">{{ col.telefono|default:col.correo|default:"Sin teléfono" }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary fw-bold px-2.5 py-1">
+                                    {{ col.num_fichas }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill fw-bold px-2.5 py-1" style="background: #F0F9FD; color: #29AAE3;">
+                                    {{ col.num_aprendices }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                {% if col.activa %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                                        <i class="bi bi-check-circle me-1"></i> Activa
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2 py-1">
+                                        <i class="bi bi-x-circle me-1"></i> Inactiva
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-3 text-end">
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn btn-sm btn-light border rounded-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        <li>
+                                            <a class="dropdown-item py-1.5" href="{% url 'instituciones_detalle' col.id %}">
+                                                <i class="bi bi-eye text-primary me-2"></i> Ver Ficha Detallada
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5" href="{% url 'instituciones_editar' col.id %}">
+                                                <i class="bi bi-pencil-square text-secondary me-2"></i> Editar Datos
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5" href="{% url 'instituciones_cambiar_estado' col.id %}?next={{ request.get_full_path|urlencode }}">
+                                                {% if col.activa %}
+                                                    <i class="bi bi-pause-circle text-warning me-2"></i> Desactivar Colegio
+                                                {% else %}
+                                                    <i class="bi bi-play-circle text-success me-2"></i> Activar Colegio
+                                                {% endif %}
+                                            </a>
+                                        </li>
+                                        <li>
+                                            {% if col.num_fichas > 0 %}
+                                                <button class="dropdown-item py-1.5 text-muted" onclick="alert('No es posible eliminar esta institución porque tiene {{ col.num_fichas }} ficha(s) técnica(s) asociada(s). Para suspenderla, use la opción Desactivar Colegio.')">
+                                                    <i class="bi bi-trash text-muted me-2"></i> Eliminar (Protegido)
+                                                </button>
+                                            {% else %}
+                                                <a class="dropdown-item py-1.5 text-danger" href="{% url 'instituciones_eliminar' col.id %}">
+                                                    <i class="bi bi-trash text-danger me-2"></i> Eliminar Institución
+                                                </a>
+                                            {% endif %}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-building-slash fs-2 d-block mb-2 opacity-50"></i>
+                                No se encontraron instituciones educativas con los criterios seleccionados.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 5. PAGINACIÓN -->
+        {% if page_obj.has_other_pages %}
+            <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span class="text-muted small">
+                    Mostrando página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} registros)
+                </span>
+                <nav aria-label="Paginación instituciones">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&municipio={{ municipio_filtro }}&estado={{ estado_filtro }}&fichas={{ fichas_filtro }}&orden={{ orden }}">
+                                    &laquo; Anterior
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}&q={{ query }}&municipio={{ municipio_filtro }}&estado={{ estado_filtro }}&fichas={{ fichas_filtro }}&orden={{ orden }}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&municipio={{ municipio_filtro }}&estado={{ estado_filtro }}&fichas={{ fichas_filtro }}&orden={{ orden }}">
+                                    Siguiente &raquo;
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+
 </div>
 
-<!-- Tabla de Resultados -->
-<div class="sinetec-card">
-    <div class="table-responsive">
-        <table class="table table-sinetec table-hover mb-0">
-            <thead>
-                <tr>
-                    <th>Código DANE</th>
-                    <th>Institución Educativa</th>
-                    <th>Municipio</th>
-                    <th>Rector(a)</th>
-                    <th>Docente Enlace</th>
-                    <th>Estado</th>
-                    <th class="text-end">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for col in instituciones %}
-                    <tr>
-                        <td class="fw-bold text-primary">{{ col.codigo_dane }}</td>
-                        <td class="fw-semibold">
-                            <a href="{% url 'instituciones_detalle' col.id %}" class="text-decoration-none text-dark">
-                                {{ col.nombre }}
-                            </a>
-                        </td>
-                        <td><span class="badge bg-light text-dark border">{{ col.municipio }}</span></td>
-                        <td>{{ col.rector_nombre|default:"No registrado" }}</td>
-                        <td>
-                            {{ col.enlace_nombre|default:"No registrado" }}<br>
-                            <small class="text-muted">{{ col.enlace_telefono|default:"" }}</small>
-                        </td>
-                        <td>
-                            {% if col.activa %}
-                                <span class="badge bg-success bg-opacity-10 text-success">Activo</span>
-                            {% else %}
-                                <span class="badge bg-danger bg-opacity-10 text-danger">Inactivo</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-end">
-                            <a href="{% url 'instituciones_detalle' col.id %}" class="btn btn-sm btn-outline-primary me-1" title="Ver Detalle">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="{% url 'instituciones_editar' col.id %}" class="btn btn-sm btn-outline-secondary" title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            <i class="bi bi-search fs-2 d-block mb-2"></i>
-                            No se encontraron instituciones educativas con los criterios seleccionados.
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+<!-- SCRIPT EXPLORADOR INTERACTIVO DE COLEGIOS -->
+<script>
+    let tipoActualExplorador = null;
+    let datosColegios = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const raw = document.getElementById('datos-colegios-json').textContent;
+            datosColegios = JSON.parse(raw);
+        } catch (e) {
+            console.error('Error cargando datos de colegios:', e);
+        }
+    });
+
+    const configTipos = {
+        'todos': {
+            titulo: 'Todos los Colegios',
+            badgeBg: '#2196F3',
+            badgeColor: '#ffffff',
+            subtitulo: 'Directorio general de instituciones educativas registradas en SINETEC'
+        },
+        'activas': {
+            titulo: 'Colegios Activos',
+            badgeBg: '#198754',
+            badgeColor: '#ffffff',
+            subtitulo: 'Planteles con articulación vigente y operando con normalidad'
+        },
+        'inactivas': {
+            titulo: 'Colegios Inactivos',
+            badgeBg: '#6c757d',
+            badgeColor: '#ffffff',
+            subtitulo: 'Planteles en pausa administrativa o cierre temporal'
+        },
+        'con_fichas': {
+            titulo: 'Colegios con Fichas / Cursos',
+            badgeBg: '#2196F3',
+            badgeColor: '#ffffff',
+            subtitulo: 'Instituciones con oferta técnica activa y cohortes en ejecución'
+        },
+        'sin_fichas': {
+            titulo: 'Colegios sin Fichas',
+            badgeBg: '#ffc107',
+            badgeColor: '#000000',
+            subtitulo: 'Instituciones vinculadas pendientes de apertura o asignación de cohorte'
+        }
+    };
+
+    function explorarColegios(tipo) {
+        const panel = document.getElementById('panelExploradorColegios');
+        if (!panel) return;
+
+        // Si ya está abierto en este mismo tipo, alternar / cerrar
+        if (panel.style.display !== 'none' && tipoActualExplorador === tipo) {
+            cerrarExploradorColegios();
+            return;
+        }
+
+        tipoActualExplorador = tipo;
+        const conf = configTipos[tipo] || configTipos['todos'];
+        const lista = datosColegios[tipo] || [];
+
+        // Actualizar badges e información de cabecera del panel
+        const badge = document.getElementById('badgePanelTipo');
+        badge.innerText = `${conf.titulo} (${lista.length})`;
+        badge.style.backgroundColor = conf.badgeBg;
+        badge.style.color = conf.badgeColor;
+
+        document.getElementById('subtituloPanelTipo').innerText = conf.subtitulo;
+        document.getElementById('buscadorRapidoPanel').value = '';
+
+        // Resetear flechas de todos los KPIs
+        ['todos', 'activas', 'inactivas', 'con_fichas', 'sin_fichas'].forEach(k => {
+            const arr = document.getElementById(`arrow-${k}`);
+            if (arr) arr.className = (k === tipo) ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+            const card = document.getElementById(`kpi-card-${k}`);
+            if (card) {
+                if (k === tipo) {
+                    card.style.boxShadow = '0 0 0 2px #2196F3, 0 6px 16px rgba(33, 150, 243, 0.2)';
+                } else {
+                    card.style.boxShadow = '';
+                }
+            }
+        });
+
+        // Renderizar items
+        const contenedor = document.getElementById('contenedorListaColegios');
+        if (lista.length === 0) {
+            contenedor.innerHTML = `
+                <div class="col-12 text-center py-4 text-muted">
+                    <i class="bi bi-info-circle fs-3 d-block mb-1 opacity-50"></i>
+                    No hay instituciones en esta categoría actualmente.
+                </div>
+            `;
+        } else {
+            let html = '';
+            lista.forEach(c => {
+                const estadoBadge = c.activa 
+                    ? '<span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 small"><i class="bi bi-check-circle-fill me-1"></i>Activa</span>'
+                    : '<span class="badge bg-secondary text-white small"><i class="bi bi-x-circle me-1"></i>Inactiva</span>';
+                
+                html += `
+                    <div class="col-12 col-md-6 col-lg-4 colegio-panel-item" 
+                         data-filtro="${(c.nombre + ' ' + c.dane + ' ' + c.municipio).toLowerCase()}">
+                        <div class="p-3 border rounded-3 bg-white h-100 shadow-sm d-flex flex-column justify-content-between" style="transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-light text-dark border font-monospace small">
+                                        <i class="bi bi-upc-scan me-1 text-secondary"></i>${c.dane}
+                                    </span>
+                                    ${estadoBadge}
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem; line-height: 1.3;">
+                                    <a href="${c.url}" class="text-dark text-decoration-none hover-primary">
+                                        ${c.nombre}
+                                    </a>
+                                </h6>
+                                <div class="text-muted small mb-3">
+                                    <i class="bi bi-geo-alt text-danger me-1"></i>${c.municipio}, Magdalena
+                                </div>
+                            </div>
+                            <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+                                <span class="badge bg-light text-dark border fw-semibold small">
+                                    <i class="bi bi-layers-fill me-1" style="color: #2196F3;"></i>${c.fichas} Cursos
+                                </span>
+                                <a href="${c.url}" class="btn btn-sm btn-outline-primary py-1 px-2.5 rounded-pill fw-semibold" style="font-size: 0.8rem;">
+                                    Ver Convenios <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            contenedor.innerHTML = html;
+        }
+
+        // Mostrar panel y hacer scroll suave hacia él
+        panel.style.display = 'block';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function filtrarColegiosPanel(texto) {
+        const query = (texto || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.colegio-panel-item');
+        items.forEach(item => {
+            const data = item.getAttribute('data-filtro') || '';
+            if (data.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    function cerrarExploradorColegios() {
+        const panel = document.getElementById('panelExploradorColegios');
+        if (panel) panel.style.display = 'none';
+        tipoActualExplorador = null;
+
+        ['todos', 'activas', 'inactivas', 'con_fichas', 'sin_fichas'].forEach(k => {
+            const arr = document.getElementById(`arrow-${k}`);
+            if (arr) arr.className = 'bi bi-chevron-down';
+            const card = document.getElementById(`kpi-card-${k}`);
+            if (card) card.style.boxShadow = '';
+        });
+    }
+</script>
 {% endblock %}

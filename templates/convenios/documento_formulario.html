@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} · Convenios SENA{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-3">
+
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item"><a href="{% url 'convenios_catalogo' %}" class="text-decoration-none" style="color: #2196F3;">Catálogo de Convenios</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'institucion_convenio_detalle' convenio.institucion.pk %}" class="text-decoration-none" style="color: #2196F3;">{{ convenio.institucion.nombre }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Subir Documento</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-xl-6">
+            <div class="sinetec-card-modern border-0 shadow-sm bg-white overflow-hidden">
+                <div class="p-4 border-bottom d-flex align-items-center justify-content-between" style="background: #F8FAFC;">
+                    <div>
+                        <div class="badge rounded-pill mb-1" style="background: #E3F2FD; color: #0D47A1;">Convenio: {{ convenio.numero_convenio }}</div>
+                        <h1 class="h5 fw-bold text-dark mb-0">Cargar Documento de Convenio</h1>
+                    </div>
+                    <a href="{% url 'institucion_convenio_detalle' convenio.institucion.pk %}" class="btn btn-sm btn-outline-secondary rounded-3">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="p-4">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger rounded-3 mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Verifica los campos obligatorios del archivo.
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Nombre o Título del Documento <span class="text-danger">*</span></label>
+                        {{ form.nombre }}
+                        {% if form.nombre.errors %}<div class="text-danger small mt-1">{{ form.nombre.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Tipo de Documento <span class="text-danger">*</span></label>
+                        {{ form.tipo }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Archivo Digital (PDF, DOCX, etc.) <span class="text-danger">*</span></label>
+                        {{ form.archivo }}
+                        {% if form.archivo.errors %}<div class="text-danger small mt-1">{{ form.archivo.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Descripción o Notas de Radicación</label>
+                        {{ form.descripcion }}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <a href="{% url 'institucion_convenio_detalle' convenio.institucion.pk %}" class="btn btn-light px-4 rounded-3 fw-semibold">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn text-white px-4 rounded-3 fw-semibold shadow-sm" style="background-color: #2196F3;">
+                            <i class="bi bi-cloud-arrow-up-fill me-1"></i>Subir Documento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
