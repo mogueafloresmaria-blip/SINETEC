@@ -1,7 +1,8 @@
 import csv
 import io
 import unicodedata
-from datetime import date
+from datetime import date, datetime
+from urllib.parse import urlencode
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -13,7 +14,11 @@ from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import HttpResponse
-from .models import Ficha, Matricula, ProgramaFormacion, Competencia, ResultadoAprendizaje, HorarioFicha
+
+from .models import (
+    Ficha, Matricula, ProgramaFormacion, Competencia, ResultadoAprendizaje,
+    HorarioFicha, CargaAcademica, GRADOS_POR_NIVEL, SECCIONES_ESCOLARES,
+)
 from openpyxl import load_workbook, Workbook
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -554,31 +559,78 @@ def crear_ficha(request):
     return render(request, 'academico/ficha_formulario.html', {'form': form, 'titulo': 'Apertura de Ficha Técnica'})
 
 
+def _parse_hora(valor):
+    valor = (valor or '').strip().upper().replace('.', '')
+    for fmt in ('%H:%M', '%H:%M:%S', '%I:%M %p', '%I:%M%p'):
+        try:
+            return datetime.strptime(valor, fmt).time()
+        except ValueError:
+            continue
+    return None
+
+
+def _docentes_activos():
+    return User.objects.filter(
+        Q(perfil__rol__nombre__icontains='Instructor') |
+        Q(perfil__rol__nombre__icontains='Profesor') |
+        Q(perfil__rol__nombre__icontains='Docente')
+    ).distinct().order_by('last_name', 'first_name')
+
+
 @login_required
 def lista_programas(request):
-    """
-    Módulo de Programas de Formación Técnica del SENA (ADSI, Sistemas, etc.).
-    """
-    query = request.GET.get('q', '').strip()
-    programas = ProgramaFormacion.objects.annotate(
-        num_fichas=Count('fichas', distinct=True),
-        num_competencias=Count('competencias', distinct=True)
-    ).all().order_by('denominacion')
+    """Carga académica: asignación de docentes a materias, grados y secciones."""
+    if request.method == 'POST':
+        profesor_id = request.POST.get('profesor_id')
+        programa_id = request.POST.get('programa_id') or request.POST.get('curso_id')
+        nivel = (request.POST.get('nivel') or '').strip()
+        grado = (request.POST.get('grado') or '').strip()
+        seccion = (request.POST.get('seccion') or 'A').strip() or 'A'
 
-    if query:
-        programas = programas.filter(
-            Q(denominacion__icontains=query) |
-            Q(codigo_programa__icontains=query)
-        )
+        if not all([profesor_id, programa_id, nivel, grado, seccion]):
+            messages.error(request, 'Todos los campos son obligatorios para asignar la carga académica.')
+        elif CargaAcademica.objects.filter(
+            profesor_id=profesor_id, programa_id=programa_id,
+            nivel=nivel, grado=grado, seccion=seccion, anio_lectivo=2026
+        ).exists():
+            messages.warning(request, 'Esta asignación ya está registrada para el periodo lectivo 2026.')
+        else:
+            CargaAcademica.objects.create(
+                profesor_id=profesor_id,
+                programa_id=programa_id,
+                nivel=nivel,
+                grado=grado,
+                seccion=seccion,
+                anio_lectivo=2026,
+            )
+            messages.success(request, 'Carga académica asignada.')
+        return redirect('programas_lista')
 
+    docentes = _docentes_activos()
+    if not docentes.exists():
+        docentes = User.objects.exclude(
+            perfil__rol__nombre='Estudiante'
+        ).order_by('last_name', 'first_name')
+    cargas = CargaAcademica.objects.select_related('profesor', 'profesor__perfil', 'programa')
     context = {
-        'programas': programas,
-        'query': query,
-        'total_programas': programas.count(),
-        'total_fichas_primaria': Ficha.objects.filter(estado='En Ejecucion').count() // 2,
-        'total_fichas_secundaria': Ficha.objects.filter(estado='En Ejecucion').count(),
+        'docentes': docentes,
+        'programas': ProgramaFormacion.objects.filter(activo=True).order_by('denominacion'),
+        'grados_por_nivel': GRADOS_POR_NIVEL,
+        'secciones': SECCIONES_ESCOLARES,
+        'cargas_primaria': cargas.filter(nivel='Primaria'),
+        'cargas_secundaria': cargas.filter(nivel='Secundaria'),
+        'cargas_inicial': cargas.filter(nivel='Inicial'),
     }
     return render(request, 'academico/malla_curricular.html', context)
+
+
+@login_required
+def eliminar_carga_academica(request, pk):
+    carga = get_object_or_404(CargaAcademica, pk=pk)
+    if request.method == 'POST':
+        carga.delete()
+        messages.success(request, 'Asignación académica retirada.')
+    return redirect('programas_lista')
 
 
 @login_required
@@ -767,36 +819,125 @@ def consulta_certificacion(request):
     return render(request, 'academico/certificacion.html', context)
 
 
+def _redirigir_horarios(request, extra=None):
+    params = extra or {}
+    for key in ('nivel', 'grado', 'seccion', 'dia'):
+        valor = request.POST.get(key) or request.GET.get(key) or params.get(key)
+        if valor:
+            params[key] = valor
+    qs = urlencode({k: v for k, v in params.items() if v})
+    return redirect(f'/academico/horarios/?{qs}' if qs else 'horarios_tablero')
+
+
 @login_required
 def tablero_horarios(request):
-    horarios = HorarioFicha.objects.select_related('ficha', 'ficha__programa', 'instructor').filter(activo=True)
-    ficha_id = request.GET.get('ficha', '').strip()
-    if ficha_id:
-        horarios = horarios.filter(ficha_id=ficha_id)
-    fichas = Ficha.objects.filter(estado='En Ejecucion').order_by('codigo_ficha')
-    return render(request, 'academico/horarios.html', {'horarios': horarios, 'fichas': fichas, 'ficha_id': ficha_id})
+    nivel = (request.GET.get('nivel') or '').strip()
+    grado = (request.GET.get('grado') or '').strip()
+    seccion = (request.GET.get('seccion') or 'A').strip() or 'A'
+    dia = (request.GET.get('dia') or '1').strip() or '1'
+    filtros_completos = bool(nivel and grado)
+
+    horarios = HorarioFicha.objects.select_related(
+        'ficha', 'ficha__programa', 'instructor', 'programa'
+    ).filter(activo=True)
+    if filtros_completos:
+        horarios = horarios.filter(nivel=nivel, grado=grado, seccion=seccion, dia=dia)
+    else:
+        horarios = horarios.none()
+
+    programas = ProgramaFormacion.objects.filter(activo=True).order_by('denominacion')
+    if not programas.exists():
+        programas = ProgramaFormacion.objects.all().order_by('denominacion')
+
+    dias_labels = dict(HorarioFicha.DIAS)
+    return render(request, 'academico/horarios.html', {
+        'horarios': horarios,
+        'programas': programas,
+        'nivel': nivel,
+        'grado': grado,
+        'seccion': seccion,
+        'dia': dia,
+        'dia_nombre': dias_labels.get(dia, 'Lunes'),
+        'filtros_completos': filtros_completos,
+        'grados_por_nivel': GRADOS_POR_NIVEL,
+        'secciones': SECCIONES_ESCOLARES,
+        'dias': HorarioFicha.DIAS,
+    })
 
 
 @login_required
 def crear_horario(request):
-    if request.method == 'POST':
-        form = HorarioFichaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Bloque agregado al horario de la ficha.')
-            return redirect('horarios_tablero')
-    else:
-        form = HorarioFichaForm()
-    return render(request, 'academico/horario_formulario.html', {'form': form})
+    if request.method != 'POST':
+        return redirect('horarios_tablero')
+
+    nivel = (request.POST.get('nivel') or '').strip()
+    grado = (request.POST.get('grado') or '').strip()
+    seccion = (request.POST.get('seccion') or 'A').strip() or 'A'
+    dia = (request.POST.get('dia') or '1').strip() or '1'
+    hora_inicio = _parse_hora(request.POST.get('hora_inicio'))
+    hora_fin = _parse_hora(request.POST.get('hora_fin'))
+    es_recreo = request.POST.get('es_recreo') in ('1', 'on', 'true', 'True')
+    programa_id = request.POST.get('programa_id') or request.POST.get('curso_id') or request.POST.get('ficha')
+    materia = (request.POST.get('materia') or request.POST.get('tema') or '').strip()
+
+    if not nivel or not grado:
+        messages.error(request, 'Selecciona nivel y grado antes de guardar el bloque.')
+        return _redirigir_horarios(request)
+    if not hora_inicio or not hora_fin:
+        messages.error(request, 'Indica hora de inicio y hora de fin.')
+        return _redirigir_horarios(request)
+    if hora_fin <= hora_inicio:
+        messages.error(request, 'La hora de fin debe ser posterior a la de inicio.')
+        return _redirigir_horarios(request)
+
+    programa = None
+    if programa_id:
+        programa = ProgramaFormacion.objects.filter(pk=programa_id).first()
+        if programa and not materia:
+            materia = programa.denominacion
+    if es_recreo:
+        materia = 'RECREO / ALMUERZO'
+
+    carga = CargaAcademica.objects.filter(
+        nivel=nivel, grado=grado, seccion=seccion, programa=programa
+    ).select_related('profesor').first() if programa else None
+    instructor = carga.profesor if carga else None
+    ficha = None
+    if instructor:
+        ficha = Ficha.objects.filter(instructor_lider=instructor, estado='En Ejecucion').first()
+
+    HorarioFicha.objects.create(
+        ficha=ficha,
+        instructor=instructor,
+        programa=programa,
+        dia=dia,
+        hora_inicio=hora_inicio,
+        hora_fin=hora_fin,
+        modalidad='Presencial',
+        tema=materia,
+        nivel=nivel,
+        grado=grado,
+        seccion=seccion,
+        es_recreo=es_recreo,
+        activo=True,
+    )
+    messages.success(request, 'Clase agregada al horario escolar.')
+    return _redirigir_horarios(request)
 
 
 @login_required
 def eliminar_horario(request, pk):
     horario = get_object_or_404(HorarioFicha, pk=pk)
+    params = {
+        'nivel': horario.nivel,
+        'grado': horario.grado,
+        'seccion': horario.seccion,
+        'dia': horario.dia,
+    }
     if request.method == 'POST':
         horario.delete()
         messages.success(request, 'Bloque retirado del horario.')
-    return redirect('horarios_tablero')
+    return _redirigir_horarios(request, extra=params)
 
 
 @login_required

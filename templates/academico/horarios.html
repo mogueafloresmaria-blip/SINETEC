@@ -1,158 +1,207 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Gesti&oacute;n de Horarios &middot; SINETEC{% endblock %}
+{% block title %}Gestión de Horarios · SINETEC{% endblock %}
 
 {% block extra_head %}
 <style>
 body{background:#f3f5f9 !important;}
-.hor-wrap{padding:1rem 1.2rem;}
-.hor-filter-bar{background:#fff;border-radius:10px;padding:1rem 1.2rem;border:1px solid #e2e8f0;margin-bottom:1rem;}
-.hor-filter-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:.3rem;}
-.hor-panel{background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);}
-.hor-nueva{background:#fff;border-left:4px solid #6366f1;border-radius:10px;border:1px solid #e2e8f0;border-left:4px solid #6366f1;padding:1.2rem;box-shadow:0 1px 4px rgba(0,0,0,.04);}
-.hor-dia-title{font-size:1.1rem;font-weight:800;text-transform:uppercase;color:#0f172a;}
-.hor-bloques-badge{font-size:.78rem;font-weight:700;color:#6366f1;}
-.hor-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;color:#94a3b8;}
-.hor-empty i{font-size:2.5rem;opacity:.3;margin-bottom:.5rem;}
-.hor-bloque{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.75rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between;}
-.hor-bloque-hora{font-size:.78rem;font-weight:700;color:#6366f1;min-width:90px;}
-.hor-bloque-materia{font-weight:700;color:#0f172a;font-size:.88rem;}
-.hor-bloque-prof{font-size:.75rem;color:#64748b;}
+.hor-wrap{padding:1.1rem 1.35rem 2rem;}
+.hor-title{font-size:1.45rem;font-weight:800;color:#0f172a;letter-spacing:-.02em;margin:0;}
+.hor-sub{color:#94a3b8;font-size:.9rem;margin:.15rem 0 0;}
+.hor-filters{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.15rem;box-shadow:0 1px 3px rgba(15,23,42,.04);margin:1.15rem 0 1.25rem;}
+.hor-flabel{font-size:.68rem;font-weight:800;letter-spacing:.04em;color:#94a3b8;margin-bottom:.4rem;}
+.hor-filters .form-select{border-radius:10px;border-color:#e2e8f0;font-weight:600;color:#0f172a;padding:.55rem .85rem;}
+.hor-filters .form-select:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.hor-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 4px rgba(15,23,42,.04);padding:1.25rem 1.3rem;}
+.hor-card-title{display:flex;align-items:center;gap:.5rem;font-weight:800;color:#0f172a;margin-bottom:1rem;}
+.hor-dot{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#4f46e5);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem;}
+.hor-label{font-size:.68rem;font-weight:800;letter-spacing:.06em;color:#64748b;margin-bottom:.35rem;}
+.hor-card .form-select,.hor-card .form-control{border-radius:10px;border-color:#e2e8f0;}
+.hor-ampm{background:#f8fafc;border:1px solid #e2e8f0;border-radius:0 10px 10px 0;font-size:.78rem;font-weight:800;color:#64748b;min-width:52px;}
+.hor-btn{background:linear-gradient(135deg,#7c6cf5,#5b4ce0);border:none;color:#fff;font-weight:700;border-radius:12px;padding:.7rem 1rem;width:100%;}
+.hor-btn:hover{color:#fff;filter:brightness(1.05);}
+.hor-btn:disabled{opacity:.55;}
+.hor-hint{border:1.5px dashed #e2e8f0;border-radius:12px;padding:1.6rem .8rem;text-align:center;color:#94a3b8;font-size:.88rem;}
+.hor-day{font-size:1.15rem;font-weight:800;letter-spacing:.04em;color:#0f172a;text-transform:uppercase;}
+.hor-count{background:#eef2ff;color:#4f46e5;font-size:.78rem;font-weight:800;padding:.28rem .7rem;border-radius:999px;}
+.hor-block{background:#fff;border:1px solid #eef0f4;border-radius:14px;padding:.9rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;box-shadow:0 1px 2px rgba(15,23,42,.03);}
+.hor-time{font-size:.78rem;font-weight:800;color:#64748b;min-width:78px;}
+.hor-mat{font-weight:800;color:#0f172a;font-size:.95rem;}
+.hor-mod{display:inline-flex;align-items:center;gap:.25rem;font-size:.75rem;color:#94a3b8;margin-top:.1rem;}
+.hor-x{width:32px;height:32px;border-radius:10px;border:1px solid #fecdd3;background:#fff1f2;color:#fb7185;display:inline-flex;align-items:center;justify-content:center;}
+.hor-recreo{background:#fffbeb;border:1.5px dashed #f59e0b;border-radius:14px;padding:.9rem 1rem;display:flex;align-items:center;justify-content:space-between;}
+.hor-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3.2rem 1rem;color:#94a3b8;}
 </style>
 {% endblock %}
 
 {% block content %}
+{{ grados_por_nivel|json_script:"grados-por-nivel" }}
 <div class="hor-wrap">
+  <h1 class="hor-title">Gestión de Horarios</h1>
+  <p class="hor-sub">Organiza las clases por nivel, grado y día.</p>
 
-  <!-- TÍTULO -->
-  <div class="d-flex align-items-center gap-2 mb-3">
-    <i class="bi bi-calendar2-week-fill" style="font-size:1.3rem;color:#6366f1;"></i>
-    <div>
-      <h1 class="h4 fw-bold text-dark mb-0">Gesti&oacute;n de Horarios</h1>
-      <p class="text-muted mb-0" style="font-size:.85rem;">Organiza las clases por nivel, grado y d&iacute;a.</p>
-    </div>
-  </div>
-
-  <!-- FILTROS -->
-  <div class="hor-filter-bar">
-    <form method="get" action="">
+  <div class="hor-filters">
+    <form method="get" id="horFiltros">
       <div class="row g-3 align-items-end">
-        <div class="col-6 col-md-3">
-          <div class="hor-filter-label">1. Nivel Acad&eacute;mico</div>
-          <select name="nivel" class="form-select form-select-sm" onchange="this.form.submit()">
+        <div class="col-6 col-lg-3">
+          <div class="hor-flabel">1. NIVEL ACADÉMICO</div>
+          <select name="nivel" id="filtroNivel" class="form-select" onchange="actualizarGrados(); this.form.submit();">
             <option value="">-- Seleccionar --</option>
-            <option value="primaria" {% if request.GET.nivel == 'primaria' %}selected{% endif %}>Primaria</option>
-            <option value="secundaria" {% if request.GET.nivel == 'secundaria' %}selected{% endif %}>Secundaria</option>
+            <option value="Inicial" {% if nivel == 'Inicial' %}selected{% endif %}>Inicial</option>
+            <option value="Primaria" {% if nivel == 'Primaria' %}selected{% endif %}>Primaria</option>
+            <option value="Secundaria" {% if nivel == 'Secundaria' %}selected{% endif %}>Secundaria</option>
           </select>
         </div>
-        <div class="col-6 col-md-3">
-          <div class="hor-filter-label">2. Grado</div>
-          <select name="grado" class="form-select form-select-sm">
+        <div class="col-6 col-lg-3">
+          <div class="hor-flabel">2. GRADO</div>
+          <select name="grado" id="filtroGrado" class="form-select" onchange="this.form.submit()">
             <option value="">-- Seleccionar --</option>
-            {% for i in "123456789" %}<option value="{{ i }}">{{ i }}&deg; Grado</option>{% endfor %}
           </select>
         </div>
-        <div class="col-6 col-md-2">
-          <div class="hor-filter-label">3. Secci&oacute;n</div>
-          <select name="seccion" class="form-select form-select-sm">
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
+        <div class="col-6 col-lg-3">
+          <div class="hor-flabel">3. SECCIÓN</div>
+          <select name="seccion" class="form-select" onchange="this.form.submit()">
+            {% for s in secciones %}
+            <option value="{{ s }}" {% if seccion == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
           </select>
         </div>
-        <div class="col-6 col-md-3">
-          <div class="hor-filter-label">4. D&iacute;a</div>
-          <select name="dia" class="form-select form-select-sm" onchange="this.form.submit()">
-            <option value="LUN" {% if request.GET.dia == 'LUN' or not request.GET.dia %}selected{% endif %}>Lunes</option>
-            <option value="MAR" {% if request.GET.dia == 'MAR' %}selected{% endif %}>Martes</option>
-            <option value="MIE" {% if request.GET.dia == 'MIE' %}selected{% endif %}>Mi&eacute;rcoles</option>
-            <option value="JUE" {% if request.GET.dia == 'JUE' %}selected{% endif %}>Jueves</option>
-            <option value="VIE" {% if request.GET.dia == 'VIE' %}selected{% endif %}>Viernes</option>
+        <div class="col-6 col-lg-3">
+          <div class="hor-flabel">4. DÍA</div>
+          <select name="dia" class="form-select" onchange="this.form.submit()">
+            {% for val, nombre in dias %}
+            <option value="{{ val }}" {% if dia == val %}selected{% endif %}>{{ nombre }}</option>
+            {% endfor %}
           </select>
         </div>
       </div>
     </form>
   </div>
 
-  <div class="row g-3">
-    <!-- NUEVA CLASE -->
-    <div class="col-md-4">
-      <div class="hor-nueva">
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <i class="bi bi-plus-circle-fill" style="color:#6366f1;"></i>
-          <span class="fw-bold text-dark">Nueva Clase</span>
-        </div>
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="hor-card">
+        <div class="hor-card-title"><span class="hor-dot">+</span> Nueva Clase</div>
+        {% if filtros_completos %}
         <form method="post" action="{% url 'horario_nuevo' %}">
           {% csrf_token %}
-          <div class="mb-2">
-            <label class="form-label small fw-bold text-muted">Ficha / Grupo</label>
-            <select name="ficha" class="form-select form-select-sm" required>
-              <option value="">Seleccionar...</option>
-              {% for f in fichas %}
-              <option value="{{ f.id }}">{{ f.codigo_ficha }} — {{ f.programa.denominacion|truncatechars:20 }}</option>
+          <input type="hidden" name="nivel" value="{{ nivel }}">
+          <input type="hidden" name="grado" value="{{ grado }}">
+          <input type="hidden" name="seccion" value="{{ seccion }}">
+          <input type="hidden" name="dia" value="{{ dia }}">
+          <div class="mb-3">
+            <div class="hor-label">MATERIA / CURSO</div>
+            <select name="programa_id" class="form-select">
+              <option value="">-- Seleccionar Materia --</option>
+              {% for p in programas %}
+              <option value="{{ p.id }}">{{ p.denominacion }}</option>
               {% endfor %}
             </select>
           </div>
-          <div class="mb-2">
-            <label class="form-label small fw-bold text-muted">D&iacute;a</label>
-            <select name="dia" class="form-select form-select-sm" required>
-              <option value="LUN">Lunes</option><option value="MAR">Martes</option><option value="MIE">Mi&eacute;rcoles</option><option value="JUE">Jueves</option><option value="VIE">Viernes</option><option value="SAB">S&aacute;bado</option>
-            </select>
-          </div>
-          <div class="row g-2 mb-2">
+          <div class="row g-2 mb-3">
             <div class="col-6">
-              <label class="form-label small fw-bold text-muted">Hora Inicio</label>
-              <input type="time" name="hora_inicio" class="form-control form-control-sm" value="07:00" required>
+              <div class="hor-label">HORA DE INICIO</div>
+              <div class="input-group">
+                <input type="time" name="hora_inicio" class="form-control" value="08:00" required>
+                <span class="input-group-text hor-ampm">AM</span>
+              </div>
             </div>
             <div class="col-6">
-              <label class="form-label small fw-bold text-muted">Hora Fin</label>
-              <input type="time" name="hora_fin" class="form-control form-control-sm" value="08:00" required>
+              <div class="hor-label">HORA DE FIN</div>
+              <div class="input-group">
+                <input type="time" name="hora_fin" class="form-control" value="09:00" required>
+                <span class="input-group-text hor-ampm">AM</span>
+              </div>
             </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label small fw-bold text-muted">Materia</label>
-            <input type="text" name="materia" class="form-control form-control-sm" placeholder="Ej: Matem&aacute;ticas" required>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="es_recreo" id="es_recreo">
+            <label class="form-check-label small fw-semibold" for="es_recreo">Marcar como Recreo / Almuerzo</label>
           </div>
-          <button type="submit" class="btn w-100 text-white fw-bold" style="background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:8px;">Agregar Bloque</button>
+          <button type="submit" class="hor-btn">Guardar en Horario</button>
         </form>
-        <div class="text-center mt-3 text-muted small">
-          <i class="bi bi-arrow-up"></i> Selecciona Nivel y Grado arriba
+        {% else %}
+        <div class="hor-hint">
+          <i class="bi bi-arrow-up d-block mb-2" style="font-size:1.2rem;"></i>
+          Seleccione Nivel y Grado arriba
         </div>
+        {% endif %}
       </div>
     </div>
 
-    <!-- BLOQUES DEL DÍA -->
-    <div class="col-md-8">
-      <div class="hor-panel p-3">
+    <div class="col-lg-8">
+      <div class="hor-card" style="min-height:360px;">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <div class="hor-dia-title">{{ request.GET.dia|default:"LUNES" }}</div>
-          <div class="hor-bloques-badge">{{ horarios|length }} Bloques</div>
+          <div class="hor-day">{{ dia_nombre }}</div>
+          <div class="hor-count">{{ horarios|length }} Bloques</div>
         </div>
 
-        {% for h in horarios %}
-        <div class="hor-bloque">
-          <div class="d-flex align-items-center gap-3">
-            <div class="hor-bloque-hora">{{ h.hora_inicio|time:"H:i" }} - {{ h.hora_fin|time:"H:i" }}</div>
-            <div>
-              <div class="hor-bloque-materia">{{ h.materia|default:h.ficha.programa.denominacion|truncatechars:25 }}</div>
-              <div class="hor-bloque-prof">{{ h.instructor.get_full_name|default:"Sin profesor" }} &middot; {{ h.ficha.codigo_ficha }}</div>
-            </div>
-          </div>
-          <form method="post" action="{% url 'horario_eliminar' h.pk %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 py-0 px-2" title="Eliminar" onclick="return confirm('¿Eliminar este bloque?');"><i class="bi bi-trash3"></i></button>
-          </form>
-        </div>
-        {% empty %}
+        {% if not filtros_completos %}
         <div class="hor-empty">
-          <i class="bi bi-calendar-x"></i>
-          <div class="fw-bold" style="font-size:1rem;color:#64748b;">D&iacute;a Libre</div>
-          <div class="small">No hay clases programadas.</div>
+          <i class="bi bi-calendar3" style="font-size:2.4rem;opacity:.25;margin-bottom:.6rem;"></i>
+          <div class="fw-bold" style="color:#64748b;">Día Libre</div>
+          <div class="small">No hay clases programadas</div>
         </div>
-        {% endfor %}
+        {% else %}
+          <div class="d-flex flex-column gap-2">
+          {% for h in horarios %}
+            {% if h.es_recreo %}
+            <div class="hor-recreo">
+              <div class="d-flex align-items-center gap-3">
+                <div class="hor-time">{{ h.hora_inicio_ampm }}</div>
+                <div>
+                  <div class="hor-mat"><i class="bi bi-bell-fill text-warning me-1"></i> RECREO / ALMUERZO</div>
+                </div>
+              </div>
+              <form method="post" action="{% url 'horario_eliminar' h.pk %}">
+                {% csrf_token %}
+                <button class="hor-x" title="Eliminar" onclick="return confirm('¿Retirar este bloque?');"><i class="bi bi-x-lg"></i></button>
+              </form>
+            </div>
+            {% else %}
+            <div class="hor-block">
+              <div class="d-flex align-items-center gap-3">
+                <div class="hor-time">{{ h.hora_inicio_ampm }}</div>
+                <div>
+                  <div class="hor-mat">{{ h.nombre_materia }}</div>
+                  <div class="hor-mod"><i class="bi bi-geo-alt"></i> {{ h.modalidad|default:"Presencial" }}</div>
+                </div>
+              </div>
+              <form method="post" action="{% url 'horario_eliminar' h.pk %}">
+                {% csrf_token %}
+                <button class="hor-x" title="Eliminar" onclick="return confirm('¿Retirar esta clase del horario?');"><i class="bi bi-x-lg"></i></button>
+              </form>
+            </div>
+            {% endif %}
+          {% empty %}
+            <div class="hor-empty">
+              <i class="bi bi-calendar3" style="font-size:2.4rem;opacity:.25;margin-bottom:.6rem;"></i>
+              <div class="fw-bold" style="color:#64748b;">Día Libre</div>
+              <div class="small">No hay clases programadas</div>
+            </div>
+          {% endfor %}
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
-
 </div>
+
+<script>
+const GRADOS = JSON.parse(document.getElementById('grados-por-nivel').textContent);
+const gradoActual = "{{ grado|escapejs }}";
+function actualizarGrados() {
+  const nivel = document.getElementById('filtroNivel').value;
+  const sel = document.getElementById('filtroGrado');
+  const opts = GRADOS[nivel] || [];
+  sel.innerHTML = '<option value="">-- Seleccionar --</option>';
+  opts.forEach(g => {
+    const o = document.createElement('option');
+    o.value = g; o.textContent = g;
+    if (g === gradoActual) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+actualizarGrados();
+</script>
 {% endblock %}

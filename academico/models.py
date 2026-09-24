@@ -10,6 +10,29 @@ from django.core.exceptions import ValidationError
 from instituciones.models import InstitucionEducativa
 
 
+NIVELES_ESCOLARES = [
+    ('Inicial', 'Inicial'),
+    ('Primaria', 'Primaria'),
+    ('Secundaria', 'Secundaria'),
+]
+
+GRADOS_POR_NIVEL = {
+    'Inicial': ['3 años', '4 años', '5 años'],
+    'Primaria': ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado', '6to Grado'],
+    'Secundaria': ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'],
+}
+
+SECCIONES_ESCOLARES = ['A', 'B', 'C']
+
+
+def formato_hora_ampm(hora):
+    if not hora:
+        return ''
+    hora_12 = hora.hour % 12 or 12
+    sufijo = 'AM' if hora.hour < 12 else 'PM'
+    return f'{hora_12:02d}:{hora.minute:02d} {sufijo}'
+
+
 class ProgramaFormacion(models.Model):
     """
     Programas de formación técnica curricular que imparte el Centro en articulación.
@@ -299,20 +322,34 @@ class Matricula(models.Model):
 
 
 class HorarioFicha(models.Model):
-    """Bloque editable del horario formativo de una ficha SENA."""
+    """Bloque editable del horario escolar por nivel, grado, sección y día."""
     DIAS = [(str(indice), nombre) for indice, nombre in enumerate(
         ('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'), start=1
     )]
     MODALIDADES = [('Presencial', 'Presencial'), ('Virtual', 'Virtual'), ('Mixta', 'Mixta')]
 
-    ficha = models.ForeignKey(Ficha, on_delete=models.CASCADE, related_name='horarios')
-    instructor = models.ForeignKey(User, on_delete=models.PROTECT, related_name='horarios_formativos')
+    ficha = models.ForeignKey(
+        Ficha, on_delete=models.SET_NULL, related_name='horarios',
+        null=True, blank=True
+    )
+    instructor = models.ForeignKey(
+        User, on_delete=models.SET_NULL, related_name='horarios_formativos',
+        null=True, blank=True
+    )
+    programa = models.ForeignKey(
+        ProgramaFormacion, on_delete=models.SET_NULL, related_name='horarios',
+        null=True, blank=True, verbose_name="Materia / Curso"
+    )
     dia = models.CharField(max_length=1, choices=DIAS)
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
     ambiente = models.CharField(max_length=120, blank=True)
     modalidad = models.CharField(max_length=20, choices=MODALIDADES, default='Presencial')
     tema = models.CharField(max_length=180, blank=True)
+    nivel = models.CharField(max_length=20, choices=NIVELES_ESCOLARES, blank=True, default='')
+    grado = models.CharField(max_length=40, blank=True, default='')
+    seccion = models.CharField(max_length=4, blank=True, default='A')
+    es_recreo = models.BooleanField(default=False)
     activo = models.BooleanField(default=True)
 
     class Meta:
@@ -321,7 +358,28 @@ class HorarioFicha(models.Model):
         ordering = ['dia', 'hora_inicio']
 
     def __str__(self):
-        return f'{self.ficha.codigo_ficha} · {self.get_dia_display()} {self.hora_inicio:%H:%M}'
+        materia = self.nombre_materia
+        return f'{materia} · {self.get_dia_display()} {self.hora_inicio:%H:%M}'
+
+    @property
+    def nombre_materia(self):
+        if self.es_recreo:
+            return 'RECREO / ALMUERZO'
+        if self.tema:
+            return self.tema
+        if self.programa:
+            return self.programa.denominacion
+        if self.ficha and self.ficha.programa:
+            return self.ficha.programa.denominacion
+        return 'Clase'
+
+    @property
+    def hora_inicio_ampm(self):
+        return formato_hora_ampm(self.hora_inicio)
+
+    @property
+    def hora_fin_ampm(self):
+        return formato_hora_ampm(self.hora_fin)
 
     def clean(self):
         super().clean()
@@ -329,6 +387,31 @@ class HorarioFicha(models.Model):
             raise ValidationError({
                 'hora_fin': "La hora final debe ser posterior a la hora inicial del bloque formativo."
             })
+
+
+class CargaAcademica(models.Model):
+    """Asignación de un docente a una materia, grado y sección."""
+    profesor = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='cargas_academicas'
+    )
+    programa = models.ForeignKey(
+        ProgramaFormacion, on_delete=models.CASCADE, related_name='cargas_academicas'
+    )
+    nivel = models.CharField(max_length=20, choices=NIVELES_ESCOLARES)
+    grado = models.CharField(max_length=40)
+    seccion = models.CharField(max_length=4, default='A')
+    anio_lectivo = models.PositiveIntegerField(default=2026)
+    creado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Carga Académica"
+        verbose_name_plural = "Cargas Académicas"
+        ordering = ['nivel', 'grado', 'programa__denominacion']
+        unique_together = ('profesor', 'programa', 'nivel', 'grado', 'seccion', 'anio_lectivo')
+
+    def __str__(self):
+        nombre = self.profesor.get_full_name() or self.profesor.username
+        return f'{self.programa.denominacion} · {nombre} · {self.grado} {self.seccion}'
 
 
 class RecursoBiblioteca(models.Model):

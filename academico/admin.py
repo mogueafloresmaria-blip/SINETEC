@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ProgramaFormacion, Competencia, ResultadoAprendizaje, Ficha, Matricula, HorarioFicha
+from .models import ProgramaFormacion, Competencia, ResultadoAprendizaje, Ficha, Matricula, HorarioFicha, CargaAcademica
 
 
 class CompetenciaInline(admin.TabularInline):
@@ -71,6 +71,13 @@ class MatriculaAdmin(admin.ModelAdmin):
 
 @admin.register(HorarioFicha)
 class HorarioFichaAdmin(admin.ModelAdmin):
-    list_display = ('ficha', 'dia', 'hora_inicio', 'hora_fin', 'instructor', 'modalidad', 'ambiente', 'activo')
-    list_filter = ('dia', 'modalidad', 'activo', 'ficha__institucion')
-    search_fields = ('ficha__codigo_ficha', 'instructor__first_name', 'instructor__last_name', 'tema', 'ambiente')
+    list_display = ('nombre_materia', 'nivel', 'grado', 'seccion', 'dia', 'hora_inicio', 'hora_fin', 'instructor', 'es_recreo', 'activo')
+    list_filter = ('dia', 'nivel', 'modalidad', 'es_recreo', 'activo')
+    search_fields = ('tema', 'grado', 'instructor__first_name', 'instructor__last_name', 'programa__denominacion')
+
+
+@admin.register(CargaAcademica)
+class CargaAcademicaAdmin(admin.ModelAdmin):
+    list_display = ('programa', 'profesor', 'nivel', 'grado', 'seccion', 'anio_lectivo')
+    list_filter = ('nivel', 'seccion', 'anio_lectivo')
+    search_fields = ('programa__denominacion', 'profesor__first_name', 'profesor__last_name', 'grado')

@@ -16,6 +16,7 @@ urlpatterns = [
     path('fichas/<int:ficha_id>/matricular/', views.matricular_aprendiz, name='fichas_matricular'),
     path('programas/', views.lista_programas, name='programas_lista'),
     path('programas/<int:pk>/', views.detalle_programa, name='programa_detalle'),
+    path('carga/<int:pk>/eliminar/', views.eliminar_carga_academica, name='carga_eliminar'),
     path('certificacion/', views.consulta_certificacion, name='consulta_certificacion'),
     path('horarios/', views.tablero_horarios, name='horarios_tablero'),
     path('horarios/nuevo/', views.crear_horario, name='horario_nuevo'),

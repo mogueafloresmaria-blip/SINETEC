@@ -84,6 +84,11 @@ class HorarioFichaForm(forms.ModelForm):
             'tema': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tema o competencia'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['ficha'].required = False
+        self.fields['instructor'].required = False
+
     def clean(self):
         cleaned = super().clean()
         if cleaned.get('hora_inicio') and cleaned.get('hora_fin') and cleaned['hora_fin'] <= cleaned['hora_inicio']:

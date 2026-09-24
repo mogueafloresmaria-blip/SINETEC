@@ -1,109 +1,154 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Malla Curricular &middot; SINETEC{% endblock %}
+{% block title %}Carga Académica · SINETEC{% endblock %}
 
 {% block extra_head %}
 <style>
 body{background:#f3f5f9 !important;}
-.mc-wrap{padding:1rem 1.2rem;}
-.mc-stat{background:#fff;border-radius:10px;padding:1rem 1.2rem;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.04);}
-.mc-stat-val{font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1;}
-.mc-stat-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-top:.2rem;}
-.mc-stat-ico{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
-.mc-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s;}
-.mc-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.08);}
-.mc-card-head{padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #0284c7;}
-.mc-card-name{font-weight:800;font-size:1rem;color:#0f172a;}
-.mc-badge-of{background:#0284c7;color:#fff;padding:.2rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;text-transform:uppercase;}
-.mc-badge-el{background:#f59e0b;color:#fff;padding:.2rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;text-transform:uppercase;}
-.mc-card-body{padding:.8rem 1rem;}
-.mc-nivel-label{font-size:.68rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:.3rem;}
-.mc-grado-pill{display:inline-block;background:#e0f2fe;color:#0284c7;padding:.15rem .5rem;border-radius:999px;font-size:.7rem;font-weight:600;margin:.1rem .2rem .1rem 0;}
+.ca-wrap{padding:1.1rem 1.35rem 2rem;}
+.ca-title{font-size:1.45rem;font-weight:800;color:#0f172a;letter-spacing:-.02em;margin:0;}
+.ca-sub{color:#94a3b8;font-size:.9rem;margin:.15rem 0 1.15rem;}
+.ca-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 4px rgba(15,23,42,.04);padding:1.25rem 1.3rem;}
+.ca-card-title{display:flex;align-items:center;gap:.5rem;font-weight:800;color:#0f172a;margin-bottom:1.05rem;}
+.ca-dot{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#4f46e5);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem;}
+.ca-label{font-size:.68rem;font-weight:800;letter-spacing:.05em;color:#64748b;margin-bottom:.35rem;}
+.ca-card .form-select{border-radius:10px;border-color:#e2e8f0;font-weight:500;}
+.ca-btn{background:linear-gradient(135deg,#7c6cf5,#5b4ce0);border:none;color:#fff;font-weight:700;border-radius:12px;padding:.75rem 1rem;width:100%;}
+.ca-btn:hover{color:#fff;filter:brightness(1.05);}
+.ca-sec-title{display:flex;align-items:center;gap:.45rem;font-size:.78rem;font-weight:800;letter-spacing:.06em;color:#94a3b8;margin:1.1rem 0 .85rem;}
+.ca-asig{background:#fff;border:1px solid #eef0f4;border-radius:14px;padding:1rem 1.05rem;position:relative;box-shadow:0 1px 2px rgba(15,23,42,.03);height:100%;}
+.ca-asig-name{font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 1.6rem .55rem 0;}
+.ca-asig-prof{display:flex;align-items:center;gap:.5rem;color:#64748b;font-size:.82rem;font-weight:600;}
+.ca-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#c7d2fe,#818cf8);color:#fff;font-size:.7rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;}
+.ca-pill{display:inline-block;margin-top:.75rem;background:#eef2ff;color:#4f46e5;font-size:.68rem;font-weight:800;letter-spacing:.04em;padding:.28rem .65rem;border-radius:999px;text-transform:uppercase;}
+.ca-x{position:absolute;top:.7rem;right:.7rem;width:28px;height:28px;border:none;background:transparent;color:#fda4af;font-size:1.05rem;}
+.ca-empty{color:#94a3b8;font-size:.85rem;padding:.4rem 0 1rem;}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="mc-wrap">
+{{ grados_por_nivel|json_script:"grados-por-nivel" }}
+<div class="ca-wrap">
+  <h1 class="ca-title">Carga Académica</h1>
+  <p class="ca-sub">Gestión de cursos y docentes.</p>
 
-  <!-- TÍTULO + BOTÓN -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="d-flex align-items-center gap-2">
-      <i class="bi bi-journal-bookmark-fill" style="font-size:1.3rem;color:#0284c7;"></i>
-      <h1 class="h4 fw-bold text-dark mb-0">Malla Curricular</h1>
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="ca-card">
+        <div class="ca-card-title"><span class="ca-dot">+</span> Nueva Asignación</div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <div class="ca-label">1. SELECCIONA DOCENTE</div>
+            <select name="profesor_id" class="form-select" required>
+              <option value="">-- Seleccionar Profesor --</option>
+              {% for d in docentes %}
+              <option value="{{ d.id }}">{{ d.last_name }}{% if d.last_name and d.first_name %}, {% endif %}{{ d.first_name }}{% if not d.first_name and not d.last_name %}{{ d.username }}{% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <div class="ca-label">2. FILTRAR POR NIVEL</div>
+            <select id="asigNivel" name="nivel" class="form-select" required onchange="filtrarGradosCarga()">
+              <option value="">-- Seleccionar Nivel --</option>
+              <option value="Inicial">Inicial</option>
+              <option value="Primaria">Primaria</option>
+              <option value="Secundaria">Secundaria</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <div class="ca-label">3. SELECCIONAR GRADO</div>
+            <select name="grado" id="asigGrado" class="form-select" required>
+              <option value="">-- Seleccionar Grado --</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <div class="ca-label">4. SELECCIONAR CURSO</div>
+            <select name="programa_id" class="form-select" required>
+              <option value="">-- Seleccionar Curso --</option>
+              {% for p in programas %}
+              <option value="{{ p.id }}">{{ p.denominacion }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-4">
+            <div class="ca-label">5. ASIGNAR SECCIÓN</div>
+            <select name="seccion" class="form-select" required>
+              {% for s in secciones %}
+              <option value="{{ s }}">Sección "{{ s }}"</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="ca-btn">Asignar Carga</button>
+        </form>
+      </div>
     </div>
-    <a href="{% url 'fichas_crear' %}" class="btn text-white fw-semibold px-4 py-2 d-inline-flex align-items-center gap-2" style="background:linear-gradient(135deg,#0284c7,#0369a1);border-radius:9px;border:none;font-size:.9rem;">
-      <i class="bi bi-plus-lg"></i> + Nuevo Curso
-    </a>
+
+    <div class="col-lg-8">
+      <div class="ca-sec-title" style="margin-top:0;">
+        <i class="bi bi-mortarboard-fill" style="color:#f59e0b;"></i> NIVEL PRIMARIA
+      </div>
+      <div class="row g-3">
+        {% for a in cargas_primaria %}
+        <div class="col-md-6">
+          <div class="ca-asig">
+            <form method="post" action="{% url 'carga_eliminar' a.pk %}">
+              {% csrf_token %}
+              <button class="ca-x" onclick="return confirm('¿Retirar esta asignación?');" title="Quitar">&times;</button>
+            </form>
+            <div class="ca-asig-name">{{ a.programa.denominacion }}</div>
+            <div class="ca-asig-prof">
+              <span class="ca-av">{{ a.profesor.first_name|slice:":1"|upper }}{{ a.profesor.last_name|slice:":1"|upper }}</span>
+              {{ a.profesor.last_name }}{% if a.profesor.last_name and a.profesor.first_name %}, {% endif %}{{ a.profesor.first_name }}
+            </div>
+            <span class="ca-pill">{{ a.grado }} "{{ a.seccion }}"</span>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12 ca-empty">No hay asignaciones en Primaria.</div>
+        {% endfor %}
+      </div>
+
+      <div class="ca-sec-title">
+        <i class="bi bi-mortarboard-fill" style="color:#f59e0b;"></i> NIVEL SECUNDARIA
+      </div>
+      <div class="row g-3">
+        {% for a in cargas_secundaria %}
+        <div class="col-md-6">
+          <div class="ca-asig">
+            <form method="post" action="{% url 'carga_eliminar' a.pk %}">
+              {% csrf_token %}
+              <button class="ca-x" onclick="return confirm('¿Retirar esta asignación?');" title="Quitar">&times;</button>
+            </form>
+            <div class="ca-asig-name">{{ a.programa.denominacion }}</div>
+            <div class="ca-asig-prof">
+              <span class="ca-av">{{ a.profesor.first_name|slice:":1"|upper }}{{ a.profesor.last_name|slice:":1"|upper }}</span>
+              {{ a.profesor.last_name }}{% if a.profesor.last_name and a.profesor.first_name %}, {% endif %}{{ a.profesor.first_name }}
+            </div>
+            <span class="ca-pill">{{ a.grado }} "{{ a.seccion }}"</span>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12 ca-empty">No hay asignaciones en Secundaria.</div>
+        {% endfor %}
+      </div>
+    </div>
   </div>
-
-  <!-- 3 STATS -->
-  <div class="row g-3 mb-4">
-    <div class="col-12 col-md-4">
-      <div class="mc-stat">
-        <div>
-          <div class="mc-stat-val">{{ programas|length }}</div>
-          <div class="mc-stat-lbl">Materias</div>
-        </div>
-        <div class="mc-stat-ico" style="background:#e0f2fe;color:#0284c7;"><i class="bi bi-journal-bookmark-fill"></i></div>
-      </div>
-    </div>
-    <div class="col-12 col-md-4">
-      <div class="mc-stat">
-        <div>
-          <div class="mc-stat-val">{{ total_fichas_primaria|default:0 }}</div>
-          <div class="mc-stat-lbl">Grupos Primaria</div>
-        </div>
-        <div class="mc-stat-ico" style="background:#ecfdf5;color:#059669;"><i class="bi bi-layers-fill"></i></div>
-      </div>
-    </div>
-    <div class="col-12 col-md-4">
-      <div class="mc-stat">
-        <div>
-          <div class="mc-stat-val">{{ total_fichas_secundaria|default:0 }}</div>
-          <div class="mc-stat-lbl">Grupos Secundaria</div>
-        </div>
-        <div class="mc-stat-ico" style="background:#eef2ff;color:#6366f1;"><i class="bi bi-layers-fill"></i></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BÚSQUEDA -->
-  <div style="background:#fff;border-radius:10px;padding:.85rem 1.2rem;border:1px solid #e2e8f0;margin-bottom:1rem;">
-    <form method="get" action="">
-      <div class="input-group">
-        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color:#e2e8f0;"><i class="bi bi-search"></i></span>
-        <input type="text" name="q" value="{{ request.GET.q }}" class="form-control border-start-0 ps-0" placeholder="Buscar materia r&aacute;pidamente..." style="border-color:#e2e8f0;font-size:.9rem;">
-      </div>
-    </form>
-  </div>
-
-  <!-- GRID DE CURSOS / MATERIAS -->
-  <div class="row g-3">
-    {% for p in programas %}
-    <div class="col-6 col-lg-3">
-      <div class="mc-card">
-        <div class="mc-card-head" style="border-bottom-color:{% cycle '#0284c7' '#6366f1' '#10b981' '#f59e0b' '#ef4444' '#8b5cf6' %};">
-          <div class="mc-card-name">{{ p.denominacion|truncatechars:18 }}</div>
-          <span class="mc-badge-of">OFICIAL</span>
-        </div>
-        <div class="mc-card-body">
-          <div class="mc-nivel-label">&bull; Secundaria</div>
-          {% for f in p.fichas.all|slice:":4" %}
-          <span class="mc-grado-pill">{{ f.codigo_ficha|truncatechars:12 }}</span>
-          {% empty %}
-          <span class="text-muted small">Sin grupos</span>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-    {% empty %}
-    <div class="col-12 text-center py-5 text-muted">
-      <i class="bi bi-journal-x fs-2 d-block mb-2 opacity-40"></i>
-      No hay materias/cursos registrados.<br>
-      <a href="{% url 'fichas_crear' %}" class="btn btn-sm mt-2" style="background:#0284c7;color:#fff;border-radius:8px;"><i class="bi bi-plus-lg me-1"></i>Crear primer curso</a>
-    </div>
-    {% endfor %}
-  </div>
-
 </div>
+
+<script>
+const GRADOS_CA = JSON.parse(document.getElementById('grados-por-nivel').textContent);
+function filtrarGradosCarga() {
+  const nivel = document.getElementById('asigNivel').value;
+  const sel = document.getElementById('asigGrado');
+  const opts = GRADOS_CA[nivel] || [];
+  sel.innerHTML = '<option value="">-- Seleccionar --</option>';
+  opts.forEach(g => {
+    const o = document.createElement('option');
+    o.value = g; o.textContent = g;
+    sel.appendChild(o);
+  });
+}
+filtrarGradosCarga();
+</script>
 {% endblock %}

@@ -114,26 +114,15 @@ $flash = get_flash();
     <!-- Área de Contenido Principal a la Derecha -->
     <div class="dyl-main" style="margin-left: 260px !important; width: calc(100% - 260px) !important; min-width: 0 !important; flex: 1 !important; display: flex !important; flex-direction: column !important; min-height: 100vh !important; background-color: #F8FAFC !important;">
         <!-- Navbar Superior Compartido -->
-        <header class="dyl-header">
+        <header class="dyl-header" style="height: 56px; background-color: #FFFFFF; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 90;">
             <div class="dyl-header-left">
-                <h2 class="dyl-header-title"><?= htmlspecialchars($pageTitle) ?></h2>
+                <span class="fw-bold text-dark" style="font-size: 0.95rem;">Panel</span>
             </div>
-            <div class="dyl-header-right">
-                <!-- Píldora con Fecha del Sistema -->
-                <div class="dyl-date-pill">
-                    <i class="bi bi-calendar-event-fill text-indigo-500"></i>
-                    <span><?= SYSTEM_DATE ?></span>
-                </div>
-
-                <!-- Usuario y Avatar -->
-                <div class="dyl-user-chip">
-                    <div class="dyl-user-avatar">
-                        <?= strtoupper(substr($user['nombres'] ?? 'J', 0, 1)) ?>
-                    </div>
-                    <div class="dyl-user-info">
-                        <span class="dyl-user-name">¡Hola, <?= htmlspecialchars($user['nombres'] ?? 'Joseph') ?>!</span>
-                        <span class="dyl-user-role"><?= htmlspecialchars(ucfirst($user['rol'] ?? 'Admin')) ?></span>
-                    </div>
+            <div class="dyl-header-right" style="display: flex; align-items: center; gap: 10px;">
+                <span class="text-dark small fw-medium" style="font-size: 0.86rem;">Hola, <?= htmlspecialchars($user['nombres'] ?? 'Joseph') ?></span>
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" 
+                     style="width: 32px; height: 32px; background-color: #84CC16; font-size: 0.78rem; letter-spacing: -0.02em; flex-shrink: 0;">
+                    <?= strtoupper(substr($user['nombres'] ?? 'J', 0, 1) . substr($user['apellidos'] ?? 'O', 0, 1)) ?>
                 </div>
             </div>
         </header>
