@@ -1,52 +1,158 @@
 {% extends 'base.html' %}
-{% block title %}Tablero de horarios - SINETEC{% endblock %}
+{% load static %}
+{% block title %}Gesti&oacute;n de Horarios &middot; SINETEC{% endblock %}
+
+{% block extra_head %}
+<style>
+body{background:#f3f5f9 !important;}
+.hor-wrap{padding:1rem 1.2rem;}
+.hor-filter-bar{background:#fff;border-radius:10px;padding:1rem 1.2rem;border:1px solid #e2e8f0;margin-bottom:1rem;}
+.hor-filter-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:.3rem;}
+.hor-panel{background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.hor-nueva{background:#fff;border-left:4px solid #6366f1;border-radius:10px;border:1px solid #e2e8f0;border-left:4px solid #6366f1;padding:1.2rem;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.hor-dia-title{font-size:1.1rem;font-weight:800;text-transform:uppercase;color:#0f172a;}
+.hor-bloques-badge{font-size:.78rem;font-weight:700;color:#6366f1;}
+.hor-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;color:#94a3b8;}
+.hor-empty i{font-size:2.5rem;opacity:.3;margin-bottom:.5rem;}
+.hor-bloque{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.75rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between;}
+.hor-bloque-hora{font-size:.78rem;font-weight:700;color:#6366f1;min-width:90px;}
+.hor-bloque-materia{font-weight:700;color:#0f172a;font-size:.88rem;}
+.hor-bloque-prof{font-size:.75rem;color:#64748b;}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4"><div><div class="sinetec-eyebrow mb-2">Agenda académica SENA</div><h1 class="sinetec-page-title h3 mb-1">Tablero de horarios</h1><p class="text-muted mb-0">Organiza sesiones, instructores, ambientes y modalidad por ficha.</p></div><a href="{% url 'horario_nuevo' %}" class="btn sinetec-btn sinetec-btn-primary"><i class="bi bi-plus-lg me-1"></i> Agregar bloque</a></div>
-<div class="sinetec-card p-3 mb-4"><form class="row g-2" method="get"><div class="col-md-10"><select class="form-select" name="ficha"><option value="">Todas las fichas activas</option>{% for ficha in fichas %}<option value="{{ ficha.pk }}" {% if ficha_id == ficha.pk|stringformat:'i' %}selected{% endif %}>Ficha {{ ficha.codigo_ficha }} · {{ ficha.programa.denominacion }}</option>{% endfor %}</select></div><div class="col-md-2"><button class="btn btn-outline-success w-100" type="submit">Filtrar</button></div></form></div>
-<div class="row g-3">
-    {% for dia in '12345' %}
-    <div class="col-12 col-md-6 col-lg-4">
-        <section class="sinetec-card h-100 shadow-sm border-0">
-            <div class="sinetec-card-header bg-white border-bottom py-3 px-3 d-flex align-items-center justify-content-between">
-                <h2 class="h6 fw-bold mb-0 text-dark d-flex align-items-center gap-2">
-                    <span class="badge bg-success bg-opacity-10 text-success rounded-circle p-2" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">
-                        {{ dia }}
-                    </span>
-                    {% if dia == '1' %}Lunes{% elif dia == '2' %}Martes{% elif dia == '3' %}Miércoles{% elif dia == '4' %}Jueves{% else %}Viernes{% endif %}
-                </h2>
-                <span class="text-muted small">Jornada Formativa</span>
-            </div>
-            <div class="p-3">
-                {% for item in horarios %}
-                    {% if item.dia == dia %}
-                    <div class="border-start border-3 border-success ps-3 mb-3 bg-light bg-opacity-50 p-2 rounded-end">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <strong class="text-success">{{ item.hora_inicio|time:'H:i' }} - {{ item.hora_fin|time:'H:i' }}</strong>
-                            <form method="post" action="{% url 'horario_eliminar' item.pk %}" class="m-0">
-                                {% csrf_token %}
-                                <button class="btn btn-sm btn-link text-danger p-0 ms-2" title="Eliminar bloque" onclick="return confirm('¿Deseas eliminar esta sesión?');">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 mt-1">
-                            Ficha {{ item.ficha.codigo_ficha }}
-                        </span>
-                        <div class="small fw-semibold text-dark mt-1">{{ item.tema|default:'Sesión formativa' }}</div>
-                        <div class="small text-muted mt-1">
-                            <i class="bi bi-person me-1"></i>{{ item.instructor.get_full_name|default:item.instructor.username }}
-                        </div>
-                        <div class="small text-muted">
-                            <i class="bi bi-geo-alt me-1"></i>{{ item.ambiente|default:'Ambiente por definir' }} · <span class="badge bg-light text-dark border">{{ item.modalidad }}</span>
-                        </div>
-                    </div>
-                    {% endif %}
-                {% empty %}
-                    <div class="text-muted small py-3 text-center">Sin sesiones programadas.</div>
-                {% endfor %}
-            </div>
-        </section>
+<div class="hor-wrap">
+
+  <!-- TÍTULO -->
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <i class="bi bi-calendar2-week-fill" style="font-size:1.3rem;color:#6366f1;"></i>
+    <div>
+      <h1 class="h4 fw-bold text-dark mb-0">Gesti&oacute;n de Horarios</h1>
+      <p class="text-muted mb-0" style="font-size:.85rem;">Organiza las clases por nivel, grado y d&iacute;a.</p>
     </div>
-    {% endfor %}
+  </div>
+
+  <!-- FILTROS -->
+  <div class="hor-filter-bar">
+    <form method="get" action="">
+      <div class="row g-3 align-items-end">
+        <div class="col-6 col-md-3">
+          <div class="hor-filter-label">1. Nivel Acad&eacute;mico</div>
+          <select name="nivel" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">-- Seleccionar --</option>
+            <option value="primaria" {% if request.GET.nivel == 'primaria' %}selected{% endif %}>Primaria</option>
+            <option value="secundaria" {% if request.GET.nivel == 'secundaria' %}selected{% endif %}>Secundaria</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="hor-filter-label">2. Grado</div>
+          <select name="grado" class="form-select form-select-sm">
+            <option value="">-- Seleccionar --</option>
+            {% for i in "123456789" %}<option value="{{ i }}">{{ i }}&deg; Grado</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <div class="hor-filter-label">3. Secci&oacute;n</div>
+          <select name="seccion" class="form-select form-select-sm">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="hor-filter-label">4. D&iacute;a</div>
+          <select name="dia" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="LUN" {% if request.GET.dia == 'LUN' or not request.GET.dia %}selected{% endif %}>Lunes</option>
+            <option value="MAR" {% if request.GET.dia == 'MAR' %}selected{% endif %}>Martes</option>
+            <option value="MIE" {% if request.GET.dia == 'MIE' %}selected{% endif %}>Mi&eacute;rcoles</option>
+            <option value="JUE" {% if request.GET.dia == 'JUE' %}selected{% endif %}>Jueves</option>
+            <option value="VIE" {% if request.GET.dia == 'VIE' %}selected{% endif %}>Viernes</option>
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="row g-3">
+    <!-- NUEVA CLASE -->
+    <div class="col-md-4">
+      <div class="hor-nueva">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-plus-circle-fill" style="color:#6366f1;"></i>
+          <span class="fw-bold text-dark">Nueva Clase</span>
+        </div>
+        <form method="post" action="{% url 'horario_nuevo' %}">
+          {% csrf_token %}
+          <div class="mb-2">
+            <label class="form-label small fw-bold text-muted">Ficha / Grupo</label>
+            <select name="ficha" class="form-select form-select-sm" required>
+              <option value="">Seleccionar...</option>
+              {% for f in fichas %}
+              <option value="{{ f.id }}">{{ f.codigo_ficha }} — {{ f.programa.denominacion|truncatechars:20 }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small fw-bold text-muted">D&iacute;a</label>
+            <select name="dia" class="form-select form-select-sm" required>
+              <option value="LUN">Lunes</option><option value="MAR">Martes</option><option value="MIE">Mi&eacute;rcoles</option><option value="JUE">Jueves</option><option value="VIE">Viernes</option><option value="SAB">S&aacute;bado</option>
+            </select>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label small fw-bold text-muted">Hora Inicio</label>
+              <input type="time" name="hora_inicio" class="form-control form-control-sm" value="07:00" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold text-muted">Hora Fin</label>
+              <input type="time" name="hora_fin" class="form-control form-control-sm" value="08:00" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">Materia</label>
+            <input type="text" name="materia" class="form-control form-control-sm" placeholder="Ej: Matem&aacute;ticas" required>
+          </div>
+          <button type="submit" class="btn w-100 text-white fw-bold" style="background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:8px;">Agregar Bloque</button>
+        </form>
+        <div class="text-center mt-3 text-muted small">
+          <i class="bi bi-arrow-up"></i> Selecciona Nivel y Grado arriba
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOQUES DEL DÍA -->
+    <div class="col-md-8">
+      <div class="hor-panel p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="hor-dia-title">{{ request.GET.dia|default:"LUNES" }}</div>
+          <div class="hor-bloques-badge">{{ horarios|length }} Bloques</div>
+        </div>
+
+        {% for h in horarios %}
+        <div class="hor-bloque">
+          <div class="d-flex align-items-center gap-3">
+            <div class="hor-bloque-hora">{{ h.hora_inicio|time:"H:i" }} - {{ h.hora_fin|time:"H:i" }}</div>
+            <div>
+              <div class="hor-bloque-materia">{{ h.materia|default:h.ficha.programa.denominacion|truncatechars:25 }}</div>
+              <div class="hor-bloque-prof">{{ h.instructor.get_full_name|default:"Sin profesor" }} &middot; {{ h.ficha.codigo_ficha }}</div>
+            </div>
+          </div>
+          <form method="post" action="{% url 'horario_eliminar' h.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 py-0 px-2" title="Eliminar" onclick="return confirm('¿Eliminar este bloque?');"><i class="bi bi-trash3"></i></button>
+          </form>
+        </div>
+        {% empty %}
+        <div class="hor-empty">
+          <i class="bi bi-calendar-x"></i>
+          <div class="fw-bold" style="font-size:1rem;color:#64748b;">D&iacute;a Libre</div>
+          <div class="small">No hay clases programadas.</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}

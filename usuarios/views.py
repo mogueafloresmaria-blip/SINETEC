@@ -440,6 +440,7 @@ def dashboard(request):
 
     # 1. Métricas reales desde la base de datos
     hoy = timezone.localdate()
+    ano_actual = hoy.year
     total_instituciones = InstitucionEducativa.objects.count()
     instituciones_activas = InstitucionEducativa.objects.filter(activa=True).count()
     total_convenios = ConvenioSENA.objects.count()
@@ -451,6 +452,7 @@ def dashboard(request):
     fichas_activas = Ficha.objects.filter(estado='En Ejecucion').count()
     total_aprendices = Matricula.objects.count()
     aprendices_activos = Matricula.objects.filter(estado_formacion='En Formacion').count()
+    matriculas_anio = Matricula.objects.filter(fecha_matricula__year=ano_actual).count()
     total_instructores = User.objects.filter(
         Q(perfil__rol__nombre__icontains='Instructor') |
         Q(perfil__rol__nombre__icontains='Docente') |
@@ -466,6 +468,21 @@ def dashboard(request):
     convenios_alerta_lista = ConvenioSENA.objects.filter(fecha_fin__gte=hoy, fecha_fin__lte=hoy + timedelta(days=90)).select_related('institucion').order_by('fecha_fin')[:5]
     seguimientos_admin_recientes = SeguimientoAdministrativo.objects.select_related('institucion', 'responsable').order_by('-fecha_limite', '-fecha_registro')[:5]
     proximos_eventos = EventoCalendario.objects.filter(fecha__gte=hoy).order_by('fecha', 'hora')[:5]
+
+    # Datos para gráficas del panel de inicio (estilo escolar)
+    grado_10 = Matricula.objects.filter(estado_formacion='En Formacion', grado_escolar='10').count()
+    grado_11 = Matricula.objects.filter(estado_formacion='En Formacion', grado_escolar='11').count()
+    chart_alumnado_nivel = {
+        'labels': ['Grado 10\u00b0', 'Grado 11\u00b0'],
+        'data': [grado_10, grado_11]
+    }
+    programas_dist_qs = Matricula.objects.filter(
+        estado_formacion='En Formacion'
+    ).values('ficha__programa__denominacion').annotate(total=Count('id')).order_by('-total')[:5]
+    chart_distribucion = {
+        'labels': [(p['ficha__programa__denominacion'] or 'Sin programa')[:22] for p in programas_dist_qs],
+        'data': [p['total'] for p in programas_dist_qs]
+    }
 
 
     # 2. Datos analíticos para las 4 gráficas interactivas (Chart.js)
@@ -514,6 +531,10 @@ def dashboard(request):
     ultimas_fichas = Ficha.objects.select_related(
         'institucion', 'programa', 'instructor_lider'
     ).order_by('-id')[:5]
+
+    ultimas_matriculas = Matricula.objects.select_related(
+        'aprendiz', 'ficha', 'ficha__programa', 'ficha__institucion'
+    ).order_by('-fecha_matricula', '-id')[:8]
 
     ultimos_seguimientos = BitacoraSeguimiento.objects.select_related(
         'ficha', 'ficha__institucion', 'instructor'
@@ -603,6 +624,8 @@ def dashboard(request):
         'fichas_activas': fichas_activas,
         'total_aprendices': total_aprendices,
         'aprendices_activos': aprendices_activos,
+        'matriculas_anio': matriculas_anio,
+        'ano_actual': ano_actual,
         'total_instructores': total_instructores,
         'total_contactos': total_contactos,
         'total_seguimientos': total_seguimientos,
@@ -613,7 +636,9 @@ def dashboard(request):
         'convenios_alerta_lista': convenios_alerta_lista,
         'seguimientos_admin_recientes': seguimientos_admin_recientes,
         'proximos_eventos': proximos_eventos,
-        # JSON 5 Gráficas
+        # JSON Gráficas (panel inicio escolar)
+        'chart_alumnado_nivel_json': json.dumps(chart_alumnado_nivel),
+        'chart_distribucion_json': json.dumps(chart_distribucion),
         'chart_municipios_json': json.dumps(chart_municipios),
         'chart_fichas_json': json.dumps(chart_fichas),
         'chart_aprendices_json': json.dumps(chart_aprendices),
@@ -629,6 +654,7 @@ def dashboard(request):
         # 4 Bloques recientes
         'ultimas_instituciones': ultimas_instituciones,
         'ultimas_fichas': ultimas_fichas,
+        'ultimas_matriculas': ultimas_matriculas,
         'ultimos_seguimientos': ultimos_seguimientos,
         'actividad_reciente': actividad_reciente,
         # Colección para tabla
@@ -954,6 +980,39 @@ def editar_aprendiz(request, pk):
 
 @login_required
 @requerir_roles('Administrador', 'Coordinador', 'Instructor SENA')
+
+@login_required
+def matriculas_lista(request):
+    """
+    Panel Control de Vencimientos y Matrículas.
+    """
+    query = request.GET.get('q', '').strip()
+    
+    matriculas = Matricula.objects.select_related('aprendiz', 'aprendiz__perfil', 'ficha', 'ficha__programa').all().order_by('ficha__codigo_ficha', 'aprendiz__last_name')
+    
+    if query:
+        matriculas = matriculas.filter(
+            Q(aprendiz__first_name__icontains=query) |
+            Q(aprendiz__last_name__icontains=query) |
+            Q(aprendiz__perfil__numero_documento__icontains=query)
+        )
+        
+    total_alumnos = matriculas.count()
+    # Simulating primaria/secundaria split
+    total_primaria = 0
+    total_secundaria = total_alumnos
+    
+    context = {
+        'matriculas': matriculas,
+        'total_alumnos': total_alumnos,
+        'total_primaria': total_primaria,
+        'total_secundaria': total_secundaria,
+        'query': query,
+    }
+    return render(request, 'usuarios/matriculas_lista.html', context)
+
+
+@login_required
 def registrar_aprendiz(request):
     fichas = Ficha.objects.select_related('programa', 'institucion').filter(estado='En Ejecucion').order_by('codigo_ficha')
     return render(request, 'usuarios/registrar_aprendiz.html', {'fichas': fichas})
@@ -1946,7 +2005,22 @@ def seguimiento(request):
 
 @login_required
 def calificaciones(request):
-    return redirect('evaluaciones_calificar')
+    """Gestión Académica — Panel de Notas y Calificaciones estilo DYL SCHOOL."""
+    fichas = Ficha.objects.filter(
+        estado='En Ejecucion'
+    ).select_related('programa', 'institucion').annotate(
+        num_matriculas=Count('matriculas')
+    ).order_by('codigo_ficha')
+    programas = ProgramaFormacion.objects.order_by('denominacion')
+    matriculas = Matricula.objects.filter(
+        estado_formacion='En Formacion'
+    ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name')[:100]
+    context = {
+        'fichas': fichas,
+        'programas': programas,
+        'matriculas': matriculas,
+    }
+    return render(request, 'evaluaciones/notas.html', context)
 
 
 @login_required
@@ -5013,4 +5087,4 @@ def api_sena_exportar_datos(request):
     import json
     response = HttpResponse(json.dumps(data_completa, indent=2, default=str), content_type='application/json')
     response['Content-Disposition'] = f'attachment; filename="SINETEC_Respaldo_SENA_{timezone.localdate()}.json"'
-    return response
+    return response

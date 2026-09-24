@@ -11,6 +11,7 @@ urlpatterns = [
     path('comunicaciones/', views.mensajeria, name='mensajeria'),
     path('fichas/', views.fichas, name='fichas'),
     path('estudiantes/', views.estudiantes_lista, name='estudiantes_lista'),
+    path('matriculas/', views.matriculas_lista, name='matriculas_lista'),
     path('estudiantes/registrar/', views.registrar_aprendiz, name='registrar_aprendiz'),
     path('biblioteca/', views.biblioteca_formacion, name='biblioteca_formacion'),
     path('asistencia/escanear/', views.escanear_asistencia_camara, name='escanear_asistencia_camara'),
@@ -77,4 +78,4 @@ urlpatterns = [
     path('sena/api/registrar-aprendiz/', views.api_sena_registrar_aprendiz, name='api_sena_registrar_aprendiz'),
     path('sena/api/generar-ia/', views.api_sena_generar_ia, name='api_sena_generar_ia'),
     path('sena/api/exportar-datos/', views.api_sena_exportar_datos, name='api_sena_exportar_datos'),
-]
+]

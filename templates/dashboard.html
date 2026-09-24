@@ -1,777 +1,325 @@
 {% extends 'base.html' %}
 {% load static %}
-
-{% block title %}Panel Administrativo Escolar · SINETEC{% endblock %}
+{% block title %}Panel de Inicio &middot; SINETEC{% endblock %}
 
 {% block extra_head %}
-<!-- Chart.js para visualizaciones ejecutivas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  .kpi-card {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 16px;
-    padding: 1.25rem 1.35rem;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-  }
-  .kpi-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.1);
-    border-color: #BFDBFE;
-  }
-  .kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--kpi-accent, #3B82F6);
-    border-radius: 4px 0 0 4px;
-  }
-  .kpi-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    flex-shrink: 0;
-  }
-  .chart-card {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 18px;
-    padding: 1.4rem;
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
-    transition: box-shadow 0.2s ease;
-    height: 100%;
-  }
-  .chart-card:hover {
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-  }
-  .chart-container-box {
-    position: relative;
-    min-height: 220px;
-    width: 100%;
-  }
-  .recent-card {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-    overflow: hidden;
-    height: 100%;
-  }
-  .recent-card .card-header {
-    background: #F8FAFC;
-    border-bottom: 1px solid #E2E8F0;
-    padding: 1.1rem 1.35rem;
-  }
+/* ========== HERO ========== */
+.dyl-hero {
+  background: linear-gradient(135deg,#1a1837 0%,#1f1d36 55%,#312e81 100%) !important;
+  border-radius:14px !important;padding:1.4rem 1.8rem !important;
+  color:#fff !important;position:relative !important;overflow:hidden !important;
+  margin-bottom:1.3rem !important;
+}
+.dyl-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:rgba(255,255,255,.04);border-radius:50%;}
+.dyl-hero-title{font-size:1.55rem !important;font-weight:800 !important;margin:0 !important;color:#fff !important;}
+.dyl-hero-sub{color:rgba(255,255,255,.6) !important;font-size:.9rem !important;margin-top:.15rem !important;}
+.dyl-hero-date{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:.3rem .85rem;font-size:.8rem;color:rgba(255,255,255,.85);white-space:nowrap;}
+.dyl-qbtn{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff !important;font-size:.82rem;font-weight:600;text-decoration:none !important;transition:background .18s;}
+.dyl-qbtn:hover{background:rgba(255,255,255,.22);}
+
+/* ========== KPI CARD ========== */
+.dyl-kpi {
+  background:#fff !important;
+  border-radius:12px !important;
+  border:1px solid #e2e8f0 !important;
+  box-shadow:0 2px 8px rgba(0,0,0,.06) !important;
+  padding:1.15rem 1.25rem !important;
+  position:relative !important;overflow:hidden !important;
+  display:block !important;text-decoration:none !important;color:inherit !important;
+  transition:transform .2s,box-shadow .2s !important;
+}
+.dyl-kpi:hover{transform:translateY(-3px) !important;box-shadow:0 8px 22px rgba(0,0,0,.1) !important;text-decoration:none !important;color:inherit !important;}
+.dyl-kpi::before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;background:var(--kc,#6366f1);border-radius:4px 0 0 4px;}
+.dyl-kpi-label{font-size:.7rem !important;font-weight:700 !important;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8 !important;margin-bottom:.3rem !important;}
+.dyl-kpi-val{font-size:2rem !important;font-weight:800 !important;color:#0f172a !important;line-height:1 !important;margin-bottom:.25rem !important;}
+.dyl-kpi-sub{font-size:.77rem !important;font-weight:600 !important;}
+.dyl-kpi-ico{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+
+/* ========== CHART / TABLE PANEL ========== */
+.dyl-panel{background:#fff !important;border-radius:12px !important;border:1px solid #e2e8f0 !important;box-shadow:0 2px 8px rgba(0,0,0,.04) !important;}
+.dyl-panel-head{background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:.85rem 1.2rem;display:flex;align-items:center;justify-content:space-between;}
+.dyl-panel .table th{font-size:.7rem !important;font-weight:700 !important;text-transform:uppercase;color:#94a3b8 !important;background:#f8fafc !important;border-bottom:1px solid #e2e8f0 !important;padding:.6rem 1rem !important;}
+.dyl-panel .table td{padding:.7rem 1rem !important;font-size:.875rem !important;vertical-align:middle !important;border-color:#f1f5f9 !important;}
+.dyl-panel .table tr:last-child td{border-bottom:none !important;}
+
+/* badges */
+.bs-act{background:#d1fae5;color:#065f46;padding:.25rem .65rem;border-radius:999px;font-size:.72rem;font-weight:700;}
+.bs-des{background:#fee2e2;color:#991b1b;padding:.25rem .65rem;border-radius:999px;font-size:.72rem;font-weight:700;}
+.bs-ret{background:#fef3c7;color:#92400e;padding:.25rem .65rem;border-radius:999px;font-size:.72rem;font-weight:700;}
+.bs-cer{background:#e0f2fe;color:#0369a1;padding:.25rem .65rem;border-radius:999px;font-size:.72rem;font-weight:700;}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-2 px-md-3">
+<div class="container-fluid py-2 px-3">
 
-    <!-- 1. HERO HEADER ADMINISTRATIVO ESCOLAR -->
-    <div class="sinetec-card-modern p-4 mb-4 text-white position-relative overflow-hidden" 
-         style="background: linear-gradient(135deg, #0F2942 0%, #1E3A8A 60%, #2563EB 100%); border: none; border-radius: 20px; box-shadow: 0 10px 30px -5px rgba(15, 41, 66, 0.25);">
-        <div class="position-absolute top-0 end-0 p-3 opacity-10 d-none d-lg-block" style="font-size: 9rem; line-height: 0.8; color: #FFFFFF; pointer-events: none;">
-            <i class="bi bi-mortarboard-fill"></i>
+  <!-- HERO -->
+  <div class="dyl-hero">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2" style="position:relative;z-index:2;">
+      <div>
+        <h1 class="dyl-hero-title">&#128075; &iexcl;Hola, {{ user.first_name|default:user.username }}!</h1>
+        <p class="dyl-hero-sub mb-0">Resumen acad&eacute;mico de hoy.</p>
+      </div>
+      <span class="dyl-hero-date"><i class="bi bi-calendar3 me-1"></i>{% now "d/m/Y" %}</span>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-3" style="position:relative;z-index:2;">
+      <a href="{% url 'registrar_aprendiz' %}" class="dyl-qbtn"><i class="bi bi-person-plus-fill"></i> Nueva Matr&iacute;cula</a>
+      <a href="{% url 'fichas_lista' %}" class="dyl-qbtn"><i class="bi bi-layers-fill"></i> Ver Fichas</a>
+      <a href="{% url 'estudiantes_lista' %}" class="dyl-qbtn"><i class="bi bi-mortarboard"></i> Estudiantes</a>
+      <a href="{% url 'semaforo_competencias' %}" class="dyl-qbtn"><i class="bi bi-traffic-light"></i> Sem&aacute;foro</a>
+      <a href="{% url 'instituciones_lista' %}" class="dyl-qbtn"><i class="bi bi-building"></i> Instituciones</a>
+    </div>
+  </div>
+
+  <!-- 4 KPIs PRINCIPALES -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <a href="{% url 'estudiantes_lista' %}" class="dyl-kpi h-100" style="--kc:#6366f1;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="dyl-kpi-label">Alumnos Activos</div>
+            <div class="dyl-kpi-val">{{ aprendices_activos }}</div>
+            <div class="dyl-kpi-sub" style="color:#6366f1;"><i class="bi bi-check-circle-fill me-1"></i>de {{ total_aprendices }} totales</div>
+          </div>
+          <div class="dyl-kpi-ico" style="background:#eef2ff;color:#6366f1;"><i class="bi bi-mortarboard-fill"></i></div>
         </div>
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 position-relative" style="z-index: 2;">
-            <div>
-                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                    <span class="badge text-white px-3 py-1.5 fw-semibold" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 999px;">
-                        <i class="bi bi-building-check me-1"></i> {{ colegio.nombre|default:"Institución Educativa Técnica" }}
-                    </span>
-                    <span class="badge text-dark bg-white fw-bold px-2.5 py-1.5 rounded-pill shadow-sm">
-                        DANE: {{ colegio.codigo_dane|default:"147189000123" }}
-                    </span>
-                    <span class="badge text-white fw-bold px-2.5 py-1.5 rounded-pill" style="background: rgba(59, 130, 246, 0.4); border: 1px solid rgba(147, 197, 253, 0.4);">
-                        Vigencia Escolar 2026
-                    </span>
-                </div>
-                <h1 class="h3 fw-bold text-white mb-2 d-flex align-items-center gap-2">
-                    <i class="bi bi-speedometer2 text-info"></i> Panel Central de Control Administrativo
-                </h1>
-                <p class="text-white-50 mb-0" style="max-width: 820px; font-size: 0.93rem;">
-                    Bienvenido, <strong>{{ user.get_full_name|default:user.username }}</strong>. Supervisión integral de matrícula escolar, seguimiento de competencias por semáforo, registro de asistencias y directorio de familias.
-                </p>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{% url 'estudiantes_lista' %}" class="dyl-kpi h-100" style="--kc:#10b981;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="dyl-kpi-label">Matr&iacute;culas {{ ano_actual }}</div>
+            <div class="dyl-kpi-val">{{ matriculas_anio }}</div>
+            <div class="dyl-kpi-sub text-success"><i class="bi bi-file-earmark-plus me-1"></i>Este a&ntilde;o escolar</div>
+          </div>
+          <div class="dyl-kpi-ico" style="background:#ecfdf5;color:#10b981;"><i class="bi bi-person-check-fill"></i></div>
+        </div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{% url 'instructores_lista' %}" class="dyl-kpi h-100" style="--kc:#8b5cf6;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="dyl-kpi-label">Plana Docente</div>
+            <div class="dyl-kpi-val">{{ total_instructores }}</div>
+            <div class="dyl-kpi-sub" style="color:#8b5cf6;"><i class="bi bi-person-workspace me-1"></i>Docentes activos</div>
+          </div>
+          <div class="dyl-kpi-ico" style="background:#f5f3ff;color:#8b5cf6;"><i class="bi bi-person-workspace"></i></div>
+        </div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{% url 'fichas_lista' %}" class="dyl-kpi h-100" style="--kc:#f59e0b;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="dyl-kpi-label">Cursos</div>
+            <div class="dyl-kpi-val">{{ total_fichas }}</div>
+            <div class="dyl-kpi-sub text-warning"><i class="bi bi-layers-fill me-1"></i>{{ fichas_activas }} en ejecuci&oacute;n</div>
+          </div>
+          <div class="dyl-kpi-ico" style="background:#fffbeb;color:#f59e0b;"><i class="bi bi-grid-fill"></i></div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- GRÁFICAS -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-7">
+      <div class="dyl-panel">
+        <div class="dyl-panel-head">
+          <div>
+            <div class="fw-bold text-dark" style="font-size:.88rem;"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Alumnado por Nivel</div>
+            <div class="text-muted" style="font-size:.74rem;">Distribuci&oacute;n por grado escolar (activos)</div>
+          </div>
+          <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3">Total: {{ aprendices_activos }}</span>
+        </div>
+        <div class="p-3" style="height:230px;position:relative;"><canvas id="chartNivel"></canvas></div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="dyl-panel">
+        <div class="dyl-panel-head">
+          <div>
+            <div class="fw-bold text-dark" style="font-size:.88rem;"><i class="bi bi-pie-chart-fill text-info me-2"></i>Distribuci&oacute;n</div>
+            <div class="text-muted" style="font-size:.74rem;">Por programa t&eacute;cnico</div>
+          </div>
+          <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3">Programas</span>
+        </div>
+        <div class="p-3" style="height:230px;position:relative;"><canvas id="chartDist"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÚLTIMAS MATRÍCULAS -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-8">
+      <div class="dyl-panel">
+        <div class="dyl-panel-head">
+          <span class="fw-bold text-dark" style="font-size:.9rem;"><i class="bi bi-person-lines-fill text-primary me-2"></i>&Uacute;ltimas Matr&iacute;culas</span>
+          <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm btn-outline-primary rounded-3 py-1 px-3" style="font-size:.8rem;">Ver todas <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 dyl-panel">
+            <thead><tr>
+              <th>Estudiante</th><th>Ficha / Programa</th>
+              <th class="text-center">Grado</th><th class="text-center">Estado</th>
+              <th class="text-end pe-3">Fecha</th>
+            </tr></thead>
+            <tbody>
+              {% for m in ultimas_matriculas %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+                         style="width:34px;height:34px;font-size:.78rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);flex-shrink:0;">
+                      {{ m.aprendiz.first_name|first|upper }}{{ m.aprendiz.last_name|first|upper }}
+                    </div>
+                    <div>
+                      <div class="fw-semibold text-dark" style="font-size:.85rem;">{{ m.aprendiz.get_full_name }}</div>
+                      <div class="text-muted" style="font-size:.72rem;">{{ m.ficha.institucion.nombre|truncatechars:22 }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark" style="font-size:.82rem;">Ficha {{ m.ficha.codigo_ficha }}</div>
+                  <div class="text-muted" style="font-size:.72rem;">{{ m.ficha.programa.denominacion|truncatechars:24 }}</div>
+                </td>
+                <td class="text-center"><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ m.grado_escolar }}&deg;</span></td>
+                <td class="text-center">
+                  {% if m.estado_formacion == 'En Formacion' %}<span class="bs-act">Activo</span>
+                  {% elif m.estado_formacion == 'Desertado' %}<span class="bs-des">Desertado</span>
+                  {% elif m.estado_formacion == 'Certificado' %}<span class="bs-cer">Certificado</span>
+                  {% else %}<span class="bs-ret">{{ m.get_estado_formacion_display }}</span>{% endif %}
+                </td>
+                <td class="text-end pe-3 text-muted" style="font-size:.78rem;">{{ m.fecha_matricula|date:"d/m/Y" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-2 d-block mb-2 opacity-40"></i>
+                No hay matr&iacute;culas registradas.<br>
+                <a href="{% url 'registrar_aprendiz' %}" class="btn btn-sm mt-2" style="background:#6366f1;color:#fff;border-radius:8px;">
+                  <i class="bi bi-person-plus me-1"></i>Registrar
+                </a>
+              </td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="dyl-panel h-100">
+        <div class="dyl-panel-head">
+          <span class="fw-bold text-dark" style="font-size:.9rem;"><i class="bi bi-layers-fill text-success me-2"></i>Fichas Recientes</span>
+          <a href="{% url 'fichas_lista' %}" class="btn btn-sm btn-outline-secondary rounded-3 py-1 px-2" style="font-size:.8rem;">Ver <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+        <div class="p-3">
+          {% for f in ultimas_fichas %}
+          <div class="d-flex align-items-start gap-2 py-2" style="border-bottom:1px solid #f1f5f9;">
+            <div style="width:30px;height:30px;border-radius:50%;background:#eef2ff;color:#6366f1;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.8rem;">
+              <i class="bi bi-layers-fill"></i>
             </div>
-            
-            <!-- Acciones Rápidas Principales -->
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'registrar_aprendiz' %}" class="btn btn-sm btn-light text-primary fw-bold px-3 py-2 rounded-3 shadow-sm">
-                    <i class="bi bi-person-plus-fill me-1"></i> Matricular
-                </a>
-                <a href="{% url 'semaforo_competencias' %}" class="btn btn-sm btn-outline-light fw-semibold px-3 py-2 rounded-3">
-                    <i class="bi bi-traffic-light me-1 text-warning"></i> Semáforo
-                </a>
-                <a href="{% url 'seguimiento_asistencia' %}" class="btn btn-sm btn-outline-light fw-semibold px-3 py-2 rounded-3">
-                    <i class="bi bi-clipboard-check me-1"></i> Asistencia
-                </a>
-                <a href="{% url 'familias_lista' %}" class="btn btn-sm btn-outline-light fw-semibold px-3 py-2 rounded-3">
-                    <i class="bi bi-people me-1"></i> Familias
-                </a>
-                <a href="{% url 'centro_reportes' %}" class="btn btn-sm btn-outline-light fw-semibold px-3 py-2 rounded-3">
-                    <i class="bi bi-file-earmark-bar-graph me-1"></i> Reportes
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. MÉTRICAS RÁPIDAS (10 KPIS EJECUTIVOS REALES) -->
-    <div class="row g-3 mb-4">
-        <!-- KPI 1: Estudiantes Matriculados -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'estudiantes_lista' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #2563EB;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Estudiantes</div>
-                            <div class="h3 fw-bold text-dark my-1">{{ total_aprendices }}</div>
-                            <div class="text-primary small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>{{ aprendices_activos }} matriculados</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #EFF6FF; color: #2563EB;">
-                            <i class="bi bi-mortarboard-fill"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- KPI 2: Cursos y Grupos -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'fichas_lista' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #0284C7;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Cursos / Grupos</div>
-                            <div class="h3 fw-bold text-dark my-1">{{ total_fichas }}</div>
-                            <div class="text-info small fw-semibold"><i class="bi bi-layers-fill me-1"></i>{{ fichas_activas }} grupos activos</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #F0F9FF; color: #0284C7;">
-                            <i class="bi bi-grid-fill"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- KPI 3: Semáforo de Desempeño -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'semaforo_competencias' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #10B981;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Semáforo Escolar</div>
-                            <div class="h4 fw-bold text-dark my-1">🟢 🟡 🔴</div>
-                            <div class="small fw-semibold text-success"><i class="bi bi-traffic-light me-1"></i>Desempeño en vivo</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #ECFDF5; color: #10B981;">
-                            <i class="bi bi-bar-chart-steps"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- KPI 4: Sedes / Colegios -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'instituciones_lista' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #6366F1;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Sedes Institucionales</div>
-                            <div class="h3 fw-bold text-dark my-1">{{ total_instituciones }}</div>
-                            <div class="small fw-semibold" style="color: #6366F1;"><i class="bi bi-building me-1"></i>{{ instituciones_activas }} activas</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #EEF2FF; color: #6366F1;">
-                            <i class="bi bi-building"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- KPI 5: Convenios / Articulación -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'convenios_catalogo' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #8B5CF6;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Convenios</div>
-                            <div class="h3 fw-bold text-dark my-1">{{ total_convenios }}</div>
-                            <div class="small fw-semibold" style="color: #8B5CF6;"><i class="bi bi-file-earmark-check me-1"></i>{{ convenios_activos }} vigentes</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #F5F3FF; color: #8B5CF6;">
-                            <i class="bi bi-file-earmark-ruled-fill"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-
-    <!-- SEGUNDA FILA DE KPIS -->
-    <div class="row g-3 mb-4">
-        <!-- KPI 6: Cuerpo Docente y Contactos -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'contactos_lista' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #059669;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Docentes & Directivos</div>
-                            <div class="h3 fw-bold text-dark my-1">{{ total_contactos }}</div>
-                            <div class="small fw-semibold text-success"><i class="bi bi-person-workspace me-1"></i>Equipo pedagógico</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #ECFDF5; color: #059669;">
-                            <i class="bi bi-person-workspace"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- KPI 7: Seguimientos y Actas -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'seguimientos_admin_lista' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #D97706;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Seguimientos</div>
-                            <div class="h3 fw-bold text-dark my-1">{{ total_seguimientos_admin }}</div>
-                            <div class="small fw-semibold text-warning"><i class="bi bi-clock-history me-1"></i>{{ seguimientos_admin_pendientes }} pendientes</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #FEF3C7; color: #D97706;">
-                            <i class="bi bi-card-checklist"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- KPI 8: Expediente Digital -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'documentos_admin_lista' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #0284C7;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Expediente Digital</div>
-                            <div class="h3 fw-bold text-dark my-1">{{ total_documentos_admin }}</div>
-                            <div class="small fw-semibold text-info"><i class="bi bi-folder-check me-1"></i>Archivos escolares</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #E0F2FE; color: #0284C7;">
-                            <i class="bi bi-folder2-open"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- KPI 9: Calendario Institucional -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'calendario_administrativo' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #2563EB;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Agenda Escolar</div>
-                            <div class="h3 fw-bold text-dark my-1">{{ total_eventos_calendario }}</div>
-                            <div class="small fw-semibold text-primary"><i class="bi bi-calendar-event me-1"></i>Actividades y citas</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #EFF6FF; color: #2563EB;">
-                            <i class="bi bi-calendar-check"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- KPI 10: Observador del Alumno -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="{% url 'observaciones_lista' %}" class="text-decoration-none">
-                <div class="kpi-card h-100" style="--kpi-accent: #475569;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Observador Alumno</div>
-                            <div class="h3 fw-bold text-dark my-1"><i class="bi bi-journal-text"></i></div>
-                            <div class="small fw-semibold text-secondary"><i class="bi bi-chat-left-text me-1"></i>Bitácora pedagógica</div>
-                        </div>
-                        <div class="kpi-icon" style="background: #F1F5F9; color: #475569;">
-                            <i class="bi bi-journal-bookmark-fill"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-
-    <!-- SECCIÓN DE ALERTAS ADMINISTRATIVAS TEMPRANAS -->
-    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <div class="d-flex align-items-center gap-2">
-                <span class="p-2 rounded-3 {% if total_alertas_activas > 0 %}bg-warning bg-opacity-15 text-warning{% else %}bg-success bg-opacity-15 text-success{% endif %}">
-                    <i class="bi {% if total_alertas_activas > 0 %}bi-exclamation-triangle-fill{% else %}bi-shield-check{% endif %} fs-4"></i>
+            <div class="flex-grow-1 min-w-0">
+              <div class="d-flex justify-content-between align-items-start">
+                <a href="{% url 'fichas_detalle' f.id %}" class="fw-semibold text-dark text-decoration-none" style="font-size:.82rem;">Ficha {{ f.codigo_ficha }}</a>
+                <span class="{% if f.estado == 'En Ejecucion' %}text-success{% else %}text-secondary{% endif %}" style="font-size:.7rem;font-weight:700;white-space:nowrap;margin-left:.3rem;">
+                  {% if f.estado == 'En Ejecucion' %}&bull; Activa{% else %}{{ f.estado }}{% endif %}
                 </span>
-                <div>
-                    <h5 class="fw-bold text-dark mb-0">Control de Alertas Escolares y Administrativas</h5>
-                    <small class="text-muted">Monitoreo continuo de vencimientos de convenios, grupos y coberturas</small>
-                </div>
+              </div>
+              <div class="text-muted text-truncate" style="font-size:.74rem;">{{ f.programa.denominacion|truncatechars:26 }}</div>
+              <div class="text-muted" style="font-size:.71rem;">{{ f.institucion.nombre|truncatechars:22 }}</div>
             </div>
-            {% if total_alertas_activas > 0 %}
-                <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-3 py-2 fw-semibold">
-                    <i class="bi bi-bell-fill me-1 text-warning"></i> {{ total_alertas_activas }} Asuntos Requieren Atención
-                </span>
-            {% else %}
-                <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 px-3 py-2 fw-semibold">
-                    <i class="bi bi-check-circle-fill me-1"></i> Todo al día · Sin alertas escolares pendientes
-                </span>
-            {% endif %}
+          </div>
+          {% empty %}
+          <div class="text-center py-4 text-muted small"><i class="bi bi-layers fs-3 d-block mb-1 opacity-40"></i>Sin fichas.</div>
+          {% endfor %}
         </div>
-
-        <div class="row g-3">
-            <!-- Alerta 1: Cursos por culminar -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3 border rounded-3 h-100 {% if fichas_por_vencer %}border-warning bg-warning bg-opacity-10{% else %}bg-light{% endif %}">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="fw-bold text-dark small"><i class="bi bi-hourglass-split text-warning me-1"></i> Cursos por Culminar (&le; 30 días)</span>
-                        <span class="badge {% if fichas_por_vencer %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %}">{{ fichas_por_vencer|length }}</span>
-                    </div>
-                    {% if fichas_por_vencer %}
-                        <ul class="list-unstyled mb-0 small">
-                            {% for f in fichas_por_vencer %}
-                                <li class="py-1 border-bottom border-warning border-opacity-25 d-flex justify-content-between align-items-center">
-                                    <a href="{% url 'fichas_detalle' f.id %}" class="text-decoration-none fw-semibold text-dark">Grupo {{ f.codigo_ficha }}</a>
-                                    <span class="text-muted" style="font-size: 0.75rem;">Fin: {{ f.fecha_fin|date:"d/m/Y" }}</span>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <div class="small text-muted"><i class="bi bi-check2 text-success me-1"></i>Sin cursos próximos a finalizar.</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Alerta 2: Seguimientos Pendientes -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3 border rounded-3 h-100 {% if seguimientos_pendientes %}border-danger bg-danger bg-opacity-10{% else %}bg-light{% endif %}">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="fw-bold text-dark small"><i class="bi bi-clock-history text-danger me-1"></i> Compromisos Pendientes</span>
-                        <span class="badge {% if seguimientos_pendientes %}bg-danger text-white{% else %}bg-secondary text-white{% endif %}">{{ seguimientos_pendientes|length }}</span>
-                    </div>
-                    {% if seguimientos_pendientes %}
-                        <ul class="list-unstyled mb-0 small">
-                            {% for s in seguimientos_pendientes %}
-                                <li class="py-1 border-bottom border-danger border-opacity-25 d-flex justify-content-between align-items-center">
-                                    <a href="{% url 'seguimiento_detalle' s.id %}" class="text-decoration-none fw-semibold text-dark">Grupo {{ s.ficha.codigo_ficha }}</a>
-                                    <span class="text-muted" style="font-size: 0.75rem;">{{ s.fecha_visita|date:"d/m/Y" }}</span>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <div class="small text-muted"><i class="bi bi-check2 text-success me-1"></i>Todos los compromisos gestionados.</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Alerta 3: Sedes sin grupos activos -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3 border rounded-3 h-100 {% if instituciones_sin_fichas %}border-info bg-info bg-opacity-10{% else %}bg-light{% endif %}">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="fw-bold text-dark small"><i class="bi bi-building-exclamation text-info me-1"></i> Sedes sin Grupos Asignados</span>
-                        <span class="badge {% if instituciones_sin_fichas %}bg-info text-dark{% else %}bg-secondary text-white{% endif %}">{{ instituciones_sin_fichas|length }}</span>
-                    </div>
-                    {% if instituciones_sin_fichas %}
-                        <ul class="list-unstyled mb-0 small">
-                            {% for col in instituciones_sin_fichas %}
-                                <li class="py-1 border-bottom border-info border-opacity-25 d-flex justify-content-between align-items-center">
-                                    <a href="{% url 'instituciones_detalle' col.id %}" class="text-decoration-none fw-semibold text-dark">{{ col.nombre|truncatechars:22 }}</a>
-                                    <span class="text-muted" style="font-size: 0.75rem;">{{ col.municipio }}</span>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <div class="small text-muted"><i class="bi bi-check2 text-success me-1"></i>Todas las sedes tienen grupos activos.</div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- 3. GRÁFICAS ANALÍTICAS MODERNAS -->
-    <div class="row g-4 mb-4">
-        <!-- Gráfica 1: Instituciones por Municipio -->
-        <div class="col-lg-6 col-xl-3">
-            <div class="chart-card d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h6 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-geo-alt-fill text-primary me-1"></i> Sedes por Municipio
-                        </h6>
-                        <small class="text-muted">Distribución territorial</small>
-                    </div>
-                    <span class="badge bg-light text-secondary border">Territorio</span>
-                </div>
-                <div class="chart-container-box flex-grow-1">
-                    <canvas id="chartMunicipios"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Gráfica 2: Estado de Grupos / Cursos -->
-        <div class="col-lg-6 col-xl-3">
-            <div class="chart-card d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h6 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-layers-fill text-primary me-1"></i> Estado de Cursos
-                        </h6>
-                        <small class="text-muted">Grupos formativos</small>
-                    </div>
-                    <span class="badge bg-light text-secondary border">Total: {{ total_fichas }}</span>
-                </div>
-                <div class="chart-container-box flex-grow-1">
-                    <canvas id="chartFichas"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Gráfica 3: Estudiantes por Sede -->
-        <div class="col-lg-6 col-xl-3">
-            <div class="chart-card d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h6 class="fw-bold text-dark mb-0" style="color: #2563EB;">
-                            <i class="bi bi-mortarboard-fill me-1"></i> Estudiantes Top
-                        </h6>
-                        <small class="text-muted">Mayor matrícula</small>
-                    </div>
-                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">Top Sedes</span>
-                </div>
-                <div class="chart-container-box flex-grow-1">
-                    <canvas id="chartAprendices"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Gráfica 4: Seguimientos Pedagógicos -->
-        <div class="col-lg-6 col-xl-3">
-            <div class="chart-card d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h6 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-clipboard2-check-fill text-success me-1"></i> Seguimientos
-                        </h6>
-                        <small class="text-muted">Tipo de intervenciones</small>
-                    </div>
-                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Bitácoras</span>
-                </div>
-                <div class="chart-container-box flex-grow-1">
-                    <canvas id="chartSeguimientos"></canvas>
-                </div>
-            </div>
-        </div>
+  <!-- KPIs SECUNDARIOS + ALERTAS -->
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3 col-lg-2">
+      <a href="{% url 'instituciones_lista' %}" class="dyl-kpi h-100" style="--kc:#6366f1;">
+        <div class="dyl-kpi-label">Sedes</div>
+        <div class="dyl-kpi-val" style="font-size:1.5rem;">{{ total_instituciones }}</div>
+        <div class="dyl-kpi-sub" style="color:#6366f1;"><i class="bi bi-building me-1"></i>{{ instituciones_activas }} activas</div>
+      </a>
     </div>
-
-    <!-- Gráfica 5: Tendencia de Acompañamiento Pedagógico -->
-    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <h6 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-graph-up-arrow text-primary me-2"></i>Evolución de Acompañamiento y Visitas Institucionales
-                </h6>
-                <small class="text-muted">Evolución cronológica de intervenciones y bitácoras pedagógicas</small>
-            </div>
-            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1.5">
-                <i class="bi bi-calendar3 me-1"></i> Periodo 2026
-            </span>
-        </div>
-        <div style="height: 220px;">
-            <canvas id="chartTendencia"></canvas>
-        </div>
+    <div class="col-6 col-md-3 col-lg-2">
+      <a href="{% url 'convenios_catalogo' %}" class="dyl-kpi h-100" style="--kc:#0284c7;">
+        <div class="dyl-kpi-label">Convenios</div>
+        <div class="dyl-kpi-val" style="font-size:1.5rem;">{{ total_convenios }}</div>
+        <div class="dyl-kpi-sub text-info"><i class="bi bi-file-earmark-check me-1"></i>{{ convenios_activos }} vigentes</div>
+      </a>
     </div>
-
-    <!-- 4. BLOQUES DE RESUMEN Y ACTIVIDAD -->
-    <div class="row g-4 mb-4">
-        <!-- Bloque 1: Últimos Cursos Registrados -->
-        <div class="col-lg-6">
-            <div class="recent-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold text-dark mb-0">
-                        <i class="bi bi-layers-fill text-primary me-2"></i>Últimos Cursos y Grupos
-                    </h6>
-                    <a href="{% url 'fichas_lista' %}" class="btn btn-sm btn-outline-primary py-1 px-2.5 rounded-3 fw-semibold">
-                        Ver todos <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small text-uppercase">
-                            <tr>
-                                <th class="ps-3">Código / Programa</th>
-                                <th>Sede</th>
-                                <th class="text-center">Estado</th>
-                                <th class="pe-3 text-end">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for f in ultimas_fichas %}
-                                <tr>
-                                    <td class="ps-3">
-                                        <a href="{% url 'fichas_detalle' f.id %}" class="fw-bold text-dark text-decoration-none">
-                                            Grupo {{ f.codigo_ficha }}
-                                        </a>
-                                        <div class="text-muted small text-truncate" style="max-width: 220px;">
-                                            {{ f.programa.nombre }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="small fw-semibold text-dark text-truncate" style="max-width: 170px;">
-                                            {{ f.institucion.nombre }}
-                                        </div>
-                                        <small class="text-muted">{{ f.institucion.municipio }}</small>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25">
-                                            {{ f.estado }}
-                                        </span>
-                                    </td>
-                                    <td class="pe-3 text-end">
-                                        <a href="{% url 'fichas_detalle' f.id %}" class="btn btn-sm btn-light border py-1 px-2">
-                                            <i class="bi bi-chevron-right"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted small">No hay cursos registrados.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bloque 2: Actividad Reciente del Sistema -->
-        <div class="col-lg-6">
-            <div class="recent-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold text-dark mb-0">
-                        <i class="bi bi-activity text-primary me-2"></i>Actividad y Eventos Recientes
-                    </h6>
-                    <a href="{% url 'auditoria_lista' %}" class="btn btn-sm btn-light border py-1 px-2.5 rounded-3 fw-semibold text-secondary">
-                        Auditoría <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
-                </div>
-                <div class="p-3">
-                    <div class="d-flex flex-column gap-2">
-                        {% for a in actividad_reciente %}
-                            <div class="d-flex align-items-start gap-2.5 p-2 rounded-3 border bg-light bg-opacity-50">
-                                <span class="rounded-circle p-1 bg-primary bg-opacity-10 text-primary mt-0.5" style="line-height: 1;">
-                                    <i class="bi bi-check2-circle fs-6"></i>
-                                </span>
-                                <div class="flex-grow-1 min-w-0">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <strong class="small text-dark text-truncate">{{ a.usuario.get_full_name|default:a.usuario.username }}</strong>
-                                        <span class="text-muted small" style="font-size: 0.72rem;">{{ a.fecha|timesince }} atrás</span>
-                                    </div>
-                                    <div class="text-dark small text-truncate">{{ a.accion }}</div>
-                                    <small class="text-muted">Módulo: <span class="badge bg-white text-secondary border">{{ a.modulo }}</span></small>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <div class="text-center py-4 text-muted small">
-                                <i class="bi bi-clock-history fs-3 d-block mb-1 text-muted opacity-50"></i>
-                                Sin eventos recientes registrados.
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="col-6 col-md-3 col-lg-2">
+      <a href="{% url 'seguimientos_admin_lista' %}" class="dyl-kpi h-100" style="--kc:#d97706;">
+        <div class="dyl-kpi-label">Seguimientos</div>
+        <div class="dyl-kpi-val" style="font-size:1.5rem;">{{ total_seguimientos_admin }}</div>
+        <div class="dyl-kpi-sub text-warning"><i class="bi bi-clock me-1"></i>{{ seguimientos_admin_pendientes }} pend.</div>
+      </a>
     </div>
+    <div class="col-6 col-md-3 col-lg-2">
+      <a href="{% url 'calendario_administrativo' %}" class="dyl-kpi h-100" style="--kc:#059669;">
+        <div class="dyl-kpi-label">Agenda</div>
+        <div class="dyl-kpi-val" style="font-size:1.5rem;">{{ total_eventos_calendario }}</div>
+        <div class="dyl-kpi-sub text-success"><i class="bi bi-calendar-event me-1"></i>Pr&oacute;ximos</div>
+      </a>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="dyl-panel h-100">
+        <div class="dyl-panel-head">
+          {% if total_alertas_activas > 0 %}
+          <div class="d-flex align-items-center gap-2">
+            <span style="background:#fef3c7;color:#d97706;border-radius:8px;padding:.35rem .45rem;"><i class="bi bi-exclamation-triangle-fill fs-5"></i></span>
+            <div><div class="fw-bold text-dark" style="font-size:.85rem;">Alertas del Sistema</div><div class="text-muted" style="font-size:.73rem;">{{ total_alertas_activas }} asuntos pendientes</div></div>
+          </div>
+          {% else %}
+          <div class="d-flex align-items-center gap-2">
+            <span style="background:#d1fae5;color:#059669;border-radius:8px;padding:.35rem .45rem;"><i class="bi bi-shield-check fs-5"></i></span>
+            <div><div class="fw-bold text-dark" style="font-size:.85rem;">Sistema al d&iacute;a</div><div class="text-muted" style="font-size:.73rem;">Sin alertas activas</div></div>
+          </div>
+          {% endif %}
+        </div>
+        <div class="p-3 d-flex flex-column gap-2">
+          {% if fichas_por_vencer %}<div class="d-flex justify-content-between align-items-center p-2 bg-warning bg-opacity-10 rounded-2 border border-warning border-opacity-25"><span class="small fw-semibold"><i class="bi bi-hourglass-split text-warning me-1"></i>Cursos por culminar</span><span class="badge bg-warning text-dark">{{ fichas_por_vencer|length }}</span></div>{% endif %}
+          {% if seguimientos_pendientes %}<div class="d-flex justify-content-between align-items-center p-2 bg-danger bg-opacity-10 rounded-2 border border-danger border-opacity-25"><span class="small fw-semibold"><i class="bi bi-clock-history text-danger me-1"></i>Compromisos pendientes</span><span class="badge bg-danger text-white">{{ seguimientos_pendientes|length }}</span></div>{% endif %}
+          {% if instituciones_sin_fichas %}<div class="d-flex justify-content-between align-items-center p-2 bg-info bg-opacity-10 rounded-2 border border-info border-opacity-25"><span class="small fw-semibold"><i class="bi bi-building-exclamation text-info me-1"></i>Sedes sin grupos</span><span class="badge bg-info text-dark">{{ instituciones_sin_fichas|length }}</span></div>{% endif %}
+          {% if not fichas_por_vencer and not seguimientos_pendientes and not instituciones_sin_fichas %}<div class="text-center py-2 text-muted small"><i class="bi bi-check2-circle text-success me-1"></i>Todo en orden</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const municipiosData = {{ chart_municipios_json|safe }};
-    const fichasData = {{ chart_fichas_json|safe }};
-    const aprendicesData = {{ chart_aprendices_json|safe }};
-    const seguimientosData = {{ chart_seguimientos_json|safe }};
-    const tendenciaData = {{ chart_tendencia_json|safe }};
-
-    // Paleta Escolar Moderna (Navy, Royal Blue, Soft Slate, Emerald, Amber, Indigo)
-    const palette = {
-        primary: '#1E3A8A',
-        primarySoft: 'rgba(30, 58, 138, 0.75)',
-        blue: '#2563EB',
-        blueSoft: 'rgba(37, 99, 235, 0.75)',
-        sky: '#0284C7',
-        skySoft: 'rgba(2, 132, 199, 0.75)',
-        indigo: '#6366F1',
-        indigoSoft: 'rgba(99, 102, 241, 0.75)',
-        emerald: '#10B981',
-        emeraldSoft: 'rgba(16, 185, 129, 0.75)',
-        amber: '#F59E0B',
-        amberSoft: 'rgba(245, 158, 11, 0.75)',
-        rose: '#F43F5E',
-        roseSoft: 'rgba(244, 63, 94, 0.75)'
-    };
-
-    // 1. Municipios (Doughnut)
-    const ctxMun = document.getElementById('chartMunicipios');
-    if (ctxMun && municipiosData.labels && municipiosData.labels.length > 0) {
-        new Chart(ctxMun, {
-            type: 'doughnut',
-            data: {
-                labels: municipiosData.labels,
-                datasets: [{
-                    data: municipiosData.data,
-                    backgroundColor: [palette.primary, palette.blue, palette.indigo, palette.sky, palette.emerald, palette.amber],
-                    borderWidth: 2,
-                    borderColor: '#FFFFFF',
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-                },
-                cutout: '62%'
-            }
-        });
+document.addEventListener('DOMContentLoaded',function(){
+  var nd={{ chart_alumnado_nivel_json|safe }};
+  var ctx1=document.getElementById('chartNivel');
+  if(ctx1){
+    if(nd.labels&&nd.data&&nd.data.some(function(v){return v>0;})){
+      new Chart(ctx1,{type:'bar',data:{labels:nd.labels,datasets:[{label:'Estudiantes',data:nd.data,backgroundColor:['rgba(99,102,241,.8)','rgba(139,92,246,.8)'],borderColor:['#6366f1','#8b5cf6'],borderWidth:2,borderRadius:10,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:13,weight:'700'}}}}}});
+    }else{
+      ctx1.parentElement.innerHTML='<div class="d-flex align-items-center justify-content-center h-100 text-muted small"><i class="bi bi-bar-chart me-2"></i>Sin datos de matrículas aún</div>';
     }
-
-    // 2. Fichas por Estado (Pie)
-    const ctxFichas = document.getElementById('chartFichas');
-    if (ctxFichas && fichasData.labels && fichasData.labels.length > 0) {
-        new Chart(ctxFichas, {
-            type: 'pie',
-            data: {
-                labels: fichasData.labels,
-                datasets: [{
-                    data: fichasData.data,
-                    backgroundColor: [palette.blue, palette.emerald, palette.amber, palette.indigo],
-                    borderWidth: 2,
-                    borderColor: '#FFFFFF',
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
-                }
-            }
-        });
+  }
+  var dd={{ chart_distribucion_json|safe }};
+  var ctx2=document.getElementById('chartDist');
+  if(ctx2){
+    if(dd.labels&&dd.labels.length>0){
+      new Chart(ctx2,{type:'doughnut',data:{labels:dd.labels,datasets:[{data:dd.data,backgroundColor:['#6366f1','#8b5cf6','#10b981','#f59e0b','#0284c7','#f43f5e'],borderWidth:3,borderColor:'#fff',hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},padding:6}}}}});
+    }else{
+      ctx2.parentElement.innerHTML='<div class="d-flex align-items-center justify-content-center h-100 text-muted small"><i class="bi bi-pie-chart me-2"></i>Sin datos aún</div>';
     }
-
-    // 3. Estudiantes por Sede (Horizontal Bar)
-    const ctxApr = document.getElementById('chartAprendices');
-    if (ctxApr && aprendicesData.labels && aprendicesData.labels.length > 0) {
-        new Chart(ctxApr, {
-            type: 'bar',
-            data: {
-                labels: aprendicesData.labels,
-                datasets: [{
-                    label: 'Estudiantes',
-                    data: aprendicesData.data,
-                    backgroundColor: palette.blueSoft,
-                    borderColor: palette.blue,
-                    borderWidth: 1.5,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                },
-                scales: {
-                    x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-                    y: { grid: { display: false }, ticks: { font: { size: 10 } } }
-                }
-            }
-        });
-    }
-
-    // 4. Seguimientos por Tipo (Vertical Bar)
-    const ctxSeg = document.getElementById('chartSeguimientos');
-    if (ctxSeg && seguimientosData.labels && seguimientosData.labels.length > 0) {
-        new Chart(ctxSeg, {
-            type: 'bar',
-            data: {
-                labels: seguimientosData.labels,
-                datasets: [{
-                    label: 'Visitas',
-                    data: seguimientosData.data,
-                    backgroundColor: palette.emeraldSoft,
-                    borderColor: palette.emerald,
-                    borderWidth: 1.5,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } },
-                    x: { grid: { display: false }, ticks: { font: { size: 11 } } }
-                }
-            }
-        });
-    }
-
-    // 5. Tendencia Temporal (Line Chart)
-    const ctxTen = document.getElementById('chartTendencia');
-    if (ctxTen && tendenciaData.labels && tendenciaData.labels.length > 0) {
-        new Chart(ctxTen, {
-            type: 'line',
-            data: {
-                labels: tendenciaData.labels,
-                datasets: [{
-                    label: 'Intervenciones y Acompañamientos',
-                    data: tendenciaData.data,
-                    borderColor: palette.blue,
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    fill: true,
-                    tension: 0.35,
-                    pointBackgroundColor: palette.primary,
-                    pointBorderColor: '#FFFFFF',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    borderWidth: 2.5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { stepSize: 1 } },
-                    x: { grid: { display: false }, ticks: { font: { size: 11 } } }
-                }
-            }
-        });
-    }
+  }
 });
 </script>
 {% endblock %}

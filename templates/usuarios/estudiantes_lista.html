@@ -1,527 +1,174 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}Directorio de Alumnos &middot; SINETEC{% endblock %}
 
-{% block title %}Directorio Escolar de Estudiantes · SINETEC{% endblock %}
-
-{% block extra_css %}
+{% block extra_head %}
 <style>
-    .school-student-card {
-        background: #FFFFFF;
-        color: #0F172A;
-        border-radius: 18px;
-        padding: 0;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid #E2E8F0;
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-    }
-    .school-student-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.1);
-        border-color: #BFDBFE;
-    }
-    .student-card-header {
-        background: linear-gradient(135deg, #0F2942 0%, #1E3A8A 100%);
-        padding: 12px 16px;
-        color: #FFFFFF;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .student-body-content {
-        padding: 16px;
-    }
-    .student-photo-frame {
-        width: 78px;
-        height: 98px;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 2px solid #3B82F6;
-        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
-        flex-shrink: 0;
-        background-color: #F1F5F9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .student-photo-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-    .student-avatar-fallback {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-        color: #1E3A8A;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-weight: 800;
-        font-size: 1.3rem;
-    }
-    .student-card-accent {
-        height: 4px;
-        background: linear-gradient(90deg, #1E3A8A 0%, #3B82F6 100%);
-    }
+body{background:#f3f5f9 !important;}
+.dir-wrap{padding:1rem 1.2rem;}
+.dir-title-row{display:flex;align-items:center;gap:.6rem;margin-bottom:1.2rem;}
+.dir-title-row h1{font-size:1.45rem;font-weight:800;color:#0f172a;margin:0;}
+/* Stat cards */
+.dir-stat{background:#fff;border-radius:10px;padding:1rem 1.2rem;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.dir-stat-val{font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1;}
+.dir-stat-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-top:.2rem;}
+.dir-stat-ico{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
+/* Search bar */
+.dir-searchbar{background:#fff;border-radius:10px;padding:.85rem 1.2rem;border:1px solid #e2e8f0;margin-bottom:1rem;}
+/* Table */
+.dir-table-wrap{background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.dir-table-wrap .table thead th{background:#1e293b !important;color:#94a3b8 !important;font-size:.72rem !important;font-weight:700 !important;text-transform:uppercase !important;letter-spacing:.05em !important;border:none !important;padding:.8rem 1rem !important;}
+.dir-table-wrap .table tbody td{padding:.75rem 1rem !important;font-size:.875rem !important;vertical-align:middle !important;border-color:#f1f5f9 !important;}
+.dir-table-wrap .table tbody tr:last-child td{border-bottom:none !important;}
+.dir-table-wrap .table tbody tr:hover{background:#f8fafc !important;}
+/* Avatar */
+.dir-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0;}
+/* Badges */
+.dir-badge-act{background:#d1fae5;color:#065f46;padding:.3rem .75rem;border-radius:999px;font-size:.73rem;font-weight:700;}
+.dir-badge-baja{background:#fee2e2;color:#991b1b;padding:.3rem .75rem;border-radius:999px;font-size:.73rem;font-weight:700;}
+.dir-badge-cer{background:#e0f2fe;color:#0369a1;padding:.3rem .75rem;border-radius:999px;font-size:.73rem;font-weight:700;}
+/* Action buttons */
+.dir-btn{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.88rem;border:1px solid;cursor:pointer;transition:opacity .15s;text-decoration:none;}
+.dir-btn:hover{opacity:.75;}
+.dir-btn-edit{background:#fffbeb;color:#d97706;border-color:#fde68a;}
+.dir-btn-del{background:#fef2f2;color:#dc2626;border-color:#fecaca;}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-3">
+<div class="dir-wrap">
 
-    <!-- Encabezado Institucional Escolar -->
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+  <!-- TÍTULO -->
+  <div class="dir-title-row">
+    <i class="bi bi-hourglass-split text-primary" style="font-size:1.3rem;"></i>
+    <h1>Directorio de Alumnos</h1>
+  </div>
+
+  <!-- 3 STAT CARDS -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+      <div class="dir-stat">
         <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-semibold">
-                    <i class="bi bi-mortarboard-fill me-1"></i> {{ colegio.nombre|default:"Institución Educativa Técnica" }}
-                </span>
-                <span class="text-muted small">Control y Registro Escolar</span>
-            </div>
-            <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-people-fill text-primary me-2"></i>Directorio Escolar de Estudiantes
-            </h1>
-            <p class="text-muted mb-0">Expedientes académicos, estado de matrícula, seguimiento por semáforo y credenciales escolares.</p>
+          <div class="dir-stat-val">{{ total_aprendices }}</div>
+          <div class="dir-stat-lbl">Total</div>
         </div>
-        <div class="d-flex flex-wrap gap-2">
-            <button class="btn btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalImportar">
-                <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Importar Excel
-            </button>
-            <a href="{% url 'registrar_aprendiz' %}" class="btn btn-primary fw-semibold shadow-sm" style="background: linear-gradient(135deg, #1E3A8A, #2563EB); border: none;">
-                <i class="bi bi-person-plus-fill me-1"></i> Matricular Estudiante
-            </a>
-        </div>
+        <div class="dir-stat-ico" style="background:#f1f5f9;color:#64748b;"><i class="bi bi-people-fill"></i></div>
+      </div>
     </div>
-
-    {% if error_importacion %}
-        <div class="alert alert-danger shadow-sm rounded-3 mb-4">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error_importacion }}
+    <div class="col-12 col-md-4">
+      <div class="dir-stat" style="border-color:#10b981;">
+        <div>
+          <div class="dir-stat-val" style="color:#047857;">{{ total_activos }}</div>
+          <div class="dir-stat-lbl" style="color:#059669;">Activos</div>
         </div>
-    {% endif %}
-
-    <!-- Tarjetas Métricas Escolares Reales -->
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="sinetec-card-modern p-3 border-start border-4 border-primary h-100">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Total Estudiantes</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_aprendices }}</h3>
-                        <span class="text-primary small fw-semibold">Censo general</span>
-                    </div>
-                    <div class="p-2.5 rounded-3 bg-primary bg-opacity-10 text-primary fs-4">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="sinetec-card-modern p-3 border-start border-4 border-success h-100">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Matriculados Activos</span>
-                        <h3 class="fw-bold text-success mb-0 mt-1">{{ total_activos }}</h3>
-                        <span class="text-success small fw-semibold">Asistiendo a clases</span>
-                    </div>
-                    <div class="p-2.5 rounded-3 bg-success bg-opacity-10 text-success fs-4">
-                        <i class="bi bi-person-check-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="sinetec-card-modern p-3 border-start border-4 border-danger h-100">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Retirados / Traslado</span>
-                        <h3 class="fw-bold text-danger mb-0 mt-1">{{ total_retirados }}</h3>
-                        <span class="text-danger small fw-semibold">Bajas registradas</span>
-                    </div>
-                    <div class="p-2.5 rounded-3 bg-danger bg-opacity-10 text-danger fs-4">
-                        <i class="bi bi-person-x-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="sinetec-card-modern p-3 border-start border-4 border-info h-100">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Graduados / Aprobados</span>
-                        <h3 class="fw-bold text-info mb-0 mt-1">{{ total_certificados }}</h3>
-                        <span class="text-info small fw-semibold">Ciclo culminado</span>
-                    </div>
-                    <div class="p-2.5 rounded-3 bg-info bg-opacity-10 text-info fs-4">
-                        <i class="bi bi-award-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="dir-stat-ico" style="background:#d1fae5;color:#059669;"><i class="bi bi-check-circle-fill"></i></div>
+      </div>
     </div>
-
-    <!-- Filtros de Búsqueda Avanzada -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
-        <div class="card-body p-3">
-            <form method="get" class="row g-2 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-secondary mb-1">
-                        <i class="bi bi-search me-1"></i> Búsqueda de estudiante:
-                    </label>
-                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Nombre, documento, correo...">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Sede / Institución:</label>
-                    <select name="institucion" class="form-select">
-                        <option value="">-- Todas las Sedes --</option>
-                        {% for inst in instituciones_disponibles %}
-                            <option value="{{ inst.id }}" {% if institucion_filtro == inst.id|stringformat:"s" %}selected{% endif %}>
-                                {{ inst.nombre|truncatechars:30 }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Curso / Grupo:</label>
-                    <select name="ficha" class="form-select">
-                        <option value="">-- Todos los Grupos --</option>
-                        {% for f in fichas_disponibles %}
-                            <option value="{{ f.codigo_ficha }}" {% if ficha_filtro == f.codigo_ficha %}selected{% endif %}>
-                                Grupo {{ f.codigo_ficha }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Estado de Matrícula:</label>
-                    <select name="estado" class="form-select">
-                        <option value="">-- Todos los Estados --</option>
-                        {% for val, nom in estados_disponibles %}
-                            <option value="{{ val }}" {% if estado_filtro == val %}selected{% endif %}>{{ nom }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary fw-semibold w-100" style="background: #1E3A8A; border: none;">
-                        <i class="bi bi-funnel-fill me-1"></i> Filtrar
-                    </button>
-                    {% if query or institucion_filtro or ficha_filtro or estado_filtro %}
-                        <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary" title="Limpiar filtros">
-                            <i class="bi bi-x-lg"></i>
-                        </a>
-                    {% endif %}
-                </div>
-            </form>
+    <div class="col-12 col-md-4">
+      <div class="dir-stat" style="border-color:#ef4444;">
+        <div>
+          <div class="dir-stat-val" style="color:#b91c1c;">{{ total_retirados }}</div>
+          <div class="dir-stat-lbl" style="color:#dc2626;">De Baja</div>
         </div>
+        <div class="dir-stat-ico" style="background:#fee2e2;color:#dc2626;"><i class="bi bi-x-circle-fill"></i></div>
+      </div>
     </div>
+  </div>
 
-    <!-- Pestañas de Vista: Tarjetas vs Tabla -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <ul class="nav nav-pills" id="viewTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active fw-semibold" id="carnets-tab" data-bs-toggle="pill" data-bs-target="#carnets-view" type="button" role="tab">
-                    <i class="bi bi-grid-fill me-1"></i> Tarjetas Escolares ({{ total_aprendices }})
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link fw-semibold" id="table-tab" data-bs-toggle="pill" data-bs-target="#table-view" type="button" role="tab">
-                    <i class="bi bi-table me-1"></i> Vista de Tabla
-                </button>
-            </li>
-        </ul>
-        <span class="text-muted small">Total registros: <strong>{{ total_aprendices }}</strong></span>
-    </div>
+  <!-- BARRA DE BÚSQUEDA + BOTÓN NUEVO ALUMNO -->
+  <div class="dir-searchbar d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between">
+    <form method="get" action="" class="d-flex gap-2 flex-grow-1" style="max-width:480px;">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color:#e2e8f0;"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" value="{{ query }}" class="form-control border-start-0 ps-0" placeholder="Buscar alumno..." style="border-color:#e2e8f0;font-size:.9rem;">
+      </div>
+      <button type="submit" class="btn btn-outline-secondary px-3" style="border-radius:8px;font-size:.9rem;">Buscar</button>
+    </form>
+    <a href="{% url 'registrar_aprendiz' %}" class="btn text-white fw-semibold px-4 py-2 d-inline-flex align-items-center gap-2" style="background:linear-gradient(135deg,#4f46e5,#6366f1);border-radius:9px;border:none;font-size:.9rem;white-space:nowrap;">
+      <i class="bi bi-person-plus-fill"></i> + Nuevo Alumno
+    </a>
+  </div>
 
-    <!-- Contenido de las Vistas -->
-    <div class="tab-content" id="viewTabsContent">
-
-        <!-- 1. VISTA TARJETAS ESCOLARES -->
-        <div class="tab-pane fade show active" id="carnets-view" role="tabpanel">
-            <div class="row g-4">
-                {% for m in matriculas %}
-                    <div class="col-md-6 col-xl-4">
-                        <div class="school-student-card h-100 d-flex flex-column justify-content-between">
-                            <div>
-                                <div class="student-card-header">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-mortarboard-fill text-info"></i>
-                                        <span style="font-size: 0.78rem; font-weight: 700; color: #FFFFFF;">
-                                            {{ colegio.nombre|default:"Institución Educativa"|truncatechars:28 }}
-                                        </span>
-                                    </div>
-                                    <span class="badge bg-light text-dark fw-bold" style="font-size: 0.68rem;">
-                                        {{ m.get_estado_formacion_display|default:'ACTIVO' }}
-                                    </span>
-                                </div>
-
-                                <div class="student-body-content">
-                                    <div class="d-flex gap-3 align-items-center mb-3">
-                                        <div class="student-photo-frame">
-                                            {% if m.aprendiz.perfil.foto %}
-                                                <img src="{{ m.aprendiz.perfil.foto.url }}" alt="{{ m.aprendiz.get_full_name }}" class="student-photo-img">
-                                            {% else %}
-                                                <div class="student-avatar-fallback">
-                                                    <span>{{ m.aprendiz.first_name|default:m.aprendiz.username|slice:':1'|upper }}{{ m.aprendiz.last_name|default:''|slice:':1'|upper }}</span>
-                                                    <small style="font-size: 0.6rem; color: #64748B;">ESTUDIANTE</small>
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        <div class="overflow-hidden flex-grow-1">
-                                            <h5 class="fw-bold text-dark mb-1 text-truncate" title="{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}" style="font-size: 0.98rem;">
-                                                {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
-                                            </h5>
-                                            <div class="mb-1">
-                                                <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.78rem;">
-                                                    <i class="bi bi-person-vcard text-primary me-1"></i> {{ m.aprendiz.perfil.get_tipo_documento_display|default:'TI' }} {{ m.aprendiz.perfil.numero_documento }}
-                                                </span>
-                                            </div>
-                                            <div class="text-muted small text-truncate" style="font-size: 0.75rem;">
-                                                <i class="bi bi-envelope text-secondary me-1"></i>{{ m.aprendiz.email|default:'Sin correo registrado' }}
-                                            </div>
-                                            <div class="text-muted small text-truncate" style="font-size: 0.72rem;">
-                                                <i class="bi bi-geo-alt text-secondary me-1"></i>{{ m.ficha.institucion.nombre|default:"Sede Principal" }}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Curso / Grupo y Programa -->
-                                    <div class="bg-light rounded-3 p-2 mb-1 border border-light-subtle">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span class="text-muted text-uppercase" style="font-size: 0.68rem; font-weight: 700;">CURSO / GRUPO:</span>
-                                            <span class="badge bg-primary text-white px-2 py-1" style="font-size: 0.72rem;">
-                                                Grupo {{ m.ficha.codigo_ficha }}
-                                            </span>
-                                        </div>
-                                        <div class="text-truncate">
-                                            <span class="text-dark fw-semibold small" style="font-size: 0.78rem;">
-                                                <i class="bi bi-book me-1 text-primary"></i>{{ m.ficha.programa.nombre }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Botones de Acción -->
-                            <div>
-                                <div class="px-3 pb-3">
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <a href="{% url 'carnet_digital_id' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-primary w-100 fw-semibold">
-                                                <i class="bi bi-qr-code-scan me-1"></i> Carnet
-                                            </a>
-                                        </div>
-                                        <div class="col-6">
-                                            <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-primary w-100 fw-semibold" style="background: #1E3A8A; border-color: #1E3A8A;">
-                                                <i class="bi bi-person-badge me-1"></i> Expediente
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="student-card-accent"></div>
-                            </div>
-                        </div>
-                    </div>
-                {% empty %}
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
-                            <div class="mb-3 text-muted">
-                                <i class="bi bi-people fs-1 d-block text-secondary opacity-50 mb-2"></i>
-                                <h4 class="fw-bold text-dark">No se encontraron estudiantes con los filtros aplicados</h4>
-                                <p class="text-muted mb-4">Puedes restablecer los filtros de búsqueda o realizar una nueva matrícula escolar.</p>
-                                <div class="d-flex justify-content-center gap-2">
-                                    <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-secondary">
-                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Ver Todos
-                                    </a>
-                                    <a href="{% url 'registrar_aprendiz' %}" class="btn btn-primary fw-semibold" style="background: #1E3A8A; border: none;">
-                                        <i class="bi bi-person-plus-fill me-1"></i> Matricular Estudiante
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- 2. VISTA TABLA ESCOLAR -->
-        <div class="tab-pane fade" id="table-view" role="tabpanel">
-            <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light text-uppercase small">
-                            <tr>
-                                <th class="ps-3 py-3">Estudiante</th>
-                                <th class="py-3">Documento</th>
-                                <th class="py-3">Curso / Grupo</th>
-                                <th class="py-3">Programa / Énfasis</th>
-                                <th class="py-3">Estado</th>
-                                <th class="py-3 pe-3 text-end">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for m in matriculas %}
-                                <tr>
-                                    <td class="ps-3">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                                                {{ m.aprendiz.first_name|slice:":1" }}{{ m.aprendiz.last_name|slice:":1" }}
-                                            </div>
-                                            <div>
-                                                <strong class="text-dark d-block">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
-                                                <small class="text-muted">{{ m.aprendiz.email|default:'Sin correo' }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-light text-dark border px-2 py-1">
-                                            <i class="bi bi-person-vcard text-primary me-1"></i>{{ m.aprendiz.perfil.get_tipo_documento_display }} {{ m.aprendiz.perfil.numero_documento }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'fichas_detalle' m.ficha.id %}" class="fw-bold text-decoration-none text-primary">
-                                            Grupo {{ m.ficha.codigo_ficha }}
-                                        </a>
-                                        <small class="d-block text-muted">{{ m.ficha.institucion.nombre }}</small>
-                                    </td>
-                                    <td>
-                                        <span class="small fw-semibold text-secondary d-block">{{ m.ficha.programa.nombre }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
-                                            {{ m.get_estado_formacion_display }}
-                                        </span>
-                                    </td>
-                                    <td class="pe-3 text-end">
-                                        <div class="dropdown d-inline-block">
-                                            <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                                <li>
-                                                    <a class="dropdown-item py-1.5" href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}">
-                                                        <i class="bi bi-eye text-primary me-2"></i> Expediente
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item py-1.5" href="{% url 'carnet_digital_id' m.aprendiz.perfil.pk %}" target="_blank">
-                                                        <i class="bi bi-person-badge text-info me-2"></i> Carnet Escolar
-                                                    </a>
-                                                </li>
-                                                <li><hr class="dropdown-divider my-1"></li>
-                                                <li><h6 class="dropdown-header small">Estado de Matrícula</h6></li>
-                                                <li>
-                                                    <a class="dropdown-item py-1 text-success" href="{% url 'estudiante_cambiar_estado' m.aprendiz.id %}?estado=En Formacion&next={{ request.get_full_path|urlencode }}">
-                                                        <i class="bi bi-check-circle me-2"></i> Activo
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item py-1 text-primary" href="{% url 'estudiante_cambiar_estado' m.aprendiz.id %}?estado=Certificado&next={{ request.get_full_path|urlencode }}">
-                                                        <i class="bi bi-award me-2"></i> Graduado
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item py-1 text-danger" href="{% url 'estudiante_cambiar_estado' m.aprendiz.id %}?estado=Retirado&next={{ request.get_full_path|urlencode }}">
-                                                        <i class="bi bi-dash-circle me-2"></i> Retirado
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <i class="bi bi-people fs-2 d-block mb-2 text-secondary opacity-50"></i>
-                                        No hay estudiantes registrados con los filtros aplicados.
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+  <!-- TABLA DE ALUMNOS -->
+  <div class="dir-table-wrap">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th class="ps-4">ALUMNO</th>
+            <th>DNI / PASAPORTE</th>
+            <th>CORREO</th>
+            <th class="text-center">ESTADO</th>
+            <th class="text-end pe-4">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in matriculas %}
+          {% with colors="#6366f1,#8b5cf6,#06b6d4,#10b981,#f59e0b,#f43f5e,#14b8a6,#ec4899" %}
+          <tr>
+            <td class="ps-4">
+              <div class="d-flex align-items-center gap-3">
+                <div class="dir-avatar" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">
+                  {{ m.aprendiz.first_name|first|upper }}{{ m.aprendiz.last_name|first|upper }}
                 </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Paginación -->
-    {% if page_obj.has_other_pages %}
-        <div class="sinetec-card-modern bg-white p-3 mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <span class="text-muted small">
-                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} estudiantes)
-            </span>
-            <nav aria-label="Paginación estudiantes">
-                <ul class="pagination pagination-sm mb-0">
-                    {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&institucion={{ institucion_filtro }}&ficha={{ ficha_filtro }}&estado={{ estado_filtro }}">
-                                &laquo; Anterior
-                            </a>
-                        </li>
-                    {% endif %}
-
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if page_obj.number == num %}
-                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}&q={{ query }}&institucion={{ institucion_filtro }}&ficha={{ ficha_filtro }}&estado={{ estado_filtro }}">
-                                    {{ num }}
-                                </a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&institucion={{ institucion_filtro }}&ficha={{ ficha_filtro }}&estado={{ estado_filtro }}">
-                                Siguiente &raquo;
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-    {% endif %}
-
-</div>
-
-<!-- Modal para Importación Masiva Excel -->
-<div class="modal fade" id="modalImportar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold text-dark">
-                    <i class="bi bi-file-earmark-spreadsheet-fill text-primary me-2"></i> Importación Masiva de Estudiantes
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="modal-body p-4">
-                    <p class="text-muted small mb-3">
-                        Carga una plantilla XLSX con las columnas requeridas para vincular automáticamente los estudiantes a su curso escolar.
-                    </p>
-                    <div class="alert alert-info py-2 small mb-3">
-                        <strong>Columnas requeridas en la fila 1:</strong><br>
-                        <code>numero_documento, nombres, apellidos, correo, grado_escolar, codigo_ficha</code>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Seleccionar archivo Excel (.xlsx):</label>
-                        <input type="file" name="archivo" class="form-control" accept=".xlsx" required>
-                    </div>
+                <div>
+                  <div class="text-muted" style="font-size:.72rem;line-height:1.1;">Estudiante</div>
+                  <div class="fw-bold text-dark" style="font-size:.88rem;line-height:1.25;">{{ m.aprendiz.get_full_name }}</div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary fw-semibold" style="background: #1E3A8A; border: none;">
-                        <i class="bi bi-upload me-1"></i> Procesar Archivo
-                    </button>
-                </div>
-            </form>
-        </div>
+              </div>
+            </td>
+            <td><span class="font-monospace fw-semibold text-dark" style="font-size:.88rem;">{{ m.aprendiz.perfil.numero_documento|default:'—' }}</span></td>
+            <td class="text-muted" style="font-size:.85rem;">{{ m.aprendiz.email|default:'—' }}</td>
+            <td class="text-center">
+              {% if m.estado_formacion == 'En Formacion' %}<span class="dir-badge-act">Activo</span>
+              {% elif m.estado_formacion == 'Certificado' %}<span class="dir-badge-cer">Certificado</span>
+              {% else %}<span class="dir-badge-baja">{{ m.get_estado_formacion_display }}</span>{% endif %}
+            </td>
+            <td class="text-end pe-4">
+              <div class="d-inline-flex gap-1">
+                <a href="{% url 'estudiante_detalle' m.aprendiz.pk %}" class="dir-btn dir-btn-edit" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                <a href="{% url 'estudiante_cambiar_estado' m.pk %}?estado=Desertado" class="dir-btn dir-btn-del" title="Dar de baja"
+                   onclick="return confirm('¿Dar de baja a este alumno?');"><i class="bi bi-person-x-fill"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% endwith %}
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2 opacity-40"></i>
+              No hay alumnos registrados a&uacute;n.<br>
+              <a href="{% url 'registrar_aprendiz' %}" class="btn btn-sm mt-2" style="background:#6366f1;color:#fff;border-radius:8px;">
+                <i class="bi bi-person-plus me-1"></i>Registrar primer alumno
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
+
+  <!-- PAGINACIÓN -->
+  {% if page_obj.has_other_pages %}
+  <div class="d-flex justify-content-center mt-3">
+    <nav><ul class="pagination pagination-sm">
+      {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}"><i class="bi bi-chevron-left"></i></a></li>
+      {% endif %}
+      {% for i in page_obj.paginator.page_range %}
+        {% if page_obj.number == i %}
+        <li class="page-item active"><span class="page-link" style="background:#6366f1;border-color:#6366f1;">{{ i }}</span></li>
+        {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+        <li class="page-item"><a class="page-link" href="?page={{ i }}&q={{ query }}">{{ i }}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}"><i class="bi bi-chevron-right"></i></a></li>
+      {% endif %}
+    </ul></nav>
+  </div>
+  {% endif %}
+
 </div>
 {% endblock %}

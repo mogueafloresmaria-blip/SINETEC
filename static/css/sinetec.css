@@ -18,7 +18,7 @@
     --sinetec-petroleum: #0F2942;
     --sinetec-petroleum-hover: #163B5F;
     --sinetec-petroleum-dark: #0A1D30;
-    --sinetec-petroleum-gradient: linear-gradient(180deg, #0A1E32 0%, #0F2942 55%, #15385B 100%);
+    --sinetec-petroleum-gradient: linear-gradient(180deg, #1a1837 0%, #1f1d36 55%, #242242 100%);
 
     /* Azul Tecnológico y Amigable (Acción y Enlaces) */
     --sinetec-blue: #3B82F6;
@@ -239,13 +239,13 @@ a:hover {
 
 .sinetec-nav .nav-link.active {
     color: #ffffff;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.2) 100%);
-    border-color: rgba(96, 165, 250, 0.4);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    background: #6366F1;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
 }
 
 .sinetec-nav .nav-link.active i {
-    color: #60A5FA;
+    color: #ffffff;
 }
 
 .sinetec-sidebar-footer {

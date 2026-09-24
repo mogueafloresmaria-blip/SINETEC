@@ -575,8 +575,10 @@ def lista_programas(request):
         'programas': programas,
         'query': query,
         'total_programas': programas.count(),
+        'total_fichas_primaria': Ficha.objects.filter(estado='En Ejecucion').count() // 2,
+        'total_fichas_secundaria': Ficha.objects.filter(estado='En Ejecucion').count(),
     }
-    return render(request, 'academico/programas_lista.html', context)
+    return render(request, 'academico/malla_curricular.html', context)
 
 
 @login_required

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Malla Curricular &middot; SINETEC{% endblock %}
+
+{% block extra_head %}
+<style>
+body{background:#f3f5f9 !important;}
+.mc-wrap{padding:1rem 1.2rem;}
+.mc-stat{background:#fff;border-radius:10px;padding:1rem 1.2rem;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.mc-stat-val{font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1;}
+.mc-stat-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-top:.2rem;}
+.mc-stat-ico{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.mc-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s;}
+.mc-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.08);}
+.mc-card-head{padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #0284c7;}
+.mc-card-name{font-weight:800;font-size:1rem;color:#0f172a;}
+.mc-badge-of{background:#0284c7;color:#fff;padding:.2rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;text-transform:uppercase;}
+.mc-badge-el{background:#f59e0b;color:#fff;padding:.2rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;text-transform:uppercase;}
+.mc-card-body{padding:.8rem 1rem;}
+.mc-nivel-label{font-size:.68rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:.3rem;}
+.mc-grado-pill{display:inline-block;background:#e0f2fe;color:#0284c7;padding:.15rem .5rem;border-radius:999px;font-size:.7rem;font-weight:600;margin:.1rem .2rem .1rem 0;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mc-wrap">
+
+  <!-- TÍTULO + BOTÓN -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-journal-bookmark-fill" style="font-size:1.3rem;color:#0284c7;"></i>
+      <h1 class="h4 fw-bold text-dark mb-0">Malla Curricular</h1>
+    </div>
+    <a href="{% url 'fichas_crear' %}" class="btn text-white fw-semibold px-4 py-2 d-inline-flex align-items-center gap-2" style="background:linear-gradient(135deg,#0284c7,#0369a1);border-radius:9px;border:none;font-size:.9rem;">
+      <i class="bi bi-plus-lg"></i> + Nuevo Curso
+    </a>
+  </div>
+
+  <!-- 3 STATS -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+      <div class="mc-stat">
+        <div>
+          <div class="mc-stat-val">{{ programas|length }}</div>
+          <div class="mc-stat-lbl">Materias</div>
+        </div>
+        <div class="mc-stat-ico" style="background:#e0f2fe;color:#0284c7;"><i class="bi bi-journal-bookmark-fill"></i></div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="mc-stat">
+        <div>
+          <div class="mc-stat-val">{{ total_fichas_primaria|default:0 }}</div>
+          <div class="mc-stat-lbl">Grupos Primaria</div>
+        </div>
+        <div class="mc-stat-ico" style="background:#ecfdf5;color:#059669;"><i class="bi bi-layers-fill"></i></div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="mc-stat">
+        <div>
+          <div class="mc-stat-val">{{ total_fichas_secundaria|default:0 }}</div>
+          <div class="mc-stat-lbl">Grupos Secundaria</div>
+        </div>
+        <div class="mc-stat-ico" style="background:#eef2ff;color:#6366f1;"><i class="bi bi-layers-fill"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BÚSQUEDA -->
+  <div style="background:#fff;border-radius:10px;padding:.85rem 1.2rem;border:1px solid #e2e8f0;margin-bottom:1rem;">
+    <form method="get" action="">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color:#e2e8f0;"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" value="{{ request.GET.q }}" class="form-control border-start-0 ps-0" placeholder="Buscar materia r&aacute;pidamente..." style="border-color:#e2e8f0;font-size:.9rem;">
+      </div>
+    </form>
+  </div>
+
+  <!-- GRID DE CURSOS / MATERIAS -->
+  <div class="row g-3">
+    {% for p in programas %}
+    <div class="col-6 col-lg-3">
+      <div class="mc-card">
+        <div class="mc-card-head" style="border-bottom-color:{% cycle '#0284c7' '#6366f1' '#10b981' '#f59e0b' '#ef4444' '#8b5cf6' %};">
+          <div class="mc-card-name">{{ p.denominacion|truncatechars:18 }}</div>
+          <span class="mc-badge-of">OFICIAL</span>
+        </div>
+        <div class="mc-card-body">
+          <div class="mc-nivel-label">&bull; Secundaria</div>
+          {% for f in p.fichas.all|slice:":4" %}
+          <span class="mc-grado-pill">{{ f.codigo_ficha|truncatechars:12 }}</span>
+          {% empty %}
+          <span class="text-muted small">Sin grupos</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5 text-muted">
+      <i class="bi bi-journal-x fs-2 d-block mb-2 opacity-40"></i>
+      No hay materias/cursos registrados.<br>
+      <a href="{% url 'fichas_crear' %}" class="btn btn-sm mt-2" style="background:#0284c7;color:#fff;border-radius:8px;"><i class="bi bi-plus-lg me-1"></i>Crear primer curso</a>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

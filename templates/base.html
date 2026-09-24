@@ -16,8 +16,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     
     <!-- Sistema de Diseño SINETEC Escolar -->
-    <link rel="stylesheet" href="{% static 'css/sinetec.css' %}?v=20260922b">
-    <link rel="stylesheet" href="{% static 'css/sinetec_custom.css' %}?v=20260922b">
+    <link rel="stylesheet" href="{% static 'css/sinetec.css' %}?v=20260923dyl">
+    <link rel="stylesheet" href="{% static 'css/sinetec_custom.css' %}?v=20260923dyl">
+    {% block extra_head %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -53,72 +54,60 @@
 
             <!-- Navegación Estructurada en 5 Zonas Oficiales -->
             <nav class="sinetec-nav">
-                <!-- 1. PRINCIPAL -->
-                <div class="sinetec-nav-label">Principal</div>
-                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'coordinador_dashboard' or request.resolver_match.url_name == 'instructor_dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                <!-- ACADÉMICO -->
+                <div class="sinetec-nav-label">Académico</div>
+                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
                     <i class="bi bi-grid-1x2-fill"></i> Inicio
                 </a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'busqueda_global' %}active{% endif %}" href="{% url 'busqueda_global' %}">
-                    <i class="bi bi-search"></i> Búsqueda Global
+                <a class="nav-link {% if 'estudiante' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'estudiantes_lista' %}">
+                    <i class="bi bi-people-fill"></i> Alumnos
                 </a>
-
-                <!-- 2. GESTIÓN ACADÉMICA -->
-                <div class="sinetec-nav-label">Gestión Académica</div>
-                <a class="nav-link {% if 'estudiante' in request.resolver_match.url_name and not 'registrar' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'estudiantes_lista' %}">
-                    <i class="bi bi-people-fill"></i> Estudiantes
-                </a>
-                <a class="nav-link {% if 'matricular' in request.resolver_match.url_name or 'registrar_aprendiz' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'registrar_aprendiz' %}">
+                <a class="nav-link {% if 'matricular' in request.resolver_match.url_name or 'matriculas_lista' in request.resolver_match.url_name or 'registrar_aprendiz' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}">
                     <i class="bi bi-person-plus-fill"></i> Matrículas
                 </a>
+                <a class="nav-link {% if 'horario' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'horarios_tablero' %}">
+                    <i class="bi bi-calendar2-week-fill"></i> Horarios
+                </a>
                 <a class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'instructores_lista' %}">
-                    <i class="bi bi-person-badge-fill"></i> Docentes
+                    <i class="bi bi-person-badge-fill"></i> Profesores
                 </a>
-                <a class="nav-link {% if 'programa' in request.resolver_match.url_name or 'ficha' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'programas_lista' %}">
-                    <i class="bi bi-journal-bookmark-fill"></i> Académico
+                <a class="nav-link {% if 'programa' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'programas_lista' %}">
+                    <i class="bi bi-stack"></i> Carga Acad.
                 </a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'escanear_asistencia_camara' %}active{% endif %}" href="{% url 'escanear_asistencia_camara' %}">
-                    <i class="bi bi-qr-code-scan"></i> Asistencia Escolar
+                <a class="nav-link {% if 'ficha' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'fichas_lista' %}">
+                    <i class="bi bi-journal-bookmark-fill"></i> Cursos
+                </a>
+                <a class="nav-link {% if 'calificacion' in request.resolver_match.url_name or 'evaluacion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'calificaciones' %}">
+                    <i class="bi bi-clipboard2-data-fill"></i> Notas
+                </a>
+
+                <!-- ADMINISTRACIÓN -->
+                <div class="sinetec-nav-label">Administración</div>
+                <a class="nav-link {% if 'familias' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familias_lista' %}">
+                    <i class="bi bi-cash-coin"></i> Pensiones
+                </a>
+                <a class="nav-link {% if 'gestion_usuarios' in request.resolver_match.url_name or 'configuracion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'gestion_usuarios' %}">
+                    <i class="bi bi-person-gear"></i> Usuarios
+                </a>
+                <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
+                    <i class="bi bi-megaphone-fill"></i> Comunicados
+                </a>
+                <a class="nav-link {% if 'asistencia' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'escanear_asistencia_camara' %}">
+                    <i class="bi bi-check2-square"></i> Tomar Asist.
                 </a>
                 <a class="nav-link {% if 'semaforo' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'semaforo_competencias' %}">
-                    <i class="bi bi-traffic-light-fill text-warning"></i> Semáforo Competencias
-                    <span class="badge bg-white bg-opacity-15 text-white ms-auto py-0 px-1" style="font-size: 0.65rem;">🟢🟡🔴</span>
+                    <i class="bi bi-bus-front-fill"></i> Transporte
                 </a>
 
-                <!-- 3. GESTIÓN ADMINISTRATIVA -->
-                <div class="sinetec-nav-label">Gestión Administrativa</div>
-                <a class="nav-link {% if request.resolver_match.url_name == 'familias_lista' %}active{% endif %}" href="{% url 'familias_lista' %}">
-                    <i class="bi bi-house-heart-fill"></i> Familias
-                </a>
-                <a class="nav-link {% if 'documento_admin' in request.resolver_match.url_name or 'documentos_admin' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'documentos_admin_lista' %}">
-                    <i class="bi bi-folder2-open"></i> Documentos
-                </a>
-                <a class="nav-link {% if 'observacion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'observaciones_lista' %}">
-                    <i class="bi bi-journal-check"></i> Convivencia
-                </a>
-                <a class="nav-link {% if 'calendario' in request.resolver_match.url_name or 'evento' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'calendario_administrativo' %}">
-                    <i class="bi bi-calendar3"></i> Calendario
-                </a>
-                <a class="nav-link {% if 'seguimiento_admin' in request.resolver_match.url_name or 'seguimientos_admin' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'seguimientos_admin_lista' %}">
-                    <i class="bi bi-card-checklist"></i> Seguimientos y Tareas
-                </a>
-
-                <!-- 4. COMUNICACIÓN -->
-                <div class="sinetec-nav-label">Comunicación</div>
-                <a class="nav-link {% if request.resolver_match.url_name == 'mensajeria' %}active{% endif %}" href="{% url 'mensajeria' %}">
-                    <i class="bi bi-chat-square-text-fill"></i> Comunicaciones
-                </a>
-
-                <!-- 5. REPORTES Y CONTROL -->
-                <div class="sinetec-nav-label">Reportes y Control</div>
-                <a class="nav-link {% if 'reporte' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'centro_reportes' %}">
-                    <i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes Oficiales
-                </a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'configuracion_sistema' or request.resolver_match.url_name == 'gestion_usuarios' %}active{% endif %}" href="{% url 'configuracion_sistema' %}">
-                    <i class="bi bi-gear-wide-connected"></i> Administración
-                </a>
-                <a class="nav-link {% if 'auditoria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'auditoria_lista' %}">
-                    <i class="bi bi-clock-history"></i> Historial y Auditoría
-                </a>
+                <!-- CERRAR SESIÓN -->
+                <div class="mt-auto pt-3 border-top" style="border-color:rgba(255,255,255,.1)!important;">
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link text-white-50 border-0 bg-transparent w-100 text-start" style="cursor:pointer;">
+                            <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
             </nav>
 
             <!-- Pie del Sidebar con datos de la Institución -->
@@ -151,9 +140,7 @@
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
-                    <a class="btn btn-sm btn-outline-primary rounded-pill fw-bold d-inline-flex align-items-center gap-1 text-nowrap px-3 py-1.5" href="{% url 'escanear_asistencia_camara' %}" title="Escanear Asistencia QR">
-                        <i class="bi bi-qr-code-scan"></i> <span class="d-none d-md-inline">Asistencia QR</span>
-                    </a>
+
 
                     <!-- Centro de Notificaciones -->
                     <div class="dropdown">
