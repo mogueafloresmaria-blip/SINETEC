@@ -87,6 +87,9 @@ class PerfilUsuario(models.Model):
         null=True,
         verbose_name="Teléfono de Contacto"
     )
+    genero = models.CharField(max_length=20, blank=True, default='', verbose_name="Género")
+    fecha_nacimiento = models.DateField(blank=True, null=True, verbose_name="Fecha de Nacimiento")
+    foto_perfil = models.ImageField(upload_to='perfiles/', blank=True, null=True, verbose_name="Foto de Perfil")
     # RN-008: Borrado lógico / estado de la cuenta
     esta_activo = models.BooleanField(
         default=True,
@@ -297,3 +300,48 @@ class FamiliaAcudiente(models.Model):
 
     def __str__(self):
         return f"{self.nombre_acudiente} ({self.parentesco})"
+
+def siguiente_numero_recibo():
+    return f"REC-{uuid.uuid4().hex[:10].upper()}"
+
+
+class PagoPension(models.Model):
+    """Recibo de caja para matrícula y pensiones escolares."""
+    METODOS = [
+        ('Efectivo', 'Efectivo'),
+        ('Transferencia', 'Transferencia'),
+        ('Tarjeta', 'Tarjeta'),
+    ]
+    ESTADOS = [('EMITIDO', 'Emitido'), ('ANULADO', 'Anulado')]
+
+    numero_recibo = models.CharField(max_length=30, unique=True, default=siguiente_numero_recibo)
+    estudiante = models.ForeignKey(User, on_delete=models.PROTECT, related_name='pagos_pension')
+    concepto = models.CharField(max_length=120, default='Pensión mensual')
+    monto = models.DecimalField(max_digits=12, decimal_places=2)
+    metodo_pago = models.CharField(max_length=30, choices=METODOS, default='Efectivo')
+    estado = models.CharField(max_length=10, choices=ESTADOS, default='EMITIDO')
+    comprobante = models.FileField(upload_to='comprobantes_pension/%Y/%m/', blank=True, null=True)
+    fecha_pago = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha_pago', '-id']
+
+    def __str__(self):
+        return f'{self.numero_recibo} · {self.estudiante.get_full_name()} · {self.monto}'
+
+
+class TransporteRuta(models.Model):
+    """Ruta escolar y datos operativos del vehículo asignado."""
+    nombre = models.CharField(max_length=150)
+    conductor = models.CharField(max_length=150)
+    placa = models.CharField(max_length=20, unique=True)
+    capacidad = models.PositiveIntegerField(default=15)
+    costo_mensual = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    activa = models.BooleanField(default=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['nombre']
+
+    def __str__(self):
+        return f'{self.nombre} · {self.placa}'

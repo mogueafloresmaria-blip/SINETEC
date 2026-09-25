@@ -375,7 +375,7 @@
                                 <strong>Curso:</strong> {% if matricula %}Grupo {{ matricula.ficha.codigo_ficha }}{% else %}Grupo Principal{% endif %}
                             </div>
                             <div class="pvc-data-item">
-                                <strong>Programa:</strong> {% if matricula %}{{ matricula.ficha.programa.nombre|truncatechars:26 }}{% else %}Educación Media{% endif %}
+                                <strong>Programa:</strong> {% if matricula %}{{ matricula.ficha.programa.denominacion|truncatechars:26 }}{% else %}Educación Media{% endif %}
                             </div>
                             <div class="pvc-data-item">
                                 <strong>Sede:</strong> {{ colegio.nombre|default:"Sede Principal"|truncatechars:24 }}

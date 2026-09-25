@@ -84,7 +84,6 @@
                             <th style="width: 55px">No.</th>
                             <th>Estudiante</th>
                             <th>Documento</th>
-                            <th>Carnet Digital</th>
                             <th class="text-end">Estado de asistencia</th>
                         </tr>
                     </thead>
@@ -95,15 +94,6 @@
                                 <td class="text-muted fw-bold">{{ forloop.counter }}</td>
                                 <td class="fw-semibold">{{ matricula.aprendiz.get_full_name|default:matricula.aprendiz.username }}</td>
                                 <td>{{ matricula.aprendiz.perfil.numero_documento }}</td>
-                                <td>
-                                    {% if matricula.aprendiz.perfil.pk %}
-                                        <a href="{% url 'carnet_digital_id' matricula.aprendiz.perfil.pk %}" target="_blank" class="btn btn-xs btn-outline-success rounded-pill px-2 py-0" style="font-size: 0.74rem;">
-                                            <i class="bi bi-qr-code me-1"></i> Ver Carné
-                                        </a>
-                                    {% else %}
-                                        <span class="text-muted small">-</span>
-                                    {% endif %}
-                                </td>
                                 <td>
                                     <div class="d-flex justify-content-end gap-2 attendance-options">
                                         <input type="radio" class="btn-check attendance-input" name="asistencia_{{ matricula.pk }}" id="presente_{{ matricula.pk }}" value="P" {% if estado == 'P' or not estado %}checked{% endif %}>
@@ -117,7 +107,7 @@
                             </tr>
                             {% endwith %}
                         {% empty %}
-                            <tr><td colspan="5" class="text-center py-5 text-muted">No hay aprendices activos en esta ficha.</td></tr>
+                            <tr><td colspan="4" class="text-center py-5 text-muted">No hay alumnos activos en esta ficha.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>

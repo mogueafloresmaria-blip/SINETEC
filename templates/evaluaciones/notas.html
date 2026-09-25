@@ -7,19 +7,19 @@
 body{background:#f3f5f9 !important;}
 .not-wrap{padding:1rem 1.2rem;}
 .not-panel{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05);}
-.not-panel-purple{border-top:4px solid #6366f1;}
+.not-panel-purple{border-top:4px solid #77CEB9;}
 .not-panel-green{border-top:4px solid #10b981;}
 .not-panel-head{padding:1rem 1.2rem;}
 .not-panel-title{font-size:1rem;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:.5rem;}
 .not-panel-sub{font-size:.78rem;color:#64748b;margin-top:.15rem;}
 .not-panel-body{padding:.5rem 1.2rem 1.2rem;}
 .not-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:.3rem;}
-.not-btn-libreta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;padding:.6rem 1.5rem;font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;gap:.4rem;}
+.not-btn-libreta{background:#77CEB9;color:#123b37;border:none;border-radius:8px;padding:.6rem 1.5rem;font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;gap:.4rem;}
 .not-btn-calificar{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:8px;padding:.6rem 1.5rem;font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;gap:.4rem;}
 .not-tbl{background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);}
 .not-tbl .table thead th{background:#1e293b !important;color:#94a3b8 !important;font-size:.72rem !important;font-weight:700 !important;text-transform:uppercase !important;letter-spacing:.05em !important;border:none !important;padding:.8rem 1rem !important;}
 .not-tbl .table tbody td{padding:.75rem 1rem !important;font-size:.875rem !important;vertical-align:middle !important;border-color:#f1f5f9 !important;}
-.not-badge-nivel{background:#eef2ff;color:#6366f1;padding:.25rem .6rem;border-radius:999px;font-size:.72rem;font-weight:700;}
+.not-badge-nivel{background:#e8f8f4;color:#387f75;padding:.25rem .6rem;border-radius:999px;font-size:.72rem;font-weight:700;}
 .not-badge-calif{background:#d1fae5;color:#065f46;padding:.25rem .6rem;border-radius:999px;font-size:.72rem;font-weight:700;}
 </style>
 {% endblock %}
@@ -30,7 +30,7 @@ body{background:#f3f5f9 !important;}
   <!-- TÍTULO -->
   <div class="d-flex align-items-center gap-2 mb-4">
     <i class="bi bi-clipboard2-data-fill" style="font-size:1.3rem;color:#6366f1;"></i>
-    <h1 class="h4 fw-bold text-dark mb-0">Gesti&oacute;n Acad&eacute;mica</h1>
+    <h1 class="h4 fw-bold text-dark mb-0">Gesti&oacute;n de Notas</h1>
   </div>
 
   <!-- DOS PANELES -->
@@ -39,7 +39,7 @@ body{background:#f3f5f9 !important;}
     <div class="col-md-6">
       <div class="not-panel not-panel-purple">
         <div class="not-panel-head">
-          <div class="not-panel-title"><i class="bi bi-journal-text"></i> Ingreso por Aula</div>
+          <div class="not-panel-title"><i class="bi bi-journal-text"></i> Calificar por Aula</div>
           <div class="not-panel-sub">Selecciona un sal&oacute;n para llenar actas completas.</div>
         </div>
         <div class="not-panel-body">
@@ -54,15 +54,15 @@ body{background:#f3f5f9 !important;}
               </select>
             </div>
             <div class="mb-3">
-              <div class="not-label">2. Curso (Filtrado)</div>
+              <div class="not-label">2. Materia</div>
               <select name="curso" class="form-select form-select-sm">
                 <option value="">-- Seleccionar Curso --</option>
                 {% for p in programas %}
-                <option value="{{ p.id }}">{{ p.denominacion }}</option>
+                <option value="{{ p.id }}">{{ p.denominacion|cut:'Técnico en '|cut:'Tecnólogo en ' }}</option>
                 {% endfor %}
               </select>
             </div>
-            <button type="submit" class="btn w-100 text-white fw-bold" style="background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:8px;">Cargar Alumnos</button>
+            <button type="submit" class="btn w-100 fw-bold" style="background:#77CEB9;color:#123b37;border-radius:8px;">Cargar Alumnos</button>
           </form>
         </div>
       </div>
@@ -78,7 +78,7 @@ body{background:#f3f5f9 !important;}
         <div class="not-panel-body">
           <div class="mb-3">
             <div class="not-label">Buscar Alumno</div>
-            <select class="form-select form-select-sm">
+            <select class="form-select form-select-sm" id="alumno-notas-select">
               <option value="">-- Nombre o DNI --</option>
               {% for m in matriculas %}
               <option value="{{ m.aprendiz.pk }}">{{ m.aprendiz.get_full_name }} ({{ m.aprendiz.perfil.numero_documento|default:'—' }})</option>
@@ -86,8 +86,8 @@ body{background:#f3f5f9 !important;}
             </select>
           </div>
           <div class="d-flex gap-2 mt-3">
-            <button class="not-btn-libreta flex-fill"><i class="bi bi-book"></i> Libreta</button>
-            <button class="not-btn-calificar flex-fill"><i class="bi bi-check2-circle"></i> Calificar</button>
+            <a class="not-btn-libreta flex-fill justify-content-center" id="btn-libretas" href="#"><i class="bi bi-book"></i> Libreta</a>
+            <a class="not-btn-calificar flex-fill justify-content-center" id="btn-calificar-alumno" href="#"><i class="bi bi-check2-circle"></i> Calificar</a>
           </div>
         </div>
       </div>
@@ -102,7 +102,7 @@ body{background:#f3f5f9 !important;}
           <tr>
             <th class="ps-4">NIVEL</th>
             <th>GRADO Y SECCI&Oacute;N</th>
-            <th>CURSO</th>
+            <th>MATERIA</th>
             <th class="text-center">ESTADO</th>
             <th class="text-end pe-4">ACCI&Oacute;N</th>
           </tr>
@@ -111,11 +111,14 @@ body{background:#f3f5f9 !important;}
           {% for f in fichas %}
           <tr>
             <td class="ps-4"><span class="not-badge-nivel">SECUNDARIA</span></td>
-            <td class="fw-semibold text-dark">{{ f.codigo_ficha }} &ldquo;{{ f.programa.denominacion|truncatechars:15 }}&rdquo;</td>
-            <td class="text-muted">{{ f.programa.denominacion|truncatechars:18 }}</td>
-            <td class="text-center"><span class="not-badge-calif"><i class="bi bi-check-circle-fill me-1"></i>{{ f.matriculas.count }} calif.</span></td>
+            <td class="fw-semibold text-dark">{{ f.matriculas.first.grado_escolar|default:'10' }}&deg; &ldquo;{{ f.matriculas.first.seccion|default:'A' }}&rdquo;</td>
+            <td class="text-muted">{{ f.programa.denominacion|cut:'Técnico en '|cut:'Tecnólogo en '|truncatechars:18 }}</td>
+            <td class="text-center"><span class="not-badge-calif"><i class="bi bi-check-circle-fill me-1"></i>{{ f.num_calificaciones }} calif.</span></td>
             <td class="text-end pe-4">
-              <a href="{% url 'fichas_detalle' f.pk %}" class="btn btn-sm btn-outline-primary rounded-2 py-0 px-2" style="font-size:.8rem;"><i class="bi bi-pencil me-1"></i>Editar</a>
+              <a href="{% url 'evaluaciones_calificar' %}?ficha={{ f.pk }}" class="btn btn-sm btn-outline-primary rounded-2 py-0 px-2" style="font-size:.8rem;"><i class="bi bi-pencil me-1"></i>Editar</a>
+              <form method="post" action="{% url 'eliminar_registro_notas' f.pk %}" class="d-inline" onsubmit="return confirm('¿Eliminar las calificaciones de este registro?');">
+                {% csrf_token %}<button type="submit" class="btn btn-sm btn-outline-danger rounded-2 py-0 px-2" title="Eliminar"><i class="bi bi-trash"></i></button>
+              </form>
             </td>
           </tr>
           {% empty %}
@@ -130,4 +133,18 @@ body{background:#f3f5f9 !important;}
   </div>
 
 </div>
+<script>
+const alumnoNotas = document.getElementById('alumno-notas-select');
+const btnLibreta = document.getElementById('btn-libretas');
+const btnCalificar = document.getElementById('btn-calificar-alumno');
+function actualizarEnlacesNotas() {
+  const id = alumnoNotas.value;
+  btnLibreta.href = id ? `/evaluaciones/libreta/${id}/` : '#';
+  btnCalificar.href = id ? `/evaluaciones/calificar/${id}/` : '#';
+  btnLibreta.classList.toggle('disabled', !id);
+  btnCalificar.classList.toggle('disabled', !id);
+}
+alumnoNotas.addEventListener('change', actualizarEnlacesNotas);
+actualizarEnlacesNotas();
+</script>
 {% endblock %}

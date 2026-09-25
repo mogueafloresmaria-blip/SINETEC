@@ -81,7 +81,7 @@ body{background:#f3f5f9 !important;}
           <option>Todas</option>
       </select>
     </form>
-    <a href="{% url 'registrar_aprendiz' %}" class="btn text-white fw-semibold px-4 py-2 d-inline-flex align-items-center gap-2" style="background:linear-gradient(135deg,#3b82f6,#2563eb);border-radius:9px;border:none;font-size:.9rem;white-space:nowrap;">
+    <a href="{% url 'nueva_matricula' %}" class="btn text-white fw-semibold px-4 py-2 d-inline-flex align-items-center gap-2" style="background:linear-gradient(135deg,#3b82f6,#2563eb);border-radius:9px;border:none;font-size:.9rem;white-space:nowrap;">
       <i class="bi bi-plus-circle-fill"></i> Nueva Matr&iacute;cula
     </a>
   </div>
@@ -135,7 +135,7 @@ body{background:#f3f5f9 !important;}
               </td>
               <td class="text-end pe-4">
                 <div class="d-inline-flex gap-1">
-                  <a href="#" class="mat-btn" style="background:#ecfdf5;color:#10b981;border-color:#a7f3d0;" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                  {% if m.aprendiz.perfil.telefono %}<a href="https://wa.me/{{ m.aprendiz.perfil.telefono }}" target="_blank" rel="noopener" class="mat-btn" style="background:#ecfdf5;color:#10b981;border-color:#a7f3d0;" title="Abrir WhatsApp"><i class="bi bi-whatsapp"></i></a>{% else %}<span class="mat-btn opacity-50" title="Sin teléfono"><i class="bi bi-whatsapp"></i></span>{% endif %}
                   <a href="{% url 'estudiante_editar' m.aprendiz.pk %}" class="mat-btn" style="background:#fffbeb;color:#d97706;border-color:#fde68a;" title="Editar"><i class="bi bi-pencil-fill"></i></a>
                   <a href="{% url 'estudiante_eliminar' m.aprendiz.pk %}" class="mat-btn" style="background:#fef2f2;color:#dc2626;border-color:#fecaca;" title="Eliminar"><i class="bi bi-trash-fill"></i></a>
                 </div>

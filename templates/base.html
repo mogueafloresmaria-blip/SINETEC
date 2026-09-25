@@ -16,8 +16,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     
     <!-- Sistema de Diseño SINETEC Escolar -->
-    <link rel="stylesheet" href="{% static 'css/sinetec.css' %}?v=20260923dyl">
-    <link rel="stylesheet" href="{% static 'css/sinetec_custom.css' %}?v=20260923dyl">
+    <link rel="stylesheet" href="{% static 'css/sinetec.css' %}?v=20260925sky">
+    <link rel="stylesheet" href="{% static 'css/sinetec_custom.css' %}?v=20260925sky">
     {% block extra_head %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
@@ -74,7 +74,7 @@
                 <a class="nav-link {% if 'programa' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'programas_lista' %}">
                     <i class="bi bi-stack"></i> Carga Acad.
                 </a>
-                <a class="nav-link {% if 'ficha' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'fichas_lista' %}">
+                <a class="nav-link {% if request.resolver_match.url_name == 'cursos_lista' %}active{% endif %}" href="{% url 'cursos_lista' %}">
                     <i class="bi bi-journal-bookmark-fill"></i> Cursos
                 </a>
                 <a class="nav-link {% if 'calificacion' in request.resolver_match.url_name or 'evaluacion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'calificaciones' %}">
@@ -83,7 +83,7 @@
 
                 <!-- ADMINISTRACIÓN -->
                 <div class="sinetec-nav-label">Administración</div>
-                <a class="nav-link {% if 'familias' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familias_lista' %}">
+                <a class="nav-link {% if request.resolver_match.url_name == 'caja_pensiones' %}active{% endif %}" href="{% url 'caja_pensiones' %}">
                     <i class="bi bi-cash-coin"></i> Pensiones
                 </a>
                 <a class="nav-link {% if 'gestion_usuarios' in request.resolver_match.url_name or 'configuracion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'gestion_usuarios' %}">
@@ -92,10 +92,10 @@
                 <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
                     <i class="bi bi-megaphone-fill"></i> Comunicados
                 </a>
-                <a class="nav-link {% if 'asistencia' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'escanear_asistencia_camara' %}">
+                <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento_asistencia' %}active{% endif %}" href="{% url 'seguimiento_asistencia' %}">
                     <i class="bi bi-check2-square"></i> Tomar Asist.
                 </a>
-                <a class="nav-link {% if 'semaforo' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'semaforo_competencias' %}">
+                <a class="nav-link {% if request.resolver_match.url_name == 'transporte_escolar' %}active{% endif %}" href="{% url 'transporte_escolar' %}">
                     <i class="bi bi-bus-front-fill"></i> Transporte
                 </a>
 

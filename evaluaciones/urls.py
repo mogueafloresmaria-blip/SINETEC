@@ -13,6 +13,8 @@ urlpatterns = [
     # Sábana de Juicios RAP institucional SENA (A y D)
     path('raps/', views.raps_por_ficha, name='evaluaciones_raps'),
     path('aprendices/', views.aprendices_por_rap, name='evaluaciones_aprendices'),
+    path('libreta/<int:pk>/', views.libreta_aprendiz, name='libreta_aprendiz'),
+    path('calificar/<int:pk>/', views.calificar_aprendiz, name='calificar_aprendiz'),
     path('exportar-excel/', views.exportar_sabana_excel, name='evaluaciones_exportar_excel'),
     path('exportar-csv/', views.exportar_sabana_csv, name='evaluaciones_exportar_csv'),
     path('exportar-pdf/', views.reporte_rap_pdf, name='evaluaciones_exportar_pdf'),

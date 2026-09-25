@@ -1,48 +1,8 @@
 {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Matricular Estudiante - Seleccionar Curso · SINETEC{% endblock %}
-
+{% block title %}Registrar Nuevo Alumno · SINETEC{% endblock %}
 {% block content %}
-<div class="py-3">
-    <div class="mb-4">
-        <div class="sinetec-eyebrow mb-1">
-            <i class="bi bi-mortarboard-fill me-1"></i> Gestión de Matrícula Escolar
-        </div>
-        <h1 class="h3 fw-bold text-dark mb-1">Seleccionar Curso o Grupo</h1>
-        <p class="text-muted mb-0">Selecciona el grupo o cohorte donde se asentará la matrícula escolar del nuevo estudiante.</p>
-    </div>
-
-    <div class="row g-3">
-        {% for ficha in fichas %}
-            <div class="col-md-6 col-xl-4">
-                <div class="sinetec-card-modern p-4 bg-white rounded-4 shadow-sm border h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-bold">
-                                Grupo {{ ficha.codigo_ficha }}
-                            </span>
-                            <span class="badge bg-light text-muted border small">{{ ficha.estado }}</span>
-                        </div>
-                        <h2 class="h6 fw-bold text-dark mb-1">{{ ficha.programa.nombre }}</h2>
-                        <p class="small text-muted mb-3">{{ ficha.institucion.nombre }}</p>
-                    </div>
-                    <div>
-                        <a href="{% url 'fichas_matricular' ficha.pk %}" class="btn btn-primary w-100 fw-semibold rounded-3" style="background: #1E3A8A; border: none;">
-                            <i class="bi bi-person-plus-fill me-1"></i> Abrir Asistente de Matrícula
-                        </a>
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <div class="col-12">
-                <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-4">
-                    <i class="bi bi-layers fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                    <h5 class="fw-bold text-dark">No hay cursos activos disponibles</h5>
-                    <p class="text-muted small">Crea o activa un grupo escolar para iniciar matrículas.</p>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-</div>
+<style>
+body{background:#f4fbff!important}.alumno-wrap{max-width:760px;margin:0 auto;padding:1.25rem}.alumno-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 28px rgba(42,94,172,.12)}.alumno-head{background:linear-gradient(110deg,#2f9ddd,#7FC4F2);color:#103c58;padding:1.15rem 1.5rem;display:flex;justify-content:space-between;align-items:center}.alumno-body{padding:1.5rem 1.8rem}.alumno-section{display:flex;align-items:center;gap:.45rem;color:#247aa5;font-size:.82rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #dcecf5;padding-bottom:.65rem;margin:0 0 1rem}.alumno-label{font-size:.76rem;font-weight:800;color:#334155;margin-bottom:.35rem}.alumno-help{background:#e8f7fd;color:#35718d;border-radius:8px;padding:.55rem .75rem;font-size:.76rem}.alumno-submit{background:#2f9ddd;color:#fff;border:0;border-radius:8px;width:100%;padding:.8rem;font-weight:900}.alumno-submit:hover{background:#247eaf;color:#fff}
+</style>
+<div class="alumno-wrap"><div class="mb-3"><a href="{% url 'estudiantes_lista' %}" class="text-decoration-none text-muted small fw-bold"><i class="bi bi-x-lg me-1"></i> Cancelar</a></div><div class="alumno-card"><div class="alumno-head"><h1 class="h5 fw-bold mb-0"><i class="bi bi-person-plus-fill me-2"></i>Registrar Nuevo Alumno</h1><span class="small fw-semibold">Institución Educativa</span></div><form method="post" enctype="multipart/form-data"><div class="alumno-body">{% csrf_token %}<h2 class="alumno-section"><i class="bi bi-person"></i> Datos Personales</h2><div class="row g-3 mb-4"><div class="col-md-6"><label class="alumno-label">Nombres *</label><input name="nombres" class="form-control" placeholder="Ej: Luis Miguel" required></div><div class="col-md-6"><label class="alumno-label">Apellidos *</label><input name="apellidos" class="form-control" placeholder="Ej: Pérez Rodríguez" required></div><div class="col-md-6"><label class="alumno-label">Fecha de Nacimiento</label><input name="fecha_nacimiento" type="date" class="form-control"></div><div class="col-md-6"><label class="alumno-label">Género</label><select name="genero" class="form-select"><option value="">-- Seleccionar --</option><option>Masculino</option><option>Femenino</option><option>Otro</option></select></div><div class="col-12"><label class="alumno-label">Foto de Perfil</label><input name="foto_perfil" type="file" class="form-control" accept="image/*"></div></div><h2 class="alumno-section"><i class="bi bi-person-vcard"></i> Identificación y Cuenta</h2><div class="mb-4"><label class="alumno-label">DNI / Documento *</label><input name="documento" class="form-control" placeholder="Será el usuario de acceso" required><div class="alumno-help mt-2"><i class="bi bi-info-circle-fill me-1"></i> El DNI será la contraseña inicial del alumno.</div></div><h2 class="alumno-section"><i class="bi bi-envelope"></i> Contacto</h2><div class="row g-3 mb-4"><div class="col-md-6"><label class="alumno-label">Correo Institucional *</label><input name="correo" type="email" class="form-control" placeholder="alumno@escuela.edu.co" required></div><div class="col-md-6"><label class="alumno-label">Teléfono (Acudiente)</label><input name="telefono" class="form-control" placeholder="+57 300 000 0000"></div></div><button class="alumno-submit" type="submit"><i class="bi bi-save me-1"></i> Registrar Alumno</button></div></form></div></div>
 {% endblock %}

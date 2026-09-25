@@ -26,8 +26,9 @@ def verificar():
     print("[OK] Login aprendiz_demo -> Éxito")
 
     res_dash = client.get('/dashboard/')
-    assert res_dash.status_code == 302 and '/aprendiz/' in res_dash.url, f"Error redirección dashboard aprendiz: {res_dash.url}"
-    print("[OK] Dispatcher /dashboard/ -> Redirige a /aprendiz/ (302)")
+    assert res_dash.status_code == 200, f"Error en dashboard aprendiz: {res_dash.status_code}"
+    assert b'Dashboard' in res_dash.content or b'dashboard' in res_dash.content, "Dashboard no renderiza contenido esperado"
+    print("[OK] GET /dashboard/ como Aprendiz -> 200 OK")
 
     res_apr = client.get('/aprendiz/')
     assert res_apr.status_code == 200, f"Error en /aprendiz/: {res_apr.status_code}"
@@ -59,8 +60,8 @@ def verificar():
     print("[OK] Login instructor_demo -> Éxito")
 
     res_dash_inst = client.get('/dashboard/')
-    assert res_dash_inst.status_code == 302 and '/instructor/' in res_dash_inst.url, f"Error redirección dashboard instructor: {res_dash_inst.url}"
-    print("[OK] Dispatcher /dashboard/ -> Redirige a /instructor/ (302)")
+    assert res_dash_inst.status_code == 200, f"Error en dashboard instructor: {res_dash_inst.status_code}"
+    print("[OK] GET /dashboard/ como Instructor -> 200 OK")
 
     res_inst = client.get('/instructor/')
     assert res_inst.status_code == 200, f"Error en /instructor/: {res_inst.status_code}"
@@ -83,8 +84,8 @@ def verificar():
     print("[OK] Login secretaria_demo -> Éxito")
 
     res_dash_sec = client.get('/dashboard/')
-    assert res_dash_sec.status_code == 302 and '/secretaria/' in res_dash_sec.url, f"Error redirección dashboard secretaría: {res_dash_sec.url}"
-    print("[OK] Dispatcher /dashboard/ -> Redirige a /secretaria/ (302)")
+    assert res_dash_sec.status_code == 200, f"Error en dashboard secretaría: {res_dash_sec.status_code}"
+    print("[OK] GET /dashboard/ como Secretaría -> 200 OK")
 
     res_sec = client.get('/secretaria/')
     assert res_sec.status_code == 200, f"Error en /secretaria/: {res_sec.status_code}"
@@ -107,8 +108,8 @@ def verificar():
     print("[OK] Login coordinador_demo -> Éxito")
 
     res_dash_coord = client.get('/dashboard/')
-    assert res_dash_coord.status_code == 302 and '/coordinacion/' in res_dash_coord.url, f"Error redirección dashboard coordinador: {res_dash_coord.url}"
-    print("[OK] Dispatcher /dashboard/ -> Redirige a /coordinacion/ (302)")
+    assert res_dash_coord.status_code == 200, f"Error en dashboard coordinador: {res_dash_coord.status_code}"
+    print("[OK] GET /dashboard/ como Coordinador -> 200 OK")
 
     res_coord = client.get('/coordinacion/')
     assert res_coord.status_code == 200, f"Error en /coordinacion/: {res_coord.status_code}"

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Calificar Alumno · SINETEC{% endblock %}
+{% block content %}
+<style>
+body{background:#f3f5f9!important}.cal-wrap{max-width:1080px;margin:0 auto;padding:1rem}.cal-back{color:#475569;text-decoration:none;font-weight:700;font-size:.85rem}.cal-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 15px rgba(15,23,42,.07)}.cal-profile{padding:1.25rem 1.5rem;border-left:4px solid #7564d8;display:flex;align-items:center;justify-content:space-between;gap:1rem}.cal-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.2rem;background:linear-gradient(135deg,#8b5cf6,#6366f1)}.cal-status{background:#e0f2fe;color:#0369a1;border-radius:9px;padding:.7rem 1rem;text-align:center;font-weight:800;font-size:.78rem}.cal-table th{background:#20242b;color:#fff;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:.85rem 1rem}.cal-table td{padding:.9rem 1rem;border-color:#f1f5f9;vertical-align:middle}.cal-plus{width:30px;height:30px;border:1px solid #e2e8f0;background:#f8fafc;color:#cbd5e1;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.cal-plus:hover{background:#6366f1;color:#fff;border-color:#6366f1}
+</style>
+<div class="cal-wrap">
+  <a href="{% url 'calificaciones' %}" class="cal-back d-inline-block mb-3"><i class="bi bi-arrow-left me-1"></i> Volver a Gestión de Notas</a>
+  <div class="cal-card">
+    <div class="cal-profile"><div class="d-flex align-items-center gap-3"><div class="cal-avatar">{{ matricula.aprendiz.first_name|first|upper }}{{ matricula.aprendiz.last_name|first|upper }}</div><div><h1 class="h4 fw-bold mb-1">{{ matricula.aprendiz.get_full_name|default:matricula.aprendiz.username }}</h1><div class="small text-muted"><i class="bi bi-mortarboard-fill me-1"></i>{{ matricula.grado_escolar|default:'Estudiante' }} · {{ matricula.ficha.programa.denominacion }}</div></div></div><div class="cal-status"><i class="bi bi-arrow-repeat me-1"></i> EN PROCESO<br><small class="fw-normal">Ficha {{ matricula.ficha.codigo_ficha }}</small></div></div>
+    <div class="table-responsive"><table class="table cal-table mb-0"><thead><tr><th>Curso</th><th class="text-center">I BIM</th><th class="text-center">II BIM</th><th class="text-center">III BIM</th><th class="text-center">IV BIM</th><th class="text-center">Acción</th></tr></thead><tbody>
+      {% for fila in filas_libreta %}<tr><td class="fw-bold text-dark">{{ fila.nombre|truncatechars:60 }}</td>{% for valor in fila.periodos %}<td class="text-center">{% if valor %}<span class="badge {% if valor == 'A' %}bg-success{% else %}bg-danger{% endif %}">{{ valor }}</span>{% else %}<span class="text-muted">-</span>{% endif %}</td>{% endfor %}<td class="text-center"><a class="cal-plus" href="{% url 'evaluaciones_calificar' %}?ficha={{ matricula.ficha.pk }}&rap={{ fila.rap_id }}" title="Abrir calificación"><i class="bi bi-plus-lg"></i></a></td></tr>{% empty %}<tr><td colspan="6" class="text-center py-5 text-muted">Este alumno todavía no tiene resultados de aprendizaje asociados.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </div>
+</div>
+{% endblock %}

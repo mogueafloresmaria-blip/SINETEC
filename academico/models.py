@@ -290,6 +290,7 @@ class Matricula(models.Model):
         default='10',
         verbose_name="Grado Escolar en el Colegio"
     )
+    seccion = models.CharField(max_length=4, default='A', verbose_name="Sección Escolar")
     estado_formacion = models.CharField(
         max_length=25,
         choices=ESTADOS_APRENDIZ,

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Transporte Escolar · SINETEC{% endblock %}
+{% block content %}
+<style>
+body{background:#f3f5f9!important}.tr-wrap{padding:1rem 1.2rem}.tr-stat,.tr-toolbar,.tr-panel{background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.04)}.tr-stat{padding:1rem 1.2rem;display:flex;justify-content:space-between;align-items:center}.tr-value{font-size:1.75rem;font-weight:900;color:#0f172a}.tr-label{font-size:.7rem;font-weight:900;letter-spacing:.06em;color:#94a3b8;text-transform:uppercase}.tr-icon{font-size:1.5rem;padding:.7rem;border-radius:12px}.tr-toolbar{padding:.8rem 1rem}.tr-panel{overflow:hidden}.tr-panel th{background:#20384d;color:#cbd5e1;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;padding:.85rem 1rem}.tr-panel td{padding:.85rem 1rem;border-color:#f1f5f9;font-size:.85rem}.tr-bus{width:38px;height:38px;display:inline-grid;place-items:center;border-radius:10px;background:#e8f0fb;color:#2A5EAC;margin-right:.6rem}
+</style>
+<div class="tr-wrap">
+  <div class="d-flex align-items-center gap-2 mb-1"><i class="bi bi-bus-front-fill fs-4" style="color:#2A5EAC"></i><h1 class="h4 fw-bold mb-0">Transporte Escolar</h1></div>
+  <p class="text-muted small mb-4">Gestión de rutas, conductores y cupos de transporte institucional.</p>
+  <div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="tr-stat" style="border-bottom:3px solid #2A5EAC"><div><div class="tr-value">{{ total_rutas }}</div><div class="tr-label">Rutas</div></div><i class="bi bi-bus-front-fill tr-icon" style="background:#e8f0fb;color:#2A5EAC"></i></div></div>
+    <div class="col-md-4"><div class="tr-stat" style="border-bottom:3px solid #334155"><div><div class="tr-value">{{ total_activos }}</div><div class="tr-label">Activos</div></div><i class="bi bi-person-check-fill tr-icon" style="background:#f1f5f9;color:#475569"></i></div></div>
+    <div class="col-md-4"><div class="tr-stat" style="border-bottom:3px solid #d97706"><div><div class="tr-value">{{ capacidad_total }}</div><div class="tr-label">Capacidad</div></div><i class="bi bi-people-fill tr-icon" style="background:#fff7ed;color:#d97706"></i></div></div>
+  </div>
+  <div class="tr-toolbar d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <form method="get" class="input-group" style="max-width:360px"><span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span><input name="q" value="{{ query }}" class="form-control border-start-0" placeholder="Buscar ruta, conductor o placa..."></form>
+    <a href="{% url 'nueva_ruta_transporte' %}" class="btn text-white fw-bold" style="background:#2A5EAC"><i class="bi bi-plus-circle me-1"></i> Nueva Ruta</a>
+  </div>
+  <div class="tr-panel table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Ruta</th><th>Conductor</th><th>Placa</th><th class="text-center">Capacidad</th><th class="text-center">Activos</th></tr></thead><tbody>
+  {% for ruta in rutas %}<tr><td><span class="tr-bus"><i class="bi bi-bus-front-fill"></i></span><strong>{{ ruta.nombre }}</strong></td><td>{{ ruta.conductor }}</td><td><span class="badge bg-light text-dark border font-monospace">{{ ruta.placa }}</span></td><td class="text-center"><span class="badge bg-primary-subtle text-primary">{{ ruta.capacidad }} asientos</span></td><td class="text-center fw-bold text-success">0</td></tr>{% empty %}<tr><td colspan="5" class="text-center py-5 text-muted">No hay rutas registradas.</td></tr>{% endfor %}
+  </tbody></table></div>
+</div>
+{% endblock %}

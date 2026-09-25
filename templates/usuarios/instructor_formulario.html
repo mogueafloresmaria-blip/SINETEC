@@ -31,7 +31,7 @@
                     </div>
                 </div>
 
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
 
                     <div class="row g-3 mb-4">
@@ -55,6 +55,20 @@
                         <div class="col-md-8">
                             <label class="form-label small fw-semibold text-dark">Número de Documento *</label>
                             <input type="text" name="numero_documento" class="form-control" value="{{ perfil.numero_documento|default:'' }}" placeholder="Ej. 12589632" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Género</label>
+                            <select name="genero" class="form-select">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Masculino" {% if perfil.genero == 'Masculino' %}selected{% endif %}>Masculino</option>
+                                <option value="Femenino" {% if perfil.genero == 'Femenino' %}selected{% endif %}>Femenino</option>
+                                <option value="Otro" {% if perfil.genero == 'Otro' %}selected{% endif %}>Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Foto de Perfil</label>
+                            <input type="file" name="foto_perfil" class="form-control" accept="image/*">
                         </div>
 
                         <div class="col-md-6">

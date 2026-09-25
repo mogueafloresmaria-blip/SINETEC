@@ -1,6 +1,7 @@
 import csv
 import io
 import unicodedata
+import uuid
 from datetime import date, datetime
 from urllib.parse import urlencode
 
@@ -578,6 +579,41 @@ def _docentes_activos():
 
 
 @login_required
+def lista_cursos(request):
+    """Malla curricular visual: materias activas y sus grupos asociados."""
+    if request.method == 'POST':
+        denominacion = (request.POST.get('denominacion') or '').strip()
+        tipo_programa = request.POST.get('tipo_programa') or 'Técnico'
+        if not denominacion:
+            messages.error(request, 'El nombre del curso es obligatorio.')
+        else:
+            ProgramaFormacion.objects.create(
+                codigo_programa=f'CUR-{uuid.uuid4().hex[:8].upper()}',
+                denominacion=denominacion,
+                tipo_programa=tipo_programa,
+                activo=True,
+            )
+            messages.success(request, f'El curso "{denominacion}" fue creado correctamente.')
+        return redirect('cursos_lista')
+
+    query = (request.GET.get('q') or '').strip()
+    cursos = ProgramaFormacion.objects.filter(activo=True).prefetch_related('fichas').annotate(
+        total_fichas=Count('fichas', distinct=True),
+        total_competencias=Count('competencias', distinct=True),
+    ).order_by('denominacion')
+    if query:
+        cursos = cursos.filter(denominacion__icontains=query)
+
+    return render(request, 'academico/cursos_lista.html', {
+        'cursos': cursos,
+        'query': query,
+        'total_cursos': ProgramaFormacion.objects.filter(activo=True).count(),
+        'grupos_primaria': CargaAcademica.objects.filter(nivel='Primaria').count(),
+        'grupos_secundaria': CargaAcademica.objects.filter(nivel='Secundaria').count(),
+    })
+
+
+@login_required
 def lista_programas(request):
     """Carga académica: asignación de docentes a materias, grados y secciones."""
     if request.method == 'POST':
@@ -923,6 +959,43 @@ def crear_horario(request):
     )
     messages.success(request, 'Clase agregada al horario escolar.')
     return _redirigir_horarios(request)
+
+
+@login_required
+def nueva_matricula(request):
+    alumnos = User.objects.filter(
+        matriculas_academicas__isnull=True,
+        perfil__rol__nombre__in=['Estudiante', 'Aprendiz'],
+    ).select_related('perfil').order_by('last_name', 'first_name')
+    fichas = Ficha.objects.filter(estado='En Ejecucion').order_by('codigo_ficha')
+    grados = Matricula._meta.get_field('grado_escolar').choices
+    secciones = ('A', 'B', 'C')
+
+    if request.method == 'POST':
+        alumno = alumnos.filter(pk=request.POST.get('alumno_id')).first()
+        ficha = fichas.filter(pk=request.POST.get('ficha_id')).first() or fichas.first()
+        grado = request.POST.get('grado_escolar') or '10'
+        seccion = request.POST.get('seccion') or 'A'
+        if not alumno or not ficha:
+            messages.error(request, 'Selecciona un alumno y asegúrate de tener un curso activo.')
+        elif Matricula.objects.filter(aprendiz=alumno, ficha=ficha).exists():
+            messages.error(request, 'El alumno ya está matriculado en este curso.')
+        else:
+            Matricula.objects.create(
+                aprendiz=alumno,
+                ficha=ficha,
+                grado_escolar=grado,
+                seccion=seccion,
+            )
+            messages.success(request, f'{alumno.get_full_name()} fue matriculado correctamente.')
+            return redirect('matriculas_lista')
+
+    return render(request, 'academico/nueva_matricula.html', {
+        'alumnos': alumnos,
+        'fichas': fichas,
+        'grados': grados,
+        'secciones': secciones,
+    })
 
 
 @login_required

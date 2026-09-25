@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from datetime import date
+from collections import OrderedDict
 import csv
 from openpyxl import Workbook
 from reportlab.lib.pagesizes import letter
@@ -25,6 +26,62 @@ TRIMESTRES = (
     ('3', 'Trimestre 3 (julio - septiembre)'),
     ('4', 'Trimestre 4 (octubre - diciembre)'),
 )
+
+
+def _filas_libreta(matriculas):
+    juicios = JuicioEvaluativo.objects.filter(
+        matricula__in=matriculas
+    ).select_related('resultado_aprendizaje__competencia').order_by(
+        'resultado_aprendizaje__competencia__codigo', '-fecha_evaluacion'
+    )
+    filas = OrderedDict()
+    for juicio in juicios:
+        rap = juicio.resultado_aprendizaje
+        clave = rap.pk
+        if clave not in filas:
+            filas[clave] = {
+                'nombre': rap.competencia.descripcion or rap.codigo,
+                'codigo': rap.codigo,
+                'rap_id': rap.pk,
+                'juicios': {},
+                'ultimo': juicio.juicio_valor,
+            }
+        trimestre = str(((juicio.fecha_evaluacion.month - 1) // 3) + 1)
+        filas[clave]['juicios'].setdefault(trimestre, juicio.juicio_valor)
+    for fila in filas.values():
+        fila['periodos'] = [fila['juicios'].get(str(numero), '') for numero in range(1, 5)]
+    return list(filas.values())
+
+
+@login_required
+def libreta_aprendiz(request, pk):
+    matriculas = Matricula.objects.filter(aprendiz_id=pk).select_related(
+        'aprendiz', 'aprendiz__perfil', 'ficha', 'ficha__programa'
+    )
+    matricula = matriculas.first()
+    if not matricula:
+        messages.error(request, 'El alumno no tiene una matrícula activa.')
+        return redirect('calificaciones')
+    return render(request, 'evaluaciones/libreta_aprendiz.html', {
+        'matricula': matricula,
+        'filas_libreta': _filas_libreta(matriculas),
+    })
+
+
+@login_required
+def calificar_aprendiz(request, pk):
+    matriculas = Matricula.objects.filter(aprendiz_id=pk).select_related(
+        'aprendiz', 'aprendiz__perfil', 'ficha', 'ficha__programa'
+    )
+    matricula = matriculas.first()
+    if not matricula:
+        messages.error(request, 'El alumno no tiene una matrícula activa.')
+        return redirect('calificaciones')
+    filas = _filas_libreta(matriculas)
+    return render(request, 'evaluaciones/calificar_aprendiz.html', {
+        'matricula': matricula,
+        'filas_libreta': filas,
+    })
 
 
 def filtrar_juicios_por_periodo(juicios, periodo_academico, trimestre):

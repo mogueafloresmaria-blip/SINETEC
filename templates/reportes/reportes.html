@@ -87,7 +87,7 @@
                             <select class="form-select form-select-sm" id="select-ficha-reporte">
                                 <option value="">-- Todos los Grupos (Consolidado) --</option>
                                 {% for f in fichas %}
-                                    <option value="{{ f.id }}">Grupo {{ f.codigo_ficha }} — {{ f.programa.nombre|truncatechars:26 }}</option>
+                                    <option value="{{ f.id }}">Grupo {{ f.codigo_ficha }} — {{ f.programa.denominacion|truncatechars:26 }}</option>
                                 {% endfor %}
                             </select>
                         </div>

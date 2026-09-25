@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 import os
 import csv
 import base64
@@ -45,6 +46,8 @@ from reportlab.lib import colors
 from reportlab.lib.utils import ImageReader, simpleSplit
 import re
 from .models import PerfilUsuario, EvidenciaTaller, CalificacionEvidencia, ResultadoAprendizaje, Rol, ConfiguracionColegio, FamiliaAcudiente
+from .models import PagoPension
+from .models import TransporteRuta
 from .decorators import (
     requerir_roles, solo_coordinador_o_admin, solo_instructor, solo_aprendiz,
     solo_secretaria_o_coordinador, validar_propietario_o_coordinador, _normalizar_texto
@@ -949,6 +952,9 @@ def editar_aprendiz(request, pk):
         if nuevo_doc:
             perfil.numero_documento = nuevo_doc
         perfil.telefono = request.POST.get('telefono', '').strip()
+        perfil.genero = request.POST.get('genero', '').strip()
+        if request.FILES.get('foto_perfil'):
+            perfil.foto_perfil = request.FILES['foto_perfil']
         perfil.save()
 
         if matricula:
@@ -1014,8 +1020,154 @@ def matriculas_lista(request):
 
 @login_required
 def registrar_aprendiz(request):
-    fichas = Ficha.objects.select_related('programa', 'institucion').filter(estado='En Ejecucion').order_by('codigo_ficha')
-    return render(request, 'usuarios/registrar_aprendiz.html', {'fichas': fichas})
+    if request.method == 'POST':
+        nombres = request.POST.get('nombres', '').strip()
+        apellidos = request.POST.get('apellidos', '').strip()
+        documento = request.POST.get('documento', '').strip()
+        correo = request.POST.get('correo', '').strip()
+        telefono = request.POST.get('telefono', '').strip()
+        genero = request.POST.get('genero', '').strip()
+        fecha_nacimiento = request.POST.get('fecha_nacimiento') or None
+        if not nombres or not apellidos or not documento or not correo:
+            messages.error(request, 'Completa los campos obligatorios del alumno.')
+        elif PerfilUsuario.objects.filter(numero_documento=documento).exists():
+            messages.error(request, 'Ya existe un alumno con ese documento.')
+        else:
+            rol, _ = Rol.objects.get_or_create(nombre='Estudiante', defaults={'descripcion': 'Alumno del colegio'})
+            username = f'alumno_{documento}'
+            usuario = User.objects.create_user(
+                username=username,
+                first_name=nombres,
+                last_name=apellidos,
+                email=correo,
+                password=documento,
+            )
+            perfil = usuario.perfil
+            perfil.rol = rol
+            perfil.tipo_documento = 'TI'
+            perfil.numero_documento = documento
+            perfil.telefono = telefono
+            perfil.genero = genero
+            perfil.fecha_nacimiento = fecha_nacimiento
+            if request.FILES.get('foto_perfil'):
+                perfil.foto_perfil = request.FILES['foto_perfil']
+            perfil.save()
+            messages.success(request, f'Alumno {usuario.get_full_name()} registrado correctamente.')
+            return redirect('estudiantes_lista')
+    return render(request, 'usuarios/registrar_aprendiz.html')
+
+
+@login_required
+def caja_pensiones(request):
+    if request.method == 'POST':
+        anular_id = request.POST.get('anular_id')
+        if anular_id:
+            pago = PagoPension.objects.filter(pk=anular_id, estado='EMITIDO').first()
+            if pago:
+                pago.estado = 'ANULADO'
+                pago.save(update_fields=['estado'])
+                messages.success(request, 'Recibo de pago anulado correctamente.')
+            return redirect('caja_pensiones')
+        estudiante_id = request.POST.get('estudiante_id')
+        concepto = (request.POST.get('concepto') or 'Pensión mensual').strip()
+        metodo_pago = request.POST.get('metodo_pago') or 'Efectivo'
+        try:
+            monto = Decimal(request.POST.get('monto', '0'))
+        except (InvalidOperation, TypeError):
+            monto = Decimal('0')
+        estudiante = User.objects.filter(pk=estudiante_id).first()
+        if not estudiante or monto <= 0:
+            messages.error(request, 'Selecciona un alumno e indica un monto válido.')
+        else:
+            PagoPension.objects.create(
+                estudiante=estudiante,
+                concepto=concepto,
+                monto=monto,
+                metodo_pago=metodo_pago,
+            )
+            messages.success(request, 'Recibo de pago emitido correctamente.')
+        return redirect('caja_pensiones')
+
+    query = request.GET.get('q', '').strip()
+    pagos = PagoPension.objects.select_related('estudiante', 'estudiante__perfil')
+    if query:
+        pagos = pagos.filter(
+            Q(estudiante__first_name__icontains=query) |
+            Q(estudiante__last_name__icontains=query) |
+            Q(numero_recibo__icontains=query)
+        )
+    hoy = timezone.localdate()
+    pagos_hoy = PagoPension.objects.filter(fecha_pago__date=hoy, estado='EMITIDO')
+    return render(request, 'usuarios/caja_pensiones.html', {
+        'pagos': pagos,
+        'query': query,
+        'estudiantes': User.objects.filter(matriculas_academicas__estado_formacion='En Formacion').distinct().order_by('last_name', 'first_name'),
+        'recaudado_hoy': sum((p.monto for p in pagos_hoy), Decimal('0')),
+        'movimientos_hoy': pagos_hoy.count(),
+    })
+
+
+@login_required
+def nuevo_cobro(request):
+    estudiantes = User.objects.filter(
+        matriculas_academicas__estado_formacion='En Formacion'
+    ).distinct().order_by('last_name', 'first_name')
+    if request.method == 'POST':
+        estudiante = estudiantes.filter(pk=request.POST.get('estudiante_id')).first()
+        cobrar_matricula = request.POST.get('cobrar_matricula') == 'on'
+        pension = request.POST.get('pension') or ''
+        metodo_pago = request.POST.get('metodo_pago') or 'Efectivo'
+        try:
+            monto = Decimal(request.POST.get('monto', '0'))
+        except (InvalidOperation, TypeError):
+            monto = Decimal('0')
+        conceptos = []
+        if cobrar_matricula:
+            conceptos.append('Matrícula anual 2026')
+        if pension:
+            conceptos.append(f'Pensión {pension}')
+        if not estudiante or monto <= 0 or not conceptos:
+            messages.error(request, 'Selecciona un alumno, un concepto y un monto válido.')
+        else:
+            PagoPension.objects.create(
+                estudiante=estudiante,
+                concepto=' + '.join(conceptos),
+                monto=monto,
+                metodo_pago=metodo_pago,
+                comprobante=request.FILES.get('comprobante'),
+            )
+            messages.success(request, 'Pago procesado y recibo emitido correctamente.')
+            return redirect('caja_pensiones')
+    return render(request, 'usuarios/nuevo_cobro.html', {'estudiantes': estudiantes})
+
+
+@login_required
+@solo_coordinador_o_admin
+def crear_usuario(request):
+    roles = Rol.objects.order_by('nombre')
+    if request.method == 'POST':
+        nombres = request.POST.get('nombres', '').strip()
+        apellidos = request.POST.get('apellidos', '').strip()
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        documento = request.POST.get('documento', '').strip()
+        password = request.POST.get('password', '')
+        rol = roles.filter(pk=request.POST.get('rol_id')).first()
+        if not all([nombres, apellidos, username, documento, password, rol]):
+            messages.error(request, 'Completa todos los campos obligatorios.')
+        elif User.objects.filter(username=username).exists() or PerfilUsuario.objects.filter(numero_documento=documento).exists():
+            messages.error(request, 'El usuario o documento ya está registrado.')
+        else:
+            usuario = User.objects.create_user(
+                username=username, first_name=nombres, last_name=apellidos,
+                email=email, password=password,
+            )
+            usuario.perfil.rol = rol
+            usuario.perfil.numero_documento = documento
+            usuario.perfil.save()
+            messages.success(request, f'Usuario {nombres} {apellidos} creado correctamente.')
+            return redirect('gestion_usuarios')
+    return render(request, 'usuarios/nuevo_usuario.html', {'roles': roles})
 
 
 @login_required
@@ -1084,7 +1236,7 @@ def mensajeria(request):
     if request.method == 'POST':
         destinatario = request.POST.get('destinatario', '').strip()
         asunto = request.POST.get('asunto', 'Comunicación SINETEC').strip()
-        contenido = request.POST.get('contenido', '').strip()
+        contenido = (request.POST.get('contenido') or request.POST.get('mensaje') or '').strip()
         if destinatario and contenido:
             send_mail(
                 subject=asunto,
@@ -1129,6 +1281,44 @@ def mensajeria(request):
         'destinatarios_instructores': destinatarios_instructores,
         'destinatarios_aprendices': destinatarios_aprendices,
     })
+
+
+@login_required
+def transporte_escolar(request):
+    """Panel de rutas escolares activas."""
+    rutas = TransporteRuta.objects.filter(activa=True)
+    query = request.GET.get('q', '').strip().lower()
+    if query:
+        rutas = rutas.filter(nombre__icontains=query) | rutas.filter(conductor__icontains=query) | rutas.filter(placa__icontains=query)
+    return render(request, 'usuarios/transporte.html', {
+        'rutas': rutas,
+        'total_rutas': TransporteRuta.objects.filter(activa=True).count(),
+        'total_activos': 0,
+        'capacidad_total': sum(ruta.capacidad for ruta in TransporteRuta.objects.filter(activa=True)),
+        'query': request.GET.get('q', ''),
+    })
+
+
+@login_required
+def nueva_ruta_transporte(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre', '').strip()
+        conductor = request.POST.get('conductor', '').strip()
+        placa = request.POST.get('placa', '').strip().upper()
+        try:
+            capacidad = int(request.POST.get('capacidad', '0'))
+            costo = Decimal(request.POST.get('costo_mensual', '0'))
+        except (TypeError, ValueError, InvalidOperation):
+            capacidad, costo = 0, Decimal('0')
+        if not nombre or not conductor or not placa or capacidad <= 0 or costo < 0:
+            messages.error(request, 'Completa los datos de la ruta con valores válidos.')
+        elif TransporteRuta.objects.filter(placa=placa).exists():
+            messages.error(request, 'Ya existe una ruta registrada con esa placa.')
+        else:
+            TransporteRuta.objects.create(nombre=nombre, conductor=conductor, placa=placa, capacidad=capacidad, costo_mensual=costo)
+            messages.success(request, 'Ruta escolar registrada correctamente.')
+            return redirect('transporte_escolar')
+    return render(request, 'usuarios/nueva_ruta.html')
 
 
 @login_required
@@ -2009,7 +2199,8 @@ def calificaciones(request):
     fichas = Ficha.objects.filter(
         estado='En Ejecucion'
     ).select_related('programa', 'institucion').annotate(
-        num_matriculas=Count('matriculas')
+        num_matriculas=Count('matriculas'),
+        num_calificaciones=Count('matriculas__juicios_evaluativos', distinct=True),
     ).order_by('codigo_ficha')
     programas = ProgramaFormacion.objects.order_by('denominacion')
     matriculas = Matricula.objects.filter(
@@ -2021,6 +2212,16 @@ def calificaciones(request):
         'matriculas': matriculas,
     }
     return render(request, 'evaluaciones/notas.html', context)
+
+
+@login_required
+def eliminar_registro_notas(request, ficha_id):
+    """Elimina las calificaciones de una ficha desde el panel escolar de notas."""
+    ficha = get_object_or_404(Ficha, pk=ficha_id)
+    if request.method == 'POST':
+        eliminadas, _ = JuicioEvaluativo.objects.filter(matricula__ficha=ficha).delete()
+        messages.success(request, f'Se eliminaron {eliminadas} calificaciones de {ficha.codigo_ficha}.')
+    return redirect('calificaciones')
 
 
 @login_required
@@ -2892,6 +3093,9 @@ def editar_instructor(request, pk):
         if nuevo_doc:
             perfil.numero_documento = nuevo_doc
         perfil.telefono = request.POST.get('telefono', '').strip()
+        perfil.genero = request.POST.get('genero', '').strip()
+        if request.FILES.get('foto_perfil'):
+            perfil.foto_perfil = request.FILES['foto_perfil']
 
         rol_nombre = request.POST.get('rol', '').strip()
         if rol_nombre:

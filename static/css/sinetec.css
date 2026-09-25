@@ -15,17 +15,17 @@
     --sinetec-text-light: #94A3B8;
 
     /* Azul Petróleo / Deep Navy (Estructura y Autoridad) */
-    --sinetec-petroleum: #0F2942;
-    --sinetec-petroleum-hover: #163B5F;
-    --sinetec-petroleum-dark: #0A1D30;
-    --sinetec-petroleum-gradient: linear-gradient(180deg, #1a1837 0%, #1f1d36 55%, #242242 100%);
+    --sinetec-petroleum: #7FC4F2;
+    --sinetec-petroleum-hover: #5CA8D8;
+    --sinetec-petroleum-dark: #2F79A8;
+    --sinetec-petroleum-gradient: linear-gradient(180deg, #7FC4F2 0%, #5CA8D8 55%, #2F79A8 100%);
 
     /* Azul Tecnológico y Amigable (Acción y Enlaces) */
-    --sinetec-blue: #3B82F6;
-    --sinetec-blue-hover: #2563EB;
-    --sinetec-blue-light: #EFF6FF;
-    --sinetec-blue-soft: #DBEAFE;
-    --sinetec-blue-border: #BFDBFE;
+    --sinetec-blue: #7FC4F2;
+    --sinetec-blue-hover: #3E91C5;
+    --sinetec-blue-light: #EAF6FD;
+    --sinetec-blue-soft: #D7EDFA;
+    --sinetec-blue-border: #A8D8F3;
 
     /* Lavanda y Lila Suave (Elegancia y Organización) */
     --sinetec-lavender: #EEF2FF;
@@ -118,8 +118,8 @@ a:hover {
 
 /* Sidebar Fijo Desktop */
 .sinetec-sidebar {
-    background: var(--sinetec-petroleum-gradient);
-    color: #E2E8F0;
+    background: #7FC4F2;
+    color: #173B52;
     width: 264px;
     min-width: 264px;
     max-width: 264px;
@@ -146,14 +146,14 @@ a:hover {
     gap: 12px;
     text-decoration: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(0, 0, 0, 0.12);
+    background: rgba(47, 121, 168, 0.25);
 }
 
 .sinetec-brand-icon {
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #2A5EAC 0%, #1D447F 100%);
     color: #ffffff;
     display: grid;
     place-items: center;
@@ -170,7 +170,7 @@ a:hover {
     font-family: var(--font-heading);
     font-size: 1.15rem;
     font-weight: 800;
-    color: #ffffff;
+    color: #123B55;
     letter-spacing: -0.01em;
     display: flex;
     align-items: center;
@@ -179,7 +179,7 @@ a:hover {
 
 .sinetec-brand-subtitle {
     font-size: 0.72rem;
-    color: #94A3B8;
+    color: #245B78;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
@@ -195,7 +195,7 @@ a:hover {
 }
 
 .sinetec-nav-label {
-    color: #94A3B8;
+    color: #245B78;
     text-transform: uppercase;
     font-size: 0.65rem;
     font-weight: 800;
@@ -205,7 +205,7 @@ a:hover {
 }
 
 .sinetec-nav .nav-link {
-    color: #CBD5E1;
+    color: #173B52;
     border-radius: 10px;
     padding: 9px 12px;
     display: flex;
@@ -221,13 +221,13 @@ a:hover {
 .sinetec-nav .nav-link i {
     width: 20px;
     text-align: center;
-    color: #94A3B8;
+    color: #245B78;
     font-size: 1.05rem;
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .sinetec-nav .nav-link:hover {
-    color: #ffffff;
+    color: #123B55;
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.12);
     transform: translateX(2px);
@@ -239,9 +239,9 @@ a:hover {
 
 .sinetec-nav .nav-link.active {
     color: #ffffff;
-    background: #6366F1;
+    background: #3E91C5;
     border-color: transparent;
-    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 14px rgba(42, 94, 172, 0.4);
 }
 
 .sinetec-nav .nav-link.active i {
@@ -251,13 +251,13 @@ a:hover {
 .sinetec-sidebar-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     padding: 14px 16px;
-    background: rgba(0, 0, 0, 0.18);
+    background: rgba(47, 121, 168, 0.25);
     font-size: 0.75rem;
-    color: #94A3B8;
+    color: #245B78;
 }
 
 .sinetec-sidebar-footer strong {
-    color: #F1F5F9;
+    color: #123B55;
     display: block;
     font-size: 0.82rem;
     margin-bottom: 2px;
@@ -272,7 +272,7 @@ a:hover {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background: var(--sinetec-bg);
+    background: linear-gradient(135deg, #fafdff 0%, #eef8fd 52%, #e4f3f8 100%);
     transition: margin-left 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease;
 }
 
@@ -391,6 +391,8 @@ a:hover {
     width: 100%;
     max-width: 100%;
     flex: 1 0 auto;
+    position: relative;
+    z-index: 0;
 }
 
 /* ==============================================================================

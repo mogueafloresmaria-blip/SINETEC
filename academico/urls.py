@@ -14,6 +14,8 @@ urlpatterns = [
     path('fichas/<int:pk>/reporte-excel/', views.reporte_ficha_excel, name='ficha_reporte_excel'),
     path('fichas/<int:pk>/reporte/excel/', views.reporte_ficha_excel),
     path('fichas/<int:ficha_id>/matricular/', views.matricular_aprendiz, name='fichas_matricular'),
+    path('matriculas/nueva/', views.nueva_matricula, name='nueva_matricula'),
+    path('cursos/', views.lista_cursos, name='cursos_lista'),
     path('programas/', views.lista_programas, name='programas_lista'),
     path('programas/<int:pk>/', views.detalle_programa, name='programa_detalle'),
     path('carga/<int:pk>/eliminar/', views.eliminar_carga_academica, name='carga_eliminar'),
