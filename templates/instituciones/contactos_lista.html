@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Contactos Institucionales · SINETEC SENA{% endblock %}
+{% block title %}Contactos Institucionales · EDUNOVA SENA{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-3 px-md-4">
@@ -191,7 +191,7 @@
                             </td>
                             <td>
                                 {% if c.correo %}
-                                    <a href="mailto:{{ c.correo }}?subject=SINETEC%20-%20Comunicación%20Institucional%20SENA" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1 small d-inline-flex align-items-center gap-1 text-nowrap">
+                                    <a href="mailto:{{ c.correo }}?subject=EDUNOVA%20-%20Comunicación%20Institucional%20SENA" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1 small d-inline-flex align-items-center gap-1 text-nowrap">
                                         <i class="bi bi-envelope-fill"></i> {{ c.correo }}
                                     </a>
                                 {% else %}

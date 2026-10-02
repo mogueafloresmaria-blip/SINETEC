@@ -1,5 +1,5 @@
 {% load static %}
-<!-- MODAL CREADOR Y GENERADOR DE CÓDIGO QR DEL APRENDIZ · SINETEC SENA -->
+<!-- MODAL CREADOR Y GENERADOR DE CÓDIGO QR DEL APRENDIZ · EDUNOVA SENA -->
 <div class="modal fade" id="modalCreadorQR" tabindex="-1" aria-labelledby="modalCreadorQRLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden" style="background: #FFFFFF;">
@@ -97,7 +97,7 @@
                             <!-- Header de Credencial -->
                             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                                 <span class="badge" style="background: #0B2414; color: #4EFA8A; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">
-                                    SINETEC · SENA
+                                    EDUNOVA · SENA
                                 </span>
                                 <span class="badge bg-light text-muted border" id="qrBadgeTipo" style="font-size: 0.7rem;">
                                     DINÁMICO 24H
@@ -108,7 +108,7 @@
                             <div class="position-relative d-inline-block mx-auto mb-3" style="padding: 10px; background: #FFFFFF; border: 2px dashed #CBD5E1; border-radius: 18px;">
                                 <img id="qrModalImg" src="" alt="Código QR Aprendiz" style="width: 200px; height: 200px; display: block; border-radius: 10px; object-fit: contain;">
                                 
-                                <!-- Emblema Central SINETEC -->
+                                <!-- Emblema Central EDUNOVA -->
                                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; background: #FFFFFF; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: grid; place-items: center; border: 1.5px solid #29AAE3;">
                                     <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; color: #29AAE3; font-size: 0.85rem;">S</span>
                                 </div>
@@ -274,7 +274,7 @@
             </head>
             <body>
                 <div class="card">
-                    <div class="header">SENA · SINETEC FORMATIVO</div>
+                    <div class="header">SENA · EDUNOVA FORMATIVO</div>
                     <img class="qr-img" src="data:image/png;base64,${qrCurrentData.qrBase64}">
                     <div class="nombre">${qrCurrentData.nombre}</div>
                     <div class="meta">Doc: ${qrCurrentData.documento} · Ficha ${qrCurrentData.ficha}</div>

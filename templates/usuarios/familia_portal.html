@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Portal de Familias y Acudientes · EDUNOVA{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header Hero del Portal de Familia (SINETEC Rosa Elegante) -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important; color: #FFFFFF; padding: 2.2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(190, 24, 93, 0.35);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-people-fill me-1"></i> Núcleo Familiar Escolar
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Portal de Familias y Acudientes</h1>
+                <p class="mb-0 text-white-50 small">
+                    Bienvenido(a), <strong>{{ acudiente.nombre_acudiente|default:user.get_full_name|default:user.username }}</strong> · Consulta el seguimiento académico, notas, asistencia y boletines de tus hijos.
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'familia_matricula' %}" class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-person-vcard-fill text-primary me-1"></i> Matrícula
+                </a>
+                <a href="{% url 'familia_boletines' %}" class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-file-earmark-ruled-fill text-success me-1"></i> Boletines
+                </a>
+                <a href="{% url 'familia_asistencia' %}" class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-calendar-check-fill text-warning me-1"></i> Asistencia
+                </a>
+                <a href="{% url 'familia_pensiones' %}" class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-cash-stack text-info me-1"></i> Pensiones
+                </a>
+                <button type="button" class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalMensajeDocenteFamilia" style="color: #db2777;">
+                    <i class="bi bi-chat-dots-fill me-1"></i> Escribir a Docente
+                </button>
+                <a href="{% url 'mensajeria' %}" class="btn btn-outline-light btn-sm fw-bold rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-envelope-fill me-1"></i> Circulares
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes del Sistema -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Listado de Hijos a Cargo -->
+    {% if hijos_data %}
+        <div class="row g-4 mb-4">
+            {% for item in hijos_data %}
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <!-- Cabecera de la ficha del estudiante -->
+                        <div class="card-header bg-white border-bottom p-4">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-4 shadow-sm" style="width: 58px; height: 58px; background: linear-gradient(135deg, #f472b6, #db2777);">
+                                        {{ item.estudiante.first_name|default:item.estudiante.username|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <h3 class="h5 fw-bold mb-0 text-dark">{{ item.estudiante.get_full_name|default:item.estudiante.username }}</h3>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 small">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Matrícula Activa
+                                            </span>
+                                        </div>
+                                        <div class="text-muted small mt-1">
+                                            Doc: <strong>{{ item.estudiante.perfil.numero_documento|default:"N/A" }}</strong> · 
+                                            Grado: <strong>{{ item.matricula.grado_escolar|default:"10" }}° {{ item.matricula.seccion|default:"A" }}</strong> · 
+                                            Curso: <strong>Grado {{ item.ficha.codigo_ficha|default:"10°A" }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <a href="{% url 'familia_matricula' %}?estudiante={{ item.estudiante.id }}" class="btn btn-outline-secondary fw-semibold btn-sm rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-person-vcard me-1"></i> Ficha Matrícula
+                                    </a>
+                                    <a href="{% url 'familia_boletines' %}?estudiante={{ item.estudiante.id }}" class="btn btn-outline-primary fw-semibold btn-sm rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-file-earmark-ruled me-1"></i> Ver Boletín
+                                    </a>
+                                    <a href="{% url 'familia_asistencia' %}?estudiante={{ item.estudiante.id }}" class="btn btn-outline-success fw-semibold btn-sm rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-calendar-check me-1"></i> Asistencia
+                                    </a>
+                                    {% if item.estudiante.perfil %}
+                                        <a href="{% url 'estudiantes_boletin_pdf' item.estudiante.perfil.pk %}" class="btn btn-primary fw-bold btn-sm rounded-pill px-3 shadow-sm" target="_blank">
+                                            <i class="bi bi-file-earmark-pdf-fill me-1 text-white"></i> PDF Oficial
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3 Métricas Rápidas del Estudiante -->
+                        <div class="card-body p-4 bg-light bg-opacity-50 border-bottom">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="bg-white p-3 rounded-3 border shadow-sm h-100">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="text-muted small fw-bold text-uppercase">Rendimiento Académico</span>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">{{ item.tasa_aprobacion }}%</span>
+                                        </div>
+                                        <div class="h4 fw-bold text-dark mb-1">{{ item.aprobados }} Aprobados</div>
+                                        <div class="small text-muted">
+                                            {{ item.por_mejorar }} por mejorar de {{ item.total_juicios }} competencias evaluadas
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="bg-white p-3 rounded-3 border shadow-sm h-100">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="text-muted small fw-bold text-uppercase">Asistencia Escolar</span>
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill">{{ item.pct_asistencia }}%</span>
+                                        </div>
+                                        <div class="h4 fw-bold text-dark mb-1">{{ item.asist_p }} Sesiones Presente</div>
+                                        <div class="small text-muted">
+                                            {{ item.asist_a }} inasistencias registradas · {{ item.asist_j }} justificaciones
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="bg-white p-3 rounded-3 border shadow-sm h-100">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="text-muted small fw-bold text-uppercase">Estado de Pagos</span>
+                                            <span class="badge bg-info bg-opacity-10 text-info rounded-pill">Al Día</span>
+                                        </div>
+                                        <div class="h4 fw-bold text-dark mb-1">{{ item.pagos|length }} Recibos</div>
+                                        <div class="small text-muted">
+                                            Comprobantes emitidos en Tesorería Escolar
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pestañas de Detalle Académico -->
+                        <div class="card-body p-4">
+                            <ul class="nav nav-pills mb-3" id="tabHijo{{ forloop.counter }}" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active rounded-pill px-3 py-1 small fw-semibold" id="tab-notas-{{ forloop.counter }}" data-bs-toggle="pill" data-bs-target="#content-notas-{{ forloop.counter }}" type="button" role="tab">
+                                        <i class="bi bi-award me-1"></i> Calificaciones y Logros
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link rounded-pill px-3 py-1 small fw-semibold" id="tab-horario-{{ forloop.counter }}" data-bs-toggle="pill" data-bs-target="#content-horario-{{ forloop.counter }}" type="button" role="tab">
+                                        <i class="bi bi-calendar2-week me-1"></i> Horario de Clases
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link rounded-pill px-3 py-1 small fw-semibold" id="tab-pagos-{{ forloop.counter }}" data-bs-toggle="pill" data-bs-target="#content-pagos-{{ forloop.counter }}" type="button" role="tab">
+                                        <i class="bi bi-receipt me-1"></i> Recibos de Caja
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="tabContent{{ forloop.counter }}">
+                                <!-- Tab 1: Calificaciones -->
+                                <div class="tab-pane fade show active" id="content-notas-{{ forloop.counter }}" role="tabpanel">
+                                    {% if item.juicios %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-light small">
+                                                    <tr>
+                                                        <th>Asignatura / Competencia</th>
+                                                        <th>Fecha</th>
+                                                        <th class="text-center">Desempeño</th>
+                                                        <th>Retroalimentación del Docente</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for j in item.juicios %}
+                                                        <tr>
+                                                            <td>
+                                                                <strong class="text-dark d-block">{{ j.resultado_aprendizaje.codigo }}</strong>
+                                                                <span class="small text-muted">{{ j.resultado_aprendizaje.descripcion|default:j.resultado_aprendizaje.codigo }}</span>
+                                                            </td>
+                                                            <td class="small text-muted">{{ j.fecha_evaluacion|date:"d/m/Y" }}</td>
+                                                            <td class="text-center">
+                                                                {% if j.juicio_valor == 'A' %}
+                                                                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-3 py-1 rounded-pill fw-bold">
+                                                                        🟢 Aprobado (A)
+                                                                    </span>
+                                                                {% else %}
+                                                                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 px-3 py-1 rounded-pill fw-bold">
+                                                                        🔴 En Proceso (Bajo)
+                                                                    </span>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="small text-muted">
+                                                                {{ j.observaciones|default:"Desempeño verificado conforme al plan curricular escolar." }}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="mt-3 text-end">
+                                            <a href="{% url 'familia_boletines' %}?estudiante={{ item.estudiante.id }}" class="btn btn-outline-primary btn-sm rounded-pill fw-semibold">
+                                                <i class="bi bi-journal-check me-1"></i> Consultar Boletín Escolar con Promedio y Notas Numéricas &rarr;
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-4 text-muted">
+                                            <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
+                                            Aún no hay calificaciones asentadas para este estudiante en el periodo actual.
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Tab 2: Horario -->
+                                <div class="tab-pane fade" id="content-horario-{{ forloop.counter }}" role="tabpanel">
+                                    {% if item.horarios %}
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered align-middle">
+                                                <thead class="table-light small">
+                                                    <tr>
+                                                        <th>Día</th>
+                                                        <th>Horario</th>
+                                                        <th>Materia / Asignatura</th>
+                                                        <th>Salón / Ambiente</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for h in item.horarios %}
+                                                        <tr>
+                                                            <td><span class="badge bg-primary bg-opacity-10 text-primary fw-bold">{{ h.get_dia_display|default:h.dia }}</span></td>
+                                                            <td class="small">{{ h.hora_inicio|time:"h:i A" }} - {{ h.hora_fin|time:"h:i A" }}</td>
+                                                            <td><strong>{{ h.asignatura|default:item.ficha.programa.denominacion }}</strong></td>
+                                                            <td class="small text-muted">{{ h.aula|default:"Sede Principal" }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-4 text-muted">
+                                            <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                                            Horario escolar en proceso de programación institucional.
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Tab 3: Recibos -->
+                                <div class="tab-pane fade" id="content-pagos-{{ forloop.counter }}" role="tabpanel">
+                                    {% if item.pagos %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-light small">
+                                                    <tr>
+                                                        <th>N° Recibo</th>
+                                                        <th>Concepto</th>
+                                                        <th>Fecha</th>
+                                                        <th>Valor</th>
+                                                        <th>Método</th>
+                                                        <th class="text-end">Comprobante Oficial</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for p in item.pagos %}
+                                                        <tr>
+                                                            <td><code>{{ p.numero_recibo }}</code></td>
+                                                            <td>{{ p.concepto }}</td>
+                                                            <td class="small text-muted">{{ p.fecha_pago|date:"d/m/Y" }}</td>
+                                                            <td class="fw-bold text-success">${{ p.monto }}</td>
+                                                            <td class="small">{{ p.metodo_pago }}</td>
+                                                            <td class="text-end">
+                                                                <a href="{% url 'recibo_pension_pdf' p.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3" target="_blank">
+                                                                    <i class="bi bi-printer-fill me-1"></i> Descargar Recibo PDF
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-4 text-muted">
+                                            <i class="bi bi-wallet2 fs-2 d-block mb-2"></i>
+                                            Sin registros de caja pendientes para este estudiante.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+            <i class="bi bi-people text-muted fs-1 mb-3"></i>
+            <h4 class="fw-bold text-dark mb-1">Sin estudiantes asociados directamente</h4>
+            <p class="text-muted small mb-3">Tu cuenta de acudiente se encuentra activa. Si no visualizas a tu hijo, comunícate con Secretaría Académica para verificar la vinculación institucional de parentesco.</p>
+            <div>
+                <a href="{% url 'secretaria_bandeja' %}" class="btn btn-primary rounded-pill px-4 btn-sm">
+                    <i class="bi bi-envelope-fill me-1"></i> Contactar Secretaría
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Circulares y Comunicados Institucionales -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h4 class="h6 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-megaphone-fill text-primary"></i> Circulares y Comunicados Oficiales para Familias
+            </h4>
+            <span class="badge bg-light text-muted border">Año Lectivo 2026</span>
+        </div>
+        <div class="row g-3">
+            {% for c in circulares %}
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <strong class="text-dark small"><i class="bi bi-file-earmark-text text-primary me-1"></i>{{ c.asunto }}</strong>
+                        <span class="badge bg-white text-muted border" style="font-size: 0.72rem;">{{ c.fecha_creacion|date:"d/m/Y" }}</span>
+                    </div>
+                    <p class="small text-muted mb-2">{{ c.mensaje|truncatechars:140 }}</p>
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <small class="text-muted"><i class="bi bi-person-fill"></i> Remitente: {{ c.remitente.get_full_name|default:c.remitente.username|default:"Rectoría / Secretaría" }}</small>
+                        {% if c.urgente %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Prioritaria</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-4 text-muted bg-light rounded-3 border">
+                    <i class="bi bi-inbox fs-2 text-secondary d-block mb-1"></i>
+                    No hay circulares oficiales vigentes dirigidas a familias en este momento.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Modal Enviar Mensaje a Docente desde Familia -->
+    <div class="modal fade" id="modalMensajeDocenteFamilia" tabindex="-1" aria-labelledby="modalMensajeDocenteFamiliaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <form method="post" action="{% url 'familia_portal' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="enviar_mensaje_docente">
+                    <div class="modal-header border-bottom py-3" style="background: #FDF2F8;">
+                        <h6 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="modalMensajeDocenteFamiliaLabel">
+                            <i class="bi bi-chat-heart-fill" style="color: #db2777;"></i> Enviar Mensaje al Cuerpo Docente
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Seleccionar Docente Destinatario</label>
+                            <select class="form-select form-select-sm rounded-3" name="docente_id" required>
+                                {% for d in docentes_lista %}
+                                    <option value="{{ d.id }}">Prof. {{ d.get_full_name|default:d.username }} (Docente Titular)</option>
+                                {% empty %}
+                                    <option value="">Docente Titular</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Mensaje / Consulta Familiar</label>
+                            <textarea class="form-control rounded-3" name="mensaje" rows="4" placeholder="Escriba su mensaje, consulta sobre rendimiento o inquietud al docente..." required></textarea>
+                        </div>
+                        <div class="form-text small text-muted">
+                            <i class="bi bi-shield-check text-success me-1"></i> La comunicación quedará registrada en el canal de mensajes de EDUNOVA y notificará de inmediato al profesor.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top py-2 bg-light">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-sm text-white rounded-pill px-4 fw-bold" style="background: #db2777; border-color: #db2777;">
+                            <i class="bi bi-send-fill me-1"></i> Enviar Mensaje
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

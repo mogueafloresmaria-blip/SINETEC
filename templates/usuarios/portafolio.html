@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mi Portafolio Digital · SINETEC{% endblock %}
+{% block title %}Mi Portafolio Digital · EDUNOVA{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -230,8 +230,8 @@
         <div class="col-6 col-xl-3">
             <div class="kpi-metric-card">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Asistencia y QR</span>
-                    <div class="kpi-icon bg-info bg-opacity-10 text-info"><i class="bi bi-qr-code-scan"></i></div>
+                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Asistencia Escolar</span>
+                    <div class="kpi-icon bg-info bg-opacity-10 text-info"><i class="bi bi-calendar-check-fill"></i></div>
                 </div>
                 <div class="h4 fw-bold text-dark mb-1">{{ porcentaje_asistencia }}%</div>
                 <div class="small text-muted">
@@ -414,11 +414,8 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h2 class="h5 fw-bold text-dark mb-1">Registro y Control de Asistencia</h2>
-                        <p class="text-muted small mb-0">Trazabilidad de sesiones presenciales y virtuales en la Media Técnica SENA.</p>
+                        <p class="text-muted small mb-0">Trazabilidad de sesiones escolares y formativas.</p>
                     </div>
-                    <a href="{% url 'carnet_digital_id' perfil.pk %}" class="btn btn-sm btn-success rounded-pill px-3">
-                        <i class="bi bi-qr-code-scan me-1"></i> Abrir Mi Carnet QR
-                    </a>
                 </div>
 
                 <div class="row g-4 mb-4">
@@ -470,7 +467,7 @@
                             {% empty %}
                                 <tr>
                                     <td colspan="4" class="text-center py-4 text-muted">
-                                        No hay asistencias registradas recientemente. Utiliza tu carné QR en cada jornada.
+                                        No hay asistencias registradas recientemente en la jornada escolar.
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -526,7 +523,7 @@
         <div class="tab-pane fade" id="tab-timeline" role="tabpanel">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
                 <h2 class="h5 fw-bold text-dark mb-1">Historia de mi Formación</h2>
-                <p class="text-muted small mb-4">Línea de tiempo cronológica con eventos reales registrados en SINETEC.</p>
+                <p class="text-muted small mb-4">Línea de tiempo cronológica con eventos reales registrados en EDUNOVA.</p>
 
                 <div class="timeline-stream">
                     {% for ev in linea_tiempo %}
@@ -562,11 +559,8 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h2 class="h5 fw-bold text-dark mb-1">Mis Recursos y Documentos Guardados</h2>
-                        <p class="text-muted small mb-0">Materiales y guías técnicas guardadas desde la Biblioteca General SENA.</p>
+                        <p class="text-muted small mb-0">Materiales y guías pedagógicas institucionales.</p>
                     </div>
-                    <a href="{% url 'biblioteca_formacion' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
-                        <i class="bi bi-book me-1"></i> Explorar Biblioteca General
-                    </a>
                 </div>
 
                 <div class="row g-3">
@@ -593,7 +587,7 @@
                     {% empty %}
                         <div class="col-12 text-center py-5 text-muted">
                             <i class="bi bi-bookmark-star fs-1 text-muted d-block mb-2"></i>
-                            Aún no has guardado recursos de la biblioteca. Explora la Biblioteca Digital y guarda tus guías favoritas.
+                            Aún no cuentas con recursos o guías guardadas en tu portafolio académico.
                         </div>
                     {% endfor %}
                 </div>

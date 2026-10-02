@@ -1,8 +1,121 @@
 {% extends 'base.html' %}
-{% block title %}Nueva Matrícula · SINETEC{% endblock %}
+{% block title %}Nueva Matrícula Oficial 2026 · EDUNOVA{% endblock %}
+
 {% block content %}
 <style>
-body{background:#f3f5f9!important}.nm-wrap{max-width:650px;margin:0 auto;padding:1.25rem}.nm-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 5px 20px rgba(15,23,42,.09)}.nm-head{background:linear-gradient(110deg,#138bd5,#3aa4eb);color:#fff;padding:1.1rem 1.4rem;display:flex;justify-content:space-between;align-items:center}.nm-body{padding:1.5rem 1.8rem}.nm-label{font-size:.78rem;font-weight:900;color:#334155;margin-bottom:.45rem}.nm-submit{background:#128ddb;color:#fff;border:0;border-radius:8px;width:100%;padding:.75rem;font-weight:900}.nm-submit:hover{background:#0877ba;color:#fff}
+body { background: #f3f5f9 !important; }
+.nm-wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem; }
+.nm-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(15,23,42,.08); border: 1px solid #e2e8f0; }
+.nm-head { background: linear-gradient(135deg, #0284c7 0%, #0369a1 60%, #075985 100%); color: #fff; padding: 1.5rem 1.8rem; display: flex; justify-content: space-between; align-items: center; }
+.nm-body { padding: 2rem 2.2rem; }
+.nm-label { font-size: .8rem; font-weight: 800; color: #1e293b; margin-bottom: .45rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.nm-submit { background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: 0; border-radius: 10px; width: 100%; padding: .85rem; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transition: all 0.2s ease; }
+.nm-submit:hover { filter: brightness(1.08); transform: translateY(-1px); color: #fff; }
 </style>
-<div class="nm-wrap"><div class="mb-3"><a href="{% url 'matriculas_lista' %}" class="text-decoration-none text-muted small fw-bold"><i class="bi bi-x-lg me-1"></i> Cancelar</a></div><div class="nm-card"><div class="nm-head"><h1 class="h5 fw-bold mb-0"><i class="bi bi-person-plus-fill me-2"></i>Nueva Matrícula</h1><span class="small opacity-75">Vigencia 2026</span></div><form method="post"><div class="nm-body">{% csrf_token %}<div class="mb-4"><label class="nm-label">1. Seleccione al Alumno</label><select name="alumno_id" class="form-select" required><option value="">-- Seleccionar Alumno --</option>{% for alumno in alumnos %}<option value="{{ alumno.pk }}">{{ alumno.get_full_name|default:alumno.username }} (DNI: {{ alumno.perfil.numero_documento }})</option>{% endfor %}</select><small class="text-muted">Solo se muestran alumnos activos sin matrícula vigente.</small></div><div class="row g-3 mb-4"><div class="col-md-7"><label class="nm-label">2. Grado / Año</label><select name="grado_escolar" class="form-select" required><option value="">-- Seleccionar --</option>{% for value,label in grados %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></div><div class="col-md-5"><label class="nm-label"><span class="text-primary me-1">A</span>3. Sección</label><select name="seccion" class="form-select" required>{% for seccion in secciones %}<option value="{{ seccion }}">"{{ seccion }}"</option>{% endfor %}</select></div></div>{% if fichas|length > 1 %}<div class="mb-4"><label class="nm-label">Curso / Grupo</label><select name="ficha_id" class="form-select">{% for ficha in fichas %}<option value="{{ ficha.pk }}">{{ ficha.codigo_ficha }} · {{ ficha.programa.denominacion }}</option>{% endfor %}</select></div>{% endif %}<button class="nm-submit" type="submit"><i class="bi bi-save me-1"></i> Confirmar Matrícula</button></div></form></div></div>
+
+<div class="nm-wrap">
+  <div class="mb-3 d-flex justify-content-between align-items-center">
+    <a href="{% url 'matriculas_lista' %}" class="text-decoration-none text-muted small fw-bold">
+      <i class="bi bi-arrow-left me-1"></i> Volver a Listado de Matrículas
+    </a>
+    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 rounded-pill fw-semibold">
+      Período Académico 2026
+    </span>
+  </div>
+
+  <div class="nm-card">
+    <div class="nm-head">
+      <div>
+        <h1 class="h5 fw-bold mb-1"><i class="bi bi-person-plus-fill me-2"></i>Nueva Matrícula Escolar</h1>
+        <p class="small mb-0 text-white-50">Formalización del registro institucional de matrícula por grado y sección</p>
+      </div>
+      <span class="badge bg-white text-primary fw-bold px-3 py-2 rounded-pill shadow-sm">Vigencia 2026</span>
+    </div>
+
+    <form method="post">
+      <div class="nm-body">
+        {% csrf_token %}
+
+        <!-- 1. Búsqueda y Selección del Alumno -->
+        <div class="mb-4">
+          <label class="nm-label d-flex justify-content-between align-items-center">
+            <span>1. Seleccione al Alumno</span>
+            <span class="small text-muted fw-normal">Total: {{ alumnos|length }} estudiantes disponibles</span>
+          </label>
+          <div class="input-group mb-2">
+            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="filtroAlumnoTexto" class="form-control border-start-0" placeholder="Escriba nombre o documento para filtrar en la lista..." onkeyup="filtrarAlumnosRapido(this.value)">
+          </div>
+          <select name="alumno_id" id="selectAlumnoMatricula" class="form-select form-select-lg fs-6" required size="5" style="max-height: 180px;">
+            <option value="" disabled>-- Seleccione un estudiante de la lista --</option>
+            {% for alumno in alumnos %}
+            <option value="{{ alumno.pk }}" {% if alumno_preseleccionado == alumno.pk|stringformat:"s" %}selected{% endif %}>
+              {{ alumno.get_full_name|default:alumno.username }} · Doc: {{ alumno.perfil.numero_documento|default:"N/A" }} {% if alumno.email %}· {{ alumno.email }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+          <small class="text-muted d-block mt-1">
+            <i class="bi bi-info-circle me-1 text-primary"></i> Estudiantes activos de la institución con expediente creado.
+          </small>
+        </div>
+
+        <!-- 2. Grado y Sección -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-7">
+            <label class="nm-label">2. Grado / Año Escolar</label>
+            <select name="grado_escolar" class="form-select" required>
+              <option value="">-- Seleccionar Grado --</option>
+              {% for value, label in grados %}
+              <option value="{{ value }}" {% if value == '10' %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-5">
+            <label class="nm-label">3. Sección / Grupo</label>
+            <select name="seccion" class="form-select" required>
+              {% for seccion in secciones %}
+              <option value="{{ seccion }}">Sección "{{ seccion }}"</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. Curso / Grupo Específico -->
+        {% if fichas %}
+        <div class="mb-4">
+          <label class="nm-label">4. Curso / Grupo Vinculado (Opcional)</label>
+          <select name="ficha_id" class="form-select">
+            <option value="">-- Asignación automática por Grado y Sección --</option>
+            {% for ficha in fichas %}
+            <option value="{{ ficha.pk }}">Grado {{ ficha.codigo_ficha }} · {{ ficha.programa.denominacion }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+
+        <button class="nm-submit mt-2" type="submit">
+          <i class="bi bi-check-circle-fill me-2"></i> Confirmar y Guardar Matrícula
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function filtrarAlumnosRapido(query) {
+  const q = query.toLowerCase().trim();
+  const select = document.getElementById('selectAlumnoMatricula');
+  const options = select.getElementsByTagName('option');
+  for (let i = 0; i < options.length; i++) {
+    const opt = options[i];
+    if (!opt.value) continue;
+    const txt = opt.textContent.toLowerCase();
+    if (txt.includes(q)) {
+      opt.style.display = '';
+    } else {
+      opt.style.display = 'none';
+    }
+  }
+}
+</script>
 {% endblock %}

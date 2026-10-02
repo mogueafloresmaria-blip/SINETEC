@@ -1,87 +1,92 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SINETEC | Portal Administrativo Escolar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EDUNOVA | Inicio de Sesión Institucional</title>
+    
+    <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --primary: #1E3A8A;
-            --primary-dark: #0F2942;
-            --primary-light: #3B82F6;
-            --accent: #2563EB;
-            --bg-page: #F8FAFC;
-            --card-bg: #FFFFFF;
-            --text-main: #0F172A;
+            --bg-deep: #FDF2F4;
+            --bg-surface: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --border-subtle: #FCE7F3;
+            --border-focus: #DB2777;
+            
+            --primary-accent: #DB2777;
+            --primary-light: #F472B6;
+            --accent-sky: #FCE7F3;
+            --primary-gradient: linear-gradient(135deg, #DB2777 0%, #831843 100%);
+            --accent-glow: rgba(219, 39, 119, 0.28);
+            
+            --text-heading: #1E293B;
+            --text-body: #334155;
             --text-muted: #64748B;
-            --border-color: #E2E8F0;
-            --ring-color: rgba(59, 130, 246, 0.2);
+            --emerald-accent: #10B981;
         }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             min-height: 100vh;
-            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 50%, #EEF2FF 100%);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-body);
+            background-image: 
+                radial-gradient(circle at 12% 15%, rgba(251, 207, 232, 0.50), transparent 45%),
+                radial-gradient(circle at 88% 75%, rgba(244, 114, 182, 0.30), transparent 50%),
+                radial-gradient(circle at 50% 90%, rgba(253, 242, 244, 0.70), transparent 60%);
+            background-attachment: fixed;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
-            color: var(--text-main);
+            padding: clamp(16px, 3vw, 32px);
             position: relative;
             overflow-x: hidden;
         }
 
-        /* Abstract geometric background elements - Zero stock photos */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 550px;
-            height: 550px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(238, 242, 255, 0) 70%);
-            top: -120px;
-            right: -100px;
-            pointer-events: none;
-        }
-
-        body::after {
-            content: '';
-            position: absolute;
-            width: 480px;
-            height: 480px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(15, 41, 66, 0.08) 0%, rgba(241, 245, 249, 0) 70%);
-            bottom: -100px;
-            left: -100px;
-            pointer-events: none;
+        h1, h2, h3, h4, h5, .brand-font {
+            font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
         }
 
         .login-shell {
             width: 100%;
-            max-width: 1060px;
-            min-height: 640px;
+            max-width: 1100px;
+            min-height: 680px;
             display: grid;
             grid-template-columns: 1.15fr 0.95fr;
-            background: var(--card-bg);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            border-radius: 24px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-subtle);
+            border-radius: 26px;
             overflow: hidden;
-            box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(15, 23, 42, 0.04);
+            box-shadow: 0 20px 50px rgba(219, 39, 119, 0.12), 0 2px 10px rgba(0, 0, 0, 0.04);
             position: relative;
             z-index: 1;
         }
 
+        @media (max-width: 960px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+                max-width: 520px;
+            }
+            .login-hero {
+                display: none !important;
+            }
+        }
+
         /* Left Hero Panel */
         .login-hero {
-            background: linear-gradient(150deg, #0F2942 0%, #1E3A8A 60%, #1E40AF 100%);
-            padding: 56px 48px;
-            color: #FFFFFF;
+            background: linear-gradient(155deg, #FFF1F2 0%, #FCE7F3 100%);
+            border-right: 1px solid var(--border-subtle);
+            padding: clamp(36px, 5vw, 56px) clamp(28px, 4vw, 48px);
+            color: var(--text-heading);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -89,169 +94,199 @@
             overflow: hidden;
         }
 
-        /* Clean subtle backdrop geometry */
-        .login-hero-glow {
+        .login-hero::before {
+            content: '';
             position: absolute;
-            top: -80px;
-            right: -80px;
+            top: -100px;
+            right: -100px;
             width: 320px;
             height: 320px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
             border-radius: 50%;
+            background: radial-gradient(circle, rgba(244, 114, 182, 0.35) 0%, transparent 70%);
             pointer-events: none;
         }
 
-        .hero-top {
-            position: relative;
-            z-index: 2;
-        }
-
-        .hero-brand {
-            display: inline-flex;
+        .hero-brand-wrap {
+            display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 28px;
+            text-decoration: none;
         }
 
-        .hero-brand-logo {
-            width: 44px;
-            height: 44px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            color: #60A5FA;
-            backdrop-filter: blur(8px);
+        .hero-brand-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: #FFFFFF;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 4px 16px rgba(219, 39, 119, 0.25);
+            border: 1px solid #FCE7F3;
         }
 
-        .hero-brand-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .hero-brand-title {
-            font-size: 1.25rem;
+        .hero-brand-name {
+            font-size: 1.5rem;
             font-weight: 800;
+            color: #831843;
             letter-spacing: -0.02em;
-            color: #FFFFFF;
+            line-height: 1.1;
         }
 
-        .hero-brand-subtitle {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: #93C5FD;
-            font-weight: 700;
+        .hero-brand-sub {
+            font-size: 0.78rem;
+            color: #BE185D;
+            font-weight: 600;
         }
 
-        .hero-badge {
+        .hero-badge-pill {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            padding: 6px 14px;
+            background: #FFFFFF;
+            border: 1px solid #FBCFE8;
+            padding: 6px 16px;
             border-radius: 999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #DBEAFE;
-            margin-bottom: 24px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #9D174D;
+            margin-bottom: 22px;
+            box-shadow: 0 2px 8px rgba(219, 39, 119, 0.10);
+        }
+
+        .hero-badge-pill .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--emerald-accent);
+            box-shadow: 0 0 8px var(--emerald-accent);
         }
 
         .hero-title {
-            font-size: clamp(2rem, 3.2vw, 2.75rem);
-            line-height: 1.15;
+            font-size: clamp(1.8rem, 2.8vw, 2.4rem);
             font-weight: 800;
+            line-height: 1.18;
+            margin-bottom: 14px;
+            color: var(--text-heading);
             letter-spacing: -0.03em;
-            color: #FFFFFF;
-            margin-bottom: 16px;
         }
 
-        .hero-title span {
-            color: #60A5FA;
+        .hero-title .gradient-text {
+            background: linear-gradient(135deg, #831843 0%, #BE185D 60%, #DB2777 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .hero-description {
-            font-size: 0.96rem;
-            line-height: 1.65;
-            color: #CBD5E1;
-            max-width: 480px;
+        .hero-desc {
+            font-size: 0.94rem;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 28px;
         }
 
-        .hero-features {
-            position: relative;
-            z-index: 2;
-            margin-top: 36px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+        /* Roles quick overview list */
+        .roles-preview-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 28px;
         }
 
-        .hero-feature-item {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 14px;
+        .role-preview-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            background: #FFFFFF;
+            border: 1px solid rgba(244, 114, 182, 0.40);
+            border-radius: 14px;
+            padding: 10px 14px;
             font-size: 0.82rem;
-            font-weight: 600;
-            color: #F1F5F9;
-            backdrop-filter: blur(6px);
+            box-shadow: 0 2px 6px rgba(219, 39, 119, 0.05);
+            transition: all 0.2s ease;
         }
 
-        .hero-feature-item i {
-            color: #60A5FA;
-            font-size: 1.1rem;
+        .role-preview-item:hover {
+            background: #FFF1F2;
+            border-color: #DB2777;
+            transform: translateX(4px);
         }
 
-        .hero-footer {
-            margin-top: 36px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.78rem;
-            color: #94A3B8;
+        .role-preview-icon {
+            font-size: 1.25rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .role-preview-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .role-preview-title {
+            color: var(--text-heading);
+            font-weight: 700;
+            font-size: 0.86rem;
+        }
+
+        .role-preview-sub {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .hero-footer-info {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
-        /* Right Form Panel */
+        /* Right Authentication Panel */
         .login-panel {
-            padding: 56px 44px;
-            background: #FFFFFF;
+            padding: clamp(36px, 5vw, 56px) clamp(28px, 4vw, 44px);
             display: flex;
             flex-direction: column;
             justify-content: center;
-        }
-
-        .login-form-wrapper {
-            width: 100%;
-            max-width: 380px;
-            margin: 0 auto;
+            background: #FFFFFF;
         }
 
         .login-header {
-            margin-bottom: 32px;
-            text-align: left;
+            margin-bottom: 28px;
         }
 
         .login-header h1 {
-            font-size: 1.75rem;
+            font-size: 1.95rem;
             font-weight: 800;
-            color: #0F172A;
+            color: var(--text-heading);
+            margin-bottom: 6px;
             letter-spacing: -0.02em;
-            margin-bottom: 8px;
         }
 
         .login-header p {
-            font-size: 0.88rem;
+            font-size: 0.92rem;
             color: var(--text-muted);
-            line-height: 1.5;
+        }
+
+        .alert-error {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #B91C1C;
+            font-size: 0.86rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .alert-error i {
+            color: #EF4444;
+            font-size: 1.15rem;
+            margin-top: 1px;
         }
 
         .form-group {
@@ -260,314 +295,376 @@
 
         .form-label {
             display: block;
-            font-size: 0.82rem;
+            font-size: 0.84rem;
             font-weight: 700;
-            color: #334155;
+            color: #1E293B;
             margin-bottom: 8px;
+            letter-spacing: 0.01em;
         }
 
         .input-icon-group {
             position: relative;
+            display: flex;
+            align-items: center;
         }
 
-        .input-icon-group i.input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94A3B8;
-            font-size: 1rem;
-            pointer-events: none;
-            transition: color 0.15s ease;
-        }
-
-        .form-control {
+        .input-icon-group input {
             width: 100%;
-            height: 48px;
             background: #F8FAFC;
-            border: 1px solid var(--border-color);
+            border: 1px solid #CBD5E1;
             border-radius: 12px;
-            padding: 0 16px 0 42px;
-            font-size: 0.92rem;
-            font-family: inherit;
+            padding: 13px 44px 13px 44px;
             color: #0F172A;
+            font-size: 0.95rem;
+            font-family: inherit;
             outline: none;
             transition: all 0.2s ease;
         }
 
-        .form-control:focus {
+        .input-icon-group input:focus {
             background: #FFFFFF;
-            border-color: var(--primary-light);
-            box-shadow: 0 0 0 4px var(--ring-color);
+            border-color: #DB2777;
+            box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.22);
         }
 
-        .form-control:focus + i.input-icon {
-            color: var(--primary-light);
+        .input-icon-group .icon-left {
+            position: absolute;
+            left: 15px;
+            color: #64748B;
+            font-size: 1.15rem;
+            pointer-events: none;
         }
 
         .password-toggle-btn {
             position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
+            right: 14px;
             background: transparent;
             border: none;
-            color: #94A3B8;
+            color: #64748B;
             cursor: pointer;
-            padding: 6px;
-            font-size: 1rem;
-            border-radius: 6px;
+            padding: 4px;
+            font-size: 1.15rem;
             display: flex;
             align-items: center;
-            justify-content: center;
+            transition: color 0.2s;
         }
 
         .password-toggle-btn:hover {
-            color: #475569;
+            color: #0F172A;
         }
 
         .form-options {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            font-size: 0.84rem;
             margin-bottom: 24px;
-            font-size: 0.82rem;
+        }
+
+        .form-options label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #475569;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .form-options input[type="checkbox"] {
+            accent-color: #DB2777;
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
         }
 
         .forgot-link {
-            color: var(--accent);
+            color: #DB2777;
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.15s ease;
+            transition: color 0.2s;
         }
 
         .forgot-link:hover {
-            color: #1D4ED8;
+            color: #BE185D;
             text-decoration: underline;
         }
 
         .btn-submit {
             width: 100%;
-            height: 48px;
-            background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+            background: linear-gradient(135deg, #DB2777 0%, #BE185D 100%);
             color: #FFFFFF;
             border: none;
+            padding: 14px 24px;
             border-radius: 12px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 700;
-            font-family: inherit;
             cursor: pointer;
-            box-shadow: 0 8px 18px -4px rgba(37, 99, 235, 0.4);
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: all 0.2s ease;
+            box-shadow: 0 6px 20px rgba(219, 39, 119, 0.35);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .btn-submit:hover {
-            background: linear-gradient(135deg, #0F2942 0%, #1D4ED8 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 12px 24px -4px rgba(37, 99, 235, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(219, 39, 119, 0.45);
+            background: linear-gradient(135deg, #BE185D 0%, #831843 100%);
         }
 
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-
-        .alert-error {
-            background: #FEF2F2;
-            border: 1px solid #FCA5A5;
-            color: #991B1B;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-size: 0.84rem;
-            line-height: 1.45;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .alert-error i {
-            font-size: 1.1rem;
-            margin-top: 1px;
-            flex-shrink: 0;
-        }
-
-        .login-footer-nav {
-            margin-top: 24px;
-            text-align: center;
-            font-size: 0.84rem;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border-color);
+        /* Demo Role Quick Switcher for evaluation */
+        .demo-roles-box {
+            margin-top: 26px;
             padding-top: 20px;
+            border-top: 1px solid #E2E8F0;
+            text-align: center;
         }
 
-        .login-footer-nav a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 700;
-            display: inline-flex;
+        .demo-roles-title {
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #475569;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
         }
 
-        .login-footer-nav a:hover {
-            color: var(--accent);
-            text-decoration: underline;
+        .demo-roles-title i {
+            color: #D97706;
         }
 
-        @media (max-width: 900px) {
-            .login-shell {
-                grid-template-columns: 1fr;
-                min-height: auto;
-                max-width: 500px;
-            }
-            .login-hero {
-                padding: 40px 28px;
-            }
-            .hero-features {
-                grid-template-columns: 1fr;
-                margin-top: 24px;
-            }
-            .login-panel {
-                padding: 40px 28px;
-            }
+        .demo-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .btn-role-quick {
+            background: #FFFFFF;
+            border: 1px solid #FCE7F3;
+            border-radius: 10px;
+            padding: 8px 6px;
+            font-size: 0.76rem;
+            color: #831843;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(219, 39, 119, 0.05);
+        }
+
+        .btn-role-quick:hover {
+            background: #FFF1F2;
+            border-color: #DB2777;
+            color: #BE185D;
+            transform: translateY(-1px);
+        }
+
+        .login-back-nav {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .login-back-nav a {
+            color: #64748B;
+            font-size: 0.84rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+
+        .login-back-nav a:hover {
+            color: #DB2777;
         }
     </style>
 </head>
 <body>
-    <div class="login-shell">
-        <!-- Left Hero Presentation Section -->
-        <section class="login-hero">
-            <div class="login-hero-glow"></div>
-            
-            <div class="hero-top">
-                <div class="hero-brand">
-                    <div class="hero-brand-logo">
-                        <i class="bi bi-mortarboard-fill"></i>
-                    </div>
-                    <div class="hero-brand-text">
-                        <span class="hero-brand-title">SINETEC</span>
-                        <span class="hero-brand-subtitle">Gestión Escolar</span>
-                    </div>
-                </div>
 
-                <div class="hero-badge">
-                    <i class="bi bi-shield-check"></i>
-                    <span>{{ colegio.nombre|default:"Institución Educativa Técnica" }}</span>
+    <div class="login-shell">
+        <!-- Left Hero Section -->
+        <section class="login-hero">
+            <div>
+                <a href="{% url 'home' %}" class="hero-brand-wrap" title="Ir al Inicio">
+                    <div class="hero-brand-icon" style="background: transparent; box-shadow: none;">
+                        <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" style="width: 44px; height: 44px; object-fit: contain;">
+                    </div>
+                    <div>
+                        <div class="hero-brand-name" style="font-weight: 800; color: #0f172a;">EDUNOVA</div>
+                        <div class="hero-brand-sub">Sistema Integrado de Educación Técnica</div>
+                    </div>
+                </a>
+
+                <div class="hero-badge-pill">
+                    <span class="dot"></span>
+                    <span>Sistema Oficial de Gestión Escolar</span>
                 </div>
 
                 <h2 class="hero-title">
                     Administración y<br>
-                    <span>Excelencia Escolar</span>
+                    <span class="gradient-text">Excelencia Académica</span>
                 </h2>
 
-                <p class="hero-description">
-                    Sistema integral para el control de matrículas, seguimiento académico por competencias, asistencia escolar y vínculo continuo con las familias.
+                <p class="hero-desc">
+                    Plataforma integral con autenticación por roles institucionales. Cada usuario accede de forma segura y exclusiva a sus herramientas autorizadas.
                 </p>
+
+                <!-- 6 Roles Showcase -->
+                <div class="roles-preview-list">
+                    <div class="role-preview-item">
+                        <span class="role-preview-icon">👑</span>
+                        <div class="role-preview-info">
+                            <span class="role-preview-title">Administrador del Sistema</span>
+                            <span class="role-preview-sub">Control global, usuarios, configuración y auditoría</span>
+                        </div>
+                    </div>
+                    <div class="role-preview-item">
+                        <span class="role-preview-icon">🏫</span>
+                        <div class="role-preview-info">
+                            <span class="role-preview-title">Rectoría Institucional</span>
+                            <span class="role-preview-sub">Supervisión directiva, métricas y reportes oficiales</span>
+                        </div>
+                    </div>
+                    <div class="role-preview-item">
+                        <span class="role-preview-icon">📋</span>
+                        <div class="role-preview-info">
+                            <span class="role-preview-title">Secretaría Académica</span>
+                            <span class="role-preview-sub">Matrículas, pensiones, certificados y constancias</span>
+                        </div>
+                    </div>
+                    <div class="role-preview-item">
+                        <span class="role-preview-icon">👩‍🏫</span>
+                        <div class="role-preview-info">
+                            <span class="role-preview-title">Cuerpo Docente</span>
+                            <span class="role-preview-sub">Planillas de notas, logros curriculares y observador</span>
+                        </div>
+                    </div>
+                    <div class="role-preview-item">
+                        <span class="role-preview-icon">👨‍🎓</span>
+                        <div class="role-preview-info">
+                            <span class="role-preview-title">Estudiante</span>
+                            <span class="role-preview-sub">Consulta de notas, boletines en PDF, horarios y aula</span>
+                        </div>
+                    </div>
+                    <div class="role-preview-item">
+                        <span class="role-preview-icon">👨‍👩‍👧</span>
+                        <div class="role-preview-info">
+                            <span class="role-preview-title">Familia y Acudiente</span>
+                            <span class="role-preview-sub">Seguimiento académico de sus hijos y circulares</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="hero-features">
-                <div class="hero-feature-item">
-                    <i class="bi bi-person-lines-fill"></i>
-                    <span>Gestión de Matrículas</span>
-                </div>
-                <div class="hero-feature-item">
-                    <i class="bi bi-pie-chart-fill"></i>
-                    <span>Semáforo de Competencias</span>
-                </div>
-                <div class="hero-feature-item">
-                    <i class="bi bi-qr-code-scan"></i>
-                    <span>Carnet Digital Escolar</span>
-                </div>
-                <div class="hero-feature-item">
-                    <i class="bi bi-people-fill"></i>
-                    <span>Núcleo Familiar</span>
-                </div>
-            </div>
-
-            <div class="hero-footer">
-                <span>Versión 2.5 · Institucional</span>
-                <span>DANE: {{ colegio.codigo_dane|default:"147189000123" }}</span>
+            <div class="hero-footer-info">
+                <span>Código DANE: {{ colegio.codigo_dane|default:"147001000234" }}</span>
+                <span>Base de Datos: MySQL Activo</span>
             </div>
         </section>
 
-        <!-- Right Authentication Panel -->
+        <!-- Right Login Form Section -->
         <section class="login-panel">
-            <div class="login-form-wrapper">
-                <div class="login-header">
-                    <h1>Iniciar Sesión</h1>
-                    <p>Ingresa tus credenciales para acceder a la plataforma escolar</p>
+            <div class="login-header">
+                <h1>Iniciar Sesión</h1>
+                <p>Ingresa tus credenciales para acceder a tu panel institucional</p>
+            </div>
+
+            {% if error_message %}
+                <div class="alert-error">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>{{ error_message }}</div>
+                </div>
+            {% endif %}
+
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="alert-error" style="background: #EBF7FE; border-color: #BAE6FD; color: #0369A1;">
+                        <i class="bi bi-info-circle-fill" style="color: #0284C7;"></i>
+                        <div>{{ msg }}</div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" autocomplete="off" id="sinetecLoginForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label" for="username">Usuario o Documento de Identidad</label>
+                    <div class="input-icon-group">
+                        <i class="bi bi-person icon-left"></i>
+                        <input id="username" type="text" name="username" placeholder="Digita tu usuario o documento..." required autofocus>
+                    </div>
                 </div>
 
-                {% if error_message %}
-                    <div class="alert-error">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        <div>
-                            <strong>Acceso denegado:</strong> {{ error_message }}
-                        </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Contraseña de Seguridad</label>
+                    <div class="input-icon-group">
+                        <i class="bi bi-lock icon-left"></i>
+                        <input id="password" type="password" name="password" placeholder="••••••••" required>
+                        <button type="button" class="password-toggle-btn" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="Mostrar u ocultar contraseña">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
+                        </button>
                     </div>
-                {% elif form.errors %}
-                    <div class="alert-error">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        <div>
-                            <strong>Acceso denegado:</strong> Usuario o contraseña incorrectos. Verifica tus credenciales e intenta nuevamente.
-                        </div>
-                    </div>
-                {% endif %}
-                {% if messages %}
-                    {% for msg in messages %}
-                        <div class="alert-error">
-                            <i class="bi bi-info-circle-fill"></i>
-                            <div>{{ msg }}</div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+                </div>
 
-                <form method="post" autocomplete="off" id="sinetecLoginForm">
-                    {% csrf_token %}
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="username">Usuario o Documento</label>
-                        <div class="input-icon-group">
-                            <input id="username" type="text" name="username" class="form-control" placeholder="Ej. rectoria, docente o documento" required autofocus>
-                            <i class="bi bi-person input-icon"></i>
-                        </div>
-                    </div>
+                <div class="form-options">
+                    <label>
+                        <input type="checkbox" name="remember_me">
+                        <span>Recordar sesión</span>
+                    </label>
+                    <a href="{% url 'recuperar_contrasena' %}" class="forgot-link">¿Olvidaste tu clave?</a>
+                </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="password">Contraseña</label>
-                        <div class="input-icon-group">
-                            <input id="password" type="password" name="password" class="form-control" placeholder="••••••••" required>
-                            <i class="bi bi-lock input-icon"></i>
-                            <button type="button" class="password-toggle-btn" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="Mostrar u ocultar contraseña">
-                                <i class="bi bi-eye" id="toggleIcon"></i>
-                            </button>
-                        </div>
-                    </div>
+                <button class="btn-submit" type="submit" id="btnSubmitLogin">
+                    <span>Ingresar al Sistema</span>
+                    <i class="bi bi-arrow-right-short" style="font-size: 1.3rem;"></i>
+                </button>
+            </form>
 
-                    <div class="form-options">
-                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: #475569;">
-                            <input type="checkbox" name="remember_me" style="accent-color: var(--accent); border-radius: 4px; width: 15px; height: 15px;">
-                            <span>Recordar sesión</span>
-                        </label>
-                        <a href="{% url 'recuperar_contrasena' %}" class="forgot-link">¿Olvidaste tu clave?</a>
-                    </div>
-
-                    <button class="btn-submit" type="submit" id="btnSubmitLogin">
-                        <span>Ingresar a SINETEC</span>
-                        <i class="bi bi-arrow-right-short" style="font-size: 1.25rem;"></i>
+            <!-- Quick Auto-Fill Buttons for Professor / Evaluation -->
+            <div class="demo-roles-box">
+                <div class="demo-roles-title">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>Cuentas de Prueba para Evaluación</span>
+                </div>
+                <div class="demo-buttons-grid">
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('admin', 'Admin2026*')">
+                        👑 Admin
                     </button>
-                </form>
-
-                <div class="login-footer-nav">
-                    <a href="{% url 'home' %}">
-                        <i class="bi bi-arrow-left"></i>
-                        <span>Volver al portal principal</span>
-                    </a>
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('rector', 'Rector2026*')">
+                        🏫 Rectoría
+                    </button>
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('secretaria', 'Secretaria2026*')">
+                        📋 Secretaría
+                    </button>
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('docente', 'Docente2026*')">
+                        👩‍🏫 Docente
+                    </button>
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('est1', 'Estudiante10*')">
+                        👨‍🎓 Estudiante (10°)
+                    </button>
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('familia', 'Familia2026*')">
+                        👨‍👩‍👧 Familia
+                    </button>
                 </div>
+            </div>
+
+            <div class="login-back-nav">
+                <a href="{% url 'home' %}">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Volver al Inicio</span>
+                </a>
             </div>
         </section>
     </div>
@@ -583,6 +680,14 @@
                 passInput.type = 'password';
                 toggleIcon.className = 'bi bi-eye';
             }
+        }
+
+        function autocompletarCredenciales(user, pass) {
+            const userInput = document.getElementById('username');
+            const passInput = document.getElementById('password');
+            userInput.value = user;
+            passInput.value = pass;
+            userInput.focus();
         }
     </script>
 </body>

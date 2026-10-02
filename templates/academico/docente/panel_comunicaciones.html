@@ -1,0 +1,478 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 9: MENSAJES Y COMUNICACIONES EDUNOVA
+     Diseño: Sistema Rosado Elegante (#db2777, #fce7f3, #fff0f3)
+     Estructura:
+     1. Mensajería Directa: Estudiantes y Familias con historial real y bidireccional
+     2. Redactar Comunicado General
+     3. Historial de Enviados
+     4. Circulares y Avisos
+     ========================================================================= -->
+<style>
+    #comunicacionesTabs .nav-link.active {
+        background-color: #db2777 !important;
+        color: white !important;
+        border-color: #db2777 !important;
+    }
+    .chat-contact-item {
+        transition: all 0.18s ease;
+        text-decoration: none !important;
+        border-left: 3px solid transparent;
+    }
+    .chat-contact-item:hover {
+        background: #fff0f3 !important;
+        border-left-color: #fbcfe8;
+    }
+    .chat-contact-item.is-selected {
+        background: #fff0f3 !important;
+        border-left-color: #db2777 !important;
+    }
+    .chat-bubble-sent {
+        background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%);
+        border: 1px solid #fce7f3;
+        border-radius: 18px 18px 4px 18px;
+        max-width: 80%;
+    }
+    .chat-bubble-received {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px 18px 18px 4px;
+        max-width: 80%;
+    }
+</style>
+
+<div class="panel-modulo-docente space-y-4" id="modulo-comunicaciones">
+
+    <!-- 1. HERO BANNER DE MENSAJERÍA Y COMUNICACIONES -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1.5px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1.5px solid #fce7f3;">
+                    <i class="bi bi-chat-dots-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        COMUNICACIONES Y CORREO INSTITUCIONAL
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Canal oficial de mensajería y comunicaciones bidireccionales con estudiantes y familias registradas en EDUNOVA.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end d-none d-lg-block position-relative z-1">
+                <div class="d-inline-flex align-items-center gap-2 px-3.5 py-2 rounded-pill fw-semibold shadow-2xs" 
+                     style="background: rgba(255, 255, 255, 0.95); border: 1.5px solid #fce7f3; color: #be185d; font-size: 0.84rem;">
+                    <i class="bi bi-shield-check" style="color: #db2777;"></i>
+                    <span>Canal Oficial EDUNOVA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. PESTAÑAS DE COMUNICACIONES -->
+    <ul class="nav nav-pills gap-2 mb-4 p-1.5 rounded-pill bg-white border shadow-2xs d-inline-flex flex-wrap" id="comunicacionesTabs" role="tablist" style="border-color: #fce7f3 !important;">
+        <li class="nav-item">
+            <button class="nav-link active rounded-pill px-4 py-2 fw-bold small transition" id="tab-chat" data-bs-toggle="tab" data-bs-target="#pane-chat" type="button" style="font-size: 0.86rem;">
+                <i class="bi bi-chat-heart-fill me-1.5"></i> Mensajes Directos (Estudiantes & Familias)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill px-4 py-2 fw-bold small text-muted transition" id="tab-redactar" data-bs-toggle="tab" data-bs-target="#pane-redactar" type="button" style="font-size: 0.86rem;">
+                <i class="bi bi-pencil-square me-1.5"></i> Redactar Circular o Correo
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill px-4 py-2 fw-bold small text-muted transition" id="tab-enviados" data-bs-toggle="tab" data-bs-target="#pane-enviados" type="button" style="font-size: 0.86rem;">
+                <i class="bi bi-send-check me-1.5"></i> Historial Enviados ({{ mensajes_enviados|length }})
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill px-4 py-2 fw-bold small text-muted transition" id="tab-recibidos" data-bs-toggle="tab" data-bs-target="#pane-recibidos" type="button" style="font-size: 0.86rem;">
+                <i class="bi bi-megaphone me-1.5"></i> Circulares Recibidas ({{ mensajes_recibidos|length }})
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="comunicacionesTabsContent">
+
+        <!-- =====================================================================
+             PESTAÑA 1: MENSAJERÍA DIRECTA CON ESTUDIANTES Y FAMILIAS (SPLIT VIEW)
+             ===================================================================== -->
+        <div class="tab-pane fade show active" id="pane-chat" role="tabpanel">
+            <div class="row g-4 align-items-stretch">
+
+                <!-- COLUMNA IZQUIERDA: LISTA ORGANIZADA DE DESTINATARIOS REALES -->
+                <div class="col-lg-4">
+                    <div class="card border rounded-4 bg-white shadow-2xs h-100 overflow-hidden" style="border-color: #fce7f3 !important;">
+                        <div class="p-3 border-bottom" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-color: #fce7f3 !important;">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">
+                                    <i class="bi bi-people-fill me-1" style="color: #db2777;"></i> Destinatarios
+                                </h6>
+                                <span class="badge rounded-pill bg-white border px-2 py-0.5" style="color: #db2777; border-color: #fce7f3 !important; font-size: 0.72rem;">
+                                    {{ chat_estudiantes|length|add:chat_familias|length }} Contactos
+                                </span>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.76rem;">Selecciona una persona para abrir su conversación</small>
+                        </div>
+
+                        <div class="p-2 overflow-y-auto" style="max-height: 520px;">
+                            <!-- SECCIÓN: MIS ESTUDIANTES -->
+                            <div class="px-2 pt-2 pb-1">
+                                <span class="fw-bold text-uppercase d-block" style="font-size: 0.72rem; color: #be185d; letter-spacing: 0.5px;">
+                                    🎓 Mis Estudiantes
+                                </span>
+                            </div>
+                            <div class="d-flex flex-column gap-1 mb-3">
+                                {% for est in chat_estudiantes %}
+                                <a href="{% url 'instructor_dashboard' %}?subpanel=comunicaciones&chat_user={{ est.id }}&chat_tipo=estudiante" 
+                                   class="chat-contact-item p-2.5 rounded-3 d-flex align-items-center justify-content-between {% if contacto_chat_activo.id == est.id and contacto_chat_activo.tipo == 'estudiante' %}is-selected{% endif %}">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-2xs flex-shrink-0"
+                                             style="background: linear-gradient(135deg, #db2777, #be185d); width: 34px; height: 34px; font-size: 0.8rem;">
+                                            {{ est.avatar_letter }}
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.86rem;">{{ est.nombre }}</strong>
+                                            <small class="text-muted" style="font-size: 0.72rem;">Grado {{ est.grado }}</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge rounded-pill px-2 py-0.5 fw-semibold" style="background: #fdf2f8; color: #db2777; font-size: 0.7rem;">
+                                        Alumno
+                                    </span>
+                                </a>
+                                {% endfor %}
+                            </div>
+
+                            <!-- SECCIÓN: FAMILIAS -->
+                            <div class="px-2 pt-2 pb-1 border-top" style="border-color: #fce7f3 !important;">
+                                <span class="fw-bold text-uppercase d-block" style="font-size: 0.72rem; color: #be185d; letter-spacing: 0.5px;">
+                                    👨‍👩‍👧 Familias y Acudientes
+                                </span>
+                            </div>
+                            <div class="d-flex flex-column gap-1">
+                                {% for fam in chat_familias %}
+                                <a href="{% url 'instructor_dashboard' %}?subpanel=comunicaciones&chat_user={{ fam.id }}&chat_tipo=familia" 
+                                   class="chat-contact-item p-2.5 rounded-3 d-flex align-items-center justify-content-between {% if contacto_chat_activo.id == fam.id and contacto_chat_activo.tipo == 'familia' %}is-selected{% endif %}">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-2xs flex-shrink-0"
+                                             style="background: linear-gradient(135deg, #f43f5e, #e11d48); width: 34px; height: 34px; font-size: 0.8rem;">
+                                            {{ fam.avatar_letter }}
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.86rem;">{{ fam.nombre }}</strong>
+                                            <small class="text-muted" style="font-size: 0.72rem;">Familiar de {{ fam.estudiante_nombre }}</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge rounded-pill px-2 py-0.5 fw-semibold" style="background: #fff1f2; color: #e11d48; font-size: 0.7rem;">
+                                        {{ fam.parentesco }}
+                                    </span>
+                                </a>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: CONVERSACIÓN ACTIVA E HISTORIAL -->
+                <div class="col-lg-8">
+                    <div class="card border rounded-4 bg-white shadow-2xs h-100 d-flex flex-column" style="border-color: #fce7f3 !important;">
+                        {% if contacto_chat_activo %}
+                        <!-- Encabezado del contacto activo -->
+                        <div class="p-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: #ffffff; border-color: #fce7f3 !important;">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-2xs"
+                                     style="background: linear-gradient(135deg, #db2777, #be185d); width: 40px; height: 40px; font-size: 0.9rem;">
+                                    {{ contacto_chat_activo.avatar_letter }}
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0" style="font-size: 0.98rem;">{{ contacto_chat_activo.nombre }}</h6>
+                                    <div class="d-flex align-items-center gap-2 small text-muted" style="font-size: 0.75rem;">
+                                        <span class="badge rounded-pill px-2 py-0.2" style="background: #fdf2f8; color: #db2777;">
+                                            {% if contacto_chat_activo.tipo == 'familia' %}Familiar / Acudiente{% else %}Estudiante Oficial{% endif %}
+                                        </span>
+                                        <span>· Grado {{ contacto_chat_activo.grado }}</span>
+                                        <span>· <i class="bi bi-telephone text-muted"></i> {{ contacto_chat_activo.telefono }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.74rem;">
+                                <i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i> Conectado en EDUNOVA
+                            </span>
+                        </div>
+
+                        <!-- Flujo de mensajes (Chat History Stream) -->
+                        <div class="p-3.5 flex-grow-1 overflow-y-auto d-flex flex-column gap-2.5" style="max-height: 380px; min-height: 280px; background: #fafafa;">
+                            {% for msg in chat_mensajes %}
+                                {% if msg.remitente == user %}
+                                <!-- Mensaje enviado por el docente -->
+                                <div class="align-self-end text-end" style="max-width: 82%;">
+                                    <div class="chat-bubble-sent p-3 shadow-2xs text-start">
+                                        <div class="d-flex justify-content-between align-items-center gap-3 mb-1">
+                                            <span class="fw-bold" style="color: #db2777; font-size: 0.76rem;">Tú (Docente)</span>
+                                            <small class="text-muted" style="font-size: 0.7rem;">{{ msg.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                                        </div>
+                                        <div class="text-dark small" style="white-space: pre-line; font-size: 0.88rem;">{{ msg.mensaje }}</div>
+                                    </div>
+                                    <small class="text-muted d-block mt-0.5 pe-1" style="font-size: 0.68rem;"><i class="bi bi-check2-all text-pink"></i> Entregado</small>
+                                </div>
+                                {% else %}
+                                <!-- Mensaje recibido del estudiante o familia -->
+                                <div class="align-self-start text-start" style="max-width: 82%;">
+                                    <div class="chat-bubble-received p-3 shadow-2xs">
+                                        <div class="d-flex justify-content-between align-items-center gap-3 mb-1">
+                                            <span class="fw-bold text-dark" style="font-size: 0.76rem;">{{ msg.remitente.get_full_name|default:msg.remitente.username }}</span>
+                                            <small class="text-muted" style="font-size: 0.7rem;">{{ msg.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                                        </div>
+                                        <div class="text-dark small" style="white-space: pre-line; font-size: 0.88rem;">{{ msg.mensaje }}</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% empty %}
+                            <div class="my-auto text-center py-5 text-muted">
+                                <i class="bi bi-chat-heart fs-1 d-block mb-2" style="color: #db2777;"></i>
+                                <h6 class="fw-bold text-dark mb-1">Conversación directa con {{ contacto_chat_activo.nombre }}</h6>
+                                <p class="small mb-0 text-muted">Aún no se registran mensajes en esta conversación. Escribe el primer mensaje a continuación.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Caja para redactar y responder mensaje -->
+                        <div class="p-3 border-top bg-white rounded-bottom-4" style="border-color: #fce7f3 !important;">
+                            <form method="POST" action="{% url 'instructor_dashboard' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="enviar_mensaje_chat">
+                                <input type="hidden" name="dest_id" value="{{ contacto_chat_activo.id }}">
+                                <input type="hidden" name="dest_tipo" value="{{ contacto_chat_activo.tipo }}">
+
+                                <div class="d-flex gap-2 align-items-end">
+                                    <div class="flex-grow-1">
+                                        <textarea name="mensaje" rows="2" class="form-control rounded-4 px-3.5 py-2" 
+                                                  style="border-color: #fce7f3; font-size: 0.88rem;" 
+                                                  placeholder="Escribe tu mensaje a {{ contacto_chat_activo.nombre }}..." required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-1.5 flex-shrink-0"
+                                            style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                                        <i class="bi bi-send-fill"></i> Enviar Mensaje
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {% else %}
+                        <div class="p-5 text-center my-auto text-muted">
+                            <i class="bi bi-chat-square-text fs-1 mb-2" style="color: #db2777;"></i>
+                            <h6 class="fw-bold text-dark">Selecciona un destinatario</h6>
+                            <p class="small">Elige un estudiante o familiar de la lista para revisar el historial y redactar mensajes.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- =====================================================================
+             PESTAÑA 2: REDACTAR CIRCULAR O CORREO INSTITUCIONAL
+             ===================================================================== -->
+        <div class="tab-pane fade" id="pane-redactar" role="tabpanel">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important; max-width: 860px;">
+                <div class="d-flex align-items-center gap-2.5 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                    <i class="bi bi-envelope-plus-fill fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Nueva Comunicación Docente General</h6>
+                </div>
+                <form method="POST" action="{% url 'instructor_dashboard' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="enviar_comunicado">
+
+                    <!-- Tipo de Destinatario y Canal -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Tipo de Destinatario *</label>
+                            <select name="tipo_destinatario" id="tipo_destinatario_select" onchange="actualizarSelectDestinatario();" 
+                                    class="form-select form-select-sm rounded-pill px-3.5 py-2" style="border-color: #fce7f3;" required>
+                                <option value="grupo" selected>Grupo Escolar Completo</option>
+                                <option value="estudiante">Estudiante Individual</option>
+                                <option value="acudiente">Padre de Familia / Acudiente</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Canal de Envío *</label>
+                            <select name="canal" class="form-select form-select-sm rounded-pill px-3.5 py-2" style="border-color: #fce7f3;" required>
+                                <option value="mensaje" selected>Mensaje Interno de Plataforma</option>
+                                <option value="correo">Correo Electrónico Institucional</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Selector dinámico de Grupo o Estudiante -->
+                    <div class="mb-3" id="campo-grupo-destino">
+                        <label class="form-label small fw-bold text-dark mb-1">Seleccionar Grupo Destino *</label>
+                        <select name="carga_id" class="form-select form-select-sm rounded-pill px-3.5 py-2" style="border-color: #fce7f3;">
+                            {% for c in cargas_unicas %}
+                            <option value="{{ c.id }}">Grado {{ c.grado }}°{{ c.seccion }} — {{ c.programa.denominacion|default:'Matemáticas' }} ({{ c.matriculas_lista|length }} alumnos)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="campo-estudiante-destino" style="display: none;">
+                        <label class="form-label small fw-bold text-dark mb-1">Seleccionar Estudiante Destino *</label>
+                        <select name="estudiante_id" class="form-select form-select-sm rounded-pill px-3.5 py-2" style="border-color: #fce7f3;">
+                            {% for est in todos_mis_estudiantes %}
+                            <option value="{{ est.aprendiz.id }}">
+                                {{ est.aprendiz.get_full_name|default:est.aprendiz.username }} (Grado {{ est.grado_escolar }}° - Usuario: {{ est.aprendiz.username }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Asunto -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Asunto de la Comunicación *</label>
+                        <input type="text" name="asunto" class="form-control form-control-sm rounded-pill px-3.5 py-2" style="border-color: #fce7f3;" placeholder="Ej: Material de profundización para el periodo lectivo" required>
+                    </div>
+
+                    <!-- Mensaje -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Cuerpo del Mensaje / Contenido *</label>
+                        <textarea name="mensaje" rows="5" class="form-control form-control-sm rounded-4 px-3.5 py-2.5" style="border-color: #fce7f3;" placeholder="Redacte el comunicado oficial o las recomendaciones pedagógicas..." required></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-2">
+                        <button type="submit" class="btn text-white rounded-pill px-5 py-2.5 fw-bold small shadow-sm" 
+                                style="background: #db2777; border: 1px solid #db2777; font-size: 0.92rem;">
+                            <i class="bi bi-send-fill me-1.5"></i> Enviar Comunicación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- =====================================================================
+             PESTAÑA 3: HISTORIAL DE MENSAJES ENVIADOS
+             ===================================================================== -->
+        <div class="tab-pane fade" id="pane-enviados" role="tabpanel">
+            <div class="card border rounded-4 bg-white shadow-2xs p-4" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                    <i class="bi bi-send-check fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Historial de Comunicaciones Enviadas</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                            <tr>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">FECHA</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">DESTINATARIO</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">ASUNTO</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">MENSAJE</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">ESTADO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in mensajes_enviados %}
+                            <tr style="border-bottom: 1px solid #fce7f3;">
+                                <td class="small text-muted">{{ m.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if m.estudiante_destinatario %}
+                                    <strong class="text-dark">{{ m.estudiante_destinatario.get_full_name|default:m.estudiante_destinatario.username }}</strong>
+                                    {% else %}
+                                    <span class="badge rounded-pill px-2.5 py-1" style="background: #fdf2f8; color: #be185d;">
+                                        {{ m.estamento_destinatario }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-dark small">{{ m.asunto }}</td>
+                                <td class="small text-muted" style="max-width: 250px;">
+                                    <span class="d-inline-block text-truncate" style="max-width: 250px;" title="{{ m.mensaje }}">
+                                        {{ m.mensaje }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.72rem;">
+                                        <i class="bi bi-check2 me-1"></i> Enviado
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted small">
+                                    No has emitido mensajes o circulares aún.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- =====================================================================
+             PESTAÑA 4: CIRCULARES Y RECIBIDOS
+             ===================================================================== -->
+        <div class="tab-pane fade" id="pane-recibidos" role="tabpanel">
+            <div class="card border rounded-4 bg-white shadow-2xs p-4" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                    <i class="bi bi-megaphone fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Circulares Oficiales y Avisos Recibidos</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                            <tr>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">FECHA</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">EMISOR</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">ASUNTO</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">CONTENIDO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in mensajes_recibidos %}
+                            <tr style="border-bottom: 1px solid #fce7f3;">
+                                <td class="small text-muted">{{ m.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <strong class="text-dark small">{{ m.remitente.get_full_name|default:m.remitente.username }}</strong>
+                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Rectoría / Secretaría</small>
+                                </td>
+                                <td class="fw-bold text-dark small">{{ m.asunto }}</td>
+                                <td class="small text-muted" style="max-width: 300px;">
+                                    <span class="d-inline-block text-truncate" style="max-width: 300px;" title="{{ m.mensaje }}">
+                                        {{ m.mensaje }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted small">
+                                    No hay circulares institucionales registradas en este momento.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function actualizarSelectDestinatario() {
+    const sel = document.getElementById('tipo_destinatario_select');
+    const grp = document.getElementById('campo-grupo-destino');
+    const est = document.getElementById('campo-estudiante-destino');
+    if (sel && grp && est) {
+        if (sel.value === 'grupo') {
+            grp.style.display = 'block';
+            est.style.display = 'none';
+        } else {
+            grp.style.display = 'none';
+            est.style.display = 'block';
+        }
+    }
+}
+</script>

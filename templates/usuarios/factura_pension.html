@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Factura de Caja N° {{ pago.numero_recibo }} · EDUNOVA{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: #f1f5f9 !important; }
+.factura-wrapper { max-width: 860px; margin: 2rem auto 4rem; padding: 0 1rem; }
+.factura-sheet {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+  padding: 3rem 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.factura-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 6.5rem;
+  font-weight: 900;
+  color: rgba(16, 185, 129, 0.06);
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  user-select: none;
+}
+.factura-top-bar {
+  border-bottom: 2px solid #0f2942;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+.factura-badge-pagado {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1.5px solid #a7f3d0;
+  font-weight: 800;
+  padding: 0.4rem 1.1rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.factura-table th {
+  background: #0f2942;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.85rem 1rem;
+  border: none;
+}
+.factura-table td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-color: #f1f5f9;
+}
+.factura-total-box {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1.75rem;
+}
+.btn-action-factura {
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 0.75rem 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media print {
+  body { background: #fff !important; }
+  .no-print, header, nav, .sidebar, footer, .sinetec-sidebar, .sinetec-navbar { display: none !important; }
+  .factura-wrapper { margin: 0; padding: 0; max-width: 100%; }
+  .factura-sheet { box-shadow: none; border: none; padding: 1.5cm; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="factura-wrapper">
+  <!-- BOTONES DE ACCIÓN SUPERIOR -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 no-print">
+    <a href="{% url 'caja_pensiones' %}" class="btn btn-outline-secondary btn-action-factura py-2">
+      <i class="bi bi-arrow-left"></i> Volver a Caja
+    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'nuevo_cobro' %}" class="btn btn-outline-primary btn-action-factura py-2">
+        <i class="bi bi-plus-circle"></i> Nuevo Cobro
+      </a>
+      <button onclick="window.print()" class="btn btn-light border btn-action-factura py-2">
+        <i class="bi bi-printer"></i> Imprimir
+      </button>
+      <a href="{% url 'recibo_pension_pdf' pago.pk %}" target="_blank" class="btn btn-success btn-action-factura py-2">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Descargar PDF Oficial
+      </a>
+    </div>
+  </div>
+
+  <!-- HOJA OFICIAL DE FACTURA ELECTRÓNICA ESCOLAR -->
+  <div class="factura-sheet position-relative">
+    <div class="factura-watermark">
+      {% if pago.estado == 'EMITIDO' %}PAGADO{% else %}ANULADO{% endif %}
+    </div>
+
+    <!-- CABECERA INSTITUCIONAL -->
+    <div class="factura-top-bar d-flex flex-wrap justify-content-between align-items-start gap-4">
+      <div>
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="rounded-3 bg-primary text-white d-flex align-items-center justify-content-center fw-black fs-4" style="width:54px; height:54px; background: linear-gradient(135deg, #1e3a8a, #0f172a) !important;">
+            <i class="bi bi-building"></i>
+          </div>
+          <div>
+            <h2 class="h5 fw-bold text-dark mb-0">{{ colegio.nombre|upper }}</h2>
+            <div class="small text-muted">NIT: {{ colegio.nit }} · Código DANE: {{ colegio.codigo_dane }}</div>
+            <div class="small text-muted">{{ colegio.resolucion }}</div>
+          </div>
+        </div>
+        <div class="small text-secondary mt-1">
+          <i class="bi bi-geo-alt me-1"></i>{{ colegio.direccion }} · <i class="bi bi-telephone me-1"></i>{{ colegio.telefono }}
+        </div>
+      </div>
+
+      <div class="text-md-end">
+        <div class="text-uppercase small fw-bold text-muted mb-1">Comprobante Oficial de Caja</div>
+        <h3 class="h4 fw-black text-primary font-monospace mb-2">{{ pago.numero_recibo }}</h3>
+        <div>
+          {% if pago.estado == 'EMITIDO' %}
+          <span class="factura-badge-pagado">
+            <i class="bi bi-check-circle-fill"></i> PAGO REGISTRADO
+          </span>
+          {% else %}
+          <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1.5 rounded-pill fw-bold">
+            <i class="bi bi-x-circle-fill me-1"></i> ANULADO
+          </span>
+          {% endif %}
+        </div>
+        <div class="small text-muted mt-2">
+          Fecha y Hora: <strong>{{ pago.fecha_pago|date:"d/m/Y H:i" }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATOS DEL ESTUDIANTE Y ACUDIENTE -->
+    <div class="row g-3 mb-4 p-3 rounded-3" style="background:#f8fafc; border: 1px solid #e2e8f0;">
+      <div class="col-md-6">
+        <div class="text-uppercase small fw-bold text-muted" style="font-size:0.7rem;">Datos del Estudiante</div>
+        <div class="fw-bold text-dark fs-6 mt-1">{{ pago.estudiante.get_full_name|default:pago.estudiante.username }}</div>
+        <div class="small text-secondary">
+          {{ pago.estudiante.perfil.tipo_documento|default:"TI" }}: <strong>{{ pago.estudiante.perfil.numero_documento|default:pago.estudiante.username }}</strong>
+        </div>
+        <div class="small text-secondary">
+          Curso / Grado: <strong>{% if matricula %}Grado {{ matricula.grado_escolar }}° {{ matricula.seccion }}{% else %}Grado Escolar Registrado{% endif %}</strong>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="text-uppercase small fw-bold text-muted" style="font-size:0.7rem;">Información de Matrícula y Pago</div>
+        <div class="small text-secondary mt-1">
+          N° Matrícula: <strong>MAT-2026-{{ pago.estudiante.id|stringformat:"04d" }}</strong>
+        </div>
+        <div class="small text-secondary">
+          Método de Pago: <span class="badge bg-secondary-subtle text-secondary fw-semibold">{{ pago.metodo_pago }}</span>
+        </div>
+        <div class="small text-secondary">
+          Acudiente: <strong>{{ matricula.acudiente_nombre|default:"Registrado en base de datos" }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA DE CONCEPTOS COBRADOS -->
+    <div class="table-responsive mb-4 rounded-3 border overflow-hidden">
+      <table class="table factura-table mb-0">
+        <thead>
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>Concepto / Descripción del Pago</th>
+            <th class="text-center" style="width: 140px;">Vigencia</th>
+            <th class="text-end" style="width: 160px;">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="fw-bold text-muted">01</td>
+            <td>
+              <div class="fw-bold text-dark">{{ pago.concepto }}</div>
+              <small class="text-muted">Servicios educativos institucionales vigencia 2026</small>
+            </td>
+            <td class="text-center text-secondary small">Año Lectivo 2026</td>
+            <td class="text-end fw-black text-dark fs-6">${{ pago.monto|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TOTAL Y DETALLE FINANCIERO -->
+    <div class="row align-items-center mb-5">
+      <div class="col-md-6">
+        {% if pago.comprobante %}
+        <div class="d-flex align-items-center gap-2 p-2 bg-light border rounded-3 small">
+          <i class="bi bi-paperclip fs-5 text-primary"></i>
+          <div>
+            <div class="fw-bold text-dark">Soporte de Pago Adjunto</div>
+            <a href="{{ pago.comprobante.url }}" target="_blank" class="text-decoration-none text-primary fw-semibold" style="font-size:0.75rem;">
+              <i class="bi bi-box-arrow-up-right me-1"></i>Ver Voucher / Transferencia
+            </a>
+          </div>
+        </div>
+        {% else %}
+        <div class="text-muted small">
+          <i class="bi bi-info-circle me-1"></i>Pago liquidado directamente en ventanilla de tesorería institucional.
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <div class="factura-total-box text-end">
+          <div class="text-uppercase small fw-bold text-muted mb-1" style="font-size:0.75rem;">Total Pagado y Asentado</div>
+          <div class="h2 fw-black text-success mb-0">${{ pago.monto|floatformat:2 }}</div>
+          <small class="text-muted">Moneda Oficial: Pesos Colombianos (COP)</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIRMAS DE RESPONSABILIDAD -->
+    <div class="row pt-4 text-center g-4" style="border-top: 1px dashed #cbd5e1; margin-top: 2rem;">
+      <div class="col-6">
+        <div style="height: 48px;"></div>
+        <div class="border-top border-dark mx-auto" style="max-width: 240px;"></div>
+        <div class="small fw-bold text-dark mt-2">Tesorería / Secretaría Académica</div>
+        <div class="text-muted" style="font-size: 0.72rem;">EDUNOVA Gestión Administrativa Escolar</div>
+      </div>
+      <div class="col-6">
+        <div style="height: 48px;"></div>
+        <div class="border-top border-dark mx-auto" style="max-width: 240px;"></div>
+        <div class="small fw-bold text-dark mt-2">Firma del Acudiente / Pagador</div>
+        <div class="text-muted" style="font-size: 0.72rem;">Recibido a Conformidad</div>
+      </div>
+    </div>
+
+    <!-- PIE DE PÁGINA DE VERIFICACIÓN -->
+    <div class="text-center text-muted mt-4 pt-3 border-top small" style="font-size: 0.72rem;">
+      Documento legal e inmutable registrado en el sistema EDUNOVA · Registro MySQL ID: {{ pago.id }} · Generado: {% now "d/m/Y H:i:s" %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,743 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 7: CALIFICACIONES (EDUNOVA)
+     Estilo: Rosado Elegante (#db2777, #fce7f3, #fff0f3, #be185d)
+     Funcionalidad:
+     1. Selectores: Asignatura, Grado, Grupo, Periodo (solo asignados al docente)
+     2. Creación de nueva evaluación (+ NUEVA CALIFICACIÓN / EVALUACIÓN)
+     3. Conexión bilateral con "Actividades y Tareas" (mismo modelo TareaClase)
+     4. Planilla General con cálculo automático de Promedio Ponderado
+     5. Calificación individual por evaluación con retroalimentación
+     6. Validación de notas (0.0 - 5.0)
+     7. Publicación y notificación automática al estudiante
+     8. Generar documento oficial de calificaciones (imprimible/descargable)
+     9. Historial completo de calificaciones en base de datos
+     10. Corrección y persistencia inmediata sin pérdida de datos
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-calificaciones">
+
+    <!-- HERO BANNER CALIFICACIONES -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-7 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-mortarboard-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        CALIFICACIONES
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Registro Oficial de Calificaciones: digita, evalúa, calcula promedios y publica notas de tus estudiantes.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-5 text-lg-end position-relative z-1 mt-3 mt-lg-0 d-flex justify-content-lg-end align-items-center gap-2 flex-wrap">
+                <button type="button" class="btn rounded-pill px-3.5 py-2.5 bg-white fw-bold shadow-2xs d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalDocumentoCalificaciones"
+                        style="border: 1.5px solid #fce7f3; color: #be185d; font-size: 0.86rem;">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Generar Documento
+                </button>
+                <button type="button" class="btn rounded-pill px-4 py-2.5 text-white fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalCrearEvaluacionDocente"
+                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                    <i class="bi bi-plus-circle-fill"></i> + NUEVA EVALUACIÓN
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETA SELECTORES / FILTROS (ASIGNATURA, GRADO, GRUPO, PERIODO) -->
+    <div class="card border rounded-4 p-3.5 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+        <form method="GET" action="{% url 'calificaciones_docente' %}" id="form-filtro-calificaciones" class="row g-3 align-items-end">
+            <input type="hidden" name="tab" value="{{ tab_calif|default:'planilla' }}">
+            {% if request.GET.evaluacion %}<input type="hidden" name="evaluacion" value="{{ request.GET.evaluacion }}">{% endif %}
+
+            <!-- Selector Curso / Grupo -->
+            <div class="col-md-5">
+                <label class="form-label text-muted small fw-bold mb-1" style="font-size: 0.76rem;">Asignatura y Grupo Asignado:</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white" style="border-color: #fce7f3; color: #db2777;"><i class="bi bi-mortarboard"></i></span>
+                    <select name="carga" class="form-select fw-bold text-dark" style="border-color: #fce7f3; font-size: 0.85rem;" onchange="this.form.submit();">
+                        {% for c in cargas_unicas %}
+                        <option value="{{ c.id }}" {% if carga_seleccionada.id == c.id %}selected{% endif %}>
+                            Grado {{ c.grado }}°{{ c.seccion }} · {{ c.programa.denominacion|default:'Matemáticas' }} ({{ c.matriculas_lista|length }} Alumnos)
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Selector Periodo -->
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold mb-1" style="font-size: 0.76rem;">Periodo Académico:</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white" style="border-color: #fce7f3; color: #db2777;"><i class="bi bi-calendar3"></i></span>
+                    <select name="periodo" class="form-select fw-bold text-dark" style="border-color: #fce7f3; font-size: 0.85rem;" onchange="this.form.submit();">
+                        <option value="Periodo 1" {% if periodo_seleccionado == 'Periodo 1' %}selected{% endif %}>Periodo 1 (Actual)</option>
+                        <option value="Periodo 2" {% if periodo_seleccionado == 'Periodo 2' %}selected{% endif %}>Periodo 2</option>
+                        <option value="Periodo 3" {% if periodo_seleccionado == 'Periodo 3' %}selected{% endif %}>Periodo 3</option>
+                        <option value="Periodo 4" {% if periodo_seleccionado == 'Periodo 4' %}selected{% endif %}>Periodo 4</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Botón Consultar -->
+            <div class="col-md-3">
+                <button type="submit" class="btn w-100 rounded-pill py-2 text-white fw-bold shadow-2xs d-flex align-items-center justify-content-center gap-2"
+                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.85rem;">
+                    <i class="bi bi-arrow-repeat"></i> Cargar Calificaciones
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- PESTAÑAS DE VISTA INTERNA (PLANILLA GENERAL, EVALUACIÓN ESPECÍFICA, HISTORIAL) -->
+    <div class="d-flex align-items-center gap-2 p-1.5 rounded-pill bg-white border shadow-2xs mb-4 d-inline-flex flex-wrap" style="border-color: #fce7f3 !important;">
+        <a href="{% url 'calificaciones_docente' %}?tab=planilla&carga={{ carga_seleccionada.id }}&periodo={{ periodo_seleccionado }}" 
+           class="btn rounded-pill px-4 py-2 fw-bold small text-decoration-none transition {% if not tab_calif or tab_calif == 'planilla' %}" style="background: #db2777; color: #ffffff; border: 1px solid #db2777;{% else %}text-muted" style="background: transparent; border: none;{% endif %}">
+            <i class="bi bi-table me-1.5"></i> Planilla General del Periodo
+        </a>
+        <a href="{% url 'calificaciones_docente' %}?tab=evaluacion&carga={{ carga_seleccionada.id }}&periodo={{ periodo_seleccionado }}{% if evaluacion_seleccionada %}&evaluacion={{ evaluacion_seleccionada.id }}{% endif %}" 
+           class="btn rounded-pill px-4 py-2 fw-bold small text-decoration-none transition {% if tab_calif == 'evaluacion' %}" style="background: #db2777; color: #ffffff; border: 1px solid #db2777;{% else %}text-muted" style="background: transparent; border: none;{% endif %}">
+            <i class="bi bi-pencil-square me-1.5"></i> Calificar por Evaluación
+        </a>
+        <a href="{% url 'calificaciones_docente' %}?tab=historial&carga={{ carga_seleccionada.id }}&periodo={{ periodo_seleccionado }}" 
+           class="btn rounded-pill px-4 py-2 fw-bold small text-decoration-none transition {% if tab_calif == 'historial' %}" style="background: #db2777; color: #ffffff; border: 1px solid #db2777;{% else %}text-muted" style="background: transparent; border: none;{% endif %}">
+            <i class="bi bi-clock-history me-1.5"></i> Historial Guardado
+        </a>
+    </div>
+
+    <!-- =========================================================================
+         VISTA 1: PLANILLA GENERAL DEL PERIODO (MATRIZ CON PROMEDIO PONDERADO)
+         ========================================================================= -->
+    {% if not tab_calif or tab_calif == 'planilla' %}
+    <div id="vista-planilla-calificaciones">
+        <!-- 4 INDICADORES COMPACTOS DEL PERIODO -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted small fw-medium d-block" style="font-size: 0.76rem;">Alumnos en nómina</span>
+                    <h3 class="fw-bold text-dark mb-0 mt-1" style="font-size: 1.6rem;">{{ estudiantes_carga_sel|length }}</h3>
+                    <small class="text-muted" style="font-size: 0.74rem;">Grado {{ carga_seleccionada.grado }}°{{ carga_seleccionada.seccion }}</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted small fw-medium d-block" style="font-size: 0.76rem;">Evaluaciones creadas</span>
+                    <h3 class="fw-bold mb-0 mt-1" style="color: #be185d; font-size: 1.6rem;">{{ evaluaciones_periodo|length }}</h3>
+                    <small class="text-muted" style="font-size: 0.74rem;">en {{ periodo_seleccionado }}</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted small fw-medium d-block" style="font-size: 0.76rem;">Porcentaje evaluado</span>
+                    <h3 class="fw-bold mb-0 mt-1 text-primary" style="font-size: 1.6rem;">{{ suma_porcentajes_evaluaciones|floatformat:0 }}%</h3>
+                    <small class="text-muted" style="font-size: 0.74rem;">acumulado sobre 100%</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted small fw-medium d-block" style="font-size: 0.76rem;">Escala institucional</span>
+                    <h3 class="fw-bold text-success mb-0 mt-1" style="font-size: 1.6rem;">0.0 - 5.0</h3>
+                    <small class="text-muted" style="font-size: 0.74rem;">Mínimo aprobatorio: 3.0</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULARIO DE PLANILLA GENERAL CON GUARDADO -->
+        <form method="POST" action="{% url 'instructor_dashboard' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="guardar_notas">
+            <input type="hidden" name="carga_id" value="{{ carga_seleccionada.id }}">
+            <input type="hidden" name="periodo" value="{{ periodo_seleccionado }}">
+
+            <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-5" style="border-color: #fce7f3 !important;">
+                <div class="p-3.5 border-bottom bg-white d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-grid-3x3-gap-fill fs-5" style="color: #db2777;"></i>
+                        <h6 class="fw-bold text-dark mb-0">Planilla Oficial de Notas · {{ periodo_seleccionado }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3; font-size: 0.8rem;">
+                            {{ carga_seleccionada.programa.denominacion|default:'Matemáticas' }} · Grado {{ carga_seleccionada.grado }}°{{ carga_seleccionada.seccion }}
+                        </span>
+                        <button type="submit" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
+                                style="background: #db2777; border: 1px solid #db2777; font-size: 0.86rem;">
+                            <i class="bi bi-floppy-fill"></i> Guardar Planilla
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    {% if evaluaciones_periodo %}
+                    <table class="table align-middle table-hover mb-0" id="tabla-planilla-general">
+                        <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                            <tr>
+                                <th class="text-center py-3" style="width: 45px; color: #be185d; font-size: 0.76rem;">#</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem; min-width: 220px;">ESTUDIANTE</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO</th>
+                                
+                                <!-- Columnas dinámicas de cada evaluación del periodo -->
+                                {% for ev in evaluaciones_periodo %}
+                                <th class="text-center py-3" style="color: #be185d; font-size: 0.76rem; min-width: 110px;">
+                                    <span class="d-block text-truncate" style="max-width: 110px;" title="{{ ev.titulo }}">{{ ev.titulo }}</span>
+                                    <span class="badge rounded-pill px-2 py-0.5" style="background: #ffffff; color: #db2777; border: 1px solid #fce7f3; font-size: 0.68rem;">
+                                        {{ ev.porcentaje }}%
+                                    </span>
+                                </th>
+                                {% endfor %}
+
+                                <th class="text-center py-3" style="width: 140px; color: #be185d; font-size: 0.76rem;">PROMEDIO FINAL</th>
+                                <th class="text-center py-3" style="width: 120px; color: #be185d; font-size: 0.76rem;">DESEMPEÑO</th>
+                                <th class="py-3" style="min-width: 200px; color: #be185d; font-size: 0.76rem;">OBSERVACIÓN DEL PERIODO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in estudiantes_carga_sel %}
+                            <tr style="border-bottom: 1px solid #fce7f3;">
+                                <td class="text-center fw-bold text-muted small">{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs" 
+                                             style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%); width: 34px; height: 34px; font-size: 0.78rem;">
+                                            {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                            <small class="text-muted" style="font-size: 0.74rem;">Grado {{ m.grado_escolar }}°{{ m.seccion }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-muted small font-monospace">{{ m.aprendiz.username }}</td>
+
+                                <!-- Notas de cada evaluación -->
+                                {% for item in m.notas_evaluaciones_lista %}
+                                <td class="text-center">
+                                    {% if item.nota is not None %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold fs-6 shadow-2xs" 
+                                          style="{% if item.nota >= 3.0 %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %}">
+                                        {{ item.nota }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted small fst-italic">—</span>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+
+                                <!-- Promedio ponderado editable / campo nota_ID -->
+                                <td class="text-center">
+                                    <input type="number" step="0.1" min="0.0" max="5.0" name="nota_{{ m.id }}" 
+                                           value="{{ m.promedio_calculado|default:'0.0' }}" 
+                                           class="form-control form-control-sm text-center fw-bold rounded-pill mx-auto shadow-2xs"
+                                           style="border: 1.5px solid #fce7f3; color: #0f172a; max-width: 105px; font-size: 0.95rem;" required>
+                                </td>
+
+                                <!-- Nivel de Desempeño Cualitativo -->
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" 
+                                          style="{% if m.desempeno_calculado == 'Superior' or m.desempeno_calculado == 'Alto' %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% elif m.desempeno_calculado == 'Básico' %}background: #fefce8; color: #ca8a04; border: 1px solid #fef08a;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %} font-size: 0.75rem;">
+                                        {{ m.desempeno_calculado }}
+                                    </span>
+                                </td>
+
+                                <!-- Observación pedagógica -->
+                                <td>
+                                    <input type="text" name="obs_{{ m.id }}" 
+                                           value="{{ m.calificacion_actual.observaciones|default:'' }}" 
+                                           class="form-control form-control-sm rounded-pill px-3" 
+                                           placeholder="Retroalimentación general del periodo..."
+                                           style="border: 1px solid #fce7f3; font-size: 0.82rem;">
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="12" class="text-center py-5 text-muted">
+                                    <i class="bi bi-people fs-2 d-block mb-2" style="color: #db2777;"></i>
+                                    No hay estudiantes matriculados en este curso.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-journal-x fs-1 mb-3 d-block" style="color: #db2777;"></i>
+                        <h4 class="fw-bold text-dark">No hay calificaciones registradas para este período.</h4>
+                        <p>Aún no se han creado evaluaciones o tareas calificadas para este grupo en el periodo seleccionado.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="p-3.5 bg-light border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted small">
+                        <i class="bi bi-info-circle text-primary me-1"></i> El promedio se pondera automáticamente según los porcentajes asignados a cada evaluación en "Actividades y Tareas".
+                    </span>
+                    <button type="submit" class="btn rounded-pill px-5 py-2.5 text-white fw-bold shadow-sm"
+                            style="background: #db2777; border: 1px solid #db2777; font-size: 0.9rem;">
+                        <i class="bi bi-save me-1.5"></i> GUARDAR CALIFICACIONES
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- =========================================================================
+         VISTA 2: CALIFICAR POR EVALUACIÓN ESPECÍFICA
+         ========================================================================= -->
+    {% elif tab_calif == 'evaluacion' %}
+    <div id="vista-evaluacion-especifica">
+        <!-- SELECTOR DE ACTIVIDAD / EVALUACIÓN DEL PERIODO -->
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">
+                    <i class="bi bi-clipboard-check-fill me-1.5" style="color: #db2777;"></i> Selecciona la evaluación a calificar:
+                </h6>
+                <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white shadow-2xs"
+                        data-bs-toggle="modal" data-bs-target="#modalCrearEvaluacionDocente"
+                        style="background: #db2777; font-size: 0.78rem;">
+                    <i class="bi bi-plus"></i> Crear otra evaluación
+                </button>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                {% for ev in evaluaciones_periodo %}
+                <a href="{% url 'calificaciones_docente' %}?tab=evaluacion&carga={{ carga_seleccionada.id }}&periodo={{ periodo_seleccionado }}&evaluacion={{ ev.id }}"
+                   class="btn rounded-pill px-3.5 py-2 fw-bold small text-decoration-none transition {% if evaluacion_seleccionada.id == ev.id %}" style="background: #db2777; color: #ffffff; border: 1px solid #db2777; box-shadow: 0 4px 10px rgba(219,39,119,0.25);{% else %}" style="background: #ffffff; border: 1px solid #fce7f3; color: #64748b;{% endif %}">
+                    <span class="me-1">{{ ev.titulo }}</span>
+                    <span class="badge rounded-pill px-2 py-0.5" style="{% if evaluacion_seleccionada.id == ev.id %}background: #ffffff; color: #db2777;{% else %}background: #fdf2f8; color: #be185d;{% endif %}">
+                        {{ ev.porcentaje }}%
+                    </span>
+                </a>
+                {% empty %}
+                <div class="p-3 text-muted small fst-italic">
+                    No se han creado evaluaciones para {{ periodo_seleccionado }}. Presiona "+ NUEVA EVALUACIÓN" para crear la primera.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if evaluacion_seleccionada %}
+        <!-- DETALLE DE LA EVALUACIÓN ACTIVA -->
+        <div class="p-4 rounded-4 mb-4 shadow-2xs" 
+             style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border: 1px solid #fce7f3;">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ffffff; color: #db2777; border: 1px solid #fce7f3;">
+                            {{ evaluacion_seleccionada.tipo_actividad }}
+                        </span>
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3;">
+                            Ponderación: {{ evaluacion_seleccionada.porcentaje }}%
+                        </span>
+                        <span class="badge rounded-pill px-3 py-1 fw-bold text-success" style="background: #ecfdf5; border: 1px solid #a7f3d0;">
+                            Puntaje máx: {{ evaluacion_seleccionada.puntaje_maximo }}
+                        </span>
+                    </div>
+                    <h3 class="fw-bold mb-1 text-dark">{{ evaluacion_seleccionada.titulo }}</h3>
+                    <p class="mb-0 text-muted small">{{ evaluacion_seleccionada.instrucciones|default:"Sin descripción complementaria." }}</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <span class="d-block small text-muted">Fecha límite de entrega:</span>
+                    <strong class="text-dark">{{ evaluacion_seleccionada.fecha_limite|date:"d/m/Y H:i"|default:"Sin límite estricto" }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULARIO DE CALIFICACIÓN POR EVALUACIÓN -->
+        <form method="POST" action="{% url 'instructor_dashboard' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="guardar_calificaciones_evaluacion">
+            <input type="hidden" name="tarea_id" value="{{ evaluacion_seleccionada.id }}">
+            <input type="hidden" name="carga_id" value="{{ carga_seleccionada.id }}">
+            <input type="hidden" name="periodo" value="{{ periodo_seleccionado }}">
+
+            <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-5" style="border-color: #fce7f3 !important;">
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover mb-0">
+                        <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                            <tr>
+                                <th class="text-center py-3" style="width: 45px; color: #be185d; font-size: 0.76rem;">#</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO</th>
+                                <th class="text-center py-3" style="width: 140px; color: #be185d; font-size: 0.76rem;">NOTA (0.0 - 5.0)</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem;">RETROALIMENTACIÓN / COMENTARIO</th>
+                                <th class="py-3" style="width: 150px; color: #be185d; font-size: 0.76rem;">ESTADO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in estudiantes_carga_sel %}
+                            <tr style="border-bottom: 1px solid #fce7f3;">
+                                <td class="text-center fw-bold text-muted small">{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs" 
+                                             style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%); width: 34px; height: 34px; font-size: 0.78rem;">
+                                            {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                            <small class="text-muted">Grado {{ m.grado_escolar }}°{{ m.seccion }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-muted small font-monospace">{{ m.aprendiz.username }}</td>
+                                <td>
+                                    <input type="number" step="0.1" min="0.0" max="5.0" name="nota_{{ m.aprendiz.id }}" 
+                                           value="{{ m.entrega_eval_sel.calificacion|default:'' }}" 
+                                           class="form-control form-control-sm text-center fw-bold rounded-pill mx-auto shadow-2xs"
+                                           placeholder="4.5"
+                                           style="border: 1.5px solid #fce7f3; color: #0f172a; max-width: 110px; font-size: 0.95rem;">
+                                </td>
+                                <td>
+                                    <input type="text" name="retro_{{ m.aprendiz.id }}" 
+                                           value="{{ m.entrega_eval_sel.retroalimentacion|default:'' }}" 
+                                           class="form-control form-control-sm rounded-pill px-3" 
+                                           placeholder="Ej: Excelente sustentación, revisar punto 2..."
+                                           style="border: 1px solid #fce7f3; font-size: 0.82rem;">
+                                </td>
+                                <td>
+                                    <select name="estado_{{ m.aprendiz.id }}" class="form-select form-select-sm rounded-pill px-3" style="border-color: #fce7f3; font-size: 0.82rem;">
+                                        <option value="CALIFICADA" {% if m.entrega_eval_sel.estado == 'CALIFICADA' or not m.entrega_eval_sel %}selected{% endif %}>? Calificada</option>
+                                        <option value="DEVUELTA" {% if m.entrega_eval_sel.estado == 'DEVUELTA' %}selected{% endif %}>? Devuelta</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3.5 bg-light border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #fce7f3 !important;">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" name="publicar_estudiantes" value="1" id="switchPublicarCalif" checked>
+                        <label class="form-check-label small fw-bold text-dark" for="switchPublicarCalif">
+                            Notificar y publicar inmediatamente en el panel de cada estudiante
+                        </label>
+                    </div>
+                    <button type="submit" class="btn rounded-pill px-5 py-2.5 text-white fw-bold shadow-sm"
+                            style="background: #db2777; border: 1px solid #db2777; font-size: 0.9rem;">
+                        <i class="bi bi-floppy-fill me-1.5"></i> GUARDAR NOTAS DE LA EVALUACIÓN
+                    </button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- =========================================================================
+         VISTA 3: HISTORIAL DE CALIFICACIONES GUARDADAS
+         ========================================================================= -->
+    {% elif tab_calif == 'historial' %}
+    <div id="vista-historial-calificaciones">
+        <div class="card border rounded-4 bg-white shadow-2xs p-4 mb-4" style="border-color: #fce7f3 !important;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-clock-history fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">HISTORIAL OFICIAL DE CALIFICACIONES EN BASE DE DATOS</h6>
+                </div>
+                <input type="text" id="buscar-historial-calif" onkeyup="filtrarTablaHistorialCalif();"
+                       class="form-control form-control-sm rounded-pill px-3" placeholder="Buscar por estudiante..."
+                       style="border-color: #fce7f3; max-width: 250px; font-size: 0.82rem;">
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0" id="tabla-historial-notas">
+                    <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                        <tr>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ASIGNATURA</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">GRADO / GRUPO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">PERIODO</th>
+                            <th class="text-center py-3" style="color: #be185d; font-size: 0.76rem;">NOTA</th>
+                            <th class="text-center py-3" style="color: #be185d; font-size: 0.76rem;">DESEMPEÑO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">OBSERVACIÓN</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA DE REGISTRO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cal in historial_calificaciones_escolares %}
+                        <tr style="border-bottom: 1px solid #fce7f3;">
+                            <td><strong class="text-dark">{{ cal.matricula.aprendiz.get_full_name|default:cal.matricula.aprendiz.username }}</strong></td>
+                            <td class="font-monospace small text-muted">{{ cal.matricula.aprendiz.username }}</td>
+                            <td><span class="badge rounded-pill px-2.5 py-1" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3;">{{ cal.carga_academica.programa.denominacion|default:'Matemáticas' }}</span></td>
+                            <td class="small fw-semibold">Grado {{ cal.carga_academica.grado }}°{{ cal.carga_academica.seccion }}</td>
+                            <td class="small">{{ cal.periodo }}</td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-3 py-1 fw-bold fs-6 shadow-2xs" 
+                                      style="{% if cal.nota >= 3.0 %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %}">
+                                    {{ cal.nota }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-2.5 py-1 small fw-bold" 
+                                      style="{% if cal.desempeno == 'Superior' or cal.desempeno == 'Alto' %}background: #ecfdf5; color: #047857;{% elif cal.desempeno == 'Básico' %}background: #fefce8; color: #ca8a04;{% else %}background: #fef2f2; color: #b91c1c;{% endif %}">
+                                    {{ cal.desempeno }}
+                                </span>
+                            </td>
+                            <td class="small text-muted">{{ cal.observaciones|default:'—' }}</td>
+                            <td class="small text-muted">{{ cal.fecha_registro|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="bi bi-journal-x fs-2 d-block mb-2" style="color: #db2777;"></i>
+                                No hay calificaciones registradas en el historial.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- =========================================================================
+     MODAL: CREAR NUEVA EVALUACIÓN / ACTIVIDAD CALIFICABLE
+     ========================================================================= -->
+<div class="modal fade" id="modalCrearEvaluacionDocente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header text-white p-3.5" style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-plus-circle-fill fs-5"></i>
+                    <h5 class="modal-title fw-bold mb-0" style="font-size: 1.05rem;">Nueva Evaluación / Actividad Calificable</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form method="POST" action="{% url 'instructor_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="crear_evaluacion">
+                <input type="hidden" name="carga_id" value="{{ carga_seleccionada.id }}">
+                <input type="hidden" name="periodo" value="{{ periodo_seleccionado }}">
+
+                <div class="modal-body p-4 space-y-3">
+                    <div class="mb-3">
+                        <label class="form-label text-dark small fw-bold">Título de la Evaluación <span class="text-danger">*</span></label>
+                        <input type="text" name="titulo" class="form-control rounded-3" placeholder="Ej: Taller 1: Ecuaciones Cuadráticas" required
+                               style="border-color: #fce7f3; font-size: 0.9rem;">
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-dark small fw-bold">Tipo de Evaluación</label>
+                            <select name="tipo_actividad" class="form-select rounded-3" style="border-color: #fce7f3; font-size: 0.88rem;">
+                                <option value="Taller" selected>Taller</option>
+                                <option value="Quiz">Quiz</option>
+                                <option value="Examen">Examen</option>
+                                <option value="Tarea">Tarea</option>
+                                <option value="Exposición">Exposición</option>
+                                <option value="Proyecto">Proyecto</option>
+                                <option value="Trabajo">Trabajo</option>
+                                <option value="Recuperación">Recuperación</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-dark small fw-bold">Porcentaje (%) <span class="text-danger">*</span></label>
+                            <input type="number" step="1" min="1" max="100" name="porcentaje" value="20" class="form-control rounded-3" required
+                                   style="border-color: #fce7f3; font-size: 0.88rem;">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-dark small fw-bold">Puntaje Máximo</label>
+                            <input type="number" step="0.1" min="1.0" max="100.0" name="puntaje_maximo" value="5.0" class="form-control rounded-3"
+                                   style="border-color: #fce7f3; font-size: 0.88rem;">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-dark small fw-bold">Fecha Límite</label>
+                            <input type="datetime-local" name="fecha_limite" class="form-control rounded-3" style="border-color: #fce7f3; font-size: 0.85rem;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-dark small fw-bold">Descripción / Instrucciones</label>
+                        <textarea name="descripcion" class="form-control rounded-3" rows="3" placeholder="Instrucciones para los estudiantes..."
+                                  style="border-color: #fce7f3; font-size: 0.85rem;"></textarea>
+                    </div>
+
+                    <div class="p-2.5 rounded-3 bg-light border small text-muted">
+                        <i class="bi bi-info-circle text-primary me-1"></i> Esta evaluación aparecerá simultáneamente en <strong>Actividades y Tareas</strong> y en la <strong>Planilla de Calificaciones</strong>.
+                    </div>
+                </div>
+
+                <div class="modal-footer p-3 bg-light">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn rounded-pill px-4 text-white fw-bold shadow-sm"
+                            style="background: #db2777; border: 1px solid #db2777;">
+                        <i class="bi bi-check-lg me-1"></i> Crear Evaluación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL: GENERAR DOCUMENTO OFICIAL DE CALIFICACIONES (PLANILLA IMPRIMIBLE)
+     ========================================================================= -->
+<div class="modal fade" id="modalDocumentoCalificaciones" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header text-white p-3.5" style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-pdf-fill fs-5"></i>
+                    <h5 class="modal-title fw-bold mb-0" style="font-size: 1.05rem;">Documento Oficial de Registro de Calificaciones</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body p-4 p-md-5" id="area-impresion-calificaciones" style="background: #ffffff; color: #1e293b;">
+                <!-- MEMBRETE INSTITUCIONAL OFICIAL -->
+                <div class="border-bottom pb-3 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-1" style="color: #be185d; letter-spacing: -0.5px;">EDUNOVA — SISTEMA INTEGRADO EDUCATIVO</h4>
+                        <p class="text-muted mb-0 small">Institución Educativa Articulada · Planilla Oficial de Evaluación Curricular</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3; font-size: 0.82rem;">
+                            PLANILLA OFICIAL ACADÉMICA
+                        </span>
+                        <div class="small text-muted mt-1">Expedición: {% now "d/m/Y H:i" %}</div>
+                    </div>
+                </div>
+
+                <!-- METADATOS DEL CURSO -->
+                <div class="row g-3 p-3 rounded-3 mb-4" style="background: #fff0f3; border: 1px solid #fce7f3; font-size: 0.85rem;">
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Docente Titular:</span>
+                        <strong class="text-dark">{{ user.get_full_name|default:user.username }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Asignatura / Módulo:</span>
+                        <strong class="text-dark">{{ carga_seleccionada.programa.denominacion|default:'Matemáticas' }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Grado y Grupo:</span>
+                        <strong class="text-dark">Grado {{ carga_seleccionada.grado }}°{{ carga_seleccionada.seccion }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Periodo Académico:</span>
+                        <strong class="text-dark">{{ periodo_seleccionado }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Total Alumnos Evaluados:</span>
+                        <strong class="text-dark">{{ estudiantes_carga_sel|length }} Estudiantes</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Escala de Calificación:</span>
+                        <strong class="text-dark">0.0 a 5.0 (Aprobatoria: 3.0)</strong>
+                    </div>
+                </div>
+
+                <!-- TABLA OFICIAL TIPO PLANILLA -->
+                <table class="table table-bordered align-middle mb-4" style="font-size: 0.82rem; border-color: #cbd5e1;">
+                    <thead style="background: #f8fafc;">
+                        <tr>
+                            <th class="text-center" style="width: 35px;">#</th>
+                            <th>ESTUDIANTE</th>
+                            <th>DOCUMENTO</th>
+                            {% for ev in evaluaciones_periodo %}
+                            <th class="text-center" style="font-size: 0.76rem;">{{ ev.titulo|truncatechars:12 }} ({{ ev.porcentaje }}%)</th>
+                            {% endfor %}
+                            <th class="text-center" style="width: 100px;">PROMEDIO</th>
+                            <th class="text-center" style="width: 100px;">DESEMPEÑO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in estudiantes_carga_sel %}
+                        <tr>
+                            <td class="text-center fw-bold">{{ forloop.counter }}</td>
+                            <td class="fw-bold">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</td>
+                            <td class="font-monospace text-muted">{{ m.aprendiz.username }}</td>
+                            {% for item in m.notas_evaluaciones_lista %}
+                            <td class="text-center fw-semibold">
+                                {{ item.nota|default:"—" }}
+                            </td>
+                            {% endfor %}
+                            <td class="text-center fw-bold fs-6" style="color: {% if m.promedio_calculado >= 3.0 %}#047857{% else %}#b91c1c{% endif %};">
+                                {{ m.promedio_calculado|default:"0.0" }}
+                            </td>
+                            <td class="text-center fw-semibold">{{ m.desempeno_calculado }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- FIRMAS INSTITUCIONALES -->
+                <div class="row pt-5 mt-4 text-center" style="font-size: 0.85rem;">
+                    <div class="col-6">
+                        <div class="border-top pt-2 mx-auto" style="max-width: 250px; border-color: #475569 !important;">
+                            <strong class="d-block text-dark">{{ user.get_full_name|default:user.username }}</strong>
+                            <span class="text-muted small">Firma del Docente</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border-top pt-2 mx-auto" style="max-width: 250px; border-color: #475569 !important;">
+                            <strong class="d-block text-dark">Rectoría / Secretaría Académica</strong>
+                            <span class="text-muted small">Registro Oficial EDUNOVA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer p-3 bg-light">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" onclick="imprimirDocumentoCalificaciones();" class="btn rounded-pill px-4 text-white fw-bold shadow-sm"
+                        style="background: #db2777; border: 1px solid #db2777;">
+                    <i class="bi bi-printer-fill me-1"></i> Imprimir / Guardar como PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     JAVASCRIPT: INTERACTIVIDAD Y BÚSQUEDA
+     ========================================================================= -->
+<script>
+function filtrarTablaHistorialCalif() {
+    const query = (document.getElementById('buscar-historial-calif').value || '').toLowerCase().trim();
+    const rows = document.querySelectorAll('#tabla-historial-notas tbody tr');
+    rows.forEach(tr => {
+        const text = tr.innerText.toLowerCase();
+        tr.style.display = text.includes(query) ? '' : 'none';
+    });
+}
+
+function imprimirDocumentoCalificaciones() {
+    const contenido = document.getElementById('area-impresion-calificaciones').innerHTML;
+    const ventana = window.open('', '_blank', 'width=950,height=750');
+    ventana.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Planilla Oficial de Calificaciones - EDUNOVA</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body { font-family: system-ui, -apple-system, sans-serif; padding: 25px; color: #1e293b; }
+                @media print {
+                    .no-print { display: none !important; }
+                    body { padding: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            ${contenido}
+            <script>
+                window.onload = function() { window.print(); }
+            <\/script>
+        </body>
+        </html>
+    `);
+    ventana.document.close();
+}
+</script>

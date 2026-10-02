@@ -1,0 +1,205 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Boletines y Calificaciones · EDUNOVA{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0 py-2">
+
+    <!-- Header Hero Escolar EDUNOVA -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(190, 24, 93, 0.35);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-award-fill me-1"></i> Desempeño Académico Oficial
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Boletines y Calificaciones Periódicas</h1>
+                <p class="mb-0 text-white-50 small">
+                    Consulta el registro oficial de notas por asignaturas, valoraciones pedagógicas y descarga el boletín escolar institucional.
+                </p>
+            </div>
+            {% if estudiante_sel and estudiante_sel.perfil %}
+            <div>
+                <a href="{% url 'estudiantes_boletin_pdf' estudiante_sel.perfil.pk %}" class="btn btn-light fw-bold rounded-pill px-4 shadow-sm text-primary" target="_blank">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Descargar Boletín Oficial (PDF)
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Selector de Estudiante (Si la familia tiene más de 1 estudiante a cargo) -->
+    {% if hijos_qs|length > 1 %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <span class="fw-bold text-dark small"><i class="bi bi-person-fill text-primary me-1"></i> Seleccionar Estudiante:</span>
+            <div class="d-flex flex-wrap gap-2">
+                {% for h in hijos_qs %}
+                    <a href="?estudiante={{ h.id }}&periodo={{ periodo_sel }}" class="btn btn-sm rounded-pill px-3 fw-bold {% if estudiante_sel.id == h.id %}btn-primary text-white{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-person me-1"></i> {{ h.get_full_name|default:h.username }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Ficha Resumen del Estudiante Seleccionado -->
+    {% if estudiante_sel %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+        <div class="card-body p-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-7">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-3 shadow-sm" style="width: 58px; height: 58px; background: linear-gradient(135deg, #1E3A8A, #3B82F6);">
+                            {{ estudiante_sel.first_name|default:estudiante_sel.username|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <h2 class="h5 fw-bold mb-1 text-dark">{{ estudiante_sel.get_full_name|default:estudiante_sel.username }}</h2>
+                            <div class="text-muted small">
+                                Documento: <strong>{{ estudiante_sel.perfil.numero_documento|default:"N/A" }}</strong> · 
+                                Grado Escolar: <strong>{{ matricula_sel.grado_escolar|default:"10" }}° - Sección {{ matricula_sel.seccion|default:"A" }}</strong> · 
+                                Año Lectivo: <strong>2026</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5 text-md-end">
+                    <div class="d-inline-flex flex-column align-items-md-end p-3 rounded-3 bg-light border">
+                        <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Promedio del Periodo</span>
+                        <div class="h3 fw-bold mb-0 {% if promedio_general >= 4.0 %}text-success{% elif promedio_general >= 3.0 %}text-primary{% else %}text-danger{% endif %}">
+                            {{ promedio_general|floatformat:2 }} <span class="fs-6 text-muted">/ 5.0</span>
+                        </div>
+                        <small class="fw-semibold {% if promedio_general >= 4.6 %}text-success{% elif promedio_general >= 4.0 %}text-primary{% elif promedio_general >= 3.0 %}text-warning text-dark{% else %}text-danger{% endif %}">
+                            {% if promedio_general >= 4.6 %}🟢 Desempeño Superior{% elif promedio_general >= 4.0 %}🔵 Desempeño Alto{% elif promedio_general >= 3.0 %}🟡 Desempeño Básico{% else %}🔴 Desempeño Bajo{% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Filtro por Período Académico -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-muted small fw-bold text-uppercase">Período Académico:</span>
+            <div class="btn-group shadow-sm rounded-pill overflow-hidden" role="group">
+                {% for p in periodos %}
+                    <a href="?{% if estudiante_sel %}estudiante={{ estudiante_sel.id }}&{% endif %}periodo={{ p }}" class="btn btn-sm fw-semibold {% if periodo_sel == p %}btn-primary text-white{% else %}btn-outline-secondary bg-white{% endif %} px-3">
+                        {{ p }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        <span class="badge bg-light text-muted border px-3 py-2">
+            Total asignaturas evaluadas: <strong>{{ total_materias }}</strong>
+        </span>
+    </div>
+
+    <!-- Tabla Principal de Asignaturas y Calificaciones -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h3 class="h6 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-card-checklist text-primary"></i> Informe Pormenorizado por Asignatura ({{ periodo_sel }})
+            </h3>
+            <span class="small text-muted">Escala oficial de 1.0 a 5.0</span>
+        </div>
+        <div class="card-body p-0">
+            {% if calificaciones %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-uppercase" style="font-size: 0.75rem;">
+                        <tr>
+                            <th class="ps-4 py-3">Asignatura / Área</th>
+                            <th class="py-3">Docente Titular</th>
+                            <th class="py-3 text-center">Período</th>
+                            <th class="py-3 text-center">Calificación</th>
+                            <th class="py-3 text-center">Desempeño</th>
+                            <th class="py-3 text-center">Estado</th>
+                            <th class="pe-4 py-3">Observaciones Pedagógicas</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        {% for item in calificaciones %}
+                        <tr>
+                            <td class="ps-4">
+                                <strong class="text-dark d-block fs-6">{{ item.asignatura }}</strong>
+                                <span class="text-muted" style="font-size: 0.72rem;">Plan Curricular Obligatorio</span>
+                            </td>
+                            <td>
+                                <i class="bi bi-person-fill text-muted me-1"></i>{{ item.docente }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border">{{ item.periodo }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="fw-bold fs-6 text-primary">{{ item.nota }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge {{ item.badge_class }} rounded-pill px-3 py-1">
+                                    {{ item.nivel }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                {% if item.estado == 'Aprobado' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Aprobado
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-1">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Por Mejorar
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4 text-muted">
+                                {{ item.observacion }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted p-4">
+                <i class="bi bi-journal-x fs-1 text-secondary opacity-50 d-block mb-3"></i>
+                <h5 class="fw-bold text-dark">No hay boletines disponibles para este estudiante en el periodo seleccionado.</h5>
+                <p class="small text-muted mb-0">Los docentes titulares aún no han asentado calificaciones para {{ periodo_sel }}. Tan pronto sean cargadas por secretaría o los docentes, aparecerán reflejadas aquí automáticamente.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Escala Nacional de Valoración Institucional -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
+        <h4 class="h6 fw-bold text-dark mb-2">Escala de Valoración Nacional (Decreto 1290 de 2009)</h4>
+        <div class="row g-2 text-center small">
+            <div class="col-6 col-md-3">
+                <div class="p-2 bg-white rounded border">
+                    <strong class="text-success d-block">Desempeño Superior</strong>
+                    <span class="text-muted">4.6 a 5.0</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-2 bg-white rounded border">
+                    <strong class="text-primary d-block">Desempeño Alto</strong>
+                    <span class="text-muted">4.0 a 4.5</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-2 bg-white rounded border">
+                    <strong class="text-warning text-dark d-block">Desempeño Básico</strong>
+                    <span class="text-muted">3.0 a 3.9</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-2 bg-white rounded border">
+                    <strong class="text-danger d-block">Desempeño Bajo</strong>
+                    <span class="text-muted">1.0 a 2.9 (No Aprobado)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

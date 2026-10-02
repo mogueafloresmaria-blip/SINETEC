@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Calificaciones - Entregas Pendientes{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6">
+    <div class="mb-6 border-b pb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Calificaciones</h1>
+        <p class="text-gray-600 mt-1">Revisión de entregas pendientes</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Entregas pendientes de calificar</h2>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left text-gray-500">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                        <th class="px-6 py-3">Aprendiz</th>
+                        <th class="px-6 py-3">Actividad</th>
+                        <th class="px-6 py-3">Fecha de Entrega</th>
+                        <th class="px-6 py-3">Estado</th>
+                        <th class="px-6 py-3">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entrega in entregas_pendientes %}
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
+                                {{ entrega.estudiante.first_name|first }}{{ entrega.estudiante.last_name|first }}
+                            </div>
+                            {{ entrega.estudiante.get_full_name }}
+                        </td>
+                        <td class="px-6 py-4 font-medium text-blue-600">{{ entrega.tarea.titulo }}</td>
+                        <td class="px-6 py-4">{{ entrega.fecha_entrega|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">{{ entrega.estado }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="{% url 'revision_entrega' entrega.id %}" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded shadow-sm font-medium transition whitespace-nowrap">
+                                🩷 Revisar y calificar
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-6 text-center text-gray-500">
+                            <div class="text-4xl text-green-500 mb-2"><i class="bi bi-check-circle"></i></div>
+                            <p class="font-bold">¡Todo al día!</p>
+                            <p class="text-sm">No tienes entregas pendientes de calificar.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

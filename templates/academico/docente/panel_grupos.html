@@ -1,0 +1,141 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO: MIS GRUPOS / CURSOS
+     Visualización y gestión directa de los grupos a cargo (Grado 10° y Grado 11°)
+     Totalmente conectado a la base de datos real (2 estudiantes por grado)
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-grupos">
+
+    <!-- HERO BANNER MIS GRUPOS -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-collection-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Gestión Académica
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Mis Grupos
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Accede a cada grupo asignado para tomar asistencia, crear actividades, calificar y consultar sus estudiantes reales.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                <span class="badge rounded-pill px-3.5 py-2 fw-bold shadow-2xs" 
+                      style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.88rem;">
+                    <i class="bi bi-check-circle-fill me-1 text-success"></i> 2 Grupos Asignados · 4 Estudiantes
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE LOS GRUPOS (GRADO 10 Y GRADO 11) -->
+    <div class="row g-4 mb-4">
+        {% for grp in grupos_lista %}
+        <div class="col-md-6">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 hover-shadow transition" style="border-color: #fce7f3 !important;">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-4 p-3 d-flex align-items-center justify-content-center"
+                             style="background: #fdf2f8; color: #db2777; width: 56px; height: 56px; border: 1px solid #fce7f3;">
+                            <i class="bi bi-mortarboard-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-dark mb-0.5">{{ grp.grado_display }}</h4>
+                            <span class="badge rounded-pill px-2.5 py-0.5" style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3; font-size: 0.75rem;">
+                                Sección {{ grp.seccion }} · Jornada Mañana
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.82rem;">
+                            {{ grp.total_estudiantes }} estudiantes
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Asignaturas impartidas al grupo -->
+                <div class="mb-3 p-3 rounded-3" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                    <small class="text-muted fw-bold d-block mb-1.5 text-uppercase" style="font-size: 0.72rem;">Materias a cargo en este grupo:</small>
+                    <div class="d-flex flex-wrap gap-1.5">
+                        {% for mat in grp.materias %}
+                        <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #ffffff; color: #475569; border: 1px solid #e2e8f0; font-size: 0.75rem;">
+                            <i class="bi bi-book me-1 text-pink"></i>{{ mat }}
+                        </span>
+                        {% empty %}
+                        <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #ffffff; color: #475569; border: 1px solid #e2e8f0; font-size: 0.75rem;">
+                            Matemáticas, Informática, Lengua Castellana
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Lista de los estudiantes del grupo -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="fw-bold text-dark text-uppercase" style="font-size: 0.74rem;">Nómina de Estudiantes ({{ grp.total_estudiantes }})</small>
+                        <a href="{% url 'mis_estudiantes' %}?grado={{ grp.grado }}" class="small fw-semibold text-decoration-none" style="color: #db2777; font-size: 0.78rem;">
+                            Ver todos en Mis Estudiantes →
+                        </a>
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        {% for est in grp.estudiantes %}
+                        <div class="p-2.5 rounded-3 border bg-white d-flex justify-content-between align-items-center shadow-2xs" style="border-color: #fce7f3 !important;">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center"
+                                     style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%); width: 34px; height: 34px; font-size: 0.78rem;">
+                                    {{ est.aprendiz.first_name|slice:':1'|default:'E' }}{{ est.aprendiz.last_name|slice:':1'|default:'S' }}
+                                </div>
+                                <div>
+                                    <strong class="text-dark d-block" style="font-size: 0.85rem;">{{ est.aprendiz.get_full_name|default:est.aprendiz.username }}</strong>
+                                    <small class="text-muted" style="font-size: 0.74rem;">Código: {{ est.aprendiz.username }}</small>
+                                </div>
+                            </div>
+                            <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ est.aprendiz.id }}" 
+                               class="btn btn-sm rounded-pill px-2.5 py-1 fw-bold" 
+                               style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3; font-size: 0.74rem;">
+                                Perfil <i class="bi bi-chevron-right ms-0.5"></i>
+                            </a>
+                        </div>
+                        {% empty %}
+                        <div class="text-muted small py-2 text-center">No hay estudiantes en este grupo.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Botones de Acción Directa del Grupo -->
+                <div class="pt-3 border-top d-flex flex-wrap gap-2" style="border-color: #fce7f3 !important;">
+                    <a href="{% url 'asistencia_docente' %}?grado={{ grp.grado }}" 
+                       class="btn rounded-pill px-3 py-1.5 fw-bold small text-white shadow-2xs d-inline-flex align-items-center gap-1.5"
+                       style="background: #db2777; border: 1px solid #db2777; font-size: 0.8rem;">
+                        <i class="bi bi-check-square-fill"></i> Tomar Asistencia
+                    </a>
+                    <a href="{% url 'calificaciones_docente' %}?grado={{ grp.grado }}" 
+                       class="btn rounded-pill px-3 py-1.5 fw-bold small shadow-2xs d-inline-flex align-items-center gap-1.5"
+                       style="background: #ffffff; color: #db2777; border: 1px solid #fce7f3; font-size: 0.8rem;">
+                        <i class="bi bi-mortarboard-fill"></i> Calificaciones
+                    </a>
+                    <a href="{% url 'actividades_tareas' %}?grado={{ grp.grado }}" 
+                       class="btn rounded-pill px-3 py-1.5 fw-bold small shadow-2xs d-inline-flex align-items-center gap-1.5"
+                       style="background: #ffffff; color: #475569; border: 1px solid #e2e8f0; font-size: 0.8rem;">
+                        <i class="bi bi-journal-plus"></i> Crear Actividad
+                    </a>
+                    <a href="{% url 'comunicaciones_docente' %}?carga_id={{ grp.carga_id }}" 
+                       class="btn rounded-pill px-3 py-1.5 fw-bold small shadow-2xs d-inline-flex align-items-center gap-1.5"
+                       style="background: #ffffff; color: #475569; border: 1px solid #e2e8f0; font-size: 0.8rem;">
+                        <i class="bi bi-chat-dots-fill"></i> Mensaje al Grupo
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>

@@ -1,0 +1,71 @@
+<!-- =================================================================
+     SECCIÓN 8: SEGUIMIENTO Y PLANIFICACIÓN / DIARIO DE CAMPO (EXCLUSIVO)
+     ================================================================= -->
+<div class="panel-modulo-docente" id="modulo-seguimiento">
+    <div class="mb-4 pb-2 border-bottom">
+        <h4 class="fw-bold text-dark mb-1">Seguimiento y Planificación de Clases</h4>
+        <p class="text-muted small mb-0">Registre temas desarrollados en el aula (diario de campo) y observaciones pedagógicas individuales.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Registrar Tema de Clase -->
+        <div class="col-md-6">
+            <div class="card border rounded-3 p-4 bg-white shadow-sm h-100">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-book text-primary me-2"></i>Diario de Campo / Tema de Clase</h6>
+                <form method="POST" action="{% url 'instructor_dashboard' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="marcar_tema">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Clase asignada:</label>
+                        <select name="horario_id" class="form-select form-select-sm" required>
+                            {% for c in clases_hoy %}
+                            <option value="{{ c.id }}">{{ c.programa.denominacion }} · Grado {{ c.grado }}-{{ c.seccion }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Tema desarrollado / Logros alcanzados:</label>
+                        <textarea name="tema_texto" class="form-control form-control-sm" rows="3" placeholder="Describa el tema visto hoy..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                        <i class="bi bi-save me-1.5"></i> Guardar Tema
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Observaciones Individuales -->
+        <div class="col-md-6">
+            <div class="card border rounded-3 p-4 bg-white shadow-sm h-100">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-pencil-square me-2" style="color: #db2777;"></i>Observación a Estudiante</h6>
+                <form method="POST" action="{% url 'instructor_dashboard' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="guardar_observacion">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Estudiante:</label>
+                        <select name="estudiante_id" class="form-select form-select-sm" required>
+                            {% for m in todos_mis_estudiantes %}
+                            <option value="{{ m.aprendiz.id }}">{{ m.aprendiz.get_full_name }} (Grado {{ m.grado_escolar }}-{{ m.seccion }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Tipo de observación:</label>
+                        <select name="tipo_observacion" class="form-select form-select-sm">
+                            <option value="Académica">Académica</option>
+                            <option value="Formativa">Formativa</option>
+                            <option value="Reconocimiento">Reconocimiento / Mérito</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Descripción:</label>
+                        <textarea name="observacion_texto" class="form-control form-control-sm" rows="2" placeholder="Detalle de la observación pedagógica..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                        <i class="bi bi-check2-circle me-1.5"></i> Registrar Observación
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

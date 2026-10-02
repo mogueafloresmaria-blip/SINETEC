@@ -17,6 +17,7 @@ class AsistenciaAprendiz(models.Model):
         ('P', 'Presente'),
         ('A', 'Ausente'),
         ('J', 'Ausencia justificada'),
+        ('T', 'Tardanza'),
     ]
 
     matricula = models.ForeignKey(
@@ -34,6 +35,15 @@ class AsistenciaAprendiz(models.Model):
         related_name='asistencias_registradas',
         verbose_name='Registrado por',
     )
+    carga_academica = models.ForeignKey(
+        'academico.CargaAcademica',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='asistencias_sesion',
+        verbose_name='Carga Académica / Asignatura'
+    )
+    periodo = models.CharField(max_length=50, default='Periodo 1', blank=True, verbose_name="Periodo Académico")
 
     class Meta:
         verbose_name = 'Asistencia de aprendiz'
@@ -987,3 +997,68 @@ class DocumentoAdministrativo(models.Model):
     @property
     def es_imagen(self):
         return self.extension in ['JPG', 'JPEG', 'PNG', 'WEBP', 'GIF']
+
+
+class ComunicadoEscolar(models.Model):
+    """
+    Circulares oficiales, comunicados institucionales y avisos escolares
+    publicados por Rectoría, Secretaría, Coordinación o Docentes.
+    """
+    ESTAMENTOS = [
+        ('Toda', 'Toda la Comunidad Educativa'),
+        ('Docentes', 'Cuerpo Docente'),
+        ('Estudiantes', 'Estudiantes'),
+        ('Familias', 'Acudientes y Familias'),
+    ]
+
+    remitente = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comunicados_publicados',
+        verbose_name="Funcionario Emisor"
+    )
+    estamento_destinatario = models.CharField(
+        max_length=50,
+        choices=ESTAMENTOS,
+        default='Toda',
+        verbose_name="Estamento Destinatario"
+    )
+    curso = models.ForeignKey(
+        'academico.Ficha',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='comunicados_especificos',
+        verbose_name="Curso o Grupo (Opcional)"
+    )
+    estudiante_destinatario = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='comunicados_directos',
+        verbose_name="Estudiante Específico (Opcional)"
+    )
+    asunto = models.CharField(
+        max_length=200,
+        verbose_name="Asunto de la Circular"
+    )
+    mensaje = models.TextField(
+        verbose_name="Contenido de la Comunicación"
+    )
+    urgente = models.BooleanField(
+        default=False,
+        verbose_name="¿Notificación Prioritaria / Urgente?"
+    )
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha y Hora de Emisión"
+    )
+
+    class Meta:
+        verbose_name = "Comunicado Escolar"
+        verbose_name_plural = "Comunicados Escolares"
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"{self.asunto} [{self.get_estamento_destinatario_display()}]"

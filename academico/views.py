@@ -626,11 +626,31 @@ def lista_programas(request):
         if not all([profesor_id, programa_id, nivel, grado, seccion]):
             messages.error(request, 'Todos los campos son obligatorios para asignar la carga académica.')
         elif CargaAcademica.objects.filter(
-            profesor_id=profesor_id, programa_id=programa_id,
-            nivel=nivel, grado=grado, seccion=seccion, anio_lectivo=2026
+            programa_id=programa_id,
+            grado=grado,
+            seccion=seccion,
+            anio_lectivo=2026
         ).exists():
-            messages.warning(request, 'Esta asignación ya está registrada para el periodo lectivo 2026.')
+            carga_exist = CargaAcademica.objects.filter(
+                programa_id=programa_id, grado=grado, seccion=seccion, anio_lectivo=2026
+            ).select_related('profesor', 'programa').first()
+            nom_p = carga_exist.profesor.get_full_name() if carga_exist.profesor else 'Otro docente'
+            messages.error(request, f'No se puede duplicar la asignación: La materia "{carga_exist.programa.denominacion}" ya está asignada al {grado} Sección "{seccion}" a cargo de {nom_p}.')
         else:
+            # Validar límite de materias por profesor (máximo 2 materias distintas)
+            materias_actuales = set(
+                CargaAcademica.objects.filter(profesor_id=profesor_id)
+                .exclude(programa_id__isnull=True)
+                .values_list('programa_id', flat=True)
+            )
+            try:
+                prog_int = int(programa_id)
+            except (ValueError, TypeError):
+                prog_int = None
+            if prog_int and prog_int not in materias_actuales and len(materias_actuales) >= 2:
+                messages.error(request, 'El docente ya está inscrito en el número máximo de materias permitidas (máximo 2 materias distintas). Ya está inscrito en otras asignaturas.')
+                return redirect('programas_lista')
+
             CargaAcademica.objects.create(
                 profesor_id=profesor_id,
                 programa_id=programa_id,
@@ -870,31 +890,121 @@ def tablero_horarios(request):
     nivel = (request.GET.get('nivel') or '').strip()
     grado = (request.GET.get('grado') or '').strip()
     seccion = (request.GET.get('seccion') or 'A').strip() or 'A'
-    dia = (request.GET.get('dia') or '1').strip() or '1'
-    filtros_completos = bool(nivel and grado)
+    dia = (request.GET.get('dia') or '').strip()
+    docente_id = request.GET.get('docente')
+    aula_filtro = request.GET.get('aula')
+    materia_id = request.GET.get('materia')
+    q = request.GET.get('q', '').strip()
 
-    horarios = HorarioFicha.objects.select_related(
-        'ficha', 'ficha__programa', 'instructor', 'programa'
-    ).filter(activo=True)
-    if filtros_completos:
-        horarios = horarios.filter(nivel=nivel, grado=grado, seccion=seccion, dia=dia)
+    # Detección de rol institucional para aislamiento estricto
+    rol_obj = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+    rol_nombre = rol_obj.nombre if rol_obj else ''
+    es_docente = not request.user.is_superuser and ('Docente' in rol_nombre or 'Instructor' in rol_nombre or 'Profesor' in rol_nombre)
+
+    if es_docente:
+        # Aislamiento estricto: el docente SOLO ve sus propias clases (y solo 10/11 como requiere la regla)
+        docente_id = str(request.user.id)
+        horarios_qs = HorarioFicha.objects.select_related(
+            'ficha', 'ficha__programa', 'instructor', 'instructor__perfil', 'programa'
+        ).filter(
+            instructor=request.user, 
+            activo=True,
+            grado__in=['10', '11', '10mo Grado', '11mo Grado', '10°', '11°', 'Décimo', 'Undécimo']
+        )
     else:
-        horarios = horarios.none()
+        # Administrador / Coordinador
+        horarios_qs = HorarioFicha.objects.select_related(
+            'ficha', 'ficha__programa', 'instructor', 'instructor__perfil', 'programa'
+        ).filter(activo=True)
 
-    programas = ProgramaFormacion.objects.filter(activo=True).order_by('denominacion')
-    if not programas.exists():
-        programas = ProgramaFormacion.objects.all().order_by('denominacion')
+    # Si no hay filtros, preseleccionar un grado/curso para que siempre tenga contenido visible
+    if not nivel and not grado and not docente_id and not aula_filtro and not q:
+        primer_h = horarios_qs.first()
+        if primer_h and primer_h.nivel and primer_h.grado:
+            nivel = primer_h.nivel
+            grado = primer_h.grado
+            seccion = primer_h.seccion or 'A'
+        else:
+            nivel = 'Secundaria'
+            grado = '10mo Grado'
+            seccion = 'A'
 
-    dias_labels = dict(HorarioFicha.DIAS)
+    if nivel:
+        horarios_qs = horarios_qs.filter(nivel=nivel)
+    if grado:
+        horarios_qs = horarios_qs.filter(grado=grado)
+    if seccion:
+        horarios_qs = horarios_qs.filter(seccion=seccion)
+    if dia and dia != 'todos':
+        horarios_qs = horarios_qs.filter(dia=dia)
+    if docente_id and not es_docente:
+        horarios_qs = horarios_qs.filter(instructor_id=docente_id)
+    if aula_filtro:
+        horarios_qs = horarios_qs.filter(ambiente__icontains=aula_filtro)
+    if materia_id:
+        horarios_qs = horarios_qs.filter(programa_id=materia_id)
+    if q:
+        horarios_qs = horarios_qs.filter(
+            Q(tema__icontains=q) |
+            Q(programa__denominacion__icontains=q) |
+            Q(ambiente__icontains=q) |
+            Q(instructor__first_name__icontains=q) |
+            Q(instructor__last_name__icontains=q)
+        )
+
+    # Rejilla semanal completa (Lunes a Viernes)
+    horarios_por_dia = {
+        '1': horarios_qs.filter(dia='1').order_by('hora_inicio'),
+        '2': horarios_qs.filter(dia='2').order_by('hora_inicio'),
+        '3': horarios_qs.filter(dia='3').order_by('hora_inicio'),
+        '4': horarios_qs.filter(dia='4').order_by('hora_inicio'),
+        '5': horarios_qs.filter(dia='5').order_by('hora_inicio'),
+    }
+
+    if es_docente:
+        docentes = User.objects.filter(id=request.user.id)
+        programas_ids = HorarioFicha.objects.filter(instructor=request.user, activo=True).values_list('programa_id', flat=True)
+        programas = ProgramaFormacion.objects.filter(id__in=programas_ids).order_by('denominacion')
+        if not programas.exists():
+            from academico.models import CargaAcademica
+            prog_cargas = CargaAcademica.objects.filter(profesor=request.user).values_list('programa_id', flat=True)
+            programas = ProgramaFormacion.objects.filter(id__in=prog_cargas).order_by('denominacion')
+    else:
+        docentes = _docentes_activos()
+        if not docentes.exists():
+            docentes = User.objects.exclude(perfil__rol__nombre='Estudiante').order_by('last_name', 'first_name')
+        programas = ProgramaFormacion.objects.filter(activo=True).order_by('denominacion')
+        if not programas.exists():
+            programas = ProgramaFormacion.objects.all().order_by('denominacion')
+
+    aulas_disponibles = [
+        'Aula 101', 'Aula 102', 'Aula 103', 'Aula 104',
+        'Aula 201', 'Aula 202', 'Aula 203', 'Aula 204',
+        'Laboratorio de Ciencias', 'Sala de Informática 1', 'Sala de Informática 2',
+        'Cancha Múltiple / Polideportivo', 'Biblioteca Central', 'Auditorio'
+    ]
+
+    horas_inicio_sugeridas = [
+        '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
+        '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+        '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+        '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'
+    ]
+
     return render(request, 'academico/horarios.html', {
-        'horarios': horarios,
+        'horarios': horarios_qs.order_by('dia', 'hora_inicio'),
+        'horarios_por_dia': horarios_por_dia,
+        'docentes': docentes,
         'programas': programas,
+        'aulas': aulas_disponibles,
+        'horas_sugeridas': horas_inicio_sugeridas,
         'nivel': nivel,
         'grado': grado,
         'seccion': seccion,
         'dia': dia,
-        'dia_nombre': dias_labels.get(dia, 'Lunes'),
-        'filtros_completos': filtros_completos,
+        'docente_sel': docente_id,
+        'aula_sel': aula_filtro,
+        'q': q,
         'grados_por_nivel': GRADOS_POR_NIVEL,
         'secciones': SECCIONES_ESCOLARES,
         'dias': HorarioFicha.DIAS,
@@ -913,81 +1023,348 @@ def crear_horario(request):
     hora_inicio = _parse_hora(request.POST.get('hora_inicio'))
     hora_fin = _parse_hora(request.POST.get('hora_fin'))
     es_recreo = request.POST.get('es_recreo') in ('1', 'on', 'true', 'True')
-    programa_id = request.POST.get('programa_id') or request.POST.get('curso_id') or request.POST.get('ficha')
-    materia = (request.POST.get('materia') or request.POST.get('tema') or '').strip()
+    programa_id = request.POST.get('programa_id')
+    docente_id = request.POST.get('docente_id')
+    aula = (request.POST.get('aula') or request.POST.get('ambiente') or 'Aula 101').strip()
+    materia_texto = (request.POST.get('materia') or request.POST.get('tema') or '').strip()
 
     if not nivel or not grado:
-        messages.error(request, 'Selecciona nivel y grado antes de guardar el bloque.')
+        messages.error(request, 'Selecciona el nivel y grado antes de guardar el bloque horario.')
         return _redirigir_horarios(request)
     if not hora_inicio or not hora_fin:
-        messages.error(request, 'Indica hora de inicio y hora de fin.')
+        messages.error(request, 'Indica hora de inicio y hora de fin válidas (a partir de las 06:00 AM).')
         return _redirigir_horarios(request)
     if hora_fin <= hora_inicio:
-        messages.error(request, 'La hora de fin debe ser posterior a la de inicio.')
+        messages.error(request, 'La hora de finalización debe ser posterior a la hora de inicio.')
         return _redirigir_horarios(request)
 
     programa = None
     if programa_id:
         programa = ProgramaFormacion.objects.filter(pk=programa_id).first()
-        if programa and not materia:
-            materia = programa.denominacion
+        if programa and not materia_texto:
+            materia_texto = programa.denominacion
+
     if es_recreo:
-        materia = 'RECREO / ALMUERZO'
+        materia_texto = 'RECREO / DESCANSO PEDAGÓGICO'
 
-    carga = CargaAcademica.objects.filter(
-        nivel=nivel, grado=grado, seccion=seccion, programa=programa
-    ).select_related('profesor').first() if programa else None
-    instructor = carga.profesor if carga else None
-    ficha = None
-    if instructor:
-        ficha = Ficha.objects.filter(instructor_lider=instructor, estado='En Ejecucion').first()
+    # Identificar docente asignado o seleccionado
+    instructor = None
+    if docente_id:
+        instructor = User.objects.filter(pk=docente_id).first()
+    if not instructor and programa:
+        carga = CargaAcademica.objects.filter(
+            nivel=nivel, grado=grado, seccion=seccion, programa=programa
+        ).select_related('profesor').first()
+        if carga:
+            instructor = carga.profesor
 
-    HorarioFicha.objects.create(
+    # ==========================================
+    # CONTROL DE CONFLICTOS ADMINISTRATIVOS
+    # ==========================================
+    dia_nombre = dict(HorarioFicha.DIAS).get(dia, 'el día seleccionado')
+
+    # 0. Límite de materias del docente (máximo 2 materias distintas)
+    if instructor and programa and not es_recreo:
+        materias_doc = set(
+            CargaAcademica.objects.filter(profesor=instructor)
+            .exclude(programa_id__isnull=True)
+            .values_list('programa_id', flat=True)
+        ) | set(
+            HorarioFicha.objects.filter(instructor=instructor, activo=True)
+            .exclude(programa_id__isnull=True)
+            .values_list('programa_id', flat=True)
+        )
+        if programa.id not in materias_doc and len(materias_doc) >= 2:
+            messages.error(request, f'El docente {instructor.get_full_name() or instructor.username} ya está inscrito en el número máximo de materias permitidas (máximo 2 materias distintas). Ya está inscrito en otras asignaturas.')
+            return _redirigir_horarios(request)
+
+    # 1. Conflicto de Docente (el docente no puede tener dos clases al mismo tiempo)
+    if instructor and not es_recreo:
+        conflicto_doc = HorarioFicha.objects.filter(
+            instructor=instructor,
+            dia=dia,
+            activo=True,
+            hora_inicio__lt=hora_fin,
+            hora_fin__gt=hora_inicio
+        ).first()
+        if conflicto_doc:
+            messages.error(
+                request,
+                f"⚠️ CONFLICTO DE HORARIO: El docente {instructor.get_full_name()} ya tiene asignada la clase de '{conflicto_doc.nombre_materia}' en {conflicto_doc.grado} Sección '{conflicto_doc.seccion}' de {conflicto_doc.hora_inicio:%H:%M} a {conflicto_doc.hora_fin:%H:%M} el {dia_nombre}."
+            )
+            return _redirigir_horarios(request)
+
+    # 2. Conflicto de Aula (el aula no puede ser ocupada por dos grupos al mismo tiempo)
+    if aula and not es_recreo:
+        conflicto_aula = HorarioFicha.objects.filter(
+            ambiente__iexact=aula,
+            dia=dia,
+            activo=True,
+            hora_inicio__lt=hora_fin,
+            hora_fin__gt=hora_inicio
+        ).first()
+        if conflicto_aula:
+            messages.error(
+                request,
+                f"⚠️ CONFLICTO DE AULA: El espacio '{aula}' ya se encuentra ocupado por el grupo {conflicto_aula.grado} '{conflicto_aula.seccion}' ({conflicto_aula.nombre_materia}) en ese mismo bloque horario el {dia_nombre}."
+            )
+            return _redirigir_horarios(request)
+
+    # 3. Conflicto de Grupo (el mismo grupo no puede tener dos clases a la misma hora)
+    conflicto_grupo = HorarioFicha.objects.filter(
+        grado=grado,
+        seccion=seccion,
+        dia=dia,
+        activo=True,
+        hora_inicio__lt=hora_fin,
+        hora_fin__gt=hora_inicio
+    ).first()
+    if conflicto_grupo:
+        messages.error(
+            request,
+            f"⚠️ CONFLICTO DE GRUPO: El grupo {grado} Sección '{seccion}' ya tiene programada la clase de '{conflicto_grupo.nombre_materia}' de {conflicto_grupo.hora_inicio:%H:%M} a {conflicto_grupo.hora_fin:%H:%M} el {dia_nombre}."
+        )
+        return _redirigir_horarios(request)
+
+    # Vincular cohorte / curso institucional
+    grado_num = ''.join(c for c in grado if c.isdigit())
+    ficha = Ficha.objects.filter(
+        Q(codigo_ficha__icontains=f"{grado_num}-{seccion}") |
+        Q(codigo_ficha__icontains=f"{grado_num}{seccion}") |
+        Q(codigo_ficha=f"{grado_num}-{seccion}")
+    ).first()
+    if not ficha:
+        ficha = Ficha.objects.filter(estado='En Ejecucion').first()
+
+    nueva_clase = HorarioFicha.objects.create(
         ficha=ficha,
         instructor=instructor,
         programa=programa,
         dia=dia,
         hora_inicio=hora_inicio,
         hora_fin=hora_fin,
+        ambiente=aula,
         modalidad='Presencial',
-        tema=materia,
+        tema=materia_texto,
         nivel=nivel,
         grado=grado,
         seccion=seccion,
         es_recreo=es_recreo,
         activo=True,
+        color_hex=request.POST.get('color_hex', '#E2E8F0'),
     )
-    messages.success(request, 'Clase agregada al horario escolar.')
+
+    # Notificación al docente y registro de auditoría
+    try:
+        from seguimiento.models import Notificacion, RegistroAuditoria
+        if instructor:
+            Notificacion.objects.create(
+                usuario=instructor,
+                titulo=f"Nueva Clase en Horario: {materia_texto}",
+                mensaje=f"Se agregó a su horario escolar la clase de {materia_texto} para {grado} '{seccion}' ({dia_nombre} {hora_inicio:%H:%M} - {hora_fin:%H:%M} en {aula}).",
+                enlace="/instructor/",
+                tipo="info"
+            )
+        RegistroAuditoria.registrar(
+            usuario=request.user,
+            modulo="Horarios",
+            accion="Creación de Clase en Horario",
+            detalles=f"Programó {materia_texto} en {grado} '{seccion}' ({dia_nombre} {hora_inicio:%H:%M} - {hora_fin:%H:%M}, {aula}).",
+            request=request
+        )
+    except Exception:
+        pass
+
+    messages.success(request, f"¡Clase de '{materia_texto}' agregada al horario de {grado} '{seccion}' ({dia_nombre} {hora_inicio:%H:%M} - {hora_fin:%H:%M})!")
     return _redirigir_horarios(request)
+
+
+@login_required
+def editar_horario(request, pk):
+    """Permite editar docente, aula, día, hora o asignatura de un bloque horario."""
+    horario = get_object_or_404(HorarioFicha, pk=pk)
+
+    if request.method == 'POST':
+        nivel = (request.POST.get('nivel') or horario.nivel).strip()
+        grado = (request.POST.get('grado') or horario.grado).strip()
+        seccion = (request.POST.get('seccion') or horario.seccion).strip()
+        dia = (request.POST.get('dia') or horario.dia).strip()
+        hora_inicio = _parse_hora(request.POST.get('hora_inicio')) or horario.hora_inicio
+        hora_fin = _parse_hora(request.POST.get('hora_fin')) or horario.hora_fin
+        es_recreo = request.POST.get('es_recreo') in ('1', 'on', 'true', 'True')
+        programa_id = request.POST.get('programa_id')
+        docente_id = request.POST.get('docente_id')
+        aula = (request.POST.get('aula') or request.POST.get('ambiente') or horario.ambiente).strip()
+        materia_texto = (request.POST.get('materia') or request.POST.get('tema') or '').strip()
+
+        if hora_fin <= hora_inicio:
+            messages.error(request, 'La hora de fin debe ser posterior a la de inicio.')
+            return redirect('horario_editar', pk=pk)
+
+        programa = horario.programa
+        if programa_id:
+            programa = ProgramaFormacion.objects.filter(pk=programa_id).first()
+            if programa and not materia_texto:
+                materia_texto = programa.denominacion
+
+        instructor = horario.instructor
+        if docente_id:
+            instructor = User.objects.filter(pk=docente_id).first()
+
+        dia_nombre = dict(HorarioFicha.DIAS).get(dia, 'el día seleccionado')
+
+        # Límite de materias del docente (máximo 2 materias distintas)
+        if instructor and programa and not es_recreo:
+            materias_doc = set(
+                CargaAcademica.objects.filter(profesor=instructor)
+                .exclude(programa_id__isnull=True)
+                .values_list('programa_id', flat=True)
+            ) | set(
+                HorarioFicha.objects.filter(instructor=instructor, activo=True)
+                .exclude(pk=pk)
+                .exclude(programa_id__isnull=True)
+                .values_list('programa_id', flat=True)
+            )
+            if programa.id not in materias_doc and len(materias_doc) >= 2:
+                messages.error(request, f'El docente {instructor.get_full_name() or instructor.username} ya está inscrito en el número máximo de materias permitidas (máximo 2 materias distintas). Ya está inscrito en otras asignaturas.')
+                return redirect('horario_editar', pk=pk)
+
+        # Conflictos excluyendo el horario actual
+        if instructor and not es_recreo:
+            c_doc = HorarioFicha.objects.filter(
+                instructor=instructor, dia=dia, activo=True,
+                hora_inicio__lt=hora_fin, hora_fin__gt=hora_inicio
+            ).exclude(pk=pk).first()
+            if c_doc:
+                messages.error(request, f"Conflicto de Docente: {instructor.get_full_name()} ya tiene clase en ese horario ({c_doc.nombre_materia} en {c_doc.grado}).")
+                return redirect('horario_editar', pk=pk)
+
+        if aula and not es_recreo:
+            c_aul = HorarioFicha.objects.filter(
+                ambiente__iexact=aula, dia=dia, activo=True,
+                hora_inicio__lt=hora_fin, hora_fin__gt=hora_inicio
+            ).exclude(pk=pk).first()
+            if c_aul:
+                messages.error(request, f"Conflicto de Aula: El espacio '{aula}' ya está reservado por {c_aul.grado} '{c_aul.seccion}'.")
+                return redirect('horario_editar', pk=pk)
+
+        c_grp = HorarioFicha.objects.filter(
+            grado=grado, seccion=seccion, dia=dia, activo=True,
+            hora_inicio__lt=hora_fin, hora_fin__gt=hora_inicio
+        ).exclude(pk=pk).first()
+        if c_grp:
+            messages.error(request, f"Conflicto de Grupo: {grado} '{seccion}' ya tiene la materia '{c_grp.nombre_materia}' a esa misma hora.")
+            return redirect('horario_editar', pk=pk)
+
+        horario.nivel = nivel
+        horario.grado = grado
+        horario.seccion = seccion
+        horario.dia = dia
+        horario.hora_inicio = hora_inicio
+        horario.hora_fin = hora_fin
+        horario.ambiente = aula
+        horario.programa = programa
+        horario.instructor = instructor
+        horario.tema = materia_texto
+        horario.es_recreo = es_recreo
+        color_hex = request.POST.get('color_hex')
+        if color_hex:
+            horario.color_hex = color_hex
+        horario.save()
+
+        messages.success(request, f"¡Clase de '{horario.nombre_materia}' actualizada correctamente!")
+        return redirect(f"/academico/horarios/?nivel={nivel}&grado={grado}&seccion={seccion}")
+
+    docentes = _docentes_activos()
+    programas = ProgramaFormacion.objects.filter(activo=True).order_by('denominacion')
+    aulas = [
+        'Aula 101', 'Aula 102', 'Aula 103', 'Aula 104',
+        'Aula 201', 'Aula 202', 'Aula 203', 'Aula 204',
+        'Laboratorio de Ciencias', 'Sala de Informática 1', 'Polideportivo / Cancha'
+    ]
+
+    return render(request, 'academico/editar_horario.html', {
+        'horario': horario,
+        'docentes': docentes,
+        'programas': programas,
+        'aulas': aulas,
+        'grados_por_nivel': GRADOS_POR_NIVEL,
+        'secciones': SECCIONES_ESCOLARES,
+        'dias': HorarioFicha.DIAS,
+    })
 
 
 @login_required
 def nueva_matricula(request):
     alumnos = User.objects.filter(
-        matriculas_academicas__isnull=True,
         perfil__rol__nombre__in=['Estudiante', 'Aprendiz'],
+        perfil__esta_activo=True,
     ).select_related('perfil').order_by('last_name', 'first_name')
+    
     fichas = Ficha.objects.filter(estado='En Ejecucion').order_by('codigo_ficha')
+    if not fichas.exists():
+        fichas = Ficha.objects.all().order_by('codigo_ficha')
     grados = Matricula._meta.get_field('grado_escolar').choices
     secciones = ('A', 'B', 'C')
 
+    alumno_preseleccionado = request.GET.get('alumno') or request.GET.get('estudiante')
+
     if request.method == 'POST':
-        alumno = alumnos.filter(pk=request.POST.get('alumno_id')).first()
-        ficha = fichas.filter(pk=request.POST.get('ficha_id')).first() or fichas.first()
+        alumno_id = request.POST.get('alumno_id')
+        alumno = alumnos.filter(pk=alumno_id).first()
         grado = request.POST.get('grado_escolar') or '10'
         seccion = request.POST.get('seccion') or 'A'
-        if not alumno or not ficha:
-            messages.error(request, 'Selecciona un alumno y asegúrate de tener un curso activo.')
-        elif Matricula.objects.filter(aprendiz=alumno, ficha=ficha).exists():
-            messages.error(request, 'El alumno ya está matriculado en este curso.')
+        
+        ficha_id = request.POST.get('ficha_id')
+        ficha = None
+        if ficha_id:
+            ficha = Ficha.objects.filter(pk=ficha_id).first()
+        if not ficha:
+            ficha = Ficha.objects.filter(codigo_ficha__icontains=f"{grado}-{seccion}").first() or fichas.first()
+
+        if not alumno:
+            messages.error(request, 'Por favor seleccione un estudiante de la lista.')
+        elif Matricula.objects.filter(aprendiz=alumno, grado_escolar=grado, seccion=seccion, estado_formacion='En Formacion').exists():
+            messages.warning(request, f'El estudiante {alumno.get_full_name()} ya se encuentra matriculado en {grado}° Sección "{seccion}".')
         else:
-            Matricula.objects.create(
+            mat = Matricula.objects.create(
                 aprendiz=alumno,
                 ficha=ficha,
                 grado_escolar=grado,
                 seccion=seccion,
+                estado_formacion='En Formacion',
             )
-            messages.success(request, f'{alumno.get_full_name()} fue matriculado correctamente.')
+            # Notificación y Auditoría
+            try:
+                from seguimiento.models import Notificacion, RegistroAuditoria
+                Notificacion.objects.create(
+                    usuario=alumno,
+                    titulo="Matrícula Escolar Formalizada",
+                    mensaje=f"Has sido matriculado formalmente en {mat.get_grado_escolar_display()} - Sección {seccion} para el año lectivo 2026.",
+                    enlace="/matriculas/",
+                    tipo="success"
+                )
+                for fam in alumno.nucleo_familiar.all():
+                    u_fam = User.objects.filter(Q(username=fam.documento) | Q(email=fam.email)).first()
+                    if u_fam:
+                        Notificacion.objects.create(
+                            usuario=u_fam,
+                            titulo=f"Matrícula Confirmada · {alumno.first_name}",
+                            mensaje=f"Se confirmó la matrícula oficial de {alumno.get_full_name()} en {mat.get_grado_escolar_display()} Sección {seccion}.",
+                            enlace="/familia/matricula/",
+                            tipo="success"
+                        )
+                RegistroAuditoria.registrar(
+                    usuario=request.user,
+                    modulo="Matrículas",
+                    accion="Formalización de Matrícula",
+                    detalles=f"Matriculó al estudiante {alumno.get_full_name()} (DNI: {getattr(alumno.perfil, 'numero_documento', 'S/D')}) en {mat.get_grado_escolar_display()} {seccion}.",
+                    request=request
+                )
+            except Exception:
+                pass
+
+            messages.success(request, f'¡{alumno.get_full_name()} ha sido matriculado exitosamente en {mat.get_grado_escolar_display()} - Sección "{seccion}"!')
             return redirect('matriculas_lista')
 
     return render(request, 'academico/nueva_matricula.html', {
@@ -995,6 +1372,7 @@ def nueva_matricula(request):
         'fichas': fichas,
         'grados': grados,
         'secciones': secciones,
+        'alumno_preseleccionado': alumno_preseleccionado,
     })
 
 
@@ -1008,8 +1386,29 @@ def eliminar_horario(request, pk):
         'dia': horario.dia,
     }
     if request.method == 'POST':
-        horario.delete()
-        messages.success(request, 'Bloque retirado del horario.')
+        from usuarios.models import PapeleraReciclaje
+        PapeleraReciclaje.objects.create(
+            tipo_objeto='Horario',
+            objeto_id=horario.id,
+            titulo=f"{horario.nombre_materia} - Grado {horario.grado}°{horario.seccion}",
+            subtitulo=f"{horario.get_dia_display()} {horario.hora_inicio.strftime('%H:%M')} - {horario.hora_fin.strftime('%H:%M')} · {horario.ambiente}",
+            datos_recuperacion={
+                'horario_id': horario.id,
+                'dia': horario.dia,
+                'hora_inicio': str(horario.hora_inicio),
+                'hora_fin': str(horario.hora_fin),
+                'ambiente': horario.ambiente,
+                'grado': horario.grado,
+                'seccion': horario.seccion,
+                'programa_id': horario.programa_id,
+                'instructor_id': horario.instructor_id,
+            },
+            eliminado_por=request.user,
+            motivo='Eliminado desde la gestión de horarios'
+        )
+        horario.activo = False
+        horario.save(update_fields=['activo'])
+        messages.success(request, f'Bloque "{horario.nombre_materia}" movido a la Papelera de Reciclaje.')
     return _redirigir_horarios(request, extra=params)
 
 
@@ -1108,3 +1507,96 @@ def matricular_aprendiz(request, ficha_id):
         'import_errors': import_errors,
         'ficha': ficha,
     })
+from django.http import JsonResponse
+from django.utils import timezone
+
+@login_required
+def api_objetivos_por_competencia(request, competencia_id):
+    from .models import Objetivo
+    objetivos = Objetivo.objects.filter(competencia_id=competencia_id)
+    data = [{'id': o.id, 'descripcion': o.descripcion} for o in objetivos]
+    return JsonResponse({'objetivos': data})
+
+@login_required
+def guardar_asistencia_clase(request):
+    carga_id = request.POST.get('carga_id') or request.GET.get('carga_id')
+    if request.method == 'POST' and carga_id:
+        from .models import CargaAcademica, Matricula
+        from seguimiento.models import AsistenciaAprendiz
+        
+        carga = get_object_or_404(CargaAcademica, id=carga_id, profesor=request.user)
+        
+        estudiantes = Matricula.objects.filter(
+            grado_escolar=carga.grado,
+            seccion=carga.seccion,
+            estado_formacion='En Formacion'
+        )
+        
+        hoy = timezone.localdate()
+        
+        for mat in estudiantes:
+            estado = request.POST.get(f'asist_{mat.aprendiz.id}')
+            if estado:
+                AsistenciaAprendiz.objects.update_or_create(
+                    matricula=mat,
+                    fecha=hoy,
+                    defaults={'estado': estado, 'observacion': f"Asistencia en clase: {carga.programa.denominacion if carga.programa else 'Clase'}"}
+                )
+        messages.success(request, f"Asistencia guardada para {carga.grado}°{carga.seccion}")
+        return redirect(f"/instructor/?carga_id={carga_id}&subpanel=asistencia")
+    return redirect('/instructor/?subpanel=asistencia')
+
+@login_required
+def crear_actividad_clase(request):
+    if request.method == 'POST':
+        from .models import CargaAcademica, Competencia, Objetivo
+        from usuarios.models import EvidenciaTaller
+        
+        carga_id = request.POST.get('carga_id')
+        carga = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first()
+        if not carga:
+            messages.error(request, 'No se puede asignar una tarea a una materia que no corresponde a su asignación docente.')
+            return redirect('/instructor/?subpanel=actividades')
+        
+        competencia_id = request.POST.get('competencia_id')
+        objetivo_id = request.POST.get('objetivo_id')
+        titulo = request.POST.get('titulo')
+        descripcion = request.POST.get('descripcion')
+        fecha_limite = request.POST.get('fecha_limite')
+
+        if fecha_limite:
+            try:
+                from datetime import datetime
+                from django.utils import timezone
+                dt_limite = timezone.make_aware(datetime.fromisoformat(fecha_limite))
+                if dt_limite < timezone.now() - timezone.timedelta(minutes=5):
+                    messages.error(request, 'No se puede poner una fecha límite anterior a la fecha actual.')
+                    return redirect(f"/instructor/?carga_id={carga_id}&subpanel=actividades")
+            except Exception:
+                pass
+        
+        EvidenciaTaller.objects.create(
+            instructor=request.user,
+            competencia_id=competencia_id,
+            objetivo_id=objetivo_id,
+            titulo=titulo,
+            descripcion=descripcion,
+            fecha_limite=fecha_limite
+        )
+        messages.success(request, f"Actividad '{titulo}' asignada exitosamente al grupo {carga.grado}°{carga.seccion}.")
+        return redirect(f"/instructor/?carga_id={carga_id}&subpanel=actividades")
+    return redirect('/instructor/?subpanel=actividades')
+
+@login_required
+def horarios_cambiar_color(request):
+    if request.method == 'POST':
+        horario_id = request.POST.get('horario_id')
+        color_clase = request.POST.get('color_clase')
+        
+        from .models import HorarioFicha
+        horario = get_object_or_404(HorarioFicha, id=horario_id)
+        horario.color_hex = color_clase
+        horario.save()
+        
+        messages.success(request, f"Color de clase actualizado exitosamente.")
+    return redirect('horarios_tablero')

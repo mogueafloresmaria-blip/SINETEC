@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ titulo }} - SINETEC{% endblock %}
+{% block title %}{{ titulo }} - EDUNOVA{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-2 px-md-3">
@@ -80,11 +80,20 @@
                             <input type="text" name="telefono" class="form-control" value="{{ perfil.telefono|default:'' }}" placeholder="Ej. 3109876543">
                         </div>
 
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Área / Especialidad Académica</label>
+                            <input type="text" name="area" class="form-control" value="{{ perfil.area|default:'' }}" placeholder="Ej: Matemáticas, Ciencias Naturales, Idiomas...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-dark">Cargo Institucional</label>
+                            <input type="text" name="cargo" class="form-control" value="{{ perfil.cargo|default:'Docente' }}" placeholder="Ej: Docente de Área, Director de Grupo...">
+                        </div>
+
                         <div class="col-12">
                             <label class="form-label small fw-semibold text-dark">Rol Institucional *</label>
                             <select name="rol" class="form-select">
-                                <option value="Instructor SENA" {% if perfil.rol.nombre == 'Instructor SENA' or not perfil %}selected{% endif %}>Instructor SENA (Líder / Técnico)</option>
-                                <option value="Docente I.E." {% if perfil.rol.nombre == 'Docente I.E.' %}selected{% endif %}>Docente Enlace de la Institución Educativa</option>
+                                <option value="Docente" {% if perfil.rol.nombre == 'Docente' or perfil.rol.nombre == 'Profesor / Docente' %}selected{% endif %}>Profesor / Docente Escolar</option>
+                                <option value="Instructor SENA" {% if perfil.rol.nombre == 'Instructor SENA' %}selected{% endif %}>Instructor Técnico SENA</option>
                                 <option value="Coordinador" {% if perfil.rol.nombre == 'Coordinador' %}selected{% endif %}>Coordinador Académico</option>
                             </select>
                         </div>

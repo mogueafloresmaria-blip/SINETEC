@@ -1,0 +1,469 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Panel del Docente · EDUNOVA — Educación y Desarrollo Unificado{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* =========================================================================
+       SISTEMA DE DISEÑO: PANEL DEL DOCENTE EDUNOVA (TEMA ROSADO IDÉNTICO A LA FOTO)
+       ========================================================================= */
+    :root {
+        --edunova-navy: #0f172a;
+        --edunova-pink-primary: #db2777;
+        --edunova-pink-dark: #be185d;
+        --edunova-pink-light: #fce7f3;
+        --edunova-pink-soft: #fff0f3;
+        --edunova-pink-accent: #f43f5e;
+        --edunova-pink-border: #fce7f3;
+        --edunova-page-bg: #fdf2f4;
+        --edunova-border: #fce7f3;
+    }
+
+    body {
+        background-color: var(--edunova-page-bg) !important;
+        background: var(--edunova-page-bg) !important;
+    }
+
+    .sinetec-topbar {
+        background: #ffffff !important;
+        border-bottom: 1px solid #fce7f3 !important;
+    }
+
+    .sinetec-sidebar {
+        background: #ffffff !important;
+        border-right: 1px solid #fce7f3 !important;
+    }
+
+    .sinetec-brand-icon {
+        background: #db2777 !important;
+        color: #ffffff !important;
+        border-radius: 10px;
+    }
+
+    .sinetec-brand-title .badge {
+        background: #fce7f3 !important;
+        color: #db2777 !important;
+        border: 1px solid #fbcfe8 !important;
+    }
+
+    .docente-shell {
+        background-color: var(--edunova-page-bg) !important;
+        background: var(--edunova-page-bg) !important;
+        padding-top: 15px;
+        padding-bottom: 60px;
+    }
+
+    /* BARRA LATERAL ROSADA ELEGANTE */
+    .teacher-sidebar-pink {
+        background: transparent;
+    }
+
+    .teacher-pink-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        color: #334155;
+        font-weight: 500;
+        font-size: 0.88rem;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.15s ease;
+        margin: 2px 0;
+    }
+
+    .teacher-pink-item:hover {
+        background-color: #fff1f5;
+        color: #db2777;
+    }
+
+    .teacher-pink-item.is-active {
+        background-color: #fce7f3 !important;
+        color: #db2777 !important;
+        font-weight: 700 !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .teacher-icon-pink {
+        color: #db2777 !important;
+        font-size: 1.15rem;
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .teacher-label-text {
+        font-size: 0.88rem;
+        letter-spacing: -0.2px;
+    }
+
+    /* CONTENEDOR PRINCIPAL DERECHO */
+    .teacher-content-panel {
+        background: transparent !important;
+        border: none !important;
+        border-radius: 20px;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: 580px;
+    }
+
+    .card {
+        border: 1px solid #fce7f3 !important;
+        border-radius: 20px !important;
+        box-shadow: 0 4px 14px rgba(219, 39, 119, 0.02) !important;
+    }
+
+    .table-clean {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-clean th {
+        background: #fdf2f8;
+        color: #475569;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 12px 16px;
+        border-bottom: 2px solid #fce7f3;
+    }
+
+    .table-clean td {
+        padding: 13px 16px;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #fff1f5;
+        vertical-align: middle;
+        color: #1e293b;
+    }
+
+    .table-clean tr:hover td {
+        background-color: #fff1f5;
+    }
+
+    /* Pestañas de subpanel interno */
+    .inner-subtabs {
+        display: flex;
+        gap: 8px;
+        border-bottom: 2px solid #fce7f3;
+        margin-bottom: 20px;
+    }
+
+    .inner-subtab-btn {
+        padding: 8px 18px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        cursor: pointer;
+    }
+
+    .inner-subtab-btn.active {
+        color: #db2777;
+        border-bottom-color: #db2777;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="docente-shell">
+    <div class="container-fluid px-3 px-lg-4">
+
+        <!-- MENSAJES Y ALERTAS DEL SISTEMA -->
+        {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show rounded-3 shadow-sm border-0 d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-info-circle-fill fs-5"></i>
+                <div class="small fw-semibold">{{ message }}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- ÁREA DE CONTENIDO PRINCIPAL (ANCHO COMPLETO Y FONDO BLANCO PURO) -->
+        <div class="w-100">
+            <div class="teacher-content-panel">
+                {% if subpanel_activo == 'inicio' %}
+                    {% include "academico/docente/panel_inicio.html" %}
+                {% elif subpanel_activo == 'perfil' %}
+                    {% include "academico/docente/panel_perfil.html" %}
+                {% elif subpanel_activo == 'asignaturas' %}
+                    {% include "academico/docente/panel_asignaturas.html" %}
+                {% elif subpanel_activo == 'estudiantes' %}
+                    {% include "academico/docente/panel_estudiantes.html" %}
+                {% elif subpanel_activo == 'grupos' %}
+                    {% include "academico/docente/panel_grupos.html" %}
+                {% elif subpanel_activo == 'actividades' or subpanel_activo == 'tareas' %}
+                    {% include "academico/docente/panel_actividades.html" %}
+                {% elif subpanel_activo == 'asistencia' %}
+                    {% include "academico/docente/panel_asistencia.html" %}
+                {% elif subpanel_activo == 'calificaciones' %}
+                    {% include "academico/docente/panel_calificaciones.html" %}
+                {% elif subpanel_activo == 'horario' %}
+                    {% include "academico/docente/panel_horario.html" %}
+                {% elif subpanel_activo == 'recursos' or subpanel_activo == 'guias' %}
+                    {% include "academico/docente/panel_recursos.html" %}
+                {% elif subpanel_activo == 'documentos' %}
+                    {% include "academico/docente/panel_documentos.html" %}
+                {% elif subpanel_activo == 'eventos' or subpanel_activo == 'calendario' %}
+                    {% include "academico/docente/panel_eventos.html" %}
+                {% elif subpanel_activo == 'reportes' %}
+                    {% include "academico/docente/panel_reportes.html" %}
+                {% elif subpanel_activo == 'manual' %}
+                    {% include "academico/docente/panel_manual.html" %}
+                {% elif subpanel_activo == 'comportamiento' or subpanel_activo == 'seguimiento' %}
+                    {% include "academico/docente/panel_seguimiento.html" %}
+                {% elif subpanel_activo == 'comunicaciones' or subpanel_activo == 'mensajeria' %}
+                    {% include "academico/docente/panel_comunicaciones.html" %}
+                {% elif subpanel_activo == 'notificaciones' %}
+                    {% include "academico/docente/panel_notificaciones.html" %}
+                {% elif subpanel_activo == 'papelera' %}
+                    {% include "academico/docente/panel_papelera.html" %}
+                {% else %}
+                    {% include "academico/docente/panel_inicio.html" %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL: VER HOJA OFICIAL DE ASISTENCIA GUARDADA
+     ========================================================================= -->
+<div class="modal fade" id="modalVerSesionAsistencia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom p-4 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);">
+                <div>
+                    <h6 class="modal-title fw-bold text-white mb-0">Hoja Oficial de Asistencia Guardada</h6>
+                    <small class="text-blue-200" id="modal-asist-subtitulo">Detalle de registro</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="table-responsive">
+                    <table class="table-clean" id="tabla-modal-asistencia">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Estudiante</th>
+                                <th>Documento</th>
+                                <th>Estado Registrado</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-modal-asistencia">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3 pt-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4 py-1.5 fw-semibold small" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Datos de sesiones de asistencia para el modal (JSON válido)
+    const sesionesAsistenciaData = {{ historial_asistencia_json|safe|default:"[]" }};
+
+    // Cambio dinámico de subpanel exclusivo y limpio
+    function switchSubpanel(panelId) {
+        if (panelId === 'observaciones' || panelId === 'planificacion') {
+            panelId = 'seguimiento';
+        }
+        if (panelId === 'mensajeria') {
+            panelId = 'comunicaciones';
+        }
+        if (panelId === 'tareas') {
+            panelId = 'actividades';
+        }
+
+        const currentSub = '{{ subpanel_activo|default:"inicio" }}';
+        if (currentSub !== panelId) {
+            window.location.href = "{% url 'instructor_dashboard' %}?subpanel=" + encodeURIComponent(panelId);
+            return;
+        }
+
+        // Desactivar items del menú lateral
+        document.querySelectorAll('.teacher-menu-item').forEach(el => {
+            el.classList.remove('is-active');
+        });
+
+        // Marcar activo en el menú lateral
+        const navItem = document.getElementById('nav-item-' + panelId);
+        if (navItem) {
+            navItem.classList.add('is-active');
+        }
+
+        // Desplegar automáticamente el submenú si este panel tiene uno
+        const sbGroup = document.getElementById('sb-group-' + panelId);
+        const chev = document.getElementById('chev-sb-group-' + panelId);
+        if (sbGroup) {
+            sbGroup.style.display = 'block';
+            if (chev) chev.style.transform = 'rotate(90deg)';
+        }
+
+        // Scroll suave al inicio del panel
+        const contentPanel = document.querySelector('.teacher-content-panel');
+        if (contentPanel) {
+            contentPanel.scrollTop = 0;
+        }
+    }
+
+    // Toggle de acordeón del menú lateral
+    function toggleMenuGroup(groupId) {
+        const sub = document.getElementById(groupId);
+        const chevron = document.getElementById('chevron-' + groupId);
+        if (sub) {
+            if (sub.style.display === 'none' || sub.style.display === '') {
+                sub.style.display = 'block';
+                if (chevron) chevron.style.transform = 'rotate(90deg)';
+            } else {
+                sub.style.display = 'none';
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+    }
+
+    // Control de vista en Mis Estudiantes (Por curso)
+    function verEstudiantesCurso(cursoId) {
+        switchSubpanel('estudiantes');
+        document.getElementById('vista-cursos-estudiantes').style.display = 'none';
+        document.querySelectorAll('.detalle-curso-estudiantes').forEach(el => {
+            el.style.display = 'none';
+        });
+        const target = document.getElementById('curso-estudiantes-' + cursoId);
+        if (target) {
+            target.style.display = 'block';
+        }
+    }
+
+    function volverACursosEstudiantes() {
+        document.getElementById('vista-cursos-estudiantes').style.display = 'block';
+        document.querySelectorAll('.detalle-curso-estudiantes').forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+
+    // Modal de Ficha del Estudiante
+    function verFichaEstudiante(id, nombre, doc, grado, materia) {
+        document.getElementById('modal-est-nombre').textContent = nombre;
+        document.getElementById('modal-est-doc').textContent = 'Doc: ' + doc;
+        document.getElementById('modal-est-grado').textContent = grado;
+        document.getElementById('modal-est-materia').textContent = materia;
+        const modal = new bootstrap.Modal(document.getElementById('modalFichaEstudiante'));
+        modal.show();
+    }
+
+    // Pestañas internas de Asistencia
+    function setAsistTab(tab) {
+        const btnTomar = document.getElementById('btn-tab-asist-tomar');
+        const btnHist = document.getElementById('btn-tab-asist-historial');
+        const paneTomar = document.getElementById('asist-pane-tomar');
+        const paneHist = document.getElementById('asist-pane-historial');
+
+        if (tab === 'tomar') {
+            btnTomar.classList.add('active');
+            btnHist.classList.remove('active');
+            paneTomar.style.display = 'block';
+            paneHist.style.display = 'none';
+        } else {
+            btnHist.classList.add('active');
+            btnTomar.classList.remove('active');
+            paneHist.style.display = 'block';
+            paneTomar.style.display = 'none';
+        }
+    }
+
+    // Pestañas internas de Calificaciones
+    function setCalifTab(tab) {
+        const btnReg = document.getElementById('btn-tab-calif-registrar');
+        const btnHist = document.getElementById('btn-tab-calif-historial');
+        const paneReg = document.getElementById('calif-pane-registrar');
+        const paneHist = document.getElementById('calif-pane-historial');
+
+        if (tab === 'registrar') {
+            btnReg.classList.add('active');
+            btnHist.classList.remove('active');
+            paneReg.style.display = 'block';
+            paneHist.style.display = 'none';
+        } else {
+            btnHist.classList.add('active');
+            btnReg.classList.remove('active');
+            paneHist.style.display = 'block';
+            paneReg.style.display = 'none';
+        }
+    }
+
+    function seleccionarCargaAsistencia(cargaId) {
+        switchSubpanel('asistencia');
+        setAsistTab('tomar');
+        const sel = document.querySelector('select[name="carga_id"]');
+        if (sel) {
+            sel.value = cargaId;
+            location.href = '{% url "instructor_dashboard" %}?subpanel=asistencia&carga=' + cargaId;
+        }
+    }
+
+    // Modal de Ver Sesión de Asistencia
+    function verSesionAsistenciaModal(idx) {
+        if (!sesionesAsistenciaData || !sesionesAsistenciaData[idx]) return;
+        const ses = sesionesAsistenciaData[idx];
+        document.getElementById('modal-asist-subtitulo').textContent = `Fecha: ${ses.fecha} · Grado ${ses.grado} · ${ses.materia}`;
+        const tbody = document.getElementById('tbody-modal-asistencia');
+        tbody.innerHTML = '';
+
+        ses.estudiantes.forEach((est, i) => {
+            let badgeClass = 'bg-success';
+            let label = est.estado;
+            if (est.estado_cod === 'A') badgeClass = 'bg-danger';
+            if (est.estado_cod === 'T') badgeClass = 'bg-warning text-dark';
+            if (est.estado_cod === 'J' || est.estado_cod === 'E') badgeClass = 'bg-primary';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${i + 1}.</td>
+                <td><strong>${est.nombre}</strong></td>
+                <td class="text-muted small">${est.documento}</td>
+                <td><span class="badge ${badgeClass} rounded-pill px-2.5 py-1">${label}</span></td>
+                <td class="small text-muted">${est.observaciones || '—'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        const modal = new bootstrap.Modal(document.getElementById('modalVerSesionAsistencia'));
+        modal.show();
+    }
+
+    function marcarTodosPresentes() {
+        document.querySelectorAll('input[type="radio"][value="P"]').forEach(el => el.checked = true);
+    }
+
+    // Inicialización al cargar la página (sin redirecciones que interrumpan la navegación)
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        const sub = urlParams.get('subpanel') || '{{ subpanel_activo|default:"inicio" }}';
+
+        if (sub === 'asistencia' && tabParam && typeof setAsistTab === 'function') {
+            setAsistTab(tabParam);
+        } else if (sub === 'calificaciones' && tabParam && typeof setCalifTab === 'function') {
+            setCalifTab(tabParam);
+        }
+
+        const cursoVer = urlParams.get('curso_ver');
+        if (cursoVer && typeof verEstudiantesCurso === 'function') {
+            verEstudiantesCurso(cursoVer);
+        }
+    });
+</script>
+{% endblock %}

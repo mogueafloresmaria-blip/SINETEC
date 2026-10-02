@@ -1,937 +1,271 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 {% load static %}
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SINETEC | Sistema Administrativo Escolar</title>
-    
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDUNOVA | Sistema Integrado de Educación Técnica y Gestión Escolar</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons (using a generic CDN, or Phosphor icons, or Bootstrap icons) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- HTML5 QR Code Library -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#db2777',
+                        primaryDark: '#831843',
+                        accent: '#f472b6',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary: #1E3A8A;
-            --primary-dark: #0F2942;
-            --primary-light: #3B82F6;
-            --accent: #2563EB;
-            --bg-light: #F8FAFC;
-            --card-bg: #FFFFFF;
-            --text-main: #0F172A;
-            --text-muted: #64748B;
-            --border-color: #E2E8F0;
-        }
-
-        *, *::before, *::after { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 50%, #F1F5F9 100%);
-            position: relative;
-            overflow-x: hidden;
-            padding-bottom: 75px;
-        }
-
-        @media (min-width: 769px) {
-            body { padding-bottom: 0; }
-        }
-
-        /* Abstract ambient gradient circles - Zero stock photos */
-        .ambient-glow-top {
-            position: absolute;
-            top: -120px;
-            right: -80px;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(248, 250, 252, 0) 70%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .ambient-glow-bottom {
-            position: absolute;
-            top: 450px;
-            left: -100px;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(248, 250, 252, 0) 70%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* 1. Header */
-        .sinetec-landing-header {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.94);
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 14px clamp(16px, 4vw, 40px);
-            position: sticky;
-            top: 0;
-            z-index: 1030;
-            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
-            display: flex;
-            justify-content: center;
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-
-        .header-container {
-            width: 100%;
-            max-width: 1180px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
         }
-
-        .brand-logo-wrap {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
         }
-
-        .brand-logo-icon {
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FFFFFF;
-            font-size: 1.35rem;
-            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-
-        .brand-title-group {
-            display: flex;
-            flex-direction: column;
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
         }
-
-        .brand-name {
-            font-size: 1.22rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-            letter-spacing: -0.02em;
-            line-height: 1.1;
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
         }
-
-        .brand-subtitle {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            font-weight: 700;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .btn-action-qr {
-            background: #EEF2FF;
-            color: var(--primary) !important;
-            border: 1px solid #C7D2FE;
-            border-radius: 10px;
-            padding: 8px 18px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .btn-action-qr:hover {
-            background: #E0E7FF;
-            color: var(--primary-dark) !important;
-            border-color: #A5B4FC;
-            transform: translateY(-1px);
-        }
-
-        .btn-action-auth {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-            color: #FFFFFF !important;
-            border-radius: 10px;
-            padding: 9px 22px;
-            font-weight: 700;
-            font-size: 0.86rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            box-shadow: 0 6px 16px rgba(15, 41, 66, 0.2);
-            transition: all 0.2s ease;
-            border: none;
-        }
-
-        .btn-action-auth:hover {
-            background: linear-gradient(135deg, #0A192F 0%, var(--primary-dark) 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(15, 41, 66, 0.3);
-        }
-
-        /* Main Hero Section */
-        .landing-main {
-            width: 100%;
-            max-width: 1140px;
-            margin: 0 auto;
-            padding: clamp(36px, 5vw, 64px) 24px 40px;
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .badge-institution {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #FFFFFF;
-            border: 1px solid var(--border-color);
-            padding: 8px 20px;
-            border-radius: 999px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-            margin-bottom: 24px;
-        }
-
-        .badge-institution i {
-            color: var(--primary-light);
-            font-size: 1rem;
-        }
-
-        .hero-headline {
-            font-size: clamp(2.4rem, 4.8vw, 3.8rem);
-            font-weight: 800;
-            line-height: 1.12;
-            letter-spacing: -0.035em;
-            color: var(--primary-dark);
-            max-width: 920px;
-            margin: 0 auto 18px;
-        }
-
-        .hero-headline .gradient-accent {
-            background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-subhead {
-            font-size: clamp(1.05rem, 2vw, 1.2rem);
-            font-weight: 500;
-            color: #475569;
-            max-width: 760px;
-            margin: 0 auto 36px;
-            line-height: 1.6;
-        }
-
-        .hero-cta-group {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-bottom: 50px;
-        }
-
-        .btn-cta-main {
-            background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
-            color: #FFFFFF !important;
-            padding: 14px 32px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 24px -4px rgba(37, 99, 235, 0.35);
-            transition: all 0.2s ease;
-            border: none;
-        }
-
-        .btn-cta-main:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.45);
-        }
-
-        .btn-cta-secondary {
-            background: #FFFFFF;
-            color: var(--primary-dark) !important;
-            border: 1px solid var(--border-color);
-            padding: 14px 26px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-            transition: all 0.2s ease;
-        }
-
-        .btn-cta-secondary:hover {
-            background: #F8FAFC;
-            border-color: #CBD5E1;
-            transform: translateY(-2px);
-        }
-
-        /* 3 Portals Grid */
-        .portal-grid {
-            width: 100%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-            margin-bottom: 48px;
-            text-align: left;
-        }
-
-        .portal-card {
-            background: #FFFFFF;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 32px 28px;
-            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06);
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .portal-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.12);
-            border-color: #BFDBFE;
-        }
-
-        .portal-card-badge {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            margin-bottom: 20px;
-        }
-
-        .portal-card.estudiantes .portal-card-badge {
-            background: #EFF6FF;
-            color: #2563EB;
-        }
-
-        .portal-card.docentes .portal-card-badge {
-            background: #EEF2FF;
-            color: #4F46E5;
-        }
-
-        .portal-card.rectoria .portal-card-badge {
-            background: #F0FDF4;
-            color: #16A34A;
-        }
-
-        .portal-card h3 {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-            margin-bottom: 10px;
-        }
-
-        .portal-card p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 20px;
-            flex-grow: 1;
-        }
-
-        .portal-card ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 24px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .portal-card ul li {
-            font-size: 0.84rem;
-            color: #334155;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-        }
-
-        .portal-card ul li i {
-            color: #10B981;
-            font-size: 0.95rem;
-        }
-
-        .portal-card-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-size: 0.88rem;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .portal-card.estudiantes .portal-card-link {
-            background: #EFF6FF;
-            color: #1D4ED8;
-            border: 1px solid #BFDBFE;
-        }
-        .portal-card.estudiantes .portal-card-link:hover {
-            background: #DBEAFE;
-        }
-
-        .portal-card.docentes .portal-card-link {
-            background: #EEF2FF;
-            color: #4338CA;
-            border: 1px solid #C7D2FE;
-        }
-        .portal-card.docentes .portal-card-link:hover {
-            background: #E0E7FF;
-        }
-
-        .portal-card.rectoria .portal-card-link {
-            background: #F0FDF4;
-            color: #15803D;
-            border: 1px solid #BBF7D0;
-        }
-        .portal-card.rectoria .portal-card-link:hover {
-            background: #DCFCE7;
-        }
-
-        /* Attendance Terminal Card */
-        .attendance-terminal-box {
-            width: 100%;
-            background: #FFFFFF;
-            border: 1px solid #C7D2FE;
-            border-radius: 24px;
-            padding: 36px 32px;
-            box-shadow: 0 16px 40px -10px rgba(30, 58, 138, 0.08);
-            margin-bottom: 48px;
-            text-align: center;
-        }
-
-        .terminal-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #EEF2FF;
-            color: var(--primary);
-            font-size: 0.76rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            padding: 6px 16px;
-            border-radius: 999px;
-            margin-bottom: 12px;
-        }
-
-        .quick-doc-row {
-            max-width: 500px;
-            margin: 20px auto 0;
-            display: flex;
-            gap: 8px;
-        }
-
-        .quick-doc-field {
-            background: #F8FAFC;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px 18px;
-            font-size: 0.95rem;
-            flex-grow: 1;
-            outline: none;
-            transition: all 0.15s ease;
-        }
-
-        .quick-doc-field:focus {
-            border-color: var(--primary-light);
-            background: #FFFFFF;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-
-        .quick-doc-btn-submit {
-            background: var(--primary);
-            color: #FFFFFF;
-            font-weight: 700;
-            border-radius: 12px;
-            padding: 12px 24px;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .quick-doc-btn-submit:hover {
-            background: var(--primary-dark);
-        }
-
-        /* Footer */
-        .sinetec-landing-footer {
-            width: 100%;
-            background: #FFFFFF;
-            border-top: 1px solid var(--border-color);
-            padding: 32px 24px;
-            text-align: center;
-            margin-top: auto;
-        }
-
-        .footer-brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-            margin-bottom: 8px;
-        }
-
-        .footer-meta {
-            font-size: 0.84rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        /* Mobile Bottom Nav */
-        .mobile-bottom-bar {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border-color);
-            padding: 8px 16px;
-            z-index: 1040;
-            box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        @media (max-width: 768px) {
-            .mobile-bottom-bar { display: flex; }
-        }
-
-        .mobile-nav-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-decoration: none;
-            padding: 4px 8px;
-            cursor: pointer;
-        }
-
-        .mobile-nav-btn.active, .mobile-nav-btn:hover {
-            color: var(--primary);
-        }
-
-        .mobile-nav-qr-main {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: #FFFFFF !important;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            font-size: 1.4rem;
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
-            margin-top: -24px;
-            border: 3px solid #FFFFFF;
-            cursor: pointer;
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed text-gray-800 font-sans flex flex-col relative" style="background-image: url('https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=2000&q=80');">
+    
+    <!-- Overlay Gradient for better text readability -->
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-blue-900/20 to-black/50 z-0 pointer-events-none"></div>
 
-    <div class="ambient-glow-top"></div>
-    <div class="ambient-glow-bottom"></div>
-
-    <!-- 1. Header Navigation -->
-    <header class="sinetec-landing-header">
-        <div class="header-container">
-            <a href="{% url 'home' %}" class="brand-logo-wrap" title="SINETEC · Plataforma Escolar">
-                <div class="brand-logo-icon">
-                    <i class="bi bi-mortarboard-fill"></i>
-                </div>
-                <div class="brand-title-group">
-                    <span class="brand-name">SINETEC</span>
-                    <span class="brand-subtitle">{{ colegio.nombre|default:"Institución Educativa" }}</span>
-                </div>
-            </a>
-
-            <div class="header-actions">
-                <button type="button" class="btn-action-qr" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
-                    <i class="bi bi-qr-code-scan"></i> <span class="d-none d-sm-inline">Asistencia QR</span>
-                </button>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'dashboard' %}" class="btn-action-auth">
-                        <i class="bi bi-speedometer2"></i> <span>Mi Panel</span>
-                    </a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn-action-auth">
-                        <i class="bi bi-box-arrow-in-right"></i> <span>Iniciar Sesión</span>
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    </header>
-
-    <!-- 2. Main Hero Section -->
-    <main class="landing-main">
-        <div class="badge-institution">
-            <i class="bi bi-shield-check"></i>
-            <span>{{ colegio.nombre|default:"Institución Educativa Técnica" }} · Sede Principal</span>
-        </div>
-
-        <h1 class="hero-headline">
-            Gestión Escolar Inteligente,<br>
-            <span class="gradient-accent">Ágil y Conectada</span>
-        </h1>
-
-        <p class="hero-subhead">
-            Administración integral de matrículas, seguimiento por competencias con semáforo institucional, control de asistencia en tiempo real y comunicación continua con las familias.
-        </p>
-
-        <div class="hero-cta-group">
-            {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="btn-cta-main">
-                    <i class="bi bi-grid-fill"></i>
-                    <span>Acceder al Panel Administrativo</span>
-                </a>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn-cta-main">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    <span>Ingresar al Sistema</span>
-                </a>
-            {% endif %}
-            <button type="button" class="btn-cta-secondary" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
-                <i class="bi bi-camera"></i>
-                <span>Registrar Asistencia QR</span>
-            </button>
-        </div>
-
-        <!-- 3 Portals Cards Grid -->
-        <div class="portal-grid">
-            <!-- Portal Estudiante y Familia -->
-            <div class="portal-card estudiantes">
-                <div class="portal-card-badge">
-                    <i class="bi bi-people-fill"></i>
-                </div>
-                <h3>Estudiantes y Familias</h3>
-                <p>Consulta el rendimiento académico, seguimiento de competencias en semáforo y carnet estudiantil digital.</p>
-                <ul>
-                    <li><i class="bi bi-check-circle-fill"></i> Semáforo de Desempeño (🟢 🟡 🔴)</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Carnet Escolar con código QR</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Historial de asistencias</li>
-                </ul>
-                <a href="{% url 'login' %}" class="portal-card-link">
-                    <span>Acceso Estudiantes / Familias</span>
-                    <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-
-            <!-- Portal Docente -->
-            <div class="portal-card docentes">
-                <div class="portal-card-badge">
-                    <i class="bi bi-person-workspace"></i>
-                </div>
-                <h3>Cuerpo Docente</h3>
-                <p>Pase de lista diario, calificación cualitativa por competencias y registro de observaciones del estudiante.</p>
-                <ul>
-                    <li><i class="bi bi-check-circle-fill"></i> Control de asistencia rápido</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Registro de competencias RAP</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Observador escolar del alumno</li>
-                </ul>
-                <a href="{% url 'login' %}" class="portal-card-link">
-                    <span>Acceso Docentes</span>
-                    <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-
-            <!-- Gestión y Rectoría -->
-            <div class="portal-card rectoria">
-                <div class="portal-card-badge">
-                    <i class="bi bi-award-fill"></i>
-                </div>
-                <h3>Rectoría y Secretaría</h3>
-                <p>Matrícula institucional en 5 pasos, gestión de cupos, reportes consolidados en Excel/PDF y circulares.</p>
-                <ul>
-                    <li><i class="bi bi-check-circle-fill"></i> Proceso de matrícula guiado</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Estadísticas y alertas escolares</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Expedición de certificados</li>
-                </ul>
-                <a href="{% url 'login' %}" class="portal-card-link">
-                    <span>Acceso Administrativo</span>
-                    <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-
-        <!-- 4. Asistencia QR Terminal -->
-        <div class="attendance-terminal-box">
-            <span class="terminal-tag">
-                <i class="bi bi-patch-check-fill"></i> Punto Digital de Registro Diario
-            </span>
-            <h2 class="h4 fw-bold text-dark mb-2">Control de Asistencia Escolar</h2>
-            <p class="text-muted small mb-4" style="max-width: 580px; margin: 0 auto;">
-                Apunta la cámara al carnet escolar digital para registrar la asistencia inmediatamente como <strong>PRESENTE</strong> en la base de datos institucional.
-            </p>
-
-            <button type="button" class="btn btn-primary fw-bold px-4 py-3 rounded-pill shadow-sm" style="background: linear-gradient(135deg, #1E3A8A, #2563EB); border: none;" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
-                <i class="bi bi-camera-fill me-2"></i> Abrir Cámara para Escaneo QR
-            </button>
-
-            <!-- Manual document registration -->
-            <div class="quick-doc-row">
-                <input type="text" id="landingDocInput" class="quick-doc-field" placeholder="O digita el número de documento escolar..." autocomplete="off">
-                <button id="btnLandingDocCheck" class="quick-doc-btn-submit" type="button">
-                    <i class="bi bi-check-circle-fill"></i> Registrar
-                </button>
-            </div>
-            
-            <div id="landingDocFeedback" class="mt-3 small" style="display:none;"></div>
-        </div>
-    </main>
-
-    <!-- 5. Footer -->
-    <footer class="sinetec-landing-footer">
-        <div class="footer-brand">
-            <i class="bi bi-mortarboard-fill text-primary"></i>
-            <span>SINETEC · {{ colegio.nombre|default:"Institución Educativa Técnica" }}</span>
-        </div>
-        <div class="footer-meta">
-            Código DANE: {{ colegio.codigo_dane|default:"147189000123" }} · Rector: {{ colegio.rector|default:"Rectoría General" }}<br>
-            Plataforma Administrativa Escolar · &copy; 2026 SINETEC. Todos los derechos reservados.
-        </div>
-    </footer>
-
-    <!-- 6. Mobile Bottom Bar -->
-    <nav class="mobile-bottom-bar">
-        <a href="{% url 'home' %}" class="mobile-nav-btn active">
-            <i class="bi bi-house-door-fill"></i>
-            <span>Inicio</span>
-        </a>
+    <!-- Main Content Wrapper (above overlay) -->
+    <div class="relative z-10 flex flex-col min-h-screen w-full">
         
-        <button type="button" class="mobile-nav-qr-main" data-bs-toggle="modal" data-bs-target="#qrScannerModal" title="Escanear Asistencia QR">
-            <i class="bi bi-qr-code-scan"></i>
-        </button>
-
-        {% if user.is_authenticated %}
-            <a href="{% url 'dashboard' %}" class="mobile-nav-btn">
-                <i class="bi bi-speedometer2"></i>
-                <span>Panel</span>
-            </a>
-        {% else %}
-            <a href="{% url 'login' %}" class="mobile-nav-btn">
-                <i class="bi bi-box-arrow-in-right"></i>
-                <span>Ingresar</span>
-            </a>
-        {% endif %}
-    </nav>
-
-    <!-- Modal Escáner QR en vivo -->
-    <div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-                <div class="modal-header border-0 bg-dark text-white py-3 px-4">
-                    <h5 class="modal-title fs-6 fw-bold d-flex align-items-center gap-2" id="qrScannerModalLabel">
-                        <i class="bi bi-qr-code-scan text-primary"></i> Escáner de Carnet Escolar QR
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar" id="btnCloseScannerModal"></button>
+        <!-- Navigation Bar -->
+        <nav class="glass-panel mx-4 mt-4 mb-2 lg:mx-10 rounded-2xl px-6 py-4 flex flex-wrap justify-between items-center shadow-lg">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/90 p-1.5 rounded-xl shadow-md">
+                    <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" class="h-9 w-auto object-contain">
                 </div>
-                <div class="modal-body p-4 text-center bg-light">
-                    <p class="small text-muted mb-3">
-                        Coloca el código QR del carnet escolar frente al lente para registrar la asistencia automáticamente.
-                    </p>
-                    
-                    <div id="qrReaderView" class="mx-auto border rounded-3 overflow-hidden shadow-sm bg-black" style="width: 100%; max-width: 360px; min-height: 280px;"></div>
-                    <div id="modalScanFeedback" class="mt-3 small" style="display: none;"></div>
-                </div>
-                <div class="modal-footer border-0 bg-white py-2 px-4 justify-content-between">
-                    <a href="{% url 'escanear_asistencia_camara' %}" class="btn btn-sm btn-link text-decoration-none text-muted">
-                        <i class="bi bi-arrows-fullscreen me-1"></i> Modo Pantalla Completa
-                    </a>
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">
-                        Cerrar
-                    </button>
+                <div>
+                    <h1 class="text-white text-2xl font-bold tracking-tight drop-shadow-md">EDUNOVA</h1>
+                    <p class="text-white/80 text-xs font-medium tracking-wide">Sistema Integrado de Educación Técnica</p>
                 </div>
             </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden lg:flex items-center gap-6 text-white font-medium">
+                <a href="#inicio" class="hover:text-accent transition-colors drop-shadow">Inicio</a>
+                <a href="#modulos" class="hover:text-accent transition-colors drop-shadow">Módulos</a>
+                <a href="#portales" class="hover:text-accent transition-colors drop-shadow">Portales</a>
+                <a href="#" onclick="abrirContacto(event)" class="hover:text-accent transition-colors drop-shadow">Contacto</a>
+                <a href="#gestion" class="hover:text-accent transition-colors drop-shadow">Gestión Integral</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="{% url 'login' %}" class="bg-primary hover:bg-primaryDark text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span class="hidden sm:inline">Ingresar a la Plataforma</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Layout (Hero + Grid) -->
+        <main id="inicio" class="flex-grow flex flex-col lg:flex-row items-center justify-center p-4 lg:p-10 gap-8">
+            
+            <!-- Left Column: Hero Section -->
+            <div class="w-full lg:w-1/2 flex flex-col justify-center gap-6 p-4 lg:pr-10">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border-white/30 w-fit text-white text-sm font-medium shadow-md">
+                    <i class="bi bi-award-fill text-accent"></i>
+                    Institución Educativa Distrital Nuevo Horizonte
+                </div>
+                
+                <h2 class="text-5xl lg:text-6xl font-extrabold text-white leading-tight drop-shadow-lg">
+                    Gestión Escolar <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-blue-200">Inteligente, Moderna y Conectada</span>
+                </h2>
+                
+                <p class="text-lg lg:text-xl text-blue-50 font-medium leading-relaxed drop-shadow-md max-w-xl">
+                    Administración integral de matrículas, seguimiento por competencias con semáforo institucional, generación ágil de boletines y comunicación continua con toda la comunidad educativa.
+                </p>
+                
+                <div class="flex flex-wrap gap-4 mt-4">
+                    <a href="{% url 'login' %}" class="bg-primary hover:bg-primaryDark text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2 text-lg">
+                        <i class="bi bi-box-arrow-in-right text-xl"></i>
+                        Ingresar a la Plataforma
+                    </a>
+                    <a href="#modulos" class="glass-panel hover:bg-white/20 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2 text-lg border border-white/40">
+                        <i class="bi bi-grid-3x3-gap-fill text-xl"></i>
+                        Portales Institucionales
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Column: Interactive Grid -->
+            <div id="modulos" class="w-full lg:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-6 p-4">
+                
+                <!-- Card 1 -->
+                <div onclick="window.location.href='{% url 'login' %}'" class="glass-card cursor-pointer p-6 rounded-3xl flex flex-col items-start gap-4">
+                    <div class="bg-blue-100 p-3 rounded-2xl text-primary text-3xl shadow-inner">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Plataforma Académica</h3>
+                        <p class="text-gray-600 text-sm font-medium">Calificaciones, tareas y seguimiento por competencias.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div onclick="window.location.href='{% url 'login' %}'" class="glass-card cursor-pointer p-6 rounded-3xl flex flex-col items-start gap-4">
+                    <div class="bg-green-100 p-3 rounded-2xl text-green-600 text-3xl shadow-inner">
+                        <i class="bi bi-ui-checks"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Gestión de Matrículas</h3>
+                        <p class="text-gray-600 text-sm font-medium">Inscripciones, admisiones y documentación escolar.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div onclick="window.location.href='{% url 'login' %}'" class="glass-card cursor-pointer p-6 rounded-3xl flex flex-col items-start gap-4">
+                    <div class="bg-amber-100 p-3 rounded-2xl text-amber-600 text-3xl shadow-inner">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Centro Financiero</h3>
+                        <p class="text-gray-600 text-sm font-medium">Recaudos, pensiones y certificados financieros.</p>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div onclick="window.location.href='{% url 'login' %}'" class="glass-card cursor-pointer p-6 rounded-3xl flex flex-col items-start gap-4">
+                    <div class="bg-purple-100 p-3 rounded-2xl text-purple-600 text-3xl shadow-inner">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Comunicación y Portales</h3>
+                        <p class="text-gray-600 text-sm font-medium">Mensajes directos a docentes, estudiantes y acudientes.</p>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div onclick="window.location.href='{% url 'login' %}'" class="glass-card cursor-pointer p-6 rounded-3xl flex flex-col items-start gap-4">
+                    <div class="bg-rose-100 p-3 rounded-2xl text-rose-600 text-3xl shadow-inner">
+                        <i class="bi bi-printer-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Reportes y Boletines</h3>
+                        <p class="text-gray-600 text-sm font-medium">Generación y descarga de informes y actas oficiales.</p>
+                    </div>
+                </div>
+
+                <!-- Card 6 -->
+                <div onclick="window.location.href='{% url 'login' %}'" class="glass-card cursor-pointer p-6 rounded-3xl flex flex-col items-start gap-4">
+                    <div class="bg-teal-100 p-3 rounded-2xl text-teal-600 text-3xl shadow-inner">
+                        <i class="bi bi-key-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Admisiones y Registro</h3>
+                        <p class="text-gray-600 text-sm font-medium">Portal para nuevos aspirantes y apertura de expedientes.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="mt-auto py-6 text-center text-white/80 text-sm font-medium drop-shadow-md">
+            &copy; {% now "Y" %} EDUNOVA - Sistema Integrado de Educación Técnica y Gestión Escolar. Todos los derechos reservados.
+        </footer>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="modalContacto" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm px-4">
+        <div class="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl transform scale-95 transition-transform duration-300" id="modalContactoContent">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Contactar a Soporte</h3>
+                <button onclick="cerrarContacto()" class="text-gray-400 hover:text-gray-700 transition-colors">
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+            </div>
+            <form onsubmit="enviarContacto(event)" class="flex flex-col gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo</label>
+                    <input type="text" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="Ej. Juan Pérez">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Correo Electrónico</label>
+                    <input type="email" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="juan@ejemplo.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Mensaje</label>
+                    <textarea required rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none" placeholder="Escriba su consulta aquí..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-3.5 rounded-xl font-bold text-lg transition-all shadow-md hover:shadow-lg mt-2 flex justify-center items-center gap-2">
+                    <i class="bi bi-send-fill"></i> Enviar Mensaje
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Scripts de Asistencia (Manual y Cámara QR) -->
+    <!-- Interactive Scripts -->
     <script>
-        // Registro Manual
-        const btnDocCheck = document.getElementById('btnLandingDocCheck');
-        const inputDoc = document.getElementById('landingDocInput');
-        const feedback = document.getElementById('landingDocFeedback');
-
-        async function submitManualDoc() {
-            const docVal = inputDoc.value.trim();
-            if (!docVal) {
-                inputDoc.focus();
-                return;
-            }
-
-            btnDocCheck.disabled = true;
-            btnDocCheck.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-            feedback.style.display = 'none';
-
-            try {
-                const resp = await fetch("{% url 'api_registrar_asistencia_qr' %}", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ raw_data: docVal })
-                });
-                const data = await resp.json();
-
-                feedback.style.display = 'block';
-                if (data.success) {
-                    feedback.className = 'mt-3 small text-success fw-bold p-3 bg-success bg-opacity-10 rounded-3 border border-success';
-                    feedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${data.mensaje}<br><span class="text-dark"><strong>${data.aprendiz}</strong> (Doc: ${data.documento}) · Grado/Curso: ${data.ficha} · Hora: ${data.hora}</span>`;
-                    inputDoc.value = '';
-                } else {
-                    feedback.className = 'mt-3 small text-danger fw-bold p-3 bg-danger bg-opacity-10 rounded-3 border border-danger';
-                    feedback.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.mensaje}`;
-                }
-            } catch(e) {
-                feedback.style.display = 'block';
-                feedback.className = 'mt-3 small text-danger p-3 bg-danger bg-opacity-10 rounded-3';
-                feedback.innerHTML = '<i class="bi bi-wifi-off me-1"></i> Error de conexión con el servidor.';
-            } finally {
-                btnDocCheck.disabled = false;
-                btnDocCheck.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Registrar';
-            }
+        function abrirContacto(e) {
+            e.preventDefault();
+            const modal = document.getElementById('modalContacto');
+            const content = document.getElementById('modalContactoContent');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95');
         }
 
-        if (btnDocCheck && inputDoc) {
-            btnDocCheck.addEventListener('click', submitManualDoc);
-            inputDoc.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    submitManualDoc();
-                }
-            });
+        function cerrarContacto() {
+            const modal = document.getElementById('modalContacto');
+            const content = document.getElementById('modalContactoContent');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.add('scale-95');
         }
 
-        // Escáner QR
-        let html5QrCode = null;
-        const qrModalEl = document.getElementById('qrScannerModal');
-        const modalFeedback = document.getElementById('modalScanFeedback');
-        let isProcessingScan = false;
-
-        async function onScanSuccess(decodedText, decodedResult) {
-            if (isProcessingScan) return;
-            isProcessingScan = true;
-
-            modalFeedback.style.display = 'block';
-            modalFeedback.className = 'mt-3 small text-primary p-2 bg-primary bg-opacity-10 rounded border border-primary';
-            modalFeedback.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Procesando registro de carnet...';
-
-            try {
-                const resp = await fetch("{% url 'api_registrar_asistencia_qr' %}", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ raw_data: decodedText })
-                });
-                const data = await resp.json();
-
-                if (data.success) {
-                    modalFeedback.className = 'mt-3 small text-success fw-bold p-3 bg-success bg-opacity-10 rounded border border-success';
-                    modalFeedback.innerHTML = `<i class="bi bi-check-circle-fill fs-5 d-block text-success mb-1"></i> ¡Asistencia Registrada!<br><strong>${data.aprendiz}</strong><br>Grado/Curso: ${data.ficha} · Hora: ${data.hora}`;
-                    
-                    if (feedback) {
-                        feedback.style.display = 'block';
-                        feedback.className = 'mt-3 small text-success fw-bold p-3 bg-success bg-opacity-10 rounded-3 border border-success';
-                        feedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Asistencia confirmada: <strong>${data.aprendiz}</strong>`;
-                    }
-                } else {
-                    modalFeedback.className = 'mt-3 small text-danger fw-bold p-3 bg-danger bg-opacity-10 rounded border border-danger';
-                    modalFeedback.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.mensaje}`;
-                }
-            } catch(err) {
-                modalFeedback.className = 'mt-3 small text-danger p-2 bg-danger bg-opacity-10 rounded';
-                modalFeedback.innerHTML = 'Error al comunicar con el servidor.';
-            }
-
-            setTimeout(() => {
-                isProcessingScan = false;
-            }, 3000);
+        function enviarContacto(e) {
+            e.preventDefault();
+            alert('¡Gracias por contactarnos! Su mensaje ha sido enviado a soporte@EDUNOVA.edu.co. Nos pondremos en contacto pronto.');
+            cerrarContacto();
         }
 
-        if (qrModalEl) {
-            qrModalEl.addEventListener('shown.bs.modal', function () {
-                modalFeedback.style.display = 'none';
-                isProcessingScan = false;
-                if (!html5QrCode) {
-                    html5QrCode = new Html5Qrcode("qrReaderView");
-                }
-                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-                html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-                    .catch(err => {
-                        console.warn("Error al iniciar cámara:", err);
-                        modalFeedback.style.display = 'block';
-                        modalFeedback.className = 'mt-3 small text-danger p-2 bg-danger bg-opacity-10 rounded';
-                        modalFeedback.innerHTML = '<i class="bi bi-camera-video-off me-1"></i> No se pudo activar la cámara. Digita tu documento abajo.';
-                    });
-            });
-
-            qrModalEl.addEventListener('hidden.bs.modal', function () {
-                if (html5QrCode && html5QrCode.isScanning) {
-                    html5QrCode.stop().then(() => {
-                        html5QrCode.clear();
-                    }).catch(err => console.error("Error al detener cámara:", err));
-                }
-            });
-        }
+        // Close modal on click outside
+        document.getElementById('modalContacto').addEventListener('click', function(e) {
+            if (e.target === this) cerrarContacto();
+        });
     </script>
 </body>
 </html>

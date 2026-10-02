@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ titulo }} - SINETEC{% endblock %}
+{% block title %}{{ titulo }} - EDUNOVA{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -233,6 +233,28 @@
                 window.alert('Debe permitir la ubicación GPS y registrar ambas firmas antes de guardar el acta.');
             }
         });
+        const selectFicha = document.getElementById('select-ficha');
+        const selectMatricula = document.getElementById('select-matricula');
+
+        if (selectFicha && selectMatricula) {
+            selectFicha.addEventListener('change', (e) => {
+                const fichaId = e.target.value;
+                selectMatricula.innerHTML = '<option value="">---------</option>';
+                if (fichaId) {
+                    fetch(`/seguimiento/api/aprendices/${fichaId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            data.aprendices.forEach(app => {
+                                const option = document.createElement('option');
+                                option.value = app.id;
+                                option.textContent = app.nombre;
+                                selectMatricula.appendChild(option);
+                            });
+                        })
+                        .catch(err => console.error('Error fetching aprendices:', err));
+                }
+            });
+        }
     })();
 </script>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Mis Resultados de Aprendizaje (RAP) · SINETEC{% endblock %}
+{% block title %}Mis Resultados de Aprendizaje (RAP) · EDUNOVA{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-2">
@@ -10,12 +10,9 @@
             <p class="text-muted mb-0">Seguimiento oficial de competencias y juicios evaluativos cualitativos ('A' - Aprobado / 'D' - No aprobado).</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{% url 'carnet_digital' %}" class="btn btn-outline-success btn-sm">
-                <i class="bi bi-person-badge me-1"></i> Mi Carnet Digital
-            </a>
             {% if matricula %}
-            <a href="{% url 'estudiantes_boletin_pdf' matricula.aprendiz.perfil.id %}" target="_blank" class="btn btn-success btn-sm">
-                <i class="bi bi-file-earmark-pdf me-1"></i> Descargar Boletín Oficial
+            <a href="{% url 'estudiantes_boletin_pdf' matricula.aprendiz.perfil.id %}" target="_blank" class="btn btn-primary btn-sm">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Descargar Boletín Oficial (PDF)
             </a>
             {% endif %}
         </div>

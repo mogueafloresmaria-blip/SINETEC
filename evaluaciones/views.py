@@ -256,10 +256,15 @@ def sabana_calificaciones(request):
 @login_required
 @requerir_roles('Administrador', 'Coordinador', 'Instructor SENA')
 def exportar_sabana_excel(request):
-    ficha = get_object_or_404(Ficha, pk=request.GET.get('ficha'))
+    ficha_id = request.GET.get('ficha')
+    rap_id = request.GET.get('rap')
+    if not ficha_id or not rap_id:
+        messages.warning(request, 'Debe seleccionar una ficha y un resultado de aprendizaje para exportar.')
+        return redirect('evaluaciones_calificar')
+    ficha = get_object_or_404(Ficha, pk=ficha_id)
     rap = get_object_or_404(
         ResultadoAprendizaje.objects.filter(competencia__programa=ficha.programa),
-        pk=request.GET.get('rap'),
+        pk=rap_id,
     )
     periodo_academico = request.GET.get('periodo', '').strip()
     trimestre = request.GET.get('trimestre', '').strip()
@@ -308,8 +313,13 @@ def exportar_sabana_excel(request):
 @login_required
 @requerir_roles('Administrador', 'Coordinador', 'Instructor SENA', 'Docente I.E.')
 def exportar_sabana_csv(request):
-    ficha = get_object_or_404(Ficha, pk=request.GET.get('ficha'))
-    rap = get_object_or_404(ResultadoAprendizaje, pk=request.GET.get('rap'))
+    ficha_id = request.GET.get('ficha')
+    rap_id = request.GET.get('rap')
+    if not ficha_id or not rap_id:
+        messages.warning(request, 'Debe seleccionar una ficha y un resultado de aprendizaje para exportar.')
+        return redirect('evaluaciones_calificar')
+    ficha = get_object_or_404(Ficha, pk=ficha_id)
+    rap = get_object_or_404(ResultadoAprendizaje, pk=rap_id)
     juicios = JuicioEvaluativo.objects.filter(
         matricula__ficha=ficha, resultado_aprendizaje=rap
     ).select_related('matricula__aprendiz').order_by('matricula__aprendiz__last_name')
@@ -340,8 +350,9 @@ def reporte_rap_pdf(request):
     """
     ficha_id = request.GET.get('ficha')
     rap_id = request.GET.get('rap')
-    periodo_academico = request.GET.get('periodo', '').strip()
-    trimestre = request.GET.get('trimestre', '').strip()
+    if not ficha_id or not rap_id:
+        messages.warning(request, 'Debe seleccionar una ficha y un resultado de aprendizaje para exportar el reporte.')
+        return redirect('evaluaciones_calificar')
 
     ficha = get_object_or_404(Ficha, pk=ficha_id)
     rap = get_object_or_404(
@@ -478,10 +489,14 @@ def raps_por_ficha(request):
 
 @login_required
 def aprendices_por_rap(request):
-    ficha = get_object_or_404(Ficha, pk=request.GET.get('ficha_id'))
+    ficha_id = request.GET.get('ficha_id')
+    rap_id = request.GET.get('rap_id')
+    if not ficha_id or not rap_id:
+        return JsonResponse({'ficha': None, 'rap': None, 'aprendices': []})
+    ficha = get_object_or_404(Ficha, pk=ficha_id)
     rap = get_object_or_404(
         ResultadoAprendizaje.objects.filter(competencia__programa=ficha.programa),
-        pk=request.GET.get('rap_id'),
+        pk=rap_id,
     )
     juicios = JuicioEvaluativo.objects.filter(
         matricula__ficha=ficha,

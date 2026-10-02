@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Entregas - {{ tarea.titulo }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">{{ tarea.titulo }}</h1>
+            <p class="text-gray-500 mt-1">Clase: {{ tarea.carga_academica.programa.denominacion }} - {{ tarea.carga_academica.grado }}°{{ tarea.carga_academica.seccion }}</p>
+        </div>
+        <a href="{% url 'detalle_clase' tarea.carga_academica.id %}?tab=tareas" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium hover:bg-gray-300">Volver a la Clase</a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <table class="min-w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3">Estudiante</th>
+                    <th class="px-6 py-3">Fecha de Entrega</th>
+                    <th class="px-6 py-3">Estado</th>
+                    <th class="px-6 py-3">Calificación</th>
+                    <th class="px-6 py-3">Acciones (Revisar)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entrega in entregas %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900">{{ entrega.estudiante.get_full_name }}</td>
+                    <td class="px-6 py-4">{{ entrega.fecha_entrega|date:"d M Y H:i" }}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">{{ entrega.estado }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if entrega.calificacion %}{{ entrega.calificacion }}{% else %}<span class="text-gray-400">Sin calificar</span>{% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <button type="button" class="text-blue-600 hover:underline" data-bs-toggle="modal" data-bs-target="#modalCalificar{{ entrega.id }}">Calificar / Ver</button>
+                    </td>
+                </tr>
+
+                <!-- Modal Calificar -->
+                <div class="modal fade" id="modalCalificar{{ entrega.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="{% url 'calificar_entrega' entrega.id %}" method="post">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Calificar Entrega de {{ entrega.estudiante.first_name }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    {% if entrega.archivo %}
+                                    <p class="mb-3"><strong>Archivo adjunto:</strong> <a href="{{ entrega.archivo.url }}" class="text-blue-600" target="_blank">Descargar / Ver</a></p>
+                                    {% endif %}
+                                    <p class="mb-3"><strong>Respuesta / Comentarios:</strong><br> {{ entrega.respuesta|default:"Sin comentarios." }}</p>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label font-medium">Nota / Calificación (Ej. 4.5)</label>
+                                        <input type="number" step="0.1" max="5.0" min="0.0" name="calificacion" class="form-control" value="{{ entrega.calificacion|default:'' }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label font-medium">Retroalimentación</label>
+                                        <textarea name="retroalimentacion" class="form-control" rows="3">{{ entrega.retroalimentacion|default:'' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary bg-blue-600 border-none">Guardar Calificación</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center">No hay entregas aún.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

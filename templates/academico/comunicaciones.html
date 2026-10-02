@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Centro de Comunicaciones · EDUNOVA{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- Hero Header de Comunicaciones -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important; color: #FFFFFF; padding: 2.2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(190, 24, 93, 0.35);">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-chat-heart-fill me-1"></i> Mensajería Interna Directa
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Centro de Comunicaciones</h1>
+                <p class="mb-0 text-white-50 small">
+                    Envío de mensajes directos, circulares de grupo y seguimiento bidireccional entre la comunidad escolar.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoMensaje" class="btn btn-light fw-bold rounded-pill px-4 shadow-sm" style="color: #db2777;">
+                    <i class="bi bi-pencil-square me-1"></i> Redactar Mensaje
+                </button>
+                <a href="{% url 'mensajeria' %}" class="btn btn-outline-light fw-semibold rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-megaphone-fill me-1"></i> Circulares Oficiales
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3 Tarjetas Resumen de Mensajería -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Bandeja de Entrada</span>
+                    <div class="rounded-3 p-2" style="background-color: #fff0f3; color: #db2777;">
+                        <i class="bi bi-inbox-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_recibidos|default:recibidos|length }}</div>
+                <div class="small text-muted mt-1">Mensajes recibidos activos</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Mensajes Enviados</span>
+                    <div class="rounded-3 p-2" style="background-color: #ecfdf5; color: #047857;">
+                        <i class="bi bi-send-check-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_enviados|default:enviados|length }}</div>
+                <div class="small text-muted mt-1">Comunicaciones enviadas</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Papelera</span>
+                    <div class="rounded-3 p-2" style="background-color: #f8fafc; color: #64748b;">
+                        <i class="bi bi-trash3-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_papelera|default:papelera|length }}</div>
+                <div class="small text-muted mt-1">Mensajes archivados</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3 Columnas: Recibidos | Enviados | Papelera -->
+    <div class="row g-4 mb-4">
+        <!-- Columna 1: Bandeja de Entrada -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-inbox-fill" style="color: #db2777;"></i>
+                        <h6 class="fw-bold text-dark mb-0">Bandeja de Entrada</h6>
+                    </div>
+                    <span class="badge rounded-pill px-2.5 py-1" style="background: #fff0f3; color: #db2777;">
+                        {{ recibidos|length }}
+                    </span>
+                </div>
+                <div class="card-body p-3 overflow-y-auto" style="max-height: 580px;">
+                    <div class="d-flex flex-column gap-2.5">
+                        {% for msg in recibidos %}
+                        <div class="p-3 rounded-4 border bg-white shadow-2xs transition" style="border-color: {% if not msg.leido %}#fbcfe8{% else %}#f1f5f9{% endif %} !important; {% if not msg.leido %}background: #fffdfd !important; border-left: 4px solid #db2777 !important;{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start mb-1.5">
+                                <span class="fw-bold text-dark small">
+                                    {{ msg.remitente.get_full_name|default:msg.remitente.username }}
+                                </span>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ msg.fecha_envio|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">{{ msg.asunto }}</h6>
+                            <p class="text-muted small mb-2" style="font-size: 0.82rem; line-height: 1.4;">{{ msg.mensaje|linebreaksbr }}</p>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <span class="badge bg-light text-muted border" style="font-size: 0.7rem;">Mensaje directo</span>
+                                <form method="post" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="eliminar">
+                                    <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" style="font-size: 0.78rem;">
+                                        <i class="bi bi-trash me-1"></i> Mover a papelera
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-envelope-open fs-2 text-pink d-block mb-2 opacity-50" style="color: #db2777;"></i>
+                            <h6 class="fw-bold text-dark mb-1">Sin mensajes recibidos</h6>
+                            <p class="small text-muted mb-0">Cuando otros usuarios te escriban, aparecerán aquí.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna 2: Mensajes Enviados -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-send-check-fill text-success"></i>
+                        <h6 class="fw-bold text-dark mb-0">Mensajes Enviados</h6>
+                    </div>
+                    <span class="badge rounded-pill px-2.5 py-1 bg-success bg-opacity-10 text-success">
+                        {{ enviados|length }}
+                    </span>
+                </div>
+                <div class="card-body p-3 overflow-y-auto" style="max-height: 580px;">
+                    <div class="d-flex flex-column gap-2.5">
+                        {% for msg in enviados %}
+                        <div class="p-3 rounded-4 border bg-white shadow-2xs transition" style="border-color: #f1f5f9 !important;">
+                            <div class="d-flex justify-content-between align-items-start mb-1.5">
+                                <span class="fw-bold text-dark small">
+                                    Para: {% if msg.destinatario %}{{ msg.destinatario.get_full_name|default:msg.destinatario.username }}{% else %}Grupo {{ msg.grupo_destino }}{% endif %}
+                                </span>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ msg.fecha_envio|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">{{ msg.asunto }}</h6>
+                            <p class="text-muted small mb-2" style="font-size: 0.82rem; line-height: 1.4;">{{ msg.mensaje|linebreaksbr }}</p>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
+                                    <i class="bi bi-check2 me-1"></i> Entregado
+                                </span>
+                                <form method="post" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="eliminar">
+                                    <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" style="font-size: 0.78rem;">
+                                        <i class="bi bi-trash me-1"></i> Mover a papelera
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-send fs-2 text-success d-block mb-2 opacity-50"></i>
+                            <h6 class="fw-bold text-dark mb-1">Sin mensajes enviados</h6>
+                            <p class="small text-muted mb-0">Usa el botón "Redactar Mensaje" para enviar tu primera comunicación.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna 3: Papelera -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-trash3-fill text-secondary"></i>
+                        <h6 class="fw-bold text-dark mb-0">Papelera</h6>
+                    </div>
+                    <span class="badge rounded-pill px-2.5 py-1 bg-secondary bg-opacity-10 text-secondary">
+                        {{ papelera|length }}
+                    </span>
+                </div>
+                <div class="card-body p-3 overflow-y-auto" style="max-height: 580px;">
+                    <div class="d-flex flex-column gap-2.5">
+                        {% for msg in papelera %}
+                        <div class="p-3 rounded-4 border bg-light shadow-2xs transition" style="border-color: #e2e8f0 !important;">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary" style="font-size: 0.7rem;">En papelera</span>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ msg.fecha_envio|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.88rem;">{{ msg.asunto }}</h6>
+                            <p class="text-muted small mb-2" style="font-size: 0.8rem; line-height: 1.4;">{{ msg.mensaje|truncatechars:90 }}</p>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <form method="post" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="restaurar">
+                                    <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                                    <button type="submit" class="btn btn-sm btn-link text-primary p-0 text-decoration-none fw-semibold" style="font-size: 0.78rem;">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+                                    </button>
+                                </form>
+                                <form method="post" class="m-0" onsubmit="return confirm('¿Eliminar definitivamente este mensaje?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="eliminar_definitivo">
+                                    <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none fw-bold" style="font-size: 0.78rem;">
+                                        <i class="bi bi-x-circle me-1"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-trash2 fs-2 text-secondary d-block mb-2 opacity-50"></i>
+                            <h6 class="fw-bold text-dark mb-1">Papelera vacía</h6>
+                            <p class="small text-muted mb-0">Los mensajes eliminados se archivarán temporalmente aquí.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Nuevo Mensaje (Bootstrap 5 Puro) -->
+<div class="modal fade" id="modalNuevoMensaje" tabindex="-1" aria-labelledby="modalNuevoMensajeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form method="post" action="{% url 'comunicaciones' %}">
+                {% csrf_token %}
+                <div class="modal-header border-bottom py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fce7f3 100%);">
+                    <h5 class="modal-title fw-bold text-dark" id="modalNuevoMensajeLabel">
+                        <i class="bi bi-pencil-square me-2" style="color: #db2777;"></i> Redactar Mensaje
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4 bg-white">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Enviar a un Grupo Escolar (Opcional)</label>
+                        <select name="grupo_destino" class="form-select border-primary-subtle rounded-3">
+                            <option value="">-- Seleccionar grupo opcional --</option>
+                            <option value="10">Todos los estudiantes de 10°</option>
+                            <option value="11">Todos los estudiantes de 11°</option>
+                        </select>
+                    </div>
+                    <div class="text-center text-muted small fw-bold my-2">— O —</div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Destinatario Individual *</label>
+                        <select name="destinatario_id" class="form-select border-primary-subtle rounded-3">
+                            <option value="">-- Seleccione destinatario --</option>
+                            {% for u in usuarios %}
+                            <option value="{{ u.id }}">
+                                {{ u.get_full_name|default:u.username }} ({{ u.perfil.rol.nombre|default:"Usuario" }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Asunto del Mensaje *</label>
+                        <input type="text" name="asunto" class="form-control border-primary-subtle rounded-3" placeholder="Ej. Consulta sobre actividad pedagógica..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Contenido del Mensaje *</label>
+                        <textarea name="mensaje" class="form-control border-primary-subtle rounded-3" rows="5" placeholder="Escribe aquí tu comunicación detallada..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top py-2.5">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background: #db2777; border-color: #db2777;">
+                        <i class="bi bi-send-fill me-1"></i> Enviar Mensaje
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

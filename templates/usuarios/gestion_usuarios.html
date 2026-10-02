@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Gestión de Usuarios y Roles · SINETEC{% endblock %}
+{% block title %}Gestión de Usuarios y Roles · EDUNOVA{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-3">
@@ -10,13 +10,13 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
-                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50">Colegio EDUNOVA · Vigencia 2026</span>
+                <span class="text-muted small">Dirección Administrativa y Rectoría</span>
             </div>
             <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-people-fill text-success me-2"></i>Gestión de Usuarios y Roles Institucionales
+                <i class="bi bi-people-fill text-primary me-2"></i>Gestión de Usuarios y Roles Institucionales
             </h1>
-            <p class="text-muted mb-0">Control de accesos, perfiles de seguridad y directorio de la comunidad SINETEC.</p>
+            <p class="text-muted mb-0">Control de accesos, perfiles de seguridad y directorio de la comunidad educativa EDUNOVA.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
@@ -125,7 +125,7 @@
     <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
             <h5 class="fw-bold text-dark mb-0">
-                <i class="bi bi-person-lines-fill text-success me-2"></i>Directorio Oficial de Usuarios SINETEC
+                <i class="bi bi-person-lines-fill text-success me-2"></i>Directorio Oficial de Usuarios EDUNOVA
             </h5>
             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2">
                 {{ usuarios|length }} usuarios listados
@@ -164,12 +164,18 @@
                             <td>
                                 {% if u.perfil.rol.nombre == 'Coordinador' %}
                                     <span class="badge bg-danger px-2 py-1">Coordinador</span>
+                                {% elif 'Rector' in u.perfil.rol.nombre %}
+                                    <span class="badge px-2 py-1 text-white" style="background:#701a75;">Rectoría</span>
+                                {% elif 'Docente' in u.perfil.rol.nombre or 'Profesor' in u.perfil.rol.nombre %}
+                                    <span class="badge bg-primary px-2 py-1">DOCENTE</span>
                                 {% elif 'Instructor' in u.perfil.rol.nombre %}
-                                    <span class="badge bg-primary px-2 py-1">Instructor SENA</span>
+                                    <span class="badge bg-info text-dark px-2 py-1">Instructor SENA</span>
                                 {% elif 'Secretar' in u.perfil.rol.nombre %}
                                     <span class="badge bg-warning text-dark px-2 py-1">Secretaría Académica</span>
                                 {% elif u.perfil.rol.nombre in 'Estudiante Aprendiz' %}
                                     <span class="badge bg-success px-2 py-1">Estudiante</span>
+                                {% elif 'Familia' in u.perfil.rol.nombre %}
+                                    <span class="badge bg-secondary px-2 py-1">Familia / Acudiente</span>
                                 {% else %}
                                     <span class="badge bg-secondary px-2 py-1">{{ u.perfil.rol.nombre|default:'Usuario' }}</span>
                                 {% endif %}
@@ -189,13 +195,31 @@
                                 {% endif %}
                             </td>
                             <td class="pe-3 text-end">
-                                {% if u.perfil.rol.nombre in 'Estudiante Aprendiz' %}
-                                    <a href="{% url 'estudiante_detalle' u.perfil.pk %}" class="btn btn-sm btn-outline-primary py-1 px-2" title="Ver Expediente">
-                                        <i class="bi bi-person-badge me-1"></i> Ver Perfil
+                                <div class="btn-group btn-group-sm">
+                                    {% if u.perfil.rol.nombre in 'Estudiante Aprendiz' and u.perfil %}
+                                        <a href="{% url 'estudiante_detalle' u.perfil.pk %}" class="btn btn-outline-primary" title="Ver Expediente del Alumno">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    {% elif 'Docente' in u.perfil.rol.nombre or 'Instructor' in u.perfil.rol.nombre or 'Profesor' in u.perfil.rol.nombre %}
+                                        <a href="{% url 'instructor_detalle' u.pk %}" class="btn btn-outline-primary" title="Ver Ficha del Docente">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'editar_usuario' u.pk %}" class="btn btn-outline-secondary" title="Editar Usuario y Roles">
+                                        <i class="bi bi-pencil-square"></i>
                                     </a>
-                                {% else %}
-                                    <span class="badge bg-light text-muted border">Personal SENA</span>
-                                {% endif %}
+                                    <a href="{% url 'usuario_toggle_activo' u.pk %}" class="btn {% if u.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="{% if u.is_active %}Desactivar Acceso{% else %}Habilitar Acceso{% endif %}">
+                                        {% if u.is_active %}<i class="bi bi-toggle-on"></i>{% else %}<i class="bi bi-toggle-off"></i>{% endif %}
+                                    </a>
+                                    {% if 'Docente' in u.perfil.rol.nombre or 'Profesor' in u.perfil.rol.nombre or 'Instructor' in u.perfil.rol.nombre or 'Coordinador' in u.perfil.rol.nombre %}
+                                    <a href="{% url 'retirar_instructor' u.pk %}" class="btn btn-outline-danger" title="Retirar / Reasignar Grupos del Funcionario">
+                                        <i class="bi bi-person-x"></i>
+                                    </a>
+                                    {% endif %}
+                                    <a href="{% url 'usuario_reset_clave' u.pk %}" class="btn btn-outline-dark" title="Restablecer Contraseña" onclick="return confirm('¿Restablecer contraseña para {{ u.username }}?');">
+                                        <i class="bi bi-key"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
@@ -210,8 +234,8 @@
             </table>
         </div>
         <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center border-top">
-            <span class="text-muted small">SENA · Regional Magdalena · Centro de Logística y Promoción Ecoturística</span>
-            <span class="text-muted small fw-semibold">SINETEC v2.0 Institucional</span>
+            <span class="text-muted small">Colegio EDUNOVA · Sistema Integral de Gestión Escolar</span>
+            <span class="text-muted small fw-semibold">Vigencia Académica 2026</span>
         </div>
     </div>
 
@@ -230,7 +254,7 @@
                         <h5 class="modal-title fw-bold mb-0" id="modalImportarInstructoresLabel">
                             Registro Masivo de Instructores SENA
                         </h5>
-                        <small class="text-white-50">Articulación con la Media Técnica · SINETEC</small>
+                        <small class="text-white-50">Articulación con la Media Técnica · EDUNOVA</small>
                     </div>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>

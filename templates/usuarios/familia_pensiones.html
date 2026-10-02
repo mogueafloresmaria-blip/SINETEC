@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recibos y Pensiones · Portal de Familias{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0 py-2">
+
+    <!-- Header Hero Escolar -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(219, 39, 119, 0.25);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-wallet2 me-1"></i> Tesorería y Cartera Escolar
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Recibos de Pensión y Estados de Cuenta</h1>
+                <p class="mb-0 text-white-50 small">
+                    Consulta el historial de pagos, mensualidades, matrículas y descarga tus comprobantes oficiales de caja.
+                </p>
+            </div>
+            <div>
+                <span class="badge bg-white text-dark px-3 py-2 rounded-pill fw-bold fs-6 shadow-sm">
+                    Año Lectivo 2026
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de Estudiante (Si hay más de 1) -->
+    {% if hijos_qs|length > 1 %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <span class="fw-bold text-dark small"><i class="bi bi-person-fill text-primary me-1"></i> Seleccionar Estudiante:</span>
+            <div class="d-flex flex-wrap gap-2">
+                {% for h in hijos_qs %}
+                    <a href="?estudiante={{ h.id }}" class="btn btn-sm rounded-pill px-3 fw-bold {% if estudiante_sel.id == h.id %}btn-primary text-white{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-person me-1"></i> {{ h.get_full_name|default:h.username }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tarjetas de Resumen Financiero -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 border-start border-4 border-primary">
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Total Facturado</span>
+                <div class="h3 fw-bold text-dark mb-1 mt-1">${{ total_facturado|floatformat:2 }}</div>
+                <small class="text-muted">Conceptos escolares emitidos en el año</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 border-start border-4 border-success">
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Total Pagado</span>
+                <div class="h3 fw-bold text-success mb-1 mt-1">${{ total_pagado|floatformat:2 }}</div>
+                <small class="text-muted">Comprobantes cancelados y aprobados</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 border-start border-4 border-warning">
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Saldo Pendiente</span>
+                <div class="h3 fw-bold {% if saldo_pendiente > 0 %}text-warning text-dark{% else %}text-muted{% endif %} mb-1 mt-1">
+                    ${{ saldo_pendiente|floatformat:2 }}
+                </div>
+                <small class="text-muted">{% if saldo_pendiente == 0 %}Estado al día en tesorería{% else %}Valores pendientes por cancelar{% endif %}</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Detallada de Recibos y Pensiones -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h3 class="h6 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-receipt-cutoff text-primary"></i> Relación Oficial de Pagos y Facturación
+            </h3>
+            <span class="small text-muted">Total comprobantes: {{ pagos|length }}</span>
+        </div>
+        <div class="card-body p-0">
+            {% if pagos %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-uppercase" style="font-size: 0.75rem;">
+                        <tr>
+                            <th class="ps-4 py-3">N° Recibo / Folio</th>
+                            <th class="py-3">Concepto Escolar</th>
+                            <th class="py-3">Fecha de Emisión / Pago</th>
+                            <th class="py-3 text-center">Valor</th>
+                            <th class="py-3">Método de Pago</th>
+                            <th class="py-3 text-center">Estado</th>
+                            <th class="pe-4 py-3 text-end">Comprobante</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        {% for p in pagos %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="badge bg-light text-dark border font-monospace fw-bold">
+                                    {{ p.numero_recibo }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong class="text-dark d-block fs-6">{{ p.concepto }}</strong>
+                                <span class="text-muted" style="font-size: 0.72rem;">Matrícula o Pensión Oficial</span>
+                            </td>
+                            <td>
+                                <span class="text-dark d-block">{{ p.fecha_pago|date:"d/m/Y" }}</span>
+                                <span class="text-muted" style="font-size: 0.72rem;">{{ p.fecha_pago|time:"h:i A" }}</span>
+                            </td>
+                            <td class="text-center">
+                                <strong class="text-dark fs-6">${{ p.monto|floatformat:2 }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-secondary border">
+                                    <i class="bi bi-credit-card me-1"></i>{{ p.metodo_pago }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                {% if p.estado in 'APROBADO,PAGADO,EMITIDO' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-bold">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Cancelado
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1 fw-bold text-dark">
+                                        <i class="bi bi-clock-history me-1"></i> Pendiente
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4 text-end">
+                                <a href="{% url 'recibo_pension_pdf' p.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" target="_blank">
+                                    <i class="bi bi-printer-fill me-1"></i> Ver Recibo PDF
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted p-4">
+                <i class="bi bi-cash-stack fs-1 text-secondary opacity-50 d-block mb-3"></i>
+                <h5 class="fw-bold text-dark">No hay recibos de pensión registrados para este estudiante.</h5>
+                <p class="small text-muted mb-0">Cuando secretaría o tesorería expida los recibos de matrícula o mensualidades, los podrás consultar y descargar aquí.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

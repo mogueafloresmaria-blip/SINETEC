@@ -1,10 +1,10 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recuperar Contraseña · SINETEC SENA</title>
+    <title>Recuperar Contraseña · EDUNOVA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -15,11 +15,11 @@
         body {
             min-height: 100vh;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #071927;
+            background: #FDF2F4;
             background-image: 
-                radial-gradient(circle at 15% 20%, rgba(33, 150, 243, 0.2) 0%, transparent 45%),
-                radial-gradient(circle at 85% 80%, rgba(25, 118, 210, 0.15) 0%, transparent 50%),
-                linear-gradient(180deg, #071927 0%, #0A2540 100%);
+                radial-gradient(circle at 15% 20%, rgba(251, 207, 232, 0.6) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(244, 114, 182, 0.3) 0%, transparent 50%),
+                linear-gradient(180deg, #FDF2F4 0%, #FCE7F3 100%);
             display: grid;
             place-items: center;
             color: #0F172A;
@@ -31,17 +31,17 @@
             background: #FFFFFF;
             border-radius: 24px;
             box-shadow: 
-                0 25px 60px -15px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.08);
+                0 25px 60px -15px rgba(219, 39, 119, 0.18),
+                0 0 0 1px rgba(251, 207, 232, 0.4);
             overflow: hidden;
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            border: 1px solid rgba(252, 231, 243, 0.9);
         }
         .recovery-header {
-            background: linear-gradient(135deg, #0A2540 0%, #1976D2 100%);
+            background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%);
             padding: 34px 30px 26px;
             text-align: center;
             position: relative;
-            border-bottom: 3px solid #2196F3;
+            border-bottom: 3px solid #DB2777;
         }
         .brand-logo-wrap {
             display: inline-flex;
@@ -63,7 +63,7 @@
             margin-bottom: 6px;
         }
         .recovery-subtitle {
-            color: #94A3B8;
+            color: rgba(255, 255, 255, 0.85);
             font-size: 0.86rem;
             line-height: 1.45;
         }
@@ -108,16 +108,16 @@
             outline: none;
         }
         input[type="text"]:focus, input[type="password"]:focus {
-            border-color: #2196F3;
+            border-color: #DB2777;
             background: #FFFFFF;
-            box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.15);
+            box-shadow: 0 0 0 4px rgba(219, 39, 119, 0.15);
         }
         .btn-submit {
             width: 100%;
             height: 48px;
             border: 0;
             border-radius: 12px;
-            background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
+            background: linear-gradient(135deg, #DB2777 0%, #BE185D 100%);
             color: #FFFFFF;
             font-weight: 800;
             font-size: 0.96rem;
@@ -127,14 +127,14 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 10px 22px rgba(33, 150, 243, 0.28);
+            box-shadow: 0 10px 22px rgba(219, 39, 119, 0.28);
             transition: all 0.2s ease;
             margin-top: 8px;
         }
         .btn-submit:hover {
             transform: translateY(-1px);
-            box-shadow: 0 14px 28px rgba(33, 150, 243, 0.35);
-            filter: brightness(1.04);
+            box-shadow: 0 14px 28px rgba(219, 39, 119, 0.35);
+            background: linear-gradient(135deg, #BE185D 0%, #831843 100%);
         }
         .btn-submit:active {
             transform: scale(0.99);
@@ -250,10 +250,10 @@
         <!-- Cabecera -->
         <header class="recovery-header">
             <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-                <img src="{% static 'img/sinetec_logo_oficial.png' %}" alt="SINETEC SENA" style="height: 58px; width: auto; display: block; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(10,37,64,0.35));">
+                <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" style="height: 64px; width: auto; display: block; object-fit: contain;">
             </div>
             <h1 class="recovery-title">Recuperar Contraseña</h1>
-            <p class="recovery-subtitle">Acceso y restablecimiento oficial para instructores y aprendices</p>
+            <p class="recovery-subtitle">Restablecimiento oficial de credenciales de acceso para la comunidad EDUNOVA</p>
         </header>
 
         <div class="recovery-body">
@@ -313,10 +313,10 @@
                     <label for="identificador">Documento de Identidad o Usuario</label>
                     <div class="input-wrap">
                         <i class="bi bi-person-badge-fill prefix-icon"></i>
-                        <input id="identificador" type="text" name="identificador" placeholder="Ej: 1082987123 o aprendiz_carlos" required autofocus>
+                        <input id="identificador" type="text" name="identificador" placeholder="Ej: 1082987123 o usuario institucional" required autofocus>
                     </div>
                     <small style="color: #64748B; font-size: 0.76rem; display: block; margin-top: 6px;">
-                        Ingresa el número de identificación (CC/TI) o tu nombre de usuario en SINETEC.
+                        Ingresa el número de identificación (CC/TI) o tu nombre de usuario en EDUNOVA.
                     </small>
                 </div>
 
@@ -332,9 +332,9 @@
                     <i class="bi bi-arrow-left"></i> Volver a Iniciar Sesión
                 </a>
 
-                <a href="https://wa.me/573000000000?text=Hola,%20solicito%20asistencia%20para%20recuperar%20mi%20contrase%C3%B1a%20en%20SINETEC%20SENA" target="_blank" class="whatsapp-support">
-                    <i class="bi bi-whatsapp"></i> Soporte Directo Coordinación SENA
-                </a>
+                <div class="text-center mt-2" style="font-size: 0.82rem; color: #64748B;">
+                    <i class="bi bi-shield-check text-pink" style="color: #db2777;"></i> Soporte Técnico y Mesa de Ayuda EDUNOVA
+                </div>
             </div>
         </div>
     </div>

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import views_clase
 
 urlpatterns = [
     path('fichas/', views.lista_fichas, name='fichas_lista'),
@@ -15,6 +16,7 @@ urlpatterns = [
     path('fichas/<int:pk>/reporte/excel/', views.reporte_ficha_excel),
     path('fichas/<int:ficha_id>/matricular/', views.matricular_aprendiz, name='fichas_matricular'),
     path('matriculas/nueva/', views.nueva_matricula, name='nueva_matricula'),
+    path('matricula/nueva/', views.nueva_matricula, name='matricula_nueva'),
     path('cursos/', views.lista_cursos, name='cursos_lista'),
     path('programas/', views.lista_programas, name='programas_lista'),
     path('programas/<int:pk>/', views.detalle_programa, name='programa_detalle'),
@@ -22,5 +24,21 @@ urlpatterns = [
     path('certificacion/', views.consulta_certificacion, name='consulta_certificacion'),
     path('horarios/', views.tablero_horarios, name='horarios_tablero'),
     path('horarios/nuevo/', views.crear_horario, name='horario_nuevo'),
+    path('horarios/<int:pk>/editar/', views.editar_horario, name='horario_editar'),
     path('horarios/<int:pk>/eliminar/', views.eliminar_horario, name='horario_eliminar'),
+    path('api/objetivos/<int:competencia_id>/', views.api_objetivos_por_competencia, name='api_objetivos_por_competencia'),
+    path('profesor/clase/asistencia/', views.guardar_asistencia_clase, name='guardar_asistencia_clase'),
+    path('profesor/clase/actividad/', views.crear_actividad_clase, name='crear_actividad_clase'),
+    path('horarios/cambiar-color/', views.horarios_cambiar_color, name='horarios_cambiar_color'),
+    path('clase/horario/<int:horario_id>/', views_clase.buscar_carga_desde_horario, name='clase_desde_horario'),
+    path('clase/<int:carga_id>/', views_clase.detalle_clase, name='detalle_clase'),
+    path('clase/<int:carga_id>/crear-tarea/', views_clase.crear_tarea, name='crear_tarea'),
+    path('tarea/<int:tarea_id>/', views_clase.detalle_tarea_docente, name='detalle_tarea_docente'),
+    path('entrega/<int:entrega_id>/revisar/', views_clase.revision_entrega, name='revision_entrega'),
+    path('mis-actividades-docente/', views_clase.mis_actividades_docente, name='mis_actividades_docente'),
+    path('panel-calificaciones/', views_clase.panel_calificaciones, name='panel_calificaciones'),
+    path('comunicaciones/', views_clase.comunicaciones, name='comunicaciones'),
+    path('mis-actividades/', views_clase.actividades_estudiante, name='actividades_estudiante'),
+    path('tarea/<int:tarea_id>/entregar/', views_clase.entregar_tarea, name='entregar_tarea'),
+    path('crear-actividad-digital/', views_clase.crear_actividad_digital, name='crear_actividad_digital'),
 ]

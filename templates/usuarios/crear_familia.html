@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vincular Nueva Familia · EDUNOVA{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 780px;">
+
+    <div class="mb-3">
+        <a href="{% url 'familias_lista' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Volver al Directorio de Familias
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="card-header bg-primary text-white p-4" style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%) !important;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-white bg-opacity-20 d-grid place-items-center" style="width: 48px; height: 48px; font-size: 1.4rem;">
+                    <i class="bi bi-people-fill text-white"></i>
+                </div>
+                <div>
+                    <h1 class="h5 fw-bold mb-0 text-white">Registrar Familia / Acudiente</h1>
+                    <p class="small mb-0 text-white-50">Vincula los datos de tutoría y contacto con un estudiante escolar matriculado.</p>
+                </div>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="card-body p-4">
+                <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-person-badge text-primary me-2"></i>Datos del Padre, Madre o Tutor Legal
+                </h6>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-7">
+                        <label class="form-label small fw-bold text-dark">Nombre Completo del Acudiente *</label>
+                        <input type="text" name="nombre_acudiente" class="form-control" placeholder="Ej: Carmen Gómez de Rodríguez" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label small fw-bold text-dark">Parentesco *</label>
+                        <select name="parentesco" class="form-select">
+                            <option value="Madre de Familia" selected>Madre de Familia</option>
+                            <option value="Padre de Familia">Padre de Familia</option>
+                            <option value="Tutor Legal">Tutor Legal</option>
+                            <option value="Abuelo(a)">Abuelo(a)</option>
+                            <option value="Tío(a)">Tío(a)</option>
+                            <option value="Hermano(a) Mayor">Hermano(a) Mayor</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-dark">Cédula / Documento de Identidad *</label>
+                        <input type="text" name="documento" class="form-control" placeholder="Ej: 45678912" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-dark">Teléfono / Celular de Contacto *</label>
+                        <input type="tel" name="telefono" class="form-control" placeholder="Ej: +57 310 987 6543" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label small fw-bold text-dark">Correo Electrónico (Para envío de circulares y boletines)</label>
+                        <input type="email" name="email" class="form-control" placeholder="acudiente@correo.com">
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-mortarboard text-primary me-2"></i>Estudiante Escolar Vinculado
+                </h6>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-dark">Selecciona el Estudiante a Cargo *</label>
+                    <select name="estudiante_id" class="form-select" required>
+                        <option value="">-- Seleccionar Alumno Matriculado --</option>
+                        {% for est in estudiantes %}
+                            <option value="{{ est.id }}">{{ est.last_name }}, {{ est.first_name }} (Doc: {{ est.perfil.numero_documento|default:est.username }})</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted mt-1 d-block">
+                        El acudiente tendrá acceso inmediato a consultar el boletín, asistencia y matrícula del estudiante seleccionado.
+                    </small>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a href="{% url 'familias_lista' %}" class="btn btn-light rounded-pill px-4">Cancelar</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        <i class="bi bi-check-circle-fill me-1"></i> Guardar y Vincular Familia
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

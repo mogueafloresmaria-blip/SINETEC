@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Asistencia Escolar · Portal de Familias{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0 py-2">
+
+    <!-- Header Hero Escolar -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(219, 39, 119, 0.25);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-calendar-check-fill me-1"></i> Control de Puntualidad y Permanencia
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Registro de Asistencia Escolar</h1>
+                <p class="mb-0 text-white-50 small">
+                    Seguimiento diario de clases presenciales, asistencias, llegadas tarde y justificaciones de tu hijo(a).
+                </p>
+            </div>
+            <div>
+                <span class="badge bg-white text-dark px-3 py-2 rounded-pill fw-bold fs-6 shadow-sm">
+                    {{ pct_asistencia }}% de Asistencia Global
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de Estudiante (Si hay más de 1) -->
+    {% if hijos_qs|length > 1 %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <span class="fw-bold text-dark small"><i class="bi bi-person-fill text-primary me-1"></i> Seleccionar Estudiante:</span>
+            <div class="d-flex flex-wrap gap-2">
+                {% for h in hijos_qs %}
+                    <a href="?estudiante={{ h.id }}&estado={{ estado_sel }}&fecha={{ fecha_sel }}" class="btn btn-sm rounded-pill px-3 fw-bold {% if estudiante_sel.id == h.id %}btn-success text-white{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-person me-1"></i> {{ h.get_full_name|default:h.username }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tarjetas KPI de Asistencia -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-success">
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Sesiones Presente</span>
+                <div class="h3 fw-bold text-success mb-0 mt-1">{{ p_count }}</div>
+                <small class="text-muted">Asistió puntualmente</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-warning">
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Llegadas Tarde</span>
+                <div class="h3 fw-bold text-warning text-dark mb-0 mt-1">{{ t_count }}</div>
+                <small class="text-muted">Ingreso después de hora</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-danger">
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Inasistencias</span>
+                <div class="h3 fw-bold text-danger mb-0 mt-1">{{ a_count }}</div>
+                <small class="text-muted">Falta sin justificar</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-info">
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Justificaciones</span>
+                <div class="h3 fw-bold text-info mb-0 mt-1">{{ j_count }}</div>
+                <small class="text-muted">Excusas aprobadas</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de Filtros de Asistencia -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <form method="get" class="row g-2 align-items-center">
+            {% if estudiante_sel %}
+                <input type="hidden" name="estudiante" value="{{ estudiante_sel.id }}">
+            {% endif %}
+            <div class="col-md-5">
+                <label class="small fw-bold text-muted mb-1">Filtrar por Fecha</label>
+                <input type="date" name="fecha" value="{{ fecha_sel }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-5">
+                <label class="small fw-bold text-muted mb-1">Filtrar por Estado</label>
+                <select name="estado" class="form-select form-select-sm">
+                    <option value="">-- Todos los Estados --</option>
+                    <option value="P" {% if estado_sel == 'P' %}selected{% endif %}>🟢 Presente</option>
+                    <option value="T" {% if estado_sel == 'T' %}selected{% endif %}>🟡 Tardanza</option>
+                    <option value="A" {% if estado_sel == 'A' %}selected{% endif %}>🔴 Ausente</option>
+                    <option value="J" {% if estado_sel == 'J' %}selected{% endif %}>🔵 Justificada</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-1">
+                <button type="submit" class="btn btn-sm btn-primary w-100 fw-bold">
+                    <i class="bi bi-funnel me-1"></i> Filtrar
+                </button>
+                {% if fecha_sel or estado_sel %}
+                    <a href="?{% if estudiante_sel %}estudiante={{ estudiante_sel.id }}{% endif %}" class="btn btn-sm btn-outline-secondary" title="Limpiar filtros">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla Detallada de Asistencia -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h3 class="h6 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-clock-history text-success"></i> Bitácora Histórica de Asistencias
+            </h3>
+            <span class="small text-muted">Total registros: {{ asistencias|length }}</span>
+        </div>
+        <div class="card-body p-0">
+            {% if asistencias %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-uppercase" style="font-size: 0.75rem;">
+                        <tr>
+                            <th class="ps-4 py-3">Fecha de la Sesión</th>
+                            <th class="py-3">Asignatura / Módulo</th>
+                            <th class="py-3 text-center">Estado Registrado</th>
+                            <th class="py-3">Docente / Registrador</th>
+                            <th class="pe-4 py-3">Observaciones Registradas</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        {% for a in asistencias %}
+                        <tr>
+                            <td class="ps-4">
+                                <strong class="text-dark d-block">{{ a.fecha|date:"l, d \d\e F \d\e Y" }}</strong>
+                                <span class="text-muted" style="font-size: 0.72rem;">{{ a.fecha|date:"d/m/Y" }}</span>
+                            </td>
+                            <td>
+                                <strong class="text-primary">{{ a.matricula.ficha.programa.denominacion|default:"Jornada Ordinaria de Clases" }}</strong>
+                            </td>
+                            <td class="text-center">
+                                {% if a.estado == 'P' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-bold">
+                                        🟢 Presente
+                                    </span>
+                                {% elif a.estado == 'T' %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1 fw-bold text-dark">
+                                        🟡 Tardanza
+                                    </span>
+                                {% elif a.estado == 'A' %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-1 fw-bold">
+                                        🔴 Ausente
+                                    </span>
+                                {% elif a.estado == 'J' %}
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-3 py-1 fw-bold">
+                                        🔵 Justificada
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ a.estado }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if a.registrado_por %}
+                                    <i class="bi bi-person-check text-muted me-1"></i>{{ a.registrado_por.get_full_name|default:a.registrado_por.username }}
+                                {% else %}
+                                    <span class="text-muted">Docente Titular</span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4 text-muted">
+                                {{ a.observaciones|default:"Asistencia registrada en la sesión académica correspondiente." }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted p-4">
+                <i class="bi bi-calendar-x fs-1 text-secondary opacity-50 d-block mb-3"></i>
+                <h5 class="fw-bold text-dark">No hay registros de asistencia para este período o filtro seleccionado.</h5>
+                <p class="small text-muted mb-0">Verifica las fechas del filtro o selecciona otro estudiante para consultar su historial.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

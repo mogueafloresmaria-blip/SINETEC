@@ -1,0 +1,735 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}[GRADO {{ clase.grado }}] {{ clase.nombre_materia }} · EDUNOVA Aula Virtual{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --prom-bg-dark: #070D1E;
+        --prom-blue-vibrant: #2563EB;
+    }
+
+    body {
+        background-color: var(--prom-bg-dark) !important;
+        color: #F8FAFC;
+    }
+
+    .prometeo-aula-wrap {
+        background: radial-gradient(circle at 10% 0%, #0F1D40 0%, #070D1E 70%);
+        min-height: 100vh;
+        color: #F8FAFC;
+        padding-bottom: 4rem;
+    }
+
+    /* Banner Hero Aislado de la Clase */
+    .prometeo-hero-aula {
+        background: linear-gradient(135deg, #0B132B 0%, #1E3A8A 50%, #2563EB 100%);
+        border-radius: 1.5rem;
+        padding: 2.2rem 2.5rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* 6 Pestañas Internas del Aula */
+    .nav-tabs-prometeo {
+        border-bottom: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .nav-tabs-prometeo .nav-link {
+        color: #94A3B8;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 0.6rem 1.25rem;
+        transition: all 0.2s ease;
+    }
+
+    .nav-tabs-prometeo .nav-link:hover {
+        color: #FFFFFF;
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-tabs-prometeo .nav-link.active {
+        color: #0F172A;
+        background: #FFFFFF;
+        border-color: #FFFFFF;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    .prometeo-section-card {
+        background: #FFFFFF;
+        color: #0F172A;
+        border-radius: 1.25rem;
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.35);
+        border: 1px solid #E2E8F0;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="prometeo-aula-wrap">
+    <div class="container-fluid px-3 px-md-5 pt-3">
+
+        <!-- Botón Volver al Dashboard Central -->
+        <div class="mb-3">
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn-sm btn-outline-light rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+                <i class="bi bi-arrow-left"></i> Volver a Mis Clases de Hoy
+            </a>
+        </div>
+
+        <!-- ====================================================================
+             1. BANNER HERO AISLADO: GRADO {{ clase.grado }} ESPECÍFICO
+             ==================================================================== -->
+        <div class="prometeo-hero-aula mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1.5 mb-2 fw-bold" style="font-size: 0.8rem;">
+                        <i class="bi bi-shield-lock-fill me-1"></i> MODO AULA AISLADA · GRADO {{ clase.grado }}° (GRUPO {{ clase.grado }}-{{ clase.seccion }})
+                    </span>
+                    <h1 class="h2 fw-bold text-white mb-1 text-uppercase">
+                        [GRADO {{ clase.grado }}] - {{ clase.nombre_materia }}
+                    </h1>
+                    <p class="text-white-50 mb-0 small">
+                        Prof. {{ user.get_full_name|default:user.username }} · {{ colegio.nombre|default:"Institución Educativa Distrital Nuevo Horizonte" }}
+                    </p>
+                </div>
+
+                <!-- Botones Operativos Rápidos -->
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-light text-primary fw-bold rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCrearTareaClase">
+                        <i class="bi bi-plus-circle-fill me-1 text-primary"></i> + Asignar Tarea
+                    </button>
+                    <button type="button" class="btn btn-outline-light fw-semibold rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalCrearGuia">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Publicar Guía
+                    </button>
+                    <button type="button" class="btn btn-outline-light fw-semibold rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalCrearMaterial">
+                        <i class="bi bi-folder-fill me-1"></i> Material Apoyo
+                    </button>
+                    <button type="button" class="btn btn-outline-light fw-semibold rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalCrearAviso">
+                        <i class="bi bi-megaphone-fill me-1"></i> Aviso al Salón
+                    </button>
+                </div>
+            </div>
+
+            <!-- Métricas Operativas Rápidas -->
+            <div class="row g-2 mt-3 pt-3 border-top border-white border-opacity-25 text-white">
+                <div class="col-6 col-md-3">
+                    <small class="text-white-50 d-block"><i class="bi bi-clock"></i> Horario de la Clase</small>
+                    <strong class="fs-6">{{ clase.hora_inicio|time:"h:i A" }} - {{ clase.hora_fin|time:"h:i A" }}</strong>
+                </div>
+                <div class="col-6 col-md-3">
+                    <small class="text-white-50 d-block"><i class="bi bi-geo-alt-fill text-danger"></i> Salón de Clases</small>
+                    <strong class="fs-6">{{ clase.ambiente|default:"Aula 301" }}</strong>
+                </div>
+                <div class="col-6 col-md-3">
+                    <small class="text-white-50 d-block"><i class="bi bi-people-fill text-success"></i> Estudiantes de {{ clase.grado }}°-{{ clase.seccion }}</small>
+                    <strong class="fs-6">{{ estudiantes.count }} Alumnos Registrados</strong>
+                </div>
+                <div class="col-6 col-md-3">
+                    <small class="text-white-50 d-block"><i class="bi bi-clock-history text-warning"></i> Entregas por Calificar</small>
+                    <strong class="fs-6">{{ entregas_pendientes_count }} Trabajos</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENSAJES -->
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm d-flex align-items-center gap-2 text-dark bg-white" role="alert">
+                <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+                <div class="fw-semibold">{{ message }}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- ====================================================================
+             2. MENÚ DE 6 PESTAÑAS INTERNAS DEL GRADO (REQUERIMIENTO OBLIGATORIO)
+             ==================================================================== -->
+        <ul class="nav nav-tabs nav-tabs-prometeo" id="claseTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-guias-btn" data-bs-toggle="tab" data-bs-target="#tab-guias" type="button" role="tab">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> 1. Guías y Recursos de Aprendizaje
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-tareas-btn" data-bs-toggle="tab" data-bs-target="#tab-tareas" type="button" role="tab">
+                    <i class="bi bi-journal-check me-1"></i> 2. Tareas y Talleres ({{ tareas_talleres|length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-evaluaciones-btn" data-bs-toggle="tab" data-bs-target="#tab-evaluaciones" type="button" role="tab">
+                    <i class="bi bi-patch-question me-1"></i> 3. Evaluaciones ({{ evaluaciones|length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-preguntas-btn" data-bs-toggle="tab" data-bs-target="#tab-preguntas" type="button" role="tab">
+                    <i class="bi bi-chat-dots me-1"></i> 4. Preguntas y Respuestas ({{ avisos.count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-asistencia-btn" data-bs-toggle="tab" data-bs-target="#tab-asistencia" type="button" role="tab">
+                    <i class="bi bi-check2-square me-1"></i> 5. Llamado a Lista
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-calificaciones-btn" data-bs-toggle="tab" data-bs-target="#tab-calificaciones" type="button" role="tab">
+                    <i class="bi bi-clipboard2-data me-1"></i> 6. Planilla de Calificaciones
+                </button>
+            </li>
+        </ul>
+
+        <!-- CONTENIDO DE LAS 6 PESTAÑAS -->
+        <div class="tab-content" id="claseTabsContent">
+
+            <!-- ----------------------------------------------------------------
+                 PESTAÑA 1: GUÍAS Y RECURSOS DE APRENDIZAJE
+                 ---------------------------------------------------------------- -->
+            <div class="tab-pane fade show active" id="tab-guias" role="tabpanel">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="prometeo-section-card h-100">
+                            <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i> Guías Didácticas de {{ clase.grado }}°
+                                </h5>
+                                <button class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3" data-bs-toggle="modal" data-bs-target="#modalCrearGuia">
+                                    + Publicar Guía
+                                </button>
+                            </div>
+                            <div class="card-body p-4">
+                                {% for guia in guias %}
+                                <div class="p-3 mb-2 rounded-3 border bg-light">
+                                    <strong class="text-dark d-block">{{ guia.titulo }}</strong>
+                                    <p class="text-muted small mb-2">{{ guia.instrucciones }}</p>
+                                    <div class="d-flex justify-content-between align-items-center small">
+                                        <span class="text-muted">{{ guia.fecha_publicacion|date:"d M Y" }}</span>
+                                        {% if guia.archivo %}
+                                        <a href="{{ guia.archivo.url }}" target="_blank" class="btn btn-sm btn-danger rounded-pill px-3 py-1">
+                                            <i class="bi bi-download me-1"></i> Descargar PDF
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-4 text-muted small">
+                                    No hay guías publicadas específicamente para Grado {{ clase.grado }}°.
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="prometeo-section-card h-100">
+                            <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-folder-fill text-warning me-2"></i> Material y Recursos de Apoyo
+                                </h5>
+                                <button class="btn btn-sm btn-outline-warning text-dark rounded-pill fw-bold px-3" data-bs-toggle="modal" data-bs-target="#modalCrearMaterial">
+                                    + Subir Material
+                                </button>
+                            </div>
+                            <div class="card-body p-4">
+                                {% for mat in materiales %}
+                                <div class="p-3 mb-2 rounded-3 border bg-light">
+                                    <strong class="text-dark d-block">{{ mat.titulo }}</strong>
+                                    <p class="text-muted small mb-2">{{ mat.descripcion }}</p>
+                                    <div class="d-flex justify-content-between align-items-center small">
+                                        <span class="text-muted">{{ mat.fecha_publicacion|date:"d M Y" }}</span>
+                                        {% if mat.archivo %}
+                                        <a href="{{ mat.archivo.url }}" target="_blank" class="btn btn-sm btn-secondary rounded-pill px-3 py-1">
+                                            <i class="bi bi-paperclip me-1"></i> Ver Recurso
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-4 text-muted small">
+                                    No hay materiales adicionales cargados para este salón.
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ----------------------------------------------------------------
+                 PESTAÑA 2: TAREAS Y TALLERES (EXCLUSIVOS DE ESTE GRADO)
+                 ---------------------------------------------------------------- -->
+            <div class="tab-pane fade" id="tab-tareas" role="tabpanel">
+                <div class="prometeo-section-card mb-4">
+                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Tareas y Talleres Asignados a Grado {{ clase.grado }}°</h5>
+                            <small class="text-muted">Alineados con competencias curriculares y rúbricas</small>
+                        </div>
+                        <button class="btn btn-primary btn-sm rounded-pill fw-bold px-3" data-bs-toggle="modal" data-bs-target="#modalCrearTareaClase">
+                            <i class="bi bi-plus-lg me-1"></i> + Crear Tarea / Taller
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if tareas_talleres %}
+                        <div class="row g-3">
+                            {% for tarea in tareas_talleres %}
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-4 border bg-light h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge bg-primary text-white">{{ tarea.tipo_actividad }}</span>
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                                                <i class="bi bi-clock me-1"></i> {{ tarea.fecha_limite|date:"d M Y, h:i A"|default:"Sin límite" }}
+                                            </span>
+                                        </div>
+                                        <h5 class="fw-bold text-dark mb-1">{{ tarea.titulo }}</h5>
+                                        <p class="text-muted small mb-2">{{ tarea.instrucciones|truncatechars:120 }}</p>
+                                        {% if tarea.criterio_evaluacion %}
+                                        <small class="text-primary d-block mb-2"><strong>Criterio:</strong> {{ tarea.criterio_evaluacion }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                        <span class="text-muted small fw-bold">
+                                            <i class="bi bi-check2-all text-success me-1"></i> {{ tarea.entregas.count }} Entregas
+                                        </span>
+                                        <a href="{% url 'revisar_entregas_tarea' tarea.id %}" class="btn btn-sm btn-outline-primary rounded-pill fw-bold px-3">
+                                            Revisar <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-journal-check fs-1 text-primary d-block mb-2"></i>
+                            <h6>No hay tareas o talleres creados para este grupo.</h6>
+                            <button class="btn btn-primary rounded-pill fw-bold px-4 mt-2" data-bs-toggle="modal" data-bs-target="#modalCrearTareaClase">
+                                + Publicar Primera Tarea
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ----------------------------------------------------------------
+                 PESTAÑA 3: EVALUACIONES (QUIZ / EXÁMENES)
+                 ---------------------------------------------------------------- -->
+            <div class="tab-pane fade" id="tab-evaluaciones" role="tabpanel">
+                <div class="prometeo-section-card mb-4">
+                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Evaluaciones y Quices · Grado {{ clase.grado }}°</h5>
+                            <small class="text-muted">Pruebas diagnósticas, cuestionarios y exámenes bimestrales</small>
+                        </div>
+                        <button class="btn btn-danger btn-sm rounded-pill fw-bold px-3" data-bs-toggle="modal" data-bs-target="#modalCrearTareaClase">
+                            <i class="bi bi-plus-lg me-1"></i> + Nueva Evaluación
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if evaluaciones %}
+                        <div class="row g-3">
+                            {% for ev in evaluaciones %}
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-4 border bg-light">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge bg-danger text-white">Evaluación Oficial</span>
+                                        <span class="text-danger fw-bold small"><i class="bi bi-calendar-event me-1"></i> {{ ev.fecha_limite|date:"d M Y, h:i A" }}</span>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-1">{{ ev.titulo }}</h5>
+                                    <p class="text-muted small mb-2">{{ ev.instrucciones }}</p>
+                                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                        <span class="badge bg-dark rounded-pill">{{ ev.puntaje_maximo }} pts</span>
+                                        <a href="{% url 'revisar_entregas_tarea' ev.id %}" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3">
+                                            Ver Calificaciones
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-patch-question fs-1 text-danger d-block mb-2"></i>
+                            <h6>No hay evaluaciones o quices programados actualmente para este grado.</h6>
+                            <p class="small mb-3">Puedes programar un quiz o examen bimestral en cualquier momento.</p>
+                            <button class="btn btn-danger rounded-pill fw-bold px-4" data-bs-toggle="modal" data-bs-target="#modalCrearTareaClase">
+                                + Programar Evaluación
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ----------------------------------------------------------------
+                 PESTAÑA 4: PREGUNTAS Y RESPUESTAS (CHAT / DUDAS EXCLUSIVAS)
+                 ---------------------------------------------------------------- -->
+            <div class="tab-pane fade" id="tab-preguntas" role="tabpanel">
+                <div class="prometeo-section-card mb-4">
+                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Preguntas, Respuestas y Avisos · Grado {{ clase.grado }}°</h5>
+                            <small class="text-muted">Canal directo de comunicación pedagógica con los alumnos de este salón</small>
+                        </div>
+                        <button class="btn btn-info text-white btn-sm rounded-pill fw-bold px-3" data-bs-toggle="modal" data-bs-target="#modalCrearAviso">
+                            <i class="bi bi-chat-plus me-1"></i> Publicar Mensaje al Grupo
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        {% for aviso in avisos %}
+                        <div class="p-3 mb-3 rounded-4 border bg-light">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-dark fs-6">{{ aviso.titulo }}</strong>
+                                <small class="text-muted">{{ aviso.fecha_publicacion|date:"d M Y, h:i A" }}</small>
+                            </div>
+                            <p class="text-secondary small mb-0">{{ aviso.mensaje }}</p>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-chat-square-dots fs-1 text-info d-block mb-2"></i>
+                            <h6>El tablón de preguntas y avisos de este grado está al día.</h6>
+                            <p class="small mb-3">Publica un comunicado o responde las inquietudes de los estudiantes de Grado {{ clase.grado }}°.</p>
+                            <button class="btn btn-info text-white rounded-pill fw-bold px-4" data-bs-toggle="modal" data-bs-target="#modalCrearAviso">
+                                Enviar Primer Aviso
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ----------------------------------------------------------------
+                 PESTAÑA 5: LLAMADO A LISTA (ASISTENCIA EXCLUSIVA DEL GRADO)
+                 ---------------------------------------------------------------- -->
+            <div class="tab-pane fade" id="tab-asistencia" role="tabpanel">
+                <div class="prometeo-section-card mb-4">
+                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Llamado a Lista · Nómina Oficial Grado {{ clase.grado }}-{{ clase.seccion }}</h5>
+                            <small class="text-muted">Registro biométrico y presencial de asistencia escolar</small>
+                        </div>
+                        {% if ficha %}
+                        <a href="{% url 'seguimiento_asistencia' %}?ficha={{ ficha.id }}&asignatura={{ clase.programa_id }}" class="btn btn-success rounded-pill fw-bold px-4 shadow-sm">
+                            <i class="bi bi-check2-square me-1"></i> Abrir Asentador de Asistencia de Hoy
+                        </a>
+                        {% else %}
+                        <a href="{% url 'seguimiento_asistencia' %}" class="btn btn-success rounded-pill fw-bold px-4 shadow-sm">
+                            <i class="bi bi-check2-square me-1"></i> Tomar Asistencia
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 text-secondary small">
+                                <thead class="table-light text-uppercase fs-7">
+                                    <tr>
+                                        <th class="ps-4 py-3">Estudiante</th>
+                                        <th class="py-3">Documento</th>
+                                        <th class="py-3">Correo</th>
+                                        <th class="py-3 text-center">Estado</th>
+                                        <th class="py-3 pe-4 text-end">Expediente</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for m in estudiantes %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <strong class="text-dark d-block">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                        </td>
+                                        <td>{{ m.aprendiz.perfil.numero_documento|default:"TI Registrada" }}</td>
+                                        <td>{{ m.aprendiz.email }}</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1">
+                                                {{ m.estado_formacion }}
+                                            </span>
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                                <i class="bi bi-person-lines-fill me-1"></i> Ficha
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">No hay estudiantes en este salón.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ----------------------------------------------------------------
+                 PESTAÑA 6: PLANILLA DE CALIFICACIONES (SÁBANA DE NOTAS)
+                 ---------------------------------------------------------------- -->
+            <div class="tab-pane fade" id="tab-calificaciones" role="tabpanel">
+                <div class="prometeo-section-card mb-4">
+                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Planilla y Sábana de Calificaciones · {{ clase.grado }}-{{ clase.seccion }}</h5>
+                            <small class="text-muted">Registro oficial de juicios evaluativos y ponderaciones académicas</small>
+                        </div>
+                        {% if ficha %}
+                        <a href="{% url 'calificaciones' %}?aula={{ ficha.id }}" class="btn btn-primary rounded-pill fw-bold px-4 shadow-sm">
+                            <i class="bi bi-table me-1"></i> Abrir Sábana Completa de Notas
+                        </a>
+                        {% else %}
+                        <a href="{% url 'calificaciones' %}" class="btn btn-primary rounded-pill fw-bold px-4 shadow-sm">
+                            <i class="bi bi-table me-1"></i> Abrir Planilla de Notas
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <div class="py-4">
+                            <i class="bi bi-bar-chart-line-fill text-primary" style="font-size: 3.5rem;"></i>
+                            <h5 class="fw-bold text-dark mt-3">Gestión de Notas del Grado {{ clase.grado }}-{{ clase.seccion }}</h5>
+                            <p class="text-muted mx-auto" style="max-width: 500px;">
+                                Asienta juicios evaluativos, registra notas numéricas (0.0 a 5.0), consolida los porcentajes de periodos y genera el boletín escolar institucional.
+                            </p>
+                            {% if ficha %}
+                            <a href="{% url 'calificaciones' %}?aula={{ ficha.id }}" class="btn btn-primary fw-bold rounded-pill px-5 py-2.5 shadow">
+                                Entrar a la Planilla de Notas de {{ clase.grado }}-{{ clase.seccion }} <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ====================================================================
+     3. MODALES DE GESTIÓN INTERNA (PRESERVADOS INTACTOS)
+     ==================================================================== -->
+
+<!-- MODAL: CREAR TAREA -->
+<div class="modal fade" id="modalCrearTareaClase" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="crear_tarea">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-journal-plus me-2"></i> Crear Actividad / Tarea para {{ clase.grado }}-{{ clase.seccion }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-white">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark">Tipo de Actividad *</label>
+                            <select name="tipo_actividad" class="form-select border-secondary-subtle fw-semibold" required>
+                                <option value="Tarea">📝 Tarea de Aula</option>
+                                <option value="Taller">📋 Taller Práctico</option>
+                                <option value="Guía">📖 Guía de Aprendizaje</option>
+                                <option value="Evaluación">📑 Evaluación / Cuestionario</option>
+                                <option value="Proyecto">🚀 Proyecto Formativo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold text-dark">Título de la Actividad *</label>
+                            <input type="text" name="titulo" class="form-control border-secondary-subtle" placeholder="Ej. Taller Práctico de Funciones Cuadráticas" required>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-3 mb-3 border bg-light">
+                        <h6 class="fw-bold text-primary small mb-3">
+                            <i class="bi bi-mortarboard-fill me-1"></i> Competencia, Objetivo y Resultado de Aprendizaje
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Competencia</label>
+                                <select name="competencia_id" class="form-select form-select-sm border-secondary-subtle">
+                                    <option value="">-- Seleccionar Competencia --</option>
+                                    {% for comp in competencias %}
+                                    <option value="{{ comp.id }}">{{ comp.codigo }} - {{ comp.descripcion|truncatechars:35 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Objetivo</label>
+                                <select name="objetivo_id" class="form-select form-select-sm border-secondary-subtle">
+                                    <option value="">-- Seleccionar Objetivo --</option>
+                                    {% for obj in objetivos %}
+                                    <option value="{{ obj.id }}">{{ obj.descripcion|truncatechars:45 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Resultado de Aprendizaje (RAP)</label>
+                                <select name="rap_id" class="form-select form-select-sm border-secondary-subtle">
+                                    <option value="">-- Seleccionar Logro / RAP --</option>
+                                    {% for rap in raps %}
+                                    <option value="{{ rap.id }}">{{ rap.codigo }} - {{ rap.descripcion|truncatechars:35 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold text-dark">Criterio o Competencia que se Evaluará *</label>
+                                <input type="text" name="criterio_evaluacion" class="form-control form-control-sm border-secondary-subtle" placeholder="Ej. Aplica conceptos matemáticos en la solución de problemas" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Puntaje Máximo *</label>
+                                <input type="number" step="0.1" min="1.0" max="10.0" name="puntaje_maximo" value="5.0" class="form-control form-control-sm border-secondary-subtle" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Instrucciones Detalladas *</label>
+                        <textarea name="instrucciones" class="form-control border-secondary-subtle" rows="4" placeholder="Instrucciones para los estudiantes..." required></textarea>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Fecha y Hora Límite *</label>
+                            <input type="datetime-local" name="fecha_limite" id="claseFechaLimite" class="form-control border-secondary-subtle" required min="{% now 'Y-m-d\TH:i' %}">
+                            <small class="text-muted" style="font-size: 0.72rem;">No se permiten fechas anteriores al día de hoy</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Archivo de Soporte (Opcional)</label>
+                            <input type="file" name="archivo" class="form-control border-secondary-subtle">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-bold rounded-pill px-4">
+                        <i class="bi bi-send-fill me-1"></i> Publicar para el Grupo {{ clase.grado }}-{{ clase.seccion }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CREAR GUÍA -->
+<div class="modal fade" id="modalCrearGuia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="crear_guia">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-pdf-fill me-2"></i> Publicar Guía Didáctica</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Título de la Guía *</label>
+                        <input type="text" name="titulo" class="form-control" required placeholder="Ej. Guía de Aprendizaje N° 3">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Instrucciones o Descripción *</label>
+                        <textarea name="instrucciones" rows="3" class="form-control" required placeholder="Instrucciones para el estudio de la guía..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Archivo PDF de la Guía</label>
+                        <input type="file" name="archivo" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4">Publicar Guía</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CREAR MATERIAL -->
+<div class="modal fade" id="modalCrearMaterial" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="crear_material">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-folder-fill me-2"></i> Publicar Material de Apoyo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nombre del Material *</label>
+                        <input type="text" name="titulo" class="form-control" required placeholder="Ej. Diapositivas de la Clase">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Descripción</label>
+                        <textarea name="descripcion" rows="3" class="form-control" placeholder="Detalles del material..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Archivo Adjunto</label>
+                        <input type="file" name="archivo" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning fw-bold rounded-pill px-4">Compartir Material</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CREAR AVISO -->
+<div class="modal fade" id="modalCrearAviso" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="crear_aviso">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-megaphone-fill me-2"></i> Publicar Aviso al Salón</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Título del Aviso *</label>
+                        <input type="text" name="titulo" class="form-control" required placeholder="Ej. Recordatorio: Evaluación la próxima semana">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Mensaje para los Estudiantes *</label>
+                        <textarea name="mensaje" rows="4" class="form-control" required placeholder="Escribe el comunicado..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info text-white fw-bold rounded-pill px-4">Publicar Aviso</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputFecha = document.getElementById('claseFechaLimite');
+    if (inputFecha) {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        inputFecha.min = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+});
+</script>
+{% endblock %}

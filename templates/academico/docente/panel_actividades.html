@@ -1,0 +1,1291 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 5: ACTIVIDADES Y TAREAS (GESTIÓN, CREACIÓN, REVISIÓN Y CALIFICACIÓN)
+     Diseño: Sistema Rosado Elegante (#db2777, #fce7f3, #fff0f3, #be185d)
+     Estructura:
+     - Vista A: Detalle completo de la actividad seleccionada (?tarea_id=X)
+       * Resumen con tema, fechas, puntajes, archivo de apoyo
+       * Métricas de entrega de esa actividad
+       * Nómina completa del grupo con estado (Entregada, Pendiente, Calificada, Devuelta)
+       * Modal de calificación individual y retroalimentación pedagógica
+     - Vista B: Listado principal de todas las actividades del docente
+       * Encabezado con "+ CREAR ACTIVIDAD"
+       * 6 Indicadores reales: Total, Publicadas, Borradores, Pendientes entrega, Pendientes calificar, Vencidas
+       * Filtros en tiempo real: Asignatura, Grado, Grupo, Estado, Búsqueda, Pendientes de calificar
+       * Tabla con todas las columnas solicitadas
+       * Acciones: Ver, Editar, Calificar, Duplicar, Cerrar, Eliminar
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-actividades">
+
+    {% if tarea_seleccionada %}
+    <!-- =====================================================================
+         VISTA A: DETALLE COMPLETO DE LA ACTIVIDAD Y REVISIÓN DE ENTREGAS
+         ===================================================================== -->
+    <div id="vista-detalle-actividad-docente">
+        <!-- BOTÓN RETORNO -->
+        <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="{% url 'actividades_tareas' %}" 
+               class="btn rounded-pill px-4 py-2 fw-bold text-decoration-none shadow-2xs d-inline-flex align-items-center gap-2 transition hover-shadow"
+               style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.88rem;">
+                <i class="bi bi-arrow-left"></i> Volver a Actividades y Tareas
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+                        data-bs-toggle="modal" data-bs-target="#modalEditarTareaDetalle"
+                        style="background: #ffffff; color: #be185d; border: 1.5px solid #fce7f3; font-size: 0.84rem;">
+                    <i class="bi bi-pencil-square"></i> Editar Actividad
+                </button>
+                <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="duplicar_tarea">
+                    <input type="hidden" name="tarea_id" value="{{ tarea_seleccionada.id }}">
+                    <button type="submit" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+                            style="background: #ffffff; color: #475569; border: 1.5px solid #e2e8f0; font-size: 0.84rem;">
+                        <i class="bi bi-copy"></i> Duplicar
+                    </button>
+                </form>
+                {% if tarea_seleccionada.estado != 'Cerrada' %}
+                <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline" onsubmit="return confirm('¿Desea cerrar esta actividad para nuevas entregas?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="cerrar_tarea">
+                    <input type="hidden" name="tarea_id" value="{{ tarea_seleccionada.id }}">
+                    <button type="submit" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+                            style="background: #fff7ed; color: #c2410c; border: 1.5px solid #fed7aa; font-size: 0.84rem;">
+                        <i class="bi bi-lock-fill"></i> Cerrar Actividad
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- HERO BANNER DETALLE DE LA ACTIVIDAD -->
+        <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+             style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+            <div class="row align-items-center">
+                <div class="col-lg-8 position-relative z-1">
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ffffff; color: #db2777; border: 1px solid #fce7f3; font-size: 0.78rem;">
+                            {{ tarea_seleccionada.tipo_actividad }}
+                        </span>
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3; font-size: 0.78rem;">
+                            {{ tarea_seleccionada.materia_nombre }} · Grado {{ tarea_seleccionada.grupo_display }}
+                        </span>
+                        <span class="badge rounded-pill px-3 py-1 fw-semibold" 
+                              style="{% if tarea_seleccionada.estado == 'Publicada' %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% elif tarea_seleccionada.estado == 'Borrador' %}background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %} font-size: 0.78rem;">
+                            <i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i> {{ tarea_seleccionada.estado }}
+                        </span>
+                        {% if tarea_seleccionada.esta_vencida and tarea_seleccionada.estado != 'Cerrada' %}
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-size: 0.76rem;">
+                            <i class="bi bi-clock-history me-1"></i> Plazo Vencido
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <h2 class="fw-bold mb-2 text-dark" style="font-size: 1.95rem; letter-spacing: -0.4px;">
+                        {{ tarea_seleccionada.titulo }}
+                    </h2>
+
+                    {% if tarea_seleccionada.criterio_evaluacion %}
+                    <p class="mb-2 text-muted fw-medium small" style="font-size: 0.88rem;">
+                        <i class="bi bi-bookmark-star me-1" style="color: #db2777;"></i> Tema: <strong class="text-dark">{{ tarea_seleccionada.criterio_evaluacion }}</strong>
+                    </p>
+                    {% endif %}
+
+                    <div class="d-flex align-items-center gap-3 flex-wrap text-muted small mt-2">
+                        <span><i class="bi bi-calendar-event me-1" style="color: #db2777;"></i> Publicada: <strong>{{ tarea_seleccionada.fecha_publicacion|date:"d/m/Y H:i" }}</strong></span>
+                        <span><i class="bi bi-alarm me-1" style="color: #db2777;"></i> Límite: <strong>{{ tarea_seleccionada.fecha_limite|date:"d/m/Y H:i"|default:"Sin límite" }}</strong></span>
+                        <span><i class="bi bi-award me-1" style="color: #db2777;"></i> Puntaje máx: <strong>{{ tarea_seleccionada.puntaje_maximo }}</strong></span>
+                        <span><i class="bi bi-percent me-1" style="color: #db2777;"></i> Ponderación: <strong>{{ tarea_seleccionada.porcentaje }}%</strong></span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 text-lg-end position-relative z-1 mt-3 mt-lg-0">
+                    <div class="d-inline-flex flex-column gap-2 p-3 rounded-4 bg-white shadow-2xs text-start" style="border: 1px solid #fce7f3; min-width: 200px;">
+                        <span class="text-muted small fw-bold" style="font-size: 0.78rem;">Material de Apoyo:</span>
+                        {% if tarea_seleccionada.archivo %}
+                        <a href="{{ tarea_seleccionada.archivo.url }}" target="_blank" 
+                           class="btn btn-sm rounded-pill text-white fw-bold d-inline-flex align-items-center gap-1.5"
+                           style="background: #db2777; font-size: 0.8rem;">
+                            <i class="bi bi-download"></i> Descargar Adjunto
+                        </a>
+                        {% else %}
+                        <span class="text-muted small fst-italic">Sin archivo adjunto</span>
+                        {% endif %}
+                        {% if tarea_seleccionada.enlace_externo %}
+                        <a href="{{ tarea_seleccionada.enlace_externo }}" target="_blank" 
+                           class="btn btn-sm btn-outline-secondary rounded-pill fw-bold d-inline-flex align-items-center gap-1.5"
+                           style="font-size: 0.78rem;">
+                            <i class="bi bi-link-45deg"></i> Enlace Web de Apoyo
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if tarea_seleccionada.instrucciones %}
+            <div class="mt-4 pt-3 border-top" style="border-color: rgba(219, 39, 119, 0.15) !important;">
+                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.88rem;"><i class="bi bi-card-text me-1 text-muted"></i> Instrucciones para los Estudiantes:</h6>
+                <p class="text-muted small mb-0" style="white-space: pre-line; line-height: 1.55;">{{ tarea_seleccionada.instrucciones }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- RESUMEN DE ENTREGAS (4 INDICADORES) -->
+        <div class="row g-3 mb-4">
+            <!-- 1. Total Estudiantes -->
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Total estudiantes</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                             style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                            <i class="bi bi-people-fill fs-6"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">{{ tarea_seleccionada.total_alumnos }}</h3>
+                        <small class="text-muted" style="font-size: 0.75rem;">en nómina</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Entregadas -->
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Entregadas</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                             style="background: #ecfdf5; color: #047857; width: 34px; height: 34px;">
+                            <i class="bi bi-check2-circle fs-6"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h3 class="fw-bold mb-0" style="color: #047857; font-size: 1.65rem;">{{ tarea_seleccionada.entregadas_count }}</h3>
+                        <small class="text-muted" style="font-size: 0.75rem;">trabajos</small>
+                    </div>
+                    <span class="badge rounded-pill px-2 py-0.5 mt-1.5 small" style="background: #ecfdf5; color: #047857; font-size: 0.7rem;">
+                        {{ tarea_seleccionada.calificadas_count }} calificadas
+                    </span>
+                </div>
+            </div>
+
+            <!-- 3. Pendientes por calificar -->
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Pendientes por calificar</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                             style="background: #fefce8; color: #ca8a04; width: 34px; height: 34px;">
+                            <i class="bi bi-pencil fs-6"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h3 class="fw-bold mb-0" style="color: #ca8a04; font-size: 1.65rem;">{{ tarea_seleccionada.sin_calificar_count }}</h3>
+                        <small class="text-muted" style="font-size: 0.75rem;">por evaluar</small>
+                    </div>
+                    <span class="badge rounded-pill px-2 py-0.5 mt-1.5 small" 
+                          style="{% if tarea_seleccionada.sin_calificar_count > 0 %}background: #fff7ed; color: #c2410c;{% else %}background: #ecfdf5; color: #047857;{% endif %} font-size: 0.7rem;">
+                        {% if tarea_seleccionada.sin_calificar_count > 0 %}Requiere revisión{% else %}Todo calificado{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- 4. Sin entregar -->
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Sin entregar</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                             style="background: #fef2f2; color: #b91c1c; width: 34px; height: 34px;">
+                            <i class="bi bi-exclamation-circle fs-6"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h3 class="fw-bold mb-0" style="color: #b91c1c; font-size: 1.65rem;">{{ tarea_seleccionada.pendientes_count }}</h3>
+                        <small class="text-muted" style="font-size: 0.75rem;">alumnos</small>
+                    </div>
+                    <span class="badge rounded-pill px-2 py-0.5 mt-1.5 small" style="background: #fef2f2; color: #b91c1c; font-size: 0.7rem;">
+                        Pendiente de envío
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- LISTA DE ESTUDIANTES Y CONTROL DE ENTREGAS -->
+        <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-5" style="border-color: #fce7f3 !important;">
+            <div class="p-3.5 border-bottom bg-white d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-person-check-fill fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0">LISTA DE ESTUDIANTES Y ENTREGAS</h6>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" id="buscar-entrega-input" onkeyup="filtrarEntregasDetalle();"
+                           class="form-control form-control-sm rounded-pill px-3 py-1.5" style="border-color: #fce7f3; max-width: 240px; font-size: 0.82rem;"
+                           placeholder="Buscar estudiante...">
+                    <select id="filtro-estado-entrega" onchange="filtrarEntregasDetalle();"
+                            class="form-select form-select-sm rounded-pill px-3 py-1.5" style="border-color: #fce7f3; font-size: 0.82rem;">
+                        <option value="todos">Todos los estados</option>
+                        <option value="CALIFICADA">Calificadas</option>
+                        <option value="ENTREGADA">Entregadas (por calificar)</option>
+                        <option value="PENDIENTE">Sin entregar</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0" id="tabla-entregas-estudiantes">
+                    <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                        <tr>
+                            <th class="text-center py-3" style="width: 45px; color: #be185d; font-size: 0.76rem;">#</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO / CÓDIGO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO ENTREGA</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA ENTREGA</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ARCHIVO / RESPUESTA</th>
+                            <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">CALIFICACIÓN</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">COMENTARIO DOCENTE</th>
+                            <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-entregas-detalle">
+                        {% for item in tarea_seleccionada.entregas_estudiantes_detalle %}
+                        <tr class="fila-entrega-item"
+                            data-nombre="{{ item.nombre_completo }}"
+                            data-doc="{{ item.documento }}"
+                            data-estado="{{ item.estado_code }}"
+                            style="border-bottom: 1px solid #fce7f3;">
+                            <td class="text-center text-muted small fw-bold">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs" 
+                                         style="width: 32px; height: 32px; background: linear-gradient(135deg, #db2777 0%, #be185d 100%); font-size: 0.75rem;">
+                                        {{ item.estudiante.first_name|slice:':1'|default:'E' }}{{ item.estudiante.last_name|slice:':1'|default:'S' }}
+                                    </div>
+                                    <strong class="text-dark" style="font-size: 0.88rem;">{{ item.nombre_completo }}</strong>
+                                </div>
+                            </td>
+                            <td class="text-muted small font-monospace">{{ item.documento }}</td>
+                            <td>
+                                {% if item.estado_code == 'CALIFICADA' %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.75rem;">
+                                    <i class="bi bi-check2-all me-1"></i> Calificada
+                                </span>
+                                {% elif item.estado_code == 'ENTREGADA' %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 0.75rem;">
+                                    <i class="bi bi-file-earmark-check me-1"></i> Entregada
+                                </span>
+                                {% elif item.estado_code == 'ENTREGADA_TARDE' %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; font-size: 0.75rem;">
+                                    <i class="bi bi-clock-history me-1"></i> Entregada tarde
+                                </span>
+                                {% elif item.estado_code == 'DEVUELTA' %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fefce8; color: #a16207; border: 1px solid #fef08a; font-size: 0.75rem;">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Devuelta
+                                </span>
+                                {% else %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-size: 0.75rem;">
+                                    <i class="bi bi-dash-circle me-1"></i> Sin entregar
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">
+                                {{ item.fecha_entrega|date:"d/m/Y H:i"|default:"—" }}
+                            </td>
+                            <td>
+                                {% if item.archivo_url %}
+                                <a href="{{ item.archivo_url }}" target="_blank" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 fw-semibold small d-inline-flex align-items-center gap-1">
+                                    <i class="bi bi-file-earmark-arrow-down text-primary"></i> Archivo
+                                </a>
+                                {% elif item.respuesta %}
+                                <span class="small text-dark text-truncate d-inline-block" style="max-width: 140px;" title="{{ item.respuesta }}">
+                                    {{ item.respuesta }}
+                                </span>
+                                {% else %}
+                                <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if item.calificacion is not None %}
+                                <span class="badge rounded-pill px-3 py-1 fw-bold fs-6 shadow-2xs" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                    {{ item.calificacion }} / {{ tarea_seleccionada.puntaje_maximo }}
+                                </span>
+                                {% else %}
+                                <span class="text-muted small">Por calificar</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted" style="max-width: 180px;">
+                                <span class="d-inline-block text-truncate" style="max-width: 180px;" title="{{ item.retroalimentacion }}">
+                                    {{ item.retroalimentacion|default:"Sin comentarios" }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn rounded-pill px-3 py-1.5 fw-bold small text-decoration-none shadow-2xs d-inline-flex align-items-center gap-1.5"
+                                        onclick="abrirModalCalificar('{{ item.estudiante.id }}', '{{ item.nombre_completo|escapejs }}', '{{ item.calificacion|default:'' }}', '{{ item.retroalimentacion|default:''|escapejs }}', '{{ item.archivo_url }}', '{{ item.estado_code }}');"
+                                        style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.82rem;">
+                                    <i class="bi bi-pencil-square"></i> {% if item.calificacion is not None %}Modificar{% else %}Calificar{% endif %}
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MODAL CALIFICAR / REVISAR ENTREGA -->
+        <div class="modal fade" id="modalCalificarEntrega" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-award-fill fs-5" style="color: #db2777;"></i>
+                            <h6 class="modal-title fw-bold text-dark">Calificar y Retroalimentar Entrega</h6>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <form method="POST" action="{% url 'instructor_dashboard' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="calificar_entrega">
+                        <input type="hidden" name="tarea_id" value="{{ tarea_seleccionada.id }}">
+                        <input type="hidden" name="estudiante_id" id="modal-calif-estudiante-id" value="">
+
+                        <div class="modal-body p-4">
+                            <div class="p-3 rounded-4 bg-light mb-3 border" style="border-color: #f1f5f9;">
+                                <strong class="d-block text-dark mb-0.5" id="modal-calif-estudiante-nombre">Estudiante</strong>
+                                <small class="text-muted">Actividad: {{ tarea_seleccionada.titulo }}</small>
+                                <div id="modal-calif-archivo-contenedor" class="mt-2" style="display: none;">
+                                    <a href="#" id="modal-calif-archivo-link" target="_blank" class="btn btn-sm btn-white bg-white border rounded-pill px-3 py-1 small fw-bold">
+                                        <i class="bi bi-download text-primary me-1"></i> Abrir Trabajo Entregado
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-dark mb-1">Calificación (0.0 a {{ tarea_seleccionada.puntaje_maximo }}) *</label>
+                                    <input type="number" step="0.1" min="0" max="{{ tarea_seleccionada.puntaje_maximo }}" 
+                                           name="calificacion" id="modal-calif-nota-input" 
+                                           class="form-control rounded-pill px-3 py-2 fw-bold fs-6" style="border-color: #fce7f3;" placeholder="Ej: 4.5" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-dark mb-1">Estado de Evaluación</label>
+                                    <select name="estado_calif" id="modal-calif-estado-select" class="form-select rounded-pill px-3 py-2" style="border-color: #fce7f3;">
+                                        <option value="CALIFICADA" selected>Calificada / Aprobada</option>
+                                        <option value="DEVUELTA">Devuelta para corrección</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark mb-1">Comentario / Retroalimentación Pedagógica</label>
+                                <textarea name="retroalimentacion" id="modal-calif-retro-input" rows="3" 
+                                          class="form-control rounded-4 px-3 py-2" style="border-color: #fce7f3;" 
+                                          placeholder="Escriba recomendaciones específicas para el estudiante..."></textarea>
+                            </div>
+
+                            <div class="small text-muted p-2 rounded-3 bg-light">
+                                <i class="bi bi-info-circle text-primary me-1"></i> Esta nota se sincroniza automáticamente con el módulo de Calificaciones y el perfil del estudiante.
+                            </div>
+                        </div>
+
+                        <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                            <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                                <i class="bi bi-save me-1.5"></i> Guardar Calificación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL EDITAR ACTIVIDAD DETALLE -->
+        <div class="modal fade" id="modalEditarTareaDetalle" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+                        <h6 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square me-2" style="color: #db2777;"></i> Editar Actividad</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <form method="POST" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="editar_tarea">
+                        <input type="hidden" name="tarea_id" value="{{ tarea_seleccionada.id }}">
+
+                        <div class="modal-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label small fw-bold text-dark mb-1">Título de la actividad *</label>
+                                    <input type="text" name="titulo" value="{{ tarea_seleccionada.titulo }}" class="form-control rounded-pill px-3 py-2" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-dark mb-1">Tipo de Actividad</label>
+                                    <select name="tipo_actividad" class="form-select rounded-pill px-3 py-2">
+                                        <option value="Tarea" {% if tarea_seleccionada.tipo_actividad == 'Tarea' %}selected{% endif %}>Tarea</option>
+                                        <option value="Taller" {% if tarea_seleccionada.tipo_actividad == 'Taller' %}selected{% endif %}>Taller</option>
+                                        <option value="Actividad" {% if tarea_seleccionada.tipo_actividad == 'Actividad' %}selected{% endif %}>Actividad</option>
+                                        <option value="Investigación" {% if tarea_seleccionada.tipo_actividad == 'Investigación' %}selected{% endif %}>Investigación</option>
+                                        <option value="Exposición" {% if tarea_seleccionada.tipo_actividad == 'Exposición' %}selected{% endif %}>Exposición</option>
+                                        <option value="Proyecto" {% if tarea_seleccionada.tipo_actividad == 'Proyecto' %}selected{% endif %}>Proyecto</option>
+                                        <option value="Quiz / Evaluación" {% if tarea_seleccionada.tipo_actividad == 'Quiz / Evaluación' %}selected{% endif %}>Quiz / Evaluación</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark mb-1">Tema / Criterio</label>
+                                    <input type="text" name="tema" value="{{ tarea_seleccionada.criterio_evaluacion|default:'' }}" class="form-control rounded-pill px-3 py-2">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark mb-1">Estado</label>
+                                    <select name="estado" class="form-select rounded-pill px-3 py-2">
+                                        <option value="Publicada" {% if tarea_seleccionada.estado == 'Publicada' %}selected{% endif %}>Publicada</option>
+                                        <option value="Borrador" {% if tarea_seleccionada.estado == 'Borrador' %}selected{% endif %}>Borrador</option>
+                                        <option value="Cerrada" {% if tarea_seleccionada.estado == 'Cerrada' %}selected{% endif %}>Cerrada</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label small fw-bold text-dark mb-1">Instrucciones</label>
+                                    <textarea name="instrucciones" rows="3" class="form-control rounded-4 px-3 py-2">{{ tarea_seleccionada.instrucciones }}</textarea>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark mb-1">Fecha límite de entrega</label>
+                                    <input type="date" name="fecha_limite" value="{{ tarea_seleccionada.fecha_limite|date:'Y-m-d' }}" class="form-control rounded-pill px-3 py-2">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark mb-1">Hora límite</label>
+                                    <input type="time" name="hora_limite" value="{{ tarea_seleccionada.fecha_limite|date:'H:i'|default:'23:59' }}" class="form-control rounded-pill px-3 py-2">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark mb-1">Puntaje máximo</label>
+                                    <input type="number" step="0.1" name="puntaje_maximo" value="{{ tarea_seleccionada.puntaje_maximo }}" class="form-control rounded-pill px-3 py-2">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark mb-1">Porcentaje que representa (%)</label>
+                                    <input type="number" step="0.5" name="porcentaje" value="{{ tarea_seleccionada.porcentaje }}" class="form-control rounded-pill px-3 py-2">
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label small fw-bold text-dark mb-1">Actualizar archivo adjunto (Opcional)</label>
+                                    <input type="file" name="archivo" class="form-control rounded-pill px-3 py-2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer px-4 py-3 bg-light border-top">
+                            <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+    <!-- =====================================================================
+         VISTA B: LISTADO PRINCIPAL DE ACTIVIDADES Y TAREAS DEL DOCENTE
+         ===================================================================== -->
+
+    <!-- 1. ENCABEZADO DEL MÓDULO -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-7 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-journal-check" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Módulo de Trabajo Pedagógico
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        ACTIVIDADES Y TAREAS
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Gestiona las actividades, tareas, entregas y calificaciones de tus estudiantes.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-5 text-end position-relative z-1 mt-3 mt-lg-0">
+                <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalCrearActividadDocente" id="btn-crear-actividad"
+                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.9rem;">
+                    <i class="bi bi-plus-circle-fill"></i> + CREAR ACTIVIDAD / TAREA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. RESUMEN DEL MÓDULO (6 INDICADORES INFORMATIVOS REALES) -->
+    <div class="row g-2.5 mb-4">
+        <!-- 1. Total actividades -->
+        <div class="col-6 col-md-2">
+            <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
+                 onclick="filtrarPorEstadoRapido('todos');" style="border-color: #fce7f3 !important; cursor: pointer;">
+                <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Total actividades</span>
+                <div class="d-flex align-items-baseline gap-1.5">
+                    <h4 class="fw-bold text-dark mb-0">{{ resumen_actividades.total }}</h4>
+                    <small class="text-muted" style="font-size: 0.7rem;">creadas</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Publicadas -->
+        <div class="col-6 col-md-2">
+            <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
+                 onclick="filtrarPorEstadoRapido('Publicada');" style="border-color: #fce7f3 !important; cursor: pointer;">
+                <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Publicadas</span>
+                <div class="d-flex align-items-baseline gap-1.5">
+                    <h4 class="fw-bold mb-0" style="color: #047857;">{{ resumen_actividades.publicadas }}</h4>
+                    <small class="text-muted" style="font-size: 0.7rem;">activas</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Borradores -->
+        <div class="col-6 col-md-2">
+            <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
+                 onclick="filtrarPorEstadoRapido('Borrador');" style="border-color: #fce7f3 !important; cursor: pointer;">
+                <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Borradores</span>
+                <div class="d-flex align-items-baseline gap-1.5">
+                    <h4 class="fw-bold text-muted mb-0">{{ resumen_actividades.borradores }}</h4>
+                    <small class="text-muted" style="font-size: 0.7rem;">en edición</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Pendientes de entrega -->
+        <div class="col-6 col-md-2">
+            <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Pendientes entrega</span>
+                <div class="d-flex align-items-baseline gap-1.5">
+                    <h4 class="fw-bold mb-0" style="color: #d97706;">{{ resumen_actividades.pendientes_entrega }}</h4>
+                    <small class="text-muted" style="font-size: 0.7rem;">por enviar</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Pendientes por calificar -->
+        <div class="col-6 col-md-2">
+            <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
+                 onclick="filtrarSoloPendientesCalificar();" style="border-color: #fce7f3 !important; cursor: pointer;">
+                <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Por calificar</span>
+                <div class="d-flex align-items-baseline gap-1.5">
+                    <h4 class="fw-bold mb-0" style="color: #db2777;">{{ resumen_actividades.pendientes_calificar }}</h4>
+                    <small class="text-muted" style="font-size: 0.7rem;">entregas</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Vencidas -->
+        <div class="col-6 col-md-2">
+            <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
+                 onclick="filtrarPorEstadoRapido('Vencida');" style="border-color: #fce7f3 !important; cursor: pointer;">
+                <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Vencidas</span>
+                <div class="d-flex align-items-baseline gap-1.5">
+                    <h4 class="fw-bold text-danger mb-0">{{ resumen_actividades.vencidas }}</h4>
+                    <small class="text-muted" style="font-size: 0.7rem;">plazo fin</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. BARRA DE BÚSQUEDA Y FILTROS -->
+    <div class="card border rounded-4 p-3.5 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+        <div class="row g-2.5 align-items-center">
+            <!-- Buscador -->
+            <div class="col-md-3">
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute top-50 translate-middle-y text-muted" style="left: 14px;"></i>
+                    <input type="text" id="buscar-actividad-input" onkeyup="aplicarFiltrosActividades();" 
+                           class="form-control form-control-sm rounded-pill ps-5 pe-3 py-2 border bg-white shadow-2xs" 
+                           style="border-color: #fce7f3; font-size: 0.85rem;" 
+                           placeholder="Buscar actividad o tema...">
+                </div>
+            </div>
+
+            <!-- Asignatura -->
+            <div class="col-6 col-md-2">
+                <select id="filtro-act-asig" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3; font-size: 0.82rem;">
+                    <option value="todas">Todas las Asignaturas</option>
+                    <option value="Matemáticas">Matemáticas</option>
+                    <option value="Informática">Informática</option>
+                </select>
+            </div>
+
+            <!-- Grado -->
+            <div class="col-6 col-md-2">
+                <select id="filtro-act-grado" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3; font-size: 0.82rem;">
+                    <option value="todos">Todos los Grados</option>
+                    <option value="10">Grado 10°</option>
+                    <option value="11">Grado 11°</option>
+                </select>
+            </div>
+
+            <!-- Grupo -->
+            <div class="col-6 col-md-2">
+                <select id="filtro-act-grupo" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3; font-size: 0.82rem;">
+                    <option value="todos">Todos los Grupos</option>
+                    <option value="10°A">Grupo 10°A</option>
+                    <option value="11°A">Grupo 11°A</option>
+                </select>
+            </div>
+
+            <!-- Estado -->
+            <div class="col-6 col-md-3 text-end d-flex gap-2">
+                <select id="filtro-act-estado" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2 flex-grow-1" style="border-color: #fce7f3; font-size: 0.82rem;">
+                    <option value="todos">Todos los Estados</option>
+                    <option value="Publicada">Publicadas</option>
+                    <option value="Borrador">Borradores</option>
+                    <option value="Cerrada">Cerradas</option>
+                    <option value="Vencida">Vencidas</option>
+                    <option value="por_calificar">Pendientes de calificar</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS DE ACCESO RÁPIDO Y FILTRADO POR ESTADO -->
+    <div class="d-flex align-items-center gap-2 mb-3.5 flex-wrap" id="actividades-tabs-bar">
+        <button type="button" class="btn rounded-pill px-4 py-2 fw-bold small transition tab-btn-act is-active shadow-2xs" id="tab-btn-todos" onclick="filtrarPorEstadoRapido('todos');"
+                style="background: #db2777; color: #ffffff; border: 1.5px solid #db2777; font-size: 0.84rem;">
+            Todas ({{ resumen_actividades.total }})
+        </button>
+        <button type="button" class="btn rounded-pill px-4 py-2 fw-bold small transition tab-btn-act shadow-2xs" id="tab-btn-Publicada" onclick="filtrarPorEstadoRapido('Publicada');"
+                style="background: #ffffff; color: #047857; border: 1.5px solid #a7f3d0; font-size: 0.84rem;">
+            <i class="bi bi-check2-circle me-1"></i> Publicadas ({{ resumen_actividades.publicadas }})
+        </button>
+        <button type="button" class="btn rounded-pill px-4 py-2 fw-bold small transition tab-btn-act shadow-2xs" id="tab-btn-Borrador" onclick="filtrarPorEstadoRapido('Borrador');"
+                style="background: #ffffff; color: #475569; border: 1.5px solid #cbd5e1; font-size: 0.84rem;">
+            <i class="bi bi-pencil-square me-1"></i> Borradores ({{ resumen_actividades.borradores }})
+        </button>
+        <button type="button" class="btn rounded-pill px-4 py-2 fw-bold small transition tab-btn-act shadow-2xs" id="tab-btn-por_calificar" onclick="filtrarSoloPendientesCalificar();"
+                style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.84rem;">
+            <i class="bi bi-clock-history me-1"></i> Por calificar ({{ resumen_actividades.pendientes_calificar }})
+        </button>
+        <button type="button" class="btn rounded-pill px-4 py-2 fw-bold small transition tab-btn-act shadow-2xs" id="tab-btn-Vencida" onclick="filtrarPorEstadoRapido('Vencida');"
+                style="background: #ffffff; color: #b91c1c; border: 1.5px solid #fecaca; font-size: 0.84rem;">
+            <i class="bi bi-exclamation-triangle me-1"></i> Vencidas ({{ resumen_actividades.vencidas }})
+        </button>
+    </div>
+
+    <!-- 4. LISTADO PRINCIPAL DE ACTIVIDADES (TABLA OFICIAL) -->
+    <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-5" style="border-color: #fce7f3 !important;">
+        <div class="table-responsive">
+            <table class="table align-middle table-hover mb-0" id="tabla-actividades-docente">
+                <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                    <tr>
+                        <th class="text-center py-3" style="width: 45px; color: #be185d; font-size: 0.76rem;">#</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ACTIVIDAD</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ASIGNATURA</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">GRADO / GRUPO</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA ENTREGA</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO</th>
+                        <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">ENTREGAS</th>
+                        <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">CALIFICADAS</th>
+                        <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-actividades-lista">
+                    <!-- Fila de Estado Vacío Profesional Dinámico -->
+                    <tr id="fila-estado-vacio-actividades" style="display: none;">
+                        <td colspan="9" class="text-center py-5">
+                            <div class="p-4 rounded-4 mx-auto text-center" style="max-width: 460px; background: #fafafa; border: 1.5px dashed #fce7f3;">
+                                <i class="bi bi-journal-x fs-1 d-block mb-2" style="color: #db2777;"></i>
+                                <h5 class="fw-bold text-dark mb-1" id="vacio-titulo">No hay actividades en borrador.</h5>
+                                <p class="text-muted small mb-3" id="vacio-mensaje">No existen actividades en este estado actualmente.</p>
+                                <a href="{% url 'crear_actividad_digital' %}" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777; font-size: 0.86rem;">
+                                    <i class="bi bi-plus-circle-fill me-1.5"></i> + Crear Nueva Actividad
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% for t in tareas_publicadas %}
+                    <tr class="fila-actividad-item"
+                        data-titulo="{{ t.titulo }}"
+                        data-tema="{{ t.criterio_evaluacion|default:'' }}"
+                        data-asig="{{ t.materia_nombre }}"
+                        data-grado="{{ t.grado_num }}"
+                        data-grupo="{{ t.grupo_display }}"
+                        data-estado="{% if t.esta_vencida and t.estado != 'Cerrada' %}Vencida{% else %}{{ t.estado }}{% endif %}"
+                        data-porcalificar="{{ t.pendientes_calificar_count }}"
+                        style="border-bottom: 1px solid #fce7f3;">
+                        <td class="text-center text-muted small fw-bold">{{ forloop.counter }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="background: #fff0f3; color: #db2777; width: 36px; height: 36px;">
+                                    <i class="bi bi-file-earmark-text-fill"></i>
+                                </div>
+                                <div>
+                                    <a href="{% url 'actividades_tareas' %}?tarea_id={{ t.id }}" 
+                                       class="text-dark fw-bold text-decoration-none d-block hover-pink" style="font-size: 0.9rem;">
+                                        {{ t.titulo }}
+                                    </a>
+                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                        {{ t.tipo_actividad }} {% if t.criterio_evaluacion %}· {{ t.criterio_evaluacion|truncatechars:35 }}{% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill px-2.5 py-1" style="background: #fdf2f8; color: #be185d; font-size: 0.76rem;">
+                                {{ t.materia_nombre }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #eef2ff; color: #3730a3; font-size: 0.76rem;">
+                                {{ t.grupo_display }}
+                            </span>
+                        </td>
+                        <td class="small text-muted">
+                            <i class="bi bi-calendar3 me-1 text-muted"></i>
+                            {{ t.fecha_limite|date:"d/m/Y H:i"|default:"Sin fecha límite" }}
+                        </td>
+                        <td>
+                            {% if t.estado == 'Borrador' %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 0.75rem;">
+                                Borrador
+                            </span>
+                            {% elif t.estado == 'Cerrada' %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-size: 0.75rem;">
+                                Cerrada
+                            </span>
+                            {% elif t.esta_vencida %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-size: 0.75rem;">
+                                Vencida
+                            </span>
+                            {% else %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.75rem;">
+                                Publicada
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #eff6ff; color: #1e40af; font-size: 0.76rem;">
+                                {{ t.total_entregas_count }} / {{ t.estudiantes_grupo_count }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            {% if t.pendientes_calificar_count > 0 %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold shadow-2xs" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; font-size: 0.75rem;">
+                                {{ t.pendientes_calificar_count }} por revisar
+                            </span>
+                            {% else %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #ecfdf5; color: #047857; font-size: 0.75rem;">
+                                {{ t.calificadas_count }} calificadas
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="dropdown d-inline-block">
+                                <button class="btn rounded-pill px-3 py-1.5 fw-bold small shadow-2xs dropdown-toggle d-inline-flex align-items-center gap-1.5"
+                                        type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                        style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.82rem;">
+                                    Acciones
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 p-1.5" style="border-color: #fce7f3; font-size: 0.84rem;">
+                                    <li>
+                                        <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                           href="{% url 'actividades_tareas' %}?tarea_id={{ t.id }}">
+                                            <i class="bi bi-eye text-muted"></i> Ver actividad y entregas
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                           href="{% url 'actividades_tareas' %}?tarea_id={{ t.id }}">
+                                            <i class="bi bi-award-fill text-warning"></i> Calificar entregas
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{% url 'instructor_dashboard' %}" class="m-0">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="duplicar_tarea">
+                                            <input type="hidden" name="tarea_id" value="{{ t.id }}">
+                                            <button type="submit" class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2">
+                                                <i class="bi bi-copy text-primary"></i> Duplicar actividad
+                                            </button>
+                                        </form>
+                                    </li>
+                                    {% if t.estado != 'Cerrada' %}
+                                    <li>
+                                        <form method="POST" action="{% url 'instructor_dashboard' %}" class="m-0" onsubmit="return confirm('¿Desea cerrar esta actividad?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="cerrar_tarea">
+                                            <input type="hidden" name="tarea_id" value="{{ t.id }}">
+                                            <button type="submit" class="dropdown-item py-1.5 rounded-2 text-warning d-flex align-items-center gap-2">
+                                                <i class="bi bi-lock-fill"></i> Cerrar actividad
+                                            </button>
+                                        </form>
+                                    </li>
+                                    {% endif %}
+                                    <li><hr class="dropdown-divider my-1" style="border-color: #fce7f3;"></li>
+                                    <li>
+                                        <form method="POST" action="{% url 'instructor_dashboard' %}" class="m-0" onsubmit="return confirm('¿Está seguro de eliminar esta actividad? Se trasladará a la Papelera de reciclaje.');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="eliminar_actividad">
+                                            <input type="hidden" name="tarea_id" value="{{ t.id }}">
+                                            <button type="submit" class="dropdown-item py-1.5 rounded-2 text-danger d-flex align-items-center gap-2">
+                                                <i class="bi bi-trash3-fill"></i> Eliminar actividad
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5">
+                            <div class="py-4">
+                                <i class="bi bi-journal-plus fs-1 d-block mb-3" style="color: #db2777;"></i>
+                                <h6 class="fw-bold text-dark mb-1">No hay actividades publicadas</h6>
+                                <p class="text-muted small mb-3">Aún no has registrado tareas o evaluaciones para tus grupos.</p>
+                                <a href="{% url 'crear_actividad_digital' %}" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                                    <i class="bi bi-plus-circle-fill me-1"></i> + Crear actividad
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center p-3.5 border-top bg-white" style="border-color: #fce7f3 !important;">
+            <span class="text-muted small" id="contador-actividades-footer">
+                Mostrando {{ tareas_publicadas|length }} actividades del docente
+            </span>
+            <div class="small text-muted">
+                <i class="bi bi-shield-check text-success me-1"></i> Asignadas exclusivamente a sus grados y grupos
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CREAR ACTIVIDAD -->
+    <div class="modal fade" id="modalCrearActividadDocente" tabindex="-1" aria-labelledby="modalCrearActividadLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+                    <div class="d-flex align-items-center gap-2.5">
+                        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" 
+                             style="background: #ffffff; color: #db2777; width: 36px; height: 36px; border: 1px solid #fce7f3;">
+                            <i class="bi bi-plus-circle-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark" id="modalCrearActividadLabel">Crear Nueva Actividad / Tarea</h6>
+                            <small class="text-muted">Diseña, asigna y programa actividades para tus estudiantes</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <form method="POST" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="crear_tarea">
+
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <!-- DATOS PRINCIPALES -->
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold text-dark mb-1">Título de la actividad *</label>
+                                <input type="text" name="titulo" class="form-control rounded-pill px-3 py-2" placeholder="Ej: Taller N°1: Funciones Cuadráticas y Polinomios" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark mb-1">Tipo de Actividad *</label>
+                                <select name="tipo_actividad" class="form-select rounded-pill px-3 py-2" required>
+                                    <option value="Tarea" selected>Tarea</option>
+                                    <option value="Taller">Taller</option>
+                                    <option value="Actividad">Actividad en Clase</option>
+                                    <option value="Investigación">Investigación</option>
+                                    <option value="Exposición">Exposición</option>
+                                    <option value="Proyecto">Proyecto</option>
+                                    <option value="Quiz / Evaluación">Quiz / Evaluación</option>
+                                </select>
+                            </div>
+
+                            <!-- ASIGNATURA Y GRUPO -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Asignatura y Curso Asignado *</label>
+                                <select name="carga_id" class="form-select rounded-pill px-3 py-2" required>
+                                    {% for c in cargas %}
+                                    <option value="{{ c.id }}">
+                                        {{ c.programa.denominacion|default:'Matemáticas' }} — Grado {{ c.grado }}°{{ c.seccion }}
+                                    </option>
+                                    {% empty %}
+                                    <option value="1">Matemáticas — Grado 10°A</option>
+                                    <option value="2">Informática — Grado 10°A</option>
+                                    <option value="3">Matemáticas — Grado 11°A</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Destinatario / Asignación</label>
+                                <select name="estudiante_id" class="form-select rounded-pill px-3 py-2">
+                                    <option value="">Todo el grupo del curso seleccionado</option>
+                                    {% for est in todos_mis_estudiantes %}
+                                    <option value="{{ est.aprendiz.id }}">
+                                        [Grado {{ est.grado_escolar }}°{{ est.seccion|default:'A' }}] {{ est.aprendiz.get_full_name|default:est.aprendiz.username }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- VINCULAR GUÍA Y RESULTADO DE APRENDIZAJE -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-journal-bookmark me-1" style="color: #db2777;"></i> Guía de Aprendizaje (Recursos)</label>
+                                <select name="guia_id" class="form-select rounded-pill px-3 py-2">
+                                    <option value="">[ Opcional: Vincular guía de la biblioteca ]</option>
+                                    {% for g in guias_biblioteca %}
+                                    <option value="{{ g.id }}">{{ g.titulo }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-bullseye me-1" style="color: #db2777;"></i> Resultado de Aprendizaje (RAP) *</label>
+                                <select name="rap_id" class="form-select rounded-pill px-3 py-2" required>
+                                    <option value="">-- Seleccionar Resultado de Aprendizaje --</option>
+                                    {% for r in raps_docente %}
+                                    <option value="{{ r.id }}">{{ r.codigo }} — {{ r.descripcion }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-dark mb-1">Tema / Unidad de Aprendizaje</label>
+                                <input type="text" name="tema" class="form-control rounded-pill px-3 py-2" placeholder="Ej: Álgebra, funciones polinómicas o algoritmos">
+                            </div>
+
+                            <!-- INSTRUCCIONES -->
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-dark mb-1">Descripción e Instrucciones para los Estudiantes *</label>
+                                <textarea name="instrucciones" rows="3" class="form-control rounded-4 px-3 py-2" 
+                                          placeholder="Detalla los objetivos, pasos a seguir, entregables y criterios que evaluará..." required></textarea>
+                            </div>
+
+                            <!-- FECHAS -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Fecha límite de entrega *</label>
+                                <input type="date" name="fecha_limite" class="form-control rounded-pill px-3 py-2" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Hora límite</label>
+                                <input type="time" name="hora_limite" value="23:59" class="form-control rounded-pill px-3 py-2">
+                            </div>
+
+                            <!-- EVALUACIÓN Y PONDERACIÓN -->
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark mb-1">¿Es calificada?</label>
+                                <select name="es_calificada" class="form-select rounded-pill px-3 py-2">
+                                    <option value="1" selected>Sí, registrar calificación</option>
+                                    <option value="0">No, formativa sin nota</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark mb-1">Puntaje máximo</label>
+                                <input type="number" step="0.1" name="puntaje_maximo" value="5.0" class="form-control rounded-pill px-3 py-2">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark mb-1">Ponderación (%)</label>
+                                <input type="number" step="0.5" name="porcentaje" value="20.0" class="form-control rounded-pill px-3 py-2">
+                            </div>
+
+                            <!-- MATERIAL ADJUNTO Y ENLACES -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Adjuntar Archivo / Guía (PDF, Word, etc.)</label>
+                                <input type="file" name="archivo" class="form-control rounded-pill px-3 py-2">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Enlace de Apoyo / Recurso Web (Opcional)</label>
+                                <input type="url" name="enlace_externo" class="form-control rounded-pill px-3 py-2" placeholder="https://...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                        <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="estado" value="Borrador" class="btn rounded-pill px-4 py-2 fw-bold text-muted border shadow-2xs bg-white" style="border-color: #cbd5e1;">
+                                <i class="bi bi-file-earmark me-1"></i> Guardar como Borrador
+                            </button>
+                            <button type="submit" name="estado" value="Publicada" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                                <i class="bi bi-send-fill me-1"></i> Publicar Inmediatamente
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<!-- =========================================================================
+     SCRIPTS DE CONTROL Y FILTROS EN TIEMPO REAL
+     ========================================================================= -->
+<script>
+// Filtrar tabla principal de actividades
+function aplicarFiltrosActividades() {
+    const q = (document.getElementById('buscar-actividad-input')?.value || '').toLowerCase().trim();
+    const asig = document.getElementById('filtro-act-asig')?.value || 'todas';
+    const grado = document.getElementById('filtro-act-grado')?.value || 'todos';
+    const grupo = document.getElementById('filtro-act-grupo')?.value || 'todos';
+    const estado = document.getElementById('filtro-act-estado')?.value || 'todos';
+
+    const filas = document.querySelectorAll('.fila-actividad-item');
+    let visibles = 0;
+
+    filas.forEach(f => {
+        const fTitulo = (f.getAttribute('data-titulo') || '').toLowerCase();
+        const fTema = (f.getAttribute('data-tema') || '').toLowerCase();
+        const fAsig = f.getAttribute('data-asig') || '';
+        const fGrado = f.getAttribute('data-grado') || '';
+        const fGrupo = f.getAttribute('data-grupo') || '';
+        const fEstado = f.getAttribute('data-estado') || '';
+        const fPorCalificar = parseInt(f.getAttribute('data-porcalificar') || '0', 10);
+
+        const matchQ = !q || fTitulo.includes(q) || fTema.includes(q);
+        const matchAsig = (asig === 'todas') || fAsig.includes(asig);
+        const matchGrado = (grado === 'todos') || (fGrado === grado);
+        const matchGrupo = (grupo === 'todos') || (fGrupo === grupo);
+        
+        let matchEstado = true;
+        if (estado === 'por_calificar') {
+            matchEstado = fPorCalificar > 0;
+        } else if (estado !== 'todos') {
+            matchEstado = (fEstado === estado);
+        }
+
+        if (matchQ && matchAsig && matchGrado && matchGrupo && matchEstado) {
+            f.style.display = '';
+            visibles++;
+        } else {
+            f.style.display = 'none';
+        }
+    });
+
+    // Control dinámico de fila de estado vacío
+    const vacioRow = document.getElementById('fila-estado-vacio-actividades');
+    const vacioTitulo = document.getElementById('vacio-titulo');
+    const vacioMensaje = document.getElementById('vacio-mensaje');
+
+    if (visibles === 0) {
+        if (vacioRow) vacioRow.style.display = '';
+        if (estado === 'Borrador') {
+            if (vacioTitulo) vacioTitulo.textContent = 'No hay actividades en borrador.';
+            if (vacioMensaje) vacioMensaje.textContent = 'No tienes borradores pendientes. Todas tus actividades están actualmente publicadas o cerradas.';
+        } else if (estado === 'Publicada') {
+            if (vacioTitulo) vacioTitulo.textContent = 'No hay actividades publicadas.';
+            if (vacioMensaje) vacioMensaje.textContent = 'No hay actividades activas en este momento para los criterios seleccionados.';
+        } else if (estado === 'por_calificar') {
+            if (vacioTitulo) vacioTitulo.textContent = 'No hay actividades pendientes por calificar.';
+            if (vacioMensaje) vacioMensaje.textContent = 'Todas las entregas recibidas han sido revisadas y calificadas.';
+        } else if (estado === 'Vencida') {
+            if (vacioTitulo) vacioTitulo.textContent = 'No hay actividades con plazo vencido.';
+            if (vacioMensaje) vacioMensaje.textContent = 'Todas las entregas se encuentran al día con sus cronogramas.';
+        } else {
+            if (vacioTitulo) vacioTitulo.textContent = 'No se encontraron actividades.';
+            if (vacioMensaje) vacioMensaje.textContent = 'Prueba ajustando el texto de búsqueda o los selectores de grado y asignatura.';
+        }
+    } else {
+        if (vacioRow) vacioRow.style.display = 'none';
+    }
+
+    // Actualizar estilo visual de las pestañas
+    const tabs = ['todos', 'Publicada', 'Borrador', 'por_calificar', 'Vencida'];
+    tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (btn) {
+            if (t === estado) {
+                btn.style.background = '#db2777';
+                btn.style.color = '#ffffff';
+                btn.style.borderColor = '#db2777';
+            } else {
+                btn.style.background = '#ffffff';
+                btn.style.color = (t === 'Publicada' ? '#047857' : (t === 'Borrador' ? '#475569' : (t === 'por_calificar' ? '#db2777' : (t === 'Vencida' ? '#b91c1c' : '#0f172a'))));
+                btn.style.borderColor = (t === 'Publicada' ? '#a7f3d0' : (t === 'Borrador' ? '#cbd5e1' : (t === 'por_calificar' ? '#fce7f3' : (t === 'Vencida' ? '#fecaca' : '#fce7f3'))));
+            }
+        }
+    });
+
+    const footerEl = document.getElementById('contador-actividades-footer');
+    if (footerEl) {
+        footerEl.textContent = `Mostrando ${visibles} actividades filtradas`;
+    }
+}
+
+// Filtro rápido por tarjeta superior o pestaña
+function filtrarPorEstadoRapido(estado) {
+    const sel = document.getElementById('filtro-act-estado');
+    if (sel) {
+        sel.value = estado;
+        aplicarFiltrosActividades();
+    }
+}
+
+// Filtro de solo pendientes de calificar
+function filtrarSoloPendientesCalificar() {
+    const sel = document.getElementById('filtro-act-estado');
+    if (sel) {
+        sel.value = 'por_calificar';
+        aplicarFiltrosActividades();
+    }
+}
+
+// Inicialización de filtros al cargar por URL
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const estadoParam = urlParams.get('estado') || urlParams.get('filtro_estado');
+    if (estadoParam) {
+        filtrarPorEstadoRapido(estadoParam);
+    }
+});
+
+// Filtrar lista de entregas en la vista de detalle
+function filtrarEntregasDetalle() {
+    const q = (document.getElementById('buscar-entrega-input')?.value || '').toLowerCase().trim();
+    const estado = document.getElementById('filtro-estado-entrega')?.value || 'todos';
+
+    const filas = document.querySelectorAll('.fila-entrega-item');
+    filas.forEach(f => {
+        const nom = (f.getAttribute('data-nombre') || '').toLowerCase();
+        const doc = (f.getAttribute('data-doc') || '').toLowerCase();
+        const fEstado = f.getAttribute('data-estado') || '';
+
+        const matchQ = !q || nom.includes(q) || doc.includes(q);
+        const matchEstado = (estado === 'todos') || (fEstado === estado);
+
+        if (matchQ && matchEstado) {
+            f.style.display = '';
+        } else {
+            f.style.display = 'none';
+        }
+    });
+}
+
+// Abrir modal de calificar pre-cargado
+function abrirModalCalificar(estudianteId, nombre, calificacion, retroalimentacion, archivoUrl, estadoCode) {
+    const elId = document.getElementById('modal-calif-estudiante-id');
+    const elNom = document.getElementById('modal-calif-estudiante-nombre');
+    const elNota = document.getElementById('modal-calif-nota-input');
+    const elRetro = document.getElementById('modal-calif-retro-input');
+    const elEstado = document.getElementById('modal-calif-estado-select');
+    const elArchCont = document.getElementById('modal-calif-archivo-contenedor');
+    const elArchLink = document.getElementById('modal-calif-archivo-link');
+
+    if (elId) elId.value = estudianteId;
+    if (elNom) elNom.textContent = nombre;
+    if (elNota) elNota.value = calificacion;
+    if (elRetro) elRetro.value = retroalimentacion;
+    if (elEstado) elEstado.value = (estadoCode === 'DEVUELTA' ? 'DEVUELTA' : 'CALIFICADA');
+
+    if (archivoUrl && elArchCont && elArchLink) {
+        elArchCont.style.display = 'block';
+        elArchLink.href = archivoUrl;
+    } else if (elArchCont) {
+        elArchCont.style.display = 'none';
+    }
+
+    const modalEl = document.getElementById('modalCalificarEntrega');
+    if (modalEl && typeof bootstrap !== 'undefined') {
+        const modalObj = new bootstrap.Modal(modalEl);
+        modalObj.show();
+    }
+}
+</script>
+
+<!-- MODAL: CREAR NUEVA ACTIVIDAD / TAREA -->
+<div class="modal fade" id="modalCrearActividadDocente" tabindex="-1" aria-labelledby="modalCrearActividadDocenteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form method="post" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="crear_tarea">
+                <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1.5px solid #fce7f3;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-3 p-2 text-white" style="background: #db2777;">
+                            <i class="bi bi-journal-plus fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark mb-0" id="modalCrearActividadDocenteLabel">Crear Nueva Actividad / Tarea</h6>
+                            <small class="text-muted">Diseña actividades, talleres o evaluaciones para tus estudiantes</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark mb-1">Título de la Actividad *</label>
+                            <input type="text" name="titulo" class="form-control rounded-3" placeholder="Ej: Taller 1 - Análisis de Funciones Lineales" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Asignatura y Grado *</label>
+                            <select name="carga_id" class="form-select rounded-3" required>
+                                {% for c in cargas %}
+                                    <option value="{{ c.id }}">{{ c.programa.denominacion|default:'Asignatura' }} — Grado {{ c.grado }}°{{ c.seccion }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Tipo de Actividad</label>
+                            <select name="tipo_actividad" class="form-select rounded-3">
+                                <option value="Tarea">Tarea Escolar</option>
+                                <option value="Taller">Taller Práctico</option>
+                                <option value="Evaluación">Evaluación Calificada</option>
+                                <option value="Guía">Guía Pedagógica</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark mb-1">Descripción / Instrucciones *</label>
+                            <textarea name="instrucciones" rows="4" class="form-control rounded-3" placeholder="Describe los objetivos, instrucciones y pasos que debe seguir el estudiante..." required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Fecha Límite de Entrega</label>
+                            <input type="date" name="fecha_limite" class="form-control rounded-3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Hora Límite</label>
+                            <input type="time" name="hora_limite" value="23:59" class="form-control rounded-3">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Puntaje Máximo (Escala 1.0 - 5.0)</label>
+                            <input type="number" step="0.1" name="puntaje_maximo" value="5.0" min="1.0" max="5.0" class="form-control rounded-3">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Porcentaje del Periodo (%)</label>
+                            <input type="number" step="1" name="porcentaje" value="20" min="1" max="100" class="form-control rounded-3">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark mb-1">Recursos / Archivo Adjunto (Opcional)</label>
+                            <input type="file" name="archivo" class="form-control rounded-3">
+                            <small class="text-muted">Guías, lecturas de apoyo o plantillas de trabajo en PDF, Word, Excel.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                    <div class="d-flex gap-2">
+                        <button type="submit" name="estado" value="Borrador" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold">
+                            <i class="bi bi-file-earmark me-1"></i> Guardar como Borrador
+                        </button>
+                        <button type="submit" name="estado" value="Publicada" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border-color: #db2777;">
+                            <i class="bi bi-send-check-fill me-1"></i> Publicar Actividad
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

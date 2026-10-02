@@ -1,0 +1,468 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 3: MIS ASIGNATURAS (CALCULADO 100% DINÁMICO DESDE LA BASE DE DATOS)
+     - Cero datos inventados (no 45, 43, 22 ni 86 estudiantes).
+     - Matemáticas, Informática y Lengua Castellana con sus estudiantes reales.
+     - Vista "Ver detalles" con grados, estudiantes reales, actividades, notas, asistencia y horarios.
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-asignaturas">
+
+    {% if asignatura_seleccionada %}
+    <!-- =====================================================================
+         VISTA DETALLE DE LA ASIGNATURA SELECCIONADA
+         ===================================================================== -->
+    <div id="vista-detalle-asignatura-docente">
+        <!-- BOTÓN DE RETORNO -->
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <a href="{% url 'mis_asignaturas' %}" 
+               class="btn rounded-pill px-4 py-2 fw-bold text-decoration-none shadow-2xs d-inline-flex align-items-center gap-2 transition hover-shadow"
+               style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.88rem;">
+                <i class="bi bi-arrow-left"></i> Volver a Mis Asignaturas
+            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'actividades_tareas' %}?asig_id={{ asignatura_seleccionada.id }}" 
+                   class="btn rounded-pill px-3.5 py-2 text-white fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+                   style="background: #db2777; border: 1px solid #db2777; font-size: 0.84rem;">
+                    <i class="bi bi-journal-plus"></i> Crear Actividad para {{ asignatura_seleccionada.nombre }}
+                </a>
+            </div>
+        </div>
+
+        <!-- HERO BANNER DETALLE ASIGNATURA -->
+        <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+             style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+            <div class="row align-items-center">
+                <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                         style="background: {{ asignatura_seleccionada.color_bg }}; color: {{ asignatura_seleccionada.color_txt }}; width: 68px; height: 68px; border: 1px solid #fce7f3;">
+                        <i class="bi {{ asignatura_seleccionada.icono }}" style="font-size: 2.2rem;"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ffffff; color: #db2777; border: 1px solid #fce7f3; font-size: 0.78rem;">
+                                Grados: {{ asignatura_seleccionada.grados_display }}
+                            </span>
+                            <span class="badge rounded-pill px-3 py-1 fw-semibold" style="background: #f1f5f9; color: #475569; font-size: 0.78rem;">
+                                {{ asignatura_seleccionada.aula }}
+                            </span>
+                        </div>
+                        <h2 class="fw-bold mb-1 text-dark" style="font-size: 2rem; letter-spacing: -0.4px;">
+                            {{ asignatura_seleccionada.nombre }}
+                        </h2>
+                        <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                            Docente Titular: <strong class="text-dark">{{ user.get_full_name|default:user.username }}</strong> · {{ asignatura_seleccionada.descripcion }}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                    <div class="d-inline-flex flex-column align-items-end gap-1 p-3 rounded-4 bg-white shadow-2xs" style="border: 1px solid #fce7f3;">
+                        <span class="text-muted small" style="font-size: 0.78rem;">Estudiantes Reales Asignados</span>
+                        <div class="fw-bold fs-4" style="color: #db2777;">
+                            {{ asignatura_seleccionada.total_estudiantes }} estudiantes
+                        </div>
+                        <small class="text-muted" style="font-size: 0.72rem;">Calculado desde base de datos</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 TARJETAS MÉTRICAS DE LA ASIGNATURA -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Estudiantes Grado 10°</span>
+                    <h3 class="fw-bold mb-0 mt-1" style="color: #db2777; font-size: 1.65rem;">{{ asignatura_seleccionada.estudiantes_10|length }}</h3>
+                    <small class="text-muted" style="font-size: 0.74rem;">estudiantes reales</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Estudiantes Grado 11°</span>
+                    <h3 class="fw-bold mb-0 mt-1" style="color: #db2777; font-size: 1.65rem;">{{ asignatura_seleccionada.estudiantes_11|length }}</h3>
+                    <small class="text-muted" style="font-size: 0.74rem;">estudiantes reales</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Actividades Creadas</span>
+                    <h3 class="fw-bold text-dark mb-0 mt-1" style="font-size: 1.65rem;">{{ asignatura_seleccionada.total_actividades }}</h3>
+                    <small class="text-muted" style="font-size: 0.74rem;">tareas publicadas</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Sesiones de Clase</span>
+                    <h3 class="fw-bold text-dark mb-0 mt-1" style="font-size: 1.65rem;">{{ asignatura_seleccionada.horarios|length }}</h3>
+                    <small class="text-muted" style="font-size: 0.74rem;">en el horario escolar</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑAS DE CONTENIDO DE LA ASIGNATURA -->
+        <ul class="nav nav-pills p-1.5 rounded-pill bg-white border shadow-2xs d-inline-flex gap-2 mb-4" id="pillsAsignaturaDetalle" style="border-color: #fce7f3 !important;">
+            <li class="nav-item">
+                <button type="button" class="nav-link rounded-pill px-4 py-2 fw-bold small active" id="tab-asig-estudiantes" data-bs-toggle="pill" data-bs-target="#pane-asig-estudiantes">
+                    <i class="bi bi-people-fill me-1.5"></i> Estudiantes Asignados ({{ asignatura_seleccionada.total_estudiantes }})
+                </button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link rounded-pill px-4 py-2 fw-bold small" id="tab-asig-actividades" data-bs-toggle="pill" data-bs-target="#pane-asig-actividades">
+                    <i class="bi bi-journal-text me-1.5"></i> Actividades ({{ asignatura_seleccionada.total_actividades }})
+                </button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link rounded-pill px-4 py-2 fw-bold small" id="tab-asig-calificaciones" data-bs-toggle="pill" data-bs-target="#pane-asig-calificaciones">
+                    <i class="bi bi-mortarboard-fill me-1.5"></i> Calificaciones
+                </button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link rounded-pill px-4 py-2 fw-bold small" id="tab-asig-horario" data-bs-toggle="pill" data-bs-target="#pane-asig-horario">
+                    <i class="bi bi-calendar-event me-1.5"></i> Horarios de Clase
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="pillsAsignaturaContent">
+
+            <!-- PANE 1: ESTUDIANTES ASIGNADOS REALES -->
+            <div class="tab-pane fade show active" id="pane-asig-estudiantes" role="tabpanel">
+                <div class="row g-4">
+                    <!-- GRADO 10 (2 ESTUDIANTES) -->
+                    <div class="col-md-6">
+                        <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-mortarboard fs-5" style="color: #db2777;"></i>
+                                    <h6 class="fw-bold text-dark mb-0">Estudiantes Grado 10°A</h6>
+                                </div>
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3;">
+                                    {{ asignatura_seleccionada.estudiantes_10|length }} estudiantes
+                                </span>
+                            </div>
+                            <div class="d-flex flex-column gap-2.5">
+                                {% for est in asignatura_seleccionada.estudiantes_10 %}
+                                <div class="p-3 rounded-3 border bg-white d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center"
+                                             style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%); width: 36px; height: 36px; font-size: 0.8rem;">
+                                            {{ est.aprendiz.first_name|slice:':1'|default:'E' }}{{ est.aprendiz.last_name|slice:':1'|default:'S' }}
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.88rem;">{{ est.aprendiz.get_full_name|default:est.aprendiz.username }}</strong>
+                                            <small class="text-muted" style="font-size: 0.75rem;">Doc: {{ est.aprendiz.username }} · {{ est.aprendiz.email|default:'estudiante@edunova.edu.co' }}</small>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ est.aprendiz.id }}" class="btn btn-sm btn-white border rounded-pill px-3 py-1 fw-bold small text-pink">
+                                        Ficha →
+                                    </a>
+                                </div>
+                                {% empty %}
+                                <div class="text-muted small py-3 text-center">No hay estudiantes de Grado 10 asignados.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GRADO 11 (2 ESTUDIANTES) -->
+                    <div class="col-md-6">
+                        <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-mortarboard-fill fs-5" style="color: #db2777;"></i>
+                                    <h6 class="fw-bold text-dark mb-0">Estudiantes Grado 11°A</h6>
+                                </div>
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3;">
+                                    {{ asignatura_seleccionada.estudiantes_11|length }} estudiantes
+                                </span>
+                            </div>
+                            <div class="d-flex flex-column gap-2.5">
+                                {% for est in asignatura_seleccionada.estudiantes_11 %}
+                                <div class="p-3 rounded-3 border bg-white d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center"
+                                             style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%); width: 36px; height: 36px; font-size: 0.8rem;">
+                                            {{ est.aprendiz.first_name|slice:':1'|default:'E' }}{{ est.aprendiz.last_name|slice:':1'|default:'S' }}
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.88rem;">{{ est.aprendiz.get_full_name|default:est.aprendiz.username }}</strong>
+                                            <small class="text-muted" style="font-size: 0.75rem;">Doc: {{ est.aprendiz.username }} · {{ est.aprendiz.email|default:'estudiante@edunova.edu.co' }}</small>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ est.aprendiz.id }}" class="btn btn-sm btn-white border rounded-pill px-3 py-1 fw-bold small text-pink">
+                                        Ficha →
+                                    </a>
+                                </div>
+                                {% empty %}
+                                <div class="text-muted small py-3 text-center">No hay estudiantes de Grado 11 asignados.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANE 2: ACTIVIDADES DE LA ASIGNATURA -->
+            <div class="tab-pane fade" id="pane-asig-actividades" role="tabpanel">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <h6 class="fw-bold text-dark mb-0">Actividades Publicadas en {{ asignatura_seleccionada.nombre }}</h6>
+                        <a href="{% url 'actividades_tareas' %}?asig_id={{ asignatura_seleccionada.id }}" class="btn btn-sm text-white rounded-pill px-3 py-1 fw-bold" style="background: #db2777;">
+                            + Crear Actividad
+                        </a>
+                    </div>
+                    <div class="d-flex flex-column gap-2.5">
+                        {% for act in asignatura_seleccionada.tareas_lista %}
+                        <div class="p-3 rounded-3 border bg-white d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                            <div>
+                                <strong class="text-dark d-block" style="font-size: 0.9rem;">{{ act.titulo }}</strong>
+                                <small class="text-muted">Grado {{ act.carga_academica.grado }}°{{ act.carga_academica.seccion }} · Fecha límite: {{ act.fecha_limite|date:"d/m/Y H:i"|default:"Sin límite" }}</small>
+                            </div>
+                            <a href="{% url 'actividades_tareas' %}?tarea_id={{ act.id }}" class="btn btn-sm btn-white border rounded-pill px-3 py-1 fw-bold text-pink">
+                                Ver Entregas →
+                            </a>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4 text-muted small">No hay actividades publicadas para esta asignatura aún.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANE 3: CALIFICACIONES DE LA ASIGNATURA -->
+            <div class="tab-pane fade" id="pane-asig-calificaciones" role="tabpanel">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <h6 class="fw-bold text-dark mb-0">Planilla y Calificaciones de {{ asignatura_seleccionada.nombre }}</h6>
+                        <a href="{% url 'calificaciones_docente' %}" class="btn btn-sm text-white rounded-pill px-3 py-1 fw-bold" style="background: #db2777;">
+                            Abrir Planilla Completa
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                                <tr>
+                                    <th class="py-2.5" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
+                                    <th class="py-2.5" style="color: #be185d; font-size: 0.76rem;">GRADO</th>
+                                    <th class="py-2.5" style="color: #be185d; font-size: 0.76rem;">PERIODO</th>
+                                    <th class="py-2.5" style="color: #be185d; font-size: 0.76rem;">CALIFICACIÓN</th>
+                                    <th class="py-2.5" style="color: #be185d; font-size: 0.76rem;">OBSERVACIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cal in asignatura_seleccionada.calificaciones_lista %}
+                                <tr style="border-bottom: 1px solid #fce7f3;">
+                                    <td><strong>{{ cal.matricula.aprendiz.get_full_name|default:cal.matricula.aprendiz.username }}</strong></td>
+                                    <td>Grado {{ cal.matricula.grado_escolar }}</td>
+                                    <td>{{ cal.periodo }}</td>
+                                    <td><span class="badge rounded-pill px-2.5 py-1 text-success fw-bold" style="background: #ecfdf5; border: 1px solid #a7f3d0;">{{ cal.nota }} / 5.0</span></td>
+                                    <td class="small text-muted">{{ cal.observaciones|default:'Calificación asignada' }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted small">No hay calificaciones registradas aún en esta asignatura.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANE 4: HORARIO DE CLASE -->
+            <div class="tab-pane fade" id="pane-asig-horario" role="tabpanel">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                    <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">Horarios Programados para {{ asignatura_seleccionada.nombre }}</h6>
+                    <div class="d-flex flex-column gap-2.5">
+                        {% for h in asignatura_seleccionada.horarios %}
+                        <div class="p-3 rounded-3 border bg-light d-flex justify-content-between align-items-center" style="border-color: #f1f5f9;">
+                            <div>
+                                <strong class="text-dark d-block">{{ h.get_dia_display }} · {{ h.hora_inicio|time:"H:i" }} - {{ h.hora_fin|time:"H:i" }}</strong>
+                                <small class="text-muted">Grado {{ h.grado }}°{{ h.seccion }} · Aula: {{ h.ambiente|default:"Aula Escolar" }}</small>
+                            </div>
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3;">
+                                Clase Oficial
+                            </span>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4 text-muted small">No hay bloques de clase programados para esta asignatura en el horario semanal.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% else %}
+    <!-- =====================================================================
+         VISTA PRINCIPAL: LISTADO DE ASIGNATURAS (CALCULADO 100% DINÁMICO)
+         ===================================================================== -->
+
+    <!-- HERO BANNER MIS ASIGNATURAS -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-book-half" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Plan de Estudios Oficial
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Mis Asignaturas
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Asignaturas asignadas a su carga docente con cálculo automático de estudiantes desde la base de datos.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                <span class="badge rounded-pill px-3.5 py-2 fw-bold shadow-2xs" 
+                      style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.88rem;">
+                    <i class="bi bi-journal-check me-1 text-pink"></i> {{ total_asignaturas }} Asignaturas a Cargo
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y FILTRO DE GRADO -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3 mb-4">
+        <div class="position-relative flex-grow-1" style="max-width: 480px;">
+            <i class="bi bi-search position-absolute top-50 translate-middle-y text-muted" style="left: 16px;"></i>
+            <input type="text" id="buscar-asignatura-input" onkeyup="filtrarAsignaturas();" 
+                   class="form-control rounded-pill ps-5 pe-3 py-2 border bg-white shadow-2xs" 
+                   style="border-color: #fce7f3; font-size: 0.88rem;" 
+                   placeholder="Buscar asignatura...">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="dropdown">
+                <button class="btn btn-white bg-white border rounded-pill px-3 py-2 shadow-2xs text-muted d-flex align-items-center gap-2" 
+                        type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.85rem; border-color: #fce7f3;">
+                    <i class="bi bi-funnel text-muted"></i>
+                    <span id="label-filtro-grado">Todos los grados</span>
+                    <i class="bi bi-chevron-down small ms-1 text-muted"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 py-1">
+                    <li><a class="dropdown-item small" href="javascript:void(0);" onclick="seleccionarFiltroGrado('todos', 'Todos los grados');">Todos los grados</a></li>
+                    <li><a class="dropdown-item small" href="javascript:void(0);" onclick="seleccionarFiltroGrado('10', 'Grado 10°');">Grado 10°</a></li>
+                    <li><a class="dropdown-item small" href="javascript:void(0);" onclick="seleccionarFiltroGrado('11', 'Grado 11°');">Grado 11°</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- LISTADO DINÁMICO DE ASIGNATURAS CALCULADAS REALMENTE -->
+    <div class="d-flex flex-column gap-3" id="contenedor-asignaturas-lista">
+        {% for asig in asignaturas_metricas %}
+        <div class="card border rounded-4 p-3.5 bg-white shadow-2xs hover-shadow transition asignatura-item-card" 
+             data-nombre="{{ asig.nombre }}" data-grado="{{ asig.grados_filtro_attr }}" style="border-color: #fce7f3 !important;">
+            <div class="row align-items-center g-3">
+                <!-- Icono -->
+                <div class="col-auto">
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" 
+                         style="background: {{ asig.color_bg }}; color: {{ asig.color_txt }}; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                        <i class="bi {{ asig.icono }} fs-3"></i>
+                    </div>
+                </div>
+
+                <!-- Título, Badges y Descripción -->
+                <div class="col-md-5">
+                    <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem;">{{ asig.nombre }}</h5>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge rounded-pill px-2.5 py-1 fw-semibold" 
+                              style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3; font-size: 0.72rem;">
+                            Grados: {{ asig.grados_display }}
+                        </span>
+                        <span class="badge rounded-pill px-2.5 py-1 text-secondary fw-semibold" 
+                              style="background: #f1f5f9; font-size: 0.72rem;">
+                            {{ asig.aula }}
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-0 lh-sm" style="font-size: 0.82rem;">
+                        {{ asig.descripcion }}
+                    </p>
+                </div>
+
+                <!-- Estadísticas (Grados, Grupos, Estudiantes Reales) -->
+                <div class="col-md-3">
+                    <div class="space-y-1.5 text-muted small" style="font-size: 0.8rem;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-people" style="color: #64748b; font-size: 0.95rem;"></i>
+                            <span>{{ asig.grados_display }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-person-video3" style="color: #64748b; font-size: 0.95rem;"></i>
+                            <span>{{ asig.num_grupos }} grupo{% if asig.num_grupos != 1 %}s{% endif %}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-person-fill" style="color: #db2777; font-size: 0.95rem;"></i>
+                            <span class="fw-bold text-dark">{{ asig.total_estudiantes }} estudiante{% if asig.total_estudiantes != 1 %}s{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="col-md-3 text-end d-flex align-items-center justify-content-end gap-2">
+                    <a href="{% url 'mis_asignaturas' %}?asignatura_id={{ asig.id }}" 
+                       class="btn rounded-pill px-3.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-2xs"
+                       style="background: #ffffff; border: 1px solid #fce7f3; color: #db2777; font-size: 0.82rem;">
+                        Ver detalles <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-muted p-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 py-1">
+                            <li><a class="dropdown-item small" href="{% url 'actividades_tareas' %}?asig_id={{ asig.id }}"><i class="bi bi-journal-text me-2 text-pink"></i>Ver Tareas</a></li>
+                            <li><a class="dropdown-item small" href="{% url 'asistencia_docente' %}"><i class="bi bi-check2-square me-2 text-pink"></i>Tomar Asistencia</a></li>
+                            <li><a class="dropdown-item small" href="{% url 'calificaciones_docente' %}"><i class="bi bi-mortarboard me-2 text-pink"></i>Calificaciones</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="card border rounded-4 p-5 text-center bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+            <i class="bi bi-book fs-1 d-block mb-2" style="color: #db2777;"></i>
+            <h6 class="fw-bold text-dark">No hay asignaturas registradas</h6>
+            <small class="text-muted">Consulte con la coordinación académica para la asignación de su carga lectiva.</small>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% endif %}
+
+</div>
+
+<!-- SCRIPT DE FILTRADO REACTIVO -->
+<script>
+let filtroGradoActivo = 'todos';
+
+function seleccionarFiltroGrado(grado, texto) {
+    filtroGradoActivo = grado;
+    document.getElementById('label-filtro-grado').textContent = texto;
+    filtrarAsignaturas();
+}
+
+function filtrarAsignaturas() {
+    const texto = (document.getElementById('buscar-asignatura-input')?.value || '').toLowerCase().trim();
+    const tarjetas = document.querySelectorAll('.asignatura-item-card');
+
+    tarjetas.forEach(card => {
+        const nombre = (card.getAttribute('data-nombre') || '').toLowerCase();
+        const gradosAttr = (card.getAttribute('data-grado') || '');
+        
+        let coincideTexto = !texto || nombre.includes(texto);
+        let coincideGrado = (filtroGradoActivo === 'todos') || gradosAttr.includes(filtroGradoActivo);
+
+        if (coincideTexto && coincideGrado) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+</script>

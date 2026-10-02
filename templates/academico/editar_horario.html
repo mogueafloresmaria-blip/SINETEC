@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Editar Clase en Horario · EDUNOVA{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: #f3f5f9 !important; }
+.edit-wrap { max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
+.edit-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 4px 20px rgba(15,23,42,0.06); overflow: hidden; }
+.edit-header { background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff; padding: 1.5rem 1.75rem; border-bottom: 1px solid #334155; }
+.edit-body { padding: 1.75rem; }
+.field-label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; color: #475569; text-transform: uppercase; margin-bottom: 0.4rem; display: block; }
+.form-control, .form-select { border-radius: 10px; border-color: #cbd5e1; font-weight: 600; color: #0f172a; padding: 0.65rem 0.85rem; }
+.form-control:focus, .form-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+.btn-save { background: linear-gradient(135deg, #4f46e5, #4338ca); color: #fff; font-weight: 700; border-radius: 12px; padding: 0.75rem 1.5rem; border: none; }
+.btn-save:hover { color: #fff; filter: brightness(1.08); }
+.btn-back { border-radius: 12px; font-weight: 700; padding: 0.75rem 1.25rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+{{ grados_por_nivel|json_script:"grados-por-nivel" }}
+<div class="edit-wrap">
+  <div class="edit-card">
+    <div class="edit-header d-flex justify-content-between align-items-center">
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-clock-history fs-4 text-warning"></i>
+          <h2 class="h5 fw-bold mb-0 text-white">Editar Clase del Horario Escolar</h2>
+        </div>
+        <p class="small text-slate-300 mb-0 mt-1" style="color: #cbd5e1;">
+          Modifique docente, aula, día, horas o asignatura. El sistema validará automáticamente posibles conflictos.
+        </p>
+      </div>
+      <a href="{% url 'horarios_tablero' %}?nivel={{ horario.nivel }}&grado={{ horario.grado }}&seccion={{ horario.seccion }}" class="btn btn-sm btn-outline-light rounded-pill px-3">
+        <i class="bi bi-x-lg me-1"></i> Cancelar
+      </a>
+    </div>
+
+    <form method="post" class="edit-body">
+      {% csrf_token %}
+      
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label class="field-label">1. Nivel Académico</label>
+          <select name="nivel" id="selNivel" class="form-select" onchange="actualizarGrados();">
+            <option value="Primaria" {% if horario.nivel == 'Primaria' %}selected{% endif %}>Primaria (1° a 5°)</option>
+            <option value="Secundaria" {% if horario.nivel == 'Secundaria' %}selected{% endif %}>Secundaria / Bachillerato (6° a 11°)</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="field-label">2. Grado</label>
+          <select name="grado" id="selGrado" class="form-select" required>
+            <!-- Llenado dinámicamente con JS -->
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="field-label">3. Sección / Grupo</label>
+          <select name="seccion" class="form-select" required>
+            {% for s in secciones %}
+            <option value="{{ s }}" {% if horario.seccion == s %}selected{% endif %}>Sección {{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="field-label">4. Asignatura / Materia</label>
+          <select name="programa_id" class="form-select">
+            <option value="">-- Seleccionar Asignatura --</option>
+            {% for p in programas %}
+            <option value="{{ p.id }}" {% if horario.programa and horario.programa.id == p.id %}selected{% elif horario.nombre_materia == p.denominacion %}selected{% endif %}>
+              {{ p.denominacion }} ({{ p.codigo }})
+            </option>
+            {% endfor %}
+          </select>
+          <input type="text" name="materia" class="form-control mt-2" placeholder="O escriba el nombre de la materia..." value="{{ horario.tema }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="field-label">5. Docente Responsable</label>
+          <select name="docente_id" class="form-select">
+            <option value="">-- Sin docente asignado --</option>
+            {% for d in docentes %}
+            <option value="{{ d.id }}" {% if horario.instructor and horario.instructor.id == d.id %}selected{% endif %}>
+              Prof. {{ d.get_full_name|default:d.username }} {% if d.perfil.area %}({{ d.perfil.area }}){% endif %}
+            </option>
+            {% endfor %}
+          </select>
+          <small class="text-muted">Si deja vacío se asignará según la Carga Académica del curso.</small>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label class="field-label">6. Día de la Semana</label>
+          <select name="dia" class="form-select" required>
+            {% for val, nom in dias %}
+            <option value="{{ val }}" {% if horario.dia == val %}selected{% endif %}>{{ nom }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="field-label">7. Hora Inicio (06:00+)</label>
+          <input type="time" name="hora_inicio" class="form-control" value="{{ horario.hora_inicio|time:'H:i' }}" required min="06:00">
+        </div>
+
+        <div class="col-md-4">
+          <label class="field-label">8. Hora Fin</label>
+          <input type="time" name="hora_fin" class="form-control" value="{{ horario.hora_fin|time:'H:i' }}" required min="06:30">
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-8">
+          <label class="field-label">9. Aula / Espacio Físico</label>
+          <select name="aula" class="form-select">
+            {% for a in aulas %}
+            <option value="{{ a }}" {% if horario.ambiente == a %}selected{% endif %}>{{ a }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-center pt-3">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" name="es_recreo" id="es_recreo" {% if horario.es_recreo %}checked{% endif %}>
+            <label class="form-check-label fw-bold text-dark small" for="es_recreo">
+              Marcar como Recreo / Descanso
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 mb-4 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+        <div class="d-flex gap-2">
+          <i class="bi bi-shield-check text-primary fs-5"></i>
+          <div>
+            <div class="fw-bold text-dark small">Validación de Conflictos Activa</div>
+            <div class="text-muted small">Al guardar, el sistema verificará que el docente no tenga otra clase simultánea, que el aula no esté ocupada y que el grupo no se solape con otra asignatura.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+        <a href="{% url 'horarios_tablero' %}?nivel={{ horario.nivel }}&grado={{ horario.grado }}&seccion={{ horario.seccion }}" class="btn btn-light btn-back text-secondary">
+          <i class="bi bi-arrow-left me-1"></i> Volver a Horarios
+        </a>
+        <button type="submit" class="btn btn-save px-4">
+          <i class="bi bi-check-circle-fill me-1"></i> Guardar Cambios
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const GRADOS = JSON.parse(document.getElementById('grados-por-nivel').textContent);
+const gradoActual = "{{ horario.grado|escapejs }}";
+
+function actualizarGrados() {
+  const nivel = document.getElementById('selNivel').value;
+  const sel = document.getElementById('selGrado');
+  const opts = GRADOS[nivel] || [];
+  sel.innerHTML = '';
+  opts.forEach(g => {
+    const o = document.createElement('option');
+    o.value = g;
+    o.textContent = g;
+    if (g === gradoActual) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+document.addEventListener('DOMContentLoaded', actualizarGrados);
+</script>
+{% endblock %}

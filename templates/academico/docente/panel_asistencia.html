@@ -1,0 +1,684 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 6: ASISTENCIA DOCENTE (EDUNOVA)
+     Estilo: Rosado Elegante (#db2777, #fce7f3, #fff0f3, #be185d)
+     Funcionalidad:
+     1. Inicio de Asistencia con filtros reales: Fecha, Asignatura, Grado, Grupo, Periodo
+     2. Nómina real de estudiantes (sin nombres inventados)
+     3. 4 Estados: ? Presente (P), ? Ausente (A), ? Tardanza (T), ?? Excusa (J)
+     4. "Marcar todos como presentes" interactivo
+     5. Observaciones pedagógicas individuales por estudiante
+     6. Guardar asistencia real en BD con prevención de duplicados
+     7. Historial completo de sesiones anteriores con opción de consulta y edición
+     8. Generar documento oficial de asistencia (con membrete EDUNOVA/SENA, imprimible/descargable)
+     9. Resumen consolidado de asistencia por estudiante con porcentajes
+     10. Conexión directa al perfil del estudiante y notificaciones de inasistencia
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-asistencia">
+
+    <!-- HERO BANNER ASISTENCIA -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-calendar-check-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        ASISTENCIA
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Registra y consulta la asistencia de tus estudiantes, control diario y novedades.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end d-none d-lg-block position-relative z-1">
+                <div class="d-inline-flex align-items-center gap-2 px-3.5 py-2 rounded-pill fw-semibold shadow-2xs" 
+                     style="background: rgba(255, 255, 255, 0.92); border: 1px solid #fce7f3; color: #be185d; font-size: 0.85rem;">
+                    <i class="bi bi-calendar3" style="color: #db2777;"></i>
+                    <span>Sesión: {{ fecha_asistencia_display }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS DE NAVEGACIÓN INTERNA DEL MÓDULO -->
+    <div class="d-flex align-items-center gap-2 p-1.5 rounded-pill bg-white border shadow-2xs mb-4 d-inline-flex flex-wrap" style="border-color: #fce7f3 !important;">
+        <button type="button" onclick="cambiarPestanaAsistencia('tomar');" id="tab-btn-tomar"
+                class="btn rounded-pill px-4 py-2 fw-bold small text-decoration-none transition tab-asist-btn" 
+                style="background: #db2777; color: #ffffff; border: 1px solid #db2777;">
+            <i class="bi bi-check2-square me-1.5"></i> Tomar Asistencia
+        </button>
+        <button type="button" onclick="cambiarPestanaAsistencia('historial');" id="tab-btn-historial"
+                class="btn rounded-pill px-4 py-2 fw-bold small text-decoration-none transition text-muted tab-asist-btn" 
+                style="background: transparent; border: none;">
+            <i class="bi bi-clock-history me-1.5"></i> Historial de Asistencia
+        </button>
+        <button type="button" onclick="cambiarPestanaAsistencia('resumen');" id="tab-btn-resumen"
+                class="btn rounded-pill px-4 py-2 fw-bold small text-decoration-none transition text-muted tab-asist-btn" 
+                style="background: transparent; border: none;">
+            <i class="bi bi-pie-chart-fill me-1.5"></i> Resumen por Estudiante
+        </button>
+    </div>
+
+    <!-- =========================================================================
+         SECCIÓN 1: TOMAR ASISTENCIA
+         ========================================================================= -->
+    <div id="seccion-asist-tomar">
+        <!-- FORMULARIO DE CONSULTA / FILTROS (ASIGNATURA, GRADO, GRUPO, FECHA, PERIODO) -->
+        <div class="card border rounded-4 p-3.5 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+            <form method="GET" action="{% url 'asistencia_docente' %}" id="form-filtro-asistencia" class="row g-3 align-items-end">
+                <!-- Selector Grado y Grupo -->
+                <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold mb-1" style="font-size: 0.76rem;">Grado y Grupo:</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white" style="border-color: #fce7f3; color: #db2777;"><i class="bi bi-people-fill"></i></span>
+                        <select name="carga" class="form-select fw-bold text-dark" style="border-color: #fce7f3; font-size: 0.85rem;" onchange="this.form.submit();">
+                            {% for c in cargas_unicas %}
+                            <option value="{{ c.id }}" {% if carga_seleccionada.id == c.id %}selected{% endif %}>
+                                Grado {{ c.grado }}°{{ c.seccion }} · {{ c.programa.denominacion|default:'Matemáticas' }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Selector Fecha -->
+                <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold mb-1" style="font-size: 0.76rem;">Fecha de la Sesión:</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white" style="border-color: #fce7f3; color: #db2777;"><i class="bi bi-calendar-event"></i></span>
+                        <input type="date" name="fecha" value="{{ fecha_asistencia_str }}" 
+                               class="form-control fw-bold text-dark" style="border-color: #fce7f3; font-size: 0.85rem;"
+                               onchange="this.form.submit();">
+                    </div>
+                </div>
+
+                <!-- Selector Periodo -->
+                <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold mb-1" style="font-size: 0.76rem;">Periodo Académico:</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white" style="border-color: #fce7f3; color: #db2777;"><i class="bi bi-bookmark-check"></i></span>
+                        <select name="periodo" class="form-select fw-bold text-dark" style="border-color: #fce7f3; font-size: 0.85rem;" onchange="this.form.submit();">
+                            <option value="Periodo 1" {% if periodo_asistencia_sel == 'Periodo 1' %}selected{% endif %}>Periodo 1</option>
+                            <option value="Periodo 2" {% if periodo_asistencia_sel == 'Periodo 2' %}selected{% endif %}>Periodo 2</option>
+                            <option value="Periodo 3" {% if periodo_asistencia_sel == 'Periodo 3' %}selected{% endif %}>Periodo 3</option>
+                            <option value="Periodo 4" {% if periodo_asistencia_sel == 'Periodo 4' %}selected{% endif %}>Periodo 4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botón Cargar / Actualizar -->
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn w-100 rounded-pill py-2 text-white fw-bold shadow-2xs d-flex align-items-center justify-content-center gap-2"
+                            style="background: #db2777; border: 1px solid #db2777; font-size: 0.85rem;">
+                        <i class="bi bi-arrow-repeat"></i> Cargar Lista
+                    </button>
+                    <button type="button" class="btn rounded-pill px-3 py-2 bg-white fw-bold shadow-2xs d-flex align-items-center justify-content-center gap-1.5"
+                            data-bs-toggle="modal" data-bs-target="#modalDocumentoAsistencia"
+                            style="border: 1.5px solid #fce7f3; color: #be185d; font-size: 0.85rem;" title="Generar documento oficial imprimible">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Documento
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 5 TARJETAS MÉTRICAS DE ASISTENCIA EN TIEMPO REAL -->
+        <div class="row g-3 mb-4">
+            <!-- 1. Total estudiantes -->
+            <div class="col-6 col-md">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-1.5">
+                        <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Total Alumnos</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" style="background: #fdf2f8; color: #be185d; width: 32px; height: 32px;">
+                            <i class="bi bi-people-fill fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-0" id="kpi-total-est" style="font-size: 1.6rem;">{{ asist_kpi_total }}</h3>
+                </div>
+            </div>
+
+            <!-- 2. Presentes -->
+            <div class="col-6 col-md">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-1.5">
+                        <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Presentes</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" style="background: #ecfdf5; color: #047857; width: 32px; height: 32px;">
+                            <i class="bi bi-check-circle-fill fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-0 text-success" id="kpi-presentes" style="font-size: 1.6rem;">{{ asist_kpi_presentes }}</h3>
+                </div>
+            </div>
+
+            <!-- 3. Ausentes -->
+            <div class="col-6 col-md">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-1.5">
+                        <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Ausentes</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" style="background: #fef2f2; color: #b91c1c; width: 32px; height: 32px;">
+                            <i class="bi bi-x-circle-fill fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-0 text-danger" id="kpi-ausentes" style="font-size: 1.6rem;">{{ asist_kpi_ausentes }}</h3>
+                </div>
+            </div>
+
+            <!-- 4. Tardanzas -->
+            <div class="col-6 col-md">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-1.5">
+                        <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Tardanzas</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" style="background: #fefce8; color: #ca8a04; width: 32px; height: 32px;">
+                            <i class="bi bi-clock-fill fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-0 text-warning" id="kpi-tardanzas" style="font-size: 1.6rem;">{{ asist_kpi_tardanzas }}</h3>
+                </div>
+            </div>
+
+            <!-- 5. Excusas -->
+            <div class="col-6 col-md">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-1.5">
+                        <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Excusas</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" style="background: #eff6ff; color: #1d4ed8; width: 32px; height: 32px;">
+                            <i class="bi bi-clipboard-check-fill fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-0 text-primary" id="kpi-excusas" style="font-size: 1.6rem;">{{ asist_kpi_excusas }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULARIO OFICIAL DE GUARDADO DE ASISTENCIA -->
+        <form method="POST" action="{% url 'instructor_dashboard' %}" id="form-guardar-asistencia-docente">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="guardar_asistencia">
+            <input type="hidden" name="carga_id" value="{{ carga_seleccionada.id }}">
+            <input type="hidden" name="fecha_asistencia" value="{{ fecha_asistencia_str }}">
+            <input type="hidden" name="periodo" value="{{ periodo_asistencia_sel }}">
+
+            <!-- BARRA DE ACCIÓN SUPERIOR CON MARCAR TODOS -->
+            <div class="card border rounded-4 p-3 bg-white shadow-2xs mb-3" style="border-color: #fce7f3 !important;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" onclick="marcarTodosPresentes();" 
+                                class="btn rounded-pill px-3.5 py-1.5 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+                                style="background: #ecfdf5; color: #047857; border: 1.5px solid #a7f3d0; font-size: 0.84rem;">
+                            <i class="bi bi-check-all fs-6"></i> Marcar todos como presentes
+                        </button>
+                        <span class="text-muted small fst-italic ms-2 d-none d-md-inline">
+                            Clase: Grado {{ carga_seleccionada.grado }}°{{ carga_seleccionada.seccion }} · {{ carga_seleccionada.programa.denominacion|default:'Matemáticas' }}
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="submit" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                                style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                            <i class="bi bi-floppy-fill"></i> GUARDAR ASISTENCIA
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLA DE ESTUDIANTES Y REGISTRO DE ASISTENCIA -->
+            <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-5" style="border-color: #fce7f3 !important;">
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover mb-0" id="tabla-asistencia-docente">
+                        <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                            <tr>
+                                <th class="text-center py-3" style="width: 45px; color: #be185d; font-size: 0.76rem;">#</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO</th>
+                                <th class="py-3 text-center" style="width: 290px; color: #be185d; font-size: 0.76rem;">ESTADO DE ASISTENCIA</th>
+                                <th class="py-3" style="color: #be185d; font-size: 0.76rem;">OBSERVACIÓN INDIVIDUAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in estudiantes_carga_sel %}
+                            <tr style="border-bottom: 1px solid #fce7f3;">
+                                <td class="text-center fw-bold text-muted small">{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs" 
+                                             style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%); width: 34px; height: 34px; font-size: 0.78rem;">
+                                            {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                            <span class="badge rounded-pill px-2 py-0.5 text-muted" style="background: #f1f5f9; font-size: 0.7rem;">
+                                                Grado {{ m.grado_escolar }}°{{ m.seccion }} · {{ m.resumen_asist.porcentaje }}% asist. general
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-muted small font-monospace fw-medium">{{ m.aprendiz.username }}</td>
+                                <td>
+                                    <div class="btn-group w-100 shadow-2xs rounded-pill p-1" style="background: #f8fafc; border: 1px solid #e2e8f0;" role="group">
+                                        <!-- Presente (P) -->
+                                        <input type="radio" class="btn-check asist-radio" name="asistencia_{{ m.id }}" id="asist_p_{{ m.id }}" value="P" 
+                                               {% if m.asistencia_estado == 'P' %}checked{% endif %} onchange="actualizarKpisEnVivo();">
+                                        <label class="btn btn-sm rounded-pill fw-bold border-0 py-1" for="asist_p_{{ m.id }}" style="font-size: 0.76rem;" title="Presente">
+                                            ? Presente
+                                        </label>
+
+                                        <!-- Tardanza (T) -->
+                                        <input type="radio" class="btn-check asist-radio" name="asistencia_{{ m.id }}" id="asist_t_{{ m.id }}" value="T" 
+                                               {% if m.asistencia_estado == 'T' %}checked{% endif %} onchange="actualizarKpisEnVivo();">
+                                        <label class="btn btn-sm rounded-pill fw-bold border-0 py-1" for="asist_t_{{ m.id }}" style="font-size: 0.76rem;" title="Tardanza">
+                                            ? Tardanza
+                                        </label>
+
+                                        <!-- Ausente (A) -->
+                                        <input type="radio" class="btn-check asist-radio" name="asistencia_{{ m.id }}" id="asist_a_{{ m.id }}" value="A" 
+                                               {% if m.asistencia_estado == 'A' %}checked{% endif %} onchange="actualizarKpisEnVivo();">
+                                        <label class="btn btn-sm rounded-pill fw-bold border-0 py-1" for="asist_a_{{ m.id }}" style="font-size: 0.76rem;" title="Ausente">
+                                            ? Ausente
+                                        </label>
+
+                                        <!-- Excusa / Justificada (J) -->
+                                        <input type="radio" class="btn-check asist-radio" name="asistencia_{{ m.id }}" id="asist_j_{{ m.id }}" value="J" 
+                                               {% if m.asistencia_estado in 'JE' %}checked{% endif %} onchange="actualizarKpisEnVivo();">
+                                        <label class="btn btn-sm rounded-pill fw-bold border-0 py-1" for="asist_j_{{ m.id }}" style="font-size: 0.76rem;" title="Excusa / Justificada">
+                                            ?? Excusa
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" name="obs_{{ m.id }}" value="{{ m.asistencia_obs_limpia }}"
+                                           class="form-control form-control-sm rounded-pill px-3" 
+                                           placeholder="Ej: Llegó 15 min tarde, presentó excusa médica..."
+                                           style="border: 1px solid #fce7f3; font-size: 0.82rem;">
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-people fs-2 d-block mb-2" style="color: #db2777;"></i>
+                                    No hay estudiantes registrados en este curso.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3.5 bg-light border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #fce7f3 !important;">
+                    <span class="text-muted small">
+                        <i class="bi bi-shield-check text-success me-1"></i> La información se sincroniza automáticamente con el perfil individual del estudiante y su acudiente.
+                    </span>
+                    <button type="submit" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm"
+                            style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                        <i class="bi bi-floppy-fill me-1"></i> GUARDAR ASISTENCIA
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- =========================================================================
+         SECCIÓN 2: HISTORIAL DE ASISTENCIA GUARDADA
+         ========================================================================= -->
+    <div id="seccion-asist-historial" style="display: none;">
+        <div class="card border rounded-4 bg-white shadow-2xs p-4 mb-4" style="border-color: #fce7f3 !important;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-clock-history fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">HISTORIAL DE ASISTENCIA</h6>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" id="buscar-historial-asist" onkeyup="filtrarTablaHistorialAsist();"
+                           class="form-control form-control-sm rounded-pill px-3" placeholder="Filtrar por fecha o grado..."
+                           style="border-color: #fce7f3; max-width: 250px; font-size: 0.82rem;">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0" id="tabla-historial-asistencias">
+                    <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                        <tr>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ASIGNATURA</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">GRADO Y GRUPO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">PERIODO</th>
+                            <th class="text-center py-3" style="color: #be185d; font-size: 0.76rem;">TOTAL</th>
+                            <th class="text-center py-3" style="color: #047857; font-size: 0.76rem;">PRESENTES</th>
+                            <th class="text-center py-3" style="color: #b91c1c; font-size: 0.76rem;">AUSENTES</th>
+                            <th class="text-center py-3" style="color: #ca8a04; font-size: 0.76rem;">TARDANZAS</th>
+                            <th class="text-center py-3" style="color: #1d4ed8; font-size: 0.76rem;">EXCUSAS</th>
+                            <th class="text-end py-3" style="color: #be185d; font-size: 0.76rem;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in historial_asistencia_sesiones %}
+                        <tr style="border-bottom: 1px solid #fce7f3;">
+                            <td class="fw-bold text-dark small"><i class="bi bi-calendar3 me-1.5" style="color: #db2777;"></i>{{ s.fecha }}</td>
+                            <td><span class="badge rounded-pill px-2.5 py-1" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3;">{{ s.materia }}</span></td>
+                            <td class="fw-semibold text-dark small">Grado {{ s.grado }}{{ s.seccion }}</td>
+                            <td class="text-muted small">{{ s.periodo }}</td>
+                            <td class="text-center fw-bold text-dark small">{{ s.total_estudiantes }}</td>
+                            <td class="text-center fw-bold text-success small">{{ s.presentes }}</td>
+                            <td class="text-center fw-bold text-danger small">{{ s.ausentes }}</td>
+                            <td class="text-center fw-bold text-warning small">{{ s.tardanzas }}</td>
+                            <td class="text-center fw-bold text-primary small">{{ s.justificados }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'asistencia_docente' %}?carga={{ s.carga_id }}&fecha={{ s.fecha_iso }}&periodo={{ s.periodo }}"
+                                   class="btn btn-sm rounded-pill px-3 py-1 fw-bold shadow-2xs"
+                                   style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.78rem;">
+                                    <i class="bi bi-pencil-square"></i> Ver / Editar
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="bi bi-journal-x fs-2 d-block mb-2" style="color: #db2777;"></i>
+                                Aún no se han registrado sesiones de asistencia en la base de datos.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         SECCIÓN 3: RESUMEN CONSOLIDADO POR ESTUDIANTE
+         ========================================================================= -->
+    <div id="seccion-asist-resumen" style="display: none;">
+        <div class="card border rounded-4 bg-white shadow-2xs p-4 mb-4" style="border-color: #fce7f3 !important;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-pie-chart-fill fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">RESUMEN DE ASISTENCIA POR ESTUDIANTE</h6>
+                </div>
+                <span class="text-muted small">Cálculo porcentual sobre todas las sesiones registradas en la base de datos</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0">
+                    <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                        <tr>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO</th>
+                            <th class="text-center py-3" style="color: #be185d; font-size: 0.76rem;">TOTAL CLASES</th>
+                            <th class="text-center py-3" style="color: #047857; font-size: 0.76rem;">PRESENTES</th>
+                            <th class="text-center py-3" style="color: #b91c1c; font-size: 0.76rem;">AUSENTES</th>
+                            <th class="text-center py-3" style="color: #ca8a04; font-size: 0.76rem;">TARDANZAS</th>
+                            <th class="text-center py-3" style="color: #1d4ed8; font-size: 0.76rem;">EXCUSAS</th>
+                            <th class="py-3" style="width: 180px; color: #be185d; font-size: 0.76rem;">% ASISTENCIA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in estudiantes_carga_sel %}
+                        <tr style="border-bottom: 1px solid #fce7f3;">
+                            <td>
+                                <strong class="text-dark d-block" style="font-size: 0.9rem;">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                <small class="text-muted">Grado {{ m.grado_escolar }}°{{ m.seccion }}</small>
+                            </td>
+                            <td class="text-muted small font-monospace">{{ m.aprendiz.username }}</td>
+                            <td class="text-center fw-bold text-dark small">{{ m.resumen_asist.total }}</td>
+                            <td class="text-center fw-bold text-success small">{{ m.resumen_asist.presentes }}</td>
+                            <td class="text-center fw-bold text-danger small">{{ m.resumen_asist.ausentes }}</td>
+                            <td class="text-center fw-bold text-warning small">{{ m.resumen_asist.tardanzas }}</td>
+                            <td class="text-center fw-bold text-primary small">{{ m.resumen_asist.excusas }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 7px; background-color: #f1f5f9;">
+                                        <div class="progress-bar rounded-pill" role="progressbar" 
+                                             style="width: {{ m.resumen_asist.porcentaje }}%; background: {% if m.resumen_asist.porcentaje >= 80 %}#10b981{% elif m.resumen_asist.porcentaje >= 65 %}#f59e0b{% else %}#ef4444{% endif %};">
+                                        </div>
+                                    </div>
+                                    <span class="small fw-bold {% if m.resumen_asist.porcentaje >= 80 %}text-success{% elif m.resumen_asist.porcentaje >= 65 %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ m.resumen_asist.porcentaje }}%
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-people fs-2 d-block mb-2" style="color: #db2777;"></i>
+                                No hay estudiantes para mostrar.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- =========================================================================
+     MODAL: GENERAR DOCUMENTO OFICIAL DE ASISTENCIA (IMPRIMIBLE / PDF)
+     ========================================================================= -->
+<div class="modal fade" id="modalDocumentoAsistencia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header text-white p-3.5" style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-pdf-fill fs-5"></i>
+                    <h5 class="modal-title fw-bold mb-0" style="font-size: 1.05rem;">Documento Oficial de Registro de Asistencia</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body p-4 p-md-5" id="area-impresion-asistencia" style="background: #ffffff; color: #1e293b;">
+                <!-- MEMBRETE INSTITUCIONAL OFICIAL -->
+                <div class="border-bottom pb-3 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-1" style="color: #be185d; letter-spacing: -0.5px;">EDUNOVA — SISTEMA INTEGRADO EDUCATIVO</h4>
+                        <p class="text-muted mb-0 small">Institución Educativa Articulada · Control de Asistencia y Novedades Escolares</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3; font-size: 0.82rem;">
+                            ACTA OFICIAL DE SESIÓN
+                        </span>
+                        <div class="small text-muted mt-1">Fecha de expedición: {{ fecha_asistencia_display }}</div>
+                    </div>
+                </div>
+
+                <!-- METADATOS DE LA SESIÓN -->
+                <div class="row g-3 p-3 rounded-3 mb-4" style="background: #fff0f3; border: 1px solid #fce7f3; font-size: 0.85rem;">
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Docente Titular:</span>
+                        <strong class="text-dark">{{ user.get_full_name|default:user.username }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Asignatura:</span>
+                        <strong class="text-dark">{{ carga_seleccionada.programa.denominacion|default:'Matemáticas' }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Grado y Grupo:</span>
+                        <strong class="text-dark">Grado {{ carga_seleccionada.grado }}°{{ carga_seleccionada.seccion }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Fecha de la Sesión:</span>
+                        <strong class="text-dark">{{ fecha_asistencia_display }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Periodo Académico:</span>
+                        <strong class="text-dark">{{ periodo_asistencia_sel }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block small">Balance de Sesión:</span>
+                        <strong class="text-dark">{{ asist_kpi_presentes }} Presentes · {{ asist_kpi_ausentes }} Ausentes · {{ asist_kpi_tardanzas }} Tardanzas</strong>
+                    </div>
+                </div>
+
+                <!-- LISTA COMPLETA DE ESTUDIANTES -->
+                <table class="table table-bordered align-middle mb-4" style="font-size: 0.82rem; border-color: #cbd5e1;">
+                    <thead style="background: #f8fafc;">
+                        <tr>
+                            <th class="text-center" style="width: 35px;">#</th>
+                            <th>ESTUDIANTE</th>
+                            <th>DOCUMENTO</th>
+                            <th class="text-center" style="width: 140px;">ESTADO</th>
+                            <th>OBSERVACIONES REGISTRADAS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in estudiantes_carga_sel %}
+                        <tr>
+                            <td class="text-center fw-bold">{{ forloop.counter }}</td>
+                            <td class="fw-bold">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</td>
+                            <td class="font-monospace text-muted">{{ m.aprendiz.username }}</td>
+                            <td class="text-center fw-bold">
+                                {% if m.asistencia_estado == 'P' %}<span class="text-success">? Presente</span>
+                                {% elif m.asistencia_estado == 'A' %}<span class="text-danger">? Ausente</span>
+                                {% elif m.asistencia_estado == 'T' %}<span class="text-warning">? Tardanza</span>
+                                {% elif m.asistencia_estado in 'JE' %}<span class="text-primary">?? Excusa</span>
+                                {% else %}<span class="text-success">? Presente</span>{% endif %}
+                            </td>
+                            <td class="text-muted">{{ m.asistencia_obs_limpia|default:'Sin novedades' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- FIRMAS DE CERTIFICACIÓN -->
+                <div class="row pt-5 mt-4 text-center" style="font-size: 0.85rem;">
+                    <div class="col-6">
+                        <div class="border-top pt-2 mx-auto" style="max-width: 250px; border-color: #475569 !important;">
+                            <strong class="d-block text-dark">{{ user.get_full_name|default:user.username }}</strong>
+                            <span class="text-muted small">Firma del Docente</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border-top pt-2 mx-auto" style="max-width: 250px; border-color: #475569 !important;">
+                            <strong class="d-block text-dark">Coordinación Académica</strong>
+                            <span class="text-muted small">Visto Bueno Institucional</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer p-3 bg-light">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" onclick="imprimirDocumentoAsistencia();" class="btn rounded-pill px-4 text-white fw-bold shadow-sm"
+                        style="background: #db2777; border: 1px solid #db2777;">
+                    <i class="bi bi-printer-fill me-1"></i> Imprimir / Guardar como PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     JAVASCRIPT: INTERACTIVIDAD Y MARCAR TODOS
+     ========================================================================= -->
+<script>
+function cambiarPestanaAsistencia(pestana) {
+    const secTomar = document.getElementById('seccion-asist-tomar');
+    const secHistorial = document.getElementById('seccion-asist-historial');
+    const secResumen = document.getElementById('seccion-asist-resumen');
+
+    const btnTomar = document.getElementById('tab-btn-tomar');
+    const btnHistorial = document.getElementById('tab-btn-historial');
+    const btnResumen = document.getElementById('tab-btn-resumen');
+
+    const resetBtn = (btn) => {
+        btn.style.background = 'transparent';
+        btn.style.border = 'none';
+        btn.style.color = '#64748b';
+    };
+    const activeBtn = (btn) => {
+        btn.style.background = '#db2777';
+        btn.style.border = '1px solid #db2777';
+        btn.style.color = '#ffffff';
+    };
+
+    resetBtn(btnTomar);
+    resetBtn(btnHistorial);
+    resetBtn(btnResumen);
+
+    if (pestana === 'tomar') {
+        secTomar.style.display = 'block';
+        secHistorial.style.display = 'none';
+        secResumen.style.display = 'none';
+        activeBtn(btnTomar);
+    } else if (pestana === 'historial') {
+        secTomar.style.display = 'none';
+        secHistorial.style.display = 'block';
+        secResumen.style.display = 'none';
+        activeBtn(btnHistorial);
+    } else if (pestana === 'resumen') {
+        secTomar.style.display = 'none';
+        secHistorial.style.display = 'none';
+        secResumen.style.display = 'block';
+        activeBtn(btnResumen);
+    }
+}
+
+function marcarTodosPresentes() {
+    const pRadios = document.querySelectorAll('input[type="radio"].asist-radio[value="P"]');
+    pRadios.forEach(radio => {
+        radio.checked = true;
+    });
+    actualizarKpisEnVivo();
+}
+
+function actualizarKpisEnVivo() {
+    let p = 0, a = 0, t = 0, j = 0;
+    const radios = document.querySelectorAll('input[type="radio"].asist-radio:checked');
+    radios.forEach(r => {
+        if (r.value === 'P') p++;
+        else if (r.value === 'A') a++;
+        else if (r.value === 'T') t++;
+        else if (r.value === 'J' || r.value === 'E') j++;
+    });
+
+    const kpiP = document.getElementById('kpi-presentes');
+    const kpiA = document.getElementById('kpi-ausentes');
+    const kpiT = document.getElementById('kpi-tardanzas');
+    const kpiJ = document.getElementById('kpi-excusas');
+
+    if (kpiP) kpiP.innerText = p;
+    if (kpiA) kpiA.innerText = a;
+    if (kpiT) kpiT.innerText = t;
+    if (kpiJ) kpiJ.innerText = j;
+}
+
+function filtrarTablaHistorialAsist() {
+    const query = (document.getElementById('buscar-historial-asist').value || '').toLowerCase().trim();
+    const rows = document.querySelectorAll('#tabla-historial-asistencias tbody tr');
+    rows.forEach(tr => {
+        const text = tr.innerText.toLowerCase();
+        tr.style.display = text.includes(query) ? '' : 'none';
+    });
+}
+
+function imprimirDocumentoAsistencia() {
+    const contenido = document.getElementById('area-impresion-asistencia').innerHTML;
+    const ventana = window.open('', '_blank', 'width=950,height=750');
+    ventana.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Registro Oficial de Asistencia - EDUNOVA</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body { font-family: system-ui, -apple-system, sans-serif; padding: 25px; color: #1e293b; }
+                @media print {
+                    .no-print { display: none !important; }
+                    body { padding: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            ${contenido}
+            <script>
+                window.onload = function() { window.print(); }
+            <\/script>
+        </body>
+        </html>
+    `);
+    ventana.document.close();
+}
+</script>

@@ -1,0 +1,340 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 8: HORARIO ESCOLAR (EXCLUSIVAMENTE PROGRAMACIÓN SEMANAL DEL DOCENTE)
+     Diseño: Sistema Rosado Elegante (#db2777, #fce7f3, #fff0f3)
+     Estructura: Hero banner, métricas de carga horaria, malla semanal (Lunes a Viernes),
+     modal para agregar clase y formulario de eliminación real.
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-horario">
+
+    <!-- 1. HERO BANNER DE HORARIO (SIN FOTO EN LA ESQUINA) -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-calendar2-week-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Mi Horario Escolar Semanal
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Distribución de clases asignadas exclusivamente a su carga docente (Lunes a Viernes).
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end d-flex align-items-center justify-content-end gap-2 position-relative z-1 mt-3 mt-lg-0">
+                <button type="button" class="btn rounded-pill px-4 py-2.5 text-white fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalAgregarHorario"
+                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                    <i class="bi bi-plus-lg"></i> Agregar Horario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 4 TARJETAS MÉTRICAS DE HORARIO -->
+    <div class="row g-3 mb-4">
+        <!-- Total de Clases -->
+        <div class="col-6 col-md-3">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Total clases</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                        <i class="bi bi-clock-history fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">{{ total_clases_horario }}</h3>
+                    <small class="text-muted" style="font-size: 0.75rem;">sesiones / sem</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Horas Semanales -->
+        <div class="col-6 col-md-3">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Horas pedagógicas</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                        <i class="bi bi-hourglass-split fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">{{ total_horas_horario }}</h3>
+                    <small class="text-muted" style="font-size: 0.75rem;">horas semanales</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupos Atendidos -->
+        <div class="col-6 col-md-3">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Grupos a cargo</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                        <i class="bi bi-people-fill fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">2</h3>
+                    <small class="text-muted" style="font-size: 0.75rem;">grados oficiales</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jornada Escolar -->
+        <div class="col-6 col-md-3">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Jornada escolar</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                        <i class="bi bi-brightness-high fs-6" style="color: #f59e0b;"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.25rem;">Matutina</h3>
+                    <small class="text-muted" style="font-size: 0.72rem;">07:00 - 13:00</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MALLA DE HORARIO SEMANAL (LUNES A VIERNES) -->
+    <div class="row g-3">
+        {% for dia in dias_con_clases %}
+        <div class="col-lg">
+            <div class="card border rounded-4 p-3 bg-white h-100 shadow-2xs" style="border-color: #fce7f3 !important;">
+                <!-- Cabecera del Día -->
+                <div class="p-2.5 text-center rounded-3 fw-bold text-uppercase small mb-3 transition shadow-2xs"
+                     style="{% if dia.es_hoy %}background: #db2777; color: #ffffff; box-shadow: 0 4px 12px rgba(219,39,119,0.25);{% else %}background: #fff0f3; color: #be185d; border: 1px solid #fce7f3;{% endif %} font-size: 0.82rem; letter-spacing: 0.5px;">
+                    {{ dia.nombre }}
+                    {% if dia.es_hoy %}
+                    <span class="badge rounded-pill bg-white ms-1 px-2 py-0.5" style="color: #db2777; font-size: 0.65rem;">HOY</span>
+                    {% endif %}
+                </div>
+
+                <!-- Bloques de Clases del Día -->
+                <div class="d-flex flex-column gap-2.5">
+                    {% for h in dia.clases %}
+                    <div class="p-3 rounded-3 bg-white border shadow-2xs position-relative hover-shadow transition" 
+                         style="border-color: #fce7f3 !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-1.5">
+                            <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" 
+                                  style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.7rem;">
+                                Grado {{ h.grado }}°{{ h.seccion }}
+                            </span>
+                            <small class="fw-bold" style="color: #be185d; font-size: 0.75rem;">
+                                {{ h.hora_inicio|time:"H:i" }} - {{ h.hora_fin|time:"H:i" }}
+                            </small>
+                        </div>
+                        <strong class="d-block text-dark small mb-1.5" style="font-size: 0.88rem;">{{ h.programa.denominacion|default:'Matemáticas' }}</strong>
+                        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 0.74rem;">
+                            <span><i class="bi bi-geo-alt-fill text-muted me-1"></i>{{ h.ambiente|default:"Aula Escolar" }}</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <!-- Botón editar clase -->
+                                <button type="button" class="btn btn-link p-0 text-decoration-none" style="color: #db2777;" title="Editar clase del horario"
+                                        onclick="abrirModalEditarHorario('{{ h.id }}', '{{ h.dia }}', '{{ h.hora_inicio|time:'H:i' }}', '{{ h.hora_fin|time:'H:i' }}', '{{ h.ambiente|default:''|escapejs }}', '{{ h.programa_id }}', '{{ h.grado }}');">
+                                    <i class="bi bi-pencil-square fs-6"></i>
+                                </button>
+                                <!-- Formulario para eliminar bloque -->
+                                <form method="POST" action="{% url 'instructor_dashboard' %}" onsubmit="return confirm('¿Desea enviar esta clase a la Papelera de Reciclaje?');" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="eliminar_horario">
+                                    <input type="hidden" name="horario_id" value="{{ h.id }}">
+                                    <button type="submit" class="btn btn-link p-0 text-decoration-none" style="color: #e11d48;" title="Eliminar clase del horario">
+                                        <i class="bi bi-trash3 fs-6"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 text-muted small opacity-75">
+                        <i class="bi bi-moon-stars fs-3 d-block mb-1.5" style="color: #db2777;"></i>
+                        Sin clases asignadas
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- MODAL: AGREGAR BLOQUE DE HORARIO -->
+<div class="modal fade" id="modalAgregarHorario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #fce7f3;">
+            <div class="modal-header border-bottom p-4" style="background: linear-gradient(135deg, #fff0f3 0%, #fce7f3 100%); border-color: #fce7f3 !important;">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-calendar-plus" style="color: #db2777;"></i>
+                        <span>Agregar Clase al Horario</span>
+                    </h5>
+                    <small class="text-muted">Asigne bloques de clase a su horario escolar semanal (control de cruces activo)</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="agregar_horario">
+                <div class="modal-body p-4 space-y-3">
+                    <!-- Asignatura y Grupo -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Asignatura y Grupo *</label>
+                        <select name="carga_id" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                            {% for c in cargas %}
+                            <option value="{{ c.id }}">Grado {{ c.grado }}°{{ c.seccion }} — {{ c.programa.denominacion|default:'Matemáticas' }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Día de la Semana -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Día de la Semana *</label>
+                        <select name="dia" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                            <option value="1">Lunes</option>
+                            <option value="2">Martes</option>
+                            <option value="3">Miércoles</option>
+                            <option value="4">Jueves</option>
+                            <option value="5">Viernes</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <!-- Hora Inicio -->
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Hora Inicio *</label>
+                            <input type="time" name="hora_inicio" class="form-control form-control-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" value="07:00" required>
+                        </div>
+                        <!-- Hora Fin -->
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Hora Final *</label>
+                            <input type="time" name="hora_fin" class="form-control form-control-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" value="08:30" required>
+                        </div>
+                    </div>
+
+                    <!-- Salón / Aula -->
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-dark mb-1">Salón / Aula Asignada:</label>
+                        <input type="text" name="ambiente" class="form-control form-control-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" placeholder="Ej: Aula 101 o Laboratorio">
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-3 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold small" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold small shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                        <i class="bi bi-check-lg me-1"></i> Guardar en Horario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: EDITAR BLOQUE DE HORARIO -->
+<div class="modal fade" id="modalEditarHorario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #fce7f3;">
+            <div class="modal-header border-bottom p-4" style="background: linear-gradient(135deg, #fff0f3 0%, #fce7f3 100%); border-color: #fce7f3 !important;">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-pencil-square" style="color: #db2777;"></i>
+                        <span>Editar Horario Escolar</span>
+                    </h5>
+                    <small class="text-muted">Modifique el horario, aula o grupo de esta clase programada</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="editar_horario">
+                <input type="hidden" name="horario_id" id="edit_horario_id" value="">
+                <div class="modal-body p-4 space-y-3">
+                    <!-- Asignatura y Grupo -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Asignatura y Grupo *</label>
+                        <select name="carga_id" id="edit_carga_id" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                            {% for c in cargas %}
+                            <option value="{{ c.id }}" data-prog="{{ c.programa_id }}" data-grado="{{ c.grado }}">
+                                Grado {{ c.grado }}°{{ c.seccion }} — {{ c.programa.denominacion|default:'Matemáticas' }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Día de la Semana -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Día de la Semana *</label>
+                        <select name="dia" id="edit_dia" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                            <option value="1">Lunes</option>
+                            <option value="2">Martes</option>
+                            <option value="3">Miércoles</option>
+                            <option value="4">Jueves</option>
+                            <option value="5">Viernes</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <!-- Hora Inicio -->
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Hora Inicio *</label>
+                            <input type="time" name="hora_inicio" id="edit_hora_inicio" class="form-control form-control-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                        </div>
+                        <!-- Hora Fin -->
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Hora Final *</label>
+                            <input type="time" name="hora_fin" id="edit_hora_fin" class="form-control form-control-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                        </div>
+                    </div>
+
+                    <!-- Salón / Aula -->
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-dark mb-1">Salón / Aula Asignada:</label>
+                        <input type="text" name="ambiente" id="edit_ambiente" class="form-control form-control-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" placeholder="Ej: Aula 101 o Laboratorio">
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-3 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold small" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold small shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                        <i class="bi bi-save-fill me-1"></i> Actualizar Horario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function abrirModalEditarHorario(id, dia, inicio, fin, ambiente, progId, grado) {
+    document.getElementById('edit_horario_id').value = id;
+    document.getElementById('edit_dia').value = dia || '1';
+    document.getElementById('edit_hora_inicio').value = inicio || '07:00';
+    document.getElementById('edit_hora_fin').value = fin || '08:30';
+    document.getElementById('edit_ambiente').value = ambiente || '';
+
+    const selectCarga = document.getElementById('edit_carga_id');
+    for (let i = 0; i < selectCarga.options.length; i++) {
+        const opt = selectCarga.options[i];
+        const pId = opt.getAttribute('data-prog');
+        const gNum = opt.getAttribute('data-grado');
+        if (pId == progId && (!grado || gNum == grado)) {
+            selectCarga.selectedIndex = i;
+            break;
+        }
+    }
+
+    const modalEl = document.getElementById('modalEditarHorario');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+}
+</script>

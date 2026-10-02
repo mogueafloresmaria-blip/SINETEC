@@ -4,41 +4,41 @@
    ============================================================================== */
 
 :root {
-    /* Paleta Institucional Escolar */
-    --sinetec-bg: #F8FAFC;
+    /* Paleta Institucional SINETEC - Rosa Elegante */
+    --sinetec-bg: #FDF2F4;
     --sinetec-card-bg: #FFFFFF;
-    --sinetec-border: #E2E8F0;
-    --sinetec-border-subtle: #F1F5F9;
+    --sinetec-border: #FCE7F3;
+    --sinetec-border-subtle: #FFF1F5;
     --sinetec-text-main: #0F172A;
     --sinetec-text-body: #334155;
     --sinetec-text-muted: #64748B;
     --sinetec-text-light: #94A3B8;
 
-    /* Azul Petróleo / Deep Navy (Estructura y Autoridad) */
-    --sinetec-petroleum: #7FC4F2;
-    --sinetec-petroleum-hover: #5CA8D8;
-    --sinetec-petroleum-dark: #2F79A8;
-    --sinetec-petroleum-gradient: linear-gradient(180deg, #7FC4F2 0%, #5CA8D8 55%, #2F79A8 100%);
+    /* Rosa Primario / Magenta Elegante */
+    --sinetec-petroleum: #DB2777;
+    --sinetec-petroleum-hover: #BE185D;
+    --sinetec-petroleum-dark: #9D174D;
+    --sinetec-petroleum-gradient: linear-gradient(135deg, #9D174D 0%, #DB2777 55%, #F472B6 100%);
 
-    /* Azul Tecnológico y Amigable (Acción y Enlaces) */
-    --sinetec-blue: #7FC4F2;
-    --sinetec-blue-hover: #3E91C5;
-    --sinetec-blue-light: #EAF6FD;
-    --sinetec-blue-soft: #D7EDFA;
-    --sinetec-blue-border: #A8D8F3;
+    /* Rosa Institucional y Enlaces */
+    --sinetec-blue: #DB2777;
+    --sinetec-blue-hover: #BE185D;
+    --sinetec-blue-light: #FDF2F4;
+    --sinetec-blue-soft: #FCE7F3;
+    --sinetec-blue-border: #FBCFE8;
 
-    /* Lavanda y Lila Suave (Elegancia y Organización) */
-    --sinetec-lavender: #EEF2FF;
-    --sinetec-lavender-border: #C7D2FE;
-    --sinetec-lavender-text: #4F46E5;
-    --sinetec-lavender-soft: #F5F3FF;
+    /* Lavanda y Rosa Pastel */
+    --sinetec-lavender: #FFF1F5;
+    --sinetec-lavender-border: #FCE7F3;
+    --sinetec-lavender-text: #DB2777;
+    --sinetec-lavender-soft: #FDF2F4;
 
     /* Rosa Sutil como Acento Refinado */
-    --sinetec-rose: #F43F5E;
-    --sinetec-rose-hover: #E11D48;
-    --sinetec-rose-soft: #FFF1F2;
-    --sinetec-rose-border: #FECDD3;
-    --sinetec-rose-text: #BE123C;
+    --sinetec-rose: #DB2777;
+    --sinetec-rose-hover: #BE185D;
+    --sinetec-rose-soft: #FCE7F3;
+    --sinetec-rose-border: #FBCFE8;
+    --sinetec-rose-text: #9D174D;
 
     /* Semáforo Oficial de Competencias (🟢 🟡 🔴) */
     --semaforo-aprobado: #10B981;
@@ -54,18 +54,18 @@
     /* Sombras y Radios */
     --sinetec-radius: 16px;
     --sinetec-radius-sm: 10px;
-    --sinetec-shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
-    --sinetec-shadow: 0 4px 20px -2px rgba(15, 41, 66, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
-    --sinetec-shadow-hover: 0 10px 25px -4px rgba(15, 41, 66, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+    --sinetec-shadow-sm: 0 1px 3px 0 rgba(219, 39, 119, 0.05), 0 1px 2px -1px rgba(219, 39, 119, 0.05);
+    --sinetec-shadow: 0 4px 20px -2px rgba(219, 39, 119, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+    --sinetec-shadow-hover: 0 10px 25px -4px rgba(219, 39, 119, 0.16), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
 
     /* Tipografías */
     --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
     /* Aliases de compatibilidad */
-    --sinetec-primary: var(--sinetec-petroleum);
-    --sinetec-primary-dark: var(--sinetec-petroleum-dark);
-    --sinetec-secondary: var(--sinetec-blue);
+    --sinetec-primary: #DB2777;
+    --sinetec-primary-dark: #BE185D;
+    --sinetec-secondary: #F472B6;
     --sinetec-cream: var(--sinetec-bg);
     --sinetec-line: var(--sinetec-border);
     --sinetec-white: #ffffff;
@@ -387,12 +387,38 @@ a:hover {
 }
 
 .sinetec-content {
-    padding: 28px 32px;
+    padding: 26px 30px;
     width: 100%;
     max-width: 100%;
     flex: 1 0 auto;
     position: relative;
-    z-index: 0;
+    z-index: auto !important;
+}
+
+/* Modales Bootstrap: siempre al frente del telón backdrop */
+.modal {
+    z-index: 1070 !important;
+}
+.modal-backdrop {
+    z-index: 1060 !important;
+}
+
+/* Hero unificado para módulos internos: Rosa Elegante Institucional SINETEC */
+.sinetec-dashboard-hero {
+    background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important;
+    color: #FFFFFF !important;
+    padding: 1.85rem 2.25rem !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 10px 25px -4px rgba(190, 24, 93, 0.35) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.sinetec-dashboard-hero h1,
+.sinetec-dashboard-hero h2,
+.sinetec-dashboard-hero h3,
+.sinetec-dashboard-hero p {
+    color: #FFFFFF !important;
 }
 
 /* ==============================================================================
@@ -402,9 +428,9 @@ a:hover {
 .sinetec-card,
 .card {
     background: var(--sinetec-card-bg);
-    border: 1px solid var(--sinetec-border);
+    border: 1px solid #FCE7F3 !important;
     border-radius: var(--sinetec-radius);
-    box-shadow: var(--sinetec-shadow);
+    box-shadow: 0 4px 16px -2px rgba(219, 39, 119, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -693,3 +719,88 @@ a:hover {
         padding: 18px 16px;
     }
 }
+
+/* ==============================================================================
+   SOBREESCRITURAS GLOBALES BOOTSTRAP - IDENTIDAD ROSA SINETEC OFICIAL
+   ============================================================================== */
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+.sinetec-btn-primary {
+    background: linear-gradient(135deg, #db2777 0%, #be185d 100%) !important;
+    background-color: #db2777 !important;
+    border-color: #db2777 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active,
+.sinetec-btn-primary:hover {
+    background: linear-gradient(135deg, #be185d 0%, #9d174d 100%) !important;
+    background-color: #be185d !important;
+    border-color: #9d174d !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 16px rgba(190, 24, 93, 0.35) !important;
+}
+
+.btn-outline-primary {
+    color: #db2777 !important;
+    border-color: #f472b6 !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:active {
+    background-color: #db2777 !important;
+    border-color: #db2777 !important;
+    color: #ffffff !important;
+}
+
+.text-primary,
+i.text-primary {
+    color: #db2777 !important;
+}
+
+.bg-primary {
+    background-color: #db2777 !important;
+}
+
+.bg-primary-subtle {
+    background-color: #fce7f3 !important;
+    color: #db2777 !important;
+}
+
+.border-primary {
+    border-color: #f472b6 !important;
+}
+
+.badge.bg-primary,
+.badge-primary {
+    background-color: #fce7f3 !important;
+    color: #db2777 !important;
+    border: 1px solid #fbcfe8 !important;
+}
+
+.badge-blue-soft,
+.badge-soft-blue {
+    background-color: #fce7f3 !important;
+    color: #db2777 !important;
+    border: 1px solid #fbcfe8 !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #f472b6 !important;
+    box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.18) !important;
+}
+
+/* Avatares y pastillas que anteriormente tenían fondos azules */
+.avatar-circle-blue,
+.bg-blue-100 {
+    background-color: #fce7f3 !important;
+    color: #db2777 !important;
+}
+

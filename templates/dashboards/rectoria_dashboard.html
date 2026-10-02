@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Rectoría y Dirección Escolar · SINETEC{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- 1. Encabezado de Rectoría (Hero SINETEC Rosa Elegante) -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important; color: #ffffff; padding: 2.2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -4px rgba(190, 24, 93, 0.35);">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 rounded-pill fw-semibold">
+                        <i class="bi bi-shield-check me-1"></i> Despacho de Rectoría y Dirección General
+                    </span>
+                    <span class="text-white-50 small">Institución Educativa Distrital Nuevo Horizonte</span>
+                </div>
+                <h1 class="h2 fw-bold text-white mb-1">
+                    Panel Directivo y de Rectoría 🏫
+                </h1>
+                <p class="text-white-50 mb-0 small">
+                    Supervisión integral de matrículas, planta docente, rendimiento académico, asistencia y circulares escolares.
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'redactar_circular' %}" class="btn btn-warning fw-bold text-dark shadow-sm rounded-pill px-3">
+                    <i class="bi bi-megaphone-fill me-1"></i> Redactar Circular
+                </a>
+                <a href="{% url 'calificaciones' %}" class="btn btn-light fw-bold text-dark shadow-sm rounded-pill px-3">
+                    <i class="bi bi-clipboard2-data-fill me-1"></i> Notas y Actas
+                </a>
+                <a href="{% url 'centro_reportes' %}" class="btn btn-outline-light fw-semibold rounded-pill px-3">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> Informes PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. KPIs de Supervisión Escolar -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Estudiantes</span>
+                    <div class="rounded-3 p-2 text-primary" style="background-color: #FCE7F3; color: #DB2777;">
+                        <i class="bi bi-people-fill fs-5" style="color: #DB2777;"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_estudiantes }} Alumnos</div>
+                <div class="small text-muted mt-1">Matrícula escolar activa</div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Cuerpo Docente</span>
+                    <div class="rounded-3 p-2 text-success" style="background-color: #ECFDF5;">
+                        <i class="bi bi-person-badge-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_docentes }} Profesores</div>
+                <div class="small text-muted mt-1">Planta docente institucional</div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Cursos y Grados</span>
+                    <div class="rounded-3 p-2" style="background-color: #FFF1F5; color: #DB2777;">
+                        <i class="bi bi-mortarboard-fill fs-5" style="color: #DB2777;"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_grupos }} Grupos</div>
+                <div class="small text-muted mt-1">Grado 10°A y Grado 11°A</div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Asistencias Hoy</span>
+                    <div class="rounded-3 p-2 text-warning" style="background-color: #FFFBEB;">
+                        <i class="bi bi-calendar2-check-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ asistencias_hoy }} Presentes</div>
+                <div class="small text-muted mt-1">{{ inasistencias_hoy }} inasistencias · {{ tardanzas_hoy }} tardanzas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Rendimiento Académico Consolidado -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0 fs-6">
+                <i class="bi bi-graph-up-arrow text-primary me-2"></i> Resumen de Rendimiento Académico Institucional
+            </h5>
+            <span class="badge bg-light text-secondary border">Periodo Lectivo 2026</span>
+        </div>
+        <div class="card-body p-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-4 text-center border-end">
+                    <div class="h1 fw-bold text-success mb-0">{{ tasa_rendimiento }}%</div>
+                    <div class="text-muted small">Tasa de Aprobación Global</div>
+                </div>
+                <div class="col-md-8">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Aprobados: <strong>{{ aprobados }}</strong></span>
+                        <span>En Proceso: <strong>{{ en_proceso }}</strong></span>
+                        <span>Por Recuperar: <strong>{{ por_recuperar }}</strong></span>
+                    </div>
+                    <div class="progress" style="height: 12px; border-radius: 6px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ tasa_rendimiento }}%;"></div>
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {% widthratio en_proceso total_califs 100 %}%;"></div>
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: {% widthratio por_recuperar total_califs 100 %}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Directorio de Estudiantes y Supervisión -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <h5 class="fw-bold text-dark mb-0 fs-6">
+                    <i class="bi bi-people-fill text-primary me-2"></i> Estudiantes Matriculados
+                </h5>
+                <small class="text-muted">Total registrados: <strong>{{ estudiantes|length }}</strong> alumnos</small>
+            </div>
+            <form method="get" class="d-flex align-items-center gap-2">
+                <select name="grado" class="form-select form-select-sm border-secondary-subtle rounded-3" style="width: 150px;" onchange="this.form.submit()">
+                    <option value="">Todos los Grados</option>
+                    {% for f in fichas %}
+                        <option value="{{ f.id }}" {% if grado_sel == f.id|stringformat:"s" %}selected{% endif %}>
+                            Grado {{ f.codigo_ficha }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="input-group input-group-sm">
+                    <input type="text" name="q" value="{{ q_rectoria }}" class="form-control border-secondary-subtle" placeholder="Buscar estudiante...">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-secondary small">
+                <thead class="bg-light text-uppercase">
+                    <tr>
+                        <th class="ps-4 py-3">#</th>
+                        <th class="py-3">Estudiante</th>
+                        <th class="py-3">Documento</th>
+                        <th class="py-3">Grado</th>
+                        <th class="py-3">Estado</th>
+                        <th class="py-3 pe-4 text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mat in estudiantes %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-muted">{{ forloop.counter }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold small" style="width: 34px; height: 34px; background: linear-gradient(135deg, #f472b6, #db2777);">
+                                    {{ mat.aprendiz.first_name|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <strong class="text-dark d-block leading-tight">
+                                        {{ mat.aprendiz.last_name }}, {{ mat.aprendiz.first_name }}
+                                    </strong>
+                                    <small class="text-muted">{{ mat.aprendiz.email|default:"Sin correo" }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                {{ mat.aprendiz.perfil.tipo_documento|default:"TI" }} {{ mat.aprendiz.perfil.numero_documento }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge px-3 py-1 rounded-pill" style="background-color: #FCE7F3; color: #DB2777; border: 1px solid #FBCFE8;">
+                                Grado {{ mat.ficha.codigo_ficha }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1">
+                                Activo
+                            </span>
+                        </td>
+                        <td class="pe-4 text-end">
+                            <div class="btn-group btn-group-sm">
+                                {% if mat.aprendiz.perfil %}
+                                <a href="{% url 'estudiantes_boletin_pdf' mat.aprendiz.perfil.pk %}" target="_blank" class="btn btn-outline-danger">
+                                    <i class="bi bi-file-earmark-pdf"></i> Boletín
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'calificaciones' %}?aula={{ mat.ficha.id }}" class="btn btn-outline-primary">
+                                    <i class="bi bi-clipboard2-data"></i> Notas
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">No se encontraron estudiantes para los filtros seleccionados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5. Circulares y Anuncios Escolares -->
+    {% if circulares %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0 fs-6">
+                <i class="bi bi-megaphone-fill text-primary me-2"></i> Circulares Oficiales y Anuncios Institucionales
+            </h5>
+            <a href="{% url 'redactar_circular' %}" class="btn btn-sm btn-primary rounded-pill px-3 text-white" style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%) !important; border: none;">
+                <i class="bi bi-pencil-square me-1"></i> Redactar Circular
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-secondary small">
+                <thead class="bg-light text-uppercase">
+                    <tr>
+                        <th class="ps-4 py-3">Asunto</th>
+                        <th class="py-3">Destinatario</th>
+                        <th class="py-3">Fecha</th>
+                        <th class="py-3 pe-4 text-end">Prioridad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in circulares %}
+                    <tr>
+                        <td class="ps-4">
+                            <strong class="text-dark d-block">{{ c.asunto }}</strong>
+                            <span class="text-muted">{{ c.mensaje|truncatechars:70 }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ c.get_estamento_destinatario_display }}</span>
+                        </td>
+                        <td>{{ c.fecha_creacion|date:"d M Y, h:i A" }}</td>
+                        <td class="pe-4 text-end">
+                            {% if c.urgente %}
+                                <span class="badge bg-danger rounded-pill px-2.5 py-1">Urgente</span>
+                            {% else %}
+                                <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1">Normal</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

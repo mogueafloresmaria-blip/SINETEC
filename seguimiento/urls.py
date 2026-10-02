@@ -14,6 +14,7 @@ urlpatterns = [
     path('<int:pk>/eliminar/', views.eliminar_seguimiento, name='seguimiento_eliminar'),
     path('<int:pk>/subir-evidencia/', views.subir_evidencia_seguimiento, name='subir_evidencia_seguimiento'),
     path('<int:pk>/eliminar-evidencia/', views.eliminar_evidencia_seguimiento, name='eliminar_evidencia_seguimiento'),
+    path('api/aprendices/<int:ficha_id>/', views.api_obtener_aprendices, name='api_obtener_aprendices'),
     path('<int:pk>/acta-pdf/', views.descargar_acta_pdf, name='seguimiento_acta_pdf'),
 
     # Secretaría (existente)

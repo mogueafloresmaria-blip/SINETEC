@@ -1,0 +1,170 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO: EVENTOS Y CALENDARIO ACADÉMICO
+     Calendario de actividades escolares, entregas, reuniones y clases
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-eventos">
+
+    <!-- HERO BANNER EVENTOS -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-calendar3-event-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Cronograma Institucional
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Eventos y Calendario
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Consulta fechas de entrega de actividades, clases programadas, reuniones y eventos pedagógicos.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalCrearEvento"
+                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                    <i class="bi bi-calendar-plus"></i> + Programar Evento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LISTA DE EVENTOS PROGRAMADOS Y ACTIVIDADES CON ENTREGA -->
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-calendar-check-fill fs-5" style="color: #db2777;"></i>
+                        <h6 class="fw-bold text-dark mb-0">Eventos Institucionales Registrados</h6>
+                    </div>
+                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3;">
+                        {{ eventos_lista|length }} eventos
+                    </span>
+                </div>
+
+                <div class="d-flex flex-column gap-3">
+                    {% for ev in eventos_lista %}
+                    <div class="p-3.5 rounded-4 border bg-white shadow-2xs d-flex align-items-start gap-3" style="border-color: #fce7f3 !important;">
+                        <div class="text-center px-3 py-2 rounded-3 fw-bold flex-shrink-0"
+                             style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3; min-width: 65px;">
+                            <div class="fs-5 lh-1">{{ ev.fecha|date:"d" }}</div>
+                            <small class="text-uppercase" style="font-size: 0.68rem;">{{ ev.fecha|date:"M" }}</small>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-dark" style="font-size: 0.95rem;">{{ ev.titulo }}</strong>
+                                <span class="badge rounded-pill px-2.5 py-0.5" style="background: #fdf2f8; color: #db2777; font-size: 0.72rem;">
+                                    {{ ev.tipo_evento|default:'Académico' }}
+                                </span>
+                            </div>
+                            <p class="text-muted small mb-1.5" style="font-size: 0.82rem;">{{ ev.descripcion|default:'Sin descripción adicional.' }}</p>
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                                <i class="bi bi-clock me-1"></i> {{ ev.hora|time:"H:i"|default:"Hora por confirmar" }}
+                            </small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x fs-1 d-block mb-2" style="color: #db2777;"></i>
+                        <h6 class="fw-bold text-dark">No hay eventos adicionales programados</h6>
+                        <small class="text-muted">Utilice el botón superior para agendar reuniones o jornadas pedagógicas.</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-clock-history fs-5" style="color: #db2777;"></i>
+                        <h6 class="fw-bold text-dark mb-0">Próximos Vencimientos de Tareas</h6>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column gap-2.5">
+                    {% for t in tareas_publicadas %}
+                    {% if t.fecha_limite %}
+                    <div class="p-3 rounded-3 border bg-light d-flex justify-content-between align-items-center" style="border-color: #f1f5f9;">
+                        <div>
+                            <strong class="text-dark d-block small">{{ t.titulo }}</strong>
+                            <small class="text-muted">{{ t.materia_nombre }} · Grado {{ t.grupo_display }}</small>
+                        </div>
+                        <span class="badge rounded-pill px-2.5 py-1 text-danger fw-bold" style="background: #fff1f2; border: 1px solid #fecdd3; font-size: 0.72rem;">
+                            {{ t.fecha_limite|date:"d/m H:i" }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    {% empty %}
+                    <div class="text-center py-4 text-muted small">No hay actividades con fecha límite registrada.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: PROGRAMAR EVENTO -->
+<div class="modal fade" id="modalCrearEvento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-calendar-plus fs-5" style="color: #db2777;"></i>
+                    <h6 class="modal-title fw-bold text-dark">Programar Evento / Reunión</h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="crear_evento_docente">
+                <div class="modal-body p-4 space-y-3">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Título del Evento *</label>
+                        <input type="text" name="titulo" class="form-control rounded-pill px-3 py-2" placeholder="Ej: Comisión de Evaluación Grado 10°" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Tipo de Evento *</label>
+                        <select name="tipo_evento" class="form-select rounded-pill px-3 py-2" required>
+                            <option value="Académico">Académico</option>
+                            <option value="Reunión de Docentes">Reunión de Docentes</option>
+                            <option value="Entrega de Informes">Entrega de Informes</option>
+                            <option value="Refuerzo / Nivelación">Refuerzo / Nivelación</option>
+                            <option value="Institucional">Institucional</option>
+                        </select>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Fecha *</label>
+                            <input type="date" name="fecha" class="form-control rounded-pill px-3 py-2" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Hora</label>
+                            <input type="time" name="hora" value="08:00" class="form-control rounded-pill px-3 py-2">
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-dark mb-1">Descripción / Objetivos</label>
+                        <textarea name="descripcion" rows="2" class="form-control rounded-4 px-3 py-2" placeholder="Detalle los objetivos del evento o reunión..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                        <i class="bi bi-save me-1"></i> Guardar Evento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

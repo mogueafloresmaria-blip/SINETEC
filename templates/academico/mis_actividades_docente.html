@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Mis Actividades{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6">
+    <div class="mb-6 border-b pb-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Mis Actividades</h1>
+            <p class="text-gray-600 mt-1">Gestión de actividades creadas o asignadas a ti.</p>
+        </div>
+        <a href="{% url 'crear_actividad_digital' %}" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg shadow-sm font-medium transition">
+            <i class="bi bi-plus-lg me-1"></i> Crear actividad
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <table class="min-w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3">Nombre</th>
+                    <th class="px-6 py-3">Grado / Asignatura</th>
+                    <th class="px-6 py-3">Fecha límite</th>
+                    <th class="px-6 py-3 text-center">Entregas</th>
+                    <th class="px-6 py-3 text-center">Pendientes de Calificar</th>
+                    <th class="px-6 py-3">Estado</th>
+                    <th class="px-6 py-3">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tarea in tareas %}
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-bold text-gray-900">{{ tarea.titulo }}</td>
+                    <td class="px-6 py-4">{{ tarea.carga_academica.grado }}° — {{ tarea.carga_academica.programa.denominacion }}</td>
+                    <td class="px-6 py-4">{{ tarea.fecha_limite|date:"d/m/Y H:i"|default:"Sin límite" }}</td>
+                    <td class="px-6 py-4 text-center font-bold text-gray-700">{{ tarea.total_entregas }}</td>
+                    <td class="px-6 py-4 text-center font-bold {% if tarea.pendientes > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                        {{ tarea.pendientes }}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">{{ tarea.estado }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <a href="{% url 'detalle_clase' tarea.carga_academica.id %}?tab=tareas" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1.5 rounded text-xs font-bold transition">
+                            Ver clase
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-6 text-center text-gray-500">No has creado ninguna actividad.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

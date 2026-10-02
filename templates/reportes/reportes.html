@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Centro Oficial de Reportes y Certificaciones · SINETEC{% endblock %}
+{% block title %}Centro Oficial de Reportes y Certificaciones · EDUNOVA{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-3 px-md-4">
 
-    <!-- Encabezado Institucional SINETEC -->
+    <!-- Encabezado Institucional EDUNOVA -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
@@ -193,6 +193,74 @@
                             <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
                         </a>
                         <a href="{% url 'exportar_semaforo_pdf' %}" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                        </a>
+            <!-- 7. Recaudos y Pensiones -->
+            <div class="col-md-6 col-xl-4">
+                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #10b981 !important;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #059669; font-size: 0.72rem;">TESORERÍA Y CAJA</span>
+                            <div class="p-2 rounded-3 bg-white text-success shadow-xs">
+                                <i class="bi bi-cash-stack fs-5"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Recaudos y Pagos de Pensiones</h6>
+                        <p class="small text-muted mb-3">Libro diario de ingresos, números de recibo, matrícula, mensualidades cobradas y métodos de pago.</p>
+                    </div>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <a href="{% url 'exportar_reporte_excel' %}?entidad=pensiones" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                        </a>
+                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=pensiones" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Control de Asistencia -->
+            <div class="col-md-6 col-xl-4">
+                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #6366f1 !important;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #4f46e5; font-size: 0.72rem;">CONTROL ESCOLAR</span>
+                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                                <i class="bi bi-calendar-check-fill fs-5"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Registro y Novedades de Asistencia</h6>
+                        <p class="small text-muted mb-3">Consolidado cronológico de asistencias, inasistencias injustificadas, retardos y justificaciones por grupo.</p>
+                    </div>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <a href="{% url 'exportar_reporte_excel' %}?entidad=asistencia" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                        </a>
+                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=asistencia" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. Transporte Escolar -->
+            <div class="col-md-6 col-xl-4">
+                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #0891b2 !important;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0891b2; font-size: 0.72rem;">TRANSPORTE Y RUTAS</span>
+                            <div class="p-2 rounded-3 bg-white text-info shadow-xs">
+                                <i class="bi bi-bus-front-fill fs-5"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Rutas y Pasajeros Escolares</h6>
+                        <p class="small text-muted mb-3">Detalle operativo de vehículos, placas, conductores asignados, capacidad y número de estudiantes a bordo.</p>
+                    </div>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <a href="{% url 'exportar_reporte_excel' %}?entidad=transportes" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                        </a>
+                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=transportes" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
                             <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
                         </a>
                     </div>

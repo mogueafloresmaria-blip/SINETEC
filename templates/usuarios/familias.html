@@ -1,113 +1,155 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Directorio de Familias y Acudientes · SINETEC{% endblock %}
+{% block title %}Familias y Acudientes · EDUNOVA{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-2 px-md-3">
+<div class="container-fluid py-3 px-md-4">
 
-    <!-- Encabezado Institucional Escolar -->
+    <!-- Encabezado Institucional -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge badge-lavender-soft">Gestión Administrativa Escolar</span>
-                <span class="text-muted small">{{ colegio.nombre|default:"Institución Educativa" }}</span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill fw-semibold">
+                    <i class="bi bi-people-fill me-1"></i> Comunidad Escolar
+                </span>
+                <span class="text-muted small">Gestión y Acompañamiento Familiar</span>
             </div>
-            <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-people-fill text-primary me-2"></i>Directorio de Familias y Acudientes
-            </h1>
-            <p class="text-muted small mb-0">Gestión de padres de familia, tutores legales, información de contacto y vinculación con estudiantes matriculados.</p>
+            <h1 class="h3 fw-bold text-dark mb-1">Familias y Acudientes</h1>
+            <p class="text-muted small mb-0">Gestión y seguimiento de las familias y estudiantes asociados de la institución educativa.</p>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <span class="badge bg-light text-secondary border px-3 py-2 fs-6 align-self-center">
-                <i class="bi bi-person-hearts me-1 text-danger"></i> {{ total_familias }} Núcleos Familiares
-            </span>
+        <div class="d-flex gap-2">
+            <a href="{% url 'crear_familia' %}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center gap-2" style="background: linear-gradient(135deg, #1E3A8A, #2563EB); border: none;">
+                <i class="bi bi-person-plus-fill"></i> Nueva Familia
+            </a>
         </div>
     </div>
 
-    <!-- Buscador de Familias -->
-    <div class="sinetec-card p-3 mb-4">
+    <!-- Buscador y Filtros -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
         <form method="get" class="row g-2 align-items-center">
             <div class="col-md-9 col-lg-10">
                 <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0">
-                        <i class="bi bi-search text-muted"></i>
+                    <span class="input-group-text bg-light border-end-0 text-muted">
+                        <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" name="q" value="{{ q|default:'' }}" class="form-control border-start-0" placeholder="Buscar por nombre de acudiente, teléfono, correo o estudiante a cargo...">
+                    <input type="text" name="q" value="{{ q|default:'' }}" class="form-control border-start-0" placeholder="Buscar familia por nombre de acudiente, documento, teléfono, correo o estudiante a cargo...">
                 </div>
             </div>
             <div class="col-md-3 col-lg-2">
-                <button type="submit" class="btn btn-sinetec-primary w-100 fw-semibold">
-                    <i class="bi bi-funnel me-1"></i> Filtrar
+                <button type="submit" class="btn btn-dark w-100 fw-bold rounded-3">
+                    <i class="bi bi-funnel me-1"></i> Buscar
                 </button>
             </div>
         </form>
     </div>
 
-    <!-- Tarjetas de Familias -->
-    <div class="row g-4">
-        {% for fam in familias %}
-        <div class="col-md-6 col-xl-4">
-            <div class="sinetec-card h-100 d-flex flex-column p-4">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="rounded-circle bg-light d-grid place-items-center text-primary" style="width: 44px; height: 44px; font-size: 1.25rem;">
-                            <i class="bi bi-person-circle"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold text-dark mb-0">{{ fam.nombre_acudiente }}</h6>
-                            <span class="badge badge-lavender-soft mt-1">{{ fam.parentesco }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="small text-muted mb-3 flex-grow-1">
-                    <div class="mb-1.5"><i class="bi bi-telephone text-secondary me-2"></i><strong>{{ fam.telefono }}</strong></div>
-                    {% if fam.email %}
-                    <div class="mb-1.5"><i class="bi bi-envelope text-secondary me-2"></i>{{ fam.email }}</div>
-                    {% endif %}
-                    {% if fam.direccion %}
-                    <div class="mb-1.5"><i class="bi bi-geo-alt text-secondary me-2"></i>{{ fam.direccion }}</div>
-                    {% endif %}
-                    {% if fam.ocupacion %}
-                    <div><i class="bi bi-briefcase text-secondary me-2"></i>{{ fam.ocupacion }}</div>
-                    {% endif %}
-                </div>
-
-                <!-- Estudiantes Relacionados -->
-                <div class="pt-3 border-top mt-auto">
-                    <div class="small text-muted mb-2 fw-semibold">
-                        <i class="bi bi-mortarboard me-1 text-primary"></i> Estudiantes Vinculados:
-                    </div>
-                    <div class="d-flex flex-wrap gap-1">
-                        {% for est in fam.estudiantes.all %}
-                            <a href="{% url 'estudiante_detalle' est.id %}" class="badge bg-light text-dark border text-decoration-none py-1.5 px-2">
-                                <i class="bi bi-person-fill me-1 text-primary"></i>{{ est.get_full_name|default:est.username }}
-                            </a>
-                        {% empty %}
-                            <span class="text-muted small fst-italic">Sin estudiantes asignados</span>
+    <!-- Tabla Principal de Familias Registradas -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h3 class="h6 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-person-lines-fill text-primary"></i> Familias y Acudientes Registrados
+            </h3>
+            <span class="badge bg-light text-muted border px-3 py-1.5 font-monospace">
+                Total: {{ total_familias }} núcleos
+            </span>
+        </div>
+        <div class="card-body p-0">
+            {% if familias %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-uppercase" style="font-size: 0.75rem;">
+                        <tr>
+                            <th class="ps-4 py-3">Nombre del Acudiente</th>
+                            <th class="py-3">Documento / Contacto</th>
+                            <th class="py-3">Parentesco</th>
+                            <th class="py-3">Estudiantes Asociados</th>
+                            <th class="py-3 text-center">Estado</th>
+                            <th class="pe-4 py-3 text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        {% for fam in familias %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 38px; height: 38px; font-size: 0.95rem; background: linear-gradient(135deg, #1E3A8A, #3B82F6);">
+                                        {{ fam.nombre_acudiente|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <strong class="text-dark d-block fs-6">{{ fam.nombre_acudiente }}</strong>
+                                        {% if fam.direccion %}
+                                            <span class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-geo-alt me-1"></i>{{ fam.direccion|truncatechars:35 }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div><i class="bi bi-person-vcard text-muted me-1"></i>Doc: <strong>{{ fam.documento|default:"No registrado" }}</strong></div>
+                                <div><i class="bi bi-telephone text-muted me-1"></i>{{ fam.telefono }}</div>
+                                {% if fam.email %}
+                                    <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-envelope text-muted me-1"></i>{{ fam.email }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-2.5 py-1.5 fw-semibold">
+                                    {{ fam.parentesco|default:"Acudiente" }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for est in fam.estudiantes.all %}
+                                        <a href="{% url 'estudiante_detalle' est.id %}" class="badge bg-primary-subtle text-primary border border-primary-subtle text-decoration-none px-2.5 py-1 fw-bold">
+                                            <i class="bi bi-mortarboard me-1"></i>{{ est.get_full_name|default:est.username }}
+                                        </a>
+                                    {% empty %}
+                                        <span class="text-muted fst-italic">Sin estudiantes asociados</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-bold">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Activo
+                                </span>
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="btn-group btn-group-sm">
+                                    {% if fam.estudiantes.all %}
+                                        <a href="{% url 'estudiante_detalle' fam.estudiantes.first.id %}" class="btn btn-outline-primary" title="Ver Expediente Escolar">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'crear_familia' %}" class="btn btn-outline-secondary" title="Vincular Otro Estudiante">
+                                        <i class="bi bi-link-45deg"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
                         {% endfor %}
-                    </div>
-                </div>
+                    </tbody>
+                </table>
             </div>
+            {% else %}
+            <div class="text-center py-5 text-muted p-4">
+                <i class="bi bi-people fs-1 text-secondary opacity-50 d-block mb-3"></i>
+                <h5 class="fw-bold text-dark">No se encontraron familias registradas</h5>
+                <p class="small text-muted mb-3">Prueba con otro término de búsqueda o crea un nuevo registro.</p>
+                <a href="{% url 'crear_familia' %}" class="btn btn-primary rounded-pill px-4 btn-sm fw-bold">
+                    <i class="bi bi-plus-lg me-1"></i> Registrar Primera Familia
+                </a>
+            </div>
+            {% endif %}
         </div>
-        {% empty %}
-        <div class="col-12 text-center py-5 text-muted">
-            <i class="bi bi-people fs-1 opacity-50 d-block mb-3"></i>
-            <h5>No se encontraron registros de familias</h5>
-            <p class="small">Prueba con otro término de búsqueda o registra nuevos estudiantes con acudientes.</p>
-        </div>
-        {% endfor %}
     </div>
 
     <!-- Paginación -->
     {% if page_obj.has_other_pages %}
-    <nav class="mt-4 d-flex justify-content-center">
+    <nav class="d-flex justify-content-center">
         <ul class="pagination pagination-sm">
             {% if page_obj.has_previous %}
             <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">Anterior</a></li>
             {% endif %}
-            <li class="page-item active"><span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+            <li class="page-item active"><span class="page-link bg-primary border-primary">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
             {% if page_obj.has_next %}
             <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Siguiente</a></li>
             {% endif %}

@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Carga Masiva de Estudiantes · EDUNOVA{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: #f3f5f9 !important; }
+.import-wrap { max-width: 960px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
+.import-hero { background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff; border-radius: 18px; padding: 1.75rem 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(15,23,42,0.08); }
+.import-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 2px 12px rgba(15,23,42,0.04); overflow: hidden; }
+.dropzone-box { border: 2px dashed #94a3b8; border-radius: 14px; background: #f8fafc; padding: 2.5rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+.dropzone-box:hover { border-color: #3b82f6; background: #eff6ff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="import-wrap">
+  <!-- ENCABEZADO -->
+  <div class="import-hero d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1 rounded-pill">SECRETARÍA ACADÉMICA</span>
+        <span class="text-light small opacity-75">Admisiones y Matrículas</span>
+      </div>
+      <h1 class="h3 fw-bold mb-1 text-white">
+        <i class="bi bi-file-earmark-spreadsheet me-2 text-warning"></i> Carga Masiva de Estudiantes
+      </h1>
+      <p class="small mb-0 text-light opacity-75">
+        Importa de forma rápida listas oficiales de alumnos mediante archivos Excel (.xlsx) o CSV.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'descargar_plantilla_estudiantes' %}" class="btn btn-warning fw-bold text-dark rounded-pill px-3 shadow-sm">
+        <i class="bi bi-download me-1"></i> Descargar Plantilla Oficial Excel
+      </a>
+      <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-light rounded-pill px-3">
+        <i class="bi bi-arrow-left me-1"></i> Volver a Estudiantes
+      </a>
+    </div>
+  </div>
+
+  {% if procesado %}
+  <!-- RESULTADOS DEL PROCESAMIENTO -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+    <div class="card-header {% if errores %}bg-warning-subtle text-dark{% else %}bg-success text-white{% endif %} py-3 px-4 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0">
+        <i class="bi {% if errores %}bi-exclamation-triangle-fill text-warning{% else %}bi-check-circle-fill{% endif %} me-2"></i>
+        Resultado de la Carga Masiva: {{ archivo_nombre }}
+      </h5>
+      <span class="badge bg-dark text-white rounded-pill px-3 py-1">{{ total_filas }} filas analizadas</span>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="p-3 bg-success-subtle text-success rounded-3 border border-success border-opacity-25 text-center">
+            <div class="h2 fw-bold mb-0">{{ creados }}</div>
+            <div class="small fw-semibold">Estudiantes Registrados con Éxito</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-danger-subtle text-danger rounded-3 border border-danger border-opacity-25 text-center">
+            <div class="h2 fw-bold mb-0">{{ errores|length }}</div>
+            <div class="small fw-semibold">Registros con Error o Advertencia</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-secondary-subtle text-secondary rounded-3 border border-secondary border-opacity-25 text-center">
+            <div class="h2 fw-bold mb-0">{{ omitidos }}</div>
+            <div class="small fw-semibold">Omitidos por Documento Duplicado</div>
+          </div>
+        </div>
+      </div>
+
+      {% if errores %}
+      <div class="alert alert-warning border-0 rounded-3 mb-4">
+        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-1"></i> Detalle de incidencias encontradas:</h6>
+        <ul class="mb-0 small ps-3">
+          {% for err in errores %}
+            <li>{{ err }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-end gap-2">
+        <a href="{% url 'importar_estudiantes_masivo' %}" class="btn btn-outline-secondary rounded-pill px-3">
+          Cargar otro archivo
+        </a>
+        <a href="{% url 'estudiantes_lista' %}" class="btn btn-primary rounded-pill px-4 fw-bold">
+          Ver lista de estudiantes actualizada <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- FORMULARIO DE CARGA -->
+  <div class="import-card p-4">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label class="form-label fw-bold text-dark fs-6 mb-2">Selecciona el archivo Excel (.xlsx) o CSV con la información de los estudiantes:</label>
+        <div class="dropzone-box" onclick="document.getElementById('inputArchivo').click();">
+          <i class="bi bi-cloud-arrow-up-fill fs-1 text-primary mb-2 d-block"></i>
+          <h5 class="fw-bold text-dark mb-1">Haz clic para elegir el archivo o arrástralo aquí</h5>
+          <p class="text-muted small mb-2">Formatos aceptados: Microsoft Excel (.xlsx) o Delimitado por comas (.csv)</p>
+          <div id="nombreArchivoSeleccionado" class="badge bg-primary px-3 py-2 fs-6 d-none"></div>
+          <input type="file" name="archivo" id="inputArchivo" class="d-none" accept=".xlsx, .csv, .txt" required onchange="mostrarNombreArchivo(this);">
+        </div>
+      </div>
+
+      <div class="alert alert-light border rounded-3 p-3 mb-4 small">
+        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-lightbulb-fill text-warning me-1"></i> Columnas soportadas por la plantilla:</h6>
+        <div class="row g-2 text-muted">
+          <div class="col-md-6">
+            • <code>tipo_documento</code>: TI, CC, CE, etc. (Default: TI)<br>
+            • <code>numero_documento</code>: <strong>Obligatorio</strong> (Único por estudiante)<br>
+            • <code>nombres</code>: <strong>Obligatorio</strong><br>
+            • <code>apellidos</code>: <strong>Obligatorio</strong><br>
+            • <code>correo</code>: Correo institucional o personal
+          </div>
+          <div class="col-md-6">
+            • <code>telefono</code>: Número de contacto<br>
+            • <code>genero</code>: M / F<br>
+            • <code>grado</code>: 10, 11, 8, 9, etc.<br>
+            • <code>seccion</code>: A, B, etc.<br>
+            • <code>acudiente_nombre</code> y <code>acudiente_telefono</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center pt-2">
+        <a href="{% url 'descargar_plantilla_estudiantes' %}" class="btn btn-outline-primary rounded-pill px-3">
+          <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar formato modelo (.xlsx)
+        </a>
+        <button type="submit" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">
+          <i class="bi bi-upload me-1"></i> Procesar y Guardar Estudiantes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function mostrarNombreArchivo(input) {
+  const badge = document.getElementById('nombreArchivoSeleccionado');
+  if (input.files && input.files[0]) {
+    badge.textContent = 'Archivo seleccionado: ' + input.files[0].name;
+    badge.classList.remove('d-none');
+  } else {
+    badge.classList.add('d-none');
+  }
+}
+</script>
+{% endblock %}

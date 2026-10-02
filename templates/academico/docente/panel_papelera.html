@@ -1,0 +1,173 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 11: PAPELERA DE RECICLAJE (GESTIÓN DE ELEMENTOS ELIMINADOS)
+     Diseño: Sistema Rosado Elegante (#db2777, #fce7f3, #fff0f3)
+     Estructura: Hero banner, métricas de retención, listado con restauración
+     real y eliminación permanente confirmada.
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-papelera">
+
+    <!-- 1. HERO BANNER DE PAPELERA (SIN FOTO EN LA ESQUINA) -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-trash3-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Papelera de Reciclaje
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Consulte las actividades y registros eliminados. Puede restaurarlos a su estado activo o purgarlos de forma definitiva.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                {% if total_items_papelera > 0 %}
+                <form method="POST" action="{% url 'instructor_dashboard' %}" onsubmit="return confirm('¿Está seguro de vaciar completamente la papelera? Esta acción no se puede deshacer.');">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="vaciar_papelera">
+                    <button type="submit" class="btn rounded-pill px-4 py-2.5 fw-bold small shadow-2xs d-inline-flex align-items-center gap-1.5"
+                            style="background: #ffffff; color: #e11d48; border: 1.5px solid #e11d48;">
+                        <i class="bi bi-trash3-fill"></i> Vaciar Papelera
+                    </button>
+                </form>
+                {% else %}
+                <div class="d-inline-flex align-items-center gap-2 px-3.5 py-2 rounded-pill fw-semibold shadow-2xs" 
+                     style="background: rgba(255, 255, 255, 0.92); border: 1px solid #fce7f3; color: #be185d; font-size: 0.85rem;">
+                    <i class="bi bi-shield-check" style="color: #db2777;"></i>
+                    <span>Papelera Limpia</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 3 TARJETAS MÉTRICAS -->
+    <div class="row g-3 mb-4">
+        <!-- Elementos Eliminados -->
+        <div class="col-md-4">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Elementos en papelera</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                        <i class="bi bi-trash3 fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">{{ items_papelera|length }}</h3>
+                    <small class="text-muted" style="font-size: 0.75rem;">registros recuperables</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Periodo de Retención -->
+        <div class="col-md-4">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Retención de seguridad</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                        <i class="bi bi-shield-lock fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">30</h3>
+                    <small class="text-muted" style="font-size: 0.75rem;">días de respaldo</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Protección de Datos -->
+        <div class="col-md-4">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Restauración</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                        <i class="bi bi-arrow-counterclockwise fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.25rem;">Inmediata</h3>
+                    <small class="text-muted" style="font-size: 0.75rem;">a su módulo original</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. LISTADO DE ELEMENTOS EN PAPELERA -->
+    <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden" style="border-color: #fce7f3 !important;">
+        <div class="p-3.5 border-bottom d-flex justify-content-between align-items-center" style="background: #fff0f3; border-color: #fce7f3 !important;">
+            <span class="small fw-bold" style="color: #be185d; font-size: 0.85rem;">
+                <i class="bi bi-recycle me-1.5" style="color: #db2777;"></i> Elementos en Papelera ({{ items_papelera|length }})
+            </span>
+            <small class="text-muted" style="font-size: 0.75rem;">Los elementos restaurados volverán inmediatamente a su módulo correspondiente.</small>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                    <tr>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">TIPO DE ELEMENTO</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">TÍTULO / DESCRIPCIÓN</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">DETALLE DE ORIGEN</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">FECHA DE ELIMINACIÓN</th>
+                        <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items_papelera %}
+                    <tr style="border-bottom: 1px solid #fce7f3;">
+                        <td>
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.72rem;">
+                                {{ item.tipo_objeto|default:"Actividad" }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ item.titulo }}</strong>
+                        </td>
+                        <td class="small text-muted">{{ item.subtitulo|default:"Curso docente" }}</td>
+                        <td class="small text-muted">{{ item.fecha_eliminacion|date:"d/m/Y H:i" }}</td>
+                        <td class="text-end">
+                            <!-- Restaurar -->
+                            <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="restaurar_papelera">
+                                <input type="hidden" name="papelera_id" value="{{ item.id }}">
+                                <button type="submit" class="btn btn-sm rounded-pill px-3 py-1 me-1 fw-bold shadow-2xs" 
+                                        style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;" title="Restaurar elemento">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+                                </button>
+                            </form>
+                            <!-- Eliminar Definitivo -->
+                            <form method="POST" action="{% url 'instructor_dashboard' %}" onsubmit="return confirm('¿Eliminar definitivamente este elemento?');" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="eliminar_definitivo_papelera">
+                                <input type="hidden" name="papelera_id" value="{{ item.id }}">
+                                <button type="submit" class="btn btn-sm rounded-circle p-1 d-inline-flex align-items-center justify-content-center shadow-2xs" 
+                                        style="background: #fff; color: #e11d48; border: 1px solid #fce7f3; width: 30px; height: 30px;" title="Eliminar para siempre">
+                                    <i class="bi bi-x-circle fs-6"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-trash fs-1 d-block mb-2" style="color: #db2777;"></i>
+                            <h6 class="fw-bold text-dark">La papelera está vacía</h6>
+                            <small class="text-muted">No hay tareas o contenidos eliminados recientemente.</small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,283 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 1: INICIO (DASHBOARD REAL CONECTADO A BASE DE DATOS)
+     - Clase actual en curso con botón "Tomar asistencia" o estado sin clase programada.
+     - Resumen métrico real: 4 estudiantes (Grado 10: 2, Grado 11: 2), asignaturas reales, actividades reales.
+     - Horario de hoy dinámico desde clases_hoy.
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-inicio">
+
+    <!-- 1. HERO BANNER DE BIENVENIDA (AESTHETIC PINK) -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #be185d 0%, #db2777 50%, #f43f5e 100%); color: white;">
+        
+        <div class="position-absolute top-0 end-0 p-5 opacity-50" style="transform: translate(20%, -30%);">
+            <div style="width: 300px; height: 300px; background: radial-gradient(circle, rgba(219,39,119,0.8) 0%, rgba(219,39,119,0) 70%); border-radius: 50%; filter: blur(40px);"></div>
+        </div>
+
+        <div class="row align-items-center position-relative z-1">
+            <div class="col-lg-8">
+                <div class="mb-2 fw-bold d-flex align-items-center gap-1.5" style="color: #fce7f3; font-size: 0.95rem;">
+                    <span>👋</span> ¡Hola, {{ user.get_full_name|default:user.username }}!
+                </div>
+                <h2 class="fw-bold mb-2 text-white" style="font-size: 2.2rem; letter-spacing: -0.5px;">
+                    Panel de Gestión e Información Académica Docente
+                </h2>
+                <p class="mb-0" style="color: #e2e8f0; font-size: 0.95rem; max-width: 580px;">
+                    Bienvenido a tu entorno de trabajo en EDUNOVA. Gestiona la información académica de tus grupos oficiales, horarios y seguimiento.
+                </p>
+            </div>
+            <div class="col-lg-4 text-end d-none d-lg-block">
+                <div class="d-inline-flex align-items-center gap-2 px-3.5 py-2 rounded-pill fw-semibold shadow-sm" 
+                     style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 0.85rem;">
+                    <i class="bi bi-calendar3" style="color: #fce7f3;"></i>
+                    <span>{{ hoy|date:"l, d \d\e F \d\e Y" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. SECCIÓN: CLASE ACTUAL (TARJETA COMPACTA Y ELEGANTE) -->
+    {% if clase_actual %}
+    <div class="card border rounded-4 px-3.5 py-2.5 bg-white shadow-2xs mb-3.5" style="border-color: #fce7f3 !important;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge rounded-pill px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1.5" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.75rem;">
+                    <span class="spinner-grow spinner-grow-sm text-success" style="width: 0.45rem; height: 0.45rem;" role="status"></span>
+                    En Curso
+                </span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <strong class="text-dark" style="font-size: 0.95rem;">{{ clase_actual.nombre_materia }}</strong>
+                    <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3; font-size: 0.75rem;">
+                        Grado {{ clase_actual.grado }}°{{ clase_actual.seccion }}
+                    </span>
+                    <span class="text-muted small"><i class="bi bi-clock-fill text-muted me-1"></i>{{ clase_actual.hora_inicio|time:"H:i" }} - {{ clase_actual.hora_fin|time:"H:i" }}</span>
+                    <span class="text-muted small"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ clase_actual.ambiente|default:"Aula Escolar" }}</span>
+                </div>
+            </div>
+            <a href="{% url 'asistencia_docente' %}?grado={{ clase_actual.grado }}&carga={{ clase_actual.id }}" 
+               class="btn text-white rounded-pill px-3.5 py-1.5 fw-bold shadow-2xs small d-inline-flex align-items-center gap-1.5"
+               style="background: #db2777; border: 1px solid #db2777; font-size: 0.82rem;">
+                <i class="bi bi-check2-square"></i> Tomar Asistencia
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="card border rounded-4 px-3.5 py-2.5 bg-white shadow-2xs mb-3.5" style="border-color: #fce7f3 !important;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2.5 text-muted small">
+                <i class="bi bi-calendar2-check" style="color: #db2777; font-size: 1.1rem;"></i>
+                <span><strong>Clase actual:</strong> Sin sesión en curso en este momento.</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'horario_docente' %}" class="btn btn-sm btn-white border rounded-pill px-3 py-1 fw-bold text-muted small shadow-2xs" style="font-size: 0.78rem;">
+                    <i class="bi bi-calendar-week me-1 text-pink"></i> Ver Horario
+                </a>
+                <a href="{% url 'asistencia_docente' %}" class="btn btn-sm text-white rounded-pill px-3 py-1 fw-bold shadow-2xs" style="background: #db2777; font-size: 0.78rem;">
+                    <i class="bi bi-check-square me-1"></i> Asistencia
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 3. RESUMEN MÉTRICO DEL DOCENTE (100% DATOS REALES DE BD) -->
+    <div class="row g-3 mb-4">
+        <!-- Mis Estudiantes -->
+        <div class="col-6 col-lg-3">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Mis Estudiantes</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                        <i class="bi bi-people-fill fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold mb-0" style="color: #db2777; font-size: 1.75rem;">{{ total_estudiantes_docente }}</h3>
+                    <small class="text-muted">estudiantes</small>
+                </div>
+                <div class="d-flex gap-2 mt-2 pt-2 border-top small" style="border-color: #fff0f3 !important;">
+                    <span class="text-muted">Grado 10: <strong>{{ total_estudiantes_10 }}</strong></span>
+                    <span class="text-muted">·</span>
+                    <span class="text-muted">Grado 11: <strong>{{ total_estudiantes_11 }}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mis Grupos -->
+        <div class="col-6 col-lg-3">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Mis Grupos</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #eff6ff; color: #2563eb; width: 34px; height: 34px;">
+                        <i class="bi bi-collection-fill fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.75rem;">{{ total_cursos }}</h3>
+                    <small class="text-muted">grupos activos</small>
+                </div>
+                <small class="text-muted mt-2 pt-2 border-top d-block" style="border-color: #f1f5f9 !important;">
+                    Grado 10°A y Grado 11°A
+                </small>
+            </div>
+        </div>
+
+        <!-- Mis Asignaturas -->
+        <div class="col-6 col-lg-3">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Mis Asignaturas</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fdf2f8; color: #db2777; width: 34px; height: 34px;">
+                        <i class="bi bi-book-half fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold mb-0" style="color: #db2777; font-size: 1.75rem;">{{ total_asignaturas }}</h3>
+                    <small class="text-muted">materias</small>
+                </div>
+                <small class="text-muted mt-2 pt-2 border-top d-block" style="border-color: #fff0f3 !important;">
+                    Matemáticas, Informática, Lengua
+                </small>
+            </div>
+        </div>
+
+        <!-- Entregas Pendientes -->
+        <div class="col-6 col-lg-3">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Por Calificar</span>
+                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                         style="background: #fff7ed; color: #ea580c; width: 34px; height: 34px;">
+                        <i class="bi bi-clock-history fs-6"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.75rem;">{{ total_entregas_pendientes }}</h3>
+                    <small class="text-muted">entregas</small>
+                </div>
+                <small class="text-muted mt-2 pt-2 border-top d-block" style="border-color: #ffedd5 !important;">
+                    {{ total_tareas_creadas }} actividades creadas
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. ESTRUCTURA DE 2 COLUMNAS: HORARIO DE HOY Y ACTIVIDADES RECIENTES -->
+    <div class="row g-4">
+        <!-- COLUMNA IZQUIERDA: HORARIO DE HOY -->
+        <div class="col-lg-7">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-calendar2-week fs-5" style="color: #db2777;"></i>
+                        <h5 class="fw-bold text-dark mb-0">Horario de Hoy</h5>
+                    </div>
+                    <a href="{% url 'horario_docente' %}" class="small fw-semibold text-decoration-none" style="color: #db2777;">
+                        Ver horario completo →
+                    </a>
+                </div>
+
+                <div class="d-flex flex-column gap-2.5">
+                    {% for c in clases_hoy %}
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3 border bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="text-center px-3 py-1.5 rounded-3 fw-bold" 
+                                 style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3; min-width: 80px; font-size: 0.82rem;">
+                                <div>{{ c.hora_inicio|time:"H:i" }}</div>
+                                <div style="font-size: 0.74rem;">- {{ c.hora_fin|time:"H:i" }}</div>
+                            </div>
+                            <div>
+                                <strong class="text-dark d-block" style="font-size: 0.95rem;">{{ c.nombre_materia }}</strong>
+                                <small class="text-muted">Grado {{ c.grado }}°{{ c.seccion }} · {{ c.ambiente|default:"Aula 101" }}</small>
+                            </div>
+                        </div>
+                        <a href="{% url 'asistencia_docente' %}?grado={{ c.grado }}" class="btn btn-sm btn-white border rounded-pill px-3 py-1 fw-semibold small text-pink">
+                            Asistencia
+                        </a>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x fs-2 text-pink d-block mb-1.5"></i>
+                        <h6 class="fw-bold text-dark mb-0.5">No hay clases programadas para hoy</h6>
+                        <small>Disfruta de tu jornada o planifica tus actividades y tareas.</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: ACCIONES RÁPIDAS Y ACTIVIDADES -->
+        <div class="col-lg-5">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-lightning-charge-fill fs-5" style="color: #db2777;"></i>
+                        <h5 class="fw-bold text-dark mb-0">Accesos Directos</h5>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mb-4">
+                    <a href="{% url 'actividades_tareas' %}" class="btn rounded-4 p-3 text-start border bg-light d-flex align-items-center justify-content-between hover-shadow transition" style="border-color: #f1f5f9;">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-3 p-2 bg-white text-pink shadow-2xs"><i class="bi bi-journal-plus fs-5"></i></div>
+                            <div>
+                                <strong class="text-dark d-block small">Crear Nueva Actividad / Tarea</strong>
+                                <small class="text-muted">Con guía pedagógica y resultado de aprendizaje</small>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+
+                    <a href="{% url 'asistencia_docente' %}" class="btn rounded-4 p-3 text-start border bg-light d-flex align-items-center justify-content-between hover-shadow transition" style="border-color: #f1f5f9;">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-3 p-2 bg-white text-pink shadow-2xs"><i class="bi bi-check-square-fill fs-5"></i></div>
+                            <div>
+                                <strong class="text-dark d-block small">Tomar Asistencia Diaria</strong>
+                                <small class="text-muted">Registro oficial por grado y sesión</small>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+
+                    <a href="{% url 'calificaciones_docente' %}" class="btn rounded-4 p-3 text-start border bg-light d-flex align-items-center justify-content-between hover-shadow transition" style="border-color: #f1f5f9;">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-3 p-2 bg-white text-pink shadow-2xs"><i class="bi bi-mortarboard-fill fs-5"></i></div>
+                            <div>
+                                <strong class="text-dark d-block small">Planilla de Calificaciones</strong>
+                                <small class="text-muted">Evaluaciones y cálculo de promedios</small>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                </div>
+
+                <!-- Notificaciones Recientes -->
+                <div class="pt-3 border-top" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="fw-bold text-dark text-uppercase" style="font-size: 0.74rem;">Últimas Notificaciones</small>
+                        <a href="{% url 'notificaciones_docente' %}" class="small text-pink fw-semibold text-decoration-none">Ver todas</a>
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        {% for n in notificaciones_docente|slice:":3" %}
+                        <div class="p-2.5 rounded-3 border bg-white small d-flex align-items-center justify-content-between" style="border-color: #fce7f3 !important;">
+                            <div>
+                                <strong class="d-block text-dark" style="font-size: 0.82rem;">{{ n.titulo|truncatechars:45 }}</strong>
+                                <small class="text-muted">{{ n.mensaje|truncatechars:60 }}</small>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.7rem;">{{ n.fecha_creacion|date:"d/m" }}</small>
+                        </div>
+                        {% empty %}
+                        <div class="text-muted small py-2 text-center">No tienes notificaciones nuevas.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>

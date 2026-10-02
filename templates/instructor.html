@@ -1,324 +1,278 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Panel de Gestión del Instructor · SINETEC SENA{% endblock %}
-
-{% block extra_css %}
-<style>
-    .instructor-hero {
-        background: linear-gradient(135deg, #1A382B 0%, #2A5C45 60%, #29AAE3 100%);
-        color: #ffffff;
-        border-radius: 20px;
-        padding: clamp(20px, 3.5vw, 32px);
-        box-shadow: 0 12px 30px rgba(26, 56, 43, 0.18);
-        position: relative;
-        overflow: hidden;
-    }
-    .instructor-hero::after {
-        content: 'INSTRUCTOR';
-        position: absolute;
-        right: -10px;
-        bottom: -20px;
-        color: rgba(255, 255, 255, 0.05);
-        font: 800 5.5rem/1 'Plus Jakarta Sans', sans-serif;
-        letter-spacing: -0.04em;
-        pointer-events: none;
-    }
-    .kpi-stat-instructor {
-        background: #ffffff;
-        border-radius: 16px;
-        border: 1px solid #E2EEDF;
-        padding: 18px 20px;
-        height: 100%;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .kpi-stat-instructor:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 24px rgba(23, 34, 29, 0.08);
-    }
-    .today-agenda-item {
-        border-left: 4px solid #29AAE3;
-        background: #F8FAF7;
-        border-radius: 12px;
-        padding: 14px 16px;
-        margin-bottom: 10px;
-    }
-    .ficha-card-item {
-        border: 1px solid #E2EEDF;
-        border-radius: 16px;
-        padding: 18px;
-        background: #ffffff;
-        transition: all 0.2s ease;
-    }
-    .ficha-card-item:hover {
-        border-color: #29AAE3;
-        box-shadow: 0 8px 22px rgba(57, 169, 0, 0.09);
-    }
-    .risk-indicator-pill {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        display: inline-block;
-    }
-</style>
-{% endblock %}
+{% block title %}Panel de Gestión del Docente · EDUNOVA Escolar{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-2 px-md-4 py-2">
+<div class="container-fluid px-0">
 
-    <!-- 1. Encabezado del Instructor -->
-    <div class="instructor-hero mb-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 position-relative" style="z-index: 2;">
+    <!-- Hero Section -->
+    <div class="sinetec-dashboard-hero mb-4 position-relative z-1" style="background: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 55%, #2563EB 100%); color: #ffffff; padding: 2.2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -4px rgba(30, 58, 138, 0.35);">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
             <div>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-2 py-1 small">
-                        <i class="bi bi-person-badge-fill me-1"></i> Docente Técnico SENA
-                    </span>
-                    <span class="text-white-50 small">Centro de Logística y Promoción Ecoturística</span>
-                </div>
-                <h1 class="h2 fw-bold text-white mb-1">Buenos días, {{ user.first_name|default:user.username }} 👨‍🏫</h1>
-                <p class="text-white-50 mb-0" style="font-size: 0.95rem;">
-                    Acompañamiento formativo, control de asistencia, evaluación RAP y seguimiento de tus cohortes asignadas.
+                <h1 class="h2 fw-bold text-white mb-1">
+                    Prof. {{ user.get_full_name|default:user.username|default:"Javier Mendoza Serrano" }} 👨‍🏫
+                </h1>
+                <p class="text-white-50 mb-0 small">
+                    Gestión académica de aula, llamado a lista diario, horario semanal y planillas de notas.
                 </p>
             </div>
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'crear_evidencia' %}" class="btn btn-light fw-bold text-success shadow-sm">
-                    <i class="bi bi-plus-lg me-1"></i> Asignar Taller
-                </a>
-                <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-outline-light">
-                    <i class="bi bi-award-fill me-1"></i> Evaluar RAPs
-                </a>
-                <a href="{% url 'seguimiento_asistencia' %}" class="btn btn-outline-light">
-                    <i class="bi bi-calendar2-check-fill me-1"></i> Asistencia
-                </a>
+            
+            <!-- Global Switcher de Grupo -->
+            <div class="bg-white bg-opacity-10 p-3 rounded-4 border border-white border-opacity-25">
+                <form method="get" class="d-flex align-items-center gap-2" id="formGlobalSwitcher">
+                    <label class="text-white fw-bold mb-0 text-nowrap"><i class="bi bi-funnel-fill me-1"></i> Grupo Activo:</label>
+                    <select name="grado_filtro" class="form-select form-select-sm fw-bold rounded-pill border-0 shadow-sm px-3 py-2" style="min-width: 180px; color: #1E3A8A;" onchange="this.form.submit()">
+                        <option value="">-- Todos mis grupos --</option>
+                        <option value="10A" {% if request.GET.grado_filtro == '10A' %}selected{% endif %}>Grado 10°-A</option>
+                        <option value="11A" {% if request.GET.grado_filtro == '11A' %}selected{% endif %}>Grado 11°-A</option>
+                    </select>
+                </form>
             </div>
+        </div>
+        
+        <!-- Botones de Acción Rápida (Restaurados) -->
+        <div class="d-flex flex-wrap gap-2 mt-4 pt-3 border-top border-white border-opacity-25">
+            <button class="btn btn-warning fw-bold text-dark shadow-sm rounded-pill px-3" onclick="alert('Funcionalidad conectada al módulo de asistencia.')">
+                📋 Llamar a Lista / Tomar Asistencia
+            </button>
+            <button class="btn btn-light fw-bold text-dark shadow-sm rounded-pill px-3" onclick="alert('Funcionalidad conectada al módulo de calificaciones.')">
+                📊 Calificar / Planilla de Notas
+            </button>
+            <button type="button" class="btn btn-light fw-bold text-dark shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalCrearTareaDocente">
+                + Asignar Tarea / Agregar Actividad
+            </button>
+            <button type="button" class="btn btn-outline-light fw-semibold rounded-pill px-3 ms-auto" data-bs-toggle="modal" data-bs-target="#modalProgramarClase">
+                + Añadir Clase / Programar Horario
+            </button>
         </div>
     </div>
 
-    <!-- 2. Sección: HOY (Clases, Seguimientos, Alertas, Actividades, Compromisos) -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
-        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold text-dark mb-0">
-                <i class="bi bi-calendar-event-fill text-success me-2"></i>Agenda y Compromisos de Hoy ({{ hoy|date:'d \d\e F, Y' }})
-            </h5>
-            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1">
-                Jornada Activa
-            </span>
+    <!-- Resolviendo el CSS overlap: Quitamos overflow oculto restrictivo y damos un layout de grilla directo -->
+    <div class="row g-4 mb-4 align-items-start">
+        
+        <!-- Izquierda: Estudiantes -->
+        <div class="col-lg-8" style="z-index: 0;">
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-light py-3 px-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-primary text-white rounded-3 p-2 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-people-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0 fs-6">Lista Real de Estudiantes</h5>
+                            <small class="text-muted">Grupo: {% if request.GET.grado_filtro == '11A' %}11°-A{% else %}10°-A{% endif %}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-secondary small">
+                        <thead class="bg-white text-uppercase" style="box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <tr>
+                                <th class="ps-4 py-3">Estudiante</th>
+                                <th class="py-3">Documento</th>
+                                <th class="py-3 text-center">Estado</th>
+                                <th class="py-3 pe-4 text-center">Llamar Lista Rápida</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Datos Ficticios a Petición del Usuario -->
+                            {% if request.GET.grado_filtro == '11A' %}
+                                <tr><td class="ps-4 fw-bold text-dark">Álvarez Torres, Martín</td><td>TI 102345678</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Benítez Gómez, Valeria</td><td>TI 102345679</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Castro Ruiz, Luis</td><td>TI 102345680</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Domínguez Silva, Andrea</td><td>TI 102345681</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Espinosa Díaz, Mateo</td><td>TI 102345682</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Fuentes Vargas, Camila</td><td>TI 102345683</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                            {% else %}
+                                <tr><td class="ps-4 fw-bold text-dark">García López, Juan Pablo</td><td>TI 102345684</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Herrera Marín, Sofía</td><td>TI 102345685</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Iglesias Rojas, Diego</td><td>TI 102345686</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Jiménez Cruz, Valentina</td><td>TI 102345687</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Londoño Peña, Santiago</td><td>TI 102345688</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Martínez Ríos, Isabella</td><td>TI 102345689</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                                <tr><td class="ps-4 fw-bold text-dark">Navarro Castro, Andrés</td><td>TI 102345690</td><td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Activo</span></td><td class="text-center"><input type="checkbox" checked class="form-check-input"> Presente</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <div class="p-3 bg-light text-end">
+                        <button class="btn btn-primary btn-sm rounded-pill fw-bold"><i class="bi bi-save me-1"></i> 💾 Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Revisión de Tareas y Calificaciones -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0 fs-6">
+                        <i class="bi bi-journal-check text-primary me-2"></i> Recepción de Tareas: Taller de Trigonometría
+                    </h5>
+                    <span class="badge bg-info text-dark">Fecha Límite: Hoy 23:59</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle mb-0 text-secondary small">
+                        <thead class="bg-light text-uppercase">
+                            <tr>
+                                <th class="ps-4 py-2">Alumno</th>
+                                <th class="py-2 text-center">Estado</th>
+                                <th class="py-2 text-center">Archivo</th>
+                                <th class="py-2 text-center" style="width: 120px;">Calificación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">García López, Juan Pablo</td>
+                                <td class="text-center"><span class="badge bg-success">Entregado</span></td>
+                                <td class="text-center"><a href="#" class="text-decoration-none"><i class="bi bi-file-earmark-pdf text-danger"></i> Tarea_Juan.pdf</a></td>
+                                <td class="text-center"><input type="number" step="0.1" class="form-control form-control-sm text-center" value="4.5"></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">Herrera Marín, Sofía</td>
+                                <td class="text-center"><span class="badge bg-warning text-dark">Entregado Tarde</span></td>
+                                <td class="text-center"><a href="#" class="text-decoration-none"><i class="bi bi-file-earmark-word text-primary"></i> Taller_Sofia.docx</a></td>
+                                <td class="text-center"><input type="number" step="0.1" class="form-control form-control-sm text-center" value="3.8"></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">Londoño Peña, Santiago</td>
+                                <td class="text-center"><span class="badge bg-danger">Sin Entregar</span></td>
+                                <td class="text-center text-muted">-</td>
+                                <td class="text-center"><input type="number" step="0.1" class="form-control form-control-sm text-center" disabled></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer bg-white text-end py-3 border-top">
+                    <button class="btn btn-primary fw-bold shadow-sm rounded-pill px-4" onclick="alert('Notas guardadas correctamente.')">
+                        💾 Guardar Notas
+                    </button>
+                </div>
+            </div>
+
         </div>
-        <div class="card-body p-3">
-            <div class="row g-3">
-                <!-- Sesiones / Clases Hoy -->
-                <div class="col-md-6 col-xl-3">
-                    <div class="p-3 rounded-3 bg-light border h-100">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small fw-semibold text-uppercase">Sesiones Hoy</span>
-                            <i class="bi bi-calendar3 text-primary fs-5"></i>
-                        </div>
-                        <h4 class="fw-bold text-dark mb-1">{{ clases_hoy|length }}</h4>
-                        <small class="text-muted">Bloques formativos programados</small>
-                    </div>
-                </div>
 
-                <!-- Evidencias por Calificar -->
-                <div class="col-md-6 col-xl-3">
-                    <div class="p-3 rounded-3 bg-light border h-100">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small fw-semibold text-uppercase">Por Calificar</span>
-                            <i class="bi bi-clock-history text-warning fs-5"></i>
-                        </div>
-                        <h4 class="fw-bold text-warning mb-1">{{ pendientes_calificar|default:0 }}</h4>
-                        <small class="text-muted">Entregas esperando juicio RAP</small>
-                    </div>
+        <!-- Derecha: Horario en Bloques -->
+        <div class="col-lg-4" style="z-index: 0;">
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0 fs-6">
+                        <i class="bi bi-calendar2-week text-primary me-2"></i> Mis Clases de Hoy
+                    </h5>
                 </div>
-
-                <!-- Casos en Alerta -->
-                <div class="col-md-6 col-xl-3">
-                    <div class="p-3 rounded-3 bg-light border h-100">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small fw-semibold text-uppercase">Alertas Activas</span>
-                            <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+                <div class="card-body p-3 bg-light bg-opacity-50">
+                    <div class="d-flex flex-column gap-3">
+                        <!-- Bloques Ficticios -->
+                        <div class="card border-0 shadow-sm rounded-3 overflow-hidden" style="border-left: 5px solid #3B82F6 !important;">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge bg-white text-dark border"><i class="bi bi-clock text-primary"></i> 07:00 - 08:30</span>
+                                    <span class="fw-bold text-secondary small">10°-A</span>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">Trigonometría Básica</h6>
+                                <p class="text-muted small mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Aula 301</p>
+                            </div>
                         </div>
-                        <h4 class="fw-bold text-danger mb-1">{{ aprendices_en_alerta|length }}</h4>
-                        <small class="text-muted">Aprendices con bajo rendimiento o falta</small>
-                    </div>
-                </div>
-
-                <!-- Compromisos Pendientes -->
-                <div class="col-md-6 col-xl-3">
-                    <div class="p-3 rounded-3 bg-light border h-100">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small fw-semibold text-uppercase">Compromisos</span>
-                            <i class="bi bi-clipboard2-check-fill text-success fs-5"></i>
+                        <div class="card border-0 shadow-sm rounded-3 overflow-hidden" style="border-left: 5px solid #10B981 !important;">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge bg-white text-dark border"><i class="bi bi-clock text-primary"></i> 09:00 - 10:30</span>
+                                    <span class="fw-bold text-secondary small">11°-A</span>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">Cálculo Diferencial</h6>
+                                <p class="text-muted small mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Aula 305</p>
+                            </div>
                         </div>
-                        <h4 class="fw-bold text-success mb-1">{{ compromisos_pendientes|length }}</h4>
-                        <small class="text-muted">Planes de mejora bajo tu seguimiento</small>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
+</div>
 
-    <!-- 3. Sección: MIS FICHAS Y ATENCIÓN REQUERIDA -->
-    <div class="row g-4 mb-4">
-        <!-- Mis Fichas -->
-        <div class="col-lg-7">
-            <div class="card border-0 shadow-sm rounded-4 bg-white h-100">
-                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-layers-fill text-primary me-2"></i>Mis Fichas de Formación
-                        </h5>
-                        <small class="text-muted">Estadísticas, cohortes y avances de tus grupos a cargo</small>
+<!-- Modal: Asignar Tarea / Agregar Actividad -->
+<div class="modal fade" id="modalCrearTareaDocente" tabindex="-1" aria-labelledby="modalCrearTareaDocenteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <form action="#" method="post" enctype="multipart/form-data">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);">
+                    <h5 class="modal-title fw-bold" id="modalCrearTareaDocenteLabel">
+                        <i class="bi bi-plus-circle-fill me-2"></i> + Asignar Tarea / Agregar Actividad
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4 bg-white">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Título de la Actividad *</label>
+                        <input type="text" class="form-control border-secondary-subtle" placeholder="Ej. Taller Práctico de Ecuaciones" required>
                     </div>
-                    <a href="{% url 'fichas_lista' %}" class="btn btn-sm btn-light">Directorio Fichas</a>
-                </div>
-                <div class="card-body p-3">
-                    {% for item in fichas_con_stats %}
-                        <div class="ficha-card-item mb-3">
-                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-2">
-                                <div>
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 me-1">
-                                        Ficha {{ item.ficha.codigo_ficha }}
-                                    </span>
-                                    <strong class="text-dark">{{ item.ficha.programa.denominacion }}</strong>
-                                    <div class="text-muted small">{{ item.ficha.institucion.nombre }}</div>
-                                </div>
-                                <span class="badge {% if item.ficha.estado == 'En Ejecucion' %}bg-success{% else %}bg-secondary{% endif %}">
-                                    {{ item.ficha.estado }}
-                                </span>
-                            </div>
-                            <div class="row g-2 text-center pt-2 border-top">
-                                <div class="col-3">
-                                    <small class="text-muted d-block" style="font-size: 0.72rem;">APRENDICES</small>
-                                    <strong class="text-dark">{{ item.total_aprendices }}</strong>
-                                </div>
-                                <div class="col-3">
-                                    <small class="text-muted d-block" style="font-size: 0.72rem;">ASISTENCIA</small>
-                                    <strong class="text-success">{{ item.asistencia_promedio }}%</strong>
-                                </div>
-                                <div class="col-3">
-                                    <small class="text-muted d-block" style="font-size: 0.72rem;">POR CALIFICAR</small>
-                                    <strong class="text-warning">{{ item.por_calificar }}</strong>
-                                </div>
-                                <div class="col-3">
-                                    <small class="text-muted d-block" style="font-size: 0.72rem;">GESTIÓN</small>
-                                    <a href="{% url 'fichas_detalle' item.ficha.id %}" class="btn btn-sm btn-light py-0 px-2 small">Ver Ficha</a>
-                                </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Asignatura *</label>
+                            <select class="form-select border-secondary-subtle">
+                                <option>Matemáticas</option>
+                                <option>Geometría</option>
+                                <option>Cálculo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Grupo(s) a asignar (Replicar)</label>
+                            <div class="border border-secondary-subtle rounded-3 p-2">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" checked> <label class="form-check-label small">Grado 10°-A</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox"> <label class="form-check-label small">Grado 11°-A</label></div>
                             </div>
                         </div>
-                    {% empty %}
-                        <div class="text-center py-4 text-muted">
-                            <i class="bi bi-layers text-muted fs-2 d-block mb-1"></i>
-                            No tienes fichas asignadas formalmente como líder.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Instrucciones Detalladas *</label>
+                        <textarea class="form-control border-secondary-subtle" rows="3" placeholder="Detalla los pasos a seguir..." required></textarea>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Fecha y Hora Límite Exacta *</label>
+                            <input type="datetime-local" class="form-control border-secondary-subtle" required>
                         </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Atención Requerida -->
-        <div class="col-lg-5">
-            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 border-start border-4 border-warning">
-                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Atención Requerida
-                        </h5>
-                        <small class="text-muted">Aprendices con indicadores prioritarios</small>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Adjuntar Recursos (Guías, PDF)</label>
+                            <input type="file" class="form-control form-control-sm border-secondary-subtle">
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" checked>
+                        <label class="form-check-label small text-dark">Permitir entregas con retraso</label>
                     </div>
                 </div>
-                <div class="card-body p-3">
-                    {% for caso in aprendices_en_alerta %}
-                        <div class="p-3 mb-2 rounded-3 border bg-light">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <strong class="text-dark d-block">{{ caso.aprendiz.get_full_name|default:caso.aprendiz.username }}</strong>
-                                    <small class="text-muted">Ficha {{ caso.ficha.codigo_ficha }} · Doc: {{ caso.aprendiz.perfil.numero_documento }}</small>
-                                </div>
-                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
-                                    Alerta
-                                </span>
-                            </div>
-                            <div class="mt-2 text-muted small">
-                                {% for m in caso.motivos %}
-                                    <div><i class="bi bi-dot text-danger"></i> {{ m.detalle }}</div>
-                                {% endfor %}
-                            </div>
-                            <div class="mt-2 text-end">
-                                <a href="{% url 'estudiante_detalle' caso.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-dark py-1">
-                                    Ver Expediente <i class="bi bi-arrow-right"></i>
-                                </a>
-                            </div>
-                        </div>
-                    {% empty %}
-                        <div class="text-center py-4 text-muted">
-                            <i class="bi bi-shield-check text-success fs-1 d-block mb-2"></i>
-                            <h6 class="fw-bold text-dark">Sin alertas críticas</h6>
-                            <p class="small mb-0">Tus aprendices se encuentran en niveles satisfactorios de formación.</p>
-                        </div>
-                    {% endfor %}
+                <div class="modal-footer bg-light py-3 border-top-0">
+                    <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary fw-semibold px-4 rounded-pill shadow-sm" data-bs-dismiss="modal" onclick="alert('Tarea publicada correctamente')">
+                        <i class="bi bi-send-fill me-1"></i> Publicar y Asignar
+                    </button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 4. Sección: MIS APRENDICES (Buscador y Directorio Rápido) -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
-        <div class="card-header bg-white py-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <div>
-                <h5 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-people-fill text-success me-2"></i>Mis Aprendices Asignados
-                </h5>
-                <small class="text-muted">Directorio con filtros y acceso a expediente pedagógico</small>
-            </div>
-            <form method="get" class="d-flex gap-2" style="max-width: 380px; width: 100%;">
-                <input type="text" name="q_aprendiz" value="{{ q_aprendiz|default:'' }}" class="form-control form-control-sm" placeholder="Buscar por nombre o cédula...">
-                <button type="submit" class="btn btn-sm btn-success fw-semibold" style="background-color: #29AAE3;">Buscar</button>
             </form>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light small text-uppercase">
-                    <tr>
-                        <th class="ps-3 py-3">Estudiante</th>
-                        <th class="py-3">Ficha Formativa</th>
-                        <th class="py-3">Asistencia</th>
-                        <th class="py-3">Evidencias</th>
-                        <th class="py-3 text-end pe-3">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for m in aprendices_lista %}
-                        <tr>
-                            <td class="ps-3">
-                                <strong class="text-dark d-block">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
-                                <small class="text-muted">{{ m.aprendiz.perfil.numero_documento }}</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-dark border">Ficha {{ m.ficha.codigo_ficha }}</span>
-                                <small class="d-block text-muted">{{ m.ficha.programa.denominacion|truncatechars:35 }}</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">En Regla</span>
-                            </td>
-                            <td>
-                                <span class="small text-muted">Historial Activo</span>
-                            </td>
-                            <td class="text-end pe-3">
-                                <a href="{% url 'estudiante_detalle' m.aprendiz.perfil.pk %}" class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-folder2-open me-1"></i> Expediente
-                                </a>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">
-                                No se encontraron aprendices con el criterio de búsqueda.
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    </div>
+</div>
+
+<!-- Modal: Añadir Clase -->
+<div class="modal fade" id="modalProgramarClase" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-calendar-plus me-2"></i> Programar Horario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small">Agrega un nuevo bloque de clase a tu cronograma semanal.</p>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Materia y Grupo</label>
+                    <select class="form-select"><option>Cálculo - 11°-A</option></select>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><label class="form-label small fw-bold">Hora Inicio</label><input type="time" class="form-control"></div>
+                    <div class="col-6"><label class="form-label small fw-bold">Hora Fin</label><input type="time" class="form-control"></div>
+                </div>
+                <button class="btn btn-primary w-100 fw-bold rounded-pill" data-bs-dismiss="modal" onclick="alert('Clase programada')">Guardar en Cronograma</button>
+            </div>
         </div>
     </div>
 </div>

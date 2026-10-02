@@ -4,39 +4,39 @@
    ============================================================================== */
 
 :root {
-  --sinetec-primary: #7FC4F2;
-  --sinetec-primary-dark: #2F79A8;
-  --sinetec-secondary: #7FC4F2;
-  --sinetec-accent: #EEF2FF;
+  --sinetec-primary: #DB2777;
+  --sinetec-primary-dark: #BE185D;
+  --sinetec-secondary: #F472B6;
+  --sinetec-accent: #FFF1F5;
   --sinetec-success: #10B981;
   --sinetec-warning: #F59E0B;
   --sinetec-danger: #EF4444;
-  --sinetec-bg-light: #F8FAFC;
+  --sinetec-bg-light: #FDF2F4;
   --sinetec-card-bg: #FFFFFF;
-  --sinetec-border: #E2E8F0;
+  --sinetec-border: #FCE7F3;
   --sinetec-text-main: #0F172A;
   --sinetec-text-muted: #64748B;
   --sinetec-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Colores Escolares Suaves */
-  --sinetec-blue: #7FC4F2;
-  --sinetec-blue-hover: #3E91C5;
-  --sinetec-blue-soft: #EAF6FD;
-  --sinetec-blue-border: #A8D8F3;
-  --sinetec-blue-deep: #2A5EAC;
+  --sinetec-blue: #DB2777;
+  --sinetec-blue-hover: #BE185D;
+  --sinetec-blue-soft: #FCE7F3;
+  --sinetec-blue-border: #FBCFE8;
+  --sinetec-blue-deep: #9D174D;
 
-  --sinetec-lavender: #EEF2FF;
-  --sinetec-lavender-border: #C7D2FE;
-  --sinetec-lavender-text: #4F46E5;
+  --sinetec-lavender: #FFF1F5;
+  --sinetec-lavender-border: #FCE7F3;
+  --sinetec-lavender-text: #DB2777;
 
-  --sinetec-rose: #F43F5E;
-  --sinetec-rose-hover: #E11D48;
-  --sinetec-rose-soft: #FFF1F2;
-  --sinetec-rose-border: #FECDD3;
+  --sinetec-rose: #DB2777;
+  --sinetec-rose-hover: #BE185D;
+  --sinetec-rose-soft: #FCE7F3;
+  --sinetec-rose-border: #FBCFE8;
 
   --sinetec-card-radius: 16px;
-  --sinetec-soft-shadow: 0 4px 20px -2px rgba(15, 41, 66, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
-  --sinetec-soft-shadow-hover: 0 10px 25px -4px rgba(15, 41, 66, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+  --sinetec-soft-shadow: 0 4px 20px -2px rgba(219, 39, 119, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  --sinetec-soft-shadow-hover: 0 10px 25px -4px rgba(219, 39, 119, 0.16), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
 }
 
 /* Tarjetas Modernas */

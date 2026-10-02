@@ -1,142 +1,104 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mi Espacio de Formación · Estudiante SENA{% endblock %}
+{% block title %}Mi Portal Estudiantil · EDUNOVA{% endblock %}
 
 {% block extra_css %}
 <style>
-    .aprendiz-welcome {
-        background: linear-gradient(135deg, #103823 0%, #1a5c36 60%, #29AAE3 100%);
+    .estudiante-welcome-banner {
+        background: linear-gradient(135deg, #312E81 0%, #4338CA 50%, #6366F1 100%);
         color: #ffffff;
         border-radius: 20px;
-        padding: clamp(20px, 3.5vw, 32px);
-        box-shadow: 0 12px 30px rgba(16, 56, 35, 0.18);
+        padding: clamp(22px, 3.5vw, 34px);
+        box-shadow: 0 10px 30px rgba(67, 56, 202, 0.3);
         position: relative;
         overflow: hidden;
     }
-    .aprendiz-welcome::after {
-        content: 'APRENDIZ';
+    .estudiante-welcome-banner::after {
+        content: 'ESTUDIANTE';
         position: absolute;
         right: -10px;
         bottom: -20px;
-        color: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.08);
         font: 800 5.5rem/1 'Plus Jakarta Sans', sans-serif;
         letter-spacing: -0.04em;
         pointer-events: none;
     }
-    .stat-card-aprendiz {
+    .stat-kpi-clickable {
         background: #ffffff;
         border-radius: 16px;
-        border: 1px solid #E2EEDF;
-        padding: 18px 20px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid #D0E7F9;
+        padding: 20px;
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(47, 121, 168, 0.05);
+        text-decoration: none;
     }
-    .stat-card-aprendiz:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 24px rgba(23, 34, 29, 0.08);
+    .stat-kpi-clickable:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(47, 121, 168, 0.16);
+        border-color: #5CA8D8;
     }
-    .kpi-icon-circle {
+    .kpi-circle-icon {
         width: 44px;
         height: 44px;
         border-radius: 12px;
         display: grid;
         place-items: center;
-        font-size: 1.25rem;
+        font-size: 1.3rem;
     }
-    .progress-bar-sena {
-        height: 10px;
+    .progress-bar-sinetec {
+        height: 8px;
         border-radius: 999px;
-        background-color: #E2EEDF;
+        background-color: #E2E8F0;
         overflow: hidden;
     }
-    .progress-bar-sena-fill {
+    .progress-bar-sinetec-fill {
         height: 100%;
-        background: linear-gradient(90deg, #29AAE3, #54c916);
+        background: linear-gradient(90deg, #5CA8D8, #10B981);
         border-radius: 999px;
         transition: width 0.6s ease;
     }
-    .actividad-item {
-        border-left: 4px solid #29AAE3;
-        background: #ffffff;
+    .nav-pills-estudiante .nav-link {
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.92rem;
+        padding: 10px 18px;
         border-radius: 12px;
-        padding: 14px 16px;
-        margin-bottom: 12px;
-        border-top: 1px solid #EAEFE7;
-        border-right: 1px solid #EAEFE7;
-        border-bottom: 1px solid #EAEFE7;
+        background: #FFFFFF;
+        border: 1px solid #D0E7F9;
         transition: all 0.2s ease;
     }
-    .actividad-item:hover {
-        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-        transform: translateX(3px);
+    .nav-pills-estudiante .nav-link:hover {
+        background: #F0F8FD;
+        color: #0369A1;
+        border-color: #5CA8D8;
     }
-    .badge-insignia {
-        background: linear-gradient(135deg, #FFF9EB, #FFF3D6);
-        border: 1px solid #FDE68A;
-        color: #B45309;
-        border-radius: 12px;
-        padding: 8px 14px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 700;
-        font-size: 0.85rem;
+    .nav-pills-estudiante .nav-link.active {
+        background: linear-gradient(135deg, #5CA8D8 0%, #2F79A8 100%);
+        color: #FFFFFF;
+        border-color: transparent;
+        box-shadow: 0 4px 14px rgba(47, 121, 168, 0.25);
     }
-    /* Carné PVC Oficial en Panel Aprendiz */
-    .pvc-aprendiz-widget {
+    .tarea-item-card {
+        border-left: 4px solid #5CA8D8;
         background: #ffffff;
-        border-radius: 18px;
-        border: 1px solid #d1d5db;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-        position: relative;
-        overflow: hidden;
-        margin-bottom: 24px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 12px;
+        border-top: 1px solid #E2E8F0;
+        border-right: 1px solid #E2E8F0;
+        border-bottom: 1px solid #E2E8F0;
+        transition: all 0.2s ease;
     }
-    .pvc-aprendiz-widget:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 16px 36px -6px rgba(11, 36, 20, 0.14);
-        border-color: #29AAE3;
-    }
-    .pvc-header-strip {
-        background: linear-gradient(135deg, #0b2414 0%, #164e2a 100%);
-        color: #ffffff;
-        padding: 12px 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .pvc-body-grid {
-        padding: 16px;
-        display: flex;
-        gap: 16px;
-        align-items: center;
-    }
-    .pvc-photo-box {
-        width: 86px;
-        height: 108px;
-        border-radius: 10px;
-        overflow: hidden;
-        border: 2.5px solid #29AAE3;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-        flex-shrink: 0;
-        background: #f8fafc;
-    }
-    .pvc-qr-box {
-        width: 76px;
-        height: 76px;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    .tarea-item-card:hover {
+        box-shadow: 0 6px 18px rgba(47, 121, 168, 0.08);
+        border-left-color: #2F79A8;
+        transform: translateX(4px);
     }
 </style>
 {% endblock %}
@@ -144,73 +106,75 @@
 {% block content %}
 <div class="container-fluid px-2 px-md-4 py-2">
 
-    <!-- 1. Encabezado de Bienvenida Personalizado -->
-    <div class="aprendiz-welcome mb-4">
+    <!-- 1. Encabezado de Bienvenida del Estudiante -->
+    <div class="estudiante-welcome-banner mb-4">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 position-relative" style="z-index: 2;">
             <div>
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-2 py-1 small">
-                        <i class="bi bi-mortarboard-fill me-1"></i> Formación Titulada SENA
+                    <span class="badge bg-white bg-opacity-25 text-white border border-white border-opacity-50 px-2 py-1 small fw-bold">
+                        <i class="bi bi-mortarboard-fill me-1"></i> Portal del Estudiante
                     </span>
-                    <span class="text-white-50 small">Centro de Logística y Promoción Ecoturística</span>
+                    <span class="text-white-50 small">{{ colegio.nombre|default:"Institución Educativa Distrital" }}</span>
                 </div>
                 <h1 class="h2 fw-bold text-white mb-1">¡Hola, {{ user.first_name|default:user.username }}! 👋</h1>
-                <p class="text-white-50 mb-0" style="font-size: 0.95rem;">
-                    {% if ficha %}
-                        Ficha <strong>{{ ficha.codigo_ficha }}</strong> · {{ ficha.programa.denominacion }} ({{ ficha.institucion.nombre }})
+                <p class="text-white text-opacity-90 mb-0" style="font-size: 0.95rem;">
+                    {% if matricula %}
+                        Grado <strong>{{ matricula.get_grado_escolar_display|default:matricula.grado_escolar }}</strong> · Grupo {{ ficha.codigo_ficha }} ({{ ficha.programa.denominacion }})
                     {% else %}
-                        Bienvenido a tu entorno oficial de formación y seguimiento académico SINETEC.
+                        Bienvenido a tu entorno oficial de clases, calificaciones y seguimiento escolar.
                     {% endif %}
                 </p>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                {% if user.perfil.pk %}
-                <a href="{% url 'carnet_digital_id' user.perfil.pk %}" class="btn btn-light fw-bold text-success d-flex align-items-center gap-2 shadow-sm">
-                    <i class="bi bi-qr-code-scan fs-5"></i> Mi Carné Digital QR
-                </a>
-                {% endif %}
-                <a href="{% url 'portafolio_aprendiz' %}" class="btn btn-outline-light d-flex align-items-center gap-2">
-                    <i class="bi bi-journal-bookmark-fill"></i> Mi Portafolio
-                </a>
+                <button type="button" class="btn btn-outline-light d-flex align-items-center gap-2 fw-semibold" onclick="activarTab('tab-horario')">
+                    <i class="bi bi-calendar2-week"></i> Mi Horario
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- 2. Tarjetas de Resumen y KPIs del Aprendiz -->
+    <!-- 2. Tarjetas Interactivas de KPIs (Hacer clic abre y lleva a su sección) -->
     <div class="row g-3 mb-4">
         <!-- Mi Progreso -->
         <div class="col-6 col-lg-3">
-            <div class="stat-card-aprendiz shadow-sm">
+            <div class="stat-kpi-clickable" onclick="activarTab('tab-calificaciones')" title="Hacer clic para ver mis calificaciones">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-muted small text-uppercase fw-semibold">Mi Progreso</span>
-                    <div class="kpi-icon-circle bg-success bg-opacity-10 text-success">
+                    <span class="text-muted small text-uppercase fw-bold">Mi Progreso</span>
+                    <div class="kpi-circle-icon bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-pie-chart-fill"></i>
                     </div>
                 </div>
                 <div>
                     <h3 class="fw-bold text-dark mb-1">{{ progreso_global|default:100 }}%</h3>
-                    <div class="progress-bar-sena mb-1">
-                        <div class="progress-bar-sena-fill" style="width: {{ progreso_global|default:100 }}%;"></div>
+                    <div class="progress-bar-sinetec mb-2">
+                        <div class="progress-bar-sinetec-fill" style="width: {{ progreso_global|default:100 }}%;"></div>
                     </div>
-                    <small class="text-muted">Cumplimiento formativo general</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Desempeño general</small>
+                        <small class="text-primary fw-bold">Ver notas <i class="bi bi-arrow-right"></i></small>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Mi Asistencia -->
         <div class="col-6 col-lg-3">
-            <div class="stat-card-aprendiz shadow-sm">
+            <div class="stat-kpi-clickable" onclick="activarTab('tab-asistencia')" title="Hacer clic para ver mi asistencia">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-muted small text-uppercase fw-semibold">Mi Asistencia</span>
-                    <div class="kpi-icon-circle bg-primary bg-opacity-10 text-primary">
+                    <span class="text-muted small text-uppercase fw-bold">Mi Asistencia</span>
+                    <div class="kpi-circle-icon bg-success bg-opacity-10 text-success">
                         <i class="bi bi-calendar-check-fill"></i>
                     </div>
                 </div>
                 <div>
                     <h3 class="fw-bold text-dark mb-1">{{ porcentaje_asistencia|default:100 }}%</h3>
-                    <div class="d-flex align-items-center gap-2 text-muted small">
-                        <span><i class="bi bi-check-circle text-success"></i> {{ asistencias_p|default:0 }} Asistencias</span>
-                        <span><i class="bi bi-x-circle text-danger"></i> {{ asistencias_a|default:0 }} Faltas</span>
+                    <div class="d-flex align-items-center gap-2 text-muted small mb-1">
+                        <span><i class="bi bi-check-circle text-success"></i> {{ asistencias_p|default:0 }} Presente</span>
+                        <span><i class="bi bi-x-circle text-danger"></i> {{ asistencias_a|default:0 }} Ausente</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Registro escolar</small>
+                        <small class="text-success fw-bold">Ver detalle <i class="bi bi-arrow-right"></i></small>
                     </div>
                 </div>
             </div>
@@ -218,277 +182,605 @@
 
         <!-- Actividades Pendientes -->
         <div class="col-6 col-lg-3">
-            <div class="stat-card-aprendiz shadow-sm">
+            <div class="stat-kpi-clickable" onclick="activarTab('tab-actividades')" title="Hacer clic para ver mis tareas y entregas">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-muted small text-uppercase fw-semibold">Actividades Pendientes</span>
-                    <div class="kpi-icon-circle bg-warning bg-opacity-10 text-warning">
+                    <span class="text-muted small text-uppercase fw-bold">Tareas / Talleres</span>
+                    <div class="kpi-circle-icon bg-warning bg-opacity-10 text-warning">
                         <i class="bi bi-clock-history"></i>
                     </div>
                 </div>
                 <div>
-                    <h3 class="fw-bold text-dark mb-1">{{ conteo_pendientes|default:0 }}</h3>
-                    <small class="text-muted">Talleres asignados por entregar</small>
+                    <h3 class="fw-bold text-dark mb-1">{{ conteo_pendientes|default:0 }} Pendientes</h3>
+                    <small class="text-muted d-block mb-1">Actividades asignadas por entregar</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Aula virtual</small>
+                        <small class="text-warning text-dark fw-bold">Entregar <i class="bi bi-arrow-right"></i></small>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- RAPs Aprobados -->
+        <!-- Clases de Hoy / Horario -->
         <div class="col-6 col-lg-3">
-            <div class="stat-card-aprendiz shadow-sm">
+            <div class="stat-kpi-clickable" onclick="activarTab('tab-horario')" title="Hacer clic para ver mi horario">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-muted small text-uppercase fw-semibold">Evaluación RAP</span>
-                    <div class="kpi-icon-circle bg-info bg-opacity-10 text-info">
-                        <i class="bi bi-award-fill"></i>
+                    <span class="text-muted small text-uppercase fw-bold">Mi Horario</span>
+                    <div class="kpi-circle-icon bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-calendar2-range-fill"></i>
                     </div>
                 </div>
                 <div>
-                    <h3 class="fw-bold text-success mb-1">{{ juicios_aprobados|default:0 }} <small class="text-muted fs-6">Aprobados</small></h3>
-                    <small class="text-muted">{% if juicios_deficientes %}<span class="text-danger fw-bold">{{ juicios_deficientes }} por mejorar</span>{% else %}100% de juicios superados{% endif %}</small>
+                    <h3 class="fw-bold text-dark mb-1">{{ horarios_hoy|length|default:todos_horarios|length }} Clases</h3>
+                    <small class="text-muted d-block mb-1">Jornada escolar activa</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Lunes a Viernes</small>
+                        <small class="text-info text-dark fw-bold">Ver horario <i class="bi bi-arrow-right"></i></small>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. Contenido Principal en 2 Columnas -->
-    <div class="row g-4">
-        <!-- Columna Izquierda: Actividades por Entregar y Compromisos -->
-        <div class="col-lg-7">
-            <!-- Actividades Pendientes -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-                    <div>
-                        <h5 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-pencil-square text-success me-2"></i>Actividades y Talleres Formativos
-                        </h5>
-                        <small class="text-muted">Entrega a tiempo tus evidencias para evaluación del instructor</small>
-                    </div>
-                    <a href="{% url 'portafolio_aprendiz' %}" class="btn btn-sm btn-light">Ver Todas</a>
-                </div>
-                <div class="card-body p-3">
-                    {% for evidencia in pendientes %}
-                        <div class="actividad-item d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
-                            <div>
-                                <strong class="text-dark d-block mb-1">{{ evidencia.titulo }}</strong>
-                                <div class="d-flex flex-wrap gap-2 small text-muted">
-                                    <span><i class="bi bi-tag text-success"></i> RAP: {{ evidencia.rap_codigo }}</span>
-                                    <span><i class="bi bi-calendar-event text-warning"></i> Límite: {{ evidencia.fecha_limite|date:'d/m/Y H:i' }}</span>
-                                    {% if evidencia.instructor %}
-                                        <span><i class="bi bi-person"></i> {{ evidencia.instructor.get_full_name|default:evidencia.instructor.username }}</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <a href="{% url 'portafolio_actividad_detalle' evidencia.pk %}" class="btn btn-sm btn-success px-3 text-nowrap fw-semibold" style="background-color: #29AAE3;">
-                                <i class="bi bi-upload me-1"></i> Entregar
-                            </a>
-                        </div>
-                    {% empty %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-check-circle-fill text-success fs-1 d-block mb-2"></i>
-                            <h6 class="fw-bold text-dark">¡Estás al día!</h6>
-                            <p class="small mb-0">No tienes talleres ni actividades pendientes de entrega en este momento.</p>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
+    <!-- 3. Navegación por Pestañas del Estudiante -->
+    <div class="mb-4" id="seccion-pestanas">
+        <ul class="nav nav-pills nav-pills-estudiante d-flex flex-wrap gap-2 border-0" id="estudianteTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-calificaciones-btn" data-bs-toggle="pill" data-bs-target="#tab-calificaciones" type="button" role="tab">
+                    <i class="bi bi-clipboard2-data-fill me-1 text-primary"></i> Mis Calificaciones y Semáforo
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-horario-btn" data-bs-toggle="pill" data-bs-target="#tab-horario" type="button" role="tab">
+                    <i class="bi bi-calendar2-week-fill me-1 text-success"></i> Mi Horario Escolar
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-actividades-btn" data-bs-toggle="pill" data-bs-target="#tab-actividades" type="button" role="tab">
+                    <i class="bi bi-pencil-square me-1 text-warning"></i> Mis Tareas y Evaluaciones
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-asistencia-btn" data-bs-toggle="pill" data-bs-target="#tab-asistencia" type="button" role="tab">
+                    <i class="bi bi-check2-square me-1 text-info"></i> Mi Asistencia
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-comunicaciones-btn" data-bs-toggle="pill" data-bs-target="#tab-comunicaciones" type="button" role="tab">
+                    <i class="bi bi-megaphone-fill me-1 text-danger"></i> Avisos y Comunicados
+                </button>
+            </li>
+        </ul>
+    </div>
 
-            <!-- Mis Compromisos Formativos -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+    <!-- Contenido de las Pestañas -->
+    <div class="tab-content" id="estudianteTabsContent">
+
+        <!-- PESTAÑA 1: CALIFICACIONES Y SEMÁFORO -->
+        <div class="tab-pane fade show active" id="tab-calificaciones" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 overflow-hidden">
+                <div class="card-header bg-white py-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 border-bottom">
                     <div>
                         <h5 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-clipboard2-check-fill text-warning me-2"></i>Mis Compromisos de Mejora
+                            <i class="bi bi-award-fill text-primary me-2"></i>Calificaciones por Competencia y Semáforo Escolar
                         </h5>
-                        <small class="text-muted">Acuerdos pedagógicos pactados durante visitas y seguimientos</small>
+                        <small class="text-muted">Seguimiento pedagógico continuo y valoración oficial</small>
                     </div>
                 </div>
-                <div class="card-body p-3">
-                    {% for comp in compromisos %}
-                        <div class="p-3 mb-2 rounded-3 border bg-light d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong class="d-block text-dark">{{ comp.titulo }}</strong>
-                                <small class="text-muted d-block">{{ comp.descripcion|truncatechars:90 }}</small>
-                                <small class="text-muted"><i class="bi bi-calendar-event me-1"></i>Fecha límite: {{ comp.fecha_limite|date:'d/m/Y' }}</small>
-                            </div>
-                            <span class="badge {% if comp.estado == 'CUMPLIDO' %}bg-success{% elif comp.estado == 'VENCIDO' %}bg-danger{% else %}bg-warning text-dark{% endif %} px-3 py-2">
-                                {{ comp.get_estado_display }}
-                            </span>
-                        </div>
-                    {% empty %}
-                        <div class="text-center py-4 text-muted small">
-                            <i class="bi bi-shield-check fs-3 text-success d-block mb-1"></i>
-                            No registras compromisos pendientes de verificación.
-                        </div>
-                    {% endfor %}
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-secondary small">
+                            <thead class="table-light text-uppercase fs-7">
+                                <tr>
+                                    <th class="py-3 ps-3">Asignatura / Competencia</th>
+                                    <th class="py-3">Resultado de Aprendizaje (Logro)</th>
+                                    <th class="py-3">Docente Evaluador</th>
+                                    <th class="py-3 text-center">Estado Semáforo</th>
+                                    <th class="py-3">Observaciones Pedagógicas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in semaforo_list %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <strong class="text-dark d-block">{{ item.competencia.descripcion|truncatechars:45 }}</strong>
+                                        <small class="text-muted">Cód: {{ item.competencia.codigo }}</small>
+                                    </td>
+                                    <td>
+                                        {% if item.resultado_aprendizaje %}
+                                            <span class="fw-semibold text-dark">{{ item.resultado_aprendizaje.codigo }}:</span>
+                                            <span class="text-muted">{{ item.resultado_aprendizaje.descripcion|truncatechars:65 }}</span>
+                                        {% else %}
+                                            <span class="text-muted">General de la Competencia</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.profesor %}
+                                            <i class="bi bi-person me-1 text-primary"></i>{{ item.profesor.get_full_name|default:item.profesor.username }}
+                                        {% else %}
+                                            <span class="text-muted">Docente Titular</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if item.estado == 'APROBADO' %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 fs-7">
+                                                🟢 Aprobado
+                                            </span>
+                                        {% elif item.estado == 'EN_PROCESO' %}
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1 fs-7 text-dark">
+                                                🟡 En Proceso
+                                            </span>
+                                        {% elif item.estado == 'RECUPERAR' %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 fs-7">
+                                                🔴 Por Recuperar
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2 py-1 fs-7">
+                                                ⚪ Pendiente
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ item.observaciones|default:"Desempeño acorde a los criterios de evaluación pedagógica."|truncatechars:75 }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-clipboard-check fs-2 text-primary d-block mb-2"></i>
+                                        <h6>Aún no hay registros de semáforo asentados para tu matrícula.</h6>
+                                        <p class="small mb-0">Los docentes registrarán las valoraciones a medida que avance el periodo académico.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Columna Derecha: Carné Digital PVC, Alertas, Horario, Trámites -->
-        <div class="col-lg-5">
-            <!-- Carné Digital del Estudiante (Tarjeta PVC Oficial SENA) -->
-            <div class="pvc-aprendiz-widget">
-                <div class="pvc-header-strip">
-                    <div class="d-flex align-items-center gap-2">
-                        <img src="{% static 'img/sena_logo_oficial.png' %}" alt="SENA" style="width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1);">
-                        <div>
-                            <div style="font-size: 0.62rem; letter-spacing: 0.08em; font-weight: 700; color: #a7f3d0; text-transform: uppercase;">SERVICIO NACIONAL DE APRENDIZAJE</div>
-                            <div style="font-size: 0.82rem; font-weight: 800; color: #ffffff;">CARNÉ DIGITAL DEL APRENDIZ</div>
+        <!-- PESTAÑA 2: HORARIO ESCOLAR -->
+        <div class="tab-pane fade" id="tab-horario" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-calendar-week-fill text-success me-2"></i>Mi Horario Semanal de Clases
+                        </h5>
+                        <small class="text-muted">Horarios estructurados de Lunes a Viernes</small>
+                    </div>
+                    <span class="badge bg-light text-secondary border">Jornada Escolar</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-secondary small">
+                            <thead class="table-light text-uppercase fs-7">
+                                <tr>
+                                    <th class="py-3 ps-3">Día</th>
+                                    <th class="py-3">Horario</th>
+                                    <th class="py-3">Asignatura / Materia</th>
+                                    <th class="py-3">Docente a Cargo</th>
+                                    <th class="py-3">Ambiente / Aula</th>
+                                    <th class="py-3 text-center">Modalidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for h in todos_horarios %}
+                                <tr>
+                                    <td class="ps-3 fw-bold text-dark">
+                                        <i class="bi bi-calendar-event me-1 text-primary"></i> {{ h.get_dia_display }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            {{ h.hora_inicio|time:"h:i A" }} - {{ h.hora_fin|time:"h:i A" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-dark">{{ h.nombre_materia }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if h.instructor %}
+                                            {{ h.instructor.get_full_name|default:h.instructor.username }}
+                                        {% else %}
+                                            <span class="text-muted">Docente Asignado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border">
+                                            <i class="bi bi-geo-alt me-1"></i>{{ h.ambiente|default:"Aula Principal" }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                                            {{ h.modalidad|default:"Presencial" }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-calendar2-x fs-2 text-warning d-block mb-2"></i>
+                                        <h6>No hay bloques de horario asignados para tu grupo en este momento.</h6>
+                                        <p class="small mb-0">La coordinación académica publicará el horario oficial próximamente.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 3: TAREAS Y EVALUACIONES -->
+        <div class="tab-pane fade" id="tab-actividades" role="tabpanel">
+            <div class="row g-4">
+                <!-- Talleres Pendientes -->
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-pencil-square text-warning me-2"></i>Talleres y Actividades Pendientes
+                                </h5>
+                                <small class="text-muted">Entrega tus compromisos académicos a tiempo</small>
+                            </div>
+                            <span class="badge bg-warning bg-opacity-10 text-warning text-dark border border-warning border-opacity-25">
+                                {{ conteo_pendientes|default:0 }} por entregar
+                            </span>
+                        </div>
+                        <div class="card-body p-3">
+                            {% for evidencia in pendientes %}
+                            <div class="tarea-item-card d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                                <div>
+                                    <strong class="text-dark d-block mb-1">{{ evidencia.titulo }}</strong>
+                                    <div class="d-flex flex-wrap gap-2 small text-muted">
+                                        <span><i class="bi bi-calendar-event text-warning"></i> Entrega: {{ evidencia.fecha_limite|date:'d/m/Y H:i' }}</span>
+                                        {% if evidencia.instructor %}
+                                            <span><i class="bi bi-person"></i> {{ evidencia.instructor.get_full_name|default:evidencia.instructor.username }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="text-muted small mt-2 mb-0">{{ evidencia.descripcion|truncatechars:110 }}</p>
+                                </div>
+                                <a href="{% url 'entregar_evidencia' evidencia.pk %}" class="btn btn-sm btn-primary px-3 text-nowrap fw-semibold text-white shadow-sm" style="background: linear-gradient(135deg, #5CA8D8 0%, #2F79A8 100%); border: none;">
+                                    <i class="bi bi-upload me-1"></i> Entregar
+                                </a>
+                            </div>
+                            {% endfor %}
+
+                            <!-- Tareas y Guías de Clase -->
+                            {% for tarea in tareas_clase %}
+                            <div class="tarea-item-card d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                        {% if 'guia' in tarea.tipo_actividad.lower or 'guía' in tarea.tipo_actividad.lower %}
+                                            <span class="badge bg-info text-dark fw-bold px-2 py-1"><i class="bi bi-file-earmark-pdf-fill me-1"></i> Guía de Aprendizaje</span>
+                                        {% else %}
+                                            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-1"><i class="bi bi-journal-text me-1"></i> {{ tarea.tipo_actividad }}</span>
+                                        {% endif %}
+                                        <strong class="text-dark d-block">{{ tarea.titulo }}</strong>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2 small text-muted mb-1">
+                                        <span><i class="bi bi-book text-primary"></i> {{ tarea.carga_academica.programa.denominacion|default:"Asignatura" }}</span>
+                                        <span><i class="bi bi-calendar-event text-warning"></i> Límite: {{ tarea.fecha_limite|date:'d/m/Y h:i A'|default:"Sin límite" }}</span>
+                                        <span><i class="bi bi-person"></i> {{ tarea.carga_academica.profesor.get_full_name|default:tarea.carga_academica.profesor.username }}</span>
+                                    </div>
+                                    <p class="text-muted small mt-1 mb-2">{{ tarea.instrucciones|truncatechars:110 }}</p>
+                                    {% if tarea.archivo %}
+                                    <div>
+                                        <a href="{{ tarea.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill py-0.5 px-2.5" style="font-size: 0.78rem;">
+                                            <i class="bi bi-file-earmark-arrow-down text-danger me-1"></i> Descargar Guía / Documento Adjunto
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% if tarea.esta_vencida %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-1.5 text-nowrap fw-semibold small">
+                                    <i class="bi bi-lock-fill me-1"></i> Entrega Cerrada
+                                </span>
+                                {% else %}
+                                <a href="{% url 'entregar_tarea_clase' tarea.id %}" class="btn btn-sm btn-primary px-3 text-nowrap fw-semibold text-white shadow-sm" style="background: linear-gradient(135deg, #5CA8D8 0%, #2F79A8 100%); border: none;">
+                                    <i class="bi bi-upload me-1"></i> Resolver / Entregar
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+
+                            {% if not pendientes and not tareas_clase %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-check-circle-fill text-success fs-1 d-block mb-2"></i>
+                                <h6 class="fw-bold text-dark">¡Estás al día!</h6>
+                                <p class="small mb-0">No tienes tareas ni talleres pendientes de entrega en este momento.</p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
-                    <span class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50" style="font-size: 0.68rem;">
-                        EN FORMACIÓN
+                </div>
+
+                <!-- Historial de Entregas y Retroalimentación -->
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h5 class="fw-bold text-dark mb-0">
+                                <i class="bi bi-check2-circle text-success me-2"></i>Mis Entregas y Calificaciones
+                            </h5>
+                            <small class="text-muted">Valoraciones y comentarios del docente</small>
+                        </div>
+                        <div class="card-body p-3">
+                            {% for e in entregas %}
+                            <div class="p-3 mb-2 rounded-3 border bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <strong class="text-dark small d-block">{{ e.evidencia.titulo }}</strong>
+                                    {% if e.juicio_evaluativo == 'A' %}
+                                        <span class="badge bg-success">Aprobado</span>
+                                    {% elif e.juicio_evaluativo == 'D' %}
+                                        <span class="badge bg-danger">Deficiente</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">En Revisión</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted d-block mb-1">Entregado: {{ e.fecha_entrega|date:'d/m/Y H:i' }}</small>
+                                {% if e.observaciones %}
+                                    <div class="p-2 bg-white rounded border small mt-2">
+                                        <strong class="text-dark">Profesor:</strong> {{ e.observaciones }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+
+                            <!-- Entregas de Tareas de Clase -->
+                            {% for e in entregas_tareas_clase %}
+                            <div class="p-3 mb-2 rounded-3 border bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <strong class="text-dark small d-block">{{ e.tarea.titulo }}</strong>
+                                    {% if e.estado == 'CALIFICADA' %}
+                                        <span class="badge bg-success">Calificada ({{ e.calificacion }})</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">En Revisión</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted d-block mb-1">Entregado: {{ e.fecha_entrega|date:'d/m/Y h:i A' }}</small>
+                                {% if e.retroalimentacion %}
+                                    <div class="p-2 bg-white rounded border small mt-2">
+                                        <strong class="text-dark">Profesor:</strong> {{ e.retroalimentacion }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+
+                            {% if not entregas and not entregas_tareas_clase %}
+                            <div class="text-center py-4 text-muted small">
+                                <i class="bi bi-inbox fs-3 text-secondary d-block mb-1"></i>
+                                Aún no has entregado actividades este periodo.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if guias_clase %}
+                    <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Guías Didácticas Asignadas
+                                </h5>
+                                <small class="text-muted">Documentos y material pedagógico publicado por tus profesores</small>
+                            </div>
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1">
+                                {{ guias_clase|length }} Guías
+                            </span>
+                        </div>
+                        <div class="card-body p-3">
+                            {% for g in guias_clase %}
+                            <div class="p-3 mb-2 rounded-3 border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <strong class="text-dark small d-block mb-1">{{ g.titulo }}</strong>
+                                    <div class="small text-muted mb-1">
+                                        <span><i class="bi bi-book me-1"></i> {{ g.carga_academica.programa.denominacion }}</span> ·
+                                        <span><i class="bi bi-person me-1"></i> {{ g.carga_academica.profesor.get_full_name|default:g.carga_academica.profesor.username }}</span>
+                                    </div>
+                                    <p class="text-muted small mb-0">{{ g.instrucciones|truncatechars:90 }}</p>
+                                </div>
+                                {% if g.archivo %}
+                                <a href="{{ g.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-semibold">
+                                    <i class="bi bi-download me-1"></i> Descargar Guía
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 4: REGISTRO DE ASISTENCIA -->
+        <div class="tab-pane fade" id="tab-asistencia" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-check2-square text-info me-2"></i>Historial de Asistencia Escolar
+                        </h5>
+                        <small class="text-muted">Seguimiento de puntualidad y permanencia</small>
+                    </div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 fw-bold">
+                        {{ porcentaje_asistencia|default:100 }}% de Asistencia Global
                     </span>
                 </div>
-
-                <div class="pvc-body-grid">
-                    <div class="pvc-photo-box">
-                        {% if user.perfil.foto %}
-                            <img src="{{ user.perfil.foto.url }}" alt="{{ user.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
-                        {% else %}
-                            <img src="{% static 'img/aprendiz_foto_2.jpg' %}" alt="{{ user.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
-                        {% endif %}
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-secondary small">
+                            <thead class="table-light text-uppercase fs-7">
+                                <tr>
+                                    <th class="py-3 ps-3">Fecha de la Sesión</th>
+                                    <th class="py-3 text-center">Estado Registrado</th>
+                                    <th class="py-3">Docente / Funcionario Registrador</th>
+                                    <th class="py-3">Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for a in historial_asistencias %}
+                                <tr>
+                                    <td class="ps-3 fw-bold text-dark">
+                                        <i class="bi bi-calendar-check me-1 text-primary"></i> {{ a.fecha|date:"l, d M Y" }}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if a.estado == 'P' %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                                                🟢 Presente
+                                            </span>
+                                        {% elif a.estado == 'A' %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">
+                                                🔴 Ausente
+                                            </span>
+                                        {% elif a.estado == 'J' %}
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1 text-dark">
+                                                🟡 Justificado
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if a.registrado_por %}
+                                            {{ a.registrado_por.get_full_name|default:a.registrado_por.username }}
+                                        {% else %}
+                                            <span class="text-muted">Docente Titular</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ a.observaciones|default:"Registro regular de asistencia en aula." }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-calendar-check fs-2 text-success d-block mb-2"></i>
+                                        <h6>No hay inasistencias registradas para tu perfil.</h6>
+                                        <p class="small mb-0">Mantienes un cumplimiento del 100% en tus jornadas escolares.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="flex-grow-1 overflow-hidden">
-                        <div class="text-uppercase fw-extrabold text-dark text-truncate mb-1" style="font-size: 0.95rem;">
-                            {{ user.get_full_name|default:user.username }}
-                        </div>
-                        <div class="mb-1">
-                            <span class="badge bg-light text-dark border fw-bold" style="font-size: 0.78rem;">
-                                <i class="bi bi-person-vcard text-success me-1"></i>{{ perfil.get_tipo_documento_display|default:'CC' }} {{ perfil.numero_documento|default:'1002345678' }}
-                            </span>
-                        </div>
-                        <div class="small text-muted text-truncate mb-1" style="font-size: 0.75rem;">
-                            <i class="bi bi-mortarboard text-secondary me-1"></i>{% if ficha %}{{ ficha.programa.denominacion }}{% else %}ADSO · Tecnólogo{% endif %}
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge text-white px-2 py-1" style="background-color: #0F2942; font-size: 0.72rem;">
-                                CURSO: {{ ficha.codigo_ficha|default:'2501234' }}
-                            </span>
-                            <span class="badge bg-warning bg-opacity-25 text-dark border border-warning" style="font-size: 0.68rem;">
-                                RH: {{ perfil.tipo_sangre|default:'O+' }}
-                            </span>
-                        </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 5: AVISOS Y COMUNICADOS -->
+        <div class="tab-pane fade" id="tab-comunicaciones" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-megaphone-fill text-danger me-2"></i>Muro de Comunicados y Circulares para Estudiantes
+                        </h5>
+                        <small class="text-muted">Notificaciones oficiales de Rectoría, Coordinación y Docentes</small>
                     </div>
-                    {% if qr_base64 %}
-                    <div class="pvc-qr-box flex-shrink-0 d-none d-sm-flex flex-column align-items-center">
-                        <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Dinámico" style="width: 100%; height: 100%; object-fit: contain;">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm text-white fw-semibold" data-bs-toggle="modal" data-bs-target="#modalMensajeDocente" style="background: #db2777; border-color: #db2777;">
+                            <i class="bi bi-chat-dots-fill me-1"></i> Escribir a mi Profesor
+                        </button>
+                        <a href="{% url 'mensajeria' %}" class="btn btn-sm btn-outline-secondary fw-semibold">
+                            <i class="bi bi-envelope me-1"></i> Mensajería Oficial
+                        </a>
                     </div>
-                    {% endif %}
-                </div>
-
-                <div class="bg-light px-3 py-2 border-top d-flex justify-content-between align-items-center">
-                    <small class="text-muted" style="font-size: 0.72rem;">
-                        <i class="bi bi-shield-lock-fill text-success me-1"></i>Seguridad: <span class="fw-bold text-dark">{{ codigo_seguridad_dia|default:'SENA-2026' }}</span>
-                    </small>
-                    {% if user.perfil.pk %}
-                    <a href="{% url 'carnet_digital_id' user.perfil.pk %}" class="btn btn-sm btn-outline-success fw-bold py-1 px-3" style="font-size: 0.78rem;">
-                        <i class="bi bi-arrow-repeat me-1"></i> Ver Reverso 3D
-                    </a>
-                    {% endif %}
-                </div>
-                <div style="height: 5px; background: linear-gradient(90deg, #29AAE3 0%, #29AAE3 70%, #FF671B 70%, #FF671B 100%);"></div>
-            </div>
-
-            <!-- Alertas Tempranas del Aprendiz -->
-            {% if alertas %}
-            <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-danger bg-white">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h6 class="fw-bold text-danger mb-0">
-                        <i class="bi bi-exclamation-octagon-fill me-2"></i>Atención Recomendada
-                    </h6>
                 </div>
                 <div class="card-body p-3">
-                    {% for al in alertas %}
-                        <div class="alert alert-warning py-2 px-3 small mb-2 d-flex align-items-center gap-2">
-                            <i class="bi bi-info-circle-fill fs-5"></i>
-                            <div>{{ al.mensaje }}</div>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Próximos Horarios y Sesiones -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-                    <h6 class="fw-bold text-dark mb-0">
-                        <i class="bi bi-calendar3 text-primary me-2"></i>Horario de Formación
-                    </h6>
-                    {% if ficha %}
-                    <a href="{% url 'horarios_tablero' %}?ficha={{ ficha.id }}" class="btn btn-sm btn-light">Ver Calendario</a>
-                    {% endif %}
-                </div>
-                <div class="card-body p-3">
-                    {% for h in horarios %}
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <div>
-                                <strong class="d-block text-dark small">{{ h.get_dia_display }} · {{ h.hora_inicio|time:'H:i' }} - {{ h.hora_fin|time:'H:i' }}</strong>
-                                <small class="text-muted">{{ h.ambiente|default:'Ambiente SENA' }} · {{ h.modalidad }}</small>
+                    <div class="row g-3">
+                        {% for com in comunicados_estudiante %}
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-4 border bg-light h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                                            {{ com.remitente.perfil.rol.nombre|default:"Institución" }}
+                                        </span>
+                                        <small class="text-muted">{{ com.fecha_creacion|date:"d M Y, h:i A" }}</small>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2">{{ com.asunto }}</h6>
+                                    <p class="text-secondary small mb-3">{{ com.mensaje|linebreaksbr }}</p>
+                                </div>
+                                <div class="pt-2 border-top d-flex justify-content-between align-items-center small text-muted">
+                                    <span>Emite: {{ com.remitente.get_full_name|default:com.remitente.username }}</span>
+                                    {% if com.urgente %}
+                                        <span class="badge bg-danger">Prioritario</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <span class="badge bg-light text-dark border">{{ h.instructor.get_full_name|default:h.instructor.username }}</span>
                         </div>
-                    {% empty %}
-                        <div class="text-center py-3 text-muted small">
-                            Horarios regulares según la programación de tu institución.
+                        {% empty %}
+                        <div class="col-12 text-center py-5 text-muted">
+                            <i class="bi bi-bell-slash fs-2 text-primary d-block mb-2"></i>
+                            <h6>No hay circulares recientes dirigidas a tu grado.</h6>
+                            <p class="small mb-0">Las novedades institucionales se publicarán aquí tan pronto sean emitidas.</p>
                         </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Trámites en Secretaría -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-                    <h6 class="fw-bold text-dark mb-0">
-                        <i class="bi bi-envelope-check-fill text-success me-2"></i>Mis Trámites en Secretaría
-                    </h6>
-                    <a href="{% url 'nueva_solicitud' %}" class="btn btn-sm btn-outline-success">Radicar</a>
-                </div>
-                <div class="card-body p-3">
-                    {% for sol in solicitudes %}
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <div>
-                                <a href="{% url 'secretaria_detalle' sol.id %}" class="fw-semibold text-dark text-decoration-none small d-block">
-                                    #{{ sol.id }} · {{ sol.asunto|truncatechars:35 }}
-                                </a>
-                                <small class="text-muted">{{ sol.fecha_creacion|date:'d/m/Y' }}</small>
-                            </div>
-                            <span class="badge bg-light text-dark border">{{ sol.get_estado_display }}</span>
-                        </div>
-                    {% empty %}
-                        <div class="text-center py-3 text-muted small">
-                            ¿Necesitas constancias o novedades? Usa el botón Radicar.
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Gamificación e Insignias -->
-            <div class="card border-0 shadow-sm rounded-4 bg-white">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h6 class="fw-bold text-dark mb-0">
-                        <i class="bi bi-award-fill text-warning me-2"></i>Mis Logros e Insignias
-                    </h6>
-                </div>
-                <div class="card-body p-3">
-                    <div class="d-flex flex-wrap gap-2">
-                        <div class="badge-insignia">
-                            <i class="bi bi-check-all fs-5 text-success"></i>
-                            <span>Puntualidad Impecable</span>
-                        </div>
-                        <div class="badge-insignia">
-                            <i class="bi bi-journal-check fs-5 text-primary"></i>
-                            <span>Portafolio Activo</span>
-                        </div>
-                        {% for logro in logros %}
-                            <div class="badge-insignia">
-                                <i class="bi {{ logro.icono }} fs-5 text-{{ logro.color }}"></i>
-                                <span>{{ logro.titulo }}</span>
-                            </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
+
+    <!-- Modal Enviar Mensaje a Docente -->
+    <div class="modal fade" id="modalMensajeDocente" tabindex="-1" aria-labelledby="modalMensajeDocenteLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <form method="post" action="{% url 'aprendiz_dashboard' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="enviar_mensaje_docente">
+                    <div class="modal-header border-bottom py-3" style="background: #FDF2F8;">
+                        <h6 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="modalMensajeDocenteLabel">
+                            <i class="bi bi-chat-left-dots-fill" style="color: #db2777;"></i> Enviar Mensaje a mi Docente
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Seleccionar Docente / Asignatura</label>
+                            <select class="form-select form-select-sm rounded-3" name="docente_id" required>
+                                {% for d in docentes_lista %}
+                                    <option value="{{ d.id }}">Prof. {{ d.get_full_name|default:d.username }} (Docente Titular)</option>
+                                {% empty %}
+                                    <option value="">Docente Titular de Grado</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Tu Mensaje o Consulta</label>
+                            <textarea class="form-control rounded-3" name="mensaje" rows="4" placeholder="Escribe tu mensaje, duda académica o solicitud al docente..." required></textarea>
+                        </div>
+                        <div class="form-text small text-muted">
+                            <i class="bi bi-shield-check text-success me-1"></i> Este mensaje quedará registrado en el historial de chat con tu docente.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top py-2 bg-light">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-sm text-white rounded-pill px-4 fw-bold" style="background: #db2777; border-color: #db2777;">
+                            <i class="bi bi-send-fill me-1"></i> Enviar Mensaje
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<script>
+    function activarTab(tabId) {
+        const tabBtn = document.getElementById(tabId + '-btn');
+        if (tabBtn) {
+            const tabInstance = new bootstrap.Tab(tabBtn);
+            tabInstance.show();
+            // Scroll suave a las pestañas para que el estudiante vea el resultado
+            const pestanasEl = document.getElementById('seccion-pestanas');
+            if (pestanasEl) {
+                pestanasEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+</script>
 {% endblock %}

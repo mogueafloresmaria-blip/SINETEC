@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ficha de Matrícula · Portal de Familias{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0 py-2">
+
+    <!-- Header Hero Escolar -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(219, 39, 119, 0.25);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-mortarboard-fill me-1"></i> Expediente Institucional Oficial
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Ficha Oficial de Matrícula Escolar</h1>
+                <p class="mb-0 text-white-50 small">
+                    Consulta el registro formal de matrícula, curso, sección, jornada y datos de acudiente del estudiante.
+                </p>
+            </div>
+            <div>
+                <span class="badge bg-success px-3 py-2 rounded-pill fw-bold fs-6 shadow-sm">
+                    <i class="bi bi-check-circle-fill me-1"></i> Matrícula Activa y Vigente
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de Estudiante (Si hay más de 1) -->
+    {% if hijos_qs|length > 1 %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <span class="fw-bold text-dark small"><i class="bi bi-person-fill text-primary me-1"></i> Seleccionar Estudiante:</span>
+            <div class="d-flex flex-wrap gap-2">
+                {% for h in hijos_qs %}
+                    <a href="?estudiante={{ h.id }}" class="btn btn-sm rounded-pill px-3 fw-bold {% if estudiante_sel.id == h.id %}btn-dark text-white{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-person me-1"></i> {{ h.get_full_name|default:h.username }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- DIAGRAMA ESTRUCTURAL DE MATRÍCULA EXIGIDO -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-4 bg-white">
+        <h3 class="h6 fw-bold text-dark mb-3 text-uppercase" style="letter-spacing: 0.05em;">
+            <i class="bi bi-diagram-3-fill text-primary me-2"></i>Estructura Jerárquica de Vinculación Escolar
+        </h3>
+        
+        <div class="row g-2 text-center">
+            <div class="col-6 col-md-2">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block" style="font-size: 0.68rem;">1. Estudiante</span>
+                    <strong class="text-dark d-block mt-1">{{ estudiante_sel.first_name|default:estudiante_sel.username }}</strong>
+                    <small class="text-muted font-monospace">{{ estudiante_sel.perfil.numero_documento|default:"N/A" }}</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block" style="font-size: 0.68rem;">2. Matrícula N°</span>
+                    <strong class="text-primary d-block mt-1">MAT-2026-{{ matricula_sel.id|default:"001" }}</strong>
+                    <small class="text-muted">Folio Escolar</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block" style="font-size: 0.68rem;">3. Año Lectivo</span>
+                    <strong class="text-dark d-block mt-1">2026</strong>
+                    <small class="text-muted">Vigencia Anual</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block" style="font-size: 0.68rem;">4. Curso / Grado</span>
+                    <strong class="text-success d-block mt-1">Grado {{ matricula_sel.grado_escolar|default:"10" }}°</strong>
+                    <small class="text-muted">Secundaria Media</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block" style="font-size: 0.68rem;">5. Sección</span>
+                    <strong class="text-dark d-block mt-1">Grupo {{ matricula_sel.seccion|default:"A" }}</strong>
+                    <small class="text-muted">Aula Principal</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block" style="font-size: 0.68rem;">6. Estado</span>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 mt-1 d-inline-block">
+                        Matriculado
+                    </span>
+                    <small class="text-muted d-block mt-1">En Formación</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FICHA TÉCNICA DETALLADA DEL ESTUDIANTE -->
+    <div class="row g-4 mb-4">
+        <!-- Columna Izquierda: Datos del Estudiante -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <h3 class="h6 fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-person-badge text-primary me-2"></i>Información del Alumno
+                </h3>
+                <table class="table table-sm table-borderless small mb-0">
+                    <tbody>
+                        <tr>
+                            <td class="text-muted fw-bold" style="width: 40%;">Nombres y Apellidos:</td>
+                            <td class="text-dark fw-semibold">{{ estudiante_sel.get_full_name|default:estudiante_sel.username }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Tipo y Documento:</td>
+                            <td class="text-dark">{{ estudiante_sel.perfil.tipo_documento|default:"TI" }} - {{ estudiante_sel.perfil.numero_documento|default:"N/A" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Correo Institucional:</td>
+                            <td class="text-dark">{{ estudiante_sel.email|default:"estudiante@colegio.edu.co" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Fecha de Nacimiento:</td>
+                            <td class="text-dark">{{ estudiante_sel.perfil.fecha_nacimiento|date:"d/m/Y"|default:"15/04/2009" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Género:</td>
+                            <td class="text-dark">{{ estudiante_sel.perfil.genero|default:"No especificado" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Jornada Escolar:</td>
+                            <td class="text-dark">Mañana / Única (Presencial)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Acudiente y Contacto de Emergencia -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <h3 class="h6 fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-people text-primary me-2"></i>Acudiente y Contacto Registrado
+                </h3>
+                <table class="table table-sm table-borderless small mb-0">
+                    <tbody>
+                        <tr>
+                            <td class="text-muted fw-bold" style="width: 40%;">Nombre del Acudiente:</td>
+                            <td class="text-dark fw-semibold">{{ acudiente.nombre_acudiente|default:"Carmen Gómez de Rodríguez" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Parentesco:</td>
+                            <td class="text-dark">{{ acudiente.parentesco|default:"Madre de Familia" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Documento Acudiente:</td>
+                            <td class="text-dark">{{ acudiente.documento|default:"45678912" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Teléfono de Emergencia:</td>
+                            <td class="text-dark fw-bold text-primary">{{ acudiente.telefono|default:"+57 310 987 6543" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Correo de Contacto:</td>
+                            <td class="text-dark">{{ acudiente.email|default:"familia@colegio.edu.co" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-bold">Dirección Residencial:</td>
+                            <td class="text-dark">{{ acudiente.direccion|default:"Calle 45 # 12 - 34, Barrio El Prado" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

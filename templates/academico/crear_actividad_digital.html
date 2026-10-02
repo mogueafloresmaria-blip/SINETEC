@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Nueva Actividad Digital · EDUNOVA Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-4" style="max-width: 1080px;">
+
+    <!-- 1. HERO BANNER -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 64px; height: 64px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-journal-plus" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Gestión Pedagógica y Curricular
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Crear Nueva Actividad o Tarea
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Asocia guías de aprendizaje, resultados formativos y asigna tareas a grupos o estudiantes específicos.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                <a href="{% url 'actividades_tareas' %}" class="btn rounded-pill px-4 py-2.5 fw-bold small shadow-2xs d-inline-flex align-items-center gap-2"
+                   style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.88rem;">
+                    <i class="bi bi-arrow-left"></i> Volver a Actividades
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. FORMULARIO PRINCIPAL -->
+    <form method="POST" id="formCrearActividad" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="row g-4">
+            <!-- COLUMNA PRINCIPAL -->
+            <div class="col-lg-8">
+                
+                <!-- SECCIÓN 1: ASIGNATURA Y GUÍA DE APRENDIZAJE -->
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2.5 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <span class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold small" 
+                              style="width: 28px; height: 28px; background: #db2777; font-size: 0.82rem;">1</span>
+                        <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Asignatura y Guía de Aprendizaje</h5>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Asignatura / Carga -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Asignatura y Grupo Destino *</label>
+                            <select name="carga_id" id="selector_carga" class="form-select rounded-pill px-3.5 py-2.5" style="border-color: #fce7f3;" required onchange="actualizarGrupoEstudiantes();">
+                                <option value="">-- Seleccionar Asignatura y Grado --</option>
+                                {% for c in cargas %}
+                                <option value="{{ c.id }}" data-grado="{{ c.grado }}" data-materia="{{ c.programa.denominacion|default:'Asignatura' }}">
+                                    {{ c.programa.denominacion|default:'Asignatura' }} — Grado {{ c.grado }}°{{ c.seccion }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="grado" id="input_grado_hidden" value="10">
+                        </div>
+
+                        <!-- Guía de Clase -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Vincular Guía de Clase *</label>
+                            <select name="guia_id" id="selector_guia" class="form-select rounded-pill px-3.5 py-2.5" style="border-color: #fce7f3;" onchange="cargarDatosGuia();">
+                                <option value="">[ Seleccionar una guía existente ]</option>
+                                {% for g in guias %}
+                                <option value="{{ g.id }}" data-titulo="{{ g.titulo }}" data-instrucciones="{{ g.instrucciones }}">
+                                    {{ g.titulo }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Preview de la guía seleccionada -->
+                        <div class="col-12" id="box_resumen_guia" style="display: none;">
+                            <div class="p-3 rounded-3 border" style="background: #fff0f3; border-color: #fce7f3 !important;">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="fw-bold small" style="color: #be185d;">
+                                        <i class="bi bi-file-earmark-text-fill me-1"></i> Resumen de la Guía Seleccionada:
+                                    </span>
+                                    <span class="badge bg-white text-pink fw-semibold" id="badge_guia_tit" style="color: #db2777; border: 1px solid #fce7f3;"></span>
+                                </div>
+                                <p class="small text-muted mb-0" id="texto_resumen_guia" style="line-height: 1.45;"></p>
+                            </div>
+                        </div>
+
+                        <!-- Resultado de Aprendizaje -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                <i class="bi bi-bullseye text-pink me-1" style="color: #db2777;"></i> Resultado de Aprendizaje (RAP / Competencia) *
+                            </label>
+                            <select name="resultado_aprendizaje_id" id="selector_rap" class="form-select rounded-pill px-3.5 py-2.5" style="border-color: #fce7f3;" required>
+                                <option value="">-- Seleccionar Resultado de Aprendizaje formativo --</option>
+                                {% for r in resultados %}
+                                <option value="{{ r.id }}">
+                                    {{ r.codigo }} — {{ r.descripcion }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted" style="font-size: 0.74rem;">El estudiante podrá visualizar este resultado de aprendizaje al consultar su tarea.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: CONTENIDO PEDAGÓGICO DE LA ACTIVIDAD -->
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2.5 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <span class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold small" 
+                              style="width: 28px; height: 28px; background: #db2777; font-size: 0.82rem;">2</span>
+                        <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Detalle de la Actividad</h5>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Título de la actividad -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark mb-1">Título de la Actividad *</label>
+                            <input type="text" name="titulo" id="input_titulo" class="form-control rounded-pill px-3.5 py-2.5" 
+                                   style="border-color: #fce7f3;" placeholder="Ej: Taller 1: Ecuaciones y Funciones Cuadráticas" required>
+                        </div>
+
+                        <!-- Tipo de Actividad / Evidencia -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Tipo de Actividad / Evidencia *</label>
+                            <select name="evidencia" class="form-select rounded-pill px-3.5 py-2.5" style="border-color: #fce7f3;" required>
+                                <option value="Tarea">Tarea Escolar</option>
+                                <option value="Taller">Taller Práctico</option>
+                                <option value="Evidencia de conocimiento">Evidencia de conocimiento</option>
+                                <option value="Evidencia de desempeño">Evidencia de desempeño</option>
+                                <option value="Evidencia de producto">Evidencia de producto</option>
+                                <option value="Evaluación">Evaluación Parcial</option>
+                            </select>
+                        </div>
+
+                        <!-- Archivo adjunto o material -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Adjuntar Archivo de Apoyo / Guía (Opcional)</label>
+                            <input type="file" name="archivo" class="form-control rounded-pill px-3.5 py-2" style="border-color: #fce7f3;">
+                        </div>
+
+                        <!-- Instrucciones -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark mb-1">Instrucciones y Criterios para el Estudiante *</label>
+                            <textarea name="instrucciones" id="input_instrucciones" rows="5" class="form-control rounded-4 px-3.5 py-2.5" 
+                                      style="border-color: #fce7f3;" placeholder="Escriba las instrucciones paso a paso que el estudiante debe seguir para resolver y entregar la actividad..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- COLUMNA LATERAL: DESTINATARIOS Y FECHAS -->
+            <div class="col-lg-4">
+
+                <!-- TARJETA 3: DESTINATARIOS -->
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <i class="bi bi-people-fill fs-5" style="color: #db2777;"></i>
+                        <h6 class="fw-bold text-dark mb-0" style="font-size: 0.98rem;">Destinatarios</h6>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1.5">¿A quién deseas asignar esta actividad?</label>
+                        <div class="d-flex flex-column gap-2">
+                            <label class="d-flex align-items-center gap-2 p-2.5 rounded-3 border cursor-pointer" 
+                                   style="background: #fff0f3; border-color: #fce7f3 !important; cursor: pointer;">
+                                <input type="radio" name="destinatario_tipo" value="todos" checked onchange="toggleSelectorEstudiante(false);" class="form-check-input" style="accent-color: #db2777;">
+                                <span class="small fw-semibold text-dark">Todo el grupo del grado seleccionado</span>
+                            </label>
+
+                            <label class="d-flex align-items-center gap-2 p-2.5 rounded-3 border cursor-pointer" 
+                                   style="border-color: #fce7f3 !important; cursor: pointer;">
+                                <input type="radio" name="destinatario_tipo" value="individual" onchange="toggleSelectorEstudiante(true);" class="form-check-input" style="accent-color: #db2777;">
+                                <span class="small fw-semibold text-dark">Estudiante individual específico</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Selector individual de estudiante -->
+                    <div id="box_estudiante_individual" style="display: none;" class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">
+                            <i class="bi bi-person-fill text-pink me-1" style="color: #db2777;"></i> Seleccionar Estudiante Destino *
+                        </label>
+                        
+                        <!-- Filtro de grado rápido -->
+                        <div class="d-flex gap-1.5 mb-2">
+                            <button type="button" class="btn btn-sm rounded-pill px-2.5 py-0.5 fw-bold btn-filtro-est active" onclick="filtrarEstudiantesPorGrado('todos', this)" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.72rem;">Todos (4)</button>
+                            <button type="button" class="btn btn-sm rounded-pill px-2.5 py-0.5 fw-bold btn-filtro-est" onclick="filtrarEstudiantesPorGrado('10', this)" style="background: #fff; color: #64748b; border: 1px solid #e2e8f0; font-size: 0.72rem;">Grado 10° (2)</button>
+                            <button type="button" class="btn btn-sm rounded-pill px-2.5 py-0.5 fw-bold btn-filtro-est" onclick="filtrarEstudiantesPorGrado('11', this)" style="background: #fff; color: #64748b; border: 1px solid #e2e8f0; font-size: 0.72rem;">Grado 11° (2)</button>
+                        </div>
+
+                        <!-- Buscador de estudiante -->
+                        <div class="position-relative mb-2">
+                            <i class="bi bi-search position-absolute top-50 translate-middle-y text-muted small" style="left: 12px;"></i>
+                            <input type="text" id="buscador_estudiante_input" onkeyup="filtrarEstudiantesTexto();" 
+                                   class="form-control form-control-sm rounded-pill ps-4 py-1.5" style="border-color: #fce7f3; font-size: 0.8rem;" 
+                                   placeholder="Buscar por nombre o documento...">
+                        </div>
+
+                        <!-- Select de estudiantes enriquecido -->
+                        <select name="estudiante_id" id="selector_estudiante_individual" class="form-select form-select-sm rounded-3 py-2" style="border-color: #fce7f3; font-size: 0.84rem;">
+                            <option value="">-- Seleccionar Estudiante --</option>
+                            {% for est in estudiantes %}
+                            <option value="{{ est.aprendiz.id }}" data-grado="{{ est.grado_escolar }}" data-nombre="{{ est.aprendiz.get_full_name|default:est.aprendiz.username }}" data-doc="{{ est.aprendiz.username }}">
+                                [Grado {{ est.grado_escolar }}°{{ est.seccion|default:'A' }}] {{ est.aprendiz.get_full_name|default:est.aprendiz.username }} (Doc: {{ est.aprendiz.username }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="p-2.5 rounded-3 border bg-light text-muted small" style="font-size: 0.78rem;">
+                        <i class="bi bi-info-circle text-pink me-1" style="color: #db2777;"></i>
+                        Los estudiantes asignados recibirán una notificación automática en su panel.
+                    </div>
+                </div>
+
+                <!-- TARJETA 4: FECHAS Y EVALUACIÓN -->
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <i class="bi bi-calendar-check-fill fs-5" style="color: #db2777;"></i>
+                        <h6 class="fw-bold text-dark mb-0" style="font-size: 0.98rem;">Plazos y Ponderación</h6>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Fecha Límite de Entrega *</label>
+                        <input type="date" name="fecha_limite" id="input_fecha_limite" class="form-control rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Hora Límite *</label>
+                        <input type="time" name="hora_limite" id="input_hora_limite" value="23:59" class="form-control rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Puntaje Máximo</label>
+                            <input type="number" step="0.1" name="puntaje_maximo" value="5.0" min="1.0" max="5.0" class="form-control rounded-pill px-3 py-2 text-center fw-bold" style="border-color: #fce7f3;">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Ponderación %</label>
+                            <input type="number" step="1" name="porcentaje" value="20" min="1" max="100" class="form-control rounded-pill px-3 py-2 text-center fw-bold" style="border-color: #fce7f3;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTÓN PUBLICAR -->
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn text-white rounded-pill py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2"
+                            style="background: #db2777; border: 1px solid #db2777; font-size: 0.98rem;">
+                        <i class="bi bi-send-fill"></i> Publicar y Enviar Actividad
+                    </button>
+                    <a href="{% url 'actividades_tareas' %}" class="btn btn-light rounded-pill py-2.5 text-muted small">
+                        Cancelar
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<script>
+// Establecer fecha límite por defecto: dentro de 7 días
+window.addEventListener('DOMContentLoaded', () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const fechaInput = document.getElementById('input_fecha_limite');
+    if (fechaInput && !fechaInput.value) {
+        fechaInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+});
+
+function cargarDatosGuia() {
+    const select = document.getElementById('selector_guia');
+    const boxResumen = document.getElementById('box_resumen_guia');
+    const textoResumen = document.getElementById('texto_resumen_guia');
+    const badgeTit = document.getElementById('badge_guia_tit');
+    const inputTit = document.getElementById('input_titulo');
+    const inputInst = document.getElementById('input_instrucciones');
+
+    const opt = select.options[select.selectedIndex];
+    if (opt && opt.value) {
+        const tit = opt.getAttribute('data-titulo') || '';
+        const inst = opt.getAttribute('data-instrucciones') || '';
+
+        boxResumen.style.display = 'block';
+        badgeTit.innerText = tit;
+        textoResumen.innerText = inst || 'Sin instrucciones adicionales.';
+
+        if (!inputTit.value) {
+            inputTit.value = tit;
+        }
+        if (!inputInst.value) {
+            inputInst.value = inst;
+        }
+    } else {
+        boxResumen.style.display = 'none';
+    }
+}
+
+function actualizarGrupoEstudiantes() {
+    const selectCarga = document.getElementById('selector_carga');
+    const opt = selectCarga.options[selectCarga.selectedIndex];
+    if (opt && opt.value) {
+        const grado = opt.getAttribute('data-grado') || '10';
+        document.getElementById('input_grado_hidden').value = grado;
+    }
+}
+
+function toggleSelectorEstudiante(mostrar) {
+    const box = document.getElementById('box_estudiante_individual');
+    const select = document.getElementById('selector_estudiante_individual');
+    if (mostrar) {
+        box.style.display = 'block';
+        select.required = true;
+    } else {
+        box.style.display = 'none';
+        select.required = false;
+        select.value = '';
+    }
+}
+
+function filtrarEstudiantesPorGrado(grado, btn) {
+    document.querySelectorAll('.btn-filtro-est').forEach(b => {
+        b.style.background = '#fff';
+        b.style.color = '#64748b';
+        b.style.borderColor = '#e2e8f0';
+    });
+    btn.style.background = '#fdf2f8';
+    btn.style.color = '#db2777';
+    btn.style.borderColor = '#fce7f3';
+
+    const select = document.getElementById('selector_estudiante_individual');
+    for (let i = 1; i < select.options.length; i++) {
+        const opt = select.options[i];
+        const g = opt.getAttribute('data-grado') || '';
+        if (grado === 'todos' || g.includes(grado)) {
+            opt.style.display = '';
+        } else {
+            opt.style.display = 'none';
+        }
+    }
+}
+
+function filtrarEstudiantesTexto() {
+    const q = (document.getElementById('buscador_estudiante_input').value || '').toLowerCase().trim();
+    const select = document.getElementById('selector_estudiante_individual');
+    for (let i = 1; i < select.options.length; i++) {
+        const opt = select.options[i];
+        const nombre = (opt.getAttribute('data-nombre') || '').toLowerCase();
+        const doc = (opt.getAttribute('data-doc') || '').toLowerCase();
+        const texto = opt.innerText.toLowerCase();
+        if (nombre.includes(q) || doc.includes(q) || texto.includes(q)) {
+            opt.style.display = '';
+        } else {
+            opt.style.display = 'none';
+        }
+    }
+}
+</script>
+{% endblock %}

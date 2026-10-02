@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Retirar o Reasignar Docente · EDUNOVA{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 800px;">
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-danger text-white py-3 px-4 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0">
+        <i class="bi bi-person-x-fill me-2"></i> Retirar o Reasignar Personal Docente
+      </h5>
+      <a href="{% url 'instructores_lista' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">
+        Volver a la lista
+      </a>
+    </div>
+
+    <div class="card-body p-4">
+      <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-4">
+        <div class="rounded-circle bg-danger-subtle text-danger fw-bold d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.2rem;">
+          {{ docente.first_name|first }}{{ docente.last_name|first }}
+        </div>
+        <div>
+          <h4 class="h5 fw-bold text-dark mb-0">{{ docente.get_full_name|default:docente.username }}</h4>
+          <span class="badge bg-secondary">{{ docente.perfil.rol.nombre|default:"Docente" }}</span>
+          <span class="text-muted small ms-2">Doc: {{ docente.perfil.numero_documento|default:"--" }}</span>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <h6 class="fw-bold text-dark mb-2">
+          <i class="bi bi-collection-fill text-primary me-2"></i> Grupos y Cargas Activas Asignadas:
+        </h6>
+        {% if fichas_asignadas or cargas_asignadas %}
+          <div class="row g-2">
+            {% for f in fichas_asignadas %}
+              <div class="col-md-6">
+                <div class="p-2 border rounded-3 bg-white small">
+                  <strong>Grupo {{ f.codigo_ficha }}</strong> - {{ f.programa.denominacion }}
+                </div>
+              </div>
+            {% endfor %}
+            {% for c in cargas_asignadas %}
+              <div class="col-md-6">
+                <div class="p-2 border rounded-3 bg-white small">
+                  <strong>{{ c.grado }} {{ c.seccion }}</strong> - {{ c.programa.denominacion }}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted small">Este docente no tiene grupos ni cursos asignados actualmente.</div>
+        {% endif %}
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-4">
+          <label class="form-label fw-bold text-dark">
+            <i class="bi bi-arrow-left-right text-success me-1"></i> Seleccionar Docente Sucesor / Reemplazo (Opcional pero recomendado):
+          </label>
+          <select name="sucesor_id" class="form-select border-secondary-subtle">
+            <option value="">-- Sin sucesor directo (desvincular grupos) --</option>
+            {% for od in otros_docentes %}
+              <option value="{{ od.pk }}">
+                Prof. {{ od.get_full_name|default:od.username }} ({{ od.perfil.rol.nombre|default:"Docente" }})
+              </option>
+            {% endfor %}
+          </select>
+          <div class="form-text small">
+            Si seleccionas un docente sucesor, todos los grupos, horarios y materias de <strong>{{ docente.get_full_name }}</strong> pasarán automáticamente al nuevo profesor sin perder ningún estudiante ni registro histórico.
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold text-dark">Tipo de acción:</label>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="accion_tipo" id="actRetirar" value="retirar" checked>
+            <label class="form-check-label" for="actRetirar">
+              <strong>Desactivar y retirar de la planta activa (Recomendado)</strong>: Mantiene el historial de notas y asistencias intacto en la base de datos, desvincula sus grupos y bloquea el acceso.
+            </label>
+          </div>
+          {% if not docente.is_superuser %}
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="accion_tipo" id="actEliminar" value="eliminar_definitivo">
+            <label class="form-check-label text-danger" for="actEliminar">
+              <strong>Eliminar cuenta definitivamente</strong>: Úsalo solo si la cuenta fue creada por error.
+            </label>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="d-flex justify-content-between pt-3 border-top">
+          <a href="{% url 'instructores_lista' %}" class="btn btn-light rounded-pill px-4">Cancelar</a>
+          <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold" onclick="return confirm('¿Confirmas el retiro de este docente? Los cambios en las asignaciones de grupo serán inmediatos.');">
+            <i class="bi bi-check-lg me-1"></i> Confirmar Retiro y Reasignación
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

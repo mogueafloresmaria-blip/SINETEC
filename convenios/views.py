@@ -130,7 +130,8 @@ def institucion_detalle(request, pk):
 def institucion_crear(request):
     """Registrar nueva institución educativa para catálogo de convenios."""
     if not _user_can_manage_convenios(request.user):
-        raise PermissionDenied("No tienes permisos para registrar instituciones.")
+        messages.error(request, "No tienes permisos de administración para registrar instituciones.")
+        return redirect('convenios_catalogo')
 
     if request.method == 'POST':
         form = InstitucionConvenioForm(request.POST, request.FILES)
@@ -195,7 +196,8 @@ def institucion_desactivar(request, pk):
 def convenio_crear(request, institucion_id=None):
     """Crear un nuevo Convenio SENA asociado a una institución."""
     if not _user_can_manage_convenios(request.user):
-        raise PermissionDenied("No tienes permisos para crear convenios.")
+        messages.error(request, "No tienes permisos de administración para crear convenios.")
+        return redirect('convenios_catalogo')
 
     institucion_preseleccionada = None
     if institucion_id:

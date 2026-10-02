@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Clase · {{ carga.programa.denominacion }} {{ carga.grado }}{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    .tab-active {
+        border-bottom: 2px solid #EC4899;
+        color: #BE185D;
+        font-weight: 600;
+    }
+    .tab-inactive {
+        color: #6B7280;
+        border-bottom: 2px solid transparent;
+    }
+    .tab-inactive:hover {
+        color: #EC4899;
+        border-bottom: 2px solid #FBCFE8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen pb-12 font-sans">
+    
+    <!-- Encabezado -->
+    <header class="bg-white border-b border-gray-200 px-6 py-6 mb-6 shadow-sm">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">{{ carga.programa.denominacion }}</h1>
+                <p class="text-pink-600 mt-1 font-medium">Grado {{ carga.grado }}° - Grupo {{ carga.seccion }}</p>
+                <div class="flex gap-4 mt-2 text-sm text-gray-500">
+                    <span><i class="bi bi-person"></i> Docente: {{ carga.profesor.get_full_name }}</span>
+                    <span><i class="bi bi-calendar"></i> Periodo Académico 2026</span>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <a href="{% url 'guardar_asistencia_clase' %}?carga={{carga.id}}" class="bg-pink-600 hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition shadow-sm">
+                    <i class="bi bi-check2-square"></i> Tomar Asistencia
+                </a>
+                <a href="{% url 'horarios_tablero' %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg text-sm transition">
+                    Volver al Horario
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navegación de Pestañas -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 mb-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="flex overflow-x-auto hide-scrollbar border-b border-gray-200">
+                <a href="?tab=informacion" class="whitespace-nowrap py-3 px-5 text-sm transition-colors {% if tab == 'informacion' %}tab-active{% else %}tab-inactive{% endif %}">Información</a>
+                <a href="?tab=objetivos" class="whitespace-nowrap py-3 px-5 text-sm transition-colors {% if tab == 'objetivos' %}tab-active{% else %}tab-inactive{% endif %}">Objetivos y Temas</a>
+                <a href="?tab=guias" class="whitespace-nowrap py-3 px-5 text-sm transition-colors {% if tab == 'guias' %}tab-active{% else %}tab-inactive{% endif %}">Guías de Aprendizaje</a>
+                <a href="?tab=tareas" class="whitespace-nowrap py-3 px-5 text-sm transition-colors {% if tab == 'tareas' %}tab-active{% else %}tab-inactive{% endif %}">Talleres y Tareas</a>
+                <a href="?tab=evaluaciones" class="whitespace-nowrap py-3 px-5 text-sm transition-colors {% if tab == 'evaluaciones' %}tab-active{% else %}tab-inactive{% endif %}">Evaluaciones</a>
+                <a href="?tab=estudiantes" class="whitespace-nowrap py-3 px-5 text-sm transition-colors {% if tab == 'estudiantes' %}tab-active{% else %}tab-inactive{% endif %}">Estudiantes</a>
+                <a href="?tab=calificaciones" class="whitespace-nowrap py-3 px-5 text-sm transition-colors {% if tab == 'calificaciones' %}tab-active{% else %}tab-inactive{% endif %}">Calificaciones</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido de las Pestañas -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        
+        {% if tab == 'informacion' %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Información General de la Clase</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <div>
+                    <p class="mb-2"><span class="font-semibold text-gray-600">Asignatura:</span> {{ carga.programa.denominacion }}</p>
+                    <p class="mb-2"><span class="font-semibold text-gray-600">Grado:</span> {{ carga.grado }}°</p>
+                    <p class="mb-2"><span class="font-semibold text-gray-600">Grupo:</span> {{ carga.seccion }}</p>
+                    <p class="mb-2"><span class="font-semibold text-gray-600">Docente:</span> {{ carga.profesor.get_full_name }}</p>
+                </div>
+                <div>
+                    <p class="mb-2"><span class="font-semibold text-gray-600">Intensidad Horaria:</span> {{ carga.programa.duracion_horas }} horas</p>
+                    <p class="mb-2"><span class="font-semibold text-gray-600">Periodo Académico:</span> 2026</p>
+                    <p class="mb-2"><span class="font-semibold text-gray-600">Descripción:</span> {{ carga.programa.observaciones|default:"Sin descripción." }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if tab == 'objetivos' %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Objetivos y Temas (Competencias)</h2>
+            {% for comp in competencias %}
+            <div class="mb-4 bg-pink-50 p-4 rounded-lg border border-pink-100">
+                <h3 class="font-bold text-pink-800">{{ comp.codigo }} - Competencia</h3>
+                <p class="text-sm text-gray-700 mt-1">{{ comp.descripcion }}</p>
+                <div class="mt-3">
+                    <h4 class="font-semibold text-pink-700 text-sm">Resultados de Aprendizaje (Temas/Subtemas):</h4>
+                    <ul class="list-disc pl-5 mt-2 text-sm text-gray-600">
+                        {% for rap in comp.resultados.all %}
+                        <li>{{ rap.codigo }} - {{ rap.descripcion }}</li>
+                        {% empty %}
+                        <li>No hay resultados registrados.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-500">No hay competencias registradas para esta asignatura.</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if tab == 'guias' %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg font-bold text-gray-800">Guías de Aprendizaje</h2>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1.5 rounded shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Subir Guía
+                </button>
+            </div>
+            {% if guias %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for guia in guias %}
+                <div class="border rounded-lg p-4 hover:shadow-md transition bg-gray-50">
+                    <h3 class="font-bold text-blue-800">{{ guia.titulo }}</h3>
+                    <p class="text-xs text-gray-500 mt-1">{{ guia.fecha_publicacion|date:"d M Y" }}</p>
+                    <p class="text-sm text-gray-700 mt-2 line-clamp-2">{{ guia.instrucciones }}</p>
+                    <div class="mt-3 flex gap-2">
+                        {% if guia.archivo %}
+                        <a href="{{ guia.archivo.url }}" target="_blank" class="text-blue-600 hover:underline text-sm"><i class="bi bi-file-earmark-pdf"></i> Ver Guía</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-500 text-center py-6">No hay guías de aprendizaje registradas.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if tab == 'tareas' %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg font-bold text-gray-800">Talleres y Tareas</h2>
+                <a href="{% url 'crear_tarea' carga.id %}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1.5 rounded shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Crear Tarea
+                </a>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Tarea / Taller</th>
+                            <th scope="col" class="px-6 py-3">Fecha Límite</th>
+                            <th scope="col" class="px-6 py-3">Estado</th>
+                            <th scope="col" class="px-6 py-3">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tarea in tareas %}
+                        <tr class="bg-white border-b hover:bg-gray-50">
+                            <td class="px-6 py-4 font-medium text-gray-900">{{ tarea.titulo }}</td>
+                            <td class="px-6 py-4">{{ tarea.fecha_limite|date:"d M Y H:i"|default:"Sin límite" }}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">{{ tarea.estado }}</span>
+                            </td>
+                            <td class="px-6 py-4 flex gap-2">
+                                <a href="{% url 'detalle_tarea_docente' tarea.id %}" class="text-blue-600 hover:underline">Ver Entregas</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center">No hay tareas creadas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if tab == 'evaluaciones' %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Evaluaciones</h2>
+            <p class="text-sm text-gray-500">Módulo de evaluaciones en construcción.</p>
+        </div>
+        {% endif %}
+
+        {% if tab == 'estudiantes' %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Estudiantes (Grupo {{ carga.grado }}°-{{ carga.seccion }})</h2>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Estudiante</th>
+                            <th scope="col" class="px-6 py-3">Correo</th>
+                            <th scope="col" class="px-6 py-3">Estado</th>
+                            <th scope="col" class="px-6 py-3">Seguimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mat in matriculas %}
+                        <tr class="bg-white border-b hover:bg-gray-50">
+                            <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
+                                    {{ mat.aprendiz.first_name|first }}{{ mat.aprendiz.last_name|first }}
+                                </div>
+                                {{ mat.aprendiz.get_full_name }}
+                            </td>
+                            <td class="px-6 py-4">{{ mat.aprendiz.email }}</td>
+                            <td class="px-6 py-4">{{ mat.estado_formacion }}</td>
+                            <td class="px-6 py-4">
+                                <a href="#" class="text-blue-600 hover:underline">Ver Perfil</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center">No hay estudiantes registrados en este grupo.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if tab == 'calificaciones' %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg font-bold text-gray-800">Calificaciones Escolares</h2>
+                <button class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1.5 rounded shadow-sm">
+                    <i class="bi bi-file-earmark-excel"></i> Planilla
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Estudiante</th>
+                            <th scope="col" class="px-6 py-3">Periodo</th>
+                            <th scope="col" class="px-6 py-3">Nota</th>
+                            <th scope="col" class="px-6 py-3">Desempeño</th>
+                            <th scope="col" class="px-6 py-3">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cal in calificaciones %}
+                        <tr class="bg-white border-b">
+                            <td class="px-6 py-4 font-medium text-gray-900">{{ cal.matricula.aprendiz.get_full_name }}</td>
+                            <td class="px-6 py-4">{{ cal.periodo }}</td>
+                            <td class="px-6 py-4 font-bold {% if cal.nota >= 3.0 %}text-green-600{% else %}text-red-600{% endif %}">{{ cal.nota }}</td>
+                            <td class="px-6 py-4">{{ cal.desempeno }}</td>
+                            <td class="px-6 py-4">
+                                <a href="#" class="text-blue-600 hover:underline">Editar</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center">Aún no hay calificaciones registradas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

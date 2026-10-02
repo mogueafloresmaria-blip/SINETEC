@@ -1,0 +1,254 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 2: PERFIL PROFESIONAL (ESTRUCTURA Y DISEÑO ROSA EXACTO AL DE LA FOTO 2)
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-perfil">
+
+    <!-- HERO DE PRESENTACIÓN PROFESIONAL (ESTILO ROSA EXACTO) -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-md-9 position-relative z-1">
+                <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-4">
+                    <!-- Avatar con botón de cámara integrado -->
+                    <div class="position-relative">
+                        <img src="{% if request.user.perfil.foto_perfil %}{{ request.user.perfil.foto_perfil.url }}{% else %}{% static 'img/default_avatar.png' %}{% endif %}" alt="{{ request.user.get_full_name }}" 
+                             class="rounded-circle shadow-sm border border-4 border-white" 
+                             style="width: 110px; height: 110px; object-fit: cover; object-position: top center;">
+                        <button type="button" class="position-absolute bottom-0 end-0 border-0 rounded-circle text-white shadow-sm d-flex align-items-center justify-content-center"
+                                style="width: 32px; height: 32px; background: #db2777; border: 2px solid #ffffff !important;" 
+                                data-bs-toggle="modal" data-bs-target="#modalEditarPerfilDocente" title="Cambiar foto">
+                            <i class="bi bi-camera-fill" style="font-size: 0.85rem;"></i>
+                        </button>
+                    </div>
+
+                    <!-- Datos Principales -->
+                    <div class="text-center text-sm-start">
+                        <h2 class="fw-bold mb-1" style="color: #0f172a; font-size: 2rem; letter-spacing: -0.5px;">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </h2>
+                        <p class="text-muted mb-2.5" style="font-size: 0.95rem;">
+                            Docente de Matemáticas y Educación Media Técnica
+                        </p>
+                        <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-sm-start">
+                            <span class="badge rounded-pill px-3 py-1.5 fw-semibold" 
+                                  style="background: #fce7f3; color: #be185d; font-size: 0.8rem;">
+                                Área: Matemáticas
+                            </span>
+                            <span class="badge rounded-pill px-3 py-1.5 fw-semibold" 
+                                  style="background: #fce7f3; color: #be185d; font-size: 0.8rem;">
+                                Cargo: Docente
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón Editar Perfil -->
+            <div class="col-md-3 text-end d-flex flex-column justify-content-center align-items-end h-100 position-relative z-1 mt-3 mt-md-0">
+                <button type="button" class="btn btn-white rounded-pill px-3.5 py-1.5 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+                        style="background: #ffffff; color: #be185d; border: 1px solid #fce7f3; font-size: 0.84rem;"
+                        data-bs-toggle="modal" data-bs-target="#modalEditarPerfilDocente">
+                    <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
+                    <span>Editar perfil</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS DE NAVEGACIÓN INTERNA -->
+    <div class="d-flex align-items-center gap-4 border-bottom mb-4" style="border-color: #fce7f3 !important;">
+        <button type="button" class="btn p-0 pb-2 border-0 fw-bold d-flex align-items-center gap-2"
+                style="color: #db2777; border-bottom: 3px solid #db2777 !important; font-size: 0.95rem; border-radius: 0;">
+            <i class="bi bi-person-fill"></i> Información general
+        </button>
+        <button type="button" class="btn p-0 pb-2 border-0 text-muted fw-semibold d-flex align-items-center gap-2"
+                style="font-size: 0.95rem; border-radius: 0;"
+                onclick="window.location.href='{% url 'instructor_dashboard' %}?subpanel=asignaturas';">
+            <i class="bi bi-book-half"></i> Asignaturas
+        </button>
+        <button type="button" class="btn p-0 pb-2 border-0 text-muted fw-semibold d-flex align-items-center gap-2"
+                style="font-size: 0.95rem; border-radius: 0;"
+                onclick="window.location.href='{% url 'instructor_dashboard' %}?subpanel=estudiantes';">
+            <i class="bi bi-people-fill"></i> Grupos
+        </button>
+    </div>
+
+    <!-- GRID DE 2 COLUMNAS CON TARJETAS DE INFORMACIÓN -->
+    <div class="row g-4">
+        <!-- Columna Izquierda -->
+        <div class="col-lg-6 space-y-4">
+            <!-- 1. Información personal -->
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2.5 mb-3.5 pb-1">
+                    <i class="bi bi-person-fill fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0 fs-6">Información personal</h6>
+                </div>
+                <div class="space-y-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-card-text fs-5" style="color: #db2777 !important;"></i>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.74rem;">Documento de identidad</small>
+                            <strong class="text-dark" style="font-size: 0.88rem;">1.234.567.890</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-calendar-event fs-5" style="color: #db2777 !important;"></i>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.74rem;">Fecha de nacimiento</small>
+                            <strong class="text-dark" style="font-size: 0.88rem;">15 de marzo de 1998</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-geo-alt-fill fs-5" style="color: #db2777 !important;"></i>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.74rem;">Lugar de nacimiento</small>
+                            <strong class="text-dark" style="font-size: 0.88rem;">Ciénaga, Magdalena</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Información profesional -->
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2.5 mb-3.5 pb-1">
+                    <i class="bi bi-briefcase-fill fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0 fs-6">Información profesional</h6>
+                </div>
+                <div class="space-y-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <small class="text-muted fw-semibold" style="font-size: 0.8rem;">Cargo</small>
+                        <strong class="text-dark" style="font-size: 0.88rem;">Docente</strong>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <small class="text-muted fw-semibold" style="font-size: 0.8rem;">Área</small>
+                        <strong class="text-dark" style="font-size: 0.88rem;">Matemáticas</strong>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <small class="text-muted fw-semibold" style="font-size: 0.8rem;">Experiencia</small>
+                        <strong class="text-dark" style="font-size: 0.88rem;">5 años en el sector educativo</strong>
+                    </div>
+                    <div>
+                        <small class="text-muted fw-semibold d-block mb-1" style="font-size: 0.8rem;">Descripción</small>
+                        <p class="text-muted mb-0 small" style="line-height: 1.5; font-size: 0.84rem;">
+                            Docente comprometida con la formación integral de los estudiantes, con enfoque en el desarrollo del pensamiento lógico y la resolución de problemas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha -->
+        <div class="col-lg-6 space-y-4">
+            <!-- 3. Contacto -->
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2.5 mb-3.5 pb-1">
+                    <i class="bi bi-headset fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0 fs-6">Contacto</h6>
+                </div>
+                <div class="space-y-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-envelope-fill fs-5" style="color: #db2777;"></i>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.74rem;">Correo institucional</small>
+                            <strong class="text-dark" style="font-size: 0.88rem;">maria.torres@edunova.edu.co</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-telephone-fill fs-5" style="color: #db2777;"></i>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.74rem;">Teléfono</small>
+                            <strong class="text-dark" style="font-size: 0.88rem;">+57 300 123 4567</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-geo-alt-fill fs-5" style="color: #db2777;"></i>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.74rem;">Dirección</small>
+                            <strong class="text-dark" style="font-size: 0.88rem;">Calle 10 # 5-20, Ciénaga, Magdalena</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Asignaturas a cargo -->
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2.5 mb-3 pb-1">
+                    <i class="bi bi-book-half fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0 fs-6">Asignaturas a cargo</h6>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge rounded-pill px-3.5 py-2 fw-semibold" style="background: #fce7f3; color: #be185d; font-size: 0.84rem;">
+                        Matemáticas
+                    </span>
+                    <span class="badge rounded-pill px-3.5 py-2 fw-semibold" style="background: #fce7f3; color: #be185d; font-size: 0.84rem;">
+                        Informática
+                    </span>
+                </div>
+            </div>
+
+            <!-- 5. Grupos a cargo -->
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                <div class="d-flex align-items-center gap-2.5 mb-3 pb-1">
+                    <i class="bi bi-people-fill fs-5" style="color: #db2777;"></i>
+                    <h6 class="fw-bold text-dark mb-0 fs-6">Grupos a cargo</h6>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge rounded-pill px-3.5 py-2 fw-semibold" style="background: #fce7f3; color: #be185d; font-size: 0.84rem;">
+                        Grado 10°A
+                    </span>
+                    <span class="badge rounded-pill px-3.5 py-2 fw-semibold" style="background: #fce7f3; color: #be185d; font-size: 0.84rem;">
+                        Grado 11°A
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL FUNCIONAL: EDITAR PERFIL PROFESIONAL DEL DOCENTE -->
+<div class="modal fade" id="modalEditarPerfilDocente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #fce7f3 !important;">
+            <div class="modal-header border-bottom p-3.5" style="background: #fff0f3;">
+                <div>
+                    <h6 class="modal-title fw-bold text-dark mb-0">Editar Perfil Profesional</h6>
+                    <small class="text-muted">Actualice sus datos de contacto y fotografía institucional</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="guardar_perfil">
+                <div class="modal-body p-4 space-y-3">
+                    <div>
+                        <label class="form-label small fw-bold text-dark mb-1">Nombre Completo:</label>
+                        <input type="text" class="form-control form-control-sm bg-light" value="{{ request.user.get_full_name }}" readonly>
+                    </div>
+                    <div>
+                        <label class="form-label small fw-bold text-dark mb-1">Documento de Identidad:</label>
+                        <input type="text" class="form-control form-control-sm bg-light" value="1.234.567.890" readonly>
+                    </div>
+                    <div>
+                        <label class="form-label small fw-bold text-dark mb-1">Correo Electrónico Institucional:</label>
+                        <input type="email" name="email" class="form-control form-control-sm" value="{{ request.user.email }}" required>
+                    </div>
+                    <div>
+                        <label class="form-label small fw-bold text-dark mb-1">Teléfono Móvil de Contacto:</label>
+                        <input type="text" name="telefono" class="form-control form-control-sm" value="{{ perfil_docente.telefono|default:'+57 300 123 4567' }}" placeholder="+57 300 123 4567">
+                    </div>
+                    <div>
+                        <label class="form-label small fw-bold text-dark mb-1">Fotografía del Docente:</label>
+                        <input type="file" name="foto_perfil" class="form-control form-control-sm" accept="image/*">
+                        <small class="text-muted" style="font-size: 0.72rem;">Formatos admitidos: JPG, PNG, WEBP.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 pt-0">
+                    <button type="button" class="btn btn-secondary rounded-pill px-3 py-1.5 fw-semibold small" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn rounded-pill px-4 py-1.5 fw-semibold small text-white shadow-sm" style="background: #db2777;">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

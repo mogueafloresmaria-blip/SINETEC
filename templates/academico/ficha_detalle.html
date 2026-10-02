@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Ficha {{ ficha.codigo_ficha }} · {{ ficha.programa.denominacion }} · SINETEC SENA{% endblock %}
+{% block title %}Ficha {{ ficha.codigo_ficha }} · {{ ficha.programa.denominacion }} · EDUNOVA SENA{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-2 px-md-3">
@@ -281,11 +281,8 @@
                                         </span>
                                     </td>
                                     <td class="pe-3 text-end">
-                                        <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="btn btn-sm btn-light border py-1 px-2" title="Ver perfil del aprendiz">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <a href="{% url 'carnet_digital_id' m.aprendiz.id %}" target="_blank" class="btn btn-sm btn-outline-success py-1 px-2" title="Carné Digital SENA">
-                                            <i class="bi bi-person-badge"></i>
+                                        <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="btn btn-sm btn-outline-primary py-1 px-2" title="Ver perfil del estudiante">
+                                            <i class="bi bi-eye"></i> Expediente
                                         </a>
                                     </td>
                                 </tr>

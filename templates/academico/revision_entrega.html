@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Revisar Entrega - {{ entrega.estudiante.get_full_name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6">
+    <!-- Encabezado superior -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Entrega — {{ entrega.tarea.titulo }}</h1>
+            <p class="text-gray-500 mt-1">Aprendiz: <span class="font-bold text-gray-700">{{ entrega.estudiante.get_full_name }}</span> | Grado: {{ entrega.tarea.carga_academica.grado }}°{{ entrega.tarea.carga_academica.seccion }}</p>
+        </div>
+        <a href="javascript:history.back()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition">
+            Volver
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Columna Izquierda: Visor del Trabajo -->
+        <div class="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col h-[800px]">
+            <div class="bg-gray-50 border-b px-4 py-3 flex justify-between items-center">
+                <h3 class="font-bold text-gray-700"><i class="bi bi-file-earmark-text"></i> Archivo enviado</h3>
+                <span class="text-xs text-gray-500">Fecha de entrega: {{ entrega.fecha_entrega|date:"d/m/Y H:i" }}</span>
+            </div>
+            
+            <div class="p-4 flex-grow flex flex-col bg-gray-100">
+                {% if entrega.archivo %}
+                    <!-- Visor en iframe -->
+                    <iframe src="{{ entrega.archivo.url }}" class="w-full h-full border-0 rounded-lg shadow-inner bg-white" title="Vista previa de entrega"></iframe>
+                    <div class="mt-4 text-center">
+                        <a href="{{ entrega.archivo.url }}" target="_blank" class="text-blue-600 hover:underline font-medium text-sm"><i class="bi bi-box-arrow-up-right"></i> Abrir en otra pestaña / Descargar</a>
+                    </div>
+                {% elif entrega.respuesta %}
+                    <div class="bg-white p-6 rounded-lg shadow-inner w-full h-full overflow-y-auto whitespace-pre-wrap text-gray-700">
+                        {{ entrega.respuesta }}
+                    </div>
+                {% else %}
+                    <div class="flex items-center justify-center w-full h-full text-gray-400 flex-col">
+                        <i class="bi bi-file-earmark-x text-5xl mb-3"></i>
+                        <p>No se adjuntó archivo ni respuesta de texto.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Panel de Evaluación -->
+        <div class="bg-white rounded-xl shadow-sm border p-6 flex flex-col">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Evaluación</h2>
+            
+            <div class="mb-4 bg-blue-50 border border-blue-100 p-4 rounded-lg">
+                <h4 class="font-bold text-blue-800 text-sm mb-1">Evidencia de aprendizaje:</h4>
+                <p class="text-gray-700 text-sm mb-3">Evidencia de {{ entrega.tarea.tipo_actividad|default:"producto" }}: {{ entrega.tarea.titulo }}</p>
+                
+                {% if entrega.tarea.resultado_aprendizaje %}
+                <h4 class="font-bold text-blue-800 text-sm mb-1">Resultado de aprendizaje:</h4>
+                <p class="text-gray-700 text-sm mb-3">{{ entrega.tarea.resultado_aprendizaje.descripcion }}</p>
+                {% endif %}
+
+                <h4 class="font-bold text-blue-800 text-sm mb-1">Criterios de evaluación:</h4>
+                <p class="text-gray-700 text-sm">{{ entrega.tarea.criterio_evaluacion|default:"Los criterios definidos en la guía de aprendizaje asociada."|linebreaksbr }}</p>
+            </div>
+
+            <!-- Formulario de Calificación -->
+            <form method="post" class="mt-4 flex flex-col flex-grow">
+                {% csrf_token %}
+                
+                <div class="mb-5">
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Calificación obtenida:</label>
+                    <div class="flex items-center gap-3">
+                        <input type="number" step="0.1" min="0" max="{{ entrega.tarea.puntaje_maximo }}" name="calificacion" value="{{ entrega.calificacion|default:'' }}" class="w-32 border-gray-300 rounded-lg shadow-sm focus:border-pink-500 focus:ring-pink-500 font-bold text-lg text-center" required>
+                        <span class="text-gray-500 font-medium text-lg">/ {{ entrega.tarea.puntaje_maximo|default:"5.0" }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-5 flex-grow flex flex-col">
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Retroalimentación del docente:</label>
+                    <textarea name="retroalimentacion" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-pink-500 focus:ring-pink-500 p-3 flex-grow resize-none" placeholder="Escriba aquí las observaciones para el aprendiz..." required>{{ entrega.retroalimentacion|default:'' }}</textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                    <button type="submit" name="guardar" value="1" class="flex-1 bg-white border-2 border-pink-600 text-pink-600 hover:bg-pink-50 font-bold py-3 rounded-lg transition shadow-sm">
+                        Guardar calificación
+                    </button>
+                    <button type="submit" name="guardar_continuar" value="1" class="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg transition shadow-sm">
+                        Guardar y continuar <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

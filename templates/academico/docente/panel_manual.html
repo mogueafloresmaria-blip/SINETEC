@@ -1,0 +1,211 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO: MANUAL DE USUARIO DEL PROFESOR (DOCUMENTACIÓN Y GUÍA INTERACTIVA)
+     Explica detalladamente cada uno de los módulos y el procedimiento paso a paso
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-manual">
+
+    <!-- HERO BANNER MANUAL -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-book-half" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Documentación Oficial
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Manual de Usuario — Panel del Docente
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Guía paso a paso para la gestión integral de grupos, estudiantes, horarios, asistencia, actividades, calificaciones y mensajería.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                        onclick="window.print();"
+                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Imprimir Manual
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENIDO DEL MANUAL -->
+    <div class="card border rounded-4 p-4 p-md-5 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+        
+        <!-- OBJETIVO -->
+        <div class="mb-5 pb-4 border-bottom" style="border-color: #fce7f3 !important;">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3;">Introducción</span>
+            </div>
+            <h4 class="fw-bold text-dark">Objetivo del Sistema</h4>
+            <p class="text-muted leading-relaxed" style="font-size: 0.95rem;">
+                El panel del docente permite gestionar de forma articulada, autónoma y transparente sus grupos escolares, estudiantes matriculados, asignaturas, horarios de clase, registro diario de asistencia, diseño de actividades y tareas, calificación y retroalimentación pedagógica, comunicaciones con familias y estudiantes, y el centro de notificaciones en tiempo real.
+            </p>
+        </div>
+
+        <!-- SECCIONES DEL MANUAL -->
+        <div class="space-y-5">
+
+            <!-- 1. Inicio -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">1</span>
+                    <h5 class="fw-bold text-dark mb-0">Módulo Inicio (Dashboard Resumen)</h5>
+                </div>
+                <p class="text-muted small mb-2">
+                    Desde <strong>Inicio</strong>, el docente puede consultar de manera inmediata:
+                </p>
+                <ul class="text-muted small space-y-1 mb-3">
+                    <li><strong>Clase actual en curso:</strong> Si tiene una clase programada en el horario para la hora y día vigentes, muestra la materia, grado, aula y el botón <em>Tomar Asistencia</em>. Si no hay clase en ese instante, el sistema informa con veracidad: <em>"No tienes clases programadas en este momento"</em>.</li>
+                    <li><strong>Resumen métrico real:</strong> Total de estudiantes (4), distribución por grupo (Grado 10: 2, Grado 11: 2), asignaturas asignadas, actividades creadas y entregas pendientes de calificar.</li>
+                    <li><strong>Horario del día:</strong> Bloques de clase programados para el día actual.</li>
+                </ul>
+            </div>
+
+            <!-- 2. Mis Estudiantes -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">2</span>
+                    <h5 class="fw-bold text-dark mb-0">Mis Estudiantes</h5>
+                </div>
+                <p class="text-muted small mb-2">
+                    Permite consultar la nómina oficial asignada al docente, estructurada con:
+                </p>
+                <ul class="text-muted small space-y-1 mb-3">
+                    <li><strong>Filtro por Grado:</strong> Selección ágil entre <em>Grado 10°</em> (Estudiante 1 y Estudiante 2), <em>Grado 11°</em> (Estudiante 3 y Estudiante 4) o vista consolidada de los 4 estudiantes.</li>
+                    <li><strong>Ficha Académica Detallada:</strong> Al seleccionar un estudiante se despliegan sus 5 pestañas: Información personal y de acudiente, Historial de calificaciones, Asistencia histórica, Actividades entregadas y Bitácora de seguimiento pedagógico.</li>
+                </ul>
+            </div>
+
+            <!-- 3. Mis Grupos -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">3</span>
+                    <h5 class="fw-bold text-dark mb-0">Mis Grupos</h5>
+                </div>
+                <p class="text-muted small mb-2">
+                    Vista centrada en los cursos a cargo: <strong>Grado 10°A</strong> (2 estudiantes) y <strong>Grado 11°A</strong> (2 estudiantes). Desde cada tarjeta de grupo, el profesor cuenta con botones directos para:
+                </p>
+                <div class="d-flex flex-wrap gap-2 pt-1">
+                    <span class="badge bg-white text-dark border px-2.5 py-1.5"><i class="bi bi-people me-1 text-pink"></i> Ver estudiantes</span>
+                    <span class="badge bg-white text-dark border px-2.5 py-1.5"><i class="bi bi-check-square me-1 text-pink"></i> Tomar asistencia</span>
+                    <span class="badge bg-white text-dark border px-2.5 py-1.5"><i class="bi bi-journal-plus me-1 text-pink"></i> Crear actividad</span>
+                    <span class="badge bg-white text-dark border px-2.5 py-1.5"><i class="bi bi-mortarboard me-1 text-pink"></i> Calificar</span>
+                    <span class="badge bg-white text-dark border px-2.5 py-1.5"><i class="bi bi-chat-dots me-1 text-pink"></i> Comunicarse</span>
+                </div>
+            </div>
+
+            <!-- 4. Mis Asignaturas -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">4</span>
+                    <h5 class="fw-bold text-dark mb-0">Mis Asignaturas</h5>
+                </div>
+                <p class="text-muted small mb-2">
+                    Muestra las asignaturas oficiales: <strong>Matemáticas</strong>, <strong>Informática</strong> y <strong>Lengua Castellana</strong>.
+                </p>
+                <ul class="text-muted small space-y-1 mb-0">
+                    <li>La cantidad de estudiantes se calcula automáticamente a partir de los grupos asociados (sin valores inventados).</li>
+                    <li>Al presionar <strong>Ver detalles</strong>, se presenta la vista completa de la asignatura: Docente titular, Grupos asociados, Estudiantes reales asignados, Actividades publicadas, Calificaciones y Asistencia.</li>
+                </ul>
+            </div>
+
+            <!-- 5. Asistencia -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">5</span>
+                    <h5 class="fw-bold text-dark mb-0">Asistencia Escolar</h5>
+                </div>
+                <p class="text-muted small mb-2"><strong>Procedimiento para tomar asistencia:</strong></p>
+                <ol class="text-muted small space-y-1 mb-0">
+                    <li>Seleccionar el grado (Grado 10 o Grado 11), la fecha de la sesión y la asignatura correspondiente.</li>
+                    <li>El sistema lista de inmediato los estudiantes del grupo.</li>
+                    <li>Marcar el estado de cada estudiante: <strong>Presente (P)</strong>, <strong>Ausente (A)</strong> o <strong>Tardanza (T)</strong>.</li>
+                    <li>Opcionalmente, escribir una observación o justificación.</li>
+                    <li>Presionar <strong>Guardar Asistencia</strong>. La sesión queda almacenada en base de datos y disponible en el historial.</li>
+                </ol>
+            </div>
+
+            <!-- 6. Actividades y Tareas -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">6</span>
+                    <h5 class="fw-bold text-dark mb-0">Creación de Actividades y Tareas</h5>
+                </div>
+                <p class="text-muted small mb-2"><strong>Procedimiento para diseñar una actividad:</strong></p>
+                <ol class="text-muted small space-y-1 mb-0">
+                    <li>Pulsar <strong>+ Crear Actividad</strong> en el módulo de Actividades.</li>
+                    <li>Completar la información básica: Título, Tipo de actividad, Asignatura y Grupo.</li>
+                    <li>Seleccionar el destinatario: Todo el grupo o un estudiante individual (ej: Estudiante 1).</li>
+                    <li>Seleccionar la <strong>Guía pedagógica</strong> desde la biblioteca de recursos o adjuntar un archivo nuevo.</li>
+                    <li>Seleccionar el <strong>Resultado de Aprendizaje (RAP)</strong> o competencia a evaluar.</li>
+                    <li>Fijar la fecha y hora límite de entrega, ponderación porcentual e instrucciones detalladas.</li>
+                    <li>Pulsar <strong>Publicar Inmediatamente</strong>. El estudiante recibe notificación automática en su panel.</li>
+                </ol>
+            </div>
+
+            <!-- 7. Flujo Estudiante y Calificación -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">7</span>
+                    <h5 class="fw-bold text-dark mb-0">Flujo de Entrega, Revisión y Calificación</h5>
+                </div>
+                <p class="text-muted small mb-2"><strong>Circuito académico completo:</strong></p>
+                <ol class="text-muted small space-y-1 mb-0">
+                    <li>El estudiante ingresa a su portal, consulta la notificación y abre la actividad asignada.</li>
+                    <li>El estudiante visualiza las instrucciones, el Resultado de Aprendizaje y descarga la guía pedagógica.</li>
+                    <li>El estudiante redacta su respuesta, adjunta su archivo de trabajo y pulsa <strong>Enviar Entrega</strong>.</li>
+                    <li>El docente recibe la notificación de entrega en su panel, abre la actividad y revisa la respuesta y el archivo del alumno.</li>
+                    <li>El docente asigna la nota numérica (escala 0.0 a 5.0) y escribe la retroalimentación pedagógica.</li>
+                    <li>El estudiante consulta de inmediato su nota oficial y las observaciones del profesor.</li>
+                </ol>
+            </div>
+
+            <!-- 8. Calificaciones -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">8</span>
+                    <h5 class="fw-bold text-dark mb-0">Planilla Oficial de Calificaciones</h5>
+                </div>
+                <p class="text-muted small mb-2">
+                    Permite seleccionar la asignatura, el grupo y el periodo lectivo (Periodo 1 a 4). Cuenta con cálculo automático de promedios ponderados y niveles de desempeño (Superior, Alto, Básico, Bajo), guardando directamente en la tabla oficial de calificaciones escolares.
+                </p>
+            </div>
+
+            <!-- 9. Horario Escolar -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">9</span>
+                    <h5 class="fw-bold text-dark mb-0">Horario Escolar y Control de Cruces</h5>
+                </div>
+                <p class="text-muted small mb-2">
+                    El docente puede agregar o editar bloques de clase indicando día, hora inicio, hora fin, asignatura, grupo y aula.
+                </p>
+                <div class="alert alert-warning rounded-3 border-0 small p-3 mb-0">
+                    <i class="bi bi-shield-exclamation me-1.5"></i> <strong>Validación Estricta de Cruces:</strong> Si se intenta registrar un horario que coincida en día y hora con otra clase del mismo docente, del mismo grupo o de la misma aula, el sistema bloquea la operación y notifica el motivo específico del cruce.
+                </div>
+            </div>
+
+            <!-- 10. Comunicaciones y Notificaciones -->
+            <div class="p-4 rounded-4" style="background: #fafafa; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center text-white fw-bold" style="background: #db2777; width: 28px; height: 28px;">10</span>
+                    <h5 class="fw-bold text-dark mb-0">Comunicaciones y Centro de Notificaciones</h5>
+                </div>
+                <p class="text-muted small mb-0">
+                    Permite enviar circulares o mensajes directos a estudiantes o acudientes. Toda acción relevante (publicación de actividad, recepción de entrega, registro de calificación, envío de mensaje) genera automáticamente una notificación interna visible en el centro de notificaciones con opción de marcar como leída.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

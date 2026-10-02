@@ -1,276 +1,459 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Control de Asistencia - SINETEC{% endblock %}
-
-{% block extra_css %}
-<style>
-    .row-highlight-scanned {
-        background-color: rgba(57, 169, 0, 0.15) !important;
-        transition: background-color 0.5s ease;
-    }
-</style>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-{% endblock %}
+{% block title %}Control de Asistencia Escolar y Llamar a Lista · EDUNOVA{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <div class="sinetec-eyebrow mb-1">Operación diaria</div>
-        <h1 class="sinetec-page-title h3 mb-1">Control de Asistencia Diaria</h1>
-        <p class="text-muted small mb-0">Registro y supervisión en tiempo real de la asistencia de aprendices por ficha.</p>
+<div class="container-fluid px-0">
+    <!-- Header Hero Escolar -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 60%, #2563EB 100%); color: #ffffff; padding: 1.85rem 2.25rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -4px rgba(30, 58, 138, 0.35);">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-calendar-check me-1"></i> Gestión de Aula y Asistencia Diaria
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Llamar a Lista y Control de Asistencia</h1>
+                <p class="mb-0 text-white text-opacity-90 small">
+                    Selecciona el grado escolar, la asignatura y la fecha para asentar la asistencia del día con guardado oficial en la base de datos.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'calificaciones' %}" class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm text-primary">
+                    <i class="bi bi-clipboard2-data-fill me-1"></i> Planilla de Notas
+                </a>
+                <a href="{% url 'instructor_dashboard' %}" class="btn btn-outline-light btn-sm fw-semibold rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Panel Docente
+                </a>
+            </div>
+        </div>
     </div>
-    <a href="{% url 'seguimiento_lista' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i> Volver a Seguimiento
-    </a>
-</div>
 
-<div class="sinetec-card p-3 mb-4">
-    <form method="get" class="row g-3 align-items-end">
-        <div class="col-md-8">
-            <label for="ficha" class="form-label small fw-semibold">Ficha Técnica</label>
-            <select id="ficha" name="ficha" class="form-select" required>
-                <option value="">-- Seleccione una ficha --</option>
-                {% for item in fichas %}
-                    <option value="{{ item.pk }}" {% if ficha and ficha.pk == item.pk %}selected{% endif %}>
-                        Ficha {{ item.codigo_ficha }} - {{ item.programa.denominacion }} ({{ item.institucion.nombre }})
-                    </option>
-                {% endfor %}
-            </select>
+    <!-- MENSAJES DE CONFIRMACIÓN -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+            <div>{{ message }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
         </div>
-        <div class="col-md-3">
-            <label for="fecha" class="form-label small fw-semibold">Fecha</label>
-            <input id="fecha" type="date" name="fecha" value="{{ fecha|date:'Y-m-d' }}" class="form-control" required>
-        </div>
-        <div class="col-md-1">
-            <button type="submit" class="btn btn-sinetec-primary w-100" title="Cargar lista">
-                <i class="bi bi-search"></i>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Pestañas de Navegación: Tomar Lista vs Historial Mensual -->
+    <ul class="nav nav-pills gap-2 mb-4" id="asistenciaPills" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill fw-bold px-4 py-2" id="pill-tomar-tab" data-bs-toggle="pill" data-bs-target="#pill-tomar" type="button" role="tab">
+                <i class="bi bi-card-checklist me-1"></i> 1. Tomar Asistencia de Hoy
             </button>
-        </div>
-    </form>
-</div>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-bold px-4 py-2" id="pill-historial-tab" data-bs-toggle="pill" data-bs-target="#pill-historial" type="button" role="tab">
+                <i class="bi bi-calendar-month me-1"></i> 2. Historial de Asistencias Mensual y por Estudiante
+            </button>
+        </li>
+    </ul>
 
-{% if ficha %}
-    <form method="post">
-        {% csrf_token %}
-        <div class="sinetec-card">
-            <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <span class="badge bg-primary">Ficha {{ ficha.codigo_ficha }}</span>
-                    <h2 class="h5 fw-bold mt-2 mb-1">{{ ficha.institucion.nombre }}</h2>
-                    <p class="text-muted small mb-0">{{ fecha|date:'l, d \d\e F \d\e Y' }}</p>
-                </div>
+    <div class="tab-content" id="asistenciaPillsContent">
 
-                <!-- Botones de Control QR en Aula -->
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <a href="{% url 'seguimiento_qr_sesion' ficha.pk %}" target="_blank" class="btn btn-outline-success btn-sm rounded-pill fw-bold px-3">
-                        <i class="bi bi-qr-code-scan me-1"></i> Proyectar QR de Clase
-                    </a>
-                    <button type="button" class="btn btn-success btn-sm rounded-pill fw-bold px-3" data-bs-toggle="modal" data-bs-target="#modalEscanearAula" style="background-color: #29AAE3; border-color: #29AAE3;">
-                        <i class="bi bi-camera-fill me-1"></i> Escanear Carnets
-                    </button>
-                </div>
+        <!-- ======================================================== -->
+        <!-- TAB 1: TOMAR ASISTENCIA DE HOY -->
+        <!-- ======================================================== -->
+        <div class="tab-pane fade show active" id="pill-tomar" role="tabpanel">
 
-                <div class="d-flex gap-2 small">
-                    <span class="badge bg-success bg-opacity-10 text-success" id="total-presentes">0 presentes</span>
-                    <span class="badge bg-danger bg-opacity-10 text-danger" id="total-ausentes">0 inasistencias</span>
-                    <span class="badge bg-warning bg-opacity-10 text-warning" id="total-excusas">0 excusas</span>
+            <!-- Barra de Selección de Grado/Curso, Asignatura y Fecha -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-body p-3 p-md-4">
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="ficha" class="form-label small fw-bold text-dark mb-1">
+                                <i class="bi bi-mortarboard-fill text-primary me-1"></i> 1. Grado / Grupo Escolar *
+                            </label>
+                            <select id="ficha" name="ficha" class="form-select border-primary-subtle rounded-3 py-2 fw-semibold" required>
+                                {% for item in fichas %}
+                                    <option value="{{ item.pk }}" {% if ficha and ficha.pk == item.pk %}selected{% endif %}>
+                                        Grado {{ item.codigo_ficha }} · {{ item.institucion.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="asignatura" class="form-label small fw-bold text-dark mb-1">
+                                <i class="bi bi-book-half text-primary me-1"></i> 2. Asignatura / Materia *
+                            </label>
+                            <select id="asignatura" name="asignatura" class="form-select border-primary-subtle rounded-3 py-2 fw-semibold" required>
+                                {% for p in programas %}
+                                    <option value="{{ p.pk }}" {% if asignatura_sel and asignatura_sel.pk == p.pk %}selected{% endif %}>
+                                        {{ p.denominacion }} (Grado {{ ficha.codigo_ficha }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="fecha" class="form-label small fw-bold text-dark mb-1">
+                                <i class="bi bi-calendar-date text-primary me-1"></i> 3. Fecha *
+                            </label>
+                            <input id="fecha" type="date" name="fecha" value="{{ fecha|date:'Y-m-d' }}" class="form-control border-primary-subtle rounded-3 py-2" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary fw-semibold rounded-3 py-2 px-3 w-100 shadow-sm text-white" style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); border: none;">
+                                <i class="bi bi-search me-1"></i> Cargar Lista
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-sinetec table-hover align-middle mb-0" id="tablaAsistencia">
-                    <thead>
-                        <tr>
-                            <th style="width: 55px">No.</th>
-                            <th>Estudiante</th>
-                            <th>Documento</th>
-                            <th class="text-end">Estado de asistencia</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for fila in filas_asistencia %}
-                            {% with matricula=fila.matricula estado=fila.estado %}
-                            <tr id="fila-aprendiz-{{ matricula.aprendiz.perfil.numero_documento }}" data-matricula-id="{{ matricula.pk }}" data-doc="{{ matricula.aprendiz.perfil.numero_documento }}">
-                                <td class="text-muted fw-bold">{{ forloop.counter }}</td>
-                                <td class="fw-semibold">{{ matricula.aprendiz.get_full_name|default:matricula.aprendiz.username }}</td>
-                                <td>{{ matricula.aprendiz.perfil.numero_documento }}</td>
-                                <td>
-                                    <div class="d-flex justify-content-end gap-2 attendance-options">
-                                        <input type="radio" class="btn-check attendance-input" name="asistencia_{{ matricula.pk }}" id="presente_{{ matricula.pk }}" value="P" {% if estado == 'P' or not estado %}checked{% endif %}>
-                                        <label class="btn btn-outline-success btn-sm" for="presente_{{ matricula.pk }}"><i class="bi bi-check-lg me-1"></i>Presente</label>
-                                        <input type="radio" class="btn-check attendance-input" name="asistencia_{{ matricula.pk }}" id="ausente_{{ matricula.pk }}" value="A" {% if estado == 'A' %}checked{% endif %}>
-                                        <label class="btn btn-outline-danger btn-sm" for="ausente_{{ matricula.pk }}"><i class="bi bi-x-lg me-1"></i>Inasistencia</label>
-                                        <input type="radio" class="btn-check attendance-input" name="asistencia_{{ matricula.pk }}" id="excusa_{{ matricula.pk }}" value="J" {% if estado == 'J' %}checked{% endif %}>
-                                        <label class="btn btn-outline-warning btn-sm" for="excusa_{{ matricula.pk }}"><i class="bi bi-file-earmark-text me-1"></i>Excusa</label>
-                                    </div>
+            {% if ficha %}
+            <form method="post" id="formAsistencia" action="{% url 'seguimiento_asistencia' %}?ficha={{ ficha.pk }}&fecha={{ fecha|date:'Y-m-d' }}{% if asignatura_sel %}&asignatura={{ asignatura_sel.pk }}{% endif %}">
+                {% csrf_token %}
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+                    <!-- Cabecera de la Sesión -->
+                    <div class="card-header bg-white p-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge px-3 py-1.5 rounded-pill fw-bold bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                                    Grado {{ ficha.codigo_ficha }}
+                                </span>
+                                <span class="badge bg-light text-primary border fw-semibold">
+                                    <i class="bi bi-journal-bookmark me-1"></i> {{ asignatura_sel.denominacion|default:"Matemáticas" }}
+                                </span>
+                                <span class="badge bg-light text-secondary border">Sesión Diaria</span>
+                            </div>
+                            <h2 class="h5 fw-bold text-dark mb-0">
+                                {{ ficha.institucion.nombre }}
+                            </h2>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar-event me-1"></i> {{ fecha|date:'l, d \d\e F \d\e Y' }} · Total Matriculados en el Curso: <strong>{{ matriculas|length }}</strong>
+                            </small>
+                        </div>
+
+                        <!-- Resumen en Vivo de la Asistencia -->
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="badge rounded-pill px-3 py-2 border" style="background-color: #ECFDF5; color: #047857; border-color: #A7F3D0 !important;" id="badge-presentes">
+                                <i class="bi bi-check-circle-fill me-1"></i> <span id="num-presentes">{{ total_presentes|default:matriculas|length }}</span> Presentes
+                            </span>
+                            <span class="badge rounded-pill px-3 py-2 border" style="background-color: #FEF2F2; color: #B91C1C; border-color: #FECACA !important;" id="badge-ausentes">
+                                <i class="bi bi-x-circle-fill me-1"></i> <span id="num-ausentes">{{ total_ausentes|default:0 }}</span> Inasistencias
+                            </span>
+                            <span class="badge rounded-pill px-3 py-2 border" style="background-color: #FFFBEB; color: #B45309; border-color: #FDE68A !important;" id="badge-tardanzas">
+                                <i class="bi bi-clock-history me-1"></i> <span id="num-tardanzas">{{ total_tardanzas|default:0 }}</span> Tardanzas
+                            </span>
+                            <span class="badge rounded-pill px-3 py-2 border" style="background-color: #F5F3FF; color: #6D28D9; border-color: #DDD6FE !important;" id="badge-excusas">
+                                <i class="bi bi-file-earmark-medical me-1"></i> <span id="num-excusas">{{ total_excusas|default:0 }}</span> Excusas
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Lista de Estudiantes -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-secondary" id="tablaAsistencia">
+                            <thead class="bg-light text-uppercase small text-dark">
+                                <tr>
+                                    <th class="ps-4 py-3" style="width: 50px;">#</th>
+                                    <th class="py-3" style="min-width: 200px;">Estudiante</th>
+                                    <th class="py-3" style="width: 140px;">Documento</th>
+                                    <th class="py-3 text-center" style="width: 380px;">Registro de Asistencia *</th>
+                                    <th class="py-3 pe-4" style="min-width: 220px;">Observación de la Sesión</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in filas_asistencia %}
+                                    {% with matricula=fila.matricula estado=fila.estado %}
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-muted">{{ forloop.counter }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold small shadow-sm" style="width: 36px; height: 36px; background: linear-gradient(135deg, #1E3A8A, #2563EB);">
+                                                    {{ matricula.aprendiz.first_name|default:matricula.aprendiz.username|slice:":1"|upper }}
+                                                </div>
+                                                <div>
+                                                    <strong class="text-dark d-block leading-tight">
+                                                        {{ matricula.aprendiz.last_name }}, {{ matricula.aprendiz.first_name }}
+                                                    </strong>
+                                                    <small class="text-muted">{{ matricula.aprendiz.email|default:"Sin correo" }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">
+                                                {{ matricula.aprendiz.perfil.tipo_documento|default:"TI" }} {{ matricula.aprendiz.perfil.numero_documento|default:"Sin doc" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group w-100 shadow-sm" role="group" aria-label="Opciones de asistencia">
+                                                <!-- Presente -->
+                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="p_{{ matricula.pk }}" value="P" {% if estado == 'P' or not estado %}checked{% endif %} onchange="actualizarContadores();">
+                                                <label class="btn btn-outline-success btn-sm fw-semibold py-1.5" for="p_{{ matricula.pk }}" title="Marcar Presente">
+                                                    <i class="bi bi-check-lg me-1"></i>Presente
+                                                </label>
+
+                                                <!-- Tardanza -->
+                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="t_{{ matricula.pk }}" value="T" {% if estado == 'T' %}checked{% endif %} onchange="actualizarContadores();">
+                                                <label class="btn btn-outline-warning btn-sm fw-semibold py-1.5" for="t_{{ matricula.pk }}" title="Marcar Llegada Tarde">
+                                                    <i class="bi bi-clock me-1"></i>Tarde
+                                                </label>
+
+                                                <!-- Ausente -->
+                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="a_{{ matricula.pk }}" value="A" {% if estado == 'A' %}checked{% endif %} onchange="actualizarContadores();">
+                                                <label class="btn btn-outline-danger btn-sm fw-semibold py-1.5" for="a_{{ matricula.pk }}" title="Marcar Inasistencia">
+                                                    <i class="bi bi-x-lg me-1"></i>Ausente
+                                                </label>
+
+                                                <!-- Excusa -->
+                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="j_{{ matricula.pk }}" value="J" {% if estado == 'J' %}checked{% endif %} onchange="actualizarContadores();">
+                                                <label class="btn btn-outline-primary btn-sm fw-semibold py-1.5" for="j_{{ matricula.pk }}" title="Marcar Justificada / Excusa">
+                                                    <i class="bi bi-shield-check me-1"></i>Excusa
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td class="pe-4">
+                                            <input type="text" name="obs_{{ matricula.pk }}" class="form-control form-control-sm border-secondary-subtle rounded-3" placeholder="Motivo o novedad de la sesión...">
+                                        </td>
+                                    </tr>
+                                    {% endwith %}
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <i class="bi bi-people fs-1 d-block text-secondary mb-2"></i>
+                                            No hay estudiantes activos matriculados en este curso escolar.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Botón Guardar Asistencia -->
+                    {% if matriculas %}
+                        <div class="card-footer bg-light p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <span class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-primary"></i> La información se almacena permanentemente en MySQL, evitando duplicidades y conservando el historial.
+                            </span>
+                            <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-pill shadow text-white" style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); border: none;">
+                                <i class="bi bi-save me-1"></i> Guardar Asistencia de la Sesión
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </form>
+            {% endif %}
+
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB 2: HISTORIAL DE ASISTENCIAS MENSUAL Y POR ESTUDIANTE -->
+        <!-- ======================================================== -->
+        <div class="tab-pane fade" id="pill-historial" role="tabpanel">
+
+            <!-- Filtros del Historial Mensual -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-body p-3 p-md-4">
+                    <form method="get" class="row g-3 align-items-end" id="formFiltroHistorial">
+                        <input type="hidden" name="ficha" value="{{ ficha.pk }}">
+                        {% if asignatura_sel %}<input type="hidden" name="asignatura" value="{{ asignatura_sel.pk }}">{% endif %}
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                <i class="bi bi-calendar-month text-primary me-1"></i> Mes y Año a Consultar
+                            </label>
+                            <input type="month" name="mes_filtro" value="{{ mes_filtro }}" class="form-control border-primary-subtle rounded-3 py-2 fw-bold">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                <i class="bi bi-search text-primary me-1"></i> Buscar Estudiante (Nombre / Doc)
+                            </label>
+                            <input type="text" name="estudiante_filtro" value="{{ estudiante_filtro }}" class="form-control border-primary-subtle rounded-3 py-2" placeholder="Ej. Alejandro, Bermúdez, 104...">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                <i class="bi bi-funnel text-primary me-1"></i> Estado de Asistencia
+                            </label>
+                            <select name="estado_filtro" class="form-select border-primary-subtle rounded-3 py-2">
+                                <option value="">-- Todos los estados --</option>
+                                <option value="P" {% if estado_filtro == 'P' %}selected{% endif %}>Presente</option>
+                                <option value="A" {% if estado_filtro == 'A' %}selected{% endif %}>Ausente (Faltas)</option>
+                                <option value="T" {% if estado_filtro == 'T' %}selected{% endif %}>Tardanza</option>
+                                <option value="J" {% if estado_filtro == 'J' %}selected{% endif %}>Justificado / Excusa</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary fw-semibold rounded-3 py-2 px-3 w-100 shadow-sm text-white" style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); border: none;">
+                                <i class="bi bi-funnel-fill me-1"></i> Filtrar Historial
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 1. RESUMEN ACUMULADO MENSUAL POR ESTUDIANTE -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0 fs-6">
+                            <i class="bi bi-bar-chart-line-fill text-primary me-2"></i> Balance Mensual de Asistencias por Estudiante (Mes: {{ mes_filtro }})
+                        </h5>
+                        <small class="text-muted">Total de asistencias, inasistencias, tardanzas y porcentaje de asistencia mensual</small>
+                    </div>
+                    <span class="badge bg-light text-primary border fw-bold px-3 py-1.5">
+                        Grado {{ ficha.codigo_ficha }} · {{ asignatura_sel.denominacion }}
+                    </span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-secondary small">
+                        <thead class="table-light text-uppercase fs-7">
+                            <tr>
+                                <th class="ps-4 py-3">Estudiante</th>
+                                <th class="py-3">Documento</th>
+                                <th class="py-3 text-center">Sesiones del Mes</th>
+                                <th class="py-3 text-center text-success">Presentes</th>
+                                <th class="py-3 text-center text-danger">Faltas (Ausente)</th>
+                                <th class="py-3 text-center text-warning">Tardanzas</th>
+                                <th class="py-3 text-center text-primary">Excusas</th>
+                                <th class="py-3 pe-4 text-center">% Asistencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in resumen_mensual_estudiantes %}
+                            <tr>
+                                <td class="ps-4">
+                                    <strong class="text-dark d-block">{{ r.matricula.aprendiz.get_full_name|default:r.matricula.aprendiz.username }}</strong>
+                                    <small class="text-muted">{{ r.matricula.aprendiz.email|default:"Sin correo" }}</small>
+                                </td>
+                                <td>{{ r.matricula.aprendiz.perfil.numero_documento|default:"TI Registrada" }}</td>
+                                <td class="text-center fw-bold">{{ r.total_sesiones }}</td>
+                                <td class="text-center text-success fw-bold">{{ r.presentes }}</td>
+                                <td class="text-center text-danger fw-bold">{{ r.ausentes }}</td>
+                                <td class="text-center text-warning fw-bold">{{ r.tardanzas }}</td>
+                                <td class="text-center text-primary fw-bold">{{ r.excusas }}</td>
+                                <td class="pe-4 text-center">
+                                    <span class="badge {% if r.porcentaje >= 80 %}bg-success{% elif r.porcentaje >= 60 %}bg-warning{% else %}bg-danger{% endif %} text-white rounded-pill px-3 py-1 fw-bold">
+                                        {{ r.porcentaje }}%
+                                    </span>
                                 </td>
                             </tr>
-                            {% endwith %}
-                        {% empty %}
-                            <tr><td colspan="4" class="text-center py-5 text-muted">No hay alumnos activos en esta ficha.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% if matriculas %}
-                <div class="p-3 border-top d-flex justify-content-end">
-                    <button type="submit" class="btn btn-sinetec-primary px-4">
-                        <i class="bi bi-save me-1"></i> Guardar asistencia del día
-                    </button>
-                </div>
-            {% endif %}
-        </div>
-    </form>
-
-    <!-- Modal de Escáner en Vivo para el Aula -->
-    <div class="modal fade" id="modalEscanearAula" tabindex="-1" aria-labelledby="modalEscanearAulaLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-                <div class="modal-header border-0 bg-dark text-white py-3 px-4">
-                    <h5 class="modal-title fs-6 fw-bold d-flex align-items-center gap-2" id="modalEscanearAulaLabel">
-                        <i class="bi bi-camera-video-fill text-success"></i> Escanear Carnets de Aula
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 text-center bg-light">
-                    <p class="small text-muted mb-3">
-                        Apunta la cámara al carné digital del aprendiz. Al detectarlo, el sistema marcará <strong>Presente</strong> automáticamente en la tabla.
-                    </p>
-                    <div id="aulaReader" class="mx-auto border rounded-3 overflow-hidden shadow-sm bg-black" style="width: 100%; max-width: 340px; min-height: 260px;"></div>
-                    <div id="aulaFeedback" class="mt-3 small" style="display: none;"></div>
-                </div>
-                <div class="modal-footer border-0 bg-white py-2 px-4 justify-content-between">
-                    <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i> Rotación diaria activa</small>
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">
-                        Cerrar Visor
-                    </button>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    No hay registros de asistencia para los estudiantes en este mes.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+            <!-- 2. REGISTRO CRONOLÓGICO DE SESIONES INDIVIDUALES -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0 fs-6">
+                            <i class="bi bi-list-check text-primary me-2"></i> Detalle Cronológico de Asistencias del Mes
+                        </h5>
+                        <small class="text-muted">Trazabilidad completa por fecha, estudiante, estado y observaciones</small>
+                    </div>
+                    <span class="badge bg-secondary rounded-pill px-3 py-1.5">{{ historial_asistencias_qs|length }} registros</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-secondary small">
+                        <thead class="table-light text-uppercase fs-7">
+                            <tr>
+                                <th class="ps-4 py-3">Fecha</th>
+                                <th class="py-3">Estudiante</th>
+                                <th class="py-3">Materia / Observación</th>
+                                <th class="py-3 text-center">Estado</th>
+                                <th class="py-3">Registrado Por</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in historial_asistencias_qs %}
+                            <tr>
+                                <td class="ps-4">
+                                    <strong class="text-dark">{{ h.fecha|date:"d/m/Y (l)" }}</strong>
+                                </td>
+                                <td>
+                                    <strong class="text-dark d-block">{{ h.matricula.aprendiz.get_full_name|default:h.matricula.aprendiz.username }}</strong>
+                                    <small class="text-muted">{{ h.matricula.grado_escolar }} - {{ h.matricula.seccion }}</small>
+                                </td>
+                                <td>
+                                    <span class="text-dark">{{ h.observaciones|default:"[Matemáticas]" }}</span>
+                                </td>
+                                <td class="text-center">
+                                    {% if h.estado == 'P' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1">
+                                        <i class="bi bi-check-circle me-1"></i> Presente
+                                    </span>
+                                    {% elif h.estado == 'A' %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2.5 py-1">
+                                        <i class="bi bi-x-circle me-1"></i> Ausente
+                                    </span>
+                                    {% elif h.estado == 'T' %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning text-dark border border-warning border-opacity-25 rounded-pill px-2.5 py-1">
+                                        <i class="bi bi-clock me-1"></i> Tardanza
+                                    </span>
+                                    {% elif h.estado == 'J' %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1">
+                                        <i class="bi bi-shield-check me-1"></i> Justificada
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ h.registrado_por.get_full_name|default:"Prof. Javier Mendoza" }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 text-secondary d-block mb-2"></i>
+                                    No se encontraron registros de asistencias para los criterios seleccionados.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
+
     </div>
 
-{% else %}
-    <div class="sinetec-card p-5 text-center text-muted">
-        <i class="bi bi-clipboard-check fs-1 text-primary d-block mb-2"></i>
-        <h2 class="h5">Seleccione una ficha y una fecha para tomar asistencia.</h2>
-    </div>
-{% endif %}
-{% endblock %}
+</div>
 
-{% block extra_js %}
 <script>
-    (() => {
-        const inputs = document.querySelectorAll('.attendance-input');
-        const counters = {
-            P: document.getElementById('total-presentes'),
-            A: document.getElementById('total-ausentes'),
-            J: document.getElementById('total-excusas'),
-        };
-        const labels = {P: 'presentes', A: 'inasistencias', J: 'excusas'};
+function actualizarContadores() {
+    let p = 0, a = 0, t = 0, j = 0;
+    const radios = document.querySelectorAll('.asist-radio:checked');
+    radios.forEach(r => {
+        if (r.value === 'P') p++;
+        else if (r.value === 'A') a++;
+        else if (r.value === 'T') t++;
+        else if (r.value === 'J') j++;
+    });
+    const elP = document.getElementById('num-presentes');
+    const elA = document.getElementById('num-ausentes');
+    const elT = document.getElementById('num-tardanzas');
+    const elJ = document.getElementById('num-excusas');
+    if (elP) elP.textContent = p;
+    if (elA) elA.textContent = a;
+    if (elT) elT.textContent = t;
+    if (elJ) elJ.textContent = j;
+}
 
-        function updateCounters() {
-            const totals = {P: 0, A: 0, J: 0};
-            document.querySelectorAll('.attendance-input:checked').forEach((input) => totals[input.value]++);
-            Object.entries(totals).forEach(([estado, total]) => {
-                if (counters[estado]) counters[estado].textContent = `${total} ${labels[estado]}`;
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mes_filtro') || urlParams.get('estudiante_filtro') || urlParams.get('estado_filtro')) {
+        const tabEl = document.querySelector('#pill-historial-tab');
+        if (tabEl) {
+            const tab = bootstrap.Tab.getOrCreateInstance(tabEl);
+            tab.show();
         }
-
-        inputs.forEach((input) => input.addEventListener('change', updateCounters));
-        updateCounters();
-
-        // Control del Modal de Escaneo en Aula
-        let aulaQrScanner = null;
-        let isProcessing = false;
-        const modalAula = document.getElementById('modalEscanearAula');
-        const feedbackEl = document.getElementById('aulaFeedback');
-
-        function playBeepSound() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, ctx.currentTime);
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.25);
-            } catch(e) {}
-        }
-
-        async function onScanSuccess(decodedText) {
-            if (isProcessing) return;
-            isProcessing = true;
-
-            feedbackEl.style.display = 'block';
-            feedbackEl.className = 'mt-3 small text-primary p-2 bg-primary bg-opacity-10 rounded border border-primary';
-            feedbackEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Verificando carnet...';
-
-            try {
-                const resp = await fetch("{% url 'api_registrar_asistencia_qr' %}", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ raw_data: decodedText })
-                });
-                const data = await resp.json();
-
-                if (data.success) {
-                    playBeepSound();
-                    feedbackEl.className = 'mt-3 small text-success fw-bold p-3 bg-success bg-opacity-10 rounded border border-success';
-                    feedbackEl.innerHTML = `<i class="bi bi-check-circle-fill fs-5 d-block mb-1"></i> ¡Presente Registrado!<br><strong>${data.aprendiz}</strong> (Doc: ${data.documento})`;
-
-                    // Localizar y marcar en la tabla de la página
-                    const row = document.getElementById(`fila-aprendiz-${data.documento}`);
-                    if (row) {
-                        const matriculaId = row.getAttribute('data-matricula-id');
-                        const radioP = document.getElementById(`presente_${matriculaId}`);
-                        if (radioP) {
-                            radioP.checked = true;
-                            updateCounters();
-                        }
-                        row.classList.add('row-highlight-scanned');
-                        setTimeout(() => row.classList.remove('row-highlight-scanned'), 3000);
-                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                } else {
-                    feedbackEl.className = 'mt-3 small text-danger fw-bold p-3 bg-danger bg-opacity-10 rounded border border-danger';
-                    feedbackEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.mensaje}`;
-                }
-            } catch(e) {
-                feedbackEl.className = 'mt-3 small text-danger p-2 bg-danger bg-opacity-10 rounded';
-                feedbackEl.innerHTML = 'Error al comunicar con el servidor.';
-            }
-
-            setTimeout(() => {
-                isProcessing = false;
-            }, 2000);
-        }
-
-        if (modalAula) {
-            modalAula.addEventListener('shown.bs.modal', function() {
-                feedbackEl.style.display = 'none';
-                isProcessing = false;
-                if (!aulaQrScanner) {
-                    aulaQrScanner = new Html5Qrcode("aulaReader");
-                }
-                const config = { fps: 10, qrbox: { width: 230, height: 230 } };
-                aulaQrScanner.start({ facingMode: "environment" }, config, onScanSuccess)
-                    .catch(err => {
-                        feedbackEl.style.display = 'block';
-                        feedbackEl.className = 'mt-3 small text-danger p-2 bg-danger bg-opacity-10 rounded';
-                        feedbackEl.innerHTML = 'No se pudo activar la cámara. Verifique permisos.';
-                    });
-            });
-
-            modalAula.addEventListener('hidden.bs.modal', function() {
-                if (aulaQrScanner && aulaQrScanner.isScanning) {
-                    aulaQrScanner.stop().then(() => aulaQrScanner.clear()).catch(console.error);
-                }
-            });
-        }
-    })();
+    }
+});
 </script>
 {% endblock %}

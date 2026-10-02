@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Configuración del Sistema · SINETEC SENA{% endblock %}
+{% block title %}Configuración del Sistema · EDUNOVA SENA{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-3">
@@ -10,13 +10,13 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
-                <span class="text-muted small">{{ centro }}</span>
+                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50">Colegio EDUNOVA · Vigencia 2026</span>
+                <span class="text-muted small">Configuración General del Sistema</span>
             </div>
             <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-sliders text-success me-2"></i>Configuración y Perfil de Acceso
+                <i class="bi bi-sliders text-primary me-2"></i>Configuración y Parámetros del Sistema
             </h1>
-            <p class="text-muted mb-0">Gestión de datos de cuenta del administrador, seguridad de acceso y parámetros del entorno SINETEC.</p>
+            <p class="text-muted mb-0">Gestión de datos de cuenta del administrador, seguridad de acceso y parámetros del entorno escolar EDUNOVA.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{% url 'gestion_usuarios' %}" class="btn btn-outline-secondary fw-semibold">
@@ -117,18 +117,83 @@
                     </div>
                 </form>
             </div>
+
+            <!-- 3. Identidad Institucional y Parámetros del Colegio -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mt-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                    <div class="p-2 rounded-3 text-white" style="background-color: #0F2942;">
+                        <i class="bi bi-building-gear fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">Identidad Institucional y Parámetros del Colegio</h5>
+                        <small class="text-muted">Personalice los datos oficiales que aparecen en recibos, boletines y reportes</small>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="colegio">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="form-label small fw-semibold text-secondary">Nombre Oficial de la Institución *</label>
+                            <input type="text" name="nombre" class="form-control fw-bold" value="{{ colegio.nombre }}" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-semibold text-secondary">Rector(a) Titular *</label>
+                            <input type="text" name="rector" class="form-control fw-semibold" value="{{ colegio.rector }}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold text-secondary">Lema Institucional</label>
+                            <input type="text" name="lema" class="form-control" value="{{ colegio.lema }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Código DANE *</label>
+                            <input type="text" name="codigo_dane" class="form-control font-monospace" value="{{ colegio.codigo_dane }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">NIT Institucional *</label>
+                            <input type="text" name="nit" class="form-control font-monospace" value="{{ colegio.nit }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Resolución MEN</label>
+                            <input type="text" name="resolucion" class="form-control" value="{{ colegio.resolucion }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Dirección Sede Principal</label>
+                            <input type="text" name="direccion" class="form-control" value="{{ colegio.direccion }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Teléfono Institucional</label>
+                            <input type="text" name="telefono" class="form-control" value="{{ colegio.telefono }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Correo Electrónico Oficial</label>
+                            <input type="email" name="email" class="form-control" value="{{ colegio.email }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Sitio Web / Portal</label>
+                            <input type="url" name="sitio_web" class="form-control" value="{{ colegio.sitio_web }}">
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-2 d-flex justify-content-end">
+                        <button type="submit" class="btn text-white fw-semibold px-4 rounded-3" style="background-color: #0F2942;">
+                            <i class="bi bi-save me-1"></i> Guardar Parámetros del Colegio
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Columna Derecha: Información del Entorno Institucional -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
                 <h6 class="fw-bold text-dark mb-3">
-                    <i class="bi bi-info-circle text-primary me-2"></i>Entorno SINETEC
+                    <i class="bi bi-info-circle text-primary me-2"></i>Entorno EDUNOVA
                 </h6>
                 <ul class="list-group list-group-flush small">
                     <li class="list-group-item px-0 d-flex justify-content-between">
                         <span class="text-muted">Plataforma:</span>
-                        <strong class="text-dark">SINETEC v2.5</strong>
+                        <strong class="text-dark">EDUNOVA v2.5</strong>
                     </li>
                     <li class="list-group-item px-0 d-flex justify-content-between">
                         <span class="text-muted">Entidad:</span>

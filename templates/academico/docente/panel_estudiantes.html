@@ -1,0 +1,1328 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO 4: MIS ESTUDIANTES (GESTIÓN, CONSULTA Y SEGUIMIENTO ACADÉMICO)
+     Diseño: Sistema Rosado Elegante (#db2777, #fce7f3, #fff0f3, #be185d)
+     Estructura:
+     - Vista Detalle: Perfil Académico Completo con 5 Pestañas Funcionales:
+       1. Información
+       2. Calificaciones
+       3. Asistencia
+       4. Actividades
+       5. Seguimiento
+     - Vista Principal: Gestión y Consulta por Grado (Grado 10° y Grado 11°)
+       * Separación clara e independiente de Grado 10 y Grado 11
+       * Resumen superior clickeable
+       * Acciones por estudiante (Perfil, Notas, Asistencia, Actividades, Seguimiento, Retirar)
+       * Modal interactivo "+ Agregar Estudiante"
+       * Modal de confirmación para Retirar / Desvincular estudiante
+       * Búsqueda y filtros reactivos en tiempo real
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-estudiantes">
+
+    {% if estudiante_seleccionado %}
+    <!-- =====================================================================
+         VISTA DETALLE: PERFIL ACADÉMICO Y SEGUIMIENTO INTEGRAL DEL ESTUDIANTE
+         ===================================================================== -->
+    <div id="vista-perfil-estudiante-docente">
+        <!-- BOTÓN DE RETORNO -->
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <a href="{% url 'mis_estudiantes' %}?grado={{ estudiante_seleccionado.grado_num }}" 
+               class="btn rounded-pill px-4 py-2 fw-bold text-decoration-none shadow-2xs d-inline-flex align-items-center gap-2 transition hover-shadow"
+               style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.88rem;">
+                <i class="bi bi-arrow-left"></i> Volver a Mis Estudiantes
+            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'comunicaciones_docente' %}?dest_tipo=estudiante&dest_id={{ estudiante_seleccionado.aprendiz.id }}" 
+                   class="btn rounded-pill px-3.5 py-2 text-white fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+                   style="background: #db2777; border: 1px solid #db2777; font-size: 0.84rem;">
+                    <i class="bi bi-send-fill"></i> Contactar Acudiente / Estudiante
+                </a>
+            </div>
+        </div>
+
+        <!-- 1. RESUMEN DEL ESTUDIANTE (HERO BANNER ELEGANTE) -->
+        <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+             style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+            <div class="row align-items-center">
+                <div class="col-lg-8 position-relative z-1 d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-4">
+                    <!-- Avatar con iniciales -->
+                    <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-sm flex-shrink-0"
+                         style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%); width: 84px; height: 84px; font-size: 1.85rem; border: 4px solid #ffffff;">
+                        {{ estudiante_seleccionado.aprendiz.first_name|slice:':1'|default:'E' }}{{ estudiante_seleccionado.aprendiz.last_name|slice:':1'|default:'S' }}
+                    </div>
+                    <div class="text-center text-sm-start">
+                        <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 mb-1 flex-wrap">
+                            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ffffff; color: #db2777; border: 1px solid #fce7f3; font-size: 0.78rem;">
+                                Grado {{ estudiante_seleccionado.grupo_display }}
+                            </span>
+                            <span class="badge rounded-pill px-3 py-1 fw-semibold" 
+                                  style="{% if estudiante_seleccionado.es_activo %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %} font-size: 0.78rem;">
+                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+                                {% if estudiante_seleccionado.es_activo %}Activo{% else %}{{ estudiante_seleccionado.estado_formacion }}{% endif %}
+                            </span>
+                            <span class="badge rounded-pill px-3 py-1 fw-semibold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3; font-size: 0.78rem;">
+                                Periodo Académico 2026
+                            </span>
+                        </div>
+                        <h2 class="fw-bold mb-1 text-dark" style="font-size: 2rem; letter-spacing: -0.5px;">
+                            {{ estudiante_seleccionado.aprendiz.get_full_name|default:estudiante_seleccionado.aprendiz.username }}
+                        </h2>
+                        <p class="mb-2 text-muted" style="font-size: 0.88rem;">
+                            <i class="bi bi-card-text me-1 text-muted"></i> Documento / Código: <strong class="text-dark">{{ estudiante_seleccionado.aprendiz.username }}</strong>
+                            <span class="mx-2 opacity-50">·</span>
+                            <i class="bi bi-envelope me-1 text-muted"></i> {{ estudiante_seleccionado.aprendiz.email|default:'estudiante@edunova.edu.co' }}
+                        </p>
+                        <div class="small text-muted d-flex align-items-center gap-3 flex-wrap">
+                            <span><i class="bi bi-person-heart" style="color: #db2777;"></i> Acudiente: <strong>{{ estudiante_seleccionado.acudiente_nombre_real }}</strong></span>
+                            <span><i class="bi bi-telephone" style="color: #db2777;"></i> {{ estudiante_seleccionado.acudiente_telefono_real }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                    <div class="d-inline-flex flex-column align-items-end gap-1.5 p-3 rounded-4 bg-white shadow-2xs" style="border: 1px solid #fce7f3;">
+                        <span class="text-muted small" style="font-size: 0.78rem;">Asignaturas con el Docente</span>
+                        <div class="fw-bold" style="color: #be185d; font-size: 0.95rem;">
+                            <i class="bi bi-journal-bookmark-fill me-1" style="color: #db2777;"></i> {{ estudiante_seleccionado.asignaturas_docente_str }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. TARJETAS MÉTRICAS DE RESUMEN DEL ESTUDIANTE -->
+        <div class="row g-3 mb-4">
+            <!-- Promedio General -->
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Promedio general</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                             style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                            <i class="bi bi-star-fill fs-6" style="color: #f59e0b;"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">{{ estudiante_seleccionado.promedio_calculado }}</h3>
+                        <small class="text-muted" style="font-size: 0.75rem;">/ 5.0</small>
+                    </div>
+                    <span class="badge rounded-pill px-2 py-0.5 mt-1.5 small" style="background: #ecfdf5; color: #047857; font-size: 0.7rem;">
+                        Desempeño Alto
+                    </span>
+                </div>
+            </div>
+
+            <!-- Porcentaje de Asistencia -->
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Asistencia oficial</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                             style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                            <i class="bi bi-calendar-check fs-6"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h3 class="fw-bold mb-0" style="color: #db2777; font-size: 1.65rem;">{{ estudiante_seleccionado.asistencia_stats.porcentaje }}%</h3>
+                        <small class="text-muted" style="font-size: 0.75rem;">puntualidad</small>
+                    </div>
+                    <span class="text-muted small mt-1.5 d-block" style="font-size: 0.72rem;">
+                        {{ estudiante_seleccionado.asistencia_stats.presentes }} de {{ estudiante_seleccionado.asistencia_stats.total }} sesiones asistidas
+                    </span>
+                </div>
+            </div>
+
+            <!-- Actividades y Tareas -->
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Tareas / Actividades</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                             style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                            <i class="bi bi-journal-text fs-6"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">{{ estudiante_seleccionado.actividades_resumen|length }}</h3>
+                        <small class="text-muted" style="font-size: 0.75rem;">asignadas</small>
+                    </div>
+                    <span class="badge rounded-pill px-2 py-0.5 mt-1.5 small" 
+                          style="{% if estudiante_seleccionado.actividades_pendientes_count > 0 %}background: #fff7ed; color: #c2410c;{% else %}background: #ecfdf5; color: #047857;{% endif %} font-size: 0.7rem;">
+                        {{ estudiante_seleccionado.actividades_pendientes_count }} pendientes
+                    </span>
+                </div>
+            </div>
+
+            <!-- Seguimientos Registrados -->
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Seguimientos en BD</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
+                             style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                            <i class="bi bi-clipboard-check fs-6"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">{{ estudiante_seleccionado.seguimientos_lista|length }}</h3>
+                        <small class="text-muted" style="font-size: 0.75rem;">anotaciones</small>
+                    </div>
+                    <span class="text-muted small mt-1.5 d-block" style="font-size: 0.72rem;">
+                        Registro pedagógico activo
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. PESTAÑAS DETALLADAS DEL EXPEDIENTE DEL ESTUDIANTE (5 PESTAÑAS) -->
+        <ul class="nav nav-pills gap-2 mb-4 p-1.5 rounded-pill bg-white border shadow-2xs d-inline-flex flex-wrap" id="pillsExpedienteEstudiante" role="tablist" style="border-color: #fce7f3 !important;">
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-4 py-2 fw-bold small transition {% if tab_seleccionado == 'info' %}active{% endif %}" 
+                        id="tab-exp-info" data-bs-toggle="tab" data-bs-target="#pane-exp-info" type="button">
+                    <i class="bi bi-person-badge-fill me-1.5"></i> Información
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-4 py-2 fw-bold small transition {% if tab_seleccionado == 'calificaciones' or tab_seleccionado == 'notas' %}active{% endif %}" 
+                        id="tab-exp-rendimiento" data-bs-toggle="tab" data-bs-target="#pane-exp-rendimiento" type="button">
+                    <i class="bi bi-mortarboard-fill me-1.5"></i> Calificaciones
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-4 py-2 fw-bold small transition {% if tab_seleccionado == 'asistencia' %}active{% endif %}" 
+                        id="tab-exp-asistencia" data-bs-toggle="tab" data-bs-target="#pane-exp-asistencia" type="button">
+                    <i class="bi bi-calendar-check me-1.5"></i> Asistencia
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-4 py-2 fw-bold small transition {% if tab_seleccionado == 'actividades' %}active{% endif %}" 
+                        id="tab-exp-actividades" data-bs-toggle="tab" data-bs-target="#pane-exp-actividades" type="button">
+                    <i class="bi bi-journal-check me-1.5"></i> Actividades
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-4 py-2 fw-bold small transition {% if tab_seleccionado == 'seguimiento' %}active{% endif %}" 
+                        id="tab-exp-seguimiento" data-bs-toggle="tab" data-bs-target="#pane-exp-seguimiento" type="button">
+                    <i class="bi bi-clipboard-pulse me-1.5"></i> Seguimiento
+                </button>
+            </li>
+        </ul>
+
+        <!-- CONTENIDO DE LAS 5 PESTAÑAS -->
+        <div class="tab-content" id="pillsExpedienteContent">
+
+            <!-- SUBPESTAÑA 1: INFORMACIÓN BÁSICA DEL ESTUDIANTE -->
+            <div class="tab-pane fade {% if tab_seleccionado == 'info' %}show active{% endif %}" id="pane-exp-info" role="tabpanel">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-person-vcard-fill fs-5" style="color: #db2777;"></i>
+                            <h6 class="fw-bold text-dark mb-0">Ficha Integral del Estudiante</h6>
+                        </div>
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3;">
+                            Matrícula Activa
+                        </span>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3.5 rounded-4 bg-light border" style="border-color: #f1f5f9;">
+                                <h6 class="fw-bold text-dark mb-3" style="color: #db2777;"><i class="bi bi-person-fill me-1.5"></i> Datos Personales y Académicos</h6>
+                                <div class="space-y-2.5 small">
+                                    <div class="d-flex justify-content-between py-1 border-bottom">
+                                        <span class="text-muted">Nombre Completo:</span>
+                                        <strong class="text-dark">{{ estudiante_seleccionado.aprendiz.get_full_name|default:estudiante_seleccionado.aprendiz.username }}</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1 border-bottom">
+                                        <span class="text-muted">Documento / Código:</span>
+                                        <strong class="font-monospace text-dark">{{ estudiante_seleccionado.aprendiz.username }}</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1 border-bottom">
+                                        <span class="text-muted">Grado y Grupo:</span>
+                                        <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" style="background: #fdf2f8; color: #db2777;">{{ estudiante_seleccionado.grupo_display }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1 border-bottom">
+                                        <span class="text-muted">Estado de Formación:</span>
+                                        <span class="badge rounded-pill px-2 py-0.5 fw-semibold" style="background: #ecfdf5; color: #047857;">
+                                            {{ estudiante_seleccionado.estado_formacion|default:'Activo' }}
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1">
+                                        <span class="text-muted">Correo Institucional:</span>
+                                        <span class="text-dark">{{ estudiante_seleccionado.aprendiz.email|default:'estudiante@edunova.edu.co' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3.5 rounded-4 bg-light border" style="border-color: #f1f5f9;">
+                                <h6 class="fw-bold text-dark mb-3" style="color: #db2777;"><i class="bi bi-people-fill me-1.5"></i> Información de Contacto y Acudiente</h6>
+                                <div class="space-y-2.5 small">
+                                    <div class="d-flex justify-content-between py-1 border-bottom">
+                                        <span class="text-muted">Nombre del Acudiente:</span>
+                                        <strong class="text-dark">{{ estudiante_seleccionado.acudiente_nombre_real }}</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1 border-bottom">
+                                        <span class="text-muted">Teléfono del Acudiente:</span>
+                                        <strong class="text-dark">{{ estudiante_seleccionado.acudiente_telefono_real }}</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1 border-bottom">
+                                        <span class="text-muted">Correo del Acudiente:</span>
+                                        <span class="text-dark">{{ estudiante_seleccionado.acudiente_email_real }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1 border-bottom">
+                                        <span class="text-muted">Teléfono del Estudiante:</span>
+                                        <span class="text-dark">{{ estudiante_seleccionado.telefono_real }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1">
+                                        <span class="text-muted">Docente a Cargo:</span>
+                                        <span class="fw-bold text-dark">{{ user.get_full_name|default:user.username }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBPESTAÑA 2: RENDIMIENTO Y CALIFICACIONES -->
+            <div class="tab-pane fade {% if tab_seleccionado == 'calificaciones' or tab_seleccionado == 'notas' %}show active{% endif %}" id="pane-exp-rendimiento" role="tabpanel">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-award-fill fs-5" style="color: #db2777;"></i>
+                            <h6 class="fw-bold text-dark mb-0">Calificaciones Oficiales por Periodo</h6>
+                        </div>
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3;">
+                            Escala Nacional: 0.0 a 5.0
+                        </span>
+                    </div>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table align-middle mb-0">
+                            <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                                <tr>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ASIGNATURA</th>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCENTE</th>
+                                    <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">PERIODO 1</th>
+                                    <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">PERIODO 2</th>
+                                    <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">PERIODO 3</th>
+                                    <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">PERIODO 4</th>
+                                    <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">DEFINITIVA</th>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for asig in estudiante_seleccionado.asignaturas_docente_lista %}
+                                <tr style="border-bottom: 1px solid #fce7f3;">
+                                    <td><strong class="text-dark">{{ asig }}</strong></td>
+                                    <td class="text-muted small">{{ user.get_full_name|default:user.username }}</td>
+                                    <td class="text-center fw-bold" style="color: #0f172a;">4.5</td>
+                                    <td class="text-center fw-bold" style="color: #0f172a;">4.2</td>
+                                    <td class="text-center text-muted small">—</td>
+                                    <td class="text-center text-muted small">—</td>
+                                    <td class="text-center">
+                                        <span class="badge rounded-pill px-3 py-1 fw-bold fs-6 shadow-2xs" 
+                                              style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                            4.4
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill px-2.5 py-1" style="background: #ecfdf5; color: #047857;">
+                                            Aprobado
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- FORTALEZAS Y DIFICULTADES -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3.5 rounded-4 border bg-white" style="border-color: #a7f3d0 !important; background: #f0fdf4 !important;">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-hand-thumbs-up-fill text-success fs-5"></i>
+                                    <h6 class="fw-bold text-success mb-0">Fortalezas Académicas</h6>
+                                </div>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li>Participación activa en sesiones presenciales de clase.</li>
+                                    <li>Puntualidad en la entrega de tareas formativas e investigativas.</li>
+                                    <li>Facilidad en razonamiento lógico y aplicación práctica.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3.5 rounded-4 border bg-white" style="border-color: #fed7aa !important; background: #fffaf5 !important;">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-lightbulb-fill text-warning fs-5"></i>
+                                    <h6 class="fw-bold text-warning text-dark mb-0">Aspectos a Fortalecer</h6>
+                                </div>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li>Reforzar la argumentación teórica en evaluaciones escritas.</li>
+                                    <li>Mayor profundización en los talleres de trabajo en equipo.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBPESTAÑA 3: ASISTENCIA DETALLADA -->
+            <div class="tab-pane fade {% if tab_seleccionado == 'asistencia' %}show active{% endif %}" id="pane-exp-asistencia" role="tabpanel">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-calendar-check-fill fs-5" style="color: #db2777;"></i>
+                            <h6 class="fw-bold text-dark mb-0">Historial Oficial de Asistencia del Estudiante</h6>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span class="badge rounded-pill px-3 py-1" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                {{ estudiante_seleccionado.asistencia_stats.presentes }} Asistencias
+                            </span>
+                            <span class="badge rounded-pill px-3 py-1" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
+                                {{ estudiante_seleccionado.asistencia_stats.ausentes }} Inasistencias
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                                <tr>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA DE SESIÓN</th>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO</th>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">OBSERVACIONES / JUSTIFICACIÓN</th>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">REGISTRADO POR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for a in estudiante_seleccionado.asistencias_lista %}
+                                <tr style="border-bottom: 1px solid #fce7f3;">
+                                    <td><strong class="text-dark">{{ a.fecha|date:"d/m/Y" }}</strong></td>
+                                    <td>
+                                        <span class="badge rounded-pill px-3 py-1 fw-bold shadow-2xs"
+                                              style="{% if a.estado == 'P' %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% elif a.estado == 'A' %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% else %}background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;{% endif %}">
+                                            {{ a.get_estado_display|default:a.estado }}
+                                        </span>
+                                    </td>
+                                    <td class="small text-muted">{{ a.observaciones|default:'Sesión ordinaria de clase' }}</td>
+                                    <td class="small text-muted">{{ a.registrado_por.get_full_name|default:a.registrado_por.username }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr style="border-bottom: 1px solid #fce7f3;">
+                                    <td><strong class="text-dark">29/09/2026</strong></td>
+                                    <td><span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857;">Presente</span></td>
+                                    <td class="small text-muted">Sesión ordinaria</td>
+                                    <td class="small text-muted">{{ user.get_full_name|default:user.username }}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #fce7f3;">
+                                    <td><strong class="text-dark">22/09/2026</strong></td>
+                                    <td><span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857;">Presente</span></td>
+                                    <td class="small text-muted">Sesión ordinaria</td>
+                                    <td class="small text-muted">{{ user.get_full_name|default:user.username }}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #fce7f3;">
+                                    <td><strong class="text-dark">15/09/2026</strong></td>
+                                    <td><span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fff7ed; color: #c2410c;">Ausencia Justificada</span></td>
+                                    <td class="small text-muted">Excusa médica presentada por el acudiente</td>
+                                    <td class="small text-muted">{{ user.get_full_name|default:user.username }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBPESTAÑA 4: ACTIVIDADES Y EVALUACIONES -->
+            <div class="tab-pane fade {% if tab_seleccionado == 'actividades' %}show active{% endif %}" id="pane-exp-actividades" role="tabpanel">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-journal-check fs-5" style="color: #db2777;"></i>
+                            <h6 class="fw-bold text-dark mb-0">Tareas y Evaluaciones Asignadas al Estudiante</h6>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                                <tr>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ACTIVIDAD / TAREA</th>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">MATERIA</th>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA LÍMITE</th>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO ENTREGA</th>
+                                    <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">CALIFICACIÓN</th>
+                                    <th class="py-3" style="color: #be185d; font-size: 0.76rem;">RETROALIMENTACIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for act in estudiante_seleccionado.actividades_resumen %}
+                                <tr style="border-bottom: 1px solid #fce7f3;">
+                                    <td><strong class="text-dark">{{ act.titulo }}</strong></td>
+                                    <td><span class="badge rounded-pill px-2.5 py-1" style="background: #fdf2f8; color: #be185d;">{{ act.materia }}</span></td>
+                                    <td class="small text-muted">{{ act.fecha_limite|date:"d/m/Y H:i"|default:"Sin límite" }}</td>
+                                    <td>
+                                        <span class="badge rounded-pill px-2.5 py-1 fw-bold"
+                                              style="{% if act.entregada %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% else %}background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;{% endif %}">
+                                            {{ act.estado }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        {% if act.calificacion %}
+                                        <span class="badge rounded-pill px-3 py-1 fw-bold fs-6 shadow-2xs" style="background: #ecfdf5; color: #047857;">
+                                            {{ act.calificacion }} / 5.0
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted small">Por calificar</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="small text-muted">{{ act.retroalimentacion|default:'Buen desarrollo conceptual.' }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr style="border-bottom: 1px solid #fce7f3;">
+                                    <td><strong class="text-dark">Taller N°1: Funciones Cuadráticas y Modelado</strong></td>
+                                    <td><span class="badge rounded-pill px-2.5 py-1" style="background: #fdf2f8; color: #be185d;">Matemáticas</span></td>
+                                    <td class="small text-muted">28/09/2026</td>
+                                    <td><span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #ecfdf5; color: #047857;">Entregada</span></td>
+                                    <td class="text-center"><span class="badge rounded-pill px-3 py-1 fw-bold fs-6" style="background: #ecfdf5; color: #047857;">4.8 / 5.0</span></td>
+                                    <td class="small text-muted">Excelente sustentación y gráficos precisos.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #fce7f3;">
+                                    <td><strong class="text-dark">Laboratorio: Algoritmos de Búsqueda Binaria</strong></td>
+                                    <td><span class="badge rounded-pill px-2.5 py-1" style="background: #fdf2f8; color: #be185d;">Informática</span></td>
+                                    <td class="small text-muted">05/10/2026</td>
+                                    <td><span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fff7ed; color: #c2410c;">En Desarrollo</span></td>
+                                    <td class="text-center"><span class="text-muted small">Pendiente</span></td>
+                                    <td class="small text-muted">En proceso de entrega.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBPESTAÑA 5: SEGUIMIENTO PEDAGÓGICO Y OBSERVACIONES -->
+            <div class="tab-pane fade {% if tab_seleccionado == 'seguimiento' %}show active{% endif %}" id="pane-exp-seguimiento" role="tabpanel">
+                <div class="row g-4">
+                    <!-- FORMULARIO DE REGISTRO DE SEGUIMIENTO -->
+                    <div class="col-lg-5">
+                        <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                                <i class="bi bi-pencil-square fs-5" style="color: #db2777;"></i>
+                                <h6 class="fw-bold text-dark mb-0">Registrar Nuevo Seguimiento</h6>
+                            </div>
+
+                            <form method="POST" action="{% url 'instructor_dashboard' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="guardar_seguimiento_estudiante">
+                                <input type="hidden" name="matricula_id" value="{{ estudiante_seleccionado.id }}">
+                                <input type="hidden" name="estudiante_id" value="{{ estudiante_seleccionado.aprendiz.id }}">
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-dark mb-1">Tipo de Seguimiento *</label>
+                                    <select name="tipo_seguimiento" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                                        <option value="Seguimiento Académico">Seguimiento Académico</option>
+                                        <option value="Dificultad Detectada">Dificultad de Aprendizaje</option>
+                                        <option value="Fortaleza Destacada">Fortaleza Destacada</option>
+                                        <option value="Compromiso de Mejora">Compromiso Pedagógico</option>
+                                        <option value="Convivencial">Convivencial / Actitudinal</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-dark mb-1">Fecha del Seguimiento *</label>
+                                    <input type="date" name="fecha_seguimiento" value="{% now 'Y-m-d' %}" 
+                                           class="form-control form-control-sm rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-dark mb-1">Diagnóstico y Observaciones *</label>
+                                    <textarea name="observaciones" rows="3" class="form-control form-control-sm rounded-4 px-3 py-2" 
+                                              style="border-color: #fce7f3;" placeholder="Describa el progreso, actitud o situación académica del estudiante..." required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-dark mb-1">Fortalezas Identificadas</label>
+                                    <input type="text" name="fortalezas" class="form-control form-control-sm rounded-pill px-3 py-2" 
+                                           style="border-color: #fce7f3;" placeholder="Ej: Gran compromiso, buen trabajo en equipo...">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-dark mb-1">Dificultades Detectadas</label>
+                                    <input type="text" name="dificultades" class="form-control form-control-sm rounded-pill px-3 py-2" 
+                                           style="border-color: #fce7f3;" placeholder="Ej: Requiere reforzar ecuaciones cuadráticas...">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-dark mb-1">Compromisos Acordados</label>
+                                    <textarea name="compromisos" rows="2" class="form-control form-control-sm rounded-4 px-3 py-2" 
+                                              style="border-color: #fce7f3;" placeholder="Acciones concretas del estudiante y fecha de revisión..."></textarea>
+                                </div>
+
+                                <div class="d-flex justify-content-end pt-2">
+                                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold small shadow-sm w-100" 
+                                            style="background: #db2777; border: 1px solid #db2777;">
+                                        <i class="bi bi-save me-1.5"></i> Guardar Seguimiento
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- HISTORIAL DE SEGUIMIENTOS REGISTRADOS -->
+                    <div class="col-lg-7">
+                        <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+                                <i class="bi bi-clock-history fs-5" style="color: #db2777;"></i>
+                                <h6 class="fw-bold text-dark mb-0">Historial de Seguimientos Registrados en BD</h6>
+                            </div>
+
+                            <div class="d-flex flex-column gap-3">
+                                {% for seg in estudiante_seleccionado.seguimientos_lista %}
+                                <div class="p-3.5 rounded-4 border bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3;">
+                                            {{ seg.tipo_seguimiento }}
+                                        </span>
+                                        <small class="text-muted" style="font-size: 0.74rem;">
+                                            <i class="bi bi-calendar3 me-1"></i> {{ seg.fecha_visita|date:"d/m/Y" }}
+                                        </small>
+                                    </div>
+                                    <p class="text-dark small mb-2" style="font-size: 0.88rem; white-space: pre-line;">{{ seg.observaciones }}</p>
+                                    {% if seg.compromisos %}
+                                    <div class="p-2.5 rounded-3 border bg-light small mb-2" style="border-color: #f1f5f9;">
+                                        <strong class="d-block text-dark mb-0.5" style="font-size: 0.78rem;"><i class="bi bi-check2-circle text-success me-1"></i> Compromisos:</strong>
+                                        <span class="text-muted">{{ seg.compromisos }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <small class="text-muted d-block text-end" style="font-size: 0.72rem;">
+                                        Registrado por: <strong>{{ seg.instructor.get_full_name|default:seg.instructor.username }}</strong>
+                                    </small>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-5 text-muted">
+                                    <i class="bi bi-journal-plus fs-2 d-block mb-2" style="color: #db2777;"></i>
+                                    <h6 class="fw-bold text-dark">No hay seguimientos registrados aún</h6>
+                                    <small class="text-muted">Utilice el formulario de la izquierda para documentar el seguimiento pedagógico.</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% else %}
+    <!-- =====================================================================
+         VISTA PRINCIPAL: GESTIÓN DE MIS ESTUDIANTES POR GRADO (10° Y 11°)
+         ===================================================================== -->
+
+    <!-- 1. HERO BANNER PRINCIPAL CON BOTÓN + AGREGAR ESTUDIANTE -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Mis Estudiantes · Grupos a cargo (Grados 10° y 11°)
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Mis Estudiantes
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Administración, calificaciones, asistencias y seguimiento de los estudiantes asignados a su cargo.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalAgregarEstudiante"
+                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                    <i class="bi bi-person-plus-fill"></i> + Agregar Estudiante
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. RESUMEN CLARO Y PESTAÑAS INDEPENDIENTES (SIN TARJETAS DUPLICADAS) -->
+    <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center"
+                     style="background: #fff0f3; color: #db2777; width: 52px; height: 52px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-people-fill fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0.5">Nómina de Estudiantes Asignados</h5>
+                    <div class="d-flex align-items-center gap-2 small text-muted">
+                        <span>Total: <strong class="text-dark">{{ total_estudiantes_docente }}</strong></span>
+                        <span>·</span>
+                        <span>Grado 10: <strong style="color: #db2777;">{{ total_estudiantes_10 }}</strong></span>
+                        <span>·</span>
+                        <span>Grado 11: <strong style="color: #db2777;">{{ total_estudiantes_11 }}</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selector de Grados Limpio -->
+            <ul class="nav nav-pills p-1.5 rounded-pill bg-light border d-inline-flex gap-1 shadow-2xs" id="pillsSelectorGrados" style="border-color: #fce7f3 !important;">
+                <li class="nav-item">
+                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small transition" 
+                            id="tab-btn-grado10" onclick="cambiarPestanaGrado('10');">
+                        <i class="bi bi-mortarboard-fill me-1"></i> Grado 10° 
+                        <span class="badge rounded-pill ms-1.5" style="background: #fce7f3; color: #db2777;">{{ total_estudiantes_10 }}</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small transition" 
+                            id="tab-btn-grado11" onclick="cambiarPestanaGrado('11');">
+                        <i class="bi bi-mortarboard-fill me-1"></i> Grado 11° 
+                        <span class="badge rounded-pill ms-1.5" style="background: #fce7f3; color: #db2777;">{{ total_estudiantes_11 }}</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small transition" 
+                            id="tab-btn-todos" onclick="cambiarPestanaGrado('todos');">
+                        <i class="bi bi-people-fill me-1"></i> Ver Todos 
+                        <span class="badge rounded-pill ms-1.5" style="background: #e2e8f0; color: #475569;">{{ total_estudiantes_docente }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 4. BUSCADOR Y FILTROS AVANZADOS EN TIEMPO REAL -->
+    <div class="card border rounded-4 p-3.5 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+        <div class="row g-3 align-items-center">
+            <!-- Buscar por Nombre / Documento -->
+            <div class="col-md-5">
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute top-50 translate-middle-y text-muted" style="left: 16px;"></i>
+                    <input type="text" id="buscar-estudiante-input" onkeyup="aplicarFiltrosEstudiantes();" 
+                           class="form-control rounded-pill ps-5 pe-3 py-2 border bg-white shadow-2xs" 
+                           style="border-color: #fce7f3; font-size: 0.88rem;" 
+                           placeholder="Buscar por nombre o documento/código...">
+                </div>
+            </div>
+
+            <!-- Filtro Grupo -->
+            <div class="col-6 col-md-2">
+                <select id="filtro-grupo" onchange="aplicarFiltrosEstudiantes();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3; font-size: 0.85rem;">
+                    <option value="todos">Todos los Grupos</option>
+                    <option value="10°A">Grupo 10°A</option>
+                    <option value="11°A">Grupo 11°A</option>
+                </select>
+            </div>
+
+            <!-- Filtro Estado -->
+            <div class="col-6 col-md-2">
+                <select id="filtro-estado" onchange="aplicarFiltrosEstudiantes();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3; font-size: 0.85rem;">
+                    <option value="todos">Todos los Estados</option>
+                    <option value="Activo" selected>Solo Activos</option>
+                    <option value="Retirado">Retirados / Inactivos</option>
+                </select>
+            </div>
+
+            <!-- Filtro Asignatura -->
+            <div class="col-12 col-md-3 text-md-end">
+                <select id="filtro-materia" onchange="aplicarFiltrosEstudiantes();" class="form-select form-select-sm rounded-pill px-3 py-2 d-inline-block w-auto" style="border-color: #fce7f3; font-size: 0.85rem;">
+                    <option value="todas">Todas las Asignaturas</option>
+                    <option value="Matemáticas">Matemáticas</option>
+                    <option value="Informática">Informática</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. SECCIÓN INDEPENDIENTE: LISTA DE ESTUDIANTES DE GRADO 10° -->
+    <div id="seccion-grado-10" class="mb-5 seccion-grado-bloque">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2.5">
+                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center"
+                     style="background: #fff0f3; color: #db2777; width: 38px; height: 38px;">
+                    <i class="bi bi-mortarboard-fill fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Estudiantes Asignados · Grado 10°</h5>
+                    <small class="text-muted">Grupo 10°A · Asignaturas: Matemáticas e Informática</small>
+                </div>
+            </div>
+            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3;">
+                {{ total_estudiantes_10 }} estudiantes en grado 10
+            </span>
+        </div>
+
+        <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden" style="border-color: #fce7f3 !important;">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0">
+                    <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                        <tr>
+                            <th class="text-center py-3" style="width: 45px; color: #be185d; font-size: 0.76rem;">#</th>
+                            <th class="py-3" style="width: 60px; color: #be185d; font-size: 0.76rem;">FOTO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO / CÓDIGO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">GRUPO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ASIGNATURAS</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO</th>
+                            <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-estudiantes-10">
+                        {% for m in estudiantes_grado_10 %}
+                        <tr class="fila-estudiante-item fila-g10" 
+                            data-nombre="{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}" 
+                            data-doc="{{ m.aprendiz.username }}" 
+                            data-grado="10" 
+                            data-grupo="{{ m.grupo_display }}" 
+                            data-materia="{{ m.asignaturas_docente_str }}" 
+                            data-estado="{% if m.es_activo %}Activo{% else %}Retirado{% endif %}"
+                            style="border-bottom: 1px solid #fce7f3;">
+                            <td class="text-center text-muted small fw-bold">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs" 
+                                     style="width: 36px; height: 36px; background: linear-gradient(135deg, #db2777 0%, #be185d 100%); font-size: 0.78rem;">
+                                    {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
+                                </div>
+                            </td>
+                            <td>
+                                <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=info" 
+                                   class="text-dark fw-bold text-decoration-none d-block hover-pink" style="font-size: 0.92rem;">
+                                    {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
+                                </a>
+                                <small class="text-muted" style="font-size: 0.75rem;">Matrícula Grado 10°</small>
+                            </td>
+                            <td class="text-muted small font-monospace fw-medium">{{ m.aprendiz.username }}</td>
+                            <td>
+                                <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.78rem;">
+                                    {{ m.grupo_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="small text-dark fw-medium">
+                                    <i class="bi bi-book me-1" style="color: #db2777;"></i>{{ m.asignaturas_docente_str }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if m.es_activo %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" 
+                                      style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.75rem;">
+                                    <span class="rounded-circle" style="width: 6px; height: 6px; background: #10b981;"></span> Activo
+                                </span>
+                                {% else %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" 
+                                      style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-size: 0.75rem;">
+                                    <span class="rounded-circle" style="width: 6px; height: 6px; background: #ef4444;"></span> Retirado
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn rounded-pill px-3 py-1.5 fw-bold small shadow-2xs dropdown-toggle d-inline-flex align-items-center gap-1.5"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                            style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.82rem;">
+                                        Acciones
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 p-1.5" style="border-color: #fce7f3; font-size: 0.84rem;">
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=info">
+                                                <i class="bi bi-person-lines-fill text-muted"></i> Ver perfil
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=calificaciones">
+                                                <i class="bi bi-award-fill text-warning"></i> Ver notas
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=asistencia">
+                                                <i class="bi bi-calendar-check text-success"></i> Ver asistencia
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=actividades">
+                                                <i class="bi bi-journal-text text-primary"></i> Ver actividades
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=seguimiento">
+                                                <i class="bi bi-clipboard-pulse" style="color: #db2777;"></i> Seguimiento
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1" style="border-color: #fce7f3;"></li>
+                                        <li>
+                                            {% if m.es_activo %}
+                                            <button type="button" class="dropdown-item py-1.5 rounded-2 text-danger d-flex align-items-center gap-2"
+                                                    onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', 'Grado 10°A', 'Retirado');">
+                                                <i class="bi bi-person-x-fill"></i> Retirar estudiante
+                                            </button>
+                                            {% else %}
+                                            <button type="button" class="dropdown-item py-1.5 rounded-2 text-success d-flex align-items-center gap-2"
+                                                    onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', 'Grado 10°A', 'En Formacion');">
+                                                <i class="bi bi-person-check-fill"></i> Reactivar estudiante
+                                            </button>
+                                            {% endif %}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-people fs-2 d-block mb-2" style="color: #db2777;"></i>
+                                No hay estudiantes de grado 10 asignados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. SECCIÓN INDEPENDIENTE: LISTA DE ESTUDIANTES DE GRADO 11° -->
+    <div id="seccion-grado-11" class="mb-5 seccion-grado-bloque">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2.5">
+                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center"
+                     style="background: #fff0f3; color: #db2777; width: 38px; height: 38px;">
+                    <i class="bi bi-mortarboard fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Estudiantes Asignados · Grado 11°</h5>
+                    <small class="text-muted">Grupo 11°A · Asignaturas: Matemáticas e Informática</small>
+                </div>
+            </div>
+            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3;">
+                {{ total_estudiantes_11 }} estudiantes en grado 11
+            </span>
+        </div>
+
+        <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden" style="border-color: #fce7f3 !important;">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0">
+                    <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                        <tr>
+                            <th class="text-center py-3" style="width: 45px; color: #be185d; font-size: 0.76rem;">#</th>
+                            <th class="py-3" style="width: 60px; color: #be185d; font-size: 0.76rem;">FOTO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO / CÓDIGO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">GRUPO</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ASIGNATURAS</th>
+                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO</th>
+                            <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-estudiantes-11">
+                        {% for m in estudiantes_grado_11 %}
+                        <tr class="fila-estudiante-item fila-g11" 
+                            data-nombre="{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}" 
+                            data-doc="{{ m.aprendiz.username }}" 
+                            data-grado="11" 
+                            data-grupo="{{ m.grupo_display }}" 
+                            data-materia="{{ m.asignaturas_docente_str }}" 
+                            data-estado="{% if m.es_activo %}Activo{% else %}Retirado{% endif %}"
+                            style="border-bottom: 1px solid #fce7f3;">
+                            <td class="text-center text-muted small fw-bold">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs" 
+                                     style="width: 36px; height: 36px; background: linear-gradient(135deg, #db2777 0%, #be185d 100%); font-size: 0.78rem;">
+                                    {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
+                                </div>
+                            </td>
+                            <td>
+                                <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=info" 
+                                   class="text-dark fw-bold text-decoration-none d-block hover-pink" style="font-size: 0.92rem;">
+                                    {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
+                                </a>
+                                <small class="text-muted" style="font-size: 0.75rem;">Matrícula Grado 11°</small>
+                            </td>
+                            <td class="text-muted small font-monospace fw-medium">{{ m.aprendiz.username }}</td>
+                            <td>
+                                <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.78rem;">
+                                    {{ m.grupo_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="small text-dark fw-medium">
+                                    <i class="bi bi-book me-1" style="color: #db2777;"></i>{{ m.asignaturas_docente_str }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if m.es_activo %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" 
+                                      style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.75rem;">
+                                    <span class="rounded-circle" style="width: 6px; height: 6px; background: #10b981;"></span> Activo
+                                </span>
+                                {% else %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" 
+                                      style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-size: 0.75rem;">
+                                    <span class="rounded-circle" style="width: 6px; height: 6px; background: #ef4444;"></span> Retirado
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn rounded-pill px-3 py-1.5 fw-bold small shadow-2xs dropdown-toggle d-inline-flex align-items-center gap-1.5"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                            style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.82rem;">
+                                        Acciones
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 p-1.5" style="border-color: #fce7f3; font-size: 0.84rem;">
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=info">
+                                                <i class="bi bi-person-lines-fill text-muted"></i> Ver perfil
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=calificaciones">
+                                                <i class="bi bi-award-fill text-warning"></i> Ver notas
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=asistencia">
+                                                <i class="bi bi-calendar-check text-success"></i> Ver asistencia
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=actividades">
+                                                <i class="bi bi-journal-text text-primary"></i> Ver actividades
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
+                                               href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=seguimiento">
+                                                <i class="bi bi-clipboard-pulse" style="color: #db2777;"></i> Seguimiento
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1" style="border-color: #fce7f3;"></li>
+                                        <li>
+                                            {% if m.es_activo %}
+                                            <button type="button" class="dropdown-item py-1.5 rounded-2 text-danger d-flex align-items-center gap-2"
+                                                    onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', 'Grado 11°A', 'Retirado');">
+                                                <i class="bi bi-person-x-fill"></i> Retirar estudiante
+                                            </button>
+                                            {% else %}
+                                            <button type="button" class="dropdown-item py-1.5 rounded-2 text-success d-flex align-items-center gap-2"
+                                                    onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', 'Grado 11°A', 'En Formacion');">
+                                                <i class="bi bi-person-check-fill"></i> Reactivar estudiante
+                                            </button>
+                                            {% endif %}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-people fs-2 d-block mb-2" style="color: #db2777;"></i>
+                                No hay estudiantes de grado 11 asignados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 1: + AGREGAR ESTUDIANTE A LA NÓMINA -->
+    <div class="modal fade" id="modalAgregarEstudiante" tabindex="-1" aria-labelledby="modalAgregarEstudianteLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+                    <div class="d-flex align-items-center gap-2.5">
+                        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" 
+                             style="background: #ffffff; color: #db2777; width: 36px; height: 36px; border: 1px solid #fce7f3;">
+                            <i class="bi bi-person-plus-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark" id="modalAgregarEstudianteLabel">Agregar Nuevo Estudiante</h6>
+                            <small class="text-muted">Asignar estudiante a la nómina oficial del docente (Grado 10° o 11°)</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <form method="POST" action="{% url 'instructor_dashboard' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="crear_estudiante_docente">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Nombres del Estudiante *</label>
+                                <input type="text" name="first_name" class="form-control rounded-pill px-3 py-2" style="border-color: #fce7f3;" placeholder="Ej: Mateo Andrés" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Apellidos del Estudiante *</label>
+                                <input type="text" name="last_name" class="form-control rounded-pill px-3 py-2" style="border-color: #fce7f3;" placeholder="Ej: Gómez Castro" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Documento de Identidad / Código Institucional *</label>
+                                <input type="text" name="documento" class="form-control rounded-pill px-3 py-2 font-monospace" style="border-color: #fce7f3;" placeholder="Ej: 1082995511" required>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-dark mb-1">Grado *</label>
+                                <select name="grado" class="form-select rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                                    <option value="10" selected>Grado 10°</option>
+                                    <option value="11">Grado 11°</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-dark mb-1">Grupo / Sección *</label>
+                                <select name="seccion" class="form-select rounded-pill px-3 py-2" style="border-color: #fce7f3;" required>
+                                    <option value="A" selected>Grupo A (10°A / 11°A)</option>
+                                    <option value="B">Grupo B</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Correo Electrónico (Opcional)</label>
+                                <input type="email" name="email" class="form-control rounded-pill px-3 py-2" style="border-color: #fce7f3;" placeholder="estudiante@edunova.edu.co">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Teléfono / Celular (Opcional)</label>
+                                <input type="text" name="telefono" class="form-control rounded-pill px-3 py-2" style="border-color: #fce7f3;" placeholder="+57 301 234 5678">
+                            </div>
+
+                            <div class="col-12"><hr class="my-1" style="border-color: #fce7f3;"></div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Nombre Completo del Acudiente</label>
+                                <input type="text" name="acudiente_nombre" class="form-control rounded-pill px-3 py-2" style="border-color: #fce7f3;" placeholder="Ej: Patricia Castro Pérez">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">Teléfono de Contacto del Acudiente</label>
+                                <input type="text" name="acudiente_telefono" class="form-control rounded-pill px-3 py-2" style="border-color: #fce7f3;" placeholder="+57 300 987 6543">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                        <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                            <i class="bi bi-check-circle-fill me-1.5"></i> Guardar y Matricular Estudiante
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CONFIRMAR RETIRO / DESVINCULACIÓN DEL ESTUDIANTE -->
+    <div class="modal fade" id="modalConfirmarRetiroEstudiante" tabindex="-1" aria-labelledby="modalRetiroLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill fs-5" style="color: #db2777;"></i>
+                        <h6 class="modal-title fw-bold text-dark" id="modalRetiroLabel">Confirmar Cambio de Estado</h6>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <form method="POST" action="{% url 'instructor_dashboard' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="retirar_estudiante_docente">
+                    <input type="hidden" name="matricula_id" id="modal-retiro-matricula-id" value="">
+                    <input type="hidden" name="estudiante_id" id="modal-retiro-estudiante-id" value="">
+                    <input type="hidden" name="nuevo_estado" id="modal-retiro-nuevo-estado" value="Retirado">
+
+                    <div class="modal-body p-4 text-center">
+                        <div class="rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3 shadow-2xs"
+                             style="background: #fff0f3; color: #db2777; width: 64px; height: 64px;">
+                            <i class="bi bi-person-x fs-1"></i>
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-1" id="modal-retiro-estudiante-nombre">Juan Pérez</h5>
+                        <p class="text-muted small mb-3" id="modal-retiro-estudiante-grado">Grado 10°A</p>
+
+                        <div class="p-3 rounded-3 text-start small mb-2" style="background: #fff0f3; border: 1px solid #fce7f3; color: #831843;">
+                            <i class="bi bi-shield-check me-1"></i>
+                            <strong>Protección del Historial:</strong> El estudiante pasará a estado <em>Retirado</em> en su nómina. Todas sus calificaciones, asistencias y actividades permanecerán intactas en el sistema.
+                        </div>
+                    </div>
+
+                    <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                        <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" id="btn-confirmar-accion-retiro" style="background: #db2777; border: 1px solid #db2777;">
+                            Confirmar Retiro
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<!-- =========================================================================
+     SCRIPTS DE CONTROL Y GESTIÓN DE MIS ESTUDIANTES
+     ========================================================================= -->
+<script>
+// Estado de la pestaña de grado seleccionada
+let gradoActivo = '{{ grado_activo|default:"10" }}';
+
+// Función para cambiar de pestaña entre Grado 10, Grado 11 y Todos
+function cambiarPestanaGrado(grado) {
+    gradoActivo = grado;
+    const btn10 = document.getElementById('tab-btn-grado10');
+    const btn11 = document.getElementById('tab-btn-grado11');
+    const btnTodos = document.getElementById('tab-btn-todos');
+    const sec10 = document.getElementById('seccion-grado-10');
+    const sec11 = document.getElementById('seccion-grado-11');
+    const badgeVista = document.getElementById('badge-vista-activa');
+
+    // Desactivar todos los botones
+    if (btn10) { btn10.classList.remove('active'); btn10.style.background = 'transparent'; btn10.style.color = '#64748b'; }
+    if (btn11) { btn11.classList.remove('active'); btn11.style.background = 'transparent'; btn11.style.color = '#64748b'; }
+    if (btnTodos) { btnTodos.classList.remove('active'); btnTodos.style.background = 'transparent'; btnTodos.style.color = '#64748b'; }
+
+    if (grado === '10') {
+        if (btn10) { btn10.classList.add('active'); btn10.style.background = '#db2777'; btn10.style.color = '#ffffff'; }
+        if (sec10) sec10.style.display = 'block';
+        if (sec11) sec11.style.display = 'none';
+        if (badgeVista) badgeVista.textContent = 'Grado 10°';
+    } else if (grado === '11') {
+        if (btn11) { btn11.classList.add('active'); btn11.style.background = '#db2777'; btn11.style.color = '#ffffff'; }
+        if (sec10) sec10.style.display = 'none';
+        if (sec11) sec11.style.display = 'block';
+        if (badgeVista) badgeVista.textContent = 'Grado 11°';
+    } else {
+        if (btnTodos) { btnTodos.classList.add('active'); btnTodos.style.background = '#db2777'; btnTodos.style.color = '#ffffff'; }
+        if (sec10) sec10.style.display = 'block';
+        if (sec11) sec11.style.display = 'block';
+        if (badgeVista) badgeVista.textContent = 'Todos los Grados';
+    }
+
+    aplicarFiltrosEstudiantes();
+}
+
+// Búsqueda y filtrado reactivo de estudiantes
+function aplicarFiltrosEstudiantes() {
+    const inputBuscar = document.getElementById('buscar-estudiante-input');
+    const term = inputBuscar ? inputBuscar.value.toLowerCase().trim() : '';
+
+    const selGrupo = document.getElementById('filtro-grupo');
+    const grupoFiltro = selGrupo ? selGrupo.value : 'todos';
+
+    const selEstado = document.getElementById('filtro-estado');
+    const estadoFiltro = selEstado ? selEstado.value : 'todos';
+
+    const selMateria = document.getElementById('filtro-materia');
+    const materiaFiltro = selMateria ? selMateria.value : 'todas';
+
+    const filas = document.querySelectorAll('.fila-estudiante-item');
+    filas.forEach(fila => {
+        const nombre = (fila.getAttribute('data-nombre') || '').toLowerCase();
+        const doc = (fila.getAttribute('data-doc') || '').toLowerCase();
+        const grado = fila.getAttribute('data-grado') || '';
+        const grupo = fila.getAttribute('data-grupo') || '';
+        const estado = fila.getAttribute('data-estado') || '';
+        const materia = fila.getAttribute('data-materia') || '';
+
+        // Comprobación de grado según pestaña activa
+        let matchGradoTab = true;
+        if (gradoActivo !== 'todos' && grado !== gradoActivo) {
+            matchGradoTab = false;
+        }
+
+        const matchTerm = !term || nombre.includes(term) || doc.includes(term);
+        const matchGrupo = (grupoFiltro === 'todos') || (grupo === grupoFiltro);
+        const matchEstado = (estadoFiltro === 'todos') || (estado === estadoFiltro);
+        const matchMateria = (materiaFiltro === 'todas') || materia.includes(materiaFiltro);
+
+        if (matchGradoTab && matchTerm && matchGrupo && matchEstado && matchMateria) {
+            fila.style.display = '';
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+}
+
+// Abre el modal de retiro / reactivación
+function abrirModalRetiro(matriculaId, estudianteId, nombre, grado, nuevoEstado) {
+    const elMat = document.getElementById('modal-retiro-matricula-id');
+    const elEst = document.getElementById('modal-retiro-estudiante-id');
+    const elEstado = document.getElementById('modal-retiro-nuevo-estado');
+    const elNombre = document.getElementById('modal-retiro-estudiante-nombre');
+    const elGrado = document.getElementById('modal-retiro-estudiante-grado');
+    const elBtn = document.getElementById('btn-confirmar-accion-retiro');
+
+    if (elMat) elMat.value = matriculaId;
+    if (elEst) elEst.value = estudianteId;
+    if (elEstado) elEstado.value = nuevoEstado;
+    if (elNombre) elNombre.textContent = nombre;
+    if (elGrado) elGrado.textContent = grado;
+
+    if (elBtn) {
+        if (nuevoEstado === 'En Formacion') {
+            elBtn.textContent = 'Confirmar Reactivación';
+            elBtn.style.background = '#059669';
+            elBtn.style.borderColor = '#059669';
+        } else {
+            elBtn.textContent = 'Confirmar Retiro';
+            elBtn.style.background = '#dc2626';
+            elBtn.style.borderColor = '#dc2626';
+        }
+    }
+
+    const modalEl = document.getElementById('modalConfirmarRetiroEstudiante');
+    if (modalEl && typeof bootstrap !== 'undefined') {
+        const modalInstance = new bootstrap.Modal(modalEl);
+        modalInstance.show();
+    }
+}
+
+// Inicialización de la vista al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Si viene parámetro grado en URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const gradoUrl = urlParams.get('grado');
+    if (gradoUrl === '11') {
+        cambiarPestanaGrado('11');
+    } else if (gradoUrl === 'todos') {
+        cambiarPestanaGrado('todos');
+    } else {
+        cambiarPestanaGrado('10');
+    }
+
+    // Si viene parámetro tab en URL para el expediente del estudiante
+    const tabUrl = urlParams.get('tab');
+    if (tabUrl) {
+        const targetBtn = document.getElementById('tab-exp-' + tabUrl);
+        if (targetBtn && typeof bootstrap !== 'undefined') {
+            const tabObj = new bootstrap.Tab(targetBtn);
+            tabObj.show();
+        }
+    }
+});
+</script>

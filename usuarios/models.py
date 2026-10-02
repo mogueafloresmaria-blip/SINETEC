@@ -184,6 +184,8 @@ class EvidenciaTaller(models.Model):
     """Guía o Taller asignado al estudiante dentro de la formación académica"""
     rap = models.ForeignKey(ResultadoAprendizaje, on_delete=models.CASCADE, related_name='evidencias', null=True, blank=True)
     rap_curricular = models.ForeignKey('academico.ResultadoAprendizaje', on_delete=models.SET_NULL, null=True, blank=True, related_name='evidencias_talleres', verbose_name="RAP Curricular SOFIA")
+    competencia = models.ForeignKey('academico.Competencia', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Competencia Evaluada")
+    objetivo = models.ForeignKey('academico.Objetivo', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Objetivo Evaluado")
     ficha = models.ForeignKey('academico.Ficha', on_delete=models.SET_NULL, null=True, blank=True, related_name='actividades_formativas', verbose_name="Ficha Asociada")
     instructor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='actividades_publicadas', verbose_name="Profesor Asignador")
     titulo = models.CharField(max_length=200, verbose_name="Título del Taller / Evidencia")
@@ -321,6 +323,7 @@ class PagoPension(models.Model):
     metodo_pago = models.CharField(max_length=30, choices=METODOS, default='Efectivo')
     estado = models.CharField(max_length=10, choices=ESTADOS, default='EMITIDO')
     comprobante = models.FileField(upload_to='comprobantes_pension/%Y/%m/', blank=True, null=True)
+    responsable = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='cobros_realizados', verbose_name='Responsable del Cobro')
     fecha_pago = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -338,6 +341,7 @@ class TransporteRuta(models.Model):
     capacidad = models.PositiveIntegerField(default=15)
     costo_mensual = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     activa = models.BooleanField(default=True)
+    estudiantes = models.ManyToManyField(User, blank=True, related_name='rutas_transporte')
     fecha_registro = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -345,3 +349,35 @@ class TransporteRuta(models.Model):
 
     def __str__(self):
         return f'{self.nombre} · {self.placa}'
+
+
+class PapeleraReciclaje(models.Model):
+    """
+    Papelera de reciclaje institucional para recuperación o borrado definitivo
+    de estudiantes, matrículas, horarios y registros del colegio.
+    """
+    TIPOS = [
+        ('Estudiante', 'Estudiante'),
+        ('Matricula', 'Matrícula'),
+        ('Horario', 'Clase / Horario'),
+        ('Docente', 'Docente / Profesor'),
+        ('Otro', 'Otro Registro'),
+    ]
+
+    tipo_objeto = models.CharField(max_length=30, choices=TIPOS, default='Estudiante', verbose_name="Tipo de Elemento")
+    objeto_id = models.IntegerField(verbose_name="ID Original del Objeto")
+    titulo = models.CharField(max_length=200, verbose_name="Identificador / Nombre")
+    subtitulo = models.CharField(max_length=255, blank=True, default='', verbose_name="Detalles")
+    datos_recuperacion = models.JSONField(blank=True, null=True, verbose_name="Snapshot de Datos")
+    eliminado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='elementos_eliminados')
+    fecha_eliminacion = models.DateTimeField(auto_now_add=True)
+    motivo = models.TextField(blank=True, default='Eliminado desde panel administrativo')
+    restaurado = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Elemento en Papelera"
+        verbose_name_plural = "Papelera de Reciclaje"
+        ordering = ['-fecha_eliminacion']
+
+    def __str__(self):
+        return f"{self.tipo_objeto}: {self.titulo} (Eliminado {self.fecha_eliminacion:%d/%m/%Y})"

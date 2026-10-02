@@ -18,8 +18,8 @@ NIVELES_ESCOLARES = [
 
 GRADOS_POR_NIVEL = {
     'Inicial': ['3 años', '4 años', '5 años'],
-    'Primaria': ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado', '6to Grado'],
-    'Secundaria': ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'],
+    'Primaria': ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado'],
+    'Secundaria': ['6to Grado', '7mo Grado', '8vo Grado', '9no Grado', '10mo Grado', '11mo Grado'],
 }
 
 SECCIONES_ESCOLARES = ['A', 'B', 'C']
@@ -152,6 +152,27 @@ class Competencia(models.Model):
     def __str__(self):
         return f"{self.codigo} - {self.descripcion[:80]}..."
 
+class Objetivo(models.Model):
+    """
+    Objetivos específicos que se desprenden de una competencia.
+    """
+    competencia = models.ForeignKey(
+        Competencia,
+        on_delete=models.CASCADE,
+        related_name='objetivos',
+        verbose_name="Competencia Asociada"
+    )
+    descripcion = models.TextField(
+        verbose_name="Descripción del Objetivo"
+    )
+
+    class Meta:
+        verbose_name = "Objetivo"
+        verbose_name_plural = "Objetivos"
+
+    def __str__(self):
+        return f"Objetivo: {self.descripcion[:80]}..."
+
 
 class ResultadoAprendizaje(models.Model):
     """
@@ -255,8 +276,17 @@ class Matricula(models.Model):
     Vinculación formal del aprendiz a una Ficha de Media Técnica.
     """
     GRADOS_ESCOLARES = [
-        ('10', 'Grado 10° (Décimo)'),
-        ('11', 'Grado 11° (Undécimo)'),
+        ('1', '1° Grado (Primaria)'),
+        ('2', '2° Grado (Primaria)'),
+        ('3', '3° Grado (Primaria)'),
+        ('4', '4° Grado (Primaria)'),
+        ('5', '5° Grado (Primaria)'),
+        ('6', '6° Grado (Secundaria)'),
+        ('7', '7° Grado (Secundaria)'),
+        ('8', '8° Grado (Secundaria)'),
+        ('9', '9° Grado (Secundaria)'),
+        ('10', '10° Grado (Bachillerato)'),
+        ('11', '11° Grado (Bachillerato)'),
     ]
 
     ESTADOS_APRENDIZ = [
@@ -352,6 +382,7 @@ class HorarioFicha(models.Model):
     seccion = models.CharField(max_length=4, blank=True, default='A')
     es_recreo = models.BooleanField(default=False)
     activo = models.BooleanField(default=True)
+    color_hex = models.CharField(max_length=7, blank=True, default='#E2E8F0', verbose_name="Color del Bloque")
 
     class Meta:
         verbose_name = "Horario de Ficha"
@@ -656,3 +687,154 @@ class SemaforoCompetencia(models.Model):
             return '🔴'
         return '⚪'
 
+class MaterialClase(models.Model):
+    carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='materiales')
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True, null=True)
+    archivo = models.FileField(upload_to='materiales_clase/%Y/%m/', blank=True, null=True)
+    enlace = models.URLField(blank=True, null=True)
+    fecha_publicacion = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Material de Clase"
+        verbose_name_plural = "Materiales de Clase"
+
+class TareaClase(models.Model):
+    carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='tareas')
+    tipo_actividad = models.CharField(max_length=50, default='Tarea', verbose_name="Tipo de Actividad")
+    competencia = models.ForeignKey('Competencia', on_delete=models.SET_NULL, null=True, blank=True, related_name='tareas_clase', verbose_name="Competencia Evaluada")
+    objetivo = models.ForeignKey('Objetivo', on_delete=models.SET_NULL, null=True, blank=True, related_name='tareas_clase', verbose_name="Objetivo Evaluado")
+    resultado_aprendizaje = models.ForeignKey('ResultadoAprendizaje', on_delete=models.SET_NULL, null=True, blank=True, related_name='tareas_clase', verbose_name="Resultado de Aprendizaje")
+    criterio_evaluacion = models.CharField(max_length=255, blank=True, null=True, verbose_name="Criterio de Evaluación")
+    titulo = models.CharField(max_length=200)
+    instrucciones = models.TextField()
+    archivo = models.FileField(upload_to='tareas_clase/%Y/%m/', blank=True, null=True)
+    fecha_publicacion = models.DateTimeField(auto_now_add=True)
+    fecha_limite = models.DateTimeField(blank=True, null=True)
+    puntaje_maximo = models.DecimalField(max_digits=4, decimal_places=2, default=5.0)
+    estado = models.CharField(max_length=20, default='Publicada', choices=[
+        ('Borrador', 'Borrador'),
+        ('Publicada', 'Publicada'),
+        ('Cerrada', 'Cerrada')
+    ], verbose_name="Estado de la Actividad")
+    porcentaje = models.DecimalField(max_digits=5, decimal_places=2, default=20.0, verbose_name="Porcentaje")
+    es_calificada = models.BooleanField(default=True, verbose_name="¿Es Calificada?")
+    enlace_externo = models.URLField(max_length=500, blank=True, null=True, verbose_name="Enlace de Apoyo")
+    periodo = models.CharField(max_length=50, default='Periodo 1', verbose_name="Periodo Académico")
+
+    class Meta:
+        verbose_name = "Tarea de Clase"
+        verbose_name_plural = "Tareas de Clase"
+
+
+class EntregaTarea(models.Model):
+    ESTADOS_ENTREGA = [
+        ('PENDIENTE', 'Pendiente'),
+        ('ENTREGADA', 'Entregada'),
+        ('ENTREGADA_TARDE', 'Entregada fuera de plazo'),
+        ('CALIFICADA', 'Calificada'),
+        ('DEVUELTA', 'Devuelta'),
+    ]
+    tarea = models.ForeignKey(TareaClase, on_delete=models.CASCADE, related_name='entregas')
+    estudiante = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tareas_entregadas')
+    respuesta = models.TextField(blank=True, null=True)
+    archivo = models.FileField(upload_to='entregas_tareas/%Y/%m/', blank=True, null=True)
+    fecha_entrega = models.DateTimeField(auto_now_add=True)
+    calificacion = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
+    retroalimentacion = models.TextField(blank=True, null=True)
+    estado = models.CharField(max_length=20, choices=ESTADOS_ENTREGA, default='PENDIENTE')
+
+    class Meta:
+        verbose_name = "Entrega de Tarea"
+        verbose_name_plural = "Entregas de Tareas"
+        unique_together = ('tarea', 'estudiante')
+
+class GuiaClase(models.Model):
+    carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='guias')
+    titulo = models.CharField(max_length=200)
+    instrucciones = models.TextField()
+    archivo = models.FileField(upload_to='guias_clase/%Y/%m/', blank=True, null=True)
+    fecha_publicacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Guía de Clase"
+        verbose_name_plural = "Guías de Clase"
+
+class ActividadClase(models.Model):
+    carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='actividades')
+    titulo = models.CharField(max_length=200)
+    instrucciones = models.TextField()
+    archivo = models.FileField(upload_to='actividades_clase/%Y/%m/', blank=True, null=True)
+    fecha_actividad = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Actividad de Clase"
+        verbose_name_plural = "Actividades de Clase"
+
+class AvisoClase(models.Model):
+    carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='avisos')
+    titulo = models.CharField(max_length=200)
+    mensaje = models.TextField()
+    fecha_publicacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Aviso de Clase"
+        verbose_name_plural = "Avisos de Clase"
+
+
+class CalificacionEscolar(models.Model):
+    """
+    Registro oficial de calificaciones escolares por periodo y materia del docente.
+    """
+    matricula = models.ForeignKey(Matricula, on_delete=models.CASCADE, related_name='calificaciones_escolares')
+    profesor = models.ForeignKey(User, on_delete=models.PROTECT, related_name='calificaciones_docente')
+    carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, null=True, blank=True, related_name='calificaciones_escolares')
+    periodo = models.CharField(max_length=50, default='Periodo 1')
+    nota = models.DecimalField(max_digits=4, decimal_places=2, default=0.0)
+    desempeno = models.CharField(max_length=20, default='Básico')
+    observaciones = models.TextField(blank=True, null=True)
+    fecha_registro = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Calificación Escolar"
+        verbose_name_plural = "Calificaciones Escolares"
+        ordering = ['-fecha_registro']
+        constraints = [
+            models.UniqueConstraint(fields=['matricula', 'carga_academica', 'periodo'], name='calificacion_escolar_unica_periodo')
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.nota is not None:
+            try:
+                n = float(self.nota)
+                if n >= 4.6:
+                    self.desempeno = 'Superior'
+                elif n >= 4.0:
+                    self.desempeno = 'Alto'
+                elif n >= 3.0:
+                    self.desempeno = 'Básico'
+                else:
+                    self.desempeno = 'Bajo'
+            except (ValueError, TypeError):
+                self.desempeno = 'Básico'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.matricula} - {self.periodo}: {self.nota}"
+
+class ComunicacionMensaje(models.Model):
+    remitente = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comunicaciones_enviadas')
+    destinatario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='comunicaciones_recibidas')
+    grupo_destino = models.CharField(max_length=50, blank=True, null=True) # '10', '11', etc.
+    asunto = models.CharField(max_length=200)
+    mensaje = models.TextField()
+    archivo = models.FileField(upload_to='comunicaciones/%Y/%m/', blank=True, null=True)
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+    leido = models.BooleanField(default=False)
+    eliminado_por_remitente = models.BooleanField(default=False)
+    eliminado_por_destinatario = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Comunicación"
+        verbose_name_plural = "Comunicaciones"
+        ordering = ['-fecha_envio']

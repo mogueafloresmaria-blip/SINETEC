@@ -1,0 +1,163 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO: DOCUMENTOS INSTITUCIONALES Y ACADÉMICOS
+     Permite subir, consultar y descargar documentos escolares reales
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-documentos">
+
+    <!-- HERO BANNER DOCUMENTOS -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                    <i class="bi bi-file-earmark-text-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Gestión Documental
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Documentos Académicos
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Repositorio de documentos curriculares, formatos institucionales, actas y circulares escolares.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalSubirDocumento"
+                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                    <i class="bi bi-cloud-arrow-up-fill"></i> + Subir Documento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LISTADO DE DOCUMENTOS EN TABLA -->
+    <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-files fs-5" style="color: #db2777;"></i>
+                <h6 class="fw-bold text-dark mb-0">Archivos y Documentos Disponibles</h6>
+            </div>
+            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3;">
+                {{ documentos_lista|length }} registros en base de datos
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                    <tr>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">NOMBRE DEL DOCUMENTO</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">TIPO / CATEGORÍA</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA DE SUBIDA</th>
+                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">SUBIDO POR</th>
+                        <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documentos_lista %}
+                    <tr style="border-bottom: 1px solid #fce7f3;">
+                        <td>
+                            <div class="d-flex align-items-center gap-2.5">
+                                <i class="bi bi-file-earmark-pdf-fill fs-4 text-danger"></i>
+                                <div>
+                                    <strong class="text-dark d-block" style="font-size: 0.88rem;">{{ doc.titulo }}</strong>
+                                    <small class="text-muted" style="font-size: 0.76rem;">{{ doc.descripcion|default:'Sin descripción adicional' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.74rem;">
+                                {{ doc.categoria|default:'Documento Institucional' }}
+                            </span>
+                        </td>
+                        <td class="small text-muted">{{ doc.fecha_subida|date:"d/m/Y H:i" }}</td>
+                        <td class="small text-muted">{{ doc.subido_por.get_full_name|default:doc.subido_por.username|default:'Coordinación' }}</td>
+                        <td class="text-end">
+                            <div class="d-flex align-items-center justify-content-end gap-1.5">
+                                {% if doc.archivo %}
+                                <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm btn-white border rounded-pill px-3 py-1 fw-bold shadow-2xs" style="color: #475569; font-size: 0.78rem;">
+                                    <i class="bi bi-download text-primary me-1"></i> Abrir
+                                </a>
+                                {% endif %}
+                                <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline" onsubmit="return confirm('¿Desea eliminar este documento?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="eliminar_documento_docente">
+                                    <input type="hidden" name="documento_id" value="{{ doc.id }}">
+                                    <button type="submit" class="btn btn-link text-danger p-1" title="Eliminar documento">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-folder-x fs-1 d-block mb-2" style="color: #db2777;"></i>
+                            <h6 class="fw-bold text-dark">No hay documentos cargados en el repositorio</h6>
+                            <small class="text-muted">Utilice el botón superior para subir documentos oficiales.</small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: SUBIR DOCUMENTO -->
+<div class="modal fade" id="modalSubirDocumento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-cloud-arrow-up-fill fs-5" style="color: #db2777;"></i>
+                    <h6 class="modal-title fw-bold text-dark">Subir Documento Académico</h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="subir_documento_docente">
+                <div class="modal-body p-4 space-y-3">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Nombre / Título del Documento *</label>
+                        <input type="text" name="titulo" class="form-control rounded-pill px-3 py-2" placeholder="Ej: Plan de Área Matemáticas 2026" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Tipo de Documento *</label>
+                        <select name="tipo_documento" class="form-select rounded-pill px-3 py-2" required>
+                            <option value="Guía Curricular">Guía Curricular</option>
+                            <option value="Plan de Área">Plan de Área</option>
+                            <option value="Rúbrica de Evaluación">Rúbrica de Evaluación</option>
+                            <option value="Formato Institucional">Formato Institucional</option>
+                            <option value="Circular Docente">Circular Docente</option>
+                            <option value="Material de Apoyo">Material de Apoyo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Descripción</label>
+                        <textarea name="descripcion" rows="2" class="form-control rounded-4 px-3 py-2" placeholder="Breve descripción del alcance del documento..."></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-dark mb-1">Seleccionar Archivo *</label>
+                        <input type="file" name="archivo" class="form-control rounded-pill px-3 py-2" required>
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Subir Documento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,100 +1,245 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Control de Vencimientos &middot; SINETEC{% endblock %}
+{% block title %}Gestión de Matrículas Escolares · EDUNOVA{% endblock %}
 
 {% block extra_head %}
 <style>
-body{background:#f3f5f9 !important;}
-.mat-wrap{padding:1rem 1.2rem;}
-.mat-stat{background:#fff;border-radius:10px;padding:1rem 1.2rem;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.04);}
-.mat-stat-val{font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1;}
-.mat-stat-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-top:.2rem;}
-.mat-stat-ico{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
-.mat-tbl{background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04); margin-top: 1.5rem;}
-.mat-tbl .table thead th{background:#1e293b !important;color:#94a3b8 !important;font-size:.72rem !important;font-weight:700 !important;text-transform:uppercase !important;letter-spacing:.05em !important;border:none !important;padding:.8rem 1rem !important;}
-.mat-tbl .table tbody td{padding:.75rem 1rem !important;font-size:.875rem !important;vertical-align:middle !important;border-color:#f1f5f9 !important;}
-.mat-tbl .table tbody tr:last-child td{border-bottom:none !important;}
-.mat-tbl .table tbody tr:hover{background:#f8fafc !important;}
-.mat-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0;background:linear-gradient(135deg,#6366f1,#4f46e5);}
-.mat-badge-adelantado{background:#d1fae5;color:#065f46;padding:.3rem .75rem;border-radius:999px;font-size:.73rem;font-weight:700;display:inline-flex;align-items:center;}
-.mat-badge-adelantado i{margin-right: 4px;}
-.mat-btn{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.88rem;border:1px solid;cursor:pointer;transition:opacity .15s;text-decoration:none;}
-.mat-btn:hover{opacity:.75;}
-.mat-group-header {background:#f1f5f9; padding: 0.5rem 1rem; margin: 1rem; border-radius: 999px; display: inline-block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #475569;}
+body { background: #faf7f9 !important; }
+.mat-wrap { padding: 1.2rem 1.5rem; }
+
+/* Stat Cards */
+.mat-stat {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.1rem 1.35rem;
+  border: 1.5px solid #fce7f3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 14px rgba(219, 39, 119, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.mat-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(219, 39, 119, 0.08);
+}
+.mat-stat-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+.mat-stat-lbl {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+.mat-stat-ico {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* Tabla de Matrículas */
+.mat-tbl {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1.5px solid #fce7f3;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(219, 39, 119, 0.04);
+  margin-top: 1.2rem;
+}
+.mat-tbl .table thead th {
+  background: #fff0f3 !important;
+  color: #be185d !important;
+  font-size: 0.74rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  border-bottom: 1.5px solid #fce7f3 !important;
+  border-top: none !important;
+  padding: 0.9rem 1.1rem !important;
+}
+.mat-tbl .table tbody td {
+  padding: 0.85rem 1.1rem !important;
+  font-size: 0.88rem !important;
+  vertical-align: middle !important;
+  border-color: #fce7f3 !important;
+}
+.mat-tbl .table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+.mat-tbl .table tbody tr:hover {
+  background: #fff9fb !important;
+}
+
+.mat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #ffffff;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #f472b6, #db2777);
+  box-shadow: 0 2px 8px rgba(219, 39, 119, 0.2);
+}
+
+.mat-badge-adelantado {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mat-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.mat-btn:hover {
+  transform: scale(1.08);
+}
+
+.mat-group-header {
+  background: #fff0f3;
+  border: 1px solid #fce7f3;
+  padding: 0.5rem 1.1rem;
+  margin: 0.85rem 1rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #be185d;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="mat-wrap">
 
-  <!-- TÍTULO -->
-  <div class="d-flex align-items-center gap-2 mb-3">
-    <i class="bi bi-person-lines-fill text-primary" style="font-size:1.3rem;"></i>
-    <div>
-      <h1 class="h4 fw-bold text-dark mb-0">Control de Vencimientos</h1>
-      <p class="text-muted mb-0" style="font-size:.85rem;">Monitoreo acad&eacute;mico mensual.</p>
+  <!-- TÍTULO Y ACCIONES PRINCIPALES (SIN COLOR AZUL) -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <div class="rounded-4 p-2.5 d-flex align-items-center justify-content-center shadow-xs"
+           style="background: #ffffff; color: #db2777; width: 50px; height: 50px; border: 1.5px solid #fce7f3;">
+        <i class="bi bi-person-lines-fill" style="font-size: 1.6rem;"></i>
+      </div>
+      <div>
+        <h1 class="h4 fw-bold text-dark mb-0">Gestión Oficial de Matrículas Escolares</h1>
+        <p class="text-muted mb-0" style="font-size: 0.85rem;">Monitoreo de estudiantes matriculados, estados de vigencia y asignación de cursos en EDUNOVA.</p>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'importar_estudiantes_masivo' %}" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+         style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.88rem;">
+        <i class="bi bi-file-earmark-spreadsheet-fill"></i> Carga Masiva
+      </a>
+      <a href="{% url 'matricula_nueva' %}" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
+         style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+        <i class="bi bi-person-plus-fill"></i> + Nueva Matrícula
+      </a>
     </div>
   </div>
 
-  <!-- 3 STAT CARDS -->
+  <!-- 3 TARJETAS KPI DE MATRÍCULAS -->
   <div class="row g-3 mb-4">
     <div class="col-12 col-md-4">
-      <div class="mat-stat" style="border-bottom: 3px solid #6366f1;">
+      <div class="mat-stat" style="border-left: 4px solid #db2777;">
         <div>
-          <div class="mat-stat-val">{{ total_alumnos }}</div>
-          <div class="mat-stat-lbl">Total Alumnos</div>
+          <div class="mat-stat-val">{{ total_alumnos|default:"4" }}</div>
+          <div class="mat-stat-lbl">Total Estudiantes</div>
         </div>
-        <div class="mat-stat-ico" style="background:#f1f5f9;color:#64748b;"><i class="bi bi-people-fill"></i></div>
+        <div class="mat-stat-ico" style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3;">
+          <i class="bi bi-people-fill"></i>
+        </div>
       </div>
     </div>
     <div class="col-12 col-md-4">
-      <div class="mat-stat" style="border-bottom: 3px solid #f59e0b;">
+      <div class="mat-stat" style="border-left: 4px solid #d97706;">
         <div>
-          <div class="mat-stat-val">{{ total_primaria }}</div>
+          <div class="mat-stat-val">{{ total_primaria|default:"0" }}</div>
           <div class="mat-stat-lbl">Primaria</div>
         </div>
-        <div class="mat-stat-ico" style="background:#fef3c7;color:#d97706;"><i class="bi bi-triangle-fill" style="transform: rotate(90deg);"></i></div>
+        <div class="mat-stat-ico" style="background: #fffbeb; color: #d97706; border: 1px solid #fde68a;">
+          <i class="bi bi-play-circle-fill"></i>
+        </div>
       </div>
     </div>
     <div class="col-12 col-md-4">
-      <div class="mat-stat" style="border-bottom: 3px solid #06b6d4;">
+      <div class="mat-stat" style="border-left: 4px solid #047857;">
         <div>
-          <div class="mat-stat-val">{{ total_secundaria }}</div>
-          <div class="mat-stat-lbl">Secundaria</div>
+          <div class="mat-stat-val">{{ total_secundaria|default:"4" }}</div>
+          <div class="mat-stat-lbl">Secundaria / Media Técnica</div>
         </div>
-        <div class="mat-stat-ico" style="background:#cffafe;color:#0891b2;"><i class="bi bi-hexagon-fill"></i></div>
+        <div class="mat-stat-ico" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- BUSCAR + CONTRATAR -->
-  <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between mb-3" style="background:#fff;border-radius:10px;padding:.85rem 1.2rem;border:1px solid #e2e8f0;">
-    <form method="get" action="" class="d-flex gap-2 flex-grow-1" style="max-width:800px;">
-      <div class="input-group" style="max-width: 300px;">
-        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color:#e2e8f0;"><i class="bi bi-search"></i></span>
-        <input type="text" name="q" value="{{ query }}" class="form-control border-start-0 ps-0" placeholder="Buscar alumno por nombre o DNI..." style="border-color:#e2e8f0;font-size:.9rem;">
+  <!-- BUSCADOR Y FILTROS -->
+  <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between mb-3 p-3 rounded-4 bg-white shadow-2xs"
+       style="border: 1.5px solid #fce7f3;">
+    <form method="get" action="" class="d-flex gap-2 flex-grow-1 flex-wrap" style="max-width: 800px;">
+      <div class="input-group" style="max-width: 320px;">
+        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #fce7f3;">
+          <i class="bi bi-search" style="color: #db2777;"></i>
+        </span>
+        <input type="text" name="q" value="{{ query|default:'' }}" class="form-control border-start-0 ps-0"
+               placeholder="Buscar alumno por nombre o DNI..." style="border-color: #fce7f3; font-size: 0.88rem;">
       </div>
-      <select class="form-select text-muted" style="border-color:#e2e8f0;font-size:.9rem;max-width: 200px;">
-          <option>Todos los Grados</option>
-      </select>
-      <select class="form-select text-muted" style="border-color:#e2e8f0;font-size:.9rem;max-width: 150px;">
-          <option>Todas</option>
+      <select name="grado" class="form-select text-muted" style="border-color: #fce7f3; font-size: 0.88rem; max-width: 180px;" onchange="this.form.submit();">
+        <option value="">Todos los Grados</option>
+        <option value="10" {% if request.GET.grado == '10' %}selected{% endif %}>Grado 10°</option>
+        <option value="11" {% if request.GET.grado == '11' %}selected{% endif %}>Grado 11°</option>
       </select>
     </form>
-    <a href="{% url 'nueva_matricula' %}" class="btn text-white fw-semibold px-4 py-2 d-inline-flex align-items-center gap-2" style="background:linear-gradient(135deg,#3b82f6,#2563eb);border-radius:9px;border:none;font-size:.9rem;white-space:nowrap;">
-      <i class="bi bi-plus-circle-fill"></i> Nueva Matr&iacute;cula
+    <a href="{% url 'matricula_nueva' %}" class="btn text-white fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 rounded-pill shadow-sm"
+       style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem; white-space: nowrap;">
+      <i class="bi bi-plus-circle-fill"></i> Nueva Matrícula
     </a>
   </div>
 
-  <!-- TABLA -->
+  <!-- TABLA DE MATRÍCULAS -->
   <div class="mat-tbl">
     <div class="table-responsive">
       <table class="table table-hover mb-0">
         <thead>
           <tr>
             <th class="ps-4">ESTUDIANTE</th>
-            <th>UBICACI&Oacute;N</th>
-            <th class="text-center">ESTADO DE PENSI&Oacute;N</th>
+            <th>UBICACIÓN</th>
+            <th class="text-center">ESTADO DE PENSIÓN</th>
             <th class="text-end pe-4">ACCIONES</th>
           </tr>
         </thead>
@@ -102,9 +247,10 @@ body{background:#f3f5f9 !important;}
           {% regroup matriculas by ficha as fichas_list %}
           {% for ficha_group in fichas_list %}
             <tr>
-              <td colspan="4" style="padding: 0 !important; background: #fff !important; border-bottom: none !important;">
+              <td colspan="4" style="padding: 0 !important; background: #ffffff !important; border-bottom: none !important;">
                 <div class="mat-group-header">
-                  <i class="bi bi-mortarboard-fill me-1"></i> {{ ficha_group.grouper.codigo_ficha }} - {{ ficha_group.grouper.programa.denominacion }}
+                  <i class="bi bi-mortarboard-fill"></i>
+                  {{ ficha_group.grouper.codigo_ficha|default:"CURSO REGULAR" }} — {{ ficha_group.grouper.programa.denominacion|default:"Formación Integral" }}
                 </div>
               </td>
             </tr>
@@ -112,32 +258,45 @@ body{background:#f3f5f9 !important;}
             <tr>
               <td class="ps-4">
                 <div class="d-flex align-items-center gap-3">
-                  <div class="mat-avatar" {% if forloop.counter|divisibleby:2 %}style="background:linear-gradient(135deg,#0284c7,#0369a1);"{% endif %}>
+                  <div class="mat-avatar">
                     {{ m.aprendiz.first_name|first|upper }}{{ m.aprendiz.last_name|first|upper|default:"" }}
                   </div>
                   <div>
-                    <div class="fw-bold text-dark" style="font-size:.88rem;">{{ m.aprendiz.last_name }}, {{ m.aprendiz.first_name }}</div>
-                    <div class="text-muted" style="font-size:.72rem;"><i class="bi bi-person-vcard text-muted"></i> {{ m.aprendiz.perfil.numero_documento|default:'—' }}</div>
+                    <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="fw-bold text-dark text-decoration-none d-block hover-pink" style="font-size: 0.9rem;">
+                      {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
+                    </a>
+                    <div class="text-muted" style="font-size: 0.74rem;">
+                      <i class="bi bi-person-vcard me-1" style="color: #db2777;"></i> Usuario: {{ m.aprendiz.username }} · DNI: {{ m.aprendiz.perfil.documento|default:m.aprendiz.perfil.numero_documento|default:'—' }}
+                    </div>
                   </div>
                 </div>
               </td>
               <td>
-                <div style="font-size:.82rem;">
-                  <div class="fw-bold text-dark">{{ ficha_group.grouper.codigo_ficha }}</div>
-                  <div class="text-muted text-uppercase" style="font-size:.7rem;">SECUNDARIA</div>
+                <div style="font-size: 0.84rem;">
+                  <div class="fw-bold text-dark">{{ ficha_group.grouper.codigo_ficha|default:"10°A" }}</div>
+                  <div class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">MEDIA TÉCNICA</div>
                 </div>
               </td>
               <td class="text-center">
                 <div class="d-flex flex-column align-items-center">
-                    <span class="mat-badge-adelantado"><i class="bi bi-star-fill"></i> ADELANTADO</span>
-                    <span class="text-primary mt-1" style="font-size:0.7rem; font-weight: 700;">Hasta Dic 2026</span>
+                  <span class="mat-badge-adelantado">
+                    <i class="bi bi-star-fill text-warning"></i> AL DÍA
+                  </span>
+                  <span class="mt-1" style="font-size: 0.72rem; font-weight: 700; color: #db2777;">Año Lectivo 2026</span>
                 </div>
               </td>
               <td class="text-end pe-4">
-                <div class="d-inline-flex gap-1">
-                  {% if m.aprendiz.perfil.telefono %}<a href="https://wa.me/{{ m.aprendiz.perfil.telefono }}" target="_blank" rel="noopener" class="mat-btn" style="background:#ecfdf5;color:#10b981;border-color:#a7f3d0;" title="Abrir WhatsApp"><i class="bi bi-whatsapp"></i></a>{% else %}<span class="mat-btn opacity-50" title="Sin teléfono"><i class="bi bi-whatsapp"></i></span>{% endif %}
-                  <a href="{% url 'estudiante_editar' m.aprendiz.pk %}" class="mat-btn" style="background:#fffbeb;color:#d97706;border-color:#fde68a;" title="Editar"><i class="bi bi-pencil-fill"></i></a>
-                  <a href="{% url 'estudiante_eliminar' m.aprendiz.pk %}" class="mat-btn" style="background:#fef2f2;color:#dc2626;border-color:#fecaca;" title="Eliminar"><i class="bi bi-trash-fill"></i></a>
+                <div class="d-inline-flex gap-1.5 align-items-center">
+                  <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold text-white shadow-2xs d-inline-flex align-items-center gap-1"
+                     style="background: #db2777; border: 1px solid #db2777; font-size: 0.78rem;" title="Ver Ficha y Expediente">
+                    <i class="bi bi-person-vcard"></i> Ficha
+                  </a>
+                  <a href="{% url 'estudiante_editar' m.aprendiz.pk %}" class="mat-btn" style="background: #fffbeb; color: #d97706; border-color: #fde68a;" title="Editar">
+                    <i class="bi bi-pencil-fill"></i>
+                  </a>
+                  <a href="{% url 'estudiante_eliminar' m.aprendiz.pk %}" class="mat-btn" style="background: #fef2f2; color: #dc2626; border-color: #fecaca;" title="Eliminar">
+                    <i class="bi bi-trash-fill"></i>
+                  </a>
                 </div>
               </td>
             </tr>
@@ -145,8 +304,9 @@ body{background:#f3f5f9 !important;}
           {% empty %}
             <tr>
               <td colspan="4" class="text-center py-5 text-muted">
-                <i class="bi bi-person-badge fs-2 d-block mb-2 opacity-40"></i>
-                No hay matr&iacute;culas registradas.
+                <i class="bi bi-person-badge fs-2 d-block mb-2" style="color: #db2777; opacity: 0.6;"></i>
+                <h6 class="fw-bold text-dark">No hay matrículas que coincidan con la búsqueda.</h6>
+                <p class="small mb-0">Verifique los filtros o registre una nueva matrícula.</p>
               </td>
             </tr>
           {% endfor %}

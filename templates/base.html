@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SINETEC · Software Administrativo Escolar{% endblock %}</title>
+    <title>{% block title %}EDUNOVA · Sistema Integrado de Educación Técnica{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,106 +15,684 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Sistema de Diseño SINETEC Escolar -->
+    <!-- Sistema de Diseño EDUNOVA Escolar -->
     <link rel="stylesheet" href="{% static 'css/sinetec.css' %}?v=20260925sky">
     <link rel="stylesheet" href="{% static 'css/sinetec_custom.css' %}?v=20260925sky">
+    <style>
+        /* SISTEMA INSTITUCIONAL EDUNOVA - PALETA ROSA ELEGANTE UNIFICADA */
+        body,
+        body.role-docente,
+        body.bg-pink-shell {
+            background-color: #fdf2f4 !important;
+            background: #fdf2f4 !important;
+        }
+
+        .sinetec-shell,
+        body.role-docente .sinetec-shell {
+            background-color: #fdf2f4 !important;
+            background: #fdf2f4 !important;
+        }
+
+        .sinetec-main,
+        body.role-docente .sinetec-main,
+        body.role-docente .docente-shell {
+            background: #fdf2f4 !important;
+            background-color: #fdf2f4 !important;
+        }
+
+        /* SIDEBAR UNIFICADO: BLANCO PURO, ROSADO ELEGANTE, SCROLL FLUIDO */
+        .sinetec-sidebar,
+        body.role-docente .sinetec-sidebar,
+        .sinetec-sidebar.is-docente-sidebar {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border-right: 1px solid #fce7f3 !important;
+            box-shadow: 2px 0 10px rgba(219, 39, 119, 0.02) !important;
+            width: 255px !important;
+            min-width: 255px !important;
+            max-width: 255px !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            position: fixed !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            z-index: 1025 !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            overscroll-behavior: contain !important;
+            display: flex !important;
+            flex-direction: column !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: #f472b6 #fdf2f4 !important;
+        }
+
+        .sinetec-sidebar::-webkit-scrollbar,
+        body.role-docente .sinetec-sidebar::-webkit-scrollbar,
+        .sinetec-sidebar.is-docente-sidebar::-webkit-scrollbar {
+            width: 5px !important;
+        }
+
+        .sinetec-sidebar::-webkit-scrollbar-thumb,
+        body.role-docente .sinetec-sidebar::-webkit-scrollbar-thumb,
+        .sinetec-sidebar.is-docente-sidebar::-webkit-scrollbar-thumb {
+            background: #f472b6 !important;
+            border-radius: 10px !important;
+        }
+
+        /* NAVEGACIÓN DENTRO DEL SIDEBAR */
+        .sinetec-nav,
+        body.role-docente .sinetec-nav,
+        .sinetec-sidebar.is-docente-sidebar .sinetec-nav {
+            overflow: visible !important;
+            overflow-y: visible !important;
+            flex: 1 0 auto !important;
+            padding: 10px 12px 30px 12px !important;
+            background: transparent !important;
+        }
+
+        /* BRAND / CABECERA DEL SIDEBAR */
+        .sinetec-brand,
+        body.role-docente .sinetec-brand,
+        .sinetec-sidebar.is-docente-sidebar .sinetec-brand {
+            background: transparent !important;
+            border-bottom: 1px solid #fce7f3 !important;
+            padding: 16px 18px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            text-decoration: none !important;
+            flex-shrink: 0 !important;
+        }
+
+        .sinetec-brand-icon,
+        body.role-docente .sinetec-brand-icon,
+        .sinetec-sidebar.is-docente-sidebar .sinetec-brand-icon {
+            background: #ffffff !important;
+            border: 1.5px solid #fce7f3 !important;
+            color: #db2777 !important;
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 12px !important;
+            display: grid !important;
+            place-items: center !important;
+            box-shadow: 0 2px 8px rgba(219, 39, 119, 0.06) !important;
+            flex-shrink: 0 !important;
+            padding: 3px !important;
+        }
+
+        .sinetec-brand-title,
+        body.role-docente .sinetec-brand-title,
+        .sinetec-sidebar.is-docente-sidebar .sinetec-brand-title {
+            color: #0f172a !important;
+            font-weight: 800 !important;
+            font-size: 1.15rem !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+        }
+
+        .sinetec-brand-title .badge,
+        body.role-docente .sinetec-brand-title .badge,
+        .sinetec-sidebar.is-docente-sidebar .sinetec-brand-title .badge {
+            background: #f43f5e !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-size: 0.6rem !important;
+            padding: 2px 6px !important;
+            font-weight: 700 !important;
+        }
+
+        .sinetec-brand-subtitle,
+        body.role-docente .sinetec-brand-subtitle,
+        .sinetec-sidebar.is-docente-sidebar .sinetec-brand-subtitle {
+            color: #64748b !important;
+            font-size: 0.72rem !important;
+            font-weight: 500 !important;
+        }
+
+        /* LABELS Y LINKS PARA TODOS LOS ROLES */
+        .sinetec-nav .sinetec-nav-label {
+            color: #be185d !important;
+            font-weight: 700 !important;
+            font-size: 0.7rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            padding: 10px 14px 4px !important;
+        }
+
+        .sinetec-nav .nav-link {
+            display: flex !important;
+            align-items: center !important;
+            padding: 8px 14px !important;
+            color: #334155 !important;
+            font-weight: 500 !important;
+            font-size: 0.88rem !important;
+            text-decoration: none !important;
+            border-radius: 12px !important;
+            transition: all 0.15s ease !important;
+            margin: 2px 0 !important;
+            gap: 10px !important;
+        }
+
+        .sinetec-nav .nav-link i {
+            color: #db2777 !important;
+            font-size: 1.12rem !important;
+            min-width: 22px !important;
+            text-align: center !important;
+        }
+
+        .sinetec-nav .nav-link:hover {
+            background-color: #fff1f5 !important;
+            color: #db2777 !important;
+        }
+
+        .sinetec-nav .nav-link.active {
+            background-color: #fce7f3 !important;
+            color: #db2777 !important;
+            font-weight: 700 !important;
+        }
+
+        .sinetec-nav .nav-link.active i {
+            color: #db2777 !important;
+        }
+
+        /* OCULTAR ELEMENTOS QUE NO VAN EN EL SIDEBAR DOCENTE */
+        body.role-docente .sinetec-sidebar-footer,
+        body.role-docente .sidebar-bottom-actions,
+        body.role-docente .teacher-role-selector,
+        .is-docente-sidebar .sinetec-sidebar-footer,
+        .is-docente-sidebar .sidebar-bottom-actions,
+        .is-docente-sidebar .teacher-role-selector {
+            display: none !important;
+        }
+
+        /* ITEMS DEL MENÚ LATERAL DOCENTE - ROSADO */
+        .teacher-pink-item {
+            display: flex !important;
+            align-items: center !important;
+            padding: 9px 14px !important;
+            color: #334155 !important;
+            font-weight: 500 !important;
+            font-size: 0.88rem !important;
+            text-decoration: none !important;
+            border-radius: 12px !important;
+            transition: all 0.15s ease !important;
+            margin: 2px 0 !important;
+            border: none !important;
+        }
+
+        .teacher-pink-item i,
+        .teacher-pink-item .teacher-icon-pink {
+            color: #db2777 !important;
+            font-size: 1.15rem !important;
+            min-width: 24px !important;
+            text-align: center !important;
+            transition: none !important;
+        }
+
+        .teacher-pink-item:hover {
+            background-color: #fff1f5 !important;
+            color: #db2777 !important;
+        }
+
+        .teacher-pink-item.is-active {
+            background-color: #fce7f3 !important;
+            color: #db2777 !important;
+            font-weight: 700 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .teacher-pink-item.is-active i,
+        .teacher-pink-item.is-active .teacher-icon-pink {
+            color: #db2777 !important;
+        }
     {% block extra_head %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% if 'Docente' in request.user.perfil.rol.nombre or 'Instructor' in request.user.perfil.rol.nombre or 'Profesor' in request.user.perfil.rol.nombre or '/instructor/' in request.path or '/perfil-profesional/' in request.path or '/mis-asignaturas/' in request.path or '/mis-estudiantes/' in request.path or '/actividades-y-tareas/' in request.path or '/asistencia/' in request.path %}role-docente bg-pink-shell{% endif %}">
 
     <div class="sinetec-shell {% if request.resolver_match.url_name == 'home' or request.path == '/' %}is-home-landing{% endif %}" id="sinetecShell">
         {% if request.resolver_match.url_name != 'home' and request.path != '/' %}
         <!-- SIDEBAR INSTITUCIONAL ESCOLAR -->
-        <aside class="sinetec-sidebar" id="sinetecSidebar">
+        <aside class="sinetec-sidebar {% if 'Docente' in request.user.perfil.rol.nombre or 'Instructor' in request.user.perfil.rol.nombre or 'Profesor' in request.user.perfil.rol.nombre or '/instructor/' in request.path or '/perfil-profesional/' in request.path or '/mis-asignaturas/' in request.path or '/mis-estudiantes/' in request.path or '/actividades-y-tareas/' in request.path or '/asistencia/' in request.path %}is-docente-sidebar{% endif %}" id="sinetecSidebar">
             <!-- Barra superior móvil con botón de cierre -->
             <div class="d-flex align-items-center justify-content-between p-3 border-bottom border-white border-opacity-10 d-lg-none" style="background: rgba(0,0,0,0.2);">
                 <div class="d-flex align-items-center gap-2 text-white">
-                    <i class="bi bi-mortarboard-fill text-primary fs-4"></i>
-                    <strong class="font-heading">SINETEC</strong>
+                    <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" style="width: 28px; height: 28px; object-fit: contain;">
+                    <strong class="font-heading">EDUNOVA</strong>
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-light rounded-circle" onclick="toggleSinetecSidebar();" aria-label="Cerrar menú">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
 
-            <!-- Marca e Identidad del Colegio -->
-            <a class="sinetec-brand" href="{% url 'dashboard' %}">
-                <div class="sinetec-brand-icon">
-                    <i class="bi bi-mortarboard-fill"></i>
+            {% with rol=request.user.perfil.rol.nombre|default:'' %}
+            <!-- Marca e Identidad Institucional EDUNOVA -->
+            <a class="sinetec-brand" href="{% if 'Estudiante' in rol or 'Aprendiz' in rol %}{% url 'aprendiz_dashboard' %}{% elif 'Familia' in rol or 'Acudiente' in rol %}{% url 'familia_portal' %}{% elif 'Docente' in rol or 'Instructor' in rol %}{% url 'instructor_dashboard' %}{% elif 'Secretar' in rol %}{% url 'secretaria_dashboard' %}{% elif 'Rector' in rol %}{% url 'rectoria_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}">
+                <div class="sinetec-brand-icon" style="background: #ffffff !important; border: 1.5px solid #fce7f3 !important; box-shadow: 0 2px 8px rgba(219,39,119,0.06); display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; padding: 3px;">
+                    <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" style="width: 36px; height: 36px; object-fit: contain;">
                 </div>
                 <div class="sinetec-brand-text">
-                    <div class="sinetec-brand-title">
-                        SINETEC
-                        <span class="badge bg-primary bg-opacity-25 text-white border border-primary border-opacity-50 py-0 px-1" style="font-size: 0.6rem;">PRO</span>
+                    <div class="sinetec-brand-title" title="EDUNOVA — Sistema Integrado de Educación Técnica" style="color: #0f172a; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                        EDUNOVA
+                        <span class="badge py-0 px-1" style="font-size: 0.6rem; background: #fce7f3; color: #db2777; border: 1px solid #fbcfe8; font-weight: 700;">PRO</span>
                     </div>
-                    <div class="sinetec-brand-subtitle">{{ colegio.nombre|default:"Institución Educativa" }}</div>
+                    <div class="sinetec-brand-subtitle" title="Sistema Integrado de Educación Técnica" style="font-size: 0.72rem; color: #64748b; font-weight: 500;">Educación Técnica</div>
                 </div>
             </a>
 
-            <!-- Navegación Estructurada en 5 Zonas Oficiales -->
+
+
+            <!-- Navegación Estructurada y Filtrada Exclusivamente por Rol -->
             <nav class="sinetec-nav">
-                <!-- ACADÉMICO -->
-                <div class="sinetec-nav-label">Académico</div>
-                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
-                    <i class="bi bi-grid-1x2-fill"></i> Inicio
-                </a>
-                <a class="nav-link {% if 'estudiante' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'estudiantes_lista' %}">
-                    <i class="bi bi-people-fill"></i> Alumnos
-                </a>
-                <a class="nav-link {% if 'matricular' in request.resolver_match.url_name or 'matriculas_lista' in request.resolver_match.url_name or 'registrar_aprendiz' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}">
-                    <i class="bi bi-person-plus-fill"></i> Matrículas
-                </a>
-                <a class="nav-link {% if 'horario' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'horarios_tablero' %}">
-                    <i class="bi bi-calendar2-week-fill"></i> Horarios
-                </a>
-                <a class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'instructores_lista' %}">
-                    <i class="bi bi-person-badge-fill"></i> Profesores
-                </a>
-                <a class="nav-link {% if 'programa' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'programas_lista' %}">
-                    <i class="bi bi-stack"></i> Carga Acad.
-                </a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'cursos_lista' %}active{% endif %}" href="{% url 'cursos_lista' %}">
-                    <i class="bi bi-journal-bookmark-fill"></i> Cursos
-                </a>
-                <a class="nav-link {% if 'calificacion' in request.resolver_match.url_name or 'evaluacion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'calificaciones' %}">
-                    <i class="bi bi-clipboard2-data-fill"></i> Notas
-                </a>
+                {% if 'Estudiante' in rol or 'Aprendiz' in rol %}
+                    <!-- 1. ESTUDIANTE -->
+                    <div class="sinetec-nav-label">Mi Portal</div>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'aprendiz_dashboard' or request.resolver_match.url_name == 'aula_aprendiz' %}active{% endif %}" href="{% url 'aprendiz_dashboard' %}">
+                        <i class="bi bi-grid-1x2-fill"></i> Mi Inicio
+                    </a>
+                    <a class="nav-link" href="{% url 'aprendiz_dashboard' %}#tab-calificaciones" onclick="activarTab('tab-calificaciones');">
+                        <i class="bi bi-clipboard2-data-fill"></i> Mis Calificaciones
+                    </a>
+                    <a class="nav-link" href="{% url 'aprendiz_dashboard' %}#tab-horario" onclick="activarTab('tab-horario');">
+                        <i class="bi bi-calendar2-week-fill"></i> Mi Horario
+                    </a>
+                    <a class="nav-link" href="{% url 'aprendiz_dashboard' %}#tab-actividades" onclick="activarTab('tab-actividades');">
+                        <i class="bi bi-pencil-square"></i> Mis Tareas
+                    </a>
+                    <a class="nav-link" href="{% url 'aprendiz_dashboard' %}#tab-asistencia" onclick="activarTab('tab-asistencia');">
+                        <i class="bi bi-check2-square"></i> Mi Asistencia
+                    </a>
+                    <div class="sinetec-nav-label">Canales</div>
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
+                        <i class="bi bi-megaphone-fill"></i> Comunicados
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'comunicaciones' %}active{% endif %}" href="{% url 'comunicaciones' %}">
+                        <i class="bi bi-chat-heart-fill"></i> Mensajería
+                    </a>
+                    <a class="nav-link {% if 'portafolio' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'portafolio_aprendiz' %}">
+                        <i class="bi bi-journal-bookmark-fill"></i> Mi Portafolio
+                    </a>
 
-                <!-- ADMINISTRACIÓN -->
-                <div class="sinetec-nav-label">Administración</div>
-                <a class="nav-link {% if request.resolver_match.url_name == 'caja_pensiones' %}active{% endif %}" href="{% url 'caja_pensiones' %}">
-                    <i class="bi bi-cash-coin"></i> Pensiones
-                </a>
-                <a class="nav-link {% if 'gestion_usuarios' in request.resolver_match.url_name or 'configuracion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'gestion_usuarios' %}">
-                    <i class="bi bi-person-gear"></i> Usuarios
-                </a>
-                <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
-                    <i class="bi bi-megaphone-fill"></i> Comunicados
-                </a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento_asistencia' %}active{% endif %}" href="{% url 'seguimiento_asistencia' %}">
-                    <i class="bi bi-check2-square"></i> Tomar Asist.
-                </a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'transporte_escolar' %}active{% endif %}" href="{% url 'transporte_escolar' %}">
-                    <i class="bi bi-bus-front-fill"></i> Transporte
-                </a>
+                {% elif 'Familia' in rol or 'Acudiente' in rol %}
+                    <!-- 2. FAMILIA / ACUDIENTE -->
+                    <div class="sinetec-nav-label">Familia</div>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_portal' or request.resolver_match.url_name == 'familia_portal_alt' %}active{% endif %}" href="{% url 'familia_portal' %}">
+                        <i class="bi bi-house-heart-fill"></i> Resumen de mis Hijos
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_matricula' %}active{% endif %}" href="{% url 'familia_matricula' %}">
+                        <i class="bi bi-person-vcard-fill"></i> Ficha de Matrícula
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_boletines' %}active{% endif %}" href="{% url 'familia_boletines' %}">
+                        <i class="bi bi-clipboard2-data-fill"></i> Boletines y Notas
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_asistencia' %}active{% endif %}" href="{% url 'familia_asistencia' %}">
+                        <i class="bi bi-calendar-check-fill"></i> Asistencia de Hijos
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_pensiones' %}active{% endif %}" href="{% url 'familia_pensiones' %}">
+                        <i class="bi bi-receipt"></i> Recibos de Pensión
+                    </a>
+                    <div class="sinetec-nav-label">Comunicación</div>
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
+                        <i class="bi bi-megaphone-fill"></i> Circulares Oficiales
+                    </a>
 
-                <!-- CERRAR SESIÓN -->
-                <div class="mt-auto pt-3 border-top" style="border-color:rgba(255,255,255,.1)!important;">
-                    <form method="post" action="{% url 'logout' %}">
+                {% elif 'Docente' in rol or 'Instructor' in rol or 'Profesor' in rol or '/instructor/' in request.path or '/perfil-profesional/' in request.path or '/mis-asignaturas/' in request.path or '/mis-estudiantes/' in request.path or '/alumno/' in request.path or '/actividades-y-tareas/' in request.path or '/asistencia/' in request.path or '/calificaciones-docente/' in request.path or '/horario' in request.path or '/comunicaciones-docente/' in request.path or '/notificaciones-docente/' in request.path or '/papelera-docente/' in request.path %}
+                    <!-- 3. DOCENTE: MENÚ LATERAL OFICIAL EDUNOVA CON DISEÑO ROSA ELEGANTE -->
+                    <div class="teacher-sidebar-pink p-1">
+                        <!-- 1. Inicio -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'instructor_dashboard' %}?subpanel=inicio" class="teacher-pink-item {% if subpanel_activo == 'inicio' or not subpanel_activo and not request.GET.subpanel %}is-active{% endif %}" id="nav-item-inicio">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-house-door-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Inicio</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 2. Mis Estudiantes -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'mis_estudiantes' %}" class="teacher-pink-item {% if subpanel_activo == 'estudiantes' %}is-active{% endif %}" id="nav-item-estudiantes">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-people-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Mis Estudiantes</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 3. Mis Grupos -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'mis_grupos' %}" class="teacher-pink-item {% if subpanel_activo == 'grupos' %}is-active{% endif %}" id="nav-item-grupos">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-collection-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Mis Grupos</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 4. Mis Asignaturas -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'mis_asignaturas' %}" class="teacher-pink-item {% if subpanel_activo == 'asignaturas' %}is-active{% endif %}" id="nav-item-asignaturas">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-book-half teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Mis Asignaturas</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 5. Horario Escolar -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'horario_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'horario' %}is-active{% endif %}" id="nav-item-horario">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-calendar-event-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Horario Escolar</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 6. Asistencia -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'asistencia_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'asistencia' %}is-active{% endif %}" id="nav-item-asistencia">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-check-square-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Asistencia</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 7. Actividades / Tareas -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'actividades_tareas' %}" class="teacher-pink-item {% if subpanel_activo == 'actividades' or subpanel_activo == 'tareas' %}is-active{% endif %}" id="nav-item-actividades">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-journal-text teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Actividades / Tareas</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 8. Calificaciones -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'calificaciones_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'calificaciones' %}is-active{% endif %}" id="nav-item-calificaciones">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-mortarboard-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Calificaciones</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 9. Comportamiento / Seguimiento -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'comportamiento_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'comportamiento' or subpanel_activo == 'seguimiento' %}is-active{% endif %}" id="nav-item-comportamiento">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-shield-check teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Comportamiento</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 10. Recursos / Guías -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'recursos_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'recursos' or subpanel_activo == 'guias' %}is-active{% endif %}" id="nav-item-recursos">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-folder2-open teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Recursos / Guías</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 11. Mensajes -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'comunicaciones_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'comunicaciones' or subpanel_activo == 'mensajeria' %}is-active{% endif %}" id="nav-item-comunicaciones">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-chat-dots-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Mensajes</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 12. Documentos -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'documentos_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'documentos' %}is-active{% endif %}" id="nav-item-documentos">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-file-earmark-text-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Documentos</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 13. Eventos / Calendario -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'eventos_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'eventos' or subpanel_activo == 'calendario' %}is-active{% endif %}" id="nav-item-eventos">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-calendar3-event-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Eventos / Calendario</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 14. Reportes -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'reportes_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'reportes' %}is-active{% endif %}" id="nav-item-reportes">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-bar-chart-line-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Reportes</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 15. Notificaciones -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'notificaciones_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'notificaciones' %}is-active{% endif %}" id="nav-item-notificaciones">
+                                <span class="d-flex align-items-center justify-content-between w-100">
+                                    <span class="d-flex align-items-center gap-3">
+                                        <i class="bi bi-bell-fill teacher-icon-pink"></i>
+                                        <span class="teacher-label-text">Notificaciones</span>
+                                    </span>
+                                    {% if total_notificaciones_sin_leer > 0 or num_notificaciones_no_leidas > 0 %}
+                                    <span class="badge rounded-pill shadow-sm" style="background: #f43f5e; color: #fff; font-size: 0.68rem; padding: 2px 7px;">{{ total_notificaciones_sin_leer|default:num_notificaciones_no_leidas }}</span>
+                                    {% endif %}
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 16. Perfil Profesional -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'perfil_profesional' %}" class="teacher-pink-item {% if subpanel_activo == 'perfil' %}is-active{% endif %}" id="nav-item-perfil">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-person-badge-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Perfil Profesional</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 17. Manual de Usuario -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'manual_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'manual' %}is-active{% endif %}" id="nav-item-manual">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-question-circle-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Manual de Usuario</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 18. Papelera -->
+                        <div class="teacher-menu-group mb-1">
+                            <a href="{% url 'papelera_docente' %}" class="teacher-pink-item {% if subpanel_activo == 'papelera' %}is-active{% endif %}" id="nav-item-papelera">
+                                <span class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-trash3-fill teacher-icon-pink"></i>
+                                    <span class="teacher-label-text">Papelera</span>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+
+                {% elif 'Secretar' in rol %}
+                    <!-- 4. SECRETARÍA -->
+                    <div class="sinetec-nav-label">Secretaría</div>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'secretaria_dashboard' %}active{% endif %}" href="{% url 'secretaria_dashboard' %}">
+                        <i class="bi bi-briefcase-fill"></i> Panel Secretaría
+                    </a>
+                    <a class="nav-link {% if 'matricular' in request.resolver_match.url_name or 'matriculas_lista' in request.resolver_match.url_name or 'registrar_aprendiz' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}">
+                        <i class="bi bi-person-plus-fill"></i> Matrículas y Cupos
+                    </a>
+                    <a class="nav-link {% if 'estudiante' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'estudiantes_lista' %}">
+                        <i class="bi bi-people-fill"></i> Estudiantes
+                    </a>
+                    <a class="nav-link {% if 'familia' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familias_lista' %}">
+                        <i class="bi bi-person-vcard-fill"></i> Familias y Acudientes
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'cursos_lista' %}active{% endif %}" href="{% url 'cursos_lista' %}">
+                        <i class="bi bi-journal-bookmark-fill"></i> Cursos y Grupos
+                    </a>
+                    <a class="nav-link {% if 'horario' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'horarios_tablero' %}">
+                        <i class="bi bi-calendar2-week-fill"></i> Horarios
+                    </a>
+                    <div class="sinetec-nav-label">Administración</div>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'caja_pensiones' %}active{% endif %}" href="{% url 'caja_pensiones' %}">
+                        <i class="bi bi-cash-coin"></i> Caja y Pensiones
+                    </a>
+                    <a class="nav-link {% if 'transporte' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'transporte_escolar' %}">
+                        <i class="bi bi-bus-front-fill"></i> Transporte
+                    </a>
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
+                        <i class="bi bi-megaphone-fill"></i> Comunicados
+                    </a>
+                    <a class="nav-link {% if 'reporte' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'centro_reportes' %}">
+                        <i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes
+                    </a>
+                    <a class="nav-link {% if 'papelera' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'papelera_reciclaje' %}">
+                        <i class="bi bi-trash3-fill"></i> Papelera
+                    </a>
+                    <a class="nav-link {% if 'auditoria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'auditoria_lista' %}">
+                        <i class="bi bi-shield-check"></i> Auditoría
+                    </a>
+
+                {% elif 'Rector' in rol %}
+                    <!-- 5. RECTORÍA -->
+                    <div class="sinetec-nav-label">Rectoría</div>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'rectoria_dashboard' %}active{% endif %}" href="{% url 'rectoria_dashboard' %}">
+                        <i class="bi bi-building-fill-check"></i> Resumen Institucional
+                    </a>
+                    <a class="nav-link {% if 'estudiante' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'estudiantes_lista' %}">
+                        <i class="bi bi-people-fill"></i> Estudiantes
+                    </a>
+                    <a class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'instructores_lista' %}">
+                        <i class="bi bi-person-badge-fill"></i> Cuerpo Docente
+                    </a>
+                    <a class="nav-link {% if 'matriculas_lista' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}">
+                        <i class="bi bi-person-plus-fill"></i> Matrículas
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'cursos_lista' %}active{% endif %}" href="{% url 'cursos_lista' %}">
+                        <i class="bi bi-journal-bookmark-fill"></i> Cursos
+                    </a>
+                    <a class="nav-link {% if 'calificacion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'calificaciones' %}">
+                        <i class="bi bi-clipboard2-data-fill"></i> Rendimiento
+                    </a>
+                    <a class="nav-link {% if 'alerta' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'alertas_tempranas' %}">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Alertas
+                    </a>
+                    <div class="sinetec-nav-label">Institucional</div>
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
+                        <i class="bi bi-megaphone-fill"></i> Circulares
+                    </a>
+                    <a class="nav-link {% if 'reporte' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'centro_reportes' %}">
+                        <i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes
+                    </a>
+                    <a class="nav-link {% if 'papelera' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'papelera_reciclaje' %}">
+                        <i class="bi bi-trash3-fill"></i> Papelera
+                    </a>
+                    <a class="nav-link {% if 'auditoria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'auditoria_lista' %}">
+                        <i class="bi bi-shield-check"></i> Auditoría
+                    </a>
+
+                {% else %}
+                    <!-- 6. ADMINISTRADOR (Acceso y Supervisión Completa) -->
+                    <div class="sinetec-nav-label">Académico</div>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                        <i class="bi bi-grid-1x2-fill"></i> Inicio
+                    </a>
+                    <a class="nav-link {% if 'estudiante' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'estudiantes_lista' %}">
+                        <i class="bi bi-people-fill"></i> Alumnos
+                    </a>
+                    <a class="nav-link {% if 'matricular' in request.resolver_match.url_name or 'matriculas_lista' in request.resolver_match.url_name or 'registrar_aprendiz' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}">
+                        <i class="bi bi-person-plus-fill"></i> Matrículas
+                    </a>
+                    <a class="nav-link {% if 'horario' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'horarios_tablero' %}">
+                        <i class="bi bi-calendar2-week-fill"></i> Horarios
+                    </a>
+                    <a class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'instructores_lista' %}">
+                        <i class="bi bi-person-badge-fill"></i> Profesores
+                    </a>
+                    <a class="nav-link {% if 'programa' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'programas_lista' %}">
+                        <i class="bi bi-stack"></i> Carga Académica
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'cursos_lista' %}active{% endif %}" href="{% url 'cursos_lista' %}">
+                        <i class="bi bi-journal-bookmark-fill"></i> Cursos
+                    </a>
+                    <a class="nav-link {% if 'calificacion' in request.resolver_match.url_name or 'evaluacion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'calificaciones' %}">
+                        <i class="bi bi-clipboard2-data-fill"></i> Notas
+                    </a>
+
+                    <div class="sinetec-nav-label">Administración</div>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'caja_pensiones' %}active{% endif %}" href="{% url 'caja_pensiones' %}">
+                        <i class="bi bi-cash-coin"></i> Pensiones
+                    </a>
+                    <a class="nav-link {% if 'gestion_usuarios' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'gestion_usuarios' %}">
+                        <i class="bi bi-person-gear"></i> Usuarios
+                    </a>
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
+                        <i class="bi bi-megaphone-fill"></i> Comunicaciones
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento_asistencia' %}active{% endif %}" href="{% url 'seguimiento_asistencia' %}">
+                        <i class="bi bi-check2-square"></i> Tomar Asistencia
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'transporte_escolar' %}active{% endif %}" href="{% url 'transporte_escolar' %}">
+                        <i class="bi bi-bus-front-fill"></i> Transporte
+                    </a>
+                    <a class="nav-link {% if 'reporte' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'centro_reportes' %}">
+                        <i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes
+                    </a>
+                    <a class="nav-link {% if 'auditoria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'auditoria_lista' %}">
+                        <i class="bi bi-shield-check"></i> Auditoría
+                    </a>
+                    <a class="nav-link {% if 'configuracion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'configuracion_sistema' %}">
+                        <i class="bi bi-sliders"></i> Configuración
+                    </a>
+                    <a class="nav-link {% if 'papelera' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'papelera_reciclaje' %}">
+                        <i class="bi bi-trash3-fill"></i> Papelera
+                    </a>
+                {% endif %}
+
+                {% if not 'Docente' in rol and not 'Instructor' in rol and not 'Profesor' in rol and not '/instructor/' in request.path and not '/perfil-profesional/' in request.path and not '/mis-asignaturas/' in request.path and not '/mis-estudiantes/' in request.path and not '/actividades-y-tareas/' in request.path and not '/asistencia/' in request.path %}
+                <!-- CERRAR SESIÓN Y AJUSTES (SOLO OTROS ROLES) -->
+                <div class="mt-auto pt-3 border-top d-flex align-items-center justify-content-between gap-2 sidebar-bottom-actions" style="border-color: rgba(226, 232, 240, 0.8) !important;">
+                    <form method="post" action="{% url 'logout' %}" class="flex-grow-1 m-0">
                         {% csrf_token %}
-                        <button type="submit" class="nav-link text-white-50 border-0 bg-transparent w-100 text-start" style="cursor:pointer;">
-                            <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
+                        <button type="submit" class="btn btn-sm btn-outline-danger w-100 text-start rounded-pill px-3 py-1.5 d-flex align-items-center gap-2 border-0" style="cursor:pointer; background: rgba(239, 68, 68, 0.08); color: #dc2626;">
+                            <i class="bi bi-box-arrow-left text-danger"></i> <span class="small fw-semibold">Cerrar Sesión</span>
                         </button>
                     </form>
+                    <a href="{% url 'configuracion_sistema' %}" class="btn btn-sm btn-light rounded-circle p-2 text-secondary border" title="Configuración">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
                 </div>
+                {% endif %}
             </nav>
+            {% endwith %}
 
+            {% with rol=request.user.perfil.rol.nombre|default:'' %}
+            {% if not 'Docente' in rol and not 'Instructor' in rol and not 'Profesor' in rol and not '/instructor/' in request.path and not '/perfil-profesional/' in request.path and not '/mis-asignaturas/' in request.path and not '/mis-estudiantes/' in request.path and not '/actividades-y-tareas/' in request.path and not '/asistencia/' in request.path %}
             <!-- Pie del Sidebar con datos de la Institución -->
             <div class="sinetec-sidebar-footer">
                 <strong><i class="bi bi-shield-check me-1 text-primary"></i> {{ colegio.nombre|default:"Institución Educativa Técnica" }}</strong>
                 {{ colegio.lema|default:"Formación Integral, Ciencia y Tecnología" }}
             </div>
+            {% endif %}
+            {% endwith %}
         </aside>
 
         <!-- Telón de Fondo para Móviles -->
@@ -135,14 +713,52 @@
                     </button>
                     <form class="sinetec-search d-none d-sm-flex" action="{% url 'busqueda_global' %}" method="get">
                         <i class="bi bi-search"></i>
-                        <input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Buscar estudiantes, cursos, trámites..." aria-label="Buscar en SINETEC">
+                        <input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Buscar en el sistema..." aria-label="Buscar en SINETEC">
                     </form>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
 
+                    {% with rol=request.user.perfil.rol.nombre|default:'' %}
+                    {% if 'Docente' in rol or 'Instructor' in rol or 'Profesor' in rol or '/instructor/' in request.path or '/perfil-profesional/' in request.path %}
+                    <!-- Topbar Docente: Fecha elegante en cápsula rosada idéntica a la captura -->
+                    <div class="d-none d-md-flex align-items-center gap-2 px-3 py-1.5 rounded-pill me-2 shadow-2xs" style="background: #fdf2f8; border: 1px solid #fce7f3;">
+                        <i class="bi bi-calendar3" style="color: #db2777; font-size: 1.1rem;"></i>
+                        <div class="lh-1 text-start" style="font-size: 0.78rem;">
+                            <div class="fw-bold text-dark">Martes, 29</div>
+                            <small class="text-muted" style="font-size: 0.68rem;">de septiembre de 2026</small>
+                        </div>
+                    </div>
 
-                    <!-- Centro de Notificaciones -->
+                    <!-- Notificaciones con campana y globo rosado -->
+                    <a href="{% url 'instructor_dashboard' %}?subpanel=notificaciones" class="sinetec-icon-btn position-relative me-1" title="Notificaciones">
+                        <i class="bi bi-bell text-secondary fs-5"></i>
+                        {% if num_notificaciones_no_leidas > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background: #f43f5e; color: #fff; font-size: 0.62rem; padding: 2px 5px;">
+                            {{ num_notificaciones_no_leidas }}
+                        </span>
+                        {% endif %}
+                    </a>
+
+                    <!-- Usuario Docente: Avatar azul marino y datos limpios -->
+                    <div class="dropdown">
+                        <button class="sinetec-user-pill border-0 text-start d-flex align-items-center gap-2 p-1 pe-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: transparent;">
+                            <span class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; background: #1e1b4b; font-size: 0.95rem;">
+                                {{ user.first_name|default:user.username|slice:':1'|upper }}
+                            </span>
+                            <span class="d-none d-md-block text-truncate lh-1" style="max-width: 160px;">
+                                <strong class="d-block small text-dark fw-bold mb-0.5">{{ user.get_full_name|default:user.username }}</strong>
+                                <small class="text-muted" style="font-size: 0.72rem;">Docente</small>
+                            </span>
+                            <i class="bi bi-chevron-down text-muted small ms-1"></i>
+                        </button>
+                    {% else %}
+                    <!-- Botón de Ayuda Docente / Institucional -->
+                    <button type="button" class="sinetec-icon-btn d-none d-sm-grid" title="Mesa de Ayuda y Soporte" onclick="alert('Centro de Ayuda EDUNOVA: Soporte académico disponible de 7:00 AM a 5:00 PM.');">
+                        <i class="bi bi-question-circle"></i>
+                    </button>
+
+                    <!-- Centro de Notificaciones General -->
                     <div class="dropdown">
                         <button class="sinetec-icon-btn position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notificaciones">
                             <i class="bi bi-bell"></i>
@@ -164,13 +780,23 @@
                             <div class="p-2" style="max-height: 280px; overflow-y: auto;">
                                 {% if notificaciones_campana %}
                                     {% for n in notificaciones_campana %}
+                                        {% if n.enlace %}
+                                        <a href="{{ n.enlace }}" class="text-decoration-none d-block p-2 border-bottom rounded-2 mb-1 notif-item-link" style="background: rgba(37,99,235,0.03);">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <strong class="small text-dark text-truncate" style="max-width: 200px;">{{ n.titulo }}</strong>
+                                                <small class="text-muted" style="font-size: 0.7rem;">{{ n.fecha_creacion|timesince }}</small>
+                                            </div>
+                                            <p class="small text-secondary mb-0 text-truncate" style="font-size: 0.78rem;">{{ n.mensaje }}</p>
+                                        </a>
+                                        {% else %}
                                         <div class="p-2 border-bottom rounded-2 mb-1">
                                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <strong class="small text-dark">{{ n.titulo|truncatechars:26 }}</strong>
+                                                <strong class="small text-dark text-truncate" style="max-width: 200px;">{{ n.titulo }}</strong>
                                                 <small class="text-muted" style="font-size: 0.7rem;">{{ n.fecha_creacion|timesince }}</small>
                                             </div>
                                             <p class="small text-secondary mb-0" style="font-size: 0.78rem;">{{ n.mensaje|truncatechars:65 }}</p>
                                         </div>
+                                        {% endif %}
                                     {% endfor %}
                                 {% else %}
                                     <div class="text-center py-4 text-muted small">
@@ -187,18 +813,24 @@
                         </div>
                     </div>
 
-                    <!-- Usuario y Perfil -->
+                    <!-- Usuario y Perfil General -->
                     <div class="dropdown">
                         <button class="sinetec-user-pill border-0 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="sinetec-avatar">
+                            {% if 'Docente' in user.perfil.rol.nombre or 'Instructor' in user.perfil.rol.nombre or 'Profesor' in user.perfil.rol.nombre or '/instructor/' in request.path or '/perfil-profesional/' in request.path or '/mis-asignaturas/' in request.path or '/mis-estudiantes/' in request.path or '/alumno/' in request.path or '/actividades-y-tareas/' in request.path or '/asistencia/' in request.path or '/calificaciones-docente/' in request.path or '/horario' in request.path or '/comunicaciones-docente/' in request.path or '/notificaciones-docente/' in request.path or '/papelera-docente/' in request.path %}
+                            <img src="{% static 'img/docente_maria.png' %}" alt="{{ user.get_full_name }}" class="sinetec-avatar rounded-circle shadow-xs" style="width: 36px; height: 36px; object-fit: cover; object-position: top center; border: 2px solid #fce7f3;">
+                            {% else %}
+                            <span class="sinetec-avatar overflow-hidden p-0 d-inline-flex align-items-center justify-content-center bg-primary text-white fw-bold">
                                 {{ user.first_name|default:user.username|slice:':1'|upper }}
                             </span>
+                            {% endif %}
                             <span class="d-none d-md-block text-truncate" style="max-width: 140px;">
                                 <strong class="d-block small text-dark leading-tight">{{ user.get_full_name|default:user.username }}</strong>
-                                <small class="text-muted" style="font-size: 0.72rem;">{{ user.perfil.rol.nombre|default:'Administrador' }}</small>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ user.perfil.rol.nombre|default:'Docente' }}</small>
                             </span>
                             <i class="bi bi-chevron-down text-muted small ms-1"></i>
                         </button>
+                    {% endif %}
+                    {% endwith %}
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mt-2" style="min-width: 220px;">
                             <li class="px-3 py-2 border-bottom mb-1">
                                 <div class="fw-bold text-dark small">{{ user.get_full_name|default:user.username }}</div>
@@ -208,15 +840,17 @@
                                 </span>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2 rounded-2" href="{% url 'dashboard' %}">
+                                <a class="dropdown-item py-2 rounded-2" href="{% if 'Estudiante' in user.perfil.rol.nombre or 'Aprendiz' in user.perfil.rol.nombre %}{% url 'aprendiz_dashboard' %}{% elif 'Familia' in user.perfil.rol.nombre or 'Acudiente' in user.perfil.rol.nombre %}{% url 'familia_portal' %}{% elif 'Docente' in user.perfil.rol.nombre or 'Instructor' in user.perfil.rol.nombre %}{% url 'instructor_dashboard' %}{% elif 'Secretar' in user.perfil.rol.nombre %}{% url 'secretaria_dashboard' %}{% elif 'Rector' in user.perfil.rol.nombre %}{% url 'rectoria_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}">
                                     <i class="bi bi-speedometer2 text-primary me-2"></i> Mi Panel de Control
                                 </a>
                             </li>
+                            {% if 'Administrador' in user.perfil.rol.nombre or 'Secretar' in user.perfil.rol.nombre or user.is_superuser %}
                             <li>
                                 <a class="dropdown-item py-2 rounded-2" href="{% url 'configuracion_sistema' %}">
                                     <i class="bi bi-sliders text-secondary me-2"></i> Configuración del Sistema
                                 </a>
                             </li>
+                            {% endif %}
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
                                 <form method="post" action="{% url 'logout' %}" class="m-0 p-0">
@@ -266,6 +900,19 @@
                     if (bd) bd.classList.toggle('is-visible');
                 }
 
+                function toggleSidebarGroup(groupId, e) {
+                    if (e) e.stopPropagation();
+                    const el = document.getElementById(groupId);
+                    const chev = document.getElementById('chev-' + groupId);
+                    if (el) {
+                        const isOpen = (el.style.display === 'block');
+                        el.style.display = isOpen ? 'none' : 'block';
+                        if (chev) {
+                            chev.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+                        }
+                    }
+                }
+
                 document.addEventListener('DOMContentLoaded', function() {
                     const sb = document.getElementById('sinetecSidebar');
                     const bd = document.getElementById('sinetecBackdrop');
@@ -285,6 +932,31 @@
                             bd.classList.remove('is-visible');
                         }
                     });
+                    const dateEl = document.getElementById('topbarLiveDateFormatted');
+                    if (dateEl) {
+                        const hoy = new Date();
+                        const opciones = { weekday: 'short', day: 'numeric', month: 'short' };
+                        dateEl.textContent = hoy.toLocaleDateString('es-CO', opciones);
+                    }
+
+                    // Manejador global de activación de pestañas mediante hash o función
+                    function activarTab(tabId) {
+                        if (!tabId) return;
+                        const cleanId = tabId.replace(/^#/, '');
+                        const tabBtn = document.getElementById(cleanId + '-btn') || document.querySelector(`[data-bs-target="#${cleanId}"]`);
+                        if (tabBtn && typeof bootstrap !== 'undefined') {
+                            const tabInstance = bootstrap.Tab.getOrCreateInstance(tabBtn);
+                            tabInstance.show();
+                            const pestanasEl = document.getElementById('seccion-pestanas') || tabBtn;
+                            if (pestanasEl) {
+                                pestanasEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }
+                    }
+                    window.activarTab = activarTab;
+                    if (window.location.hash && window.location.hash.startsWith('#tab-')) {
+                        setTimeout(function() { activarTab(window.location.hash.substring(1)); }, 120);
+                    }
                 });
             </script>
             {% block extra_js %}{% endblock %}

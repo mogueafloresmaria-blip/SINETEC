@@ -1,0 +1,164 @@
+{% load static %}
+<!-- =========================================================================
+     MÓDULO: RECURSOS E IDEAS PEDAGÓGICAS
+     Biblioteca docente de guías, documentos, enlaces e ideas para actividades
+     ========================================================================= -->
+<div class="panel-modulo-docente space-y-4" id="modulo-recursos">
+
+    <!-- HERO BANNER RECURSOS E IDEAS -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
+         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1.5px solid #fce7f3;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
+                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1.5px solid #fce7f3;">
+                    <i class="bi bi-lightbulb-fill" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Espacio de Innovación y Apoyo
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Recursos e Ideas Pedagógicas
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Guías de clase, materiales curriculares, enlaces pedagógicos e ideas prácticas para fortalecer tus actividades escolares.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+                <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalAgregarRecurso"
+                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                    <i class="bi bi-plus-circle-fill"></i> + Agregar Recurso
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE RECURSOS E IDEAS -->
+    <div class="row g-3 mb-4">
+        {% for g in guias_biblioteca %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between hover-shadow transition" style="border-color: #fce7f3 !important;">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-2.5">
+                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.74rem;">
+                            {{ g.carga_academica.programa.denominacion|default:'Matemáticas' }}
+                        </span>
+                        <span class="badge rounded-pill px-2.5 py-1 text-muted" style="background: #f1f5f9; font-size: 0.72rem;">
+                            Grado {{ g.carga_academica.grado }}°{{ g.carga_academica.seccion }}
+                        </span>
+                    </div>
+
+                    <h5 class="fw-bold text-dark mb-1.5" style="font-size: 1.05rem;">{{ g.titulo }}</h5>
+                    <p class="text-muted small mb-3 leading-relaxed" style="font-size: 0.84rem; white-space: pre-line;">
+                        {{ g.instrucciones|default:'Recurso pedagógico con orientaciones temáticas y materiales de apoyo.'|truncatewords:25 }}
+                    </p>
+                </div>
+
+                <div class="pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #fce7f3 !important;">
+                    {% if g.archivo %}
+                    <a href="{{ g.archivo.url }}" target="_blank" class="btn btn-sm btn-white border rounded-pill px-3 py-1 fw-semibold small shadow-2xs" style="color: #475569; font-size: 0.8rem;">
+                        <i class="bi bi-file-earmark-arrow-down text-danger me-1"></i> Descargar Material
+                    </a>
+                    {% else %}
+                    <span class="badge bg-light text-muted border px-2.5 py-1 small" style="font-size: 0.75rem;">Material Digital</span>
+                    {% endif %}
+
+                    <a href="{% url 'actividades_tareas' %}?guia_id={{ g.id }}" class="btn btn-sm text-white rounded-pill px-3 py-1 fw-bold shadow-2xs" style="background: #db2777; font-size: 0.8rem;">
+                        <i class="bi bi-plus-circle me-1"></i> Usar en Actividad
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border rounded-4 p-5 text-center bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+                <div class="rounded-circle mx-auto p-3 d-flex align-items-center justify-content-center mb-3" 
+                     style="background: #fff0f3; color: #db2777; width: 68px; height: 68px;">
+                    <i class="bi bi-journal-bookmark fs-1"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">No tienes recursos registrados todavía.</h5>
+                <p class="text-muted small mb-4 mx-auto" style="max-width: 480px;">
+                    Crea guías pedagógicas, enlaces didácticos, ideas de actividades o documentos de apoyo para utilizarlos en tus clases y compartirlos con tus grupos escolares.
+                </p>
+                <div>
+                    <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold small shadow-sm" 
+                            data-bs-toggle="modal" data-bs-target="#modalAgregarRecurso" style="background: #db2777; border: 1px solid #db2777;">
+                        <i class="bi bi-plus-lg me-1.5"></i> Agregar recurso
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- MODAL: AGREGAR RECURSO E IDEA PEDAGÓGICA -->
+<div class="modal fade" id="modalAgregarRecurso" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1.5px solid #fce7f3;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-lightbulb-fill fs-5" style="color: #db2777;"></i>
+                    <h6 class="modal-title fw-bold text-dark">Nuevo Recurso o Idea Pedagógica</h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="agregar_recurso">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Título del Recurso *</label>
+                        <input type="text" name="titulo" class="form-control rounded-pill px-3.5 py-2" placeholder="Ej: Taller Práctico - Algoritmos y Diagramas de Flujo" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Tipo de Recurso</label>
+                            <select name="tipo_recurso" class="form-select form-select-sm rounded-pill px-3 py-2">
+                                <option value="Guía Curricular" selected>Guía Curricular</option>
+                                <option value="Material de Clase">Material de Clase</option>
+                                <option value="Documento de Apoyo">Documento de Apoyo</option>
+                                <option value="Enlace / Video">Enlace / Video</option>
+                                <option value="Idea de Actividad">Idea de Actividad</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">Asignatura y Grado *</label>
+                            <select name="carga_id" class="form-select form-select-sm rounded-pill px-3 py-2" required>
+                                {% for c in cargas %}
+                                <option value="{{ c.id }}">{{ c.programa.denominacion }} — Grado {{ c.grado }}°{{ c.seccion }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Descripción / Orientaciones Pedagógicas</label>
+                        <textarea name="descripcion" rows="3" class="form-control rounded-4 px-3.5 py-2" placeholder="Describa el objetivo formativo, instrucciones o metodología..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Enlace Web de Consulta (Opcional)</label>
+                        <input type="url" name="enlace" class="form-control rounded-pill px-3.5 py-2" placeholder="https://ejemplo.com/recurso-educativo">
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-dark mb-1">Archivo de Apoyo (PDF, Word, etc.)</label>
+                        <input type="file" name="archivo" class="form-control rounded-pill px-3 py-2">
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                        <i class="bi bi-save me-1.5"></i> Guardar Recurso
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

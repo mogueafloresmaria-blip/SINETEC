@@ -1,14 +1,492 @@
 {% extends 'base.html' %}
-{% block title %}Caja y Pensiones · SINETEC{% endblock %}
-{% block content %}
+{% load static %}
+{% block title %}Caja y Pensiones Escolares · EDUNOVA{% endblock %}
+
+{% block extra_head %}
 <style>
-body{background:#f3f5f9!important}.caja-wrap{padding:1rem 1.2rem}.caja-stat{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:1.2rem 1.4rem;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.04)}.caja-stat-value{font-size:1.7rem;font-weight:900;color:#0f172a}.caja-stat-label{color:#64748b;font-size:.7rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}.caja-stat-icon{font-size:1.6rem;padding:.7rem;border-radius:12px}.caja-toolbar,.caja-table{background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.04)}.caja-toolbar{padding:.8rem 1rem}.caja-table{overflow:hidden}.caja-table th{background:#20384d;color:#cbd5e1;font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;padding:.85rem 1rem}.caja-table td{padding:.8rem 1rem;border-color:#f1f5f9;vertical-align:middle;font-size:.84rem}.caja-green{color:#059669}.caja-btn{border:0;border-radius:9px;padding:.65rem 1rem;background:#10b981;color:#fff;font-weight:800}.caja-btn:hover{background:#059669;color:#fff}.caja-action{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;text-decoration:none}
+body { background: #f3f5f9 !important; }
+.caja-wrap { padding: 1.25rem 1.5rem 2.5rem; }
+.caja-stat { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(15,23,42,0.04); }
+.caja-stat-value { font-size: 1.85rem; font-weight: 900; color: #0f172a; }
+.caja-stat-label { color: #64748b; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.25rem; }
+.caja-stat-icon { font-size: 1.75rem; padding: 0.85rem; border-radius: 14px; }
+.caja-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 15px rgba(15,23,42,0.04); overflow: hidden; }
+.caja-table th { background: #0f172a; color: #f8fafc; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.95rem 1rem; border: none; }
+.caja-table td { padding: 0.95rem 1rem; border-color: #f1f5f9; vertical-align: middle; font-size: 0.88rem; }
+.caja-btn { border: 0; border-radius: 12px; padding: 0.75rem 1.35rem; background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 800; box-shadow: 0 2px 8px rgba(16,185,129,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+.caja-btn:hover { background: #059669; color: #fff; filter: brightness(1.06); }
+.caja-action { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; text-decoration: none; }
 </style>
+{% endblock %}
+
+{% block content %}
 <div class="caja-wrap">
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"><div><h1 class="h4 fw-bold text-dark mb-1"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Gestión de Caja</h1><p class="text-muted small mb-0">Recaudo de matrículas y pensiones escolares.</p></div></div>
-  <div class="row g-3 mb-4"><div class="col-md-6"><div class="caja-stat" style="border-left:4px solid #10b981"><div><div class="caja-stat-label caja-green">Recaudado hoy</div><div class="caja-stat-value">$ {{ recaudado_hoy|floatformat:2 }}</div><small class="text-muted">Recibos emitidos en la fecha actual</small></div><div class="caja-stat-icon" style="background:#ecfdf5;color:#10b981"><i class="bi bi-cash-coin"></i></div></div></div><div class="col-md-6"><div class="caja-stat" style="border-left:4px solid #4f46e5"><div><div class="caja-stat-label text-primary">Movimientos hoy</div><div class="caja-stat-value">{{ movimientos_hoy }}</div><small class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>Recibos válidos emitidos</small></div><div class="caja-stat-icon" style="background:#eef2ff;color:#4f46e5"><i class="bi bi-receipt"></i></div></div></div></div>
-  <div class="caja-toolbar d-flex flex-column flex-md-row justify-content-between gap-3 mb-4"><form method="get" class="input-group" style="max-width:430px"><span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span><input class="form-control border-start-0" name="q" value="{{ query }}" placeholder="Buscar por alumno o N° recibo..."></form><a class="caja-btn text-decoration-none" href="{% url 'nuevo_cobro' %}"><i class="bi bi-plus-lg me-1"></i> Nuevo Cobro</a></div>
-  <div class="caja-table table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Recibo</th><th>Fecha y hora</th><th>Alumno</th><th>Detalle del pago</th><th>Monto</th><th class="text-end">Acciones</th></tr></thead><tbody>{% for pago in pagos %}<tr class="{% if pago.estado == 'ANULADO' %}opacity-50 text-decoration-line-through{% endif %}"><td><span class="badge bg-light text-dark border font-monospace">{{ pago.numero_recibo }}</span></td><td class="text-muted">{{ pago.fecha_pago|date:'d/m/Y H:i' }}</td><td><strong>{{ pago.estudiante.get_full_name|default:pago.estudiante.username }}</strong><small class="d-block text-muted">{{ pago.estudiante.perfil.numero_documento }}</small></td><td><span class="badge bg-light text-dark border">{{ pago.concepto }}</span><span class="badge bg-info-subtle text-info-emphasis">{{ pago.metodo_pago }}</span>{% if pago.estado == 'ANULADO' %}<span class="badge bg-danger">ANULADO</span>{% endif %}</td><td class="fw-bold caja-green">$ {{ pago.monto|floatformat:2 }}</td><td class="text-end"><button class="caja-action btn btn-sm btn-outline-primary" title="Ver recibo"><i class="bi bi-receipt"></i></button>{% if pago.estado == 'EMITIDO' %}<form method="post" class="d-inline">{% csrf_token %}<input type="hidden" name="anular_id" value="{{ pago.pk }}"><button class="caja-action btn btn-sm btn-outline-danger" title="Anular" type="submit"><i class="bi bi-x-circle"></i></button></form>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="text-center py-5 text-muted"><i class="bi bi-receipt-cutoff fs-2 d-block mb-2"></i>No hay recibos registrados.</td></tr>{% endfor %}</tbody></table></div>
+  <!-- ENCABEZADO -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge bg-success-subtle text-success fw-bold px-3 py-1 rounded-pill">MÓDULO DE TESORERÍA</span>
+        <span class="text-muted small">Caja Oficial de Cobros Escolar</span>
+      </div>
+      <h1 class="h3 fw-bold text-dark mb-1">
+        <i class="bi bi-wallet2 text-success me-2"></i>Gestión de Caja y Pensiones
+      </h1>
+      <p class="text-muted small mb-0">Control de pagos, matrículas, mensualidades e historial de recaudos con comprobantes oficiales.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="caja-btn" href="{% url 'nuevo_cobro' %}">
+        <i class="bi bi-plus-circle-fill"></i> Realizar Nuevo Cobro
+      </a>
+    </div>
+  </div>
+
+  <!-- TARJETAS DE ESTADÍSTICAS -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="caja-stat" style="border-left: 5px solid #10b981;">
+        <div>
+          <div class="caja-stat-label text-success">Recaudado Hoy</div>
+          <div class="caja-stat-value text-success">${{ recaudado_hoy|floatformat:0 }}</div>
+          <small class="text-muted">Total liquidado en la fecha actual</small>
+        </div>
+        <div class="caja-stat-icon" style="background:#ecfdf5; color:#10b981;">
+          <i class="bi bi-cash-stack"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="caja-stat" style="border-left: 5px solid #4f46e5;">
+        <div>
+          <div class="caja-stat-label text-primary">Recibos Emitidos Hoy</div>
+          <div class="caja-stat-value text-primary">{{ movimientos_hoy }}</div>
+          <small class="text-muted">Operaciones de caja registradas</small>
+        </div>
+        <div class="caja-stat-icon" style="background:#eef2ff; color:#4f46e5;">
+          <i class="bi bi-receipt-cutoff"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="caja-stat" style="border-left: 5px solid #0891b2;">
+        <div>
+          <div class="caja-stat-label text-info">Historial Registrado</div>
+          <div class="caja-stat-value text-info">{{ pagos.count }}</div>
+          <small class="text-muted">Total de comprobantes en el sistema</small>
+        </div>
+        <div class="caja-stat-icon" style="background:#ecfeff; color:#0891b2;">
+          <i class="bi bi-journal-check"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA DE BÚSQUEDA Y FILTRO -->
+  <div class="caja-card p-3 mb-4">
+    <form method="get" class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="input-group" style="max-width: 460px;">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+        <input class="form-control border-start-0" name="q" value="{{ query }}" placeholder="Buscar por nombre de alumno, documento o N° recibo...">
+        <button class="btn btn-primary px-3" type="submit">Buscar</button>
+      </div>
+      {% if query %}
+      <a href="{% url 'caja_pensiones' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+        <i class="bi bi-x-lg me-1"></i> Limpiar filtro
+      </a>
+      {% endif %}
+    </form>
+  </div>
+
+  {% if pago_exitoso %}
+  <!-- BANNER DESTACADO DE PAGO RECIENTE -->
+  <div class="alert alert-success border-2 border-success rounded-4 p-3 mb-4 shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width:48px; height:48px; font-size:1.4rem;">
+        <i class="bi bi-check-lg"></i>
+      </div>
+      <div>
+        <h5 class="fw-bold text-success mb-0">¡Recibo N° {{ pago_exitoso.numero_recibo }} Emitido Correctamente!</h5>
+        <div class="small text-muted">
+          Estudiante: <strong>{{ pago_exitoso.estudiante.get_full_name }}</strong> · Concepto: <strong>{{ pago_exitoso.concepto }}</strong> · Monto: <strong class="text-success">${{ pago_exitoso.monto|floatformat:0 }}</strong> ({{ pago_exitoso.metodo_pago }})
+        </div>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'ver_factura_pension' pago_exitoso.pk %}" class="btn btn-outline-success fw-bold rounded-pill px-3">
+        <i class="bi bi-file-earmark-text me-1"></i> Ver Factura Digital
+      </a>
+      <a href="{% url 'recibo_pension_pdf' pago_exitoso.pk %}" target="_blank" class="btn btn-success fw-bold rounded-pill px-3">
+        <i class="bi bi-printer me-1"></i> Descargar PDF
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ==================== SECCIÓN 1: RECAUDO DE HOY ==================== -->
+  <div class="caja-card mb-5">
+    <div class="p-3 bg-white border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-success text-white px-2.5 py-1 rounded-pill fw-bold" style="font-size: 0.75rem;">
+            <i class="bi bi-clock-history me-1"></i> EN VIVO · {{ hoy|date:'d/m/Y' }}
+          </span>
+          <h2 class="h5 fw-bold text-dark mb-0">RECAUDO DE HOY</h2>
+        </div>
+        <small class="text-muted">Cobros y operaciones liquidadas en la fecha actual en tiempo real desde MySQL.</small>
+      </div>
+      <div class="text-end">
+        <span class="small text-muted me-2">Total Recaudado Hoy:</span>
+        <span class="h5 fw-bold text-success mb-0">${{ recaudado_hoy|floatformat:0 }}</span>
+        <span class="badge bg-light text-dark border ms-2">{{ pagos_hoy.count }} operaciones</span>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table caja-table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Concepto</th>
+            <th>Valor</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Responsable</th>
+            <th class="text-end pe-3">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pago in pagos_hoy %}
+          <tr class="{% if pago.estado == 'ANULADO' %}opacity-50 text-decoration-line-through bg-light{% endif %}">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center" style="width:34px; height:34px; font-size:0.85rem;">
+                  {{ pago.estudiante.first_name|first|default:"E" }}
+                </div>
+                <div>
+                  <div class="fw-bold text-dark">{{ pago.estudiante.get_full_name|default:pago.estudiante.username }}</div>
+                  <div class="small text-muted">{{ pago.estudiante.perfil.tipo_documento|default:"TI" }}: {{ pago.estudiante.perfil.numero_documento }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                {{ pago.concepto }}
+              </span>
+              <div class="small text-muted">{{ pago.metodo_pago }} · {{ pago.numero_recibo }}</div>
+            </td>
+            <td>
+              <span class="fw-bold text-success fs-6">${{ pago.monto|floatformat:0 }}</span>
+            </td>
+            <td>
+              <span class="text-dark fw-semibold">{{ pago.fecha_pago|date:'d/m/Y' }}</span><br>
+              <span class="text-muted small">{{ pago.fecha_pago|date:'H:i' }}</span>
+            </td>
+            <td>
+              {% if pago.estado == 'EMITIDO' %}
+              <span class="badge bg-success-subtle text-success fw-bold px-2 py-1">
+                <i class="bi bi-check-circle me-1"></i>PAGADO
+              </span>
+              {% else %}
+              <span class="badge bg-danger-subtle text-danger fw-bold px-2 py-1">
+                <i class="bi bi-x-circle me-1"></i>ANULADO
+              </span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">
+                <i class="bi bi-person-check me-1 text-primary"></i>{% if pago.responsable %}{{ pago.responsable.get_full_name|default:pago.responsable.username }}{% else %}Cajero Autorizado{% endif %}
+              </span>
+            </td>
+            <td class="text-end pe-3">
+              <div class="dropdown d-inline-block">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill px-3 fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-gear-fill me-1 text-primary"></i> Acciones
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                  <li>
+                    <button type="button" class="dropdown-item py-2"
+                      data-recibo="{{ pago.numero_recibo }}"
+                      data-estudiante="{{ pago.estudiante.get_full_name|default:pago.estudiante.username }}"
+                      data-doc="{% if pago.estudiante.perfil %}{{ pago.estudiante.perfil.tipo_documento }}: {{ pago.estudiante.perfil.numero_documento }}{% else %}TI: N/A{% endif %}"
+                      data-concepto="{{ pago.concepto }}"
+                      data-valor="${{ pago.monto|floatformat:0 }}"
+                      data-fecha="{{ pago.fecha_pago|date:'d/m/Y H:i' }}"
+                      data-estado="{{ pago.estado }}"
+                      data-responsable="{% if pago.responsable %}{{ pago.responsable.get_full_name|default:pago.responsable.username }}{% else %}Cajero Autorizado{% endif %}"
+                      data-metodo="{{ pago.metodo_pago }}"
+                      data-factura="{% url 'ver_factura_pension' pago.pk %}"
+                      data-pdf="{% url 'recibo_pension_pdf' pago.pk %}"
+                      onclick="abrirModalDetalleBtn(this)">
+                      <i class="bi bi-eye-fill text-info me-2"></i> Ver detalle
+                    </button>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-2" href="{% url 'ver_factura_pension' pago.pk %}">
+                      <i class="bi bi-receipt text-primary me-2"></i> Ver comprobante / factura
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-2" href="{% url 'recibo_pension_pdf' pago.pk %}" target="_blank">
+                      <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i> Descargar Comprobante PDF
+                    </a>
+                  </li>
+                  {% if pago.estado == 'EMITIDO' %}
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <form method="post" onsubmit="return confirm('¿Seguro que desea anular el recibo oficial {{ pago.numero_recibo }}?');">
+                      {% csrf_token %}
+                      <input type="hidden" name="anular_id" value="{{ pago.pk }}">
+                      <button type="submit" class="dropdown-item py-2 text-danger">
+                        <i class="bi bi-x-circle-fill text-danger me-2"></i> Anular recibo
+                      </button>
+                    </form>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-4 text-muted">
+              <i class="bi bi-cash-stack fs-2 d-block text-secondary mb-1"></i>
+              No se han registrado cobros el día de hoy todavía.<br>
+              <a href="{% url 'nuevo_cobro' %}" class="btn btn-sm btn-success rounded-pill px-3 mt-2">
+                <i class="bi bi-plus-circle me-1"></i> Realizar primer cobro del día
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== SECCIÓN 2: HISTORIAL COMPLETO DE COBROS ==================== -->
+  <div class="caja-card">
+    <div class="p-3 bg-white border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <h2 class="h5 fw-bold text-dark mb-0">Historial General de Recaudos</h2>
+        <small class="text-muted">Consulta todos los pagos históricos registrados en el colegio.</small>
+      </div>
+      <span class="badge bg-light text-dark border px-3 py-1.5">{{ pagos.count }} recibos registrados</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table caja-table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>N° Recibo</th>
+            <th>Fecha y Hora</th>
+            <th>Estudiante</th>
+            <th>Concepto(s) Cobrado(s)</th>
+            <th>Método</th>
+            <th>Monto Total</th>
+            <th>Estado</th>
+            <th>Responsable</th>
+            <th class="text-end pe-3">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pago in pagos %}
+          <tr class="{% if pago.estado == 'ANULADO' %}opacity-50 text-decoration-line-through bg-light{% endif %}">
+            <td>
+              <span class="badge bg-light text-dark border font-monospace fw-bold px-2 py-1">
+                {{ pago.numero_recibo }}
+              </span>
+            </td>
+            <td class="text-muted small">
+              {{ pago.fecha_pago|date:'d/m/Y' }}<br>
+              <span class="text-secondary">{{ pago.fecha_pago|date:'H:i' }}</span>
+            </td>
+            <td>
+              <div class="fw-bold text-dark">{{ pago.estudiante.get_full_name|default:pago.estudiante.username }}</div>
+              <div class="small text-muted">{{ pago.estudiante.perfil.tipo_documento|default:"TI" }}: {{ pago.estudiante.perfil.numero_documento }}</div>
+            </td>
+            <td>
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                {{ pago.concepto }}
+              </span>
+            </td>
+            <td>
+              <span class="badge bg-secondary-subtle text-secondary">{{ pago.metodo_pago }}</span>
+            </td>
+            <td class="fw-bold text-success fs-6">
+              ${{ pago.monto|floatformat:0 }}
+            </td>
+            <td>
+              {% if pago.estado == 'EMITIDO' %}
+              <span class="badge bg-success-subtle text-success fw-bold"><i class="bi bi-check-circle me-1"></i>PAGADO</span>
+              {% else %}
+              <span class="badge bg-danger-subtle text-danger fw-bold"><i class="bi bi-x-circle me-1"></i>ANULADO</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="small text-muted">
+                {% if pago.responsable %}{{ pago.responsable.get_full_name|default:pago.responsable.username }}{% else %}Caja Central{% endif %}
+              </span>
+            </td>
+            <td class="text-end pe-3">
+              <div class="dropdown d-inline-block">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill px-3 fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-gear-fill me-1 text-primary"></i> Acciones
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                  <li>
+                    <button type="button" class="dropdown-item py-2"
+                      data-recibo="{{ pago.numero_recibo }}"
+                      data-estudiante="{{ pago.estudiante.get_full_name|default:pago.estudiante.username }}"
+                      data-doc="{% if pago.estudiante.perfil %}{{ pago.estudiante.perfil.tipo_documento }}: {{ pago.estudiante.perfil.numero_documento }}{% else %}TI: N/A{% endif %}"
+                      data-concepto="{{ pago.concepto }}"
+                      data-valor="${{ pago.monto|floatformat:0 }}"
+                      data-fecha="{{ pago.fecha_pago|date:'d/m/Y H:i' }}"
+                      data-estado="{{ pago.estado }}"
+                      data-responsable="{% if pago.responsable %}{{ pago.responsable.get_full_name|default:pago.responsable.username }}{% else %}Caja Central{% endif %}"
+                      data-metodo="{{ pago.metodo_pago }}"
+                      data-factura="{% url 'ver_factura_pension' pago.pk %}"
+                      data-pdf="{% url 'recibo_pension_pdf' pago.pk %}"
+                      onclick="abrirModalDetalleBtn(this)">
+                      <i class="bi bi-eye-fill text-info me-2"></i> Ver detalle
+                    </button>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-2" href="{% url 'ver_factura_pension' pago.pk %}">
+                      <i class="bi bi-receipt text-primary me-2"></i> Ver comprobante / factura
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-2" href="{% url 'recibo_pension_pdf' pago.pk %}" target="_blank">
+                      <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i> Descargar PDF
+                    </a>
+                  </li>
+                  {% if pago.estado == 'EMITIDO' %}
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <form method="post" onsubmit="return confirm('¿Seguro que desea anular el recibo oficial {{ pago.numero_recibo }}?');">
+                      {% csrf_token %}
+                      <input type="hidden" name="anular_id" value="{{ pago.pk }}">
+                      <button type="submit" class="dropdown-item py-2 text-danger">
+                        <i class="bi bi-x-circle-fill text-danger me-2"></i> Anular recibo
+                      </button>
+                    </form>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center py-5 text-muted">
+              <i class="bi bi-receipt-cutoff fs-1 d-block mb-2 text-secondary"></i>
+              No se encontraron cobros registrados con los criterios seleccionados.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
-<div class="modal fade" id="modalCobro" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header"><h2 class="modal-title fs-5 fw-bold">Nuevo Cobro</h2><button class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><form method="post">{% csrf_token %}<div class="modal-body"><label class="form-label small fw-bold">ALUMNO</label><select name="estudiante_id" class="form-select mb-3" required><option value="">Seleccionar alumno</option>{% for estudiante in estudiantes %}<option value="{{ estudiante.pk }}">{{ estudiante.get_full_name|default:estudiante.username }}</option>{% endfor %}</select><label class="form-label small fw-bold">CONCEPTO</label><input name="concepto" class="form-control mb-3" value="Pensión mensual" required><div class="row g-3"><div class="col-6"><label class="form-label small fw-bold">MONTO</label><input name="monto" type="number" min="0.01" step="0.01" class="form-control" required></div><div class="col-6"><label class="form-label small fw-bold">MÉTODO</label><select name="metodo_pago" class="form-select"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option></select></div></div></div><div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button><button class="caja-btn" type="submit"><i class="bi bi-check2 me-1"></i>Emitir recibo</button></div></form></div></div></div>
+
+<!-- MODAL DE DETALLE DE PAGO / COMPROBANTE -->
+<div class="modal fade" id="modalDetallePago" tabindex="-1" aria-labelledby="modalDetallePagoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-dark text-white px-4 py-3">
+        <h5 class="modal-title fw-bold" id="modalDetallePagoLabel">
+          <i class="bi bi-receipt-cutoff text-success me-2"></i> Detalle Oficial de Recibo de Caja
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 bg-light">
+        <div class="bg-white p-3 rounded-3 border shadow-sm mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-light text-dark border font-monospace fw-bold" id="modRecibo">REC-000</span>
+            <span class="badge" id="modEstado">ESTADO</span>
+          </div>
+          <div class="h4 fw-bold text-success mb-1" id="modValor">$0</div>
+          <div class="small text-muted" id="modMetodo">Efectivo</div>
+        </div>
+
+        <ul class="list-group list-group-flush rounded-3 border bg-white small mb-3">
+          <li class="list-group-item d-flex justify-content-between py-2">
+            <span class="text-muted">Estudiante:</span>
+            <strong class="text-dark" id="modEstudiante">--</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between py-2">
+            <span class="text-muted">Documento:</span>
+            <strong class="text-dark" id="modDocumento">--</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between py-2">
+            <span class="text-muted">Concepto:</span>
+            <strong class="text-primary" id="modConcepto">--</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between py-2">
+            <span class="text-muted">Fecha y Hora:</span>
+            <strong class="text-dark" id="modFecha">--</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between py-2">
+            <span class="text-muted">Responsable del Cobro:</span>
+            <strong class="text-dark" id="modResponsable">--</strong>
+          </li>
+        </ul>
+      </div>
+      <div class="modal-footer bg-white border-top px-4 py-3 d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cerrar</button>
+        <div class="d-flex gap-2">
+          <a href="#" id="modBtnFactura" class="btn btn-outline-primary rounded-pill px-3 fw-bold">
+            <i class="bi bi-file-earmark-text me-1"></i> Ver Factura Digital
+          </a>
+          <a href="#" id="modBtnPdf" target="_blank" class="btn btn-success rounded-pill px-3 fw-bold">
+            <i class="bi bi-printer me-1"></i> Imprimir PDF
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function abrirModalDetalleBtn(btn) {
+  abrirModalDetalle(
+    btn.dataset.recibo,
+    btn.dataset.estudiante,
+    btn.dataset.doc,
+    btn.dataset.concepto,
+    btn.dataset.valor,
+    btn.dataset.fecha,
+    btn.dataset.estado,
+    btn.dataset.responsable,
+    btn.dataset.metodo,
+    btn.dataset.factura,
+    btn.dataset.pdf
+  );
+}
+
+function abrirModalDetalle(recibo, estudiante, doc, concepto, valor, fecha, estado, responsable, metodo, urlFactura, urlPdf) {
+  document.getElementById('modRecibo').textContent = recibo;
+  document.getElementById('modEstudiante').textContent = estudiante;
+  document.getElementById('modDocumento').textContent = doc;
+  document.getElementById('modConcepto').textContent = concepto;
+  document.getElementById('modValor').textContent = valor;
+  document.getElementById('modFecha').textContent = fecha;
+  document.getElementById('modResponsable').textContent = responsable || 'Caja Central';
+  document.getElementById('modMetodo').textContent = 'Método de pago: ' + metodo;
+
+  const badgeEstado = document.getElementById('modEstado');
+  if (estado === 'EMITIDO') {
+    badgeEstado.className = 'badge bg-success-subtle text-success fw-bold px-2 py-1';
+    badgeEstado.textContent = 'PAGADO';
+  } else {
+    badgeEstado.className = 'badge bg-danger-subtle text-danger fw-bold px-2 py-1';
+    badgeEstado.textContent = 'ANULADO';
+  }
+
+  document.getElementById('modBtnFactura').href = urlFactura;
+  document.getElementById('modBtnPdf').href = urlPdf;
+
+  const modal = new bootstrap.Modal(document.getElementById('modalDetallePago'));
+  modal.show();
+}
+</script>
 {% endblock %}
