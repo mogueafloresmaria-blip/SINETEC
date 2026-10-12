@@ -15,11 +15,11 @@
         body {
             min-height: 100vh;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #FDF2F4;
+            background: var(--color-fondo);
             background-image: 
                 radial-gradient(circle at 15% 20%, rgba(251, 207, 232, 0.6) 0%, transparent 45%),
                 radial-gradient(circle at 85% 80%, rgba(244, 114, 182, 0.3) 0%, transparent 50%),
-                linear-gradient(180deg, #FDF2F4 0%, #FCE7F3 100%);
+                linear-gradient(180deg, var(--color-fondo) 0%, var(--color-acento) 100%);
             display: grid;
             place-items: center;
             color: #0F172A;
@@ -31,17 +31,17 @@
             background: #FFFFFF;
             border-radius: 24px;
             box-shadow: 
-                0 25px 60px -15px rgba(219, 39, 119, 0.18),
+                0 25px 60px -15px rgba(90, 56, 37, 0.18),
                 0 0 0 1px rgba(251, 207, 232, 0.4);
             overflow: hidden;
             border: 1px solid rgba(252, 231, 243, 0.9);
         }
         .recovery-header {
-            background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%);
+            background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%);
             padding: 34px 30px 26px;
             text-align: center;
             position: relative;
-            border-bottom: 3px solid #DB2777;
+            border-bottom: 3px solid var(--color-principal);
         }
         .brand-logo-wrap {
             display: inline-flex;
@@ -108,16 +108,16 @@
             outline: none;
         }
         input[type="text"]:focus, input[type="password"]:focus {
-            border-color: #DB2777;
+            border-color: var(--color-principal);
             background: #FFFFFF;
-            box-shadow: 0 0 0 4px rgba(219, 39, 119, 0.15);
+            box-shadow: 0 0 0 4px rgba(90, 56, 37, 0.15);
         }
         .btn-submit {
             width: 100%;
             height: 48px;
             border: 0;
             border-radius: 12px;
-            background: linear-gradient(135deg, #DB2777 0%, #BE185D 100%);
+            background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%);
             color: #FFFFFF;
             font-weight: 800;
             font-size: 0.96rem;
@@ -127,14 +127,14 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 10px 22px rgba(219, 39, 119, 0.28);
+            box-shadow: 0 10px 22px rgba(90, 56, 37, 0.28);
             transition: all 0.2s ease;
             margin-top: 8px;
         }
         .btn-submit:hover {
             transform: translateY(-1px);
-            box-shadow: 0 14px 28px rgba(219, 39, 119, 0.35);
-            background: linear-gradient(135deg, #BE185D 0%, #831843 100%);
+            box-shadow: 0 14px 28px rgba(90, 56, 37, 0.35);
+            background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 100%);
         }
         .btn-submit:active {
             transform: scale(0.99);
@@ -264,32 +264,29 @@
             </div>
             {% endif %}
 
-            {% if mensaje_exito and not usuario_encontrado %}
+            {% if mensaje_exito %}
             <div class="alert-box success">
                 <i class="bi bi-check-circle-fill"></i>
                 <div>{{ mensaje_exito }}</div>
             </div>
             {% endif %}
 
-            {% if usuario_encontrado %}
-            <!-- Paso 2: Crear Nueva Contraseña -->
-            <div class="verified-card">
-                <div class="verified-header">
-                    <i class="bi bi-shield-check"></i> Identidad Confirmada
-                </div>
-                <div class="verified-name">{{ usuario_encontrado.get_full_name|default:usuario_encontrado.username }}</div>
-                <span class="verified-badge">Documento: {{ usuario_encontrado.perfil.numero_documento|default:"Registrado" }}</span>
+            {% if token_invalido %}
+            <div class="alert-box danger">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>El enlace no es válido o ya venció. Solicita uno nuevo para continuar.</div>
             </div>
-
+            {% elif token_valido %}
             <form method="post" autocomplete="off">
                 {% csrf_token %}
-                <input type="hidden" name="usuario_id" value="{{ usuario_encontrado.pk }}">
+                <input type="hidden" name="uidb64" value="{{ uidb64 }}">
+                <input type="hidden" name="token" value="{{ token }}">
                 
                 <div class="form-group">
                     <label for="nueva_contrasena">Nueva Contraseña</label>
                     <div class="input-wrap">
                         <i class="bi bi-lock-fill prefix-icon"></i>
-                        <input id="nueva_contrasena" type="password" name="nueva_contrasena" placeholder="Mínimo 4 caracteres" required autofocus>
+                        <input id="nueva_contrasena" type="password" name="nueva_contrasena" placeholder="Usa una contraseña segura" required autofocus>
                     </div>
                 </div>
 
@@ -310,18 +307,18 @@
             <form method="post" autocomplete="off">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="identificador">Documento de Identidad o Usuario</label>
+                    <label for="identificador">Correo, documento o usuario registrado</label>
                     <div class="input-wrap">
                         <i class="bi bi-person-badge-fill prefix-icon"></i>
-                        <input id="identificador" type="text" name="identificador" placeholder="Ej: 1082987123 o usuario institucional" required autofocus>
+                        <input id="identificador" type="text" name="identificador" placeholder="Ingresa tu correo, documento o usuario" required autofocus>
                     </div>
                     <small style="color: #64748B; font-size: 0.76rem; display: block; margin-top: 6px;">
-                        Ingresa el número de identificación (CC/TI) o tu nombre de usuario en EDUNOVA.
+                        Si la cuenta existe y tiene un correo registrado, enviaremos allí el enlace seguro.
                     </small>
                 </div>
 
                 <button type="submit" class="btn-submit">
-                    <i class="bi bi-arrow-right-circle-fill"></i> Verificar Identidad
+                    <i class="bi bi-envelope-check-fill"></i> Enviar enlace seguro
                 </button>
             </form>
             {% endif %}
@@ -333,7 +330,7 @@
                 </a>
 
                 <div class="text-center mt-2" style="font-size: 0.82rem; color: #64748B;">
-                    <i class="bi bi-shield-check text-pink" style="color: #db2777;"></i> Soporte Técnico y Mesa de Ayuda EDUNOVA
+                    <i class="bi bi-shield-check text-primary" style="color: var(--color-principal);"></i> Soporte Técnico y Mesa de Ayuda EDUNOVA
                 </div>
             </div>
         </div>

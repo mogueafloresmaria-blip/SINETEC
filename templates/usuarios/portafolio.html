@@ -6,24 +6,24 @@
 {% block extra_css %}
 <style>
     :root {
-        --portafolio-rose-bg: #FDF8FA;
+        --portafolio-rose-bg: var(--color-fondo);
         --portafolio-rose-card: #FFFFFF;
-        --portafolio-rose-border: #F0D9E5;
-        --portafolio-rose-accent: #8E5266;
-        --portafolio-rose-dark: #4A2834;
+        --portafolio-rose-border: #E5DFD5;
+        --portafolio-rose-accent: var(--color-principal);
+        --portafolio-rose-dark: var(--color-secundario);
         --portafolio-slate: #24342C;
         --portafolio-muted: #627269;
-        --sena-green: #29AAE3;
-        --sena-green-dark: #1E6B00;
+        --sena-green: var(--color-principal);
+        --sena-green-dark: var(--color-secundario);
     }
 
     .portafolio-header {
-        background: linear-gradient(135deg, #FFFFFF 0%, #FAF1F5 100%);
+        background: linear-gradient(135deg, #FFFFFF 0%, var(--color-fondo) 100%);
         border: 1px solid var(--portafolio-rose-border);
         border-radius: 26px;
         padding: 32px;
         margin-bottom: 28px;
-        box-shadow: 0 12px 36px rgba(142, 82, 102, 0.05);
+        box-shadow: 0 12px 36px rgba(139, 94, 60, 0.05);
     }
 
     .portafolio-avatar {
@@ -37,7 +37,7 @@
         font-family: 'Plus Jakarta Sans', sans-serif;
         font-size: 2.2rem;
         font-weight: 800;
-        box-shadow: 0 12px 24px rgba(142, 82, 102, 0.22);
+        box-shadow: 0 12px 24px rgba(139, 94, 60, 0.22);
     }
 
     .portafolio-kicker {
@@ -59,7 +59,7 @@
 
     .kpi-metric-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 28px rgba(142, 82, 102, 0.07);
+        box-shadow: 0 12px 28px rgba(139, 94, 60, 0.07);
         border-color: var(--portafolio-rose-accent);
     }
 
@@ -85,11 +85,11 @@
     .tab-pills .nav-link.active {
         background-color: var(--portafolio-rose-accent);
         color: #FFFFFF;
-        box-shadow: 0 8px 18px rgba(142, 82, 102, 0.22);
+        box-shadow: 0 8px 18px rgba(139, 94, 60, 0.22);
     }
 
     .tab-pills .nav-link:hover:not(.active) {
-        background-color: #F8EDF3;
+        background-color: var(--color-acento);
         color: var(--portafolio-rose-dark);
     }
 

@@ -13,7 +13,12 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
-from usuarios.decorators import requerir_roles
+from usuarios.decorators import (
+    _obtener_categorias_rol,
+    requerir_roles,
+    solo_instructor,
+    validar_propietario_o_coordinador,
+)
 from usuarios.models import CalificacionEvidencia
 from .models import JuicioEvaluativo
 from academico.models import Ficha, ResultadoAprendizaje, Matricula, Competencia, SemaforoCompetencia
@@ -61,7 +66,11 @@ def libreta_aprendiz(request, pk):
     matricula = matriculas.first()
     if not matricula:
         messages.error(request, 'El alumno no tiene una matrícula activa.')
+        perfil = getattr(request.user, 'perfil', None)
+        if perfil and perfil.rol and 'ESTUDIANTE' in _obtener_categorias_rol(perfil.rol.nombre):
+            return redirect('aprendiz_dashboard')
         return redirect('calificaciones')
+    validar_propietario_o_coordinador(request, matricula.aprendiz)
     return render(request, 'evaluaciones/libreta_aprendiz.html', {
         'matricula': matricula,
         'filas_libreta': _filas_libreta(matriculas),
@@ -76,7 +85,11 @@ def calificar_aprendiz(request, pk):
     matricula = matriculas.first()
     if not matricula:
         messages.error(request, 'El alumno no tiene una matrícula activa.')
+        perfil = getattr(request.user, 'perfil', None)
+        if perfil and perfil.rol and 'ESTUDIANTE' in _obtener_categorias_rol(perfil.rol.nombre):
+            return redirect('aprendiz_dashboard')
         return redirect('calificaciones')
+    validar_propietario_o_coordinador(request, matricula.aprendiz)
     filas = _filas_libreta(matriculas)
     return render(request, 'evaluaciones/calificar_aprendiz.html', {
         'matricula': matricula,
@@ -464,6 +477,7 @@ def reporte_rap_pdf(request):
 
 
 @login_required
+@solo_instructor
 def raps_por_ficha(request):
     ficha_id = request.GET.get('ficha_id')
     if not ficha_id:
@@ -488,6 +502,7 @@ def raps_por_ficha(request):
 
 
 @login_required
+@solo_instructor
 def aprendices_por_rap(request):
     ficha_id = request.GET.get('ficha_id')
     rap_id = request.GET.get('rap_id')
@@ -571,11 +586,18 @@ def semaforo_competencias(request):
     estado_filtro = request.GET.get('estado', '').strip()
     query = request.GET.get('q', '').strip()
 
-    es_estudiante = hasattr(request.user, 'perfil') and request.user.perfil.rol and request.user.perfil.rol.nombre in ['Estudiante', 'Aprendiz']
+    perfil = getattr(request.user, 'perfil', None)
+    es_estudiante = bool(
+        perfil and perfil.rol and
+        'ESTUDIANTE' in _obtener_categorias_rol(perfil.rol.nombre)
+    )
 
     fichas = Ficha.objects.all().select_related('programa', 'institucion').order_by('codigo_ficha')
     if es_estudiante:
-        fichas = fichas.filter(matriculas__aprendiz=request.user)
+        fichas = fichas.filter(
+            matriculas__aprendiz=request.user,
+            matriculas__estado_formacion='En Formacion',
+        ).distinct()
 
     ficha_actual = None
     if ficha_id:
@@ -639,7 +661,11 @@ def semaforo_competencias(request):
     total_recuperar = 0
 
     if ficha_actual and competencia_actual:
-        matriculas_qs = ficha_actual.matriculas.select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name')
+        matriculas_qs = ficha_actual.matriculas.filter(
+            estado_formacion='En Formacion',
+        ).select_related('aprendiz', 'aprendiz__perfil').order_by(
+            'aprendiz__last_name', 'aprendiz__first_name'
+        )
         if es_estudiante:
             matriculas_qs = matriculas_qs.filter(aprendiz=request.user)
 
@@ -709,6 +735,7 @@ def semaforo_competencias(request):
 
 
 @login_required
+@solo_instructor
 def api_actualizar_semaforo(request):
     """
     Endpoint AJAX para actualización instantánea en 1 clic del Semáforo de Competencia.
@@ -716,9 +743,6 @@ def api_actualizar_semaforo(request):
     """
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
-
-    if hasattr(request.user, 'perfil') and request.user.perfil.rol and request.user.perfil.rol.nombre in ['Estudiante', 'Aprendiz']:
-        return JsonResponse({'status': 'error', 'message': 'Acceso no autorizado para estudiantes'}, status=403)
 
     if request.content_type == 'application/json':
         try:

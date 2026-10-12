@@ -10,30 +10,46 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
                 <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
-                    <i class="bi bi-calendar-check me-1"></i> Gestión de Aula y Asistencia Diaria
+                    <i class="bi bi-calendar-check me-1"></i> {% if puede_llamar_asistencia %}Gestión de Aula y Asistencia Diaria{% else %}Consulta Oficial de Asistencia Escolar{% endif %}
                 </span>
-                <h1 class="h3 fw-bold mb-1 text-white">Llamar a Lista y Control de Asistencia</h1>
+                <h1 class="h3 fw-bold mb-1 text-white">
+                    {% if puede_llamar_asistencia %}
+                        Llamar a Lista y Control de Asistencia
+                    {% else %}
+                        <i class="bi bi-eye-fill me-2"></i>Lista y Consulta de Asistencia Escolar
+                    {% endif %}
+                </h1>
                 <p class="mb-0 text-white text-opacity-90 small">
-                    Selecciona el grado escolar, la asignatura y la fecha para asentar la asistencia del día con guardado oficial en la base de datos.
+                    {% if puede_llamar_asistencia %}
+                        Selecciona el grado escolar, la asignatura y la fecha para asentar la asistencia del día con guardado oficial en la base de datos.
+                    {% else %}
+                        Consulta la nómina de estudiantes matriculados y el historial oficial de asistencias por curso, asignatura y fecha (Modo Consulta).
+                    {% endif %}
                 </p>
             </div>
             <div class="d-flex gap-2">
                 <a href="{% url 'calificaciones' %}" class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm text-primary">
                     <i class="bi bi-clipboard2-data-fill me-1"></i> Planilla de Notas
                 </a>
+                {% if es_administrador_consulta %}
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-light btn-sm fw-semibold rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Panel Principal
+                </a>
+                {% else %}
                 <a href="{% url 'instructor_dashboard' %}" class="btn btn-outline-light btn-sm fw-semibold rounded-pill px-3">
                     <i class="bi bi-arrow-left me-1"></i> Panel Docente
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- MENSAJES DE CONFIRMACIÓN -->
+    <!-- MENSAJES DE CONFIRMACIÓN O RESTRICCIÓN -->
     {% if messages %}
     <div class="mb-4">
         {% for message in messages %}
-        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm d-flex align-items-center gap-2" role="alert">
-            <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show rounded-4 border-0 shadow-sm d-flex align-items-center gap-2" role="alert">
+            <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-check-circle-fill text-success{% endif %} fs-5"></i>
             <div>{{ message }}</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
         </div>
@@ -45,7 +61,8 @@
     <ul class="nav nav-pills gap-2 mb-4" id="asistenciaPills" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active rounded-pill fw-bold px-4 py-2" id="pill-tomar-tab" data-bs-toggle="pill" data-bs-target="#pill-tomar" type="button" role="tab">
-                <i class="bi bi-card-checklist me-1"></i> 1. Tomar Asistencia de Hoy
+                <i class="bi {% if puede_llamar_asistencia %}bi-card-checklist{% else %}bi-people-fill{% endif %} me-1"></i>
+                {% if puede_llamar_asistencia %}1. Tomar Asistencia de Hoy{% else %}1. Ver Lista de Estudiantes (Modo Consulta){% endif %}
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -61,6 +78,16 @@
         <!-- TAB 1: TOMAR ASISTENCIA DE HOY -->
         <!-- ======================================================== -->
         <div class="tab-pane fade show active" id="pill-tomar" role="tabpanel">
+
+            {% if not puede_llamar_asistencia %}
+            <div class="alert alert-primary border-0 shadow-sm rounded-4 d-flex align-items-center gap-3 p-3 mb-4 bg-primary bg-opacity-10 text-dark">
+                <i class="bi bi-shield-lock-fill fs-3 text-primary"></i>
+                <div>
+                    <strong class="d-block text-primary">Modo de Consulta Exclusivo (Rol Administrador):</strong>
+                    <span class="small text-muted">Como Administrador, cuentas con acceso a la lista completa de estudiantes matriculados y a la consulta del historial de asistencias. La opción de <strong>Llamar y Guardar Asistencia</strong> está reservada a Docentes y directivos escolares autorizados.</span>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Barra de Selección de Grado/Curso, Asignatura y Fecha -->
             <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
@@ -154,7 +181,7 @@
                                     <th class="ps-4 py-3" style="width: 50px;">#</th>
                                     <th class="py-3" style="min-width: 200px;">Estudiante</th>
                                     <th class="py-3" style="width: 140px;">Documento</th>
-                                    <th class="py-3 text-center" style="width: 380px;">Registro de Asistencia *</th>
+                                    <th class="py-3 text-center" style="width: 380px;">Registro de Asistencia</th>
                                     <th class="py-3 pe-4" style="min-width: 220px;">Observación de la Sesión</th>
                                 </tr>
                             </thead>
@@ -184,32 +211,32 @@
                                         <td>
                                             <div class="btn-group w-100 shadow-sm" role="group" aria-label="Opciones de asistencia">
                                                 <!-- Presente -->
-                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="p_{{ matricula.pk }}" value="P" {% if estado == 'P' or not estado %}checked{% endif %} onchange="actualizarContadores();">
+                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="p_{{ matricula.pk }}" value="P" {% if estado == 'P' or not estado %}checked{% endif %} {% if not puede_llamar_asistencia %}disabled{% endif %} onchange="actualizarContadores();">
                                                 <label class="btn btn-outline-success btn-sm fw-semibold py-1.5" for="p_{{ matricula.pk }}" title="Marcar Presente">
                                                     <i class="bi bi-check-lg me-1"></i>Presente
                                                 </label>
 
                                                 <!-- Tardanza -->
-                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="t_{{ matricula.pk }}" value="T" {% if estado == 'T' %}checked{% endif %} onchange="actualizarContadores();">
+                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="t_{{ matricula.pk }}" value="T" {% if estado == 'T' %}checked{% endif %} {% if not puede_llamar_asistencia %}disabled{% endif %} onchange="actualizarContadores();">
                                                 <label class="btn btn-outline-warning btn-sm fw-semibold py-1.5" for="t_{{ matricula.pk }}" title="Marcar Llegada Tarde">
                                                     <i class="bi bi-clock me-1"></i>Tarde
                                                 </label>
 
                                                 <!-- Ausente -->
-                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="a_{{ matricula.pk }}" value="A" {% if estado == 'A' %}checked{% endif %} onchange="actualizarContadores();">
+                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="a_{{ matricula.pk }}" value="A" {% if estado == 'A' %}checked{% endif %} {% if not puede_llamar_asistencia %}disabled{% endif %} onchange="actualizarContadores();">
                                                 <label class="btn btn-outline-danger btn-sm fw-semibold py-1.5" for="a_{{ matricula.pk }}" title="Marcar Inasistencia">
                                                     <i class="bi bi-x-lg me-1"></i>Ausente
                                                 </label>
 
                                                 <!-- Excusa -->
-                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="j_{{ matricula.pk }}" value="J" {% if estado == 'J' %}checked{% endif %} onchange="actualizarContadores();">
+                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="j_{{ matricula.pk }}" value="J" {% if estado == 'J' %}checked{% endif %} {% if not puede_llamar_asistencia %}disabled{% endif %} onchange="actualizarContadores();">
                                                 <label class="btn btn-outline-primary btn-sm fw-semibold py-1.5" for="j_{{ matricula.pk }}" title="Marcar Justificada / Excusa">
                                                     <i class="bi bi-shield-check me-1"></i>Excusa
                                                 </label>
                                             </div>
                                         </td>
                                         <td class="pe-4">
-                                            <input type="text" name="obs_{{ matricula.pk }}" class="form-control form-control-sm border-secondary-subtle rounded-3" placeholder="Motivo o novedad de la sesión...">
+                                            <input type="text" name="obs_{{ matricula.pk }}" class="form-control form-control-sm border-secondary-subtle rounded-3" {% if not puede_llamar_asistencia %}disabled readonly placeholder="Modo solo lectura (Consulta)"{% else %}placeholder="Motivo o novedad de la sesión..."{% endif %}>
                                         </td>
                                     </tr>
                                     {% endwith %}
@@ -225,15 +252,26 @@
                         </table>
                     </div>
 
-                    <!-- Botón Guardar Asistencia -->
+                    <!-- Botón Guardar Asistencia / Indicador de Modo Consulta -->
                     {% if matriculas %}
                         <div class="card-footer bg-light p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                             <span class="text-muted small">
-                                <i class="bi bi-info-circle me-1 text-primary"></i> La información se almacena permanentemente en MySQL, evitando duplicidades y conservando el historial.
+                                <i class="bi bi-info-circle me-1 text-primary"></i>
+                                {% if puede_llamar_asistencia %}
+                                    La información se almacena permanentemente en MySQL, evitando duplicidades y conservando el historial.
+                                {% else %}
+                                    Vista en modo consulta. Para registrar o modificar asistencias diarias, debe iniciar sesión con una cuenta de Docente o Rectoría.
+                                {% endif %}
                             </span>
+                            {% if puede_llamar_asistencia %}
                             <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-pill shadow text-white" style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); border: none;">
                                 <i class="bi bi-save me-1"></i> Guardar Asistencia de la Sesión
                             </button>
+                            {% else %}
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                                <i class="bi bi-eye me-1"></i> Modo Solo Consulta (Llamado no disponible para Administrador)
+                            </span>
+                            {% endif %}
                         </div>
                     {% endif %}
                 </div>

@@ -14,6 +14,11 @@ from django.contrib.auth.models import User
 
 
 @login_required
+@requerir_roles(
+    'Administrador', 'Rectoría', 'Rector', 'Coordinador',
+    'Secretaría', 'Secretaria', 'Instructor', 'Instructor SENA',
+    'Docente', 'Docente I.E.', 'Profesor',
+)
 def lista_instituciones(request):
     """
     Directorio interactivo de Instituciones Educativas con buscador reactivo,
@@ -111,6 +116,11 @@ def lista_instituciones(request):
 
 
 @login_required
+@requerir_roles(
+    'Administrador', 'Rectoría', 'Rector', 'Coordinador',
+    'Secretaría', 'Secretaria', 'Instructor', 'Instructor SENA',
+    'Docente', 'Docente I.E.', 'Profesor',
+)
 def detalle_institucion(request, pk):
     """
     Perfil Institucional Completo del Colegio con 9 Pestañas 100% Funcionales:
@@ -354,6 +364,7 @@ def detalle_institucion(request, pk):
 
 
 @login_required
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria')
 def crear_institucion(request):
     """
     Registro de una nueva institución educativa en convenio con trazabilidad en auditoría.
@@ -380,6 +391,7 @@ def crear_institucion(request):
 
 
 @login_required
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria')
 def editar_institucion(request, pk):
     """
     Edición de datos de una institución educativa existente con trazabilidad en auditoría.
@@ -407,6 +419,7 @@ def editar_institucion(request, pk):
 
 
 @login_required
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria')
 def cambiar_estado_institucion(request, pk):
     """
     Alterna de forma segura el estado de una institución (Activa / Inactiva) con auditoría.
@@ -432,6 +445,7 @@ def cambiar_estado_institucion(request, pk):
 
 
 @login_required
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria')
 def eliminar_institucion(request, pk):
     """
     Eliminación segura de una institución educativa:
@@ -471,6 +485,7 @@ def eliminar_institucion(request, pk):
 # ==============================================================================
 
 @login_required
+@requerir_roles('Administrador', 'Coordinador', 'Secretaría', 'Secretaria')
 def contactos_lista(request):
     """
     Catálogo general de contactos institucionales de colegios articulados con el SENA.
@@ -627,6 +642,7 @@ def contacto_eliminar(request, pk):
 # ==============================================================================
 
 @login_required
+@requerir_roles('Administrador', 'Coordinador', 'Secretaría', 'Secretaria', 'Instructor SENA', 'Docente I.E.')
 def observaciones_lista(request):
     """
     Directorio administrativo de Observaciones, Reuniones, Acuerdos y Antecedentes

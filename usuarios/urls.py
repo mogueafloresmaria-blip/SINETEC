@@ -1,6 +1,7 @@
 from django.urls import path
 from django.http import HttpResponse
 from . import views
+from . import views_docentes
 
 urlpatterns = [
     path('service-worker.js', lambda r: HttpResponse('', content_type='application/javascript')),
@@ -25,7 +26,7 @@ urlpatterns = [
     path('familia/', views.familia_portal, name='familia_portal'),
     path('familia/boletines/', views.familia_boletines, name='familia_boletines'),
     path('familia/asistencia/', views.familia_asistencia, name='familia_asistencia'),
-    path('familia/pensiones/', views.familia_pensiones, name='familia_pensiones'),
+    # path('familia/pensiones/', views.familia_pensiones, name='familia_pensiones'),
     path('familia/matricula/', views.familia_matricula, name='familia_matricula'),
     path('familias/portal/', views.familia_portal, name='familia_portal_alt'),
     path('familias/nueva/', views.crear_familia, name='crear_familia'),
@@ -41,6 +42,7 @@ urlpatterns = [
     path('transporte/<int:pk>/quitar/<int:estudiante_id>/', views.quitar_estudiante_ruta, name='quitar_estudiante_ruta'),
     path('asistencia/api/escanear-qr/', views.api_registrar_asistencia_qr, name='api_registrar_asistencia_qr'),
     path('recuperar-contrasena/', views.recuperar_contrasena, name='recuperar_contrasena'),
+    path('recuperar-contrasena/confirmar/<uidb64>/<token>/', views.confirmar_recuperacion, name='confirmar_recuperacion'),
     path('api/recuperar-contrasena/', views.api_recuperar_contrasena, name='api_recuperar_contrasena'),
     path('estudiantes/qr/<uuid:token>/', views.qr_estudiante, name='estudiante_qr'),
     path('estudiantes/<int:pk>/carnet/', views.ver_carnet_digital, name='carnet_digital_id'),
@@ -54,16 +56,17 @@ urlpatterns = [
     path('calificaciones/', views.calificaciones, name='calificaciones'),
     path('calificaciones/ficha/<int:ficha_id>/eliminar/', views.eliminar_registro_notas, name='eliminar_registro_notas'),
     path('perfil-profesional/', views.perfil_profesional_view, name='perfil_profesional'),
+    path('mi-perfil/', views.mi_perfil_view, name='mi_perfil'),
     path('mis-asignaturas/', views.mis_asignaturas_view, name='mis_asignaturas'),
     path('mis-estudiantes/', views.mis_estudiantes_view, name='mis_estudiantes'),
     path('alumno/', views.mis_estudiantes_view, name='alumno_docente'),
-    path('actividades-y-tareas/', views.actividades_tareas_view, name='actividades_tareas'),
-    path('actividades-tareas/', views.actividades_tareas_view, name='actividades_y_tareas'),
     path('asistencia/', views.asistencia_docente_view, name='asistencia_docente'),
+    path('temas-y-actividades/', views.temas_actividades_view, name='temas_actividades'),
     path('calificaciones-docente/', views.calificaciones_docente_view, name='calificaciones_docente'),
     path('horario-escolar/', views.horario_docente_view, name='horario_docente'),
     path('horario/', views.horario_docente_view, name='horario_docente_alt'),
     path('mis-grupos/', views.mis_grupos_view, name='mis_grupos'),
+    path('grados-y-materias/', views.grados_y_materias_view, name='grados_y_materias'),
     path('comportamiento-docente/', views.comportamiento_docente_view, name='comportamiento_docente'),
     path('recursos-docente/', views.recursos_docente_view, name='recursos_docente'),
     path('documentos-docente/', views.documentos_docente_view, name='documentos_docente'),
@@ -75,6 +78,8 @@ urlpatterns = [
     path('papelera-docente/', views.papelera_docente_view, name='papelera_docente'),
     path('aula/instructor/', views.instructor_dashboard, name='aula_instructor'),
     path('instructor/', views.instructor_dashboard, name='instructor_dashboard'),
+    path('docente/', views.instructor_dashboard, name='docente_dashboard'),
+    path('documentos/', views.documentos_docente_view, name='documentos_docente_short'),
     path('instructor/clase/<int:clase_id>/', views.detalle_clase_hoy, name='detalle_clase_hoy'),
     path('instructor/tarea/<int:tarea_id>/entregas/', views.revisar_entregas_tarea, name='revisar_entregas_tarea'),
     path('instructor/evidencias/nueva/', views.crear_evidencia, name='crear_evidencia'),
@@ -119,7 +124,10 @@ urlpatterns = [
     path('configuracion/', views.configuracion_sistema, name='configuracion_sistema'),
     path('indicadores/', views.indicadores_dashboard, name='indicadores_dashboard'),
     path('notificaciones/', views.notificaciones_lista, name='notificaciones_lista'),
+    path('notificaciones/<int:pk>/leer/', views.abrir_notificacion_view, name='abrir_notificacion'),
     path('notificaciones/<int:pk>/marcar-leida/', views.marcar_notificacion_leida, name='marcar_notificacion_leida'),
+    path('notificaciones/<int:pk>/marcar-leida-ajax/', views.marcar_notificacion_leida_ajax, name='marcar_notificacion_leida_ajax'),
+    path('notificaciones/marcar-todas-leidas/', views.marcar_todas_notificaciones_leidas_view, name='marcar_todas_notificaciones_leidas'),
     path('papelera/', views.papelera_reciclaje, name='papelera_reciclaje'),
     path('papelera/<int:pk>/restaurar/', views.restaurar_elemento_papelera, name='restaurar_elemento_papelera'),
     path('papelera/<int:pk>/eliminar-definitivo/', views.eliminar_definitivo_papelera, name='eliminar_definitivo_papelera'),
@@ -136,4 +144,10 @@ urlpatterns = [
     path('sena/api/registrar-aprendiz/', views.api_sena_registrar_aprendiz, name='api_sena_registrar_aprendiz'),
     path('sena/api/generar-ia/', views.api_sena_generar_ia, name='api_sena_generar_ia'),
     path('sena/api/exportar-datos/', views.api_sena_exportar_datos, name='api_sena_exportar_datos'),
+    
+    # Gestión de Docentes
+    path('docentes/gestion/', views_docentes.docentes_lista, name='docentes_lista'),
+    path('docentes/gestion/nuevo/', views_docentes.docente_editar, name='docente_nuevo'),
+    path('docentes/gestion/<int:pk>/editar/', views_docentes.docente_editar, name='docente_editar'),
+    path('docentes/gestion/<int:pk>/eliminar/', views_docentes.docente_eliminar, name='docente_eliminar'),
 ]

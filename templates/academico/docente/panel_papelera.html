@@ -1,7 +1,7 @@
 {% load static %}
 <!-- =========================================================================
      MÓDULO 11: PAPELERA DE RECICLAJE (GESTIÓN DE ELEMENTOS ELIMINADOS)
-     Diseño: Sistema Rosado Elegante (#db2777, #fce7f3, #fff0f3)
+     Diseño: Café Institucional y Crema (var(--color-principal), var(--color-acento), #F5F2EB)
      Estructura: Hero banner, métricas de retención, listado con restauración
      real y eliminación permanente confirmada.
      ========================================================================= -->
@@ -9,11 +9,11 @@
 
     <!-- 1. HERO BANNER DE PAPELERA (SIN FOTO EN LA ESQUINA) -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+         style="background: linear-gradient(135deg, #FAF8F5 0%, #F5F2EB 50%, var(--color-acento) 100%); border: 1px solid var(--color-acento);">
         <div class="row align-items-center">
             <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
-                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                     style="background: #ffffff; color: var(--color-principal); width: 62px; height: 62px; border: 1px solid var(--color-acento);">
                     <i class="bi bi-trash3-fill" style="font-size: 2rem;"></i>
                 </div>
                 <div>
@@ -31,14 +31,14 @@
                     {% csrf_token %}
                     <input type="hidden" name="action" value="vaciar_papelera">
                     <button type="submit" class="btn rounded-pill px-4 py-2.5 fw-bold small shadow-2xs d-inline-flex align-items-center gap-1.5"
-                            style="background: #ffffff; color: #e11d48; border: 1.5px solid #e11d48;">
+                            style="background: #ffffff; color: #DC2626; border: 1.5px solid #DC2626;">
                         <i class="bi bi-trash3-fill"></i> Vaciar Papelera
                     </button>
                 </form>
                 {% else %}
                 <div class="d-inline-flex align-items-center gap-2 px-3.5 py-2 rounded-pill fw-semibold shadow-2xs" 
-                     style="background: rgba(255, 255, 255, 0.92); border: 1px solid #fce7f3; color: #be185d; font-size: 0.85rem;">
-                    <i class="bi bi-shield-check" style="color: #db2777;"></i>
+                     style="background: rgba(255, 255, 255, 0.92); border: 1px solid var(--color-acento); color: var(--color-secundario); font-size: 0.85rem;">
+                    <i class="bi bi-shield-check" style="color: var(--color-principal);"></i>
                     <span>Papelera Limpia</span>
                 </div>
                 {% endif %}
@@ -50,11 +50,11 @@
     <div class="row g-3 mb-4">
         <!-- Elementos Eliminados -->
         <div class="col-md-4">
-            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Elementos en papelera</span>
                     <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
-                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                         style="background: #F5F2EB; color: var(--color-principal); width: 34px; height: 34px;">
                         <i class="bi bi-trash3 fs-6"></i>
                     </div>
                 </div>
@@ -67,11 +67,11 @@
 
         <!-- Periodo de Retención -->
         <div class="col-md-4">
-            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Retención de seguridad</span>
                     <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
-                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                         style="background: #F5F2EB; color: var(--color-principal); width: 34px; height: 34px;">
                         <i class="bi bi-shield-lock fs-6"></i>
                     </div>
                 </div>
@@ -84,11 +84,11 @@
 
         <!-- Protección de Datos -->
         <div class="col-md-4">
-            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Restauración</span>
                     <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
-                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                         style="background: #F5F2EB; color: var(--color-principal); width: 34px; height: 34px;">
                         <i class="bi bi-arrow-counterclockwise fs-6"></i>
                     </div>
                 </div>
@@ -101,47 +101,76 @@
     </div>
 
     <!-- 3. LISTADO DE ELEMENTOS EN PAPELERA -->
-    <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden" style="border-color: #fce7f3 !important;">
-        <div class="p-3.5 border-bottom d-flex justify-content-between align-items-center" style="background: #fff0f3; border-color: #fce7f3 !important;">
-            <span class="small fw-bold" style="color: #be185d; font-size: 0.85rem;">
-                <i class="bi bi-recycle me-1.5" style="color: #db2777;"></i> Elementos en Papelera ({{ items_papelera|length }})
+    <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden" style="border-color: var(--color-acento) !important;">
+        <div class="p-3.5 border-bottom d-flex justify-content-between align-items-center" style="background: #F5F2EB; border-color: var(--color-acento) !important;">
+            <span class="small fw-bold" style="color: var(--color-secundario); font-size: 0.85rem;">
+                <i class="bi bi-recycle me-1.5" style="color: var(--color-principal);"></i> Elementos en Papelera ({{ items_papelera|length }})
             </span>
             <small class="text-muted" style="font-size: 0.75rem;">Los elementos restaurados volverán inmediatamente a su módulo correspondiente.</small>
         </div>
 
         <div class="table-responsive">
             <table class="table align-middle mb-0">
-                <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
                     <tr>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">TIPO DE ELEMENTO</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">TÍTULO / DESCRIPCIÓN</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">DETALLE DE ORIGEN</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">FECHA DE ELIMINACIÓN</th>
-                        <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem; letter-spacing: 0.5px;">ACCIONES</th>
+                        <th class="py-3 px-3" style="color: var(--color-secundario); font-size: 0.76rem; letter-spacing: 0.5px;">NOMBRE</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem; letter-spacing: 0.5px;">TIPO</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem; letter-spacing: 0.5px;">MÓDULO DE ORIGEN</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem; letter-spacing: 0.5px;">FECHA DE ELIMINACIÓN</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem; letter-spacing: 0.5px;">USUARIO QUE ELIMINÓ</th>
+                        <th class="py-3 px-3 text-end" style="color: var(--color-secundario); font-size: 0.76rem; letter-spacing: 0.5px;">ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in items_papelera %}
-                    <tr style="border-bottom: 1px solid #fce7f3;">
+                    <tr style="border-bottom: 1px solid var(--color-acento);">
+                        <td class="px-3">
+                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ item.titulo }}</strong>
+                            <small class="text-muted">ID: #{{ item.objeto_id }}</small>
+                        </td>
                         <td>
-                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.72rem;">
-                                {{ item.tipo_objeto|default:"Actividad" }}
+                            {% if item.tipo_objeto == 'TareaClase' %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 0.72rem;">
+                                <i class="bi bi-journal-text me-1"></i> Actividad
+                            </span>
+                            {% elif item.tipo_objeto == 'EntregaTarea' %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; font-size: 0.72rem;">
+                                <i class="bi bi-file-earmark-check me-1"></i> Entrega / Alumno
+                            </span>
+                            {% elif item.tipo_objeto == 'Horario' %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; font-size: 0.72rem;">
+                                <i class="bi bi-calendar-week me-1"></i> Horario
+                            </span>
+                            {% elif item.tipo_objeto == 'GuiaClase' %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 0.72rem;">
+                                <i class="bi bi-file-earmark-text me-1"></i> Documento / Guía
+                            </span>
+                            {% else %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--color-acento); color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.72rem;">
+                                {{ item.tipo_objeto|default:"Registro" }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #FAF8F5; color: var(--color-secundario); border: 1px solid var(--color-acento); font-size: 0.75rem;">
+                                <i class="bi bi-geo-alt me-1 text-muted"></i>{{ item.modulo_origen|default:item.subtitulo|default:"Módulo Académico" }}
                             </span>
                         </td>
-                        <td>
-                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ item.titulo }}</strong>
-                        </td>
-                        <td class="small text-muted">{{ item.subtitulo|default:"Curso docente" }}</td>
                         <td class="small text-muted">{{ item.fecha_eliminacion|date:"d/m/Y H:i" }}</td>
-                        <td class="text-end">
-                            <!-- Restaurar -->
+                        <td>
+                            <span class="small fw-semibold text-dark">
+                                <i class="bi bi-person-circle me-1 text-muted"></i>{{ item.eliminado_por.get_full_name|default:item.eliminado_por.username|default:"Docente" }}
+                            </span>
+                        </td>
+                        <td class="px-3 text-end">
+                            <!-- Recuperar / Restaurar -->
                             <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="restaurar_papelera">
                                 <input type="hidden" name="papelera_id" value="{{ item.id }}">
                                 <button type="submit" class="btn btn-sm rounded-pill px-3 py-1 me-1 fw-bold shadow-2xs" 
-                                        style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;" title="Restaurar elemento">
-                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+                                        style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;" title="Recuperar elemento al módulo de origen">
+                                    <i class="bi bi-recycle me-1"></i> ♻️ Recuperar
                                 </button>
                             </form>
                             <!-- Eliminar Definitivo -->
@@ -150,7 +179,7 @@
                                 <input type="hidden" name="action" value="eliminar_definitivo_papelera">
                                 <input type="hidden" name="papelera_id" value="{{ item.id }}">
                                 <button type="submit" class="btn btn-sm rounded-circle p-1 d-inline-flex align-items-center justify-content-center shadow-2xs" 
-                                        style="background: #fff; color: #e11d48; border: 1px solid #fce7f3; width: 30px; height: 30px;" title="Eliminar para siempre">
+                                        style="background: #fff; color: #DC2626; border: 1px solid var(--color-acento); width: 30px; height: 30px;" title="Eliminar para siempre">
                                     <i class="bi bi-x-circle fs-6"></i>
                                 </button>
                             </form>
@@ -158,8 +187,8 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
-                            <i class="bi bi-trash fs-1 d-block mb-2" style="color: #db2777;"></i>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-trash fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
                             <h6 class="fw-bold text-dark">La papelera está vacía</h6>
                             <small class="text-muted">No hay tareas o contenidos eliminados recientemente.</small>
                         </td>

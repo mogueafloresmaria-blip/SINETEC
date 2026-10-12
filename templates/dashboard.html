@@ -7,16 +7,17 @@
 <style>
 /* ==========================================================================
    EDUNOVA - SISTEMA DE DISEÑO DIRECTIVO INSTITUCIONAL
+   PALETA: CAFÉ CLARO · BEIGE · CREMA · MARRÓN SUAVE
    ========================================================================== */
 .admin-hero {
-  background: linear-gradient(135deg, #ffffff 0%, #fff1f5 45%, #fce7f3 100%) !important;
-  border: 1.5px solid #fce7f3 !important;
+  background: linear-gradient(135deg, #ffffff 0%, #F5F2EB 45%, var(--color-acento) 100%) !important;
+  border: 1.5px solid #E5DFD5 !important;
   border-radius: 20px !important;
   padding: 1.8rem 2.2rem !important;
   position: relative !important;
   overflow: hidden !important;
   margin-bottom: 1.75rem !important;
-  box-shadow: 0 8px 24px -6px rgba(219, 39, 119, 0.08) !important;
+  box-shadow: 0 8px 24px -6px rgba(90, 56, 37, 0.08) !important;
 }
 
 .admin-hero::after {
@@ -26,7 +27,7 @@
   right: -40px;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(219,39,119,0.08) 0%, rgba(219,39,119,0) 70%);
+  background: radial-gradient(circle, rgba(139, 94, 60, 0.08) 0%, rgba(139, 94, 60, 0) 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -35,7 +36,7 @@
   font-size: 1.85rem !important;
   font-weight: 800 !important;
   margin: 0 !important;
-  color: #0f172a !important;
+  color: var(--color-titulo) !important;
   letter-spacing: -0.5px;
   display: flex;
   align-items: center;
@@ -44,7 +45,7 @@
 }
 
 .admin-hero-sub {
-  color: #64748b !important;
+  color: #75675E !important;
   font-size: 0.95rem !important;
   margin-top: 0.35rem !important;
   max-width: 680px;
@@ -52,13 +53,13 @@
 
 .admin-hero-date {
   background: #ffffff;
-  border: 1.5px solid #fce7f3;
+  border: 1.5px solid #E5DFD5;
   border-radius: 999px;
   padding: 0.45rem 1.15rem;
   font-size: 0.84rem;
   font-weight: 700;
-  color: #be185d;
-  box-shadow: 0 2px 8px rgba(219, 39, 119, 0.06);
+  color: var(--color-secundario);
+  box-shadow: 0 2px 8px rgba(90, 56, 37, 0.06);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -70,7 +71,7 @@
   gap: 0.6rem;
   margin-top: 1.25rem;
   padding-top: 1.25rem;
-  border-top: 1px solid rgba(252, 231, 243, 0.8) !important;
+  border-top: 1px solid rgba(229, 223, 213, 0.8) !important;
   position: relative;
   z-index: 2;
 }
@@ -81,28 +82,28 @@
   gap: 0.45rem;
   padding: 0.5rem 1.1rem;
   background: #ffffff;
-  border: 1.5px solid #fce7f3;
+  border: 1.5px solid #E5DFD5;
   border-radius: 999px;
-  color: #0f172a !important;
+  color: var(--color-titulo) !important;
   font-size: 0.84rem;
   font-weight: 700;
   text-decoration: none !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 2px 6px rgba(90, 56, 37, 0.03);
 }
 
 .admin-qbtn i {
-  color: #db2777;
+  color: var(--color-principal);
   font-size: 0.95rem;
   transition: color 0.2s;
 }
 
 .admin-qbtn:hover {
-  background: #db2777 !important;
+  background: var(--color-principal) !important;
   color: #ffffff !important;
-  border-color: #db2777 !important;
+  border-color: var(--color-principal) !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(219, 39, 119, 0.25);
+  box-shadow: 0 6px 16px rgba(90, 56, 37, 0.25);
 }
 
 .admin-qbtn:hover i {
@@ -110,10 +111,10 @@
 }
 
 .admin-qbtn-primary {
-  background: #db2777 !important;
+  background: var(--color-principal) !important;
   color: #ffffff !important;
-  border-color: #db2777 !important;
-  box-shadow: 0 4px 12px rgba(219, 39, 119, 0.28) !important;
+  border-color: var(--color-principal) !important;
+  box-shadow: 0 4px 12px rgba(90, 56, 37, 0.25) !important;
 }
 
 .admin-qbtn-primary i {
@@ -121,8 +122,8 @@
 }
 
 .admin-qbtn-primary:hover {
-  background: #be185d !important;
-  border-color: #be185d !important;
+  background: var(--color-secundario) !important;
+  border-color: var(--color-secundario) !important;
   color: #ffffff !important;
   transform: translateY(-2px);
 }
@@ -131,8 +132,8 @@
 .admin-kpi {
   background: #ffffff !important;
   border-radius: 18px !important;
-  border: 1.5px solid #fce7f3 !important;
-  box-shadow: 0 4px 12px rgba(219, 39, 119, 0.04) !important;
+  border: 1.5px solid #E5DFD5 !important;
+  box-shadow: 0 4px 12px rgba(90, 56, 37, 0.04) !important;
   padding: 1.35rem 1.45rem !important;
   position: relative !important;
   overflow: hidden !important;
@@ -144,8 +145,8 @@
 
 .admin-kpi:hover {
   transform: translateY(-3px) !important;
-  box-shadow: 0 10px 25px rgba(219, 39, 119, 0.1) !important;
-  border-color: #fbcfe8 !important;
+  box-shadow: 0 10px 25px rgba(90, 56, 37, 0.1) !important;
+  border-color: #E0D8CE !important;
   text-decoration: none !important;
   color: inherit !important;
 }
@@ -157,7 +158,7 @@
   top: 0;
   width: 5px;
   height: 100%;
-  background: var(--kc, #db2777);
+  background: var(--kc, var(--color-principal));
   border-radius: 4px 0 0 4px;
 }
 
@@ -166,14 +167,14 @@
   font-weight: 800 !important;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #be185d !important;
+  color: var(--color-secundario) !important;
   margin-bottom: 0.35rem !important;
 }
 
 .admin-kpi-val {
   font-size: 2.25rem !important;
   font-weight: 800 !important;
-  color: #0f172a !important;
+  color: var(--color-titulo) !important;
   line-height: 1 !important;
   margin-bottom: 0.45rem !important;
   letter-spacing: -0.5px;
@@ -182,7 +183,7 @@
 .admin-kpi-sub {
   font-size: 0.8rem !important;
   font-weight: 600 !important;
-  color: #64748b;
+  color: #75675E;
 }
 
 .admin-kpi-ico {
@@ -200,14 +201,14 @@
 .admin-panel {
   background: #ffffff !important;
   border-radius: 18px !important;
-  border: 1.5px solid #fce7f3 !important;
-  box-shadow: 0 4px 15px rgba(219, 39, 119, 0.04) !important;
+  border: 1.5px solid #E5DFD5 !important;
+  box-shadow: 0 4px 15px rgba(90, 56, 37, 0.04) !important;
   overflow: hidden;
 }
 
 .admin-panel-head {
-  background: linear-gradient(135deg, #ffffff 0%, #fff1f5 100%);
-  border-bottom: 1.5px solid #fce7f3;
+  background: linear-gradient(135deg, #ffffff 0%, #F5F2EB 100%);
+  border-bottom: 1.5px solid #E5DFD5;
   padding: 1.05rem 1.4rem;
   display: flex;
   align-items: center;
@@ -220,9 +221,9 @@
   font-size: 0.74rem !important;
   font-weight: 800 !important;
   text-transform: uppercase;
-  color: #be185d !important;
-  background: #fff0f3 !important;
-  border-bottom: 1.5px solid #fce7f3 !important;
+  color: var(--color-secundario) !important;
+  background: #FAF8F5 !important;
+  border-bottom: 1.5px solid #E5DFD5 !important;
   padding: 0.85rem 1.1rem !important;
   letter-spacing: 0.5px;
 }
@@ -231,7 +232,7 @@
   padding: 0.9rem 1.1rem !important;
   font-size: 0.88rem !important;
   vertical-align: middle !important;
-  border-color: #fce7f3 !important;
+  border-color: #EDE8E1 !important;
 }
 
 .admin-panel .table tr:last-child td {
@@ -249,13 +250,13 @@
       <div class="d-flex align-items-center gap-3">
         <!-- Logo Oficial EDUNOVA -->
         <div class="rounded-4 p-2 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
-             style="background: #ffffff; width: 68px; height: 68px; border: 1.5px solid #fce7f3;">
+             style="background: #ffffff; width: 68px; height: 68px; border: 1.5px solid #E5DFD5;">
           <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" style="width: 52px; height: 52px; object-fit: contain;">
         </div>
         <div>
-          <div class="text-uppercase fw-bold mb-1 d-flex align-items-center gap-2" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.8px;">
+          <div class="text-uppercase fw-bold mb-1 d-flex align-items-center gap-2" style="color: var(--color-principal); font-size: 0.76rem; letter-spacing: 0.8px;">
             <span>SISTEMA INTEGRADO DE EDUCACIÓN TÉCNICA</span>
-            <span class="badge py-0.5 px-2 rounded-pill" style="background:#fce7f3;color:#db2777;font-size:0.68rem;border:1px solid #fbcfe8;">CAMPUS DIRECTIVO</span>
+            <span class="badge py-0.5 px-2 rounded-pill" style="background:var(--color-acento);color:var(--color-secundario);font-size:0.68rem;border:1px solid #E0D8CE;">CAMPUS DIRECTIVO</span>
           </div>
           <h1 class="admin-hero-title">
             Panel Institucional EDUNOVA
@@ -263,39 +264,18 @@
           <p class="admin-hero-sub mb-0">Supervisión integral de estudiantes, matrículas, cuerpo docente, horarios y finanzas escolares.</p>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-2">
-        <span class="admin-hero-date">
-          <i class="bi bi-calendar3" style="color: #db2777;"></i>
-          <span>{% now "l, d \d\e F \d\e Y" %}</span>
-        </span>
-      </div>
     </div>
 
-    <!-- BOTONES DE ACCIÓN RÁPIDA ORGANIZADOS Y PROPORCIONADOS -->
-    <div class="admin-quick-nav">
-      <a href="{% url 'matriculas_lista' %}" class="admin-qbtn admin-qbtn-primary">
-        <i class="bi bi-person-plus-fill"></i> Nueva Matrícula
+    <!-- ACCIONES EJECUTIVAS RESUMIDAS (SIN DUPLICAR EL MENÚ) -->
+    <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-3 border-top" style="border-color: rgba(229, 223, 213, 0.7) !important;">
+      <a href="{% url 'matriculas_lista' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white shadow-2xs" style="background:var(--color-principal);border:none;">
+        <i class="bi bi-person-plus-fill me-1"></i> Nueva Matrícula
       </a>
-      <a href="{% url 'estudiantes_lista' %}" class="admin-qbtn">
-        <i class="bi bi-mortarboard-fill"></i> Alumnos ({{ total_aprendices }})
+      <a href="{% url 'redactar_circular' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold bg-white text-dark border shadow-2xs" style="border-color:#E5DFD5;">
+        <i class="bi bi-megaphone-fill me-1" style="color:var(--color-principal);"></i> Publicar Comunicado
       </a>
-      <a href="{% url 'instructores_lista' %}" class="admin-qbtn">
-        <i class="bi bi-person-badge-fill"></i> Plana Docente ({{ total_docentes }})
-      </a>
-      <a href="{% url 'horarios_tablero' %}" class="admin-qbtn">
-        <i class="bi bi-calendar2-week-fill"></i> Horarios Escolares
-      </a>
-      <a href="{% url 'calificaciones' %}" class="admin-qbtn">
-        <i class="bi bi-clipboard2-data-fill"></i> Planilla de Notas
-      </a>
-      <a href="{% url 'caja_pensiones' %}" class="admin-qbtn">
-        <i class="bi bi-cash-coin"></i> Pensiones Escolares
-      </a>
-      <a href="{% url 'mensajeria' %}" class="admin-qbtn">
-        <i class="bi bi-megaphone-fill"></i> Comunicados
-      </a>
-      <a href="{% url 'centro_reportes' %}" class="admin-qbtn">
-        <i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes
+      <a href="{% url 'caja_pensiones' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold bg-white text-dark border shadow-2xs" style="border-color:#E5DFD5;">
+        <i class="bi bi-cash-coin me-1" style="color:var(--color-principal);"></i> Estado de Pensiones
       </a>
     </div>
   </div>
@@ -304,32 +284,32 @@
   <div class="row g-3 mb-4">
     <!-- Total Estudiantes -->
     <div class="col-6 col-md-3">
-      <a href="{% url 'estudiantes_lista' %}" class="admin-kpi h-100" style="--kc:#db2777;">
+      <a href="{% url 'estudiantes_lista' %}" class="admin-kpi h-100" style="--kc:var(--color-principal);">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <div class="admin-kpi-label">Total Estudiantes</div>
+            <div class="admin-kpi-label">Total Alumnos</div>
             <div class="admin-kpi-val">{{ total_aprendices }}</div>
             <div class="admin-kpi-sub">
-              <i class="bi bi-people-fill me-1" style="color: #db2777;"></i>Grado 10°: <strong>{{ grado_10 }}</strong> · Grado 11°: <strong>{{ grado_11 }}</strong>
+              <i class="bi bi-people-fill me-1" style="color: var(--color-principal);"></i>Grado 10°: <strong>{{ grado_10 }}</strong> · Grado 11°: <strong>{{ grado_11 }}</strong>
             </div>
           </div>
-          <div class="admin-kpi-ico" style="background:#fff0f3;color:#db2777;border:1.5px solid #fce7f3;"><i class="bi bi-mortarboard-fill"></i></div>
+          <div class="admin-kpi-ico" style="background:#F5F2EB;color:var(--color-principal);border:1.5px solid #E5DFD5;"><i class="bi bi-mortarboard-fill"></i></div>
         </div>
       </a>
     </div>
 
     <!-- Total Docentes -->
     <div class="col-6 col-md-3">
-      <a href="{% url 'instructores_lista' %}" class="admin-kpi h-100" style="--kc:#be185d;">
+      <a href="{% url 'instructores_lista' %}" class="admin-kpi h-100" style="--kc:var(--color-secundario);">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <div class="admin-kpi-label">Plana Docente</div>
+            <div class="admin-kpi-label">Profesores Activos</div>
             <div class="admin-kpi-val">{{ total_docentes }}</div>
             <div class="admin-kpi-sub">
-              <i class="bi bi-person-check-fill me-1" style="color: #be185d;"></i>Prof. <strong>{{ docente_principal.get_full_name|default:'María Torres' }}</strong>
+              <i class="bi bi-person-check-fill me-1" style="color: var(--color-secundario);"></i>Prof. <strong>{{ docente_principal.get_full_name|default:'Miguel González' }}</strong>
             </div>
           </div>
-          <div class="admin-kpi-ico" style="background:#fdf2f8;color:#be185d;border:1.5px solid #fce7f3;"><i class="bi bi-person-workspace"></i></div>
+          <div class="admin-kpi-ico" style="background:var(--color-acento);color:var(--color-secundario);border:1.5px solid #E5DFD5;"><i class="bi bi-person-workspace"></i></div>
         </div>
       </a>
     </div>
@@ -375,54 +355,54 @@
         <div>
           <div class="admin-panel-head">
             <div>
-              <div class="fw-bold text-dark" style="font-size:.92rem;"><i class="bi bi-bar-chart-fill me-2" style="color:#db2777;"></i>Alumnado por Nivel Escolar</div>
+              <div class="fw-bold text-dark" style="font-size:.92rem;"><i class="bi bi-bar-chart-fill me-2" style="color:var(--color-principal);"></i>Alumnado por Nivel Escolar</div>
               <div class="text-muted" style="font-size:.76rem;">Distribución por grado escolar (Estudiantes reales)</div>
             </div>
-            <span class="badge rounded-pill bg-white text-pink border px-3 py-1" style="color:#db2777;border-color:#fce7f3 !important;font-weight:700;">Total: {{ total_aprendices }} Estudiantes</span>
+            <span class="badge rounded-pill bg-white text-primary border px-3 py-1" style="color:var(--color-principal) !important;border-color:#E5DFD5 !important;font-weight:700;">Total: {{ total_aprendices }} Estudiantes</span>
           </div>
 
           <div class="p-3">
             <!-- Barra Grado 10 -->
-            <a href="{% url 'matriculas_lista' %}?grado=10" class="text-decoration-none d-block mb-3 p-2.5 rounded-3 border transition-all" style="background:#fff0f3;border-color:#fce7f3 !important;">
+            <a href="{% url 'matriculas_lista' %}?grado=10" class="text-decoration-none d-block mb-3 p-2.5 rounded-3 border transition-all" style="background:#F5F2EB;border-color:#E5DFD5 !important;">
               <div class="d-flex justify-content-between align-items-center mb-1.5">
                 <div class="d-flex align-items-center gap-2">
-                  <span class="badge rounded-pill px-2.5 py-1 text-white fw-bold" style="background:#db2777;font-size:0.76rem;">10°A</span>
+                  <span class="badge rounded-pill px-2.5 py-1 text-white fw-bold" style="background:var(--color-principal);font-size:0.76rem;">10°A</span>
                   <span class="fw-bold text-dark" style="font-size:0.86rem;">Grado Décimo · Secundaria</span>
                 </div>
-                <span class="fw-bold" style="color:#db2777;font-size:0.84rem;">2 Alumnos (50%) <i class="bi bi-chevron-right ms-1"></i></span>
+                <span class="fw-bold" style="color:var(--color-principal);font-size:0.84rem;">2 Alumnos (50%) <i class="bi bi-chevron-right ms-1"></i></span>
               </div>
-              <div class="progress mb-1.5" style="height: 10px; background-color: #fce7f3; border-radius: 999px;">
-                <div class="progress-bar rounded-pill" role="progressbar" style="width: 50%; background: linear-gradient(90deg, #db2777, #f43f5e);" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress mb-1.5" style="height: 10px; background-color: var(--color-acento); border-radius: 999px;">
+                <div class="progress-bar rounded-pill" role="progressbar" style="width: 50%; background: linear-gradient(90deg, var(--color-principal), #B8977E);" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
               </div>
               <div class="d-flex justify-content-between text-muted" style="font-size:0.74rem;">
                 <span><i class="bi bi-people-fill me-1 text-muted"></i>Juan Pérez, María Gómez</span>
-                <span class="text-pink fw-semibold" style="color:#db2777;">Ver lista de 10° &rarr;</span>
+                <span class="fw-semibold" style="color:var(--color-principal);">Ver lista de 10° &rarr;</span>
               </div>
             </a>
 
             <!-- Barra Grado 11 -->
-            <a href="{% url 'matriculas_lista' %}?grado=11" class="text-decoration-none d-block mb-3 p-2.5 rounded-3 border transition-all" style="background:#fdf2f8;border-color:#fce7f3 !important;">
+            <a href="{% url 'matriculas_lista' %}?grado=11" class="text-decoration-none d-block mb-3 p-2.5 rounded-3 border transition-all" style="background:var(--color-acento);border-color:#E5DFD5 !important;">
               <div class="d-flex justify-content-between align-items-center mb-1.5">
                 <div class="d-flex align-items-center gap-2">
-                  <span class="badge rounded-pill px-2.5 py-1 text-white fw-bold" style="background:#be185d;font-size:0.76rem;">11°A</span>
+                  <span class="badge rounded-pill px-2.5 py-1 text-white fw-bold" style="background:var(--color-secundario);font-size:0.76rem;">11°A</span>
                   <span class="fw-bold text-dark" style="font-size:0.86rem;">Grado Undécimo · Media Técnica</span>
                 </div>
-                <span class="fw-bold" style="color:#be185d;font-size:0.84rem;">2 Alumnos (50%) <i class="bi bi-chevron-right ms-1"></i></span>
+                <span class="fw-bold" style="color:var(--color-secundario);font-size:0.84rem;">2 Alumnos (50%) <i class="bi bi-chevron-right ms-1"></i></span>
               </div>
-              <div class="progress mb-1.5" style="height: 10px; background-color: #fce7f3; border-radius: 999px;">
-                <div class="progress-bar rounded-pill" role="progressbar" style="width: 50%; background: linear-gradient(90deg, #be185d, #db2777);" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress mb-1.5" style="height: 10px; background-color: var(--color-acento); border-radius: 999px;">
+                <div class="progress-bar rounded-pill" role="progressbar" style="width: 50%; background: linear-gradient(90deg, var(--color-secundario), var(--color-principal));" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
               </div>
               <div class="d-flex justify-content-between text-muted" style="font-size:0.74rem;">
                 <span><i class="bi bi-people-fill me-1 text-muted"></i>Luis Martínez, Ana López</span>
-                <span class="fw-semibold" style="color:#be185d;">Ver lista de 11° &rarr;</span>
+                <span class="fw-semibold" style="color:var(--color-secundario);">Ver lista de 11° &rarr;</span>
               </div>
             </a>
           </div>
         </div>
 
         <!-- Acciones Rápidas del Nivel -->
-        <div class="p-3 pt-0 border-top mt-2 d-flex align-items-center justify-content-between" style="border-color:#fce7f3 !important;">
-          <a href="{% url 'matriculas_lista' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold" style="background:#fff0f3;color:#db2777;border:1.5px solid #fce7f3;font-size:0.78rem;">
+        <div class="p-3 pt-0 border-top mt-2 d-flex align-items-center justify-content-between" style="border-color:#E5DFD5 !important;">
+          <a href="{% url 'matriculas_lista' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold" style="background:#F5F2EB;color:var(--color-principal);border:1.5px solid #E5DFD5;font-size:0.78rem;">
             <i class="bi bi-person-lines-fill me-1.5"></i>Gestionar Matrículas
           </a>
           <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold bg-white text-muted border" style="font-size:0.78rem;border-color:#e2e8f0 !important;">
@@ -438,51 +418,51 @@
         <div>
           <div class="admin-panel-head">
             <div>
-              <div class="fw-bold text-dark" style="font-size:.92rem;"><i class="bi bi-pie-chart-fill me-2" style="color:#be185d;"></i>Asignaturas Impartidas</div>
+              <div class="fw-bold text-dark" style="font-size:.92rem;"><i class="bi bi-pie-chart-fill me-2" style="color:var(--color-secundario);"></i>Asignaturas Impartidas</div>
               <div class="text-muted" style="font-size:.76rem;">Matemáticas · Informática · Lengua Castellana</div>
             </div>
-            <span class="badge rounded-pill bg-white border px-3 py-1" style="color:#be185d;border-color:#fce7f3 !important;font-weight:700;">3 Áreas Curriculares</span>
+            <span class="badge rounded-pill bg-white border px-3 py-1" style="color:var(--color-secundario);border-color:#E5DFD5 !important;font-weight:700;">3 Áreas Curriculares</span>
           </div>
 
           <div class="p-3">
             <div class="d-flex flex-column gap-2">
               <!-- Asignatura 1: Matemáticas -->
-              <a href="{% url 'programas_lista' %}" class="text-decoration-none d-flex align-items-center justify-content-between p-2.5 rounded-3 border bg-white" style="border-color:#fce7f3 !important;transition:all 0.15s ease;">
+              <a href="{% url 'programas_lista' %}" class="text-decoration-none d-flex align-items-center justify-content-between p-2.5 rounded-3 border bg-white" style="border-color:#E5DFD5 !important;transition:all 0.15s ease;">
                 <div class="d-flex align-items-center gap-2.5">
-                  <div class="rounded-3 p-2 text-center" style="background:#fff0f3;color:#db2777;border:1px solid #fce7f3;">
+                  <div class="rounded-3 p-2 text-center" style="background:#F5F2EB;color:var(--color-principal);border:1px solid #E5DFD5;">
                     <i class="bi bi-calculator-fill fs-5"></i>
                   </div>
                   <div>
                     <strong class="d-block text-dark" style="font-size:0.86rem;">Matemáticas</strong>
-                    <span class="text-muted" style="font-size:0.74rem;">Docente: Prof. María Torres · 4 hrs/sem · Grados 10°A y 11°A</span>
+                    <span class="text-muted" style="font-size:0.74rem;">Docente: Prof. {{ docente_principal.get_full_name|default:'Miguel González' }} · 4 hrs/sem · Grados 10°A y 11°A</span>
                   </div>
                 </div>
-                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:#fff0f3;color:#db2777;border:1px solid #fce7f3;font-size:0.74rem;">Ver Área &rarr;</span>
+                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:#F5F2EB;color:var(--color-principal);border:1px solid #E5DFD5;font-size:0.74rem;">Ver Área &rarr;</span>
               </a>
 
               <!-- Asignatura 2: Informática -->
-              <a href="{% url 'programas_lista' %}" class="text-decoration-none d-flex align-items-center justify-content-between p-2.5 rounded-3 border bg-white" style="border-color:#fce7f3 !important;transition:all 0.15s ease;">
+              <a href="{% url 'programas_lista' %}" class="text-decoration-none d-flex align-items-center justify-content-between p-2.5 rounded-3 border bg-white" style="border-color:#E5DFD5 !important;transition:all 0.15s ease;">
                 <div class="d-flex align-items-center gap-2.5">
-                  <div class="rounded-3 p-2 text-center" style="background:#fff0f3;color:#be185d;border:1px solid #fce7f3;">
+                  <div class="rounded-3 p-2 text-center" style="background:#F5F2EB;color:var(--color-secundario);border:1px solid #E5DFD5;">
                     <i class="bi bi-laptop-fill fs-5"></i>
                   </div>
                   <div>
                     <strong class="d-block text-dark" style="font-size:0.86rem;">Informática y Sistemas</strong>
-                    <span class="text-muted" style="font-size:0.74rem;">Docente: Prof. María Torres · 4 hrs/sem · Laboratorio 102</span>
+                    <span class="text-muted" style="font-size:0.74rem;">Docente: Prof. {{ docente_principal.get_full_name|default:'Miguel González' }} · 4 hrs/sem · Laboratorio 102</span>
                   </div>
                 </div>
-                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:#fff0f3;color:#be185d;border:1px solid #fce7f3;font-size:0.74rem;">Ver Área &rarr;</span>
+                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:#F5F2EB;color:var(--color-secundario);border:1px solid #E5DFD5;font-size:0.74rem;">Ver Área &rarr;</span>
               </a>
 
               <!-- Asignatura 3: Lengua Castellana -->
-              <a href="{% url 'programas_lista' %}" class="text-decoration-none d-flex align-items-center justify-content-between p-2.5 rounded-3 border bg-white" style="border-color:#fce7f3 !important;transition:all 0.15s ease;">
+              <a href="{% url 'programas_lista' %}" class="text-decoration-none d-flex align-items-center justify-content-between p-2.5 rounded-3 border bg-white" style="border-color:#E5DFD5 !important;transition:all 0.15s ease;">
                 <div class="d-flex align-items-center gap-2.5">
                   <div class="rounded-3 p-2 text-center" style="background:#fffbeb;color:#d97706;border:1px solid #fde68a;">
                     <i class="bi bi-journal-richtext fs-5"></i>
                   </div>
                   <div>
                     <strong class="d-block text-dark" style="font-size:0.86rem;">Lengua Castellana</strong>
-                    <span class="text-muted" style="font-size:0.74rem;">Docente: Prof. María Torres · 3 hrs/sem · Aula 101</span>
+                    <span class="text-muted" style="font-size:0.74rem;">Docente: Prof. {{ docente_principal.get_full_name|default:'Miguel González' }} · 3 hrs/sem · Aula 101</span>
                   </div>
                 </div>
                 <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:#fffbeb;color:#d97706;border:1px solid #fde68a;font-size:0.74rem;">Ver Área &rarr;</span>
@@ -492,11 +472,11 @@
         </div>
 
         <!-- Acciones Rápidas de Carga -->
-        <div class="p-3 pt-0 border-top mt-2 d-flex align-items-center justify-content-between" style="border-color:#fce7f3 !important;">
-          <a href="{% url 'programas_lista' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white shadow-2xs" style="background:#db2777;border:1px solid #db2777;font-size:0.78rem;">
+        <div class="p-3 pt-0 border-top mt-2 d-flex align-items-center justify-content-between" style="border-color:#E5DFD5 !important;">
+          <a href="{% url 'programas_lista' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white shadow-2xs" style="background:var(--color-principal);border:1px solid var(--color-principal);font-size:0.78rem;">
             <i class="bi bi-stack me-1.5"></i>Gestionar Carga Académica
           </a>
-          <a href="{% url 'horarios_tablero' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold" style="background:#fff0f3;color:#db2777;border:1px solid #fce7f3;font-size:0.78rem;">
+          <a href="{% url 'horarios_tablero' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold" style="background:#F5F2EB;color:var(--color-principal);border:1px solid #E5DFD5;font-size:0.78rem;">
             <i class="bi bi-calendar2-week me-1.5"></i>Malla Horaria
           </a>
         </div>
@@ -511,9 +491,9 @@
       <div class="admin-panel">
         <div class="admin-panel-head">
           <span class="fw-bold text-dark" style="font-size:.92rem;">
-            <i class="bi bi-people-fill me-2" style="color:#db2777;"></i>Nómina Oficial de Estudiantes ({{ total_aprendices }})
+            <i class="bi bi-people-fill me-2" style="color:var(--color-principal);"></i>Nómina Oficial de Estudiantes ({{ total_aprendices }})
           </span>
-          <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background:#fff0f3;color:#db2777;border:1px solid #fce7f3;font-size:.78rem;">
+          <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background:#F5F2EB;color:var(--color-principal);border:1px solid #E5DFD5;font-size:.78rem;">
             Ver todos <i class="bi bi-arrow-right ms-1"></i>
           </a>
         </div>
@@ -534,34 +514,34 @@
                 <td>
                   <div class="d-flex align-items-center gap-2.5">
                     <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-2xs"
-                         style="width:36px;height:36px;font-size:.82rem;background:linear-gradient(135deg,#db2777,#be185d);flex-shrink:0;">
+                         style="width:36px;height:36px;font-size:.82rem;background:linear-gradient(135deg,var(--color-principal),var(--color-secundario));flex-shrink:0;">
                       {{ m.aprendiz.first_name|first|upper }}{{ m.aprendiz.last_name|first|upper }}
                     </div>
                     <div>
-                      <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="fw-bold text-dark text-decoration-none hover-pink d-block" style="font-size:.88rem;">
+                      <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="fw-bold text-dark text-decoration-none d-block" style="font-size:.88rem;">
                         {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
                       </a>
                       <div class="text-muted" style="font-size:.74rem;">Usuario: {{ m.aprendiz.username }} · {{ m.aprendiz.perfil.numero_documento|default:'DOC-SINET' }}</div>
                     </div>
                   </div>
                 </td>
-                <td class="text-center"><span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:#fdf2f8;color:#db2777;border:1px solid #fce7f3;">Grado {{ m.grado_escolar }}°</span></td>
+                <td class="text-center"><span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:var(--color-acento);color:var(--color-secundario);border:1px solid #E0D8CE;">Grado {{ m.grado_escolar }}°</span></td>
                 <td class="text-center"><span class="badge rounded-pill px-2.5 py-1 fw-bold bg-light text-dark border">{{ m.seccion|default:'A' }}</span></td>
                 <td class="text-center">
                   <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;">En Formación</span>
                 </td>
                 <td class="text-end pe-3">
                   <div class="d-flex align-items-center justify-content-end gap-1.5 flex-nowrap">
-                    <!-- Botón de Ficha Modal Rápida -->
+                    <!-- Botón de Detalle Modal Rápido -->
                     <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold text-white shadow-2xs d-inline-flex align-items-center gap-1"
                             data-bs-toggle="modal" data-bs-target="#modalFichaRapida{{ m.aprendiz.id }}"
-                            style="background:#db2777;border:1px solid #db2777;font-size:0.78rem;white-space:nowrap;cursor:pointer;"
-                            title="Ver Ficha Rápida">
-                      <i class="bi bi-person-vcard"></i> Ficha
+                            style="background:var(--color-principal);border:1px solid var(--color-principal);font-size:0.78rem;white-space:nowrap;cursor:pointer;"
+                            title="Ver Detalle Rápido">
+                      <i class="bi bi-eye"></i> Detalle
                     </button>
                     <!-- Enlace directo al expediente completo -->
                     <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="btn btn-sm rounded-pill px-2 py-1 fw-bold text-muted border bg-white d-inline-flex align-items-center"
-                       title="Abrir Expediente Completo (10 pestañas)" style="font-size:0.78rem;border-color:#e2e8f0 !important;">
+                       title="Abrir Expediente Completo" style="font-size:0.78rem;border-color:#e2e8f0 !important;">
                       <i class="bi bi-box-arrow-up-right"></i>
                     </a>
                   </div>
@@ -570,15 +550,15 @@
                   <div class="modal fade text-start" id="modalFichaRapida{{ m.aprendiz.id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                       <div class="modal-content rounded-4 border-0 shadow-lg">
-                        <div class="modal-header border-0 pb-0" style="background:#fff0f3;">
+                        <div class="modal-header border-0 pb-0" style="background:#F5F2EB;">
                           <div class="d-flex align-items-center gap-3">
                             <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm"
-                                 style="width:48px;height:48px;font-size:1.1rem;background:linear-gradient(135deg,#db2777,#be185d);">
+                                 style="width:48px;height:48px;font-size:1.1rem;background:linear-gradient(135deg,var(--color-principal),var(--color-secundario));">
                               {{ m.aprendiz.first_name|first|upper }}{{ m.aprendiz.last_name|first|upper }}
                             </div>
                             <div>
                               <h5 class="modal-title fw-bold text-dark mb-0">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</h5>
-                              <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" style="background:#db2777;color:#fff;font-size:0.74rem;">
+                              <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" style="background:var(--color-principal);color:#fff;font-size:0.74rem;">
                                 Grado {{ m.grado_escolar }}° - Sección {{ m.seccion|default:'A' }}
                               </span>
                             </div>
@@ -604,15 +584,15 @@
                               <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;">Al Día (2026)</span>
                             </div>
                             <div class="col-12">
-                              <small class="text-muted d-block" style="font-size:0.75rem;">Curso / Ficha Institucional</small>
+                              <small class="text-muted d-block" style="font-size:0.75rem;">Curso / Grupo Escolar</small>
                               <strong class="text-dark small">{{ m.ficha.nombre|default:m.ficha.codigo_ficha }}</strong>
                             </div>
                           </div>
                         </div>
                         <div class="modal-footer border-top p-3 d-flex justify-content-between" style="background:#fafafa;">
                           <button type="button" class="btn btn-sm btn-light rounded-pill px-3 fw-bold" data-bs-dismiss="modal">Cerrar</button>
-                          <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="btn btn-sm text-white rounded-pill px-3 py-1.5 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5" style="background:#db2777;border:none;">
-                            <i class="bi bi-person-lines-fill"></i> Abrir Expediente Completo (10 pestañas) &rarr;
+                          <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="btn btn-sm text-white rounded-pill px-3 py-1.5 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5" style="background:var(--color-principal);border:none;">
+                            <i class="bi bi-person-lines-fill"></i> Abrir Expediente Completo &rarr;
                           </a>
                         </div>
                       </div>
@@ -634,17 +614,17 @@
       <div class="admin-panel h-100">
         <div class="admin-panel-head">
           <span class="fw-bold text-dark" style="font-size:.92rem;">
-            <i class="bi bi-calendar-event me-2" style="color:#db2777;"></i>Horario Escolar y Clases
+            <i class="bi bi-calendar-event me-2" style="color:var(--color-principal);"></i>Horario Escolar y Clases
           </span>
-          <a href="{% url 'horarios_tablero' %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background:#fff0f3;color:#db2777;border:1px solid #fce7f3;font-size:.78rem;">
+          <a href="{% url 'horarios_tablero' %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background:#F5F2EB;color:var(--color-principal);border:1px solid #E5DFD5;font-size:.78rem;">
             Ver Horario <i class="bi bi-arrow-right ms-1"></i>
           </a>
         </div>
         <div class="p-3">
           {% for h in proximas_clases %}
-          <div class="d-flex align-items-center justify-content-between p-2.5 mb-2 rounded-3 border" style="background:#fff0f3;border-color:#fce7f3 !important;">
+          <div class="d-flex align-items-center justify-content-between p-2.5 mb-2 rounded-3 border" style="background:#F5F2EB;border-color:#E5DFD5 !important;">
             <div class="d-flex align-items-center gap-2.5">
-              <div class="rounded-3 p-2 text-center text-white fw-bold" style="background:#db2777;font-size:0.75rem;min-width:44px;">
+              <div class="rounded-3 p-2 text-center text-white fw-bold" style="background:var(--color-principal);font-size:0.75rem;min-width:44px;">
                 {% if h.dia == 1 %}LUN{% elif h.dia == 2 %}MAR{% elif h.dia == 3 %}MIÉ{% elif h.dia == 4 %}JUE{% elif h.dia == 5 %}VIE{% else %}D{{ h.dia }}{% endif %}
               </div>
               <div>
@@ -656,7 +636,7 @@
               <span class="badge bg-white text-dark border px-2 py-1 fw-bold small" style="font-size:0.75rem;">
                 {{ h.hora_inicio|time:"h:i A" }} - {{ h.hora_fin|time:"h:i A" }}
               </span>
-              <small class="d-block text-muted" style="font-size:0.7rem;">Prof. {{ h.instructor.get_full_name|default:'María Torres' }}</small>
+              <small class="d-block text-muted" style="font-size:0.7rem;">Prof. {{ h.instructor.get_full_name|default:'Miguel González' }}</small>
             </div>
           </div>
           {% empty %}
@@ -674,17 +654,17 @@
       <div class="admin-panel h-100">
         <div class="admin-panel-head">
           <span class="fw-bold text-dark" style="font-size:.92rem;">
-            <i class="bi bi-megaphone me-2" style="color:#db2777;"></i>Comunicaciones Institucionales
+            <i class="bi bi-megaphone me-2" style="color:var(--color-principal);"></i>Comunicaciones Institucionales
           </span>
-          <a href="{% url 'redactar_circular' %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background:#fff0f3;color:#db2777;border:1px solid #fce7f3;font-size:.78rem;">
+          <a href="{% url 'redactar_circular' %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background:#F5F2EB;color:var(--color-principal);border:1px solid #E5DFD5;font-size:.78rem;">
             Redactar <i class="bi bi-plus ms-1"></i>
           </a>
         </div>
         <div class="p-3">
           {% for c in comunicaciones_recientes %}
-          <div class="p-2.5 mb-2 rounded-3 border bg-white" style="border-color:#fce7f3 !important;">
+          <div class="p-2.5 mb-2 rounded-3 border bg-white" style="border-color:#E5DFD5 !important;">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" style="background:#fdf2f8;color:#db2777;font-size:0.72rem;">{{ c.estamento_destinatario|default:'General' }}</span>
+              <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" style="background:var(--color-acento);color:var(--color-secundario);font-size:0.72rem;">{{ c.estamento_destinatario|default:'General' }}</span>
               <small class="text-muted" style="font-size:0.72rem;">{{ c.fecha_creacion|date:"d/m/Y H:i" }}</small>
             </div>
             <strong class="d-block text-dark small" style="font-size:0.86rem;">{{ c.asunto }}</strong>
@@ -712,13 +692,13 @@
             <span class="small fw-bold text-dark"><i class="bi bi-mortarboard-fill text-success me-1.5"></i>Alumnos Matriculados</span>
             <span class="badge bg-white text-success border border-success fw-bold px-2.5 py-1">4 de 4 en formación</span>
           </div>
-          <div class="d-flex justify-content-between align-items-center p-2.5 rounded-3 border" style="background:#fff0f3;border-color:#fce7f3 !important;">
-            <span class="small fw-bold text-dark"><i class="bi bi-person-badge-fill me-1.5" style="color:#db2777;"></i>Cuerpo Docente Oficial</span>
-            <span class="badge bg-white border fw-bold px-2.5 py-1" style="color:#db2777;border-color:#fce7f3 !important;">1 Docente (6 asignaciones)</span>
+          <div class="d-flex justify-content-between align-items-center p-2.5 rounded-3 border" style="background:#F5F2EB;border-color:#E5DFD5 !important;">
+            <span class="small fw-bold text-dark"><i class="bi bi-person-badge-fill me-1.5" style="color:var(--color-principal);"></i>Cuerpo Docente Oficial</span>
+            <span class="badge bg-white border fw-bold px-2.5 py-1" style="color:var(--color-principal);border-color:#E5DFD5 !important;">1 Docente (6 asignaciones)</span>
           </div>
-          <div class="d-flex justify-content-between align-items-center p-2.5 rounded-3 border" style="background:#fdf2f8;border-color:#fce7f3 !important;">
-            <span class="small fw-bold text-dark"><i class="bi bi-calendar2-check-fill me-1.5" style="color:#be185d;"></i>Horario Escolar Oficial</span>
-            <span class="badge bg-white border fw-bold px-2.5 py-1" style="color:#be185d;border-color:#fce7f3 !important;">10 Bloques activos sin cruces</span>
+          <div class="d-flex justify-content-between align-items-center p-2.5 rounded-3 border" style="background:var(--color-acento);border-color:#E5DFD5 !important;">
+            <span class="small fw-bold text-dark"><i class="bi bi-calendar2-check-fill me-1.5" style="color:var(--color-secundario);"></i>Horario Escolar Oficial</span>
+            <span class="badge bg-white border fw-bold px-2.5 py-1" style="color:var(--color-secundario);border-color:#E5DFD5 !important;">10 Bloques activos sin cruces</span>
           </div>
           <div class="d-flex justify-content-between align-items-center p-2.5 rounded-3 border bg-light text-muted">
             <span class="small fw-semibold text-dark"><i class="bi bi-cash-coin me-1.5" style="color:#d97706;"></i>Pensiones Escolares y Tesorería</span>
@@ -735,8 +715,9 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  // Event listeners si se requieren para interactividad del dashboard
   console.log("Dashboard EDUNOVA inicializado correctamente.");
 });
 </script>
 {% endblock %}
+
+

@@ -1,44 +1,53 @@
 {% load static %}
 <!-- =========================================================================
-     MÓDULO 10: NOTIFICACIONES (CENTRO OFICIAL DE AVISOS Y ALERTAS DEL DOCENTE)
-     Diseño: Sistema Rosado Elegante (#db2777, #fce7f3, #fff0f3)
-     Estructura: Hero banner, métricas de alertas, listado en tiempo real con
-     diferenciación de no leídas y acciones de lectura inmediata.
+     MÓDULO: CENTRO DE NOTIFICACIONES Y ALERTAS DEL DOCENTE (EDUNOVA)
+     Identidad Institucional: Café Cálido (var(--color-principal)), Crema (var(--color-acento)) y Beige (#F5F2EB)
+     Funcionalidad: Filtros por pestaña (Todas, No leídas, Leídas), categorías, búsqueda
+     inmediata, persistencia real en BD y sincronización de contadores.
      ========================================================================= -->
 <div class="panel-modulo-docente space-y-4" id="modulo-notificaciones">
 
-    <!-- 1. HERO BANNER DE NOTIFICACIONES (SIN FOTO EN LA ESQUINA) -->
+    <!-- 1. HERO BANNER DE NOTIFICACIONES -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+         style="background: linear-gradient(135deg, #FAF8F5 0%, #F5F2EB 50%, var(--color-acento) 100%); border: 1px solid var(--color-acento);">
         <div class="row align-items-center">
             <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
-                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                     style="background: #ffffff; color: var(--color-principal); width: 62px; height: 62px; border: 1px solid var(--color-acento);">
                     <i class="bi bi-bell-fill" style="font-size: 2rem;"></i>
                 </div>
                 <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="text-uppercase fw-bold" style="color: var(--color-principal); font-size: 0.76rem; letter-spacing: 0.6px;">
+                            Bandeja Institucional
+                        </span>
+                        {% if total_notificaciones_sin_leer > 0 %}
+                        <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" id="badge-header-sin-leer" style="background: var(--color-principal); color: #ffffff; font-size: 0.7rem;">
+                            {{ total_notificaciones_sin_leer }} pendientes
+                        </span>
+                        {% endif %}
+                    </div>
                     <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
-                        Centro de Notificaciones
+                        Notificaciones
                     </h2>
                     <p class="mb-0 text-muted" style="font-size: 0.88rem;">
-                        Avisos en tiempo real sobre entregas de estudiantes, tareas pendientes y mensajes institucionales.
+                        Avisos sobre entregas de actividades, mensajes de familias, circulares e información de sus cursos.
                     </p>
                 </div>
             </div>
-            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
+            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0" id="contenedor-accion-masiva">
                 {% if total_notificaciones_sin_leer > 0 %}
-                <form method="POST" action="{% url 'instructor_dashboard' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="marcar_todas_notificaciones_leidas">
-                    <button type="submit" class="btn rounded-pill px-4 py-2.5 fw-bold small shadow-2xs d-inline-flex align-items-center gap-1.5"
-                            style="background: #ffffff; color: #db2777; border: 1.5px solid #db2777;">
-                        <i class="bi bi-check2-all"></i> Marcar todas como leídas
-                    </button>
-                </form>
+                <button type="button" class="btn rounded-pill px-4 py-2.5 fw-bold small shadow-2xs d-inline-flex align-items-center gap-1.5"
+                        id="btn-marcar-todas"
+                        onclick="marcarTodasComoLeidas();"
+                        style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-principal);">
+                    <i class="bi bi-check2-all"></i> Marcar todas como leídas
+                </button>
                 {% else %}
                 <div class="d-inline-flex align-items-center gap-2 px-3.5 py-2 rounded-pill fw-semibold shadow-2xs" 
-                     style="background: rgba(255, 255, 255, 0.92); border: 1px solid #fce7f3; color: #be185d; font-size: 0.85rem;">
-                    <i class="bi bi-check-circle" style="color: #db2777;"></i>
+                     id="badge-bandeja-al-dia"
+                     style="background: rgba(255, 255, 255, 0.92); border: 1px solid var(--color-acento); color: var(--color-secundario); font-size: 0.85rem;">
+                    <i class="bi bi-check-circle-fill" style="color: var(--color-principal);"></i>
                     <span>Bandeja al día</span>
                 </div>
                 {% endif %}
@@ -46,122 +55,389 @@
         </div>
     </div>
 
-    <!-- 2. 3 TARJETAS MÉTRICAS -->
-    <div class="row g-3 mb-4">
-        <!-- Total Notificaciones -->
-        <div class="col-md-4">
-            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Total notificaciones</span>
-                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
-                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
-                        <i class="bi bi-bell fs-6"></i>
-                    </div>
+    <!-- 3. BARRA DE FILTROS Y PESTAÑAS -->
+    <div class="card border rounded-4 bg-white shadow-2xs mb-4 overflow-hidden" style="border-color: var(--color-acento) !important;">
+        <div class="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-3" style="background: #F5F2EB; border-color: var(--color-acento) !important;">
+            <!-- Pestañas de Estado -->
+            <ul class="nav nav-pills gap-2 mb-0" id="tabs-notificaciones">
+                <li class="nav-item">
+                    <button type="button" class="nav-link active rounded-pill px-3.5 py-1.5 fw-bold small transition" 
+                            id="tab-todas" onclick="filtrarNotificacionesEstado('todas', this)"
+                            style="background: var(--color-principal); color: #ffffff;">
+                        <i class="bi bi-collection-fill me-1"></i> Todas (<span id="cnt-tab-todas">{{ notificaciones_docente|length }}</span>)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small text-dark bg-white border transition" 
+                            id="tab-noleidas" onclick="filtrarNotificacionesEstado('noleidas', this)"
+                            style="border-color: var(--color-acento) !important;">
+                        <i class="bi bi-envelope-fill me-1" style="color: var(--color-principal);"></i> No leídas (<span id="cnt-tab-noleidas">{{ total_notificaciones_sin_leer }}</span>)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small text-dark bg-white border transition" 
+                            id="tab-leidas" onclick="filtrarNotificacionesEstado('leidas', this)"
+                            style="border-color: var(--color-acento) !important;">
+                        <i class="bi bi-envelope-open me-1" style="color: var(--color-secundario);"></i> Leídas
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Filtros adicionales: Búsqueda por Texto y Categoría -->
+            <div class="d-flex align-items-center gap-2 flex-grow-1 justify-content-end" style="max-width: 520px;">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0" style="border-color: var(--color-acento);">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="buscar-notificacion" 
+                           placeholder="Buscar notificación..." onkeyup="aplicarFiltrosNotificaciones();"
+                           style="border-color: var(--color-acento); font-size: 0.85rem;">
                 </div>
-                <div class="d-flex align-items-baseline gap-2">
-                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">{{ notificaciones_docente|length }}</h3>
-                    <small class="text-muted" style="font-size: 0.75rem;">historial total</small>
-                </div>
+                <select class="form-select form-select-sm" id="filtro-categoria-notif" onchange="aplicarFiltrosNotificaciones();"
+                        style="border-color: var(--color-acento); max-width: 180px; font-size: 0.85rem;">
+                    <option value="">Todas las categorías</option>
+                    <option value="academica">Académicas</option>
+                    <option value="institucional">Institucionales</option>
+                    <option value="mensaje">Mensajes</option>
+                    <option value="horarios">Horarios</option>
+                </select>
             </div>
         </div>
 
-        <!-- Sin Leer -->
-        <div class="col-md-4">
-            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Pendientes de lectura</span>
-                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
-                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
-                        <i class="bi bi-envelope-exclamation fs-6"></i>
-                    </div>
-                </div>
-                <div class="d-flex align-items-baseline gap-2">
-                    <h3 class="fw-bold mb-0" style="color: #db2777; font-size: 1.65rem;">{{ total_notificaciones_sin_leer }}</h3>
-                    <small class="text-muted" style="font-size: 0.75rem;">por revisar</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Alertas de Entregas -->
-        <div class="col-md-4">
-            <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Entregas de estudiantes</span>
-                    <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
-                         style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
-                        <i class="bi bi-file-earmark-check fs-6"></i>
-                    </div>
-                </div>
-                <div class="d-flex align-items-baseline gap-2">
-                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.65rem;">Activas</h3>
-                    <small class="text-muted" style="font-size: 0.75rem;">en tiempo real</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. LISTADO DE NOTIFICACIONES -->
-    <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden" style="border-color: #fce7f3 !important;">
-        <div class="p-3.5 border-bottom d-flex justify-content-between align-items-center" style="background: #fff0f3; border-color: #fce7f3 !important;">
-            <span class="small fw-bold" style="color: #be185d; font-size: 0.85rem;">
-                <i class="bi bi-bell-fill me-1.5" style="color: #db2777;"></i> Todas las Notificaciones ({{ notificaciones_docente|length }})
-            </span>
-            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #db2777; color: #ffffff; font-size: 0.75rem;">
-                {{ total_notificaciones_sin_leer }} sin leer
-            </span>
-        </div>
-
-        <div class="list-group list-group-flush">
+        <!-- LISTADO DE NOTIFICACIONES -->
+        <div class="list-group list-group-flush" id="lista-notificaciones-docente">
             {% for n in notificaciones_docente %}
-            <div class="list-group-item p-3.5 d-flex justify-content-between align-items-center flex-wrap gap-2 transition hover-shadow" 
-                 style="{% if not n.leida %}background: #fff0f3; border-left: 4px solid #db2777;{% else %}background: #ffffff;{% endif %} border-color: #fce7f3;">
-                <div class="d-flex align-items-start gap-3">
-                    <div class="rounded-circle mt-1 d-flex align-items-center justify-content-center shadow-2xs" 
-                         style="width: 40px; height: 40px; {% if not n.leida %}background: linear-gradient(135deg, #db2777 0%, #be185d 100%); color: #ffffff;{% else %}background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3;{% endif %}">
-                        <i class="bi {% if 'Entrega' in n.titulo %}bi-file-earmark-arrow-up-fill{% elif 'Tarea' in n.titulo %}bi-journal-check{% elif 'Mensaje' in n.titulo %}bi-chat-dots-fill{% else %}bi-info-circle-fill{% endif %} fs-5"></i>
+            <div class="list-group-item p-3.5 d-flex justify-content-between align-items-center flex-wrap gap-2 transition hover-shadow item-notificacion"
+                 id="notif-item-{{ n.id }}"
+                 data-notif-id="{{ n.id }}"
+                 data-leida="{% if n.leida %}true{% else %}false{% endif %}"
+                 data-categoria="{% if 'Entrega' in n.titulo or 'actividad' in n.titulo|lower or 'Tarea' in n.titulo %}academica{% elif 'Mensaje' in n.titulo or 'acudiente' in n.titulo|lower %}mensaje{% elif 'horario' in n.titulo|lower %}horarios{% else %}institucional{% endif %}"
+                 style="{% if not n.leida %}background: #FAF8F5; border-left: 4px solid var(--color-principal);{% else %}background: #ffffff; border-left: 4px solid transparent;{% endif %} border-color: var(--color-acento); cursor: pointer;"
+                 onclick="abrirModalNotificacion('{{ n.id }}', '{{ n.titulo|escapejs }}', '{{ n.mensaje|escapejs }}', '{{ n.fecha_creacion|date:"d M Y, h:i A" }}', '{{ n.enlace|default:""|escapejs }}');">
+                
+                <div class="d-flex align-items-start gap-3 flex-grow-1">
+                    <div class="rounded-circle mt-1 d-flex align-items-center justify-content-center shadow-2xs flex-shrink-0 notif-icon-box" 
+                         style="width: 42px; height: 42px; {% if not n.leida %}background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); color: #ffffff;{% else %}background: var(--color-acento); color: var(--color-secundario); border: 1px solid var(--color-acento);{% endif %}">
+                        <i class="bi {% if 'Entrega' in n.titulo or 'actividad' in n.titulo|lower %}bi-file-earmark-arrow-up-fill{% elif 'Tarea' in n.titulo or 'Evaluación' in n.titulo %}bi-journal-check{% elif 'Mensaje' in n.titulo or 'acudiente' in n.titulo|lower %}bi-chat-dots-fill{% elif 'horario' in n.titulo|lower %}bi-clock-history{% elif 'circular' in n.titulo|lower or 'institucional' in n.titulo|lower %}bi-megaphone-fill{% else %}bi-info-circle-fill{% endif %} fs-5"></i>
                     </div>
-                    <div>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <strong class="text-dark" style="font-size: 0.95rem;">{{ n.titulo }}</strong>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <strong class="text-dark notif-titulo" style="font-size: 0.95rem;">{{ n.titulo }}</strong>
                             {% if not n.leida %}
-                            <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: #db2777; color: #ffffff; font-size: 0.65rem;">Nueva</span>
+                            <span class="badge rounded-pill px-2 py-0.5 fw-bold badge-nueva" id="badge-nueva-{{ n.id }}" style="background: var(--color-principal); color: #ffffff; font-size: 0.65rem;">Nueva</span>
                             {% endif %}
+                            <span class="badge rounded-pill px-2 py-0.5 fw-semibold" style="background: #F5F2EB; color: var(--color-secundario); border: 1px solid var(--color-acento); font-size: 0.68rem;">
+                                {% if 'Entrega' in n.titulo or 'actividad' in n.titulo|lower or 'Tarea' in n.titulo %}Actividad Académica{% elif 'Mensaje' in n.titulo or 'acudiente' in n.titulo|lower %}Mensaje{% elif 'horario' in n.titulo|lower %}Horarios{% else %}Aviso Institucional{% endif %}
+                            </span>
                         </div>
-                        <p class="text-secondary small mb-1" style="font-size: 0.85rem;">{{ n.mensaje }}</p>
+                        <p class="text-secondary small mb-1 notif-mensaje" style="font-size: 0.85rem; line-height: 1.4;">{{ n.mensaje }}</p>
                         <small class="text-muted" style="font-size: 0.74rem;">
                             <i class="bi bi-clock me-1"></i> {{ n.fecha_creacion|date:"d M Y, h:i A" }}
                         </small>
                     </div>
                 </div>
 
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2" onclick="event.stopPropagation();">
+                    <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold small shadow-2xs btn-abrir-notif"
+                            onclick="abrirModalNotificacion('{{ n.id }}', '{{ n.titulo|escapejs }}', '{{ n.mensaje|escapejs }}', '{{ n.fecha_creacion|date:"d M Y, h:i A" }}', '{{ n.enlace|default:""|escapejs }}');"
+                            style="background: #ffffff; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.78rem;">
+                        <i class="bi bi-eye me-1"></i> Ver detalle
+                    </button>
                     {% if n.enlace %}
-                    <a href="{{ n.enlace }}" class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-bold small text-decoration-none shadow-2xs"
-                       style="background: #ffffff; color: #db2777; border: 1px solid #fce7f3;">
-                        Ver detalle <i class="bi bi-arrow-right ms-1"></i>
+                    <a href="{% url 'abrir_notificacion' n.id %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold small text-decoration-none shadow-2xs"
+                       style="background: var(--color-principal); color: #ffffff; border: 1px solid var(--color-principal); font-size: 0.78rem;">
+                        Ir a destino <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                     {% endif %}
                     {% if not n.leida %}
-                    <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="marcar_notificacion_leida">
-                        <input type="hidden" name="notificacion_id" value="{{ n.id }}">
-                        <button type="submit" class="btn btn-sm rounded-circle p-1.5 d-inline-flex align-items-center justify-content-center shadow-2xs" 
-                                style="background: #ffffff; color: #db2777; border: 1px solid #fce7f3; width: 32px; height: 32px;" title="Marcar como leída">
-                            <i class="bi bi-check-lg fs-5"></i>
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-sm rounded-circle p-1.5 d-inline-flex align-items-center justify-content-center shadow-2xs btn-check-leida"
+                            id="btn-check-{{ n.id }}"
+                            onclick="marcarLeidaDirecta('{{ n.id }}');"
+                            style="background: #ffffff; color: var(--color-principal); border: 1px solid var(--color-acento); width: 32px; height: 32px;" title="Marcar como leída">
+                        <i class="bi bi-check-lg fs-5"></i>
+                    </button>
                     {% endif %}
                 </div>
             </div>
             {% empty %}
-            <div class="text-center py-5 text-muted">
-                <i class="bi bi-bell-slash fs-1 d-block mb-2" style="color: #db2777;"></i>
-                <h6 class="fw-bold text-dark">No tienes notificaciones nuevas.</h6>
-                <small class="text-muted">Las alertas de entregas de actividades y mensajes aparecerán aquí de forma automática en tiempo real.</small>
+            <div class="text-center py-5 text-muted" id="estado-vacio-notificaciones">
+                <i class="bi bi-bell-slash fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
+                <h6 class="fw-bold text-dark">No tienes notificaciones en esta bandeja</h6>
+                <small class="text-muted">Las alertas de actividades, calificaciones y mensajes institucionales aparecerán en tiempo real.</small>
             </div>
             {% endfor %}
+
+            <div class="text-center py-5 text-muted d-none" id="sin-resultados-busqueda">
+                <i class="bi bi-search fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
+                <h6 class="fw-bold text-dark">Sin coincidencias</h6>
+                <small class="text-muted">No se encontraron notificaciones con los filtros seleccionados.</small>
+            </div>
         </div>
     </div>
 
 </div>
+
+<!-- MODAL INTERACTIVO DE LECTURA DE NOTIFICACIÓN -->
+<div class="modal fade" id="modalLecturaNotificacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-2xs"
+                         style="width: 36px; height: 36px; background: var(--color-principal); color: #ffffff;">
+                        <i class="bi bi-bell-fill fs-6"></i>
+                    </div>
+                    <h6 class="modal-title fw-bold text-dark mb-0">Detalle de la Notificación</h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: var(--color-acento); color: var(--color-principal); font-size: 0.74rem;">
+                        Notificación Docente
+                    </span>
+                    <small class="text-muted" id="modal-notif-fecha">
+                        <i class="bi bi-clock me-1"></i> --
+                    </small>
+                </div>
+                <h5 class="fw-bold text-dark mb-2" id="modal-notif-titulo">--</h5>
+                <div class="p-3 rounded-3 mb-3" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                    <p class="text-secondary mb-0 leading-relaxed" id="modal-notif-mensaje" style="font-size: 0.92rem;">--</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 text-muted small">
+                    <i class="bi bi-check-circle-fill" style="color: var(--color-principal);"></i>
+                    <span>Esta notificación se encuentra registrada como <strong>leída</strong>.</span>
+                </div>
+            </div>
+            <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-between" style="border-color: var(--color-acento) !important;">
+                <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+                <a href="#" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-2xs d-none" id="modal-notif-btn-enlace" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                    Ir al recurso <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="csrf-token-notif" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<script>
+let estadoActualFiltro = 'todas';
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function getCsrfToken() {
+    const input = document.getElementById('csrf-token-notif') || document.querySelector('[name=csrfmiddlewaretoken]');
+    if (input && input.value) return input.value;
+    return getCookie('csrftoken') || '{{ csrf_token }}';
+}
+
+function filtrarNotificacionesEstado(estado, btn) {
+    estadoActualFiltro = estado;
+    
+    // Actualizar estilos de pestañas
+    const tabs = document.querySelectorAll('#tabs-notificaciones .nav-link');
+    tabs.forEach(t => {
+        t.classList.remove('active');
+        t.style.background = '#ffffff';
+        t.style.color = '#111827';
+    });
+    
+    btn.classList.add('active');
+    btn.style.background = 'var(--color-principal)';
+    btn.style.color = '#ffffff';
+
+    aplicarFiltrosNotificaciones();
+}
+
+function aplicarFiltrosNotificaciones() {
+    const query = (document.getElementById('buscar-notificacion').value || '').toLowerCase().trim();
+    const cat = document.getElementById('filtro-categoria-notif').value;
+    const items = document.querySelectorAll('.item-notificacion');
+    let visibles = 0;
+
+    items.forEach(it => {
+        const leida = it.dataset.leida === 'true';
+        const itemCat = it.dataset.categoria;
+        const txt = it.textContent.toLowerCase();
+
+        let coincideEstado = true;
+        if (estadoActualFiltro === 'noleidas' && leida) coincideEstado = false;
+        if (estadoActualFiltro === 'leidas' && !leida) coincideEstado = false;
+
+        let coincideCat = true;
+        if (cat && itemCat !== cat) coincideCat = false;
+
+        let coincideQuery = true;
+        if (query && !txt.includes(query)) coincideQuery = false;
+
+        if (coincideEstado && coincideCat && coincideQuery) {
+            it.classList.remove('d-none');
+            visibles++;
+        } else {
+            it.classList.add('d-none');
+        }
+    });
+
+    const sinResultados = document.getElementById('sin-resultados-busqueda');
+    if (sinResultados) {
+        if (visibles === 0 && items.length > 0) {
+            sinResultados.classList.remove('d-none');
+        } else {
+            sinResultados.classList.add('d-none');
+        }
+    }
+}
+
+function actualizarContadorNotificaciones(totalNoLeidas) {
+    const elCnt = document.getElementById('cnt-no-leidas');
+    if (elCnt) elCnt.textContent = totalNoLeidas;
+
+    const elTabNoLeidas = document.getElementById('cnt-tab-noleidas');
+    if (elTabNoLeidas) elTabNoLeidas.textContent = totalNoLeidas;
+
+    const badges = document.querySelectorAll('.badge-campana, #badge-campana, [id*="notificaciones-sin-leer"], .sinetec-notif-badge, #badge-sidebar-notificaciones, .badge-sidebar-notif');
+    badges.forEach(b => {
+        b.textContent = totalNoLeidas;
+        if (totalNoLeidas === 0) {
+            b.style.display = 'none';
+        } else {
+            b.style.display = 'inline-block';
+        }
+    });
+
+    const contAccion = document.getElementById('contenedor-accion-masiva');
+    if (contAccion && totalNoLeidas === 0) {
+        contAccion.innerHTML = `
+            <div class="d-inline-flex align-items-center gap-2 px-3.5 py-2 rounded-pill fw-semibold shadow-2xs" 
+                 id="badge-bandeja-al-dia"
+                 style="background: rgba(255, 255, 255, 0.92); border: 1px solid var(--color-acento); color: var(--color-secundario); font-size: 0.85rem;">
+                <i class="bi bi-check-circle-fill" style="color: var(--color-principal);"></i>
+                <span>Bandeja al día</span>
+            </div>
+        `;
+    }
+}
+
+function marcarVisualmenteLeido(notifId) {
+    const item = document.getElementById('notif-item-' + notifId);
+    if (!item) return;
+
+    item.dataset.leida = "true";
+    item.style.background = "#ffffff";
+    item.style.borderLeft = "4px solid transparent";
+
+    const badgeNueva = document.getElementById('badge-nueva-' + notifId);
+    if (badgeNueva) badgeNueva.remove();
+
+    const btnCheck = document.getElementById('btn-check-' + notifId);
+    if (btnCheck) btnCheck.remove();
+
+    const iconBox = item.querySelector('.notif-icon-box');
+    if (iconBox) {
+        iconBox.style.background = "var(--color-acento)";
+        iconBox.style.color = "var(--color-secundario)";
+        iconBox.style.border = "1px solid var(--color-acento)";
+    }
+    
+    // Si la pestaña actual es 'noleidas', re-filtrar
+    if (estadoActualFiltro === 'noleidas') {
+        aplicarFiltrosNotificaciones();
+    }
+}
+
+function abrirModalNotificacion(id, titulo, mensaje, fecha, enlace) {
+    document.getElementById('modal-notif-titulo').textContent = titulo;
+    document.getElementById('modal-notif-mensaje').textContent = mensaje;
+    document.getElementById('modal-notif-fecha').innerHTML = '<i class="bi bi-clock me-1"></i> ' + fecha;
+
+    const btnEnlace = document.getElementById('modal-notif-btn-enlace');
+    if (enlace && enlace.trim() !== '') {
+        btnEnlace.href = enlace;
+        btnEnlace.classList.remove('d-none');
+    } else {
+        btnEnlace.classList.add('d-none');
+    }
+
+    const modalEl = document.getElementById('modalLecturaNotificacion');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+
+    const item = document.getElementById('notif-item-' + id);
+    const yaLeida = item && item.dataset.leida === "true";
+
+    if (!yaLeida) {
+        marcarLeidaDirecta(id);
+    }
+}
+
+function marcarLeidaDirecta(id) {
+    const item = document.getElementById('notif-item-' + id);
+    if (item && item.dataset.leida === "true") return;
+
+    marcarVisualmenteLeido(id);
+    const elCnt = document.getElementById('cnt-no-leidas');
+    let actualCount = parseInt(elCnt ? elCnt.textContent : '0') || 0;
+    if (actualCount > 0) {
+        actualCount--;
+        actualizarContadorNotificaciones(actualCount);
+    }
+
+    fetch('/notificaciones/' + id + '/marcar-leida-ajax/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'ok' && typeof data.total_no_leidas !== 'undefined') {
+            actualizarContadorNotificaciones(data.total_no_leidas);
+        }
+    })
+    .catch(err => {
+        console.warn('Error al sincronizar lectura de notificación:', err);
+    });
+}
+
+function marcarTodasComoLeidas() {
+    const items = document.querySelectorAll('.item-notificacion');
+    items.forEach(it => {
+        const id = it.dataset.notifId;
+        marcarVisualmenteLeido(id);
+    });
+    actualizarContadorNotificaciones(0);
+
+    fetch('/notificaciones/marcar-todas-leidas/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        actualizarContadorNotificaciones(0);
+    })
+    .catch(err => {
+        console.warn('Error al marcar todas las notificaciones:', err);
+    });
+}
+</script>

@@ -5,10 +5,44 @@
 
 {% block extra_css %}
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    pink: {
+                        50: '#FBF9F6',
+                        100: '#F5F0EB',
+                        200: 'var(--color-acento)',
+                        300: '#E0D8CE',
+                        400: '#C7B6A5',
+                        500: '#A98D77',
+                        600: 'var(--color-principal)',
+                        700: 'var(--color-secundario)',
+                        800: 'var(--color-secundario)',
+                        900: '#3D2B1F',
+                    },
+                    primary: {
+                        50: '#FBF9F6',
+                        100: '#F5F0EB',
+                        200: 'var(--color-acento)',
+                        300: '#E0D8CE',
+                        400: '#C7B6A5',
+                        500: '#A98D77',
+                        600: 'var(--color-principal)',
+                        700: 'var(--color-secundario)',
+                        800: 'var(--color-secundario)',
+                        900: '#3D2B1F',
+                    }
+                }
+            }
+        }
+    }
+</script>
 <style>
     .tab-active {
-        border-bottom: 2px solid #EC4899;
-        color: #BE185D;
+        border-bottom: 2px solid var(--color-principal);
+        color: var(--color-secundario);
         font-weight: 600;
     }
     .tab-inactive {
@@ -16,8 +50,8 @@
         border-bottom: 2px solid transparent;
     }
     .tab-inactive:hover {
-        color: #EC4899;
-        border-bottom: 2px solid #FBCFE8;
+        color: var(--color-principal);
+        border-bottom: 2px solid #E0D8CE;
     }
 </style>
 {% endblock %}
@@ -30,7 +64,7 @@
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-slate-800">{{ carga.programa.denominacion }}</h1>
-                <p class="text-pink-600 mt-1 font-medium">Grado {{ carga.grado }}° - Grupo {{ carga.seccion }}</p>
+                <p class="text-primary-600 mt-1 font-medium">Grado {{ carga.grado }}° - Grupo {{ carga.seccion }}</p>
                 <div class="flex gap-4 mt-2 text-sm text-gray-500">
                     <span><i class="bi bi-person"></i> Docente: {{ carga.profesor.get_full_name }}</span>
                     <span><i class="bi bi-calendar"></i> Periodo Académico 2026</span>
@@ -88,11 +122,11 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Objetivos y Temas (Competencias)</h2>
             {% for comp in competencias %}
-            <div class="mb-4 bg-pink-50 p-4 rounded-lg border border-pink-100">
-                <h3 class="font-bold text-pink-800">{{ comp.codigo }} - Competencia</h3>
+            <div class="mb-4 bg-pink-50 p-4 rounded-lg border border-primary-100">
+                <h3 class="font-bold text-primary-800">{{ comp.codigo }} - Competencia</h3>
                 <p class="text-sm text-gray-700 mt-1">{{ comp.descripcion }}</p>
                 <div class="mt-3">
-                    <h4 class="font-semibold text-pink-700 text-sm">Resultados de Aprendizaje (Temas/Subtemas):</h4>
+                    <h4 class="font-semibold text-primary-700 text-sm">Resultados de Aprendizaje (Temas/Subtemas):</h4>
                     <ul class="list-disc pl-5 mt-2 text-sm text-gray-600">
                         {% for rap in comp.resultados.all %}
                         <li>{{ rap.codigo }} - {{ rap.descripcion }}</li>
@@ -204,7 +238,7 @@
                         {% for mat in matriculas %}
                         <tr class="bg-white border-b hover:bg-gray-50">
                             <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
+                                <div class="w-8 h-8 rounded-full bg-pink-100 text-primary-600 flex items-center justify-center font-bold">
                                     {{ mat.aprendiz.first_name|first }}{{ mat.aprendiz.last_name|first }}
                                 </div>
                                 {{ mat.aprendiz.get_full_name }}

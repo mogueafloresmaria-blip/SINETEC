@@ -6,13 +6,13 @@
 {% block extra_css %}
 <style>
     .coordinador-hero {
-        background: linear-gradient(135deg, #2D1B28 0%, #4A2838 50%, #8E5266 100%);
+        background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%);
         color: #ffffff;
         border-radius: 20px;
         padding: clamp(24px, 3.5vw, 36px);
         position: relative;
         overflow: hidden;
-        box-shadow: 0 12px 30px rgba(74, 40, 56, 0.2);
+        box-shadow: 0 12px 30px rgba(90, 56, 37, 0.18);
     }
     .coordinador-hero::after {
         content: 'COORDINACIÓN';
@@ -27,7 +27,7 @@
     .kpi-card {
         background: #ffffff;
         border-radius: 16px;
-        border: 1px solid #EAD8E2;
+        border: 1px solid #E5DFD5;
         padding: 18px 20px;
         transition: all 0.25s ease;
         position: relative;
@@ -40,29 +40,29 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: #8E5266;
+        background: var(--color-principal);
     }
-    .kpi-card.kpi-success::before { background: #29AAE3; }
-    .kpi-card.kpi-warning::before { background: #FFAB00; }
-    .kpi-card.kpi-danger::before { background: #DE350B; }
-    .kpi-card.kpi-info::before { background: #0065FF; }
+    .kpi-card.kpi-success::before { background: #10B981; }
+    .kpi-card.kpi-warning::before { background: #F59E0B; }
+    .kpi-card.kpi-danger::before { background: #EF4444; }
+    .kpi-card.kpi-info::before { background: var(--color-principal); }
 
     .kpi-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 24px rgba(142, 82, 102, 0.12);
+        box-shadow: 0 10px 24px rgba(139, 94, 60, 0.12);
     }
     .kpi-value {
         font-size: 2.2rem;
         font-weight: 800;
         line-height: 1.1;
-        color: #2D1B28;
+        color: #3D2B1F;
     }
 
     .alert-case-card {
         background: #ffffff;
         border-radius: 14px;
-        border: 1px solid #F0D9E5;
-        border-left: 5px solid #DE350B;
+        border: 1px solid #E5DFD5;
+        border-left: 5px solid #EF4444;
         padding: 14px 18px;
         display: flex;
         align-items: center;
@@ -70,10 +70,10 @@
         gap: 14px;
         transition: all 0.2s ease;
     }
-    .alert-case-card.case-warning { border-left-color: #FFAB00; }
-    .alert-case-card.case-info { border-left-color: #0065FF; }
+    .alert-case-card.case-warning { border-left-color: #F59E0B; }
+    .alert-case-card.case-info { border-left-color: var(--color-principal); }
     .alert-case-card:hover {
-        background: #FDF7FA;
+        background: var(--color-fondo);
         transform: translateX(4px);
     }
 </style>

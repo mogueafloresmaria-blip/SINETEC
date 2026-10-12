@@ -44,226 +44,286 @@
             </span>
         </div>
 
-        <div class="row g-4">
+        <!-- GRID RESPONSIVO DE TARJETAS (3 col desktop, 2 col tablet, 1 col mobile) -->
+        <style>
+            .edunova-grid-cards {
+                display: grid;
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+                gap: 1.25rem;
+            }
+            @media (min-width: 768px) {
+                .edunova-grid-cards {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+            @media (min-width: 1200px) {
+                .edunova-grid-cards {
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                }
+            }
+
+            .edunova-card {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                padding: 1.25rem;
+                border-radius: 1rem;
+                background-color: #f8fafc;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+                transition: transform 0.15s ease, box-shadow 0.15s ease;
+            }
+            .edunova-card:hover {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+
+            .edunova-card-body {
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .edunova-card-desc {
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                color: #64748b;
+                font-size: 0.84rem;
+                line-height: 1.45;
+                margin-bottom: 0.75rem;
+            }
+
+            .edunova-card-footer {
+                margin-top: auto;
+                padding-top: 0.75rem;
+                border-top: 1px solid #e2e8f0;
+                display: flex;
+                gap: 0.5rem;
+                width: 100%;
+            }
+
+            .edunova-btn-export {
+                flex: 1 1 0;
+                min-width: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.45rem 0.6rem;
+                font-size: 0.8rem;
+                font-weight: 600;
+                white-space: nowrap;
+                border-radius: 0.5rem;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+        </style>
+
+        <div class="edunova-grid-cards">
             <!-- 1. Instituciones y Sedes -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #1E3A8A; font-size: 0.72rem;">SEDES ESCOLARES</span>
-                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
-                                <i class="bi bi-buildings-fill fs-5"></i>
-                            </div>
+            <div class="edunova-card">
+                <div class="edunova-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #1E3A8A; font-size: 0.72rem;">SEDES ESCOLARES</span>
+                        <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                            <i class="bi bi-buildings-fill fs-5"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1">Sedes Institucionales</h6>
-                        <p class="small text-muted mb-3">Directorio oficial de planteles, sedes, códigos DANE, municipios, convenios vigentes, rectores y enlaces.</p>
                     </div>
-                    <div class="d-flex gap-2 pt-2 border-top">
-                        <a href="{% url 'exportar_reporte_excel' %}?entidad=instituciones" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                        </a>
-                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=instituciones" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                        </a>
-                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Sedes Institucionales</h6>
+                    <p class="edunova-card-desc">Directorio oficial de planteles, sedes, códigos DANE, municipios, convenios vigentes, rectores y enlaces.</p>
+                </div>
+                <div class="edunova-card-footer">
+                    <a href="{% url 'exportar_reporte_excel' %}?entidad=instituciones" class="btn btn-sm btn-outline-primary edunova-btn-export">
+                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{% url 'exportar_reporte_pdf' %}?entidad=instituciones" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
+                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                    </a>
                 </div>
             </div>
 
             <!-- 2. Cursos y Grupos -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #1E3A8A !important;">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0F2942; font-size: 0.72rem;">CURSOS Y GRUPOS</span>
-                            <div class="p-2 rounded-3 bg-white text-dark shadow-xs">
-                                <i class="bi bi-journal-bookmark-fill fs-5"></i>
-                            </div>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1">Cursos y Grupos Formativos</h6>
-                        <p class="small text-muted mb-2">Consolidado general o grupo específico con programas, sedes y docentes titulares a cargo.</p>
-                        
-                        <div class="mb-3">
-                            <label class="form-label text-muted" style="font-size: 0.75rem;">Filtrar por grupo específico (opcional):</label>
-                            <select class="form-select form-select-sm" id="select-ficha-reporte">
-                                <option value="">-- Todos los Grupos (Consolidado) --</option>
-                                {% for f in fichas %}
-                                    <option value="{{ f.id }}">Grupo {{ f.codigo_ficha }} — {{ f.programa.denominacion|truncatechars:26 }}</option>
-                                {% endfor %}
-                            </select>
+            <div class="edunova-card" style="border-top: 3px solid #1E3A8A !important;">
+                <div class="edunova-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0F2942; font-size: 0.72rem;">CURSOS Y GRUPOS</span>
+                        <div class="p-2 rounded-3 bg-white text-dark shadow-xs">
+                            <i class="bi bi-journal-bookmark-fill fs-5"></i>
                         </div>
                     </div>
-                    <div class="d-flex gap-2 pt-2 border-top">
-                        <button class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3" onclick="exportarCursos('excel')">
-                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3" onclick="exportarCursos('pdf')">
-                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                        </button>
+                    <h6 class="fw-bold text-dark mb-1">Cursos y Grupos Formativos</h6>
+                    <p class="edunova-card-desc">Consolidado general o grupo específico con programas, sedes y docentes titulares a cargo.</p>
+                    <div class="mb-2">
+                        <select class="form-select form-select-sm" id="select-ficha-reporte" style="font-size: 0.78rem;">
+                            <option value="">-- Todos los Grupos (Consolidado) --</option>
+                            {% for f in fichas %}
+                                <option value="{{ f.id }}">Grupo {{ f.codigo_ficha }} — {{ f.programa.denominacion|truncatechars:22 }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
+                </div>
+                <div class="edunova-card-footer">
+                    <button class="btn btn-sm btn-outline-primary edunova-btn-export" onclick="exportarCursos('excel')">
+                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger edunova-btn-export" onclick="exportarCursos('pdf')">
+                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                    </button>
                 </div>
             </div>
 
             <!-- 3. Estudiantes Matriculados -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #2563EB; font-size: 0.72rem;">ESTUDIANTES</span>
-                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
-                                <i class="bi bi-mortarboard-fill fs-5"></i>
-                            </div>
+            <div class="edunova-card">
+                <div class="edunova-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #2563EB; font-size: 0.72rem;">ESTUDIANTES</span>
+                        <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                            <i class="bi bi-mortarboard-fill fs-5"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1">Estudiantes Matriculados</h6>
-                        <p class="small text-muted mb-3">Padrón escolar oficial: número de documento, nombres, acudiente, grado, grupo y estado de matrícula.</p>
                     </div>
-                    <div class="d-flex gap-2 pt-2 border-top">
-                        <a href="{% url 'exportar_reporte_excel' %}?entidad=aprendices" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                        </a>
-                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=aprendices" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                        </a>
-                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Estudiantes Matriculados</h6>
+                    <p class="edunova-card-desc">Padrón escolar oficial: número de documento, nombres, acudiente, grado, grupo y estado de matrícula.</p>
+                </div>
+                <div class="edunova-card-footer">
+                    <a href="{% url 'exportar_reporte_excel' %}?entidad=aprendices" class="btn btn-sm btn-outline-primary edunova-btn-export">
+                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{% url 'exportar_reporte_pdf' %}?entidad=aprendices" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
+                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                    </a>
                 </div>
             </div>
 
             <!-- 4. Cuerpo Docente -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #4F46E5; font-size: 0.72rem;">DOCENTES</span>
-                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
-                                <i class="bi bi-person-workspace fs-5"></i>
-                            </div>
+            <div class="edunova-card">
+                <div class="edunova-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #4F46E5; font-size: 0.72rem;">DOCENTES</span>
+                        <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                            <i class="bi bi-person-workspace fs-5"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1">Cuerpo Docente y Directivos</h6>
-                        <p class="small text-muted mb-3">Directorio de docentes, roles pedagógicos asignados, correos electrónicos y grupos a cargo.</p>
                     </div>
-                    <div class="d-flex gap-2 pt-2 border-top">
-                        <a href="{% url 'exportar_reporte_excel' %}?entidad=instructores" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                        </a>
-                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=instructores" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                        </a>
-                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Cuerpo Docente y Directivos</h6>
+                    <p class="edunova-card-desc">Directorio de docentes, roles pedagógicos asignados, correos electrónicos y grupos a cargo.</p>
+                </div>
+                <div class="edunova-card-footer">
+                    <a href="{% url 'exportar_reporte_excel' %}?entidad=instructores" class="btn btn-sm btn-outline-primary edunova-btn-export">
+                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{% url 'exportar_reporte_pdf' %}?entidad=instructores" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
+                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                    </a>
                 </div>
             </div>
 
             <!-- 5. Seguimientos y Observador -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0284C7; font-size: 0.72rem;">SEGUIMIENTO</span>
-                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
-                                <i class="bi bi-clipboard2-pulse-fill fs-5"></i>
-                            </div>
+            <div class="edunova-card">
+                <div class="edunova-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0284C7; font-size: 0.72rem;">SEGUIMIENTO</span>
+                        <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                            <i class="bi bi-clipboard2-pulse-fill fs-5"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1">Bitácoras y Acompañamiento</h6>
-                        <p class="small text-muted mb-3">Historial de visitas en aula, observaciones pedagógicas, acuerdos y seguimiento de compromisos.</p>
                     </div>
-                    <div class="d-flex gap-2 pt-2 border-top">
-                        <a href="{% url 'exportar_reporte_excel' %}?entidad=seguimientos" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                        </a>
-                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=seguimientos" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                        </a>
-                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Bitácoras y Acompañamiento</h6>
+                    <p class="edunova-card-desc">Historial de visitas en aula, observaciones pedagógicas, acuerdos y seguimiento de compromisos.</p>
+                </div>
+                <div class="edunova-card-footer">
+                    <a href="{% url 'exportar_reporte_excel' %}?entidad=seguimientos" class="btn btn-sm btn-outline-primary edunova-btn-export">
+                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{% url 'exportar_reporte_pdf' %}?entidad=seguimientos" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
+                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                    </a>
                 </div>
             </div>
 
-            <!-- 6. Semáforo de Competencias (3 Colores Oficiales) -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #10B981 !important;">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #10B981; font-size: 0.72rem;">SEMÁFORO ESCOLAR</span>
-                            <div class="p-2 rounded-3 bg-white text-success shadow-xs">
-                                <i class="bi bi-traffic-light-fill fs-5"></i>
-                            </div>
+            <!-- 6. Semáforo Escolar -->
+            <div class="edunova-card" style="border-top: 3px solid #10B981 !important;">
+                <div class="edunova-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #10B981; font-size: 0.72rem;">SEMÁFORO ESCOLAR</span>
+                        <div class="p-2 rounded-3 bg-white text-success shadow-xs">
+                            <i class="bi bi-traffic-light-fill fs-5"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1">Sábana del Semáforo de Competencias</h6>
-                        <p class="small text-muted mb-3">Consolidado general de calificaciones (🟢 Aprobado, 🟡 En proceso, 🔴 Por recuperar) por estudiante y grupo.</p>
                     </div>
-                    <div class="d-flex gap-2 pt-2 border-top">
-                        <a href="{% url 'exportar_semaforo_excel' %}" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                        </a>
-                        <a href="{% url 'exportar_semaforo_pdf' %}" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                        </a>
-            <!-- 7. Recaudos y Pensiones -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #10b981 !important;">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #059669; font-size: 0.72rem;">TESORERÍA Y CAJA</span>
-                            <div class="p-2 rounded-3 bg-white text-success shadow-xs">
-                                <i class="bi bi-cash-stack fs-5"></i>
-                            </div>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1">Recaudos y Pagos de Pensiones</h6>
-                        <p class="small text-muted mb-3">Libro diario de ingresos, números de recibo, matrícula, mensualidades cobradas y métodos de pago.</p>
-                    </div>
-                    <div class="d-flex gap-2 pt-2 border-top">
-                        <a href="{% url 'exportar_reporte_excel' %}?entidad=pensiones" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                        </a>
-                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=pensiones" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                        </a>
-                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Sábana del Semáforo</h6>
+                    <p class="edunova-card-desc">Consolidado general de calificaciones (Aprobado, En proceso, Por recuperar) por estudiante y grupo.</p>
+                </div>
+                <div class="edunova-card-footer">
+                    <a href="{% url 'exportar_semaforo_excel' %}" class="btn btn-sm btn-outline-primary edunova-btn-export">
+                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{% url 'exportar_semaforo_pdf' %}" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
+                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                    </a>
                 </div>
             </div>
 
-            <!-- 8. Control de Asistencia -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #6366f1 !important;">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #4f46e5; font-size: 0.72rem;">CONTROL ESCOLAR</span>
-                            <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
-                                <i class="bi bi-calendar-check-fill fs-5"></i>
-                            </div>
+            <!-- 7. Tesorería -->
+            <div class="edunova-card" style="border-top: 3px solid #059669 !important;">
+                <div class="edunova-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #059669; font-size: 0.72rem;">TESORERÍA Y CAJA</span>
+                        <div class="p-2 rounded-3 bg-white text-success shadow-xs">
+                            <i class="bi bi-cash-stack fs-5" style="color: #059669;"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1">Registro y Novedades de Asistencia</h6>
-                        <p class="small text-muted mb-3">Consolidado cronológico de asistencias, inasistencias injustificadas, retardos y justificaciones por grupo.</p>
                     </div>
-                    <div class="d-flex gap-2 pt-2 border-top">
-                        <a href="{% url 'exportar_reporte_excel' %}?entidad=asistencia" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                        </a>
-                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=asistencia" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                        </a>
-                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Recaudos y Pensiones</h6>
+                    <p class="edunova-card-desc">Libro diario de ingresos, números de recibo, matrícula, mensualidades cobradas y métodos de pago.</p>
+                </div>
+                <div class="edunova-card-footer">
+                    <a href="{% url 'exportar_reporte_excel' %}?entidad=pensiones" class="btn btn-sm btn-outline-primary edunova-btn-export">
+                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{% url 'exportar_reporte_pdf' %}?entidad=pensiones" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
+                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                    </a>
                 </div>
             </div>
 
-            <!-- 9. Transporte Escolar -->
-            <div class="col-md-6 col-xl-4">
-                <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between shadow-sm" style="border-top: 3px solid #0891b2 !important;">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0891b2; font-size: 0.72rem;">TRANSPORTE Y RUTAS</span>
-                            <div class="p-2 rounded-3 bg-white text-info shadow-xs">
-                                <i class="bi bi-bus-front-fill fs-5"></i>
-                            </div>
+            <!-- 8. Control Escolar -->
+            <div class="edunova-card" style="border-top: 3px solid #4F46E5 !important;">
+                <div class="edunova-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #4F46E5; font-size: 0.72rem;">CONTROL ESCOLAR</span>
+                        <div class="p-2 rounded-3 bg-white text-primary shadow-xs">
+                            <i class="bi bi-calendar-check-fill fs-5" style="color: #4F46E5;"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1">Rutas y Pasajeros Escolares</h6>
-                        <p class="small text-muted mb-3">Detalle operativo de vehículos, placas, conductores asignados, capacidad y número de estudiantes a bordo.</p>
                     </div>
-                    <div class="d-flex gap-2 pt-2 border-top">
-                        <a href="{% url 'exportar_reporte_excel' %}?entidad=transportes" class="btn btn-sm btn-outline-primary flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                        </a>
-                        <a href="{% url 'exportar_reporte_pdf' %}?entidad=transportes" target="_blank" class="btn btn-sm btn-outline-danger flex-fill fw-semibold rounded-3">
-                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                        </a>
+                    <h6 class="fw-bold text-dark mb-1">Registro de Asistencia</h6>
+                    <p class="edunova-card-desc">Consolidado cronológico de asistencias, inasistencias injustificadas, retardos y novedades por grupo.</p>
+                </div>
+                <div class="edunova-card-footer">
+                    <a href="{% url 'exportar_reporte_excel' %}?entidad=asistencia" class="btn btn-sm btn-outline-primary edunova-btn-export">
+                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{% url 'exportar_reporte_pdf' %}?entidad=asistencia" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
+                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                    </a>
+                </div>
+            </div>
+
+            <!-- 9. Ruta -->
+            <div class="edunova-card" style="border-top: 3px solid #0891B2 !important;">
+                <div class="edunova-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0891B2; font-size: 0.72rem;">TRANSPORTE Y RUTA</span>
+                        <div class="p-2 rounded-3 bg-white text-info shadow-xs">
+                            <i class="bi bi-bus-front-fill fs-5" style="color: #0891B2;"></i>
+                        </div>
                     </div>
+                    <h6 class="fw-bold text-dark mb-1">Rutas Escolares</h6>
+                    <p class="edunova-card-desc">Detalle operativo de vehículos, placas, conductores asignados, capacidad y número de estudiantes a bordo.</p>
+                </div>
+                <div class="edunova-card-footer">
+                    <a href="{% url 'exportar_reporte_excel' %}?entidad=transportes" class="btn btn-sm btn-outline-primary edunova-btn-export">
+                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{% url 'exportar_reporte_pdf' %}?entidad=transportes" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
+                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
+                    </a>
                 </div>
             </div>
         </div>

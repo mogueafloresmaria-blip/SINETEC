@@ -7,7 +7,7 @@
 <div class="container-fluid px-0">
 
     <!-- Hero Header de Comunicaciones -->
-    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important; color: #FFFFFF; padding: 2.2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(190, 24, 93, 0.35);">
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%) !important; color: #FFFFFF; padding: 2.2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(90, 56, 37, 0.35);">
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
             <div>
                 <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
@@ -19,7 +19,7 @@
                 </p>
             </div>
             <div class="d-flex gap-2">
-                <button type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoMensaje" class="btn btn-light fw-bold rounded-pill px-4 shadow-sm" style="color: #db2777;">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoMensaje" class="btn btn-light fw-bold rounded-pill px-4 shadow-sm" style="color: var(--color-principal);">
                     <i class="bi bi-pencil-square me-1"></i> Redactar Mensaje
                 </button>
                 <a href="{% url 'mensajeria' %}" class="btn btn-outline-light fw-semibold rounded-pill px-3 shadow-sm">
@@ -35,7 +35,7 @@
             <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted small fw-bold text-uppercase">Bandeja de Entrada</span>
-                    <div class="rounded-3 p-2" style="background-color: #fff0f3; color: #db2777;">
+                    <div class="rounded-3 p-2" style="background-color: #F5F2EB; color: var(--color-principal);">
                         <i class="bi bi-inbox-fill fs-5"></i>
                     </div>
                 </div>
@@ -74,19 +74,19 @@
         <!-- Columna 1: Bandeja de Entrada -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
-                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-inbox-fill" style="color: #db2777;"></i>
+                        <i class="bi bi-inbox-fill" style="color: var(--color-principal);"></i>
                         <h6 class="fw-bold text-dark mb-0">Bandeja de Entrada</h6>
                     </div>
-                    <span class="badge rounded-pill px-2.5 py-1" style="background: #fff0f3; color: #db2777;">
+                    <span class="badge rounded-pill px-2.5 py-1" style="background: #F5F2EB; color: var(--color-principal);">
                         {{ recibidos|length }}
                     </span>
                 </div>
                 <div class="card-body p-3 overflow-y-auto" style="max-height: 580px;">
                     <div class="d-flex flex-column gap-2.5">
                         {% for msg in recibidos %}
-                        <div class="p-3 rounded-4 border bg-white shadow-2xs transition" style="border-color: {% if not msg.leido %}#fbcfe8{% else %}#f1f5f9{% endif %} !important; {% if not msg.leido %}background: #fffdfd !important; border-left: 4px solid #db2777 !important;{% endif %}">
+                        <div class="p-3 rounded-4 border bg-white shadow-2xs transition" style="border-color: {% if not msg.leido %}#E0D8CE{% else %}#f1f5f9{% endif %} !important; {% if not msg.leido %}background: #fffdfd !important; border-left: 4px solid var(--color-principal) !important;{% endif %}">
                             <div class="d-flex justify-content-between align-items-start mb-1.5">
                                 <span class="fw-bold text-dark small">
                                     {{ msg.remitente.get_full_name|default:msg.remitente.username }}
@@ -109,7 +109,7 @@
                         </div>
                         {% empty %}
                         <div class="text-center py-5 text-muted">
-                            <i class="bi bi-envelope-open fs-2 text-pink d-block mb-2 opacity-50" style="color: #db2777;"></i>
+                            <i class="bi bi-envelope-open fs-2 text-primary d-block mb-2 opacity-50" style="color: var(--color-principal);"></i>
                             <h6 class="fw-bold text-dark mb-1">Sin mensajes recibidos</h6>
                             <p class="small text-muted mb-0">Cuando otros usuarios te escriban, aparecerán aquí.</p>
                         </div>
@@ -122,7 +122,7 @@
         <!-- Columna 2: Mensajes Enviados -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
-                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-send-check-fill text-success"></i>
                         <h6 class="fw-bold text-dark mb-0">Mensajes Enviados</h6>
@@ -172,7 +172,7 @@
         <!-- Columna 3: Papelera -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
-                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-trash3-fill text-secondary"></i>
                         <h6 class="fw-bold text-dark mb-0">Papelera</h6>
@@ -231,9 +231,9 @@
         <div class="modal-content rounded-4 border-0 shadow">
             <form method="post" action="{% url 'comunicaciones' %}">
                 {% csrf_token %}
-                <div class="modal-header border-bottom py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fce7f3 100%);">
+                <div class="modal-header border-bottom py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%);">
                     <h5 class="modal-title fw-bold text-dark" id="modalNuevoMensajeLabel">
-                        <i class="bi bi-pencil-square me-2" style="color: #db2777;"></i> Redactar Mensaje
+                        <i class="bi bi-pencil-square me-2" style="color: var(--color-principal);"></i> Redactar Mensaje
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
@@ -269,7 +269,7 @@
                 </div>
                 <div class="modal-footer bg-light border-top py-2.5">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background: #db2777; border-color: #db2777;">
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background: var(--color-principal); border-color: var(--color-principal);">
                         <i class="bi bi-send-fill me-1"></i> Enviar Mensaje
                     </button>
                 </div>

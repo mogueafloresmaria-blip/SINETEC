@@ -701,6 +701,7 @@ class MaterialClase(models.Model):
 
 class TareaClase(models.Model):
     carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='tareas')
+    tema = models.ForeignKey('GuiaClase', on_delete=models.SET_NULL, null=True, blank=True, related_name='actividades', verbose_name="Tema Relacionado")
     tipo_actividad = models.CharField(max_length=50, default='Tarea', verbose_name="Tipo de Actividad")
     competencia = models.ForeignKey('Competencia', on_delete=models.SET_NULL, null=True, blank=True, related_name='tareas_clase', verbose_name="Competencia Evaluada")
     objetivo = models.ForeignKey('Objetivo', on_delete=models.SET_NULL, null=True, blank=True, related_name='tareas_clase', verbose_name="Objetivo Evaluado")
@@ -715,7 +716,8 @@ class TareaClase(models.Model):
     estado = models.CharField(max_length=20, default='Publicada', choices=[
         ('Borrador', 'Borrador'),
         ('Publicada', 'Publicada'),
-        ('Cerrada', 'Cerrada')
+        ('Cerrada', 'Cerrada'),
+        ('Papelera', 'Papelera'),
     ], verbose_name="Estado de la Actividad")
     porcentaje = models.DecimalField(max_digits=5, decimal_places=2, default=20.0, verbose_name="Porcentaje")
     es_calificada = models.BooleanField(default=True, verbose_name="¿Es Calificada?")
@@ -734,6 +736,7 @@ class EntregaTarea(models.Model):
         ('ENTREGADA_TARDE', 'Entregada fuera de plazo'),
         ('CALIFICADA', 'Calificada'),
         ('DEVUELTA', 'Devuelta'),
+        ('PAPELERA', 'En Papelera de Reciclaje'),
     ]
     tarea = models.ForeignKey(TareaClase, on_delete=models.CASCADE, related_name='entregas')
     estudiante = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tareas_entregadas')
@@ -750,15 +753,28 @@ class EntregaTarea(models.Model):
         unique_together = ('tarea', 'estudiante')
 
 class GuiaClase(models.Model):
-    carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='guias')
+    TIPO_CHOICES = [
+        ('GUIA', 'Guía'),
+        ('MATERIAL_PEDAGOGICO', 'Material Pedagógico'),
+        ('MATERIAL_APOYO', 'Material de Apoyo'),
+    ]
+    ESTADO_CHOICES = [
+        ('ACTIVO', 'Activo'),
+        ('PAPELERA', 'En Papelera'),
+    ]
+    carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='guias', null=True, blank=True)
+    profesor = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='documentos_docente')
+    tipo_documento = models.CharField(max_length=30, choices=TIPO_CHOICES, default='GUIA', verbose_name="Tipo de Documento")
     titulo = models.CharField(max_length=200)
-    instrucciones = models.TextField()
+    instrucciones = models.TextField(blank=True, default='')
     archivo = models.FileField(upload_to='guias_clase/%Y/%m/', blank=True, null=True)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ACTIVO', verbose_name="Estado")
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Guía de Clase"
-        verbose_name_plural = "Guías de Clase"
+        verbose_name = "Documento / Guía de Clase"
+        verbose_name_plural = "Documentos y Guías de Clase"
+        ordering = ['-fecha_publicacion']
 
 class ActividadClase(models.Model):
     carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='actividades')

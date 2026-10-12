@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if docente %}Editar Docente{% else %}Nuevo Docente{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .nav-tabs .nav-link {
+        color: var(--color-texto);
+        font-weight: 600;
+        border: none;
+        border-bottom: 3px solid transparent;
+        padding: 10px 20px;
+    }
+    .nav-tabs .nav-link.active {
+        color: var(--color-principal);
+        border-bottom: 3px solid var(--color-principal);
+        background: transparent;
+    }
+    .section-title {
+        color: var(--color-titulo);
+        font-weight: 700;
+        font-size: 1.1rem;
+        border-bottom: 1px solid var(--color-acento);
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+    }
+    .form-label {
+        font-weight: 600;
+        color: var(--color-texto);
+        font-size: 0.85rem;
+    }
+    .required::after {
+        content: "*";
+        color: red;
+        margin-left: 4px;
+    }
+    .audit-footer {
+        font-size: 0.75rem;
+        color: #888;
+        text-align: right;
+        margin-top: 20px;
+        font-style: italic;
+    }
+    .bottom-toolbar {
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 15px;
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+    .toolbar-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        height: 80px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: white;
+        color: var(--color-texto);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .toolbar-btn i {
+        font-size: 24px;
+        margin-bottom: 5px;
+        color: var(--color-principal);
+    }
+    .toolbar-btn span {
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .toolbar-btn:hover {
+        background: #f1f1f1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        color: var(--color-principal);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1" style="color: var(--color-titulo); font-weight: 700;">Datos del Docente</h2>
+            <p class="text-muted mb-0">{% if docente %}Edición de datos{% else %}Registro de nuevo docente{% endif %}</p>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="" id="docenteForm">
+        {% csrf_token %}
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; background: var(--color-tarjetas);">
+            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                <ul class="nav nav-tabs" id="docenteTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="datos-personales-tab" data-bs-toggle="tab" data-bs-target="#datos-personales" type="button" role="tab" aria-controls="datos-personales" aria-selected="true">Datos Personales</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="info-academica-tab" data-bs-toggle="tab" data-bs-target="#info-academica" type="button" role="tab" aria-controls="info-academica" aria-selected="false">Información Académica</button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card-body p-4">
+                <div class="tab-content" id="docenteTabsContent">
+                    <!-- DATOS PERSONALES -->
+                    <div class="tab-pane fade show active" id="datos-personales" role="tabpanel" aria-labelledby="datos-personales-tab">
+                        
+                        <h4 class="section-title">Datos de Identificación</h4>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label required">Nombres</label>
+                                <input type="text" class="form-control" name="nombres" value="{{ user.first_name|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Apellidos</label>
+                                <input type="text" class="form-control" name="apellidos" value="{{ user.last_name|default:'' }}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label required">Tipo Documento</label>
+                                <select class="form-select" name="tipo_documento" required>
+                                    <option value="CC" {% if perfil.tipo_documento == 'CC' %}selected{% endif %}>Cédula de Ciudadanía</option>
+                                    <option value="CE" {% if perfil.tipo_documento == 'CE' %}selected{% endif %}>Cédula de Extranjería</option>
+                                    <option value="PEP" {% if perfil.tipo_documento == 'PEP' %}selected{% endif %}>Permiso Especial de Permanencia</option>
+                                    <option value="PPT" {% if perfil.tipo_documento == 'PPT' %}selected{% endif %}>Permiso por Protección Temporal</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label required">Número</label>
+                                <input type="text" class="form-control" name="numero_documento" value="{{ perfil.numero_documento|default:'' }}" required {% if docente %}readonly{% endif %}>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Fecha de Nacimiento</label>
+                                <input type="date" class="form-control" name="fecha_nacimiento" value="{{ perfil.fecha_nacimiento|date:'Y-m-d' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Edad</label>
+                                <input type="number" class="form-control" name="edad" readonly>
+                            </div>
+                        </div>
+
+                        <h4 class="section-title">Ubicación y Contacto</h4>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Dirección</label>
+                                <input type="text" class="form-control" name="direccion" value="{{ docente.direccion|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Barrio</label>
+                                <input type="text" class="form-control" name="barrio" value="{{ docente.barrio|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Teléfono</label>
+                                <input type="text" class="form-control" name="telefono" value="{{ perfil.telefono|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">E-mail</label>
+                                <input type="email" class="form-control" name="email" value="{{ user.email|default:'' }}">
+                            </div>
+                        </div>
+
+                        <h4 class="section-title">Perfil Profesional</h4>
+                        <div class="mb-2"><strong>Experiencia Académica</strong></div>
+                        <table class="table table-bordered table-sm" id="tablaExperiencia">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th>Instituciones donde ha Trabajado</th>
+                                    <th width="150">Años</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exp in experiencias %}
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="exp_institucion[]" value="{{ exp.institucion }}"></td>
+                                    <td><input type="number" class="form-control form-control-sm" name="exp_anos[]" value="{{ exp.anos }}"></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+                                </tr>
+                                {% endfor %}
+                                <!-- Filas por defecto -->
+                                {% if not experiencias %}
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="exp_institucion[]"></td>
+                                    <td><input type="number" class="form-control form-control-sm" name="exp_anos[]"></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="exp_institucion[]"></td>
+                                    <td><input type="number" class="form-control form-control-sm" name="exp_anos[]"></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="btn-add-experiencia"><i class="bi bi-plus-circle"></i> Agregar Fila</button>
+
+                    </div>
+
+                    <!-- INFORMACIÓN ACADÉMICA -->
+                    <div class="tab-pane fade" id="info-academica" role="tabpanel" aria-labelledby="info-academica-tab">
+                        
+                        <h4 class="section-title">Información académica dentro de la Institución</h4>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label required">Área</label>
+                                <input type="text" class="form-control" name="area" value="{{ docente.area|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Escalafón</label>
+                                <select class="form-select" name="escalafon">
+                                    <option value="">Seleccione...</option>
+                                    <option value="Grado 1" {% if docente.escalafon == 'Grado 1' %}selected{% endif %}>Grado 1</option>
+                                    <option value="Grado 2" {% if docente.escalafon == 'Grado 2' %}selected{% endif %}>Grado 2</option>
+                                    <option value="Grado 3" {% if docente.escalafon == 'Grado 3' %}selected{% endif %}>Grado 3</option>
+                                    <option value="Grado 4" {% if docente.escalafon == 'Grado 4' %}selected{% endif %}>Grado 4</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Estado</label>
+                                <select class="form-select" name="estado_docente" required>
+                                    <option value="ACTIVO" {% if docente.estado_docente == 'ACTIVO' %}selected{% endif %}>Activo</option>
+                                    <option value="INACTIVO" {% if docente.estado_docente == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
+                                    <option value="LICENCIA" {% if docente.estado_docente == 'LICENCIA' %}selected{% endif %}>En Licencia</option>
+                                    <option value="RETIRADO" {% if docente.estado_docente == 'RETIRADO' %}selected{% endif %}>Retirado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nro de Resolución</label>
+                                <input type="text" class="form-control" name="nro_resolucion" value="{{ docente.nro_resolucion|default:'' }}">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Profesión</label>
+                                <input type="text" class="form-control" name="profesion" value="{{ docente.profesion|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Ingreso</label>
+                                <input type="date" class="form-control" name="fecha_ingreso" value="{{ docente.fecha_ingreso|date:'Y-m-d' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Retiro</label>
+                                <input type="date" class="form-control" name="fecha_retiro" value="{{ docente.fecha_retiro|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+
+                        <h4 class="section-title">Estudios Realizados</h4>
+                        <div class="mb-2"><strong>Maestría, Cursos, Seminarios u Otros Estudios Realizados</strong></div>
+                        <table class="table table-bordered table-sm" id="tablaEstudios">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th>Estudios Realizados</th>
+                                    <th>Institución</th>
+                                    <th width="100">Año</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for est in estudios %}
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="estudio_titulo[]" value="{{ est.titulo }}"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="estudio_institucion[]" value="{{ est.institucion }}"></td>
+                                    <td><input type="number" class="form-control form-control-sm" name="estudio_ano[]" value="{{ est.ano }}"></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+                                </tr>
+                                {% endfor %}
+                                {% if not estudios %}
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="estudio_titulo[]"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="estudio_institucion[]"></td>
+                                    <td><input type="number" class="form-control form-control-sm" name="estudio_ano[]"></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="estudio_titulo[]"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="estudio_institucion[]"></td>
+                                    <td><input type="number" class="form-control form-control-sm" name="estudio_ano[]"></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="btn-add-estudio"><i class="bi bi-plus-circle"></i> Agregar Fila</button>
+
+                    </div>
+                </div>
+
+                <div class="audit-footer">
+                    Diseñado por Diego Mercado Arrieta / SINETEC
+                </div>
+            </div>
+        </div>
+
+        <!-- TOOLBAR INFERIOR -->
+        <div class="bottom-toolbar shadow">
+            <a href="{% url 'docente_nuevo' %}" class="toolbar-btn">
+                <i class="bi bi-person-plus"></i>
+                <span>Nuevo</span>
+            </a>
+            <a href="{% url 'docentes_lista' %}" class="toolbar-btn">
+                <i class="bi bi-search"></i>
+                <span>Buscar</span>
+            </a>
+            <button type="submit" class="toolbar-btn" style="border: none; cursor: pointer;">
+                <i class="bi bi-save"></i>
+                <span>Guardar</span>
+            </button>
+            <button type="button" class="toolbar-btn" onclick="window.print();">
+                <i class="bi bi-printer"></i>
+                <span>Imprimir</span>
+            </button>
+            <a href="{% url 'docentes_lista' %}" class="toolbar-btn" style="color: #dc3545;">
+                <i class="bi bi-x-circle text-danger"></i>
+                <span>Cancelar</span>
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Calcular edad
+        const inputFecha = document.querySelector('input[name="fecha_nacimiento"]');
+        const inputEdad = document.querySelector('input[name="edad"]');
+        
+        function calcularEdad() {
+            if(inputFecha.value) {
+                const hoy = new Date();
+                const cumpleanos = new Date(inputFecha.value);
+                let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+                const m = hoy.getMonth() - cumpleanos.getMonth();
+                if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
+                    edad--;
+                }
+                inputEdad.value = edad;
+            }
+        }
+        
+        inputFecha.addEventListener("change", calcularEdad);
+        calcularEdad(); // Init
+        
+        // Agregar filas dinamicas
+        document.getElementById('btn-add-experiencia').addEventListener('click', function() {
+            const tbody = document.querySelector('#tablaExperiencia tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="form-control form-control-sm" name="exp_institucion[]"></td>
+                <td><input type="number" class="form-control form-control-sm" name="exp_anos[]"></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        document.getElementById('btn-add-estudio').addEventListener('click', function() {
+            const tbody = document.querySelector('#tablaEstudios tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="form-control form-control-sm" name="estudio_titulo[]"></td>
+                <td><input type="text" class="form-control form-control-sm" name="estudio_institucion[]"></td>
+                <td><input type="number" class="form-control form-control-sm" name="estudio_ano[]"></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        // Eliminar fila
+        document.addEventListener('click', function(e) {
+            if(e.target.closest('.btn-eliminar-fila')) {
+                const tr = e.target.closest('tr');
+                tr.remove();
+            }
+        });
+    });
+</script>
+{% endblock %}

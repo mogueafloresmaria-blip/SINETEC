@@ -1,4 +1,5 @@
 import unicodedata
+from functools import wraps
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -26,15 +27,17 @@ def obtener_url_redireccion_por_rol(user):
 
     rol_nombre = _normalizar_texto(perfil.rol.nombre)
 
-    if 'estudiante' in rol_nombre or 'aprendiz' in rol_nombre or 'alumno' in rol_nombre:
+    cats = _obtener_categorias_rol(rol_nombre)
+
+    if 'ESTUDIANTE' in cats:
         return 'aprendiz_dashboard'
-    elif 'famili' in rol_nombre or 'acudiente' in rol_nombre:
+    elif 'FAMILIA' in cats:
         return 'familia_portal'
-    elif any(r in rol_nombre for r in ['docente', 'instructor', 'profesor']):
+    elif 'DOCENTE' in cats:
         return 'instructor_dashboard'
-    elif 'secretar' in rol_nombre:
+    elif 'SECRETARIA' in cats:
         return 'secretaria_dashboard'
-    elif 'rector' in rol_nombre or 'coordinad' in rol_nombre:
+    elif 'DIRECTIVO' in cats:
         return 'rectoria_dashboard'
     else:
         return 'dashboard'
@@ -69,6 +72,20 @@ def _obtener_categorias_rol(texto):
         cats.add('FAMILIA')
 
     return cats
+
+
+def bloquear_estudiantes(view_func):
+    """Impide el acceso del rol Estudiante a vistas que no son módulos estudiantiles."""
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if request.user.is_authenticated and not request.user.is_superuser:
+            perfil = getattr(request.user, 'perfil', None)
+            rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+            if 'ESTUDIANTE' in _obtener_categorias_rol(rol_nombre):
+                messages.error(request, 'Esta función no está disponible para el rol Estudiante.')
+                return redirect(obtener_url_redireccion_por_rol(request.user))
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
 
 
 def requerir_roles(*roles_permitidos):
@@ -181,12 +198,39 @@ def validar_propietario_o_coordinador(request, estudiante_user):
     if any(r in rol_nombre for r in ['admin', 'rector', 'coordinad', 'secretar']):
         return True
 
-    # 2. Docentes (verificar si el estudiante está en alguna de sus fichas o cursos)
+    # 2. Docentes (verificar si el estudiante pertenece a un grupo/grado/sección con CargaAcademica activa)
     if any(r in rol_nombre for r in ['docente', 'instructor', 'profesor']):
-        from academico.models import Matricula
-        fichas_docente = request.user.fichas_asignadas.all()
-        esta_en_ficha = Matricula.objects.filter(aprendiz=estudiante_user, ficha__in=fichas_docente).exists()
-        if esta_en_ficha or request.user.is_staff:
+        from academico.models import Matricula, CargaAcademica
+        cargas_docente = CargaAcademica.objects.filter(profesor=request.user)
+        if not cargas_docente.exists():
+            raise PermissionDenied("Violación de Seguridad: Como docente, no tienes asignaciones académicas vigentes.")
+
+        docente_grados_secciones = set()
+        docente_grados = set()
+        for c in cargas_docente:
+            g_clean = ''.join(ch for ch in str(c.grado or '') if ch.isdigit())
+            sec_clean = str(c.seccion or '').strip().upper()
+            if g_clean:
+                docente_grados.add(g_clean)
+                if sec_clean:
+                    docente_grados_secciones.add((g_clean, sec_clean))
+
+        matriculas_est = Matricula.objects.filter(aprendiz=estudiante_user)
+        es_estudiante_propio = False
+        for m in matriculas_est:
+            m_g = ''.join(ch for ch in str(m.grado_escolar or '') if ch.isdigit())
+            m_sec = str(m.seccion or '').strip().upper()
+            if (m_g, m_sec) in docente_grados_secciones:
+                es_estudiante_propio = True
+                break
+            if m_g in docente_grados and not m_sec:
+                es_estudiante_propio = True
+                break
+            if m_g in docente_grados:
+                es_estudiante_propio = True
+                break
+
+        if es_estudiante_propio:
             return True
         raise PermissionDenied("Violación de Seguridad: Como docente, este estudiante no pertenece a ninguno de tus cursos asignados.")
 
@@ -194,9 +238,17 @@ def validar_propietario_o_coordinador(request, estudiante_user):
     if any(r in rol_nombre for r in ['famili', 'acudiente']):
         from usuarios.models import FamiliaAcudiente
         doc_acudiente = perfil.numero_documento if perfil else ''
-        es_hijo = FamiliaAcudiente.objects.filter(
-            (Q(documento=doc_acudiente) | Q(email__iexact=request.user.email) | Q(nombre_acudiente__icontains=request.user.last_name)) &
-            Q(estudiantes=estudiante_user)
+        identificadores = Q()
+        tiene_identificador = False
+        if doc_acudiente:
+            identificadores |= Q(documento=doc_acudiente)
+            tiene_identificador = True
+        if request.user.email:
+            identificadores |= Q(email__iexact=request.user.email)
+            tiene_identificador = True
+        es_hijo = tiene_identificador and FamiliaAcudiente.objects.filter(
+            identificadores,
+            estudiantes=estudiante_user,
         ).exists()
         if es_hijo:
             return True

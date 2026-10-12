@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from instituciones.models import InstitucionEducativa
 from academico.models import ProgramaFormacion, Ficha, Matricula
+from usuarios.models import Rol
 from .models import AsistenciaAprendiz, BitacoraSeguimiento
 
 
@@ -25,6 +26,9 @@ class SeguimientoModelTest(TestCase):
             first_name="Andrea",
             last_name="Gómez"
         )
+        rol_instructor, _ = Rol.objects.get_or_create(nombre='Instructor SENA')
+        self.instructor.perfil.rol = rol_instructor
+        self.instructor.perfil.save()
         self.ficha = Ficha.objects.create(
             codigo_ficha="2501890",
             programa=self.programa,
@@ -136,11 +140,14 @@ class SeguimientoModelTest(TestCase):
         matricula_uno = Matricula.objects.create(ficha=self.ficha, aprendiz=aprendiz_uno, grado_escolar='10')
         matricula_dos = Matricula.objects.create(ficha=self.ficha, aprendiz=aprendiz_dos, grado_escolar='11')
         self.client.force_login(self.instructor)
-        url = f'/seguimiento/asistencia/?ficha={self.ficha.pk}&fecha=2026-09-15'
+        url = (
+            f'/seguimiento/asistencia/?ficha={self.ficha.pk}'
+            f'&fecha=2026-09-15&asignatura={self.programa.pk}'
+        )
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Control de Asistencia Diaria')
+        self.assertContains(response, 'Llamar a Lista y Control de Asistencia')
 
         response = self.client.post(url, {
             f'asistencia_{matricula_uno.pk}': 'A',

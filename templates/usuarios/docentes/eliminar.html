@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Docente{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 600px;">
+    <div class="card border-0 shadow" style="border-radius: 12px; border-top: 4px solid #dc3545 !important;">
+        <div class="card-body p-4 text-center">
+            <div class="mb-4">
+                <i class="bi bi-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+            </div>
+            
+            <h3 class="mb-3" style="color: var(--color-titulo); font-weight: 700;">Confirmar Eliminación</h3>
+            
+            <p class="text-muted mb-4">
+                ¿Está seguro de que desea inhabilitar y eliminar al docente <strong>{{ docente.usuario.get_full_name }}</strong>?
+                <br>Esta acción cambiará su estado a inactivo y restringirá su acceso al sistema.
+            </p>
+            
+            <form method="post" action="">
+                {% csrf_token %}
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'docentes_lista' %}" class="btn btn-light px-4" style="border-radius: 8px;">Cancelar</a>
+                    <button type="submit" class="btn btn-danger px-4 shadow-sm" style="border-radius: 8px;">Sí, Eliminar Docente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

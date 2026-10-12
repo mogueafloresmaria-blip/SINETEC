@@ -7,30 +7,30 @@
 body{background:#f3f5f9 !important;}
 .cursos-wrap{padding:1.1rem 1.35rem 2rem;}
 .cursos-title{font-size:1.45rem;font-weight:800;color:#0f172a;margin:0;}
-.cursos-sub{color:#94a3b8;font-size:.9rem;margin:.15rem 0 1.15rem;}
-.cursos-primary{background:linear-gradient(135deg,#17c6b2,#05a996);border:0;border-radius:10px;color:#fff;font-weight:800;padding:.65rem 1rem;box-shadow:0 6px 14px rgba(5,169,150,.18);}
-.cursos-primary:hover{background:linear-gradient(135deg,#12b6a4,#049987);color:#fff;}
+.cursos-sub{color:#75675E;font-size:.9rem;margin:.15rem 0 1.15rem;}
+.cursos-primary{background:var(--color-principal);border:0;border-radius:10px;color:#fff;font-weight:700;padding:.65rem 1.15rem;box-shadow:0 4px 10px rgba(139,94,60,.2);}
+.cursos-primary:hover{background:var(--color-secundario);color:#fff;}
 .cursos-stat{background:#fff;border:1px solid #e2e8f0;border-radius:14px;min-height:104px;padding:1rem 1.1rem;box-shadow:0 1px 4px rgba(15,23,42,.04);position:relative;overflow:hidden;}
-.cursos-stat:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#4f8edb;}
-.cursos-stat:nth-child(2):before{background:#21a7cc;}.cursos-stat:nth-child(3):before{background:#5b8fe8;}
+.cursos-stat:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-principal);}
+.cursos-stat:nth-child(2):before{background:var(--color-secundario);}.cursos-stat:nth-child(3):before{background:#A67B5B;}
 .cursos-stat-number{font-size:1.8rem;font-weight:900;line-height:1;color:#1e293b;}
 .cursos-stat-label{font-size:.67rem;font-weight:900;letter-spacing:.05em;color:#b0b8c4;text-transform:uppercase;margin-top:.35rem;}
 .cursos-stat-note{font-size:.72rem;color:#94a3b8;margin-top:.35rem;}
-.cursos-stat-icon{position:absolute;right:1.1rem;top:1.1rem;font-size:1.8rem;color:#dbe4fb;}
+.cursos-stat-icon{position:absolute;right:1.1rem;top:1.1rem;font-size:1.8rem;color:var(--color-acento);}
 .cursos-toolbar{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:.75rem 1rem;box-shadow:0 1px 3px rgba(15,23,42,.03);}
 .cursos-search{border:0!important;box-shadow:none!important;font-size:.85rem;}
 .cursos-search-wrap{border:1px solid #e2e8f0;border-radius:9px;max-width:470px;}
 .curso-card{background:#fff;border:1px solid #e2e8f0;border-radius:13px;overflow:hidden;height:100%;box-shadow:0 1px 4px rgba(15,23,42,.04);transition:transform .18s ease,box-shadow .18s ease;}
 .curso-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(15,23,42,.08);}
-.curso-card-head{background:linear-gradient(110deg,#258ed8,#62afea);color:#fff;padding:.85rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:.6rem;}
+.curso-card-head{background:linear-gradient(110deg,var(--color-principal),var(--color-secundario));color:#fff;padding:.85rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:.6rem;}
 .curso-card-title{font-size:1rem;font-weight:900;margin:0;line-height:1.25;}
 .curso-card-title i{font-size:.9rem;margin-right:.35rem;}
 .curso-type{font-size:.6rem;font-weight:900;letter-spacing:.04em;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:.25rem .5rem;white-space:nowrap;}
 .curso-card-body{padding:1rem;min-height:145px;}
 .curso-level{font-size:.62rem;font-weight:900;letter-spacing:.06em;color:#a2adba;text-transform:uppercase;margin:.25rem 0 .45rem;}
-.curso-level i{font-size:.5rem;color:#60a5fa;margin-right:.3rem;}
-.curso-pill{display:inline-block;border:1px solid #d7e7f3;background:#f3f9fd;color:#5a7890;border-radius:6px;padding:.25rem .5rem;font-size:.68rem;font-weight:800;margin:0 .25rem .3rem 0;}
-.curso-pill.primaria{background:#fff9e8;border-color:#f6e7b1;color:#a98a32;}
+.curso-level i{font-size:.5rem;color:var(--color-principal);margin-right:.3rem;}
+.curso-pill{display:inline-block;border:1px solid #E0D8CE;background:#F5F2EB;color:var(--color-secundario);border-radius:6px;padding:.25rem .5rem;font-size:.68rem;font-weight:800;margin:0 .25rem .3rem 0;}
+.curso-pill.primaria{background:var(--color-acento);border-color:#E0D8CE;color:var(--color-secundario);}
 .curso-empty{background:#fff;border:1px dashed #d7dee8;border-radius:14px;padding:3rem;text-align:center;color:#94a3b8;}
 @media(max-width:575px){.cursos-wrap{padding:.9rem .8rem 1.5rem;}.cursos-primary{width:100%;}.cursos-toolbar{padding:.7rem;}.cursos-search-wrap{max-width:none;width:100%;}}
 </style>
@@ -40,8 +40,8 @@ body{background:#f3f5f9 !important;}
 <div class="cursos-wrap">
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-      <h1 class="cursos-title"><i class="bi bi-book-half text-primary me-2"></i>Malla Curricular</h1>
-      <p class="cursos-sub mb-0">Gestiona las materias oficiales y talleres por niveles académicos.</p>
+      <h1 class="cursos-title"><i class="bi bi-journal-bookmark-fill me-2" style="color:var(--color-principal);"></i>Cursos y Asignaturas Escolares</h1>
+      <p class="cursos-sub mb-0">Estructura curricular de materias oficiales y talleres por nivel educativo · EDUNOVA</p>
     </div>
     <button class="cursos-primary" type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoCurso">
       <i class="bi bi-plus-lg me-1"></i> Nuevo Curso

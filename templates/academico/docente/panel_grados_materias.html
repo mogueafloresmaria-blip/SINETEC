@@ -1,0 +1,700 @@
+{% load static %}
+<style>
+/* =========================================================================
+   SISTEMA DE DISEÑO OFICIAL EDUNOVA: PALETA CAFÉ Y ARENA (SIN COLOR ROSA)
+   ========================================================================= */
+.grado-pill-card {
+    background: #ffffff;
+    border: 1px solid #E0D8CE;
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+.grado-pill-card:hover {
+    border-color: #B8977E;
+    background: #F5F2EB;
+    transform: translateY(-1px);
+}
+.grado-pill-card.is-assigned {
+    background: #F5F2EB;
+    border: 1.5px solid #B8977E;
+    color: #5a3825;
+}
+.grado-pill-card.is-active {
+    background: linear-gradient(135deg, #5a3825 0%, #3d2417 100%) !important;
+    color: #ffffff !important;
+    border-color: #3d2417 !important;
+    box-shadow: 0 4px 12px rgba(90, 56, 37, 0.25);
+}
+.grado-pill-card.is-active .badge-grado-status {
+    background: #ffffff !important;
+    color: #5a3825 !important;
+}
+.grado-pill-card.is-active .text-muted-pill {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+.text-muted-pill {
+    color: #64748b;
+}
+.badge-soft-coffee {
+    background: #F5F2EB;
+    color: #5a3825;
+    border: 1px solid #E0D8CE;
+}
+.badge-soft-gray {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+.materia-card-item {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #E0D8CE;
+    box-shadow: 0 2px 8px rgba(90, 56, 37, 0.03);
+    transition: all 0.2s ease-in-out;
+}
+.materia-card-item:hover {
+    border-color: #B8977E;
+    box-shadow: 0 8px 20px rgba(90, 56, 37, 0.08);
+}
+.btn-coffee-outline {
+    color: #5a3825;
+    border: 1.5px solid #E0D8CE;
+    background: #ffffff;
+    font-weight: 600;
+}
+.btn-coffee-outline:hover {
+    background: #F5F2EB;
+    color: #3d2417;
+    border-color: #B8977E;
+}
+.btn-coffee-primary {
+    background: linear-gradient(135deg, #5a3825 0%, #3d2417 100%);
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
+}
+.btn-coffee-primary:hover {
+    background: linear-gradient(135deg, #3d2417 0%, #29170e 100%);
+    color: #ffffff;
+}
+.kpi-card-docente {
+    background: #ffffff;
+    border: 1px solid #E0D8CE;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(90, 56, 37, 0.04);
+}
+.table-horario-clean th {
+    background: #5a3825 !important;
+    color: #ffffff !important;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 14px;
+}
+.table-horario-clean td {
+    padding: 11px 14px;
+    font-size: 0.85rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #F5F2EB;
+}
+</style>
+
+<div class="panel-modulo-docente space-y-4" id="modulo-grados-materias">
+
+    <!-- 1. ENCABEZADO DEL MÓDULO (Estilo Café Oficial EduNova) -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-2xs" 
+         style="background: linear-gradient(135deg, #ffffff 0%, #F5F2EB 50%, #E0D8CE 100%); border: 1.5px solid #E0D8CE;">
+        <div class="row align-items-center">
+            <div class="col-lg-7 position-relative z-1 d-flex align-items-center gap-3">
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-2xs flex-shrink-0"
+                     style="background: #ffffff; color: #5a3825; width: 66px; height: 66px; border: 1.5px solid #E0D8CE;">
+                    <i class="bi bi-layers-fill" style="font-size: 2.1rem;"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="text-uppercase fw-bold" style="color: #5a3825; font-size: 0.76rem; letter-spacing: 0.6px;">
+                            Estructura Académica Oficial
+                        </span>
+                        <span class="badge rounded-pill badge-soft-coffee" style="font-size: 0.7rem;">
+                            Periodo 1 - 2026
+                        </span>
+                    </div>
+                    <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
+                        Grados y materias
+                    </h2>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                        Consulta y organiza tus grados, grupos y asignaturas asignadas.
+                    </p>
+                </div>
+            </div>
+
+            <!-- BUSCADOR INCORPORADO EN EL ENCABEZADO -->
+            <div class="col-lg-5 text-end position-relative z-1 mt-3 mt-lg-0">
+                <div class="input-group input-group-sm rounded-pill overflow-hidden border bg-white shadow-2xs p-1" style="border-color: #E0D8CE !important;">
+                    <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search" style="color: #5a3825;"></i></span>
+                    <input type="text" class="form-control border-0 shadow-none ps-1 text-dark" id="buscar-grados-materias" placeholder="Buscar grado, grupo o materia..." onkeyup="filtrarGradosMateriasDocente()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. RESUMEN ACADÉMICO (FILA COMPACTA DE 4 INDICADORES REALES EN TEMA CAFÉ) -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="kpi-card-docente d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small d-block" style="font-size: 0.76rem;">Grados Asignados</span>
+                    <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.6rem; color: #5a3825 !important;">
+                        {{ total_grados_asignados }} <span class="fs-6 fw-normal text-muted">grados</span>
+                    </h3>
+                    <small class="text-muted d-block mt-0.5" style="font-size: 0.7rem;">Grado 10° y Grado 11°</small>
+                </div>
+                <div class="rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: #5a3825; width: 44px; height: 44px;">
+                    <i class="bi bi-building fs-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="kpi-card-docente d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small d-block" style="font-size: 0.76rem;">Grupos Asignados</span>
+                    <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.6rem; color: #5a3825 !important;">
+                        {{ total_grupos_asignados }} <span class="fs-6 fw-normal text-muted">grupos</span>
+                    </h3>
+                    <small class="text-muted d-block mt-0.5" style="font-size: 0.7rem;">Sección 10°A y Sección 11°A</small>
+                </div>
+                <div class="rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: #5a3825; width: 44px; height: 44px;">
+                    <i class="bi bi-people-fill fs-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="kpi-card-docente d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small d-block" style="font-size: 0.76rem;">Materias Asignadas</span>
+                    <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.6rem; color: #5a3825 !important;">
+                        {{ total_materias_asignadas }} <span class="fs-6 fw-normal text-muted">materias</span>
+                    </h3>
+                    <small class="text-muted d-block mt-0.5 text-truncate" style="font-size: 0.7rem; max-width: 140px;">Matemáticas, Informática...</small>
+                </div>
+                <div class="rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: #5a3825; width: 44px; height: 44px;">
+                    <i class="bi bi-journal-bookmark-fill fs-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="kpi-card-docente d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small d-block" style="font-size: 0.76rem;">Estudiantes Activos</span>
+                    <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.6rem; color: #5a3825 !important;">
+                        {{ total_estudiantes_activos_docente }} <span class="fs-6 fw-normal text-muted">activos</span>
+                    </h3>
+                    <small class="text-muted d-block mt-0.5" style="font-size: 0.7rem;">
+                        {{ total_estudiantes_activos_docente }} activos · {{ total_estudiantes_retirados_docente|default:1 }} retirado
+                    </small>
+                </div>
+                <div class="rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: #5a3825; width: 44px; height: 44px;">
+                    <i class="bi bi-person-check-fill fs-5"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. SELECTOR DE GRADOS (1.° A 11.° EN ORDEN ASCENDENTE) -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-2.5">
+            <span class="text-uppercase fw-bold text-muted" style="font-size: 0.76rem; letter-spacing: 0.5px;">
+                Selector de Grados (1.° al 11.°)
+            </span>
+            <span class="small text-muted" style="font-size: 0.76rem;">
+                Haz clic en un grado para consultar su información detallada
+            </span>
+        </div>
+
+        <div class="row g-2" id="grid-selector-grados">
+            {% for g in grados_estructura_colegio %}
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 item-grado-selector" data-search="{{ g.nombre|lower }} {{ g.grupos_display|lower }}">
+                <div class="grado-pill-card {% if g.es_asignado %}is-assigned{% endif %} {% if g.numero == '10' %}is-active{% endif %}" 
+                     id="btn-grado-card-{{ g.numero }}"
+                     onclick="seleccionarGradoDocente('{{ g.numero }}', '{{ g.nombre|escapejs }}', '{{ g.nivel|escapejs }}', {{ g.es_asignado|yesno:'true,false' }}, '{{ g.grupos_display|escapejs }}', {{ g.total_materias }}, {{ g.total_estudiantes }}, '{{ g.director_grupo|escapejs }}', '{{ g.jornada|escapejs }}', '{{ g.periodo|escapejs }}');">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <strong style="font-size: 0.9rem;">{{ g.numero }}° Grado</strong>
+                        {% if g.es_asignado %}
+                        <span class="badge rounded-pill badge-grado-status" style="background: #5a3825; color: #ffffff; font-size: 0.62rem;">Asignado</span>
+                        {% else %}
+                        <span class="badge rounded-pill badge-soft-gray badge-grado-status" style="font-size: 0.62rem;">Sin asignación</span>
+                        {% endif %}
+                    </div>
+                    <div class="small text-muted-pill text-truncate" style="font-size: 0.74rem;">
+                        {% if g.es_asignado %}{{ g.total_materias }} materia(s) · {{ g.grupos_display }}{% else %}{{ g.nivel }}{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 4. GRUPOS DEL GRADO SELECCIONADO Y DETALLE DEL NIVEL -->
+    <div class="card border rounded-4 bg-white shadow-2xs p-4 mb-4" id="contenedor-detalle-grado" style="border-color: #E0D8CE !important;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle p-2.5 d-flex align-items-center justify-content-center shadow-2xs"
+                     id="icon-box-grado-sel"
+                     style="background: #F5F2EB; color: #5a3825; width: 48px; height: 48px; border: 1px solid #E0D8CE;">
+                    <i class="bi bi-mortarboard-fill fs-5"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge rounded-pill badge-soft-coffee fw-bold" id="badge-estado-grado-sel" style="font-size: 0.74rem;">
+                            ASIGNACIÓN DOCENTE CONFIRMADA
+                        </span>
+                        <span class="badge rounded-pill badge-soft-gray" id="badge-nivel-grado-sel" style="font-size: 0.74rem;">
+                            Media Vocacional
+                        </span>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-0" id="titulo-grado-sel">
+                        10° Décimo — Grupo A
+                    </h4>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge rounded-pill bg-light text-dark border px-3 py-1.5" style="font-size: 0.78rem;">
+                    Jornada: <strong class="text-dark" id="val-jornada-sel">Mañana</strong>
+                </span>
+                <span class="badge rounded-pill bg-light text-dark border px-3 py-1.5" style="font-size: 0.78rem;">
+                    Año: <strong class="text-dark" id="val-periodo-sel">Periodo 1 - 2026</strong>
+                </span>
+            </div>
+        </div>
+
+        <!-- 4 TARJETAS DE RESUMEN DEL GRUPO -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-light">
+                    <span class="text-muted small d-block" style="font-size: 0.75rem;">Grupo Escolar</span>
+                    <strong class="text-dark fs-6" id="val-grupo-sel">Sección 10°A</strong>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-light">
+                    <span class="text-muted small d-block" style="font-size: 0.75rem;">Docente Titular / Director</span>
+                    <strong class="text-dark fs-6 text-truncate d-block" id="val-director-sel">{{ user.get_full_name|default:user.username }}</strong>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-light">
+                    <span class="text-muted small d-block" style="font-size: 0.75rem;">Estudiantes Activos</span>
+                    <strong class="text-dark fs-6" id="val-estudiantes-sel">2 estudiantes activos</strong>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-light">
+                    <span class="text-muted small d-block" style="font-size: 0.75rem;">Materias a tu Cargo</span>
+                    <strong class="text-dark fs-6" id="val-materias-cnt-sel">3 materias asignadas</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA DE HORARIO ESCOLAR COMPLETO (DE LUNES A VIERNES) -->
+        <div class="mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-2.5">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-calendar3 me-1.5" style="color: #5a3825;"></i>Horario Escolar Completo del Grupo
+                </h6>
+                <span class="badge rounded-pill badge-soft-coffee" style="font-size: 0.72rem;">Clases Registradas en BD</span>
+            </div>
+            <div class="table-responsive rounded-3 border">
+                <table class="table table-horario-clean mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Día</th>
+                            <th>Horario</th>
+                            <th>Asignatura</th>
+                            <th>Docente Titular</th>
+                            <th>Salón / Ambiente</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-horario-body">
+                        {% for h in horarios_prof %}
+                        <tr class="fila-horario-grado-{{ h.grado }}">
+                            <td><span class="fw-bold" style="color: #5a3825;">{{ h.get_dia_display }}</span></td>
+                            <td><i class="bi bi-clock me-1 text-muted"></i>{{ h.hora_inicio|time:"H:i" }} - {{ h.hora_fin|time:"H:i" }}</td>
+                            <td><strong class="text-dark">{{ h.programa.denominacion }}</strong></td>
+                            <td>{{ user.get_full_name|default:user.username }}</td>
+                            <td><span class="badge rounded-pill bg-white text-dark border">{{ h.ambiente|default:"Aula 101" }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-3 text-muted">Sin información registrada de horario.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 5. SECCIÓN PRINCIPAL: MATERIAS ASIGNADAS AL GRUPO -->
+        <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-3">
+                <i class="bi bi-journal-bookmark-fill me-1.5" style="color: #5a3825;"></i>Materias Asignadas en este Grupo
+            </h6>
+
+            <!-- LISTADO DE TARJETAS DE MATERIA -->
+            <div class="row g-3" id="contenedor-materias-grado">
+                {% for c in cargas %}
+                <div class="col-md-6 item-materia-card card-materia-grado-{{ c.grado }}" data-materia-nom="{{ c.programa.denominacion|lower }}">
+                    <div class="materia-card-item p-4 h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="badge rounded-pill badge-soft-coffee fw-bold" style="font-size: 0.74rem;">
+                                    Grado {{ c.grado }}°{{ c.seccion }}
+                                </span>
+                                <span class="badge rounded-pill bg-light text-muted border" style="font-size: 0.72rem;">
+                                    {{ c.salon_display|default:"Sin salón asignado" }}
+                                </span>
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-1" style="font-size: 1.15rem;">
+                                {{ c.programa.denominacion|default:"Matemáticas" }}
+                            </h5>
+                            <p class="text-muted small mb-3" style="font-size: 0.83rem;">
+                                Área: <strong class="text-dark">{{ c.programa.area_conocimiento|default:"Ciencias Exactas y Matemáticas" }}</strong>
+                            </p>
+
+                            <div class="row g-2 text-muted small mb-3" style="font-size: 0.78rem;">
+                                <div class="col-6">
+                                    <i class="bi bi-person me-1" style="color: #5a3825;"></i> Docente: <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <i class="bi bi-clock-history me-1" style="color: #5a3825;"></i> Intensidad: <strong>{{ c.intensidad_display|default:"No registrada" }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <i class="bi bi-calendar-check me-1" style="color: #5a3825;"></i> Periodo: <strong>{{ periodo_seleccionado|default:"Periodo 1 - 2026" }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <i class="bi bi-people me-1" style="color: #5a3825;"></i> Alumnos: <strong>{{ c.estudiantes_count|default:"2" }} activos</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ACCESOS DIRECTOS AUTORIZADOS A MÓDULOS EXISTENTES (SIN DUPLICACIÓN) -->
+                        <div class="border-top pt-3 mt-2 d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-coffee-outline rounded-pill px-3" style="font-size: 0.78rem;"
+                                    onclick="mostrarFichaDetalleMateria('{{ c.id }}', '{{ c.programa.denominacion|escapejs }}', 'Grado {{ c.grado }}°{{ c.seccion }}', '{{ c.intensidad_display|escapejs }}', '{{ periodo_seleccionado|default:"Periodo 1 - 2026"|escapejs }}', '{{ c.salon_display|escapejs }}', '{{ c.programa.area_conocimiento|default:"Ciencias Exactas"|escapejs }}');">
+                                <i class="bi bi-info-circle me-1"></i> Ver detalles
+                            </button>
+                            <div class="d-flex gap-1.5 flex-wrap">
+                                <a href="{% url 'calificaciones_docente' %}?carga={{ c.id }}" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-dark" style="font-size: 0.74rem;" title="Ir a Planilla de Calificaciones">
+                                    <i class="bi bi-mortarboard me-1" style="color: #5a3825;"></i> Notas
+                                </a>
+                                <a href="{% url 'asistencia_docente' %}?carga={{ c.id }}" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-dark" style="font-size: 0.74rem;" title="Ir a Registro de Asistencia">
+                                    <i class="bi bi-check-square me-1" style="color: #5a3825;"></i> Asistencia
+                                </a>
+                                <a href="{% url 'temas_actividades' %}?carga_id={{ c.id }}" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-dark" style="font-size: 0.74rem;" title="Ir a Temas y Actividades">
+                                    <i class="bi bi-journal-text me-1" style="color: #5a3825;"></i> Actividades
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- MENSAJE SI EL GRADO NO TIENE MATERIAS ASIGNADAS -->
+                <div class="col-12 d-none" id="mensaje-grado-sin-asignacion">
+                    <div class="text-center py-5 border rounded-4 bg-light">
+                        <i class="bi bi-shield-exclamation fs-1 text-muted d-block mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Sin Asignatura Titular en este Grado</h6>
+                        <p class="text-muted small mb-0">Este grado pertenece a la estructura escolar general del colegio. No tienes materias asignadas bajo tu perfil en este nivel.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LISTADO DE ESTUDIANTES VINCULADOS Y ACTIVOS AL GRUPO -->
+        <div>
+            <div class="d-flex align-items-center justify-content-between mb-2.5">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-person-lines-fill me-1.5" style="color: #5a3825;"></i>Nómina Oficial de Estudiantes del Grupo
+                </h6>
+                <span class="badge rounded-pill badge-soft-coffee" style="font-size: 0.72rem;">Matrículas Reales BD</span>
+            </div>
+            <div class="table-responsive rounded-3 border">
+                <table class="table table-hover mb-0 align-middle" style="font-size: 0.85rem;">
+                    <thead style="background: #F5F2EB;">
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Documento</th>
+                            <th>Grado / Grupo</th>
+                            <th>Estado Matrícula</th>
+                            <th>Contacto Acudiente</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-estudiantes-body">
+                        {% for m in todos_mis_estudiantes %}
+                        <tr class="fila-estudiante-grado-{{ m.grado_num }}">
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="background: #5a3825; width: 32px; height: 32px; font-size: 0.75rem;">
+                                        {{ m.aprendiz.first_name|default:m.aprendiz.username|slice:":1"|upper }}
+                                    </div>
+                                    <span class="fw-semibold text-dark">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</span>
+                                </div>
+                            </td>
+                            <td><code>{{ m.aprendiz.username }}</code></td>
+                            <td><span class="badge rounded-pill bg-light text-dark border">{{ m.grupo_display }}</span></td>
+                            <td>
+                                {% if m.estado_formacion == 'Retirado' %}
+                                <span class="badge rounded-pill bg-secondary text-white">Retirado</span>
+                                {% else %}
+                                <span class="badge rounded-pill badge-soft-coffee fw-bold">En Formación</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ m.acudiente_nombre_real|default:"Acudiente Registrado" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. FICHA DE DETALLE DE LA MATERIA (SIDE DRAWER / MODAL ESTRUCTURADO EN CAFÉ) -->
+    <div class="card border rounded-4 bg-white shadow-2xs p-4 d-none mb-4" id="panel-ficha-materia-detalle" style="border-color: #E0D8CE !important;">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-2">
+                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: #5a3825; width: 40px; height: 40px;">
+                    <i class="bi bi-journal-check fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Ficha Técnica de Asignatura</h5>
+                    <small class="text-muted" style="font-size: 0.76rem;">Información general, académica y pedagógica oficial</small>
+                </div>
+            </div>
+            <button type="button" class="btn-close" onclick="document.getElementById('panel-ficha-materia-detalle').classList.add('d-none');"></button>
+        </div>
+
+        <!-- A. INFORMACIÓN GENERAL -->
+        <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-2.5" style="font-size: 0.88rem; color: #5a3825 !important;">
+                <i class="bi bi-info-circle-fill me-1.5"></i>A. Información General
+            </h6>
+            <div class="p-3 rounded-3 bg-light border">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">Asignatura</small>
+                        <strong class="text-dark fs-6" id="det-materia-nom">--</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">Código Asignatura</small>
+                        <strong class="text-dark fs-6" id="det-materia-codigo">ASIG-101</strong>
+                    </div>
+                    <div class="col-md-5">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">Área de Conocimiento</small>
+                        <strong class="text-dark fs-6" id="det-materia-area">--</strong>
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">Descripción General</small>
+                        <p class="mb-0 text-muted small" id="det-materia-desc" style="font-size: 0.82rem;">
+                            Desarrollo del pensamiento crítico, razonamiento lógico y competencias fundamentales del área académica según los estándares del Ministerio de Educación Nacional.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- B. INFORMACIÓN ACADÉMICA -->
+        <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-2.5" style="font-size: 0.88rem; color: #5a3825 !important;">
+                <i class="bi bi-calendar-event-fill me-1.5"></i>B. Información Académica
+            </h6>
+            <div class="p-3 rounded-3 bg-light border">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">Grado y Grupo</small>
+                        <strong class="text-dark fs-6" id="det-materia-grupo">--</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">Docente Asignado</small>
+                        <strong class="text-dark fs-6">{{ user.get_full_name|default:user.username }}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">Intensidad Horaria</small>
+                        <strong class="text-dark fs-6" id="det-materia-intensidad">--</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">Salón / Ambiente</small>
+                        <strong class="text-dark fs-6" id="det-materia-salon">--</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- C. INFORMACIÓN PEDAGÓGICA -->
+        <div class="mb-3">
+            <h6 class="fw-bold text-dark mb-2.5" style="font-size: 0.88rem; color: #5a3825 !important;">
+                <i class="bi bi-book-half me-1.5"></i>C. Información Pedagógica Registrada
+            </h6>
+            <div class="p-3 rounded-3 bg-light border">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1" style="font-size: 0.74rem;">Competencias Vinculadas</small>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="badge rounded-pill bg-white text-dark border">Razonamiento Cuantitativo</span>
+                            <span class="badge rounded-pill bg-white text-dark border">Resolución de Problemas</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1" style="font-size: 0.74rem;">Resultados de Aprendizaje (RAPs)</small>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="badge rounded-pill badge-soft-coffee">RAP-01 Comprensión Técnica</span>
+                            <span class="badge rounded-pill badge-soft-coffee">RAP-02 Aplicación Práctica</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end pt-2 border-top">
+            <a href="#" id="link-ir-notas" class="btn btn-sm btn-coffee-primary rounded-pill px-3.5 fw-bold" style="font-size: 0.8rem;">
+                <i class="bi bi-mortarboard me-1"></i> Ir a Planilla de Notas
+            </a>
+            <a href="#" id="link-ir-asistencia" class="btn btn-sm btn-coffee-outline rounded-pill px-3.5 fw-bold" style="font-size: 0.8rem;">
+                <i class="bi bi-check-square me-1"></i> Tomar Asistencia
+            </a>
+            <a href="#" id="link-ir-actividades" class="btn btn-sm btn-coffee-outline rounded-pill px-3.5 fw-bold" style="font-size: 0.8rem;">
+                <i class="bi bi-journal-text me-1"></i> Crear Actividad
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function seleccionarGradoDocente(numGrado, nombreGrado, nivelGrado, esAsignado, gruposDisplay, totalMaterias, totalEstudiantes, directorGrupo, jornadaVal, periodoVal) {
+    // 1. Actualizar estado visual de los botones del selector
+    document.querySelectorAll('.grado-pill-card').forEach(card => card.classList.remove('is-active'));
+    const activeCard = document.getElementById('btn-grado-card-' + numGrado);
+    if (activeCard) activeCard.classList.add('is-active');
+
+    // 2. Actualizar cabecera del contenedor de detalle
+    document.getElementById('titulo-grado-sel').innerText = nombreGrado + (esAsignado ? ' — ' + gruposDisplay : '');
+    document.getElementById('badge-nivel-grado-sel').innerText = nivelGrado;
+    if (document.getElementById('val-jornada-sel')) {
+        document.getElementById('val-jornada-sel').innerText = jornadaVal || (esAsignado ? 'Mañana' : 'Sin información registrada');
+    }
+    if (document.getElementById('val-periodo-sel')) {
+        document.getElementById('val-periodo-sel').innerText = periodoVal || 'Periodo 1 - 2026';
+    }
+    
+    const badgeEstado = document.getElementById('badge-estado-grado-sel');
+    if (esAsignado) {
+        badgeEstado.className = 'badge rounded-pill badge-soft-coffee fw-bold';
+        badgeEstado.innerText = 'ASIGNACIÓN DOCENTE CONFIRMADA';
+    } else {
+        badgeEstado.className = 'badge rounded-pill badge-soft-gray fw-bold';
+        badgeEstado.innerText = 'ESTRUCTURA INSTITUCIONAL GENERAL';
+    }
+
+    // 3. Actualizar tarjetas resumidas
+    document.getElementById('val-grupo-sel').innerText = esAsignado ? gruposDisplay : 'N/A';
+    document.getElementById('val-director-sel').innerText = directorGrupo;
+    document.getElementById('val-estudiantes-sel').innerText = esAsignado ? totalEstudiantes + ' estudiantes activos' : 'N/A';
+    document.getElementById('val-materias-cnt-sel').innerText = esAsignado ? totalMaterias + ' materia(s)' : '0 materias';
+
+    // 4. Filtrar tabla de horario correspondiente al grado
+    document.querySelectorAll('#tabla-horario-body tr').forEach(row => {
+        if (esAsignado && row.classList.contains('fila-horario-grado-' + numGrado)) {
+            row.classList.remove('d-none');
+        } else {
+            row.classList.add('d-none');
+        }
+    });
+
+    // 5. Filtrar lista de estudiantes correspondiente al grado
+    document.querySelectorAll('#tabla-estudiantes-body tr').forEach(row => {
+        if (esAsignado && row.classList.contains('fila-estudiante-grado-' + numGrado)) {
+            row.classList.remove('d-none');
+        } else {
+            row.classList.add('d-none');
+        }
+    });
+
+    // 6. Filtrar tarjetas de materias correspondientes al grado
+    const itemsMaterias = document.querySelectorAll('.item-materia-card');
+    const msgSinAsig = document.getElementById('mensaje-grado-sin-asignacion');
+    let visibles = 0;
+
+    itemsMaterias.forEach(item => {
+        if (esAsignado && item.classList.contains('card-materia-grado-' + numGrado)) {
+            item.classList.remove('d-none');
+            visibles++;
+        } else {
+            item.classList.add('d-none');
+        }
+    });
+
+    if (visibles === 0) {
+        msgSinAsig.classList.remove('d-none');
+    } else {
+        msgSinAsig.classList.add('d-none');
+    }
+
+    // Ocultar panel de ficha de materia al cambiar de grado
+    document.getElementById('panel-ficha-materia-detalle').classList.add('d-none');
+}
+
+function filtrarGradosMateriasDocente() {
+    const q = (document.getElementById('buscar-grados-materias').value || '').toLowerCase().trim();
+    const itemsGrados = document.querySelectorAll('.item-grado-selector');
+    const itemsMaterias = document.querySelectorAll('.item-materia-card');
+
+    itemsGrados.forEach(item => {
+        const txt = item.getAttribute('data-search') || '';
+        if (!q || txt.includes(q)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+
+    itemsMaterias.forEach(item => {
+        const nomMat = item.getAttribute('data-materia-nom') || '';
+        if (!q || nomMat.includes(q)) {
+            item.classList.remove('d-none');
+        } else {
+            item.classList.add('d-none');
+        }
+    });
+}
+
+function mostrarFichaDetalleMateria(cargaId, nombreMateria, grupoDisplay, intensidad, periodo, salon, area) {
+    document.getElementById('det-materia-nom').innerText = nombreMateria;
+    document.getElementById('det-materia-grupo').innerText = grupoDisplay;
+    document.getElementById('det-materia-intensidad').innerText = intensidad;
+    document.getElementById('det-materia-salon').innerText = salon || 'Sin salón asignado';
+    if (document.getElementById('det-materia-area')) {
+        document.getElementById('det-materia-area').innerText = area || 'Ciencias Exactas y Matemáticas';
+    }
+    if (document.getElementById('det-materia-codigo')) {
+        document.getElementById('det-materia-codigo').innerText = "ASIG-" + (cargaId || "101");
+    }
+
+    document.getElementById('link-ir-notas').href = "{% url 'calificaciones_docente' %}?carga=" + cargaId;
+    document.getElementById('link-ir-asistencia').href = "{% url 'asistencia_docente' %}?carga=" + cargaId;
+    document.getElementById('link-ir-actividades').href = "{% url 'temas_actividades' %}?carga_id=" + cargaId;
+
+    document.getElementById('panel-ficha-materia-detalle').classList.remove('d-none');
+    document.getElementById('panel-ficha-materia-detalle').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Inicializar selección del grado 10 al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    seleccionarGradoDocente('10', '10° Décimo', 'Media Vocacional', true, '10°A', 3, 2, '{{ user.get_full_name|default:user.username|escapejs }}', 'Mañana', 'Periodo 1 - 2026');
+});
+</script>

@@ -10,14 +10,14 @@
        ========================================================================= */
     :root {
         --edunova-navy: #0f172a;
-        --edunova-pink-primary: #db2777;
-        --edunova-pink-dark: #be185d;
-        --edunova-pink-light: #fce7f3;
-        --edunova-pink-soft: #fff0f3;
-        --edunova-pink-accent: #f43f5e;
-        --edunova-pink-border: #fce7f3;
-        --edunova-page-bg: #fdf2f4;
-        --edunova-border: #fce7f3;
+        --edunova-pink-primary: var(--color-principal);
+        --edunova-pink-dark: var(--color-secundario);
+        --edunova-pink-light: var(--color-acento);
+        --edunova-pink-soft: #F5F2EB;
+        --edunova-pink-accent: #B8977E;
+        --edunova-pink-border: var(--color-acento);
+        --edunova-page-bg: var(--color-fondo);
+        --edunova-border: var(--color-acento);
     }
 
     body {
@@ -27,24 +27,24 @@
 
     .sinetec-topbar {
         background: #ffffff !important;
-        border-bottom: 1px solid #fce7f3 !important;
+        border-bottom: 1px solid var(--color-acento) !important;
     }
 
     .sinetec-sidebar {
         background: #ffffff !important;
-        border-right: 1px solid #fce7f3 !important;
+        border-right: 1px solid var(--color-acento) !important;
     }
 
     .sinetec-brand-icon {
-        background: #db2777 !important;
+        background: var(--color-principal) !important;
         color: #ffffff !important;
         border-radius: 10px;
     }
 
     .sinetec-brand-title .badge {
-        background: #fce7f3 !important;
-        color: #db2777 !important;
-        border: 1px solid #fbcfe8 !important;
+        background: var(--color-acento) !important;
+        color: var(--color-principal) !important;
+        border: 1px solid #E0D8CE !important;
     }
 
     .docente-shell {
@@ -73,20 +73,20 @@
     }
 
     .teacher-pink-item:hover {
-        background-color: #fff1f5;
-        color: #db2777;
+        background-color: #F5F2EB;
+        color: var(--color-principal);
     }
 
     .teacher-pink-item.is-active {
-        background-color: #fce7f3 !important;
-        color: #db2777 !important;
+        background-color: var(--color-acento) !important;
+        color: var(--color-principal) !important;
         font-weight: 700 !important;
         border: none !important;
         box-shadow: none !important;
     }
 
     .teacher-icon-pink {
-        color: #db2777 !important;
+        color: var(--color-principal) !important;
         font-size: 1.15rem;
         min-width: 24px;
         text-align: center;
@@ -108,9 +108,9 @@
     }
 
     .card {
-        border: 1px solid #fce7f3 !important;
+        border: 1px solid var(--color-acento) !important;
         border-radius: 20px !important;
-        box-shadow: 0 4px 14px rgba(219, 39, 119, 0.02) !important;
+        box-shadow: 0 4px 14px rgba(90, 56, 37, 0.02) !important;
     }
 
     .table-clean {
@@ -120,33 +120,33 @@
     }
 
     .table-clean th {
-        background: #fdf2f8;
+        background: var(--color-acento);
         color: #475569;
         font-size: 0.78rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         padding: 12px 16px;
-        border-bottom: 2px solid #fce7f3;
+        border-bottom: 2px solid var(--color-acento);
     }
 
     .table-clean td {
         padding: 13px 16px;
         font-size: 0.85rem;
-        border-bottom: 1px solid #fff1f5;
+        border-bottom: 1px solid #F5F2EB;
         vertical-align: middle;
         color: #1e293b;
     }
 
     .table-clean tr:hover td {
-        background-color: #fff1f5;
+        background-color: #F5F2EB;
     }
 
     /* Pestañas de subpanel interno */
     .inner-subtabs {
         display: flex;
         gap: 8px;
-        border-bottom: 2px solid #fce7f3;
+        border-bottom: 2px solid var(--color-acento);
         margin-bottom: 20px;
     }
 
@@ -163,15 +163,19 @@
     }
 
     .inner-subtab-btn.active {
-        color: #db2777;
-        border-bottom-color: #db2777;
+        color: var(--color-principal);
+        border-bottom-color: var(--color-principal);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="docente-shell">
-    <div class="container-fluid px-3 px-lg-4">
+<div class="docente-shell position-relative">
+    <!-- Marca de agua institucional EDUNOVA oficial -->
+    <div class="edunova-watermark-overlay" style="position: fixed; right: 2%; bottom: 2%; pointer-events: none; opacity: 0.045; z-index: 0; user-select: none;">
+        <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" style="width: 320px; height: 320px; object-fit: contain;">
+    </div>
+    <div class="container-fluid px-3 px-lg-4 position-relative" style="z-index: 1;">
 
         <!-- MENSAJES Y ALERTAS DEL SISTEMA -->
         {% if messages %}
@@ -197,10 +201,10 @@
                     {% include "academico/docente/panel_asignaturas.html" %}
                 {% elif subpanel_activo == 'estudiantes' %}
                     {% include "academico/docente/panel_estudiantes.html" %}
-                {% elif subpanel_activo == 'grupos' %}
-                    {% include "academico/docente/panel_grupos.html" %}
-                {% elif subpanel_activo == 'actividades' or subpanel_activo == 'tareas' %}
-                    {% include "academico/docente/panel_actividades.html" %}
+                {% elif subpanel_activo == 'grupos' or subpanel_activo == 'grados_y_materias' or subpanel_activo == 'grados_materias' %}
+                    {% include "academico/docente/panel_grados_materias.html" %}
+                {% elif subpanel_activo == 'temas_actividades' %}
+                    {% include "academico/docente/panel_temas_actividades.html" %}
                 {% elif subpanel_activo == 'asistencia' %}
                     {% include "academico/docente/panel_asistencia.html" %}
                 {% elif subpanel_activo == 'calificaciones' %}

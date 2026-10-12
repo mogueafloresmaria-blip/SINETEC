@@ -12,16 +12,16 @@ body { background: #faf7f9 !important; }
   background: #ffffff;
   border-radius: 16px;
   padding: 1.1rem 1.35rem;
-  border: 1.5px solid #fce7f3;
+  border: 1.5px solid var(--color-acento);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 14px rgba(219, 39, 119, 0.04);
+  box-shadow: 0 4px 14px rgba(90, 56, 37, 0.04);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .mat-stat:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(219, 39, 119, 0.08);
+  box-shadow: 0 8px 20px rgba(90, 56, 37, 0.08);
 }
 .mat-stat-val {
   font-size: 1.85rem;
@@ -52,19 +52,19 @@ body { background: #faf7f9 !important; }
 .mat-tbl {
   background: #ffffff;
   border-radius: 18px;
-  border: 1.5px solid #fce7f3;
+  border: 1.5px solid var(--color-acento);
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(219, 39, 119, 0.04);
+  box-shadow: 0 4px 16px rgba(90, 56, 37, 0.04);
   margin-top: 1.2rem;
 }
 .mat-tbl .table thead th {
-  background: #fff0f3 !important;
-  color: #be185d !important;
+  background: #F5F2EB !important;
+  color: var(--color-secundario) !important;
   font-size: 0.74rem !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.06em !important;
-  border-bottom: 1.5px solid #fce7f3 !important;
+  border-bottom: 1.5px solid var(--color-acento) !important;
   border-top: none !important;
   padding: 0.9rem 1.1rem !important;
 }
@@ -72,7 +72,7 @@ body { background: #faf7f9 !important; }
   padding: 0.85rem 1.1rem !important;
   font-size: 0.88rem !important;
   vertical-align: middle !important;
-  border-color: #fce7f3 !important;
+  border-color: var(--color-acento) !important;
 }
 .mat-tbl .table tbody tr:last-child td {
   border-bottom: none !important;
@@ -92,8 +92,8 @@ body { background: #faf7f9 !important; }
   font-weight: 800;
   color: #ffffff;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #f472b6, #db2777);
-  box-shadow: 0 2px 8px rgba(219, 39, 119, 0.2);
+  background: linear-gradient(135deg, var(--color-principal), var(--color-secundario));
+  box-shadow: 0 2px 8px rgba(90, 56, 37, 0.2);
 }
 
 .mat-badge-adelantado {
@@ -127,8 +127,8 @@ body { background: #faf7f9 !important; }
 }
 
 .mat-group-header {
-  background: #fff0f3;
-  border: 1px solid #fce7f3;
+  background: #F5F2EB;
+  border: 1px solid var(--color-acento);
   padding: 0.5rem 1.1rem;
   margin: 0.85rem 1rem;
   border-radius: 999px;
@@ -139,7 +139,7 @@ body { background: #faf7f9 !important; }
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #be185d;
+  color: var(--color-secundario);
 }
 </style>
 {% endblock %}
@@ -151,7 +151,7 @@ body { background: #faf7f9 !important; }
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div class="d-flex align-items-center gap-3">
       <div class="rounded-4 p-2.5 d-flex align-items-center justify-content-center shadow-xs"
-           style="background: #ffffff; color: #db2777; width: 50px; height: 50px; border: 1.5px solid #fce7f3;">
+           style="background: #ffffff; color: var(--color-principal); width: 50px; height: 50px; border: 1.5px solid var(--color-acento);">
         <i class="bi bi-person-lines-fill" style="font-size: 1.6rem;"></i>
       </div>
       <div>
@@ -159,14 +159,18 @@ body { background: #faf7f9 !important; }
         <p class="text-muted mb-0" style="font-size: 0.85rem;">Monitoreo de estudiantes matriculados, estados de vigencia y asignación de cursos en EDUNOVA.</p>
       </div>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
       <a href="{% url 'importar_estudiantes_masivo' %}" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
-         style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.88rem;">
+         style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.88rem;">
         <i class="bi bi-file-earmark-spreadsheet-fill"></i> Carga Masiva
       </a>
+      <a href="{% url 'registrar_aprendiz' %}" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+         style="background: #FAF8F5; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.88rem;">
+        <i class="bi bi-person-plus-fill"></i> Matrícula Estudiante
+      </a>
       <a href="{% url 'matricula_nueva' %}" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
-         style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
-        <i class="bi bi-person-plus-fill"></i> + Nueva Matrícula
+         style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem;">
+        <i class="bi bi-person-check-fill"></i> + Asignar Matrícula
       </a>
     </div>
   </div>
@@ -174,12 +178,12 @@ body { background: #faf7f9 !important; }
   <!-- 3 TARJETAS KPI DE MATRÍCULAS -->
   <div class="row g-3 mb-4">
     <div class="col-12 col-md-4">
-      <div class="mat-stat" style="border-left: 4px solid #db2777;">
+      <div class="mat-stat" style="border-left: 4px solid var(--color-principal);">
         <div>
           <div class="mat-stat-val">{{ total_alumnos|default:"4" }}</div>
           <div class="mat-stat-lbl">Total Estudiantes</div>
         </div>
-        <div class="mat-stat-ico" style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3;">
+        <div class="mat-stat-ico" style="background: #F5F2EB; color: var(--color-principal); border: 1px solid var(--color-acento);">
           <i class="bi bi-people-fill"></i>
         </div>
       </div>
@@ -210,23 +214,23 @@ body { background: #faf7f9 !important; }
 
   <!-- BUSCADOR Y FILTROS -->
   <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between mb-3 p-3 rounded-4 bg-white shadow-2xs"
-       style="border: 1.5px solid #fce7f3;">
+       style="border: 1.5px solid var(--color-acento);">
     <form method="get" action="" class="d-flex gap-2 flex-grow-1 flex-wrap" style="max-width: 800px;">
       <div class="input-group" style="max-width: 320px;">
-        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #fce7f3;">
-          <i class="bi bi-search" style="color: #db2777;"></i>
+        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: var(--color-acento);">
+          <i class="bi bi-search" style="color: var(--color-principal);"></i>
         </span>
         <input type="text" name="q" value="{{ query|default:'' }}" class="form-control border-start-0 ps-0"
-               placeholder="Buscar alumno por nombre o DNI..." style="border-color: #fce7f3; font-size: 0.88rem;">
+               placeholder="Buscar alumno por nombre o DNI..." style="border-color: var(--color-acento); font-size: 0.88rem;">
       </div>
-      <select name="grado" class="form-select text-muted" style="border-color: #fce7f3; font-size: 0.88rem; max-width: 180px;" onchange="this.form.submit();">
+      <select name="grado" class="form-select text-muted" style="border-color: var(--color-acento); font-size: 0.88rem; max-width: 180px;" onchange="this.form.submit();">
         <option value="">Todos los Grados</option>
         <option value="10" {% if request.GET.grado == '10' %}selected{% endif %}>Grado 10°</option>
         <option value="11" {% if request.GET.grado == '11' %}selected{% endif %}>Grado 11°</option>
       </select>
     </form>
     <a href="{% url 'matricula_nueva' %}" class="btn text-white fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 rounded-pill shadow-sm"
-       style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem; white-space: nowrap;">
+       style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem; white-space: nowrap;">
       <i class="bi bi-plus-circle-fill"></i> Nueva Matrícula
     </a>
   </div>
@@ -262,11 +266,11 @@ body { background: #faf7f9 !important; }
                     {{ m.aprendiz.first_name|first|upper }}{{ m.aprendiz.last_name|first|upper|default:"" }}
                   </div>
                   <div>
-                    <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="fw-bold text-dark text-decoration-none d-block hover-pink" style="font-size: 0.9rem;">
+                    <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="fw-bold text-dark text-decoration-none d-block hover-coffee" style="font-size: 0.9rem;">
                       {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
                     </a>
                     <div class="text-muted" style="font-size: 0.74rem;">
-                      <i class="bi bi-person-vcard me-1" style="color: #db2777;"></i> Usuario: {{ m.aprendiz.username }} · DNI: {{ m.aprendiz.perfil.documento|default:m.aprendiz.perfil.numero_documento|default:'—' }}
+                      <i class="bi bi-person-vcard me-1" style="color: var(--color-principal);"></i> Usuario: {{ m.aprendiz.username }} · DNI: {{ m.aprendiz.perfil.documento|default:m.aprendiz.perfil.numero_documento|default:'—' }}
                     </div>
                   </div>
                 </div>
@@ -282,13 +286,13 @@ body { background: #faf7f9 !important; }
                   <span class="mat-badge-adelantado">
                     <i class="bi bi-star-fill text-warning"></i> AL DÍA
                   </span>
-                  <span class="mt-1" style="font-size: 0.72rem; font-weight: 700; color: #db2777;">Año Lectivo 2026</span>
+                  <span class="mt-1" style="font-size: 0.72rem; font-weight: 700; color: var(--color-principal);">Año Lectivo 2026</span>
                 </div>
               </td>
               <td class="text-end pe-4">
                 <div class="d-inline-flex gap-1.5 align-items-center">
                   <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold text-white shadow-2xs d-inline-flex align-items-center gap-1"
-                     style="background: #db2777; border: 1px solid #db2777; font-size: 0.78rem;" title="Ver Ficha y Expediente">
+                     style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.78rem;" title="Ver Ficha y Expediente">
                     <i class="bi bi-person-vcard"></i> Ficha
                   </a>
                   <a href="{% url 'estudiante_editar' m.aprendiz.pk %}" class="mat-btn" style="background: #fffbeb; color: #d97706; border-color: #fde68a;" title="Editar">
@@ -304,7 +308,7 @@ body { background: #faf7f9 !important; }
           {% empty %}
             <tr>
               <td colspan="4" class="text-center py-5 text-muted">
-                <i class="bi bi-person-badge fs-2 d-block mb-2" style="color: #db2777; opacity: 0.6;"></i>
+                <i class="bi bi-person-badge fs-2 d-block mb-2" style="color: var(--color-principal); opacity: 0.6;"></i>
                 <h6 class="fw-bold text-dark">No hay matrículas que coincidan con la búsqueda.</h6>
                 <p class="small mb-0">Verifique los filtros o registre una nueva matrícula.</p>
               </td>

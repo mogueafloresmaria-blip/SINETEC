@@ -7,6 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import FileResponse, Http404
 from django.utils import timezone
 from django.db.models import Q
+from usuarios.decorators import _obtener_categorias_rol
 
 from .models import InstitucionConvenio, ConvenioSENA, DocumentoConvenio, BeneficioConvenio
 from .forms import InstitucionConvenioForm, ConvenioSENAForm, DocumentoConvenioForm, BeneficioConvenioForm
@@ -28,12 +29,23 @@ def _user_can_manage_convenios(user):
     return False
 
 
+def _rechazar_acceso_estudiante(request):
+    perfil = getattr(request.user, 'perfil', None)
+    if (
+        perfil and perfil.rol and
+        'ESTUDIANTE' in _obtener_categorias_rol(perfil.rol.nombre) and
+        not (request.user.is_staff or request.user.is_superuser)
+    ):
+        raise PermissionDenied("El catálogo de convenios no está disponible para el rol Estudiante.")
+
+
 @login_required
 def catalogo_convenios(request):
     """
     Página principal del catálogo visual de Instituciones y Convenios SENA.
     Incluye estadísticas calculadas en tiempo real y buscador multifiltro.
     """
+    _rechazar_acceso_estudiante(request)
     can_manage = _user_can_manage_convenios(request.user)
     
     # Obtener parámetros de búsqueda y filtrado
@@ -114,6 +126,7 @@ def institucion_detalle(request, pk):
     """
     Vista detallada de la institución educativa, sus convenios SENA y documentos asociados.
     """
+    _rechazar_acceso_estudiante(request)
     institucion = get_object_or_404(InstitucionConvenio.objects.prefetch_related('convenios__documentos__usuario_carga'), pk=pk)
     can_manage = _user_can_manage_convenios(request.user)
     convenios = institucion.convenios.all()
@@ -130,8 +143,7 @@ def institucion_detalle(request, pk):
 def institucion_crear(request):
     """Registrar nueva institución educativa para catálogo de convenios."""
     if not _user_can_manage_convenios(request.user):
-        messages.error(request, "No tienes permisos de administración para registrar instituciones.")
-        return redirect('convenios_catalogo')
+        raise PermissionDenied("No tienes permisos de administración para registrar instituciones.")
 
     if request.method == 'POST':
         form = InstitucionConvenioForm(request.POST, request.FILES)
@@ -196,8 +208,7 @@ def institucion_desactivar(request, pk):
 def convenio_crear(request, institucion_id=None):
     """Crear un nuevo Convenio SENA asociado a una institución."""
     if not _user_can_manage_convenios(request.user):
-        messages.error(request, "No tienes permisos de administración para crear convenios.")
-        return redirect('convenios_catalogo')
+        raise PermissionDenied("No tienes permisos de administración para crear convenios.")
 
     institucion_preseleccionada = None
     if institucion_id:
@@ -296,6 +307,7 @@ def documento_subir(request, convenio_id):
 @login_required
 def documento_descargar(request, pk):
     """Descarga segura de archivo usando FileResponse de Django."""
+    _rechazar_acceso_estudiante(request)
     doc = get_object_or_404(DocumentoConvenio, pk=pk)
     if not doc.archivo:
         raise Http404("El archivo solicitado no se encuentra disponible.")
@@ -339,6 +351,7 @@ def convenio_detalle(request, pk):
     Vista detallada del Convenio SENA con semáforo de vigencia, días restantes,
     beneficios vinculados y expediente documental digital.
     """
+    _rechazar_acceso_estudiante(request)
     convenio = get_object_or_404(
         ConvenioSENA.objects.select_related('institucion', 'institucion_educativa').prefetch_related('beneficios', 'documentos'),
         pk=pk
@@ -394,4 +407,3 @@ def beneficio_eliminar(request, pk):
         ben.delete()
         messages.success(request, f"Beneficio '{nom}' retirado del convenio.")
     return redirect('convenio_detalle', pk=conv_id)
-

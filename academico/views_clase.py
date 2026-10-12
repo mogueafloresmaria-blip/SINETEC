@@ -2,10 +2,34 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Count, Q
+from usuarios.decorators import _obtener_categorias_rol, solo_aprendiz, solo_instructor
 from .models import CargaAcademica, HorarioFicha, Matricula, ProgramaFormacion, Competencia, ResultadoAprendizaje, TareaClase, EntregaTarea, GuiaClase, ActividadClase, AvisoClase, CalificacionEscolar
 from django.contrib.auth.models import User
 
+
+def _cargas_para_aprendiz(usuario):
+    cargas_por_matricula = Q()
+    hay_matriculas = False
+    matriculas = Matricula.objects.filter(
+        aprendiz=usuario,
+        estado_formacion='En Formacion',
+    ).only('grado_escolar', 'seccion')
+
+    for matricula in matriculas:
+        grado = ''.join(caracter for caracter in matricula.grado_escolar if caracter.isdigit())
+        if not grado:
+            continue
+        seccion = Q(seccion__iexact=matricula.seccion) | Q(seccion__isnull=True) | Q(seccion='')
+        cargas_por_matricula |= Q(grado__icontains=grado) & seccion
+        hay_matriculas = True
+
+    if not hay_matriculas:
+        return CargaAcademica.objects.none()
+    return CargaAcademica.objects.filter(cargas_por_matricula).distinct()
+
+
 @login_required
+@solo_instructor
 def buscar_carga_desde_horario(request, horario_id):
     horario = get_object_or_404(HorarioFicha, id=horario_id)
     # Get or create CargaAcademica matching this HorarioFicha
@@ -33,6 +57,7 @@ def buscar_carga_desde_horario(request, horario_id):
         return redirect('horarios_tablero')
 
 @login_required
+@solo_instructor
 def detalle_clase(request, carga_id):
     carga = get_object_or_404(CargaAcademica, id=carga_id)
     
@@ -70,6 +95,7 @@ def detalle_clase(request, carga_id):
     return render(request, 'academico/detalle_clase.html', context)
 
 @login_required
+@solo_instructor
 def crear_tarea(request, carga_id):
     carga = get_object_or_404(CargaAcademica, id=carga_id)
     if request.method == 'POST':
@@ -92,6 +118,7 @@ def crear_tarea(request, carga_id):
     return render(request, 'academico/crear_tarea.html', {'carga': carga})
 
 @login_required
+@solo_instructor
 def detalle_tarea_docente(request, tarea_id):
     tarea = get_object_or_404(TareaClase, id=tarea_id)
     entregas = tarea.entregas.all()
@@ -101,6 +128,7 @@ def detalle_tarea_docente(request, tarea_id):
     })
 
 @login_required
+@solo_instructor
 def revision_entrega(request, entrega_id):
     entrega = get_object_or_404(EntregaTarea, id=entrega_id)
     if request.method == 'POST':
@@ -137,6 +165,7 @@ def revision_entrega(request, entrega_id):
     return render(request, 'academico/revision_entrega.html', {'entrega': entrega})
 
 @login_required
+@solo_instructor
 def panel_calificaciones(request):
     cargas = CargaAcademica.objects.filter(profesor=request.user)
     tareas = TareaClase.objects.filter(carga_academica__in=cargas)
@@ -150,6 +179,7 @@ def panel_calificaciones(request):
     return render(request, 'academico/panel_calificaciones.html', {'entregas_pendientes': entregas_pendientes})
 
 @login_required
+@solo_instructor
 def mis_actividades_docente(request):
     cargas = CargaAcademica.objects.filter(profesor=request.user)
     tareas = TareaClase.objects.filter(carga_academica__in=cargas).annotate(
@@ -159,6 +189,7 @@ def mis_actividades_docente(request):
     return render(request, 'academico/mis_actividades_docente.html', {'tareas': tareas})
 
 @login_required
+@solo_instructor
 def crear_actividad_digital(request):
     guias = GuiaClase.objects.filter(Q(carga_academica__profesor=request.user) | Q(carga_academica__isnull=True)).distinct()
     if not guias.exists():
@@ -281,6 +312,10 @@ def crear_actividad_digital(request):
 @login_required
 def comunicaciones(request):
     from .models import ComunicacionMensaje
+    perfil = getattr(request.user, 'perfil', None)
+    rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+    es_aprendiz = 'ESTUDIANTE' in _obtener_categorias_rol(rol_nombre)
+
     recibidos = ComunicacionMensaje.objects.filter(destinatario=request.user, eliminado_por_destinatario=False).order_by('-fecha_envio')
     enviados = ComunicacionMensaje.objects.filter(remitente=request.user, eliminado_por_remitente=False).order_by('-fecha_envio')
     
@@ -294,10 +329,13 @@ def comunicaciones(request):
     
     if request.method == 'POST':
         action = request.POST.get('action')
+        mensajes_del_usuario = ComunicacionMensaje.objects.filter(
+            Q(remitente=request.user) | Q(destinatario=request.user)
+        )
         
         if action == 'eliminar':
             msg_id = request.POST.get('msg_id')
-            msg = get_object_or_404(ComunicacionMensaje, id=msg_id)
+            msg = get_object_or_404(mensajes_del_usuario, id=msg_id)
             if msg.remitente == request.user:
                 msg.eliminado_por_remitente = True
             if msg.destinatario == request.user:
@@ -308,7 +346,7 @@ def comunicaciones(request):
             
         elif action == 'restaurar':
             msg_id = request.POST.get('msg_id')
-            msg = get_object_or_404(ComunicacionMensaje, id=msg_id)
+            msg = get_object_or_404(mensajes_del_usuario, id=msg_id)
             if msg.remitente == request.user:
                 msg.eliminado_por_remitente = False
             if msg.destinatario == request.user:
@@ -319,7 +357,7 @@ def comunicaciones(request):
             
         elif action == 'eliminar_definitivo':
             msg_id = request.POST.get('msg_id')
-            msg = get_object_or_404(ComunicacionMensaje, id=msg_id)
+            msg = get_object_or_404(mensajes_del_usuario, id=msg_id)
             # Solo si el usuario es dueño en alguna parte
             if msg.remitente == request.user or msg.destinatario == request.user:
                 msg.delete()
@@ -331,6 +369,28 @@ def comunicaciones(request):
         grupo_destino = request.POST.get('grupo_destino')
         asunto = request.POST.get('asunto')
         mensaje = request.POST.get('mensaje')
+
+        if es_aprendiz:
+            cargas = _cargas_para_aprendiz(request.user)
+            matriculas = Matricula.objects.filter(
+                aprendiz=request.user,
+                estado_formacion='En Formacion',
+            )
+            fichas_ids = matriculas.values_list('ficha_id', flat=True)
+            instructores_ids = set(matriculas.values_list('ficha__instructor_lider_id', flat=True))
+            instructores_ids.update(
+                HorarioFicha.objects.filter(ficha_id__in=fichas_ids)
+                .exclude(instructor_id__isnull=True)
+                .values_list('instructor_id', flat=True)
+            )
+            instructores_ids.update(cargas.values_list('profesor_id', flat=True))
+            if grupo_destino or not destinatario_id or not User.objects.filter(
+                pk=destinatario_id,
+                is_active=True,
+                pk__in=instructores_ids,
+            ).exists():
+                messages.error(request, 'Solo puedes escribir a docentes asignados a tu matrícula.')
+                return redirect('comunicaciones')
         
         if asunto and mensaje:
             msg = ComunicacionMensaje.objects.create(
@@ -366,7 +426,25 @@ def comunicaciones(request):
             return redirect('comunicaciones')
             
     # Obtener usuarios activos institucionales disponibles para mensajería
-    usuarios_disponibles = User.objects.filter(is_active=True).exclude(id=request.user.id).select_related('perfil', 'perfil__rol').order_by('first_name', 'last_name')
+    usuarios_disponibles = User.objects.filter(is_active=True).exclude(
+        id=request.user.id
+    ).select_related('perfil', 'perfil__rol')
+    if es_aprendiz:
+        cargas = _cargas_para_aprendiz(request.user)
+        matriculas = Matricula.objects.filter(
+            aprendiz=request.user,
+            estado_formacion='En Formacion',
+        )
+        fichas_ids = matriculas.values_list('ficha_id', flat=True)
+        instructores_ids = set(matriculas.values_list('ficha__instructor_lider_id', flat=True))
+        instructores_ids.update(
+            HorarioFicha.objects.filter(ficha_id__in=fichas_ids)
+            .exclude(instructor_id__isnull=True)
+            .values_list('instructor_id', flat=True)
+        )
+        instructores_ids.update(cargas.values_list('profesor_id', flat=True))
+        usuarios_disponibles = usuarios_disponibles.filter(pk__in=instructores_ids)
+    usuarios_disponibles = usuarios_disponibles.order_by('first_name', 'last_name')
 
     return render(request, 'academico/comunicaciones.html', {
         'recibidos': recibidos,
@@ -379,23 +457,29 @@ def comunicaciones(request):
     })
 
 @login_required
+@solo_aprendiz
 def actividades_estudiante(request):
-    matriculas = Matricula.objects.filter(aprendiz=request.user, estado_formacion='En Formacion')
     tareas = []
-    for m in matriculas:
-        # Get CargaAcademica matching this matricula
-        cargas = CargaAcademica.objects.filter(grado=m.grado_escolar, seccion=m.seccion)
-        for c in cargas:
-            ts = TareaClase.objects.filter(carga_academica=c)
-            for t in ts:
-                entrega = EntregaTarea.objects.filter(tarea=t, estudiante=request.user).first()
-                tareas.append({'tarea': t, 'entrega': entrega})
+    tareas_qs = TareaClase.objects.filter(
+        carga_academica__in=_cargas_para_aprendiz(request.user),
+        estado='Publicada',
+    ).select_related('carga_academica', 'carga_academica__programa').distinct()
+    for tarea in tareas_qs:
+        entrega = EntregaTarea.objects.filter(tarea=tarea, estudiante=request.user).first()
+        tareas.append({'tarea': tarea, 'entrega': entrega})
     
     return render(request, 'academico/actividades_estudiante.html', {'tareas': tareas})
 
 @login_required
+@solo_aprendiz
 def entregar_tarea(request, tarea_id):
-    tarea = get_object_or_404(TareaClase, id=tarea_id)
+    tarea = get_object_or_404(
+        TareaClase.objects.filter(
+            carga_academica__in=_cargas_para_aprendiz(request.user),
+            estado='Publicada',
+        ),
+        id=tarea_id,
+    )
     if request.method == 'POST':
         respuesta = request.POST.get('respuesta')
         archivo = request.FILES.get('archivo')

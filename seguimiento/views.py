@@ -33,12 +33,13 @@ from .forms import (
 from academico.models import Ficha, Matricula, ProgramaFormacion
 from instituciones.models import InstitucionEducativa
 from convenios.models import ConvenioSENA
-from usuarios.decorators import requerir_roles
+from usuarios.decorators import requerir_roles, solo_instructor, _obtener_categorias_rol
 from django.contrib.auth.models import User
 
 
 
 @login_required
+@solo_instructor
 def lista_seguimientos(request):
     """
     Historial general de bitácoras de visitas técnicas y acompañamiento.
@@ -140,6 +141,7 @@ def lista_seguimientos(request):
 
 
 @login_required
+@solo_instructor
 def control_asistencia(request):
     ficha_id = request.GET.get('ficha', '').strip()
     fecha_param = request.GET.get('fecha', '').strip()
@@ -215,7 +217,20 @@ def control_asistencia(request):
             for asistencia in AsistenciaAprendiz.objects.filter(matricula__in=matriculas, fecha=fecha)
         }
 
+    # Control de permisos para registro/llamado de asistencia:
+    rol_nombre = getattr(request.user.perfil.rol, 'nombre', '') if hasattr(request.user, 'perfil') and request.user.perfil and request.user.perfil.rol else ''
+    es_admin_puro = (request.user.is_superuser or 'admin' in rol_nombre.lower()) and not any(r in rol_nombre.lower() for r in ['docente', 'instructor', 'profesor', 'rector'])
+    puede_llamar_asistencia = not es_admin_puro
+
     if request.method == 'POST' and ficha:
+        if not puede_llamar_asistencia:
+            messages.error(
+                request,
+                "Acceso restringido: El Administrador cuenta únicamente con permisos de consulta en el módulo de Asistencia y no puede llamar ni modificar registros."
+            )
+            asig_param = f"&asignatura={asignatura_sel.pk}" if asignatura_sel else ""
+            return redirect(f'/seguimiento/asistencia/?ficha={ficha.pk}&fecha={fecha.isoformat()}{asig_param}')
+
         estados_validos = {'P', 'A', 'J', 'T'}
         materia_nombre = asignatura_sel.denominacion if asignatura_sel else 'Matemáticas'
         with transaction.atomic():
@@ -343,11 +358,14 @@ def control_asistencia(request):
             {'matricula': matricula, 'estado': asistencias.get(matricula.pk, 'P')}
             for matricula in matriculas
         ],
+        'puede_llamar_asistencia': puede_llamar_asistencia,
+        'es_administrador_consulta': es_admin_puro,
     })
 
 
 
 @login_required
+@solo_instructor
 def nuevo_seguimiento(request):
     """
     Registro de una nueva bitácora de seguimiento con adjunto y validación RN-006.
@@ -410,6 +428,7 @@ def decodificar_firma(valor, nombre):
 
 
 @login_required
+@solo_instructor
 def detalle_seguimiento(request, pk):
     """
     Vista detallada de una bitácora de seguimiento, compromisos y acta adjunta.
@@ -454,6 +473,7 @@ def detalle_seguimiento(request, pk):
 
 
 @login_required
+@solo_instructor
 def descargar_acta_pdf(request, pk):
     bitacora = get_object_or_404(
         BitacoraSeguimiento.objects.select_related('ficha__institucion', 'instructor', 'matricula__aprendiz'),
@@ -557,6 +577,7 @@ def descargar_acta_pdf(request, pk):
 
 
 @login_required
+@solo_instructor
 def editar_seguimiento(request, pk):
     """
     Edición administrativa de una bitácora de seguimiento formativo.
@@ -589,6 +610,7 @@ def editar_seguimiento(request, pk):
 
 
 @login_required
+@solo_instructor
 def cambiar_estado_seguimiento(request, pk):
     """
     Cambio ágil del estado de la bitácora (Pendiente, En Proceso, Realizado).
@@ -615,28 +637,44 @@ def cambiar_estado_seguimiento(request, pk):
 
 
 @login_required
+@solo_instructor
 def eliminar_seguimiento(request, pk):
     """
-    Eliminación protegida de una bitácora de seguimiento con registro en auditoría.
+    Eliminación protegida de una bitácora de seguimiento con registro en Papelera y auditoría.
     """
     bitacora = get_object_or_404(BitacoraSeguimiento, pk=pk)
     if request.method == 'POST':
         bitacora_id = bitacora.id
-        ficha_codigo = bitacora.ficha.codigo_ficha
+        ficha_codigo = bitacora.ficha.codigo_ficha if bitacora.ficha else "General"
+        from usuarios.models import PapeleraReciclaje
+        PapeleraReciclaje.objects.create(
+            tipo_objeto='Bitacora',
+            objeto_id=bitacora.id,
+            titulo=f"Bitácora de Seguimiento #{bitacora_id}",
+            subtitulo=f"Ficha {ficha_codigo} · Observaciones: {bitacora.observaciones[:60] if bitacora.observaciones else 'Sin notas'}",
+            datos_recuperacion={
+                'bitacora_id': bitacora.id,
+                'ficha_id': bitacora.ficha_id,
+                'observaciones': bitacora.observaciones,
+            },
+            eliminado_por=request.user,
+            motivo='Eliminada desde seguimiento hacia la Papelera de Reciclaje'
+        )
         bitacora.delete()
         RegistroAuditoria.registrar(
             usuario=request.user,
             modulo='Seguimiento',
-            accion='Eliminación',
-            detalles=f"Eliminó la bitácora #{bitacora_id} de la ficha {ficha_codigo}",
+            accion='Envío a Papelera de Reciclaje',
+            detalles=f"Envió a la papelera la bitácora #{bitacora_id} de la ficha {ficha_codigo}",
             request=request
         )
-        messages.success(request, f"La bitácora de seguimiento #{bitacora_id} ha sido eliminada del sistema.")
+        messages.success(request, f"La bitácora de seguimiento #{bitacora_id} ha sido enviada a la Papelera de Reciclaje. Puede restaurarla cuando lo desee.")
         return redirect('seguimiento_lista')
     return render(request, 'seguimiento/confirmar_eliminar_seguimiento.html', {'bitacora': bitacora})
 
 
 @login_required
+@solo_instructor
 def subir_evidencia_seguimiento(request, pk):
     """
     Carga ágil de evidencia documental o soporte escaneado directamente desde la ficha de detalle.
@@ -660,6 +698,7 @@ def subir_evidencia_seguimiento(request, pk):
 
 
 @login_required
+@solo_instructor
 def eliminar_evidencia_seguimiento(request, pk):
     """
     Eliminación del archivo de evidencia adjunto en una bitácora.
@@ -685,6 +724,7 @@ def eliminar_evidencia_seguimiento(request, pk):
 
 
 @login_required
+@requerir_roles('Administrador', 'Coordinador', 'Secretaría', 'Secretaria', 'Instructor SENA')
 def secretaria_bandeja(request):
     """
     Bandeja de gestión de solicitudes y trámites ante la Secretaría del SENA.
@@ -726,16 +766,31 @@ def secretaria_bandeja(request):
 
 
 @login_required
+@requerir_roles(
+    'Administrador', 'Coordinador', 'Secretaría', 'Secretaria',
+    'Instructor SENA', 'Docente I.E.', 'Estudiante', 'Aprendiz',
+)
 def nueva_solicitud(request):
     """
     Formulario oficial 'CONTACTAR SECRETARÍA' para que aprendices e instructores
     radiquen una nueva solicitud, trámite o novedad ante la Secretaría SENA.
     """
-    fichas = Ficha.objects.all()
     perfil = getattr(request.user, 'perfil', None)
+    es_estudiante = bool(
+        perfil and perfil.rol and
+        'ESTUDIANTE' in _obtener_categorias_rol(perfil.rol.nombre)
+    )
+    matriculas_estudiante = Matricula.objects.filter(
+        aprendiz=request.user,
+        estado_formacion='En Formacion',
+    ).select_related('ficha') if es_estudiante else Matricula.objects.none()
+    fichas = (
+        Ficha.objects.filter(pk__in=matriculas_estudiante.values_list('ficha_id', flat=True))
+        if es_estudiante else Ficha.objects.all()
+    )
     ficha_defecto = None
-    if perfil and perfil.rol and perfil.rol.nombre == 'Estudiante':
-        mat = Matricula.objects.filter(aprendiz=request.user).first()
+    if es_estudiante:
+        mat = matriculas_estudiante.order_by('-fecha_matricula').first()
         if mat:
             ficha_defecto = mat.ficha
 
@@ -750,7 +805,17 @@ def nueva_solicitud(request):
         if not asunto or not mensaje:
             messages.error(request, "Por favor complete el asunto y la descripción detallada del trámite.")
         else:
-            ficha_asociada = Ficha.objects.filter(id=ficha_id).first() if ficha_id else ficha_defecto
+            if es_estudiante:
+                matricula = (
+                    matriculas_estudiante.filter(ficha_id=ficha_id).first()
+                    if ficha_id else matriculas_estudiante.order_by('-fecha_matricula').first()
+                )
+                if not matricula:
+                    messages.error(request, 'No puedes radicar una solicitud para una matrícula que no te pertenece.')
+                    return redirect('nueva_solicitud')
+                ficha_asociada = matricula.ficha
+            else:
+                ficha_asociada = Ficha.objects.filter(id=ficha_id).first() if ficha_id else ficha_defecto
             solicitud = SolicitudSecretaria.objects.create(
                 aprendiz=request.user,
                 ficha=ficha_asociada,
@@ -890,6 +955,7 @@ def cambiar_estado_solicitud(request, pk):
 
 
 @login_required
+@requerir_roles('Administrador', 'Rectoría', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Instructor', 'Instructor SENA', 'Profesor')
 def proyectar_qr_sesion(request, ficha_id):
     """
     Proyector en pantalla grande / aula del Código QR dinámico de asistencia diaria.
@@ -940,6 +1006,8 @@ def proyectar_qr_sesion(request, ficha_id):
     })
 
 
+@login_required
+@requerir_roles('Administrador', 'Rectoría', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Instructor', 'Instructor SENA', 'Profesor')
 def marcar_asistencia_sesion(request, ficha_id):
     """
     Página de confirmación y registro cuando un aprendiz escanea el código QR proyectado en clase.
@@ -972,18 +1040,20 @@ def marcar_asistencia_sesion(request, ficha_id):
         }, status=400)
 
     aprendiz_user = None
-    if request.user.is_authenticated:
-        aprendiz_user = request.user
-    elif request.method == 'POST':
+    if request.method == 'POST':
         documento = request.POST.get('documento', '').strip()
         from usuarios.models import PerfilUsuario
         perfil = PerfilUsuario.objects.filter(
             Q(numero_documento=documento) | Q(usuario__username=documento)
+        ).select_related('usuario', 'rol').filter(
+            Q(rol__nombre__icontains='Estudiante') |
+            Q(rol__nombre__icontains='Aprendiz') |
+            Q(rol__nombre__icontains='Alumno')
         ).first()
-        if perfil:
+        if perfil and documento:
             aprendiz_user = perfil.usuario
         else:
-            messages.error(request, f'No se encontró ningún aprendiz asociado al documento "{documento}".')
+            messages.error(request, 'No se encontró un estudiante asociado al documento ingresado.')
 
     if aprendiz_user:
         matricula = Matricula.objects.filter(ficha=ficha, aprendiz=aprendiz_user).first()
@@ -999,7 +1069,7 @@ def marcar_asistencia_sesion(request, ficha_id):
             defaults={
                 'estado': 'P',
                 'observaciones': 'Asistencia a clase registrada mediante escaneo de QR proyectado en aula',
-                'registrado_por': aprendiz_user,
+                'registrado_por': request.user,
             }
         )
         if not creado and asistencia.estado != 'P':
@@ -1030,6 +1100,7 @@ def marcar_asistencia_sesion(request, ficha_id):
 # ==============================================================================
 
 @login_required
+@solo_instructor
 def seguimientos_administrativos_lista(request):
     """
     Directorio integral de seguimientos y compromisos administrativos
@@ -1169,6 +1240,7 @@ def seguimiento_admin_editar(request, pk):
 
 
 @login_required
+@solo_instructor
 def seguimiento_admin_cambiar_estado(request, pk):
     """
     Cambio rápido de estado para un seguimiento administrativo.
@@ -1217,6 +1289,7 @@ def seguimiento_admin_eliminar(request, pk):
 # ==============================================================================
 
 @login_required
+@solo_instructor
 def calendario_administrativo(request):
     """
     Agenda interactiva de eventos, reuniones, visitas y vencimientos de convenios.
@@ -1324,6 +1397,7 @@ def evento_calendario_eliminar(request, pk):
 # ==============================================================================
 
 @login_required
+@requerir_roles('Administrador', 'Coordinador', 'Secretaría', 'Secretaria', 'Instructor SENA', 'Docente I.E.')
 def documentos_admin_lista(request):
     """
     Biblioteca documental digital: repositorio oficial de convenios, actas,
@@ -1424,6 +1498,7 @@ def documento_admin_subir(request):
 
 
 @login_required
+@requerir_roles('Administrador', 'Coordinador', 'Secretaría', 'Secretaria', 'Instructor SENA', 'Docente I.E.')
 def documento_admin_descargar(request, pk):
     """
     Descarga real y protegida del archivo digital desde el repositorio.
@@ -1474,6 +1549,7 @@ def documento_admin_eliminar(request, pk):
     return render(request, 'seguimiento/confirmar_eliminar_documento.html', {'documento': doc})
 
 @login_required
+@solo_instructor
 def api_obtener_aprendices(request, ficha_id):
     from academico.models import Matricula
     matriculas = Matricula.objects.filter(ficha_id=ficha_id).select_related('aprendiz')
@@ -1484,5 +1560,3 @@ def api_obtener_aprendices(request, ficha_id):
             'nombre': f"{m.aprendiz.get_full_name() or m.aprendiz.username}"
         })
     return JsonResponse({'aprendices': data})
-
-

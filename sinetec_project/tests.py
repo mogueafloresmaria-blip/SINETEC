@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from usuarios.models import Rol
 
 class InicioViewTest(TestCase):
     def setUp(self):
@@ -9,14 +10,16 @@ class InicioViewTest(TestCase):
             email='test@sena.edu.co',
             password='Password123*'
         )
+        self.user.perfil.rol, _ = Rol.objects.get_or_create(nombre='Administrador')
+        self.user.perfil.save()
 
     def test_pagina_inicio_responde_ok(self):
         """Verifica que la URL raíz / responda con código HTTP 200 y use la plantilla home.html"""
         respuesta = self.client.get('/')
         self.assertEqual(respuesta.status_code, 200)
         self.assertTemplateUsed(respuesta, 'home.html')
-        self.assertContains(respuesta, 'SINETEC')
-        self.assertContains(respuesta, 'Centro de Logística y Promoción Ecoturística')
+        self.assertContains(respuesta, 'EDUNOVA')
+        self.assertContains(respuesta, 'Institución Educativa Distrital Nuevo Horizonte')
 
     def test_login_pantalla_responde_ok(self):
         """Verifica que la pantalla de inicio de sesión cargue correctamente"""
@@ -66,4 +69,3 @@ class InicioViewTest(TestCase):
         r_eval = self.client.get('/evaluaciones/')
         self.assertEqual(r_eval.status_code, 200)
         self.assertTemplateUsed(r_eval, 'evaluaciones/calificar.html')
-

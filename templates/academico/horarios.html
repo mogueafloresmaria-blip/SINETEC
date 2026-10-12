@@ -17,7 +17,7 @@
     }
 
     /* Colores pastel elegantes con borde acentuado */
-    .bg-pastel-rosado { background-color: rgba(252, 231, 243, 0.6); border-left: 4px solid #F472B6; }
+    .bg-pastel-cafe { background-color: rgba(252, 231, 243, 0.6); border-left: 4px solid #B8977E; }
     .bg-pastel-azul { background-color: rgba(224, 242, 254, 0.6); border-left: 4px solid #38BDF8; }
     .bg-pastel-verde { background-color: rgba(220, 252, 231, 0.6); border-left: 4px solid #4ADE80; }
     .bg-pastel-rojo { background-color: rgba(254, 226, 226, 0.6); border-left: 4px solid #F87171; }
@@ -53,8 +53,8 @@
     <header class="bg-white border-b border-gray-200 px-6 py-8 mb-8 shadow-sm">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Mi Horario Semanal</h1>
-                <p class="text-slate-500 mt-1 text-sm md:text-base">Institución Educativa Distrital Nuevo Horizonte</p>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Horarios Escolares</h1>
+                <p class="text-slate-500 mt-1 text-sm md:text-base">Tablero de Gestión y Programación de Clases · EDUNOVA</p>
             </div>
 
             <!-- Filtros (Visible solo para Admins o para cambiar contexto) -->
@@ -75,7 +75,7 @@
                 </select>
                 
                 {% if request.user.is_superuser or request.user.perfil.rol.nombre in 'Administrador,Coordinador' %}
-                <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-4 py-2 transition-colors flex items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalNuevaClase">
+                <button type="button" class="text-white font-medium rounded-lg text-sm px-4 py-2 transition-colors flex items-center gap-2 shadow-sm" style="background-color: var(--color-principal);" data-bs-toggle="modal" data-bs-target="#modalNuevaClase">
                     <i class="bi bi-plus-lg"></i> Programar Clase
                 </button>
                 {% endif %}
@@ -168,7 +168,7 @@
             <input type="hidden" name="color_clase" id="inputColorClase" value="bg-pastel-gris">
             
             <div class="flex flex-wrap justify-center gap-3 mb-6">
-                <div class="color-dot" style="background-color: #FCE7F3; border-color: #F472B6;" data-class="bg-pastel-rosado" onclick="seleccionarColorDot(this)"></div>
+                <div class="color-dot" style="background-color: var(--color-acento); border-color: #B8977E;" data-class="bg-pastel-cafe" onclick="seleccionarColorDot(this)"></div>
                 <div class="color-dot" style="background-color: #E0F2FE; border-color: #38BDF8;" data-class="bg-pastel-azul" onclick="seleccionarColorDot(this)"></div>
                 <div class="color-dot" style="background-color: #DCFCE7; border-color: #4ADE80;" data-class="bg-pastel-verde" onclick="seleccionarColorDot(this)"></div>
                 <div class="color-dot" style="background-color: #FEE2E2; border-color: #F87171;" data-class="bg-pastel-rojo" onclick="seleccionarColorDot(this)"></div>

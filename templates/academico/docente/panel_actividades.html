@@ -1,7 +1,7 @@
 {% load static %}
 <!-- =========================================================================
      MÓDULO 5: ACTIVIDADES Y TAREAS (GESTIÓN, CREACIÓN, REVISIÓN Y CALIFICACIÓN)
-     Diseño: Sistema Rosado Elegante (#db2777, #fce7f3, #fff0f3, #be185d)
+     Diseño: Café Institucional y Crema (var(--color-principal), var(--color-acento), #F5F2EB, var(--color-secundario))
      Estructura:
      - Vista A: Detalle completo de la actividad seleccionada (?tarea_id=X)
        * Resumen con tema, fechas, puntajes, archivo de apoyo
@@ -24,15 +24,15 @@
     <div id="vista-detalle-actividad-docente">
         <!-- BOTÓN RETORNO -->
         <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <a href="{% url 'actividades_tareas' %}" 
+            <a href="{% url 'temas_actividades' %}" 
                class="btn rounded-pill px-4 py-2 fw-bold text-decoration-none shadow-2xs d-inline-flex align-items-center gap-2 transition hover-shadow"
-               style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.88rem;">
+               style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.88rem;">
                 <i class="bi bi-arrow-left"></i> Volver a Actividades y Tareas
             </a>
             <div class="d-flex align-items-center gap-2">
                 <button type="button" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
                         data-bs-toggle="modal" data-bs-target="#modalEditarTareaDetalle"
-                        style="background: #ffffff; color: #be185d; border: 1.5px solid #fce7f3; font-size: 0.84rem;">
+                        style="background: #ffffff; color: var(--color-secundario); border: 1.5px solid var(--color-acento); font-size: 0.84rem;">
                     <i class="bi bi-pencil-square"></i> Editar Actividad
                 </button>
                 <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline">
@@ -60,14 +60,14 @@
 
         <!-- HERO BANNER DETALLE DE LA ACTIVIDAD -->
         <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-             style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+             style="background: linear-gradient(135deg, #FAF8F5 0%, #F5F2EB 50%, var(--color-acento) 100%); border: 1px solid var(--color-acento);">
             <div class="row align-items-center">
                 <div class="col-lg-8 position-relative z-1">
                     <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ffffff; color: #db2777; border: 1px solid #fce7f3; font-size: 0.78rem;">
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ffffff; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.78rem;">
                             {{ tarea_seleccionada.tipo_actividad }}
                         </span>
-                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #be185d; border: 1px solid #fce7f3; font-size: 0.78rem;">
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: var(--color-acento); color: var(--color-secundario); border: 1px solid var(--color-acento); font-size: 0.78rem;">
                             {{ tarea_seleccionada.materia_nombre }} · Grado {{ tarea_seleccionada.grupo_display }}
                         </span>
                         <span class="badge rounded-pill px-3 py-1 fw-semibold" 
@@ -87,25 +87,25 @@
 
                     {% if tarea_seleccionada.criterio_evaluacion %}
                     <p class="mb-2 text-muted fw-medium small" style="font-size: 0.88rem;">
-                        <i class="bi bi-bookmark-star me-1" style="color: #db2777;"></i> Tema: <strong class="text-dark">{{ tarea_seleccionada.criterio_evaluacion }}</strong>
+                        <i class="bi bi-bookmark-star me-1" style="color: var(--color-principal);"></i> Tema: <strong class="text-dark">{{ tarea_seleccionada.criterio_evaluacion }}</strong>
                     </p>
                     {% endif %}
 
                     <div class="d-flex align-items-center gap-3 flex-wrap text-muted small mt-2">
-                        <span><i class="bi bi-calendar-event me-1" style="color: #db2777;"></i> Publicada: <strong>{{ tarea_seleccionada.fecha_publicacion|date:"d/m/Y H:i" }}</strong></span>
-                        <span><i class="bi bi-alarm me-1" style="color: #db2777;"></i> Límite: <strong>{{ tarea_seleccionada.fecha_limite|date:"d/m/Y H:i"|default:"Sin límite" }}</strong></span>
-                        <span><i class="bi bi-award me-1" style="color: #db2777;"></i> Puntaje máx: <strong>{{ tarea_seleccionada.puntaje_maximo }}</strong></span>
-                        <span><i class="bi bi-percent me-1" style="color: #db2777;"></i> Ponderación: <strong>{{ tarea_seleccionada.porcentaje }}%</strong></span>
+                        <span><i class="bi bi-calendar-event me-1" style="color: var(--color-principal);"></i> Publicada: <strong>{{ tarea_seleccionada.fecha_publicacion|date:"d/m/Y H:i" }}</strong></span>
+                        <span><i class="bi bi-alarm me-1" style="color: var(--color-principal);"></i> Límite: <strong>{{ tarea_seleccionada.fecha_limite|date:"d/m/Y H:i"|default:"Sin límite" }}</strong></span>
+                        <span><i class="bi bi-award me-1" style="color: var(--color-principal);"></i> Puntaje máx: <strong>{{ tarea_seleccionada.puntaje_maximo }}</strong></span>
+                        <span><i class="bi bi-percent me-1" style="color: var(--color-principal);"></i> Ponderación: <strong>{{ tarea_seleccionada.porcentaje }}%</strong></span>
                     </div>
                 </div>
 
                 <div class="col-lg-4 text-lg-end position-relative z-1 mt-3 mt-lg-0">
-                    <div class="d-inline-flex flex-column gap-2 p-3 rounded-4 bg-white shadow-2xs text-start" style="border: 1px solid #fce7f3; min-width: 200px;">
+                    <div class="d-inline-flex flex-column gap-2 p-3 rounded-4 bg-white shadow-2xs text-start" style="border: 1px solid var(--color-acento); min-width: 200px;">
                         <span class="text-muted small fw-bold" style="font-size: 0.78rem;">Material de Apoyo:</span>
                         {% if tarea_seleccionada.archivo %}
                         <a href="{{ tarea_seleccionada.archivo.url }}" target="_blank" 
                            class="btn btn-sm rounded-pill text-white fw-bold d-inline-flex align-items-center gap-1.5"
-                           style="background: #db2777; font-size: 0.8rem;">
+                           style="background: var(--color-principal); font-size: 0.8rem;">
                             <i class="bi bi-download"></i> Descargar Adjunto
                         </a>
                         {% else %}
@@ -123,7 +123,7 @@
             </div>
 
             {% if tarea_seleccionada.instrucciones %}
-            <div class="mt-4 pt-3 border-top" style="border-color: rgba(219, 39, 119, 0.15) !important;">
+            <div class="mt-4 pt-3 border-top" style="border-color: rgba(90, 56, 37, 0.15) !important;">
                 <h6 class="fw-bold text-dark mb-1" style="font-size: 0.88rem;"><i class="bi bi-card-text me-1 text-muted"></i> Instrucciones para los Estudiantes:</h6>
                 <p class="text-muted small mb-0" style="white-space: pre-line; line-height: 1.55;">{{ tarea_seleccionada.instrucciones }}</p>
             </div>
@@ -134,11 +134,11 @@
         <div class="row g-3 mb-4">
             <!-- 1. Total Estudiantes -->
             <div class="col-6 col-md-3">
-                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Total estudiantes</span>
                         <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
-                             style="background: #fff0f3; color: #db2777; width: 34px; height: 34px;">
+                             style="background: #F5F2EB; color: var(--color-principal); width: 34px; height: 34px;">
                             <i class="bi bi-people-fill fs-6"></i>
                         </div>
                     </div>
@@ -151,7 +151,7 @@
 
             <!-- 2. Entregadas -->
             <div class="col-6 col-md-3">
-                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Entregadas</span>
                         <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
@@ -171,7 +171,7 @@
 
             <!-- 3. Pendientes por calificar -->
             <div class="col-6 col-md-3">
-                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Pendientes por calificar</span>
                         <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
@@ -192,7 +192,7 @@
 
             <!-- 4. Sin entregar -->
             <div class="col-6 col-md-3">
-                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+                <div class="card border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="text-muted fw-medium small" style="font-size: 0.78rem;">Sin entregar</span>
                         <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" 
@@ -212,18 +212,18 @@
         </div>
 
         <!-- LISTA DE ESTUDIANTES Y CONTROL DE ENTREGAS -->
-        <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-5" style="border-color: #fce7f3 !important;">
-            <div class="p-3.5 border-bottom bg-white d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #fce7f3 !important;">
+        <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-5" style="border-color: var(--color-acento) !important;">
+            <div class="p-3.5 border-bottom bg-white d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: var(--color-acento) !important;">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-person-check-fill fs-5" style="color: #db2777;"></i>
+                    <i class="bi bi-person-check-fill fs-5" style="color: var(--color-principal);"></i>
                     <h6 class="fw-bold text-dark mb-0">LISTA DE ESTUDIANTES Y ENTREGAS</h6>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <input type="text" id="buscar-entrega-input" onkeyup="filtrarEntregasDetalle();"
-                           class="form-control form-control-sm rounded-pill px-3 py-1.5" style="border-color: #fce7f3; max-width: 240px; font-size: 0.82rem;"
+                           class="form-control form-control-sm rounded-pill px-3 py-1.5" style="border-color: var(--color-acento); max-width: 240px; font-size: 0.82rem;"
                            placeholder="Buscar estudiante...">
                     <select id="filtro-estado-entrega" onchange="filtrarEntregasDetalle();"
-                            class="form-select form-select-sm rounded-pill px-3 py-1.5" style="border-color: #fce7f3; font-size: 0.82rem;">
+                            class="form-select form-select-sm rounded-pill px-3 py-1.5" style="border-color: var(--color-acento); font-size: 0.82rem;">
                         <option value="todos">Todos los estados</option>
                         <option value="CALIFICADA">Calificadas</option>
                         <option value="ENTREGADA">Entregadas (por calificar)</option>
@@ -234,17 +234,17 @@
 
             <div class="table-responsive">
                 <table class="table align-middle table-hover mb-0" id="tabla-entregas-estudiantes">
-                    <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                    <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
                         <tr>
-                            <th class="text-center py-3" style="width: 45px; color: #be185d; font-size: 0.76rem;">#</th>
-                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
-                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO / CÓDIGO</th>
-                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO ENTREGA</th>
-                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA ENTREGA</th>
-                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ARCHIVO / RESPUESTA</th>
-                            <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">CALIFICACIÓN</th>
-                            <th class="py-3" style="color: #be185d; font-size: 0.76rem;">COMENTARIO DOCENTE</th>
-                            <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem;">ACCIONES</th>
+                            <th class="text-center py-3" style="width: 45px; color: var(--color-secundario); font-size: 0.76rem;">#</th>
+                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ESTUDIANTE</th>
+                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">DOCUMENTO / CÓDIGO</th>
+                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ESTADO ENTREGA</th>
+                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">FECHA ENTREGA</th>
+                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ARCHIVO / RESPUESTA</th>
+                            <th class="py-3 text-center" style="color: var(--color-secundario); font-size: 0.76rem;">CALIFICACIÓN</th>
+                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">COMENTARIO DOCENTE</th>
+                            <th class="py-3 text-end" style="color: var(--color-secundario); font-size: 0.76rem;">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody id="tbody-entregas-detalle">
@@ -253,12 +253,12 @@
                             data-nombre="{{ item.nombre_completo }}"
                             data-doc="{{ item.documento }}"
                             data-estado="{{ item.estado_code }}"
-                            style="border-bottom: 1px solid #fce7f3;">
+                            style="border-bottom: 1px solid var(--color-acento);">
                             <td class="text-center text-muted small fw-bold">{{ forloop.counter }}</td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs" 
-                                         style="width: 32px; height: 32px; background: linear-gradient(135deg, #db2777 0%, #be185d 100%); font-size: 0.75rem;">
+                                         style="width: 32px; height: 32px; background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); font-size: 0.75rem;">
                                         {{ item.estudiante.first_name|slice:':1'|default:'E' }}{{ item.estudiante.last_name|slice:':1'|default:'S' }}
                                     </div>
                                     <strong class="text-dark" style="font-size: 0.88rem;">{{ item.nombre_completo }}</strong>
@@ -319,11 +319,26 @@
                                 </span>
                             </td>
                             <td class="text-end">
-                                <button type="button" class="btn rounded-pill px-3 py-1.5 fw-bold small text-decoration-none shadow-2xs d-inline-flex align-items-center gap-1.5"
-                                        onclick="abrirModalCalificar('{{ item.estudiante.id }}', '{{ item.nombre_completo|escapejs }}', '{{ item.calificacion|default:'' }}', '{{ item.retroalimentacion|default:''|escapejs }}', '{{ item.archivo_url }}', '{{ item.estado_code }}');"
-                                        style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.82rem;">
-                                    <i class="bi bi-pencil-square"></i> {% if item.calificacion is not None %}Modificar{% else %}Calificar{% endif %}
-                                </button>
+                                <div class="d-inline-flex align-items-center gap-1.5 justify-content-end">
+                                    <button type="button" class="btn rounded-pill px-3 py-1.5 fw-bold small text-decoration-none shadow-2xs d-inline-flex align-items-center gap-1.5"
+                                            onclick="abrirModalCalificar('{{ item.estudiante.id }}', '{{ item.nombre_completo|escapejs }}', '{{ item.calificacion|default:'' }}', '{{ item.retroalimentacion|default:''|escapejs }}', '{{ item.archivo_url }}', '{{ item.estado_code }}');"
+                                            style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.82rem;">
+                                        <i class="bi bi-pencil-square"></i> {% if item.calificacion is not None %}Modificar{% else %}Calificar{% endif %}
+                                    </button>
+                                    {% if item.entrega_id %}
+                                    <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline m-0" onsubmit="return confirm('¿Enviar la entrega/respuesta de {{ item.nombre_completo|escapejs }} a la Papelera de reciclaje? Podrá recuperarla posteriormente sin perder información.');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="eliminar_entrega_tarea">
+                                        <input type="hidden" name="entrega_id" value="{{ item.entrega_id }}">
+                                        <input type="hidden" name="tarea_id" value="{{ tarea_seleccionada.id }}">
+                                        <button type="submit" class="btn btn-sm rounded-circle p-0 d-inline-flex align-items-center justify-content-center shadow-2xs"
+                                                style="width: 31px; height: 31px; background: #fff5f5; color: #dc2626; border: 1px solid #fecaca;"
+                                                title="Enviar entrega a la Papelera de reciclaje">
+                                            <i class="bi bi-trash3" style="font-size: 0.8rem;"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -336,9 +351,9 @@
         <div class="modal fade" id="modalCalificarEntrega" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content rounded-4 border-0 shadow">
-                    <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+                    <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
                         <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-award-fill fs-5" style="color: #db2777;"></i>
+                            <i class="bi bi-award-fill fs-5" style="color: var(--color-principal);"></i>
                             <h6 class="modal-title fw-bold text-dark">Calificar y Retroalimentar Entrega</h6>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -366,11 +381,11 @@
                                     <label class="form-label small fw-bold text-dark mb-1">Calificación (0.0 a {{ tarea_seleccionada.puntaje_maximo }}) *</label>
                                     <input type="number" step="0.1" min="0" max="{{ tarea_seleccionada.puntaje_maximo }}" 
                                            name="calificacion" id="modal-calif-nota-input" 
-                                           class="form-control rounded-pill px-3 py-2 fw-bold fs-6" style="border-color: #fce7f3;" placeholder="Ej: 4.5" required>
+                                           class="form-control rounded-pill px-3 py-2 fw-bold fs-6" style="border-color: var(--color-acento);" placeholder="Ej: 4.5" required>
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label small fw-bold text-dark mb-1">Estado de Evaluación</label>
-                                    <select name="estado_calif" id="modal-calif-estado-select" class="form-select rounded-pill px-3 py-2" style="border-color: #fce7f3;">
+                                    <select name="estado_calif" id="modal-calif-estado-select" class="form-select rounded-pill px-3 py-2" style="border-color: var(--color-acento);">
                                         <option value="CALIFICADA" selected>Calificada / Aprobada</option>
                                         <option value="DEVUELTA">Devuelta para corrección</option>
                                     </select>
@@ -380,7 +395,7 @@
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-dark mb-1">Comentario / Retroalimentación Pedagógica</label>
                                 <textarea name="retroalimentacion" id="modal-calif-retro-input" rows="3" 
-                                          class="form-control rounded-4 px-3 py-2" style="border-color: #fce7f3;" 
+                                          class="form-control rounded-4 px-3 py-2" style="border-color: var(--color-acento);" 
                                           placeholder="Escriba recomendaciones específicas para el estudiante..."></textarea>
                             </div>
 
@@ -389,9 +404,9 @@
                             </div>
                         </div>
 
-                        <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                        <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: var(--color-acento) !important;">
                             <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                            <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
                                 <i class="bi bi-save me-1.5"></i> Guardar Calificación
                             </button>
                         </div>
@@ -404,8 +419,8 @@
         <div class="modal fade" id="modalEditarTareaDetalle" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content rounded-4 border-0 shadow">
-                    <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
-                        <h6 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square me-2" style="color: #db2777;"></i> Editar Actividad</h6>
+                    <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
+                        <h6 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square me-2" style="color: var(--color-principal);"></i> Editar Actividad</h6>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
 
@@ -478,7 +493,7 @@
 
                         <div class="modal-footer px-4 py-3 bg-light border-top">
                             <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                            <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
                                 Guardar Cambios
                             </button>
                         </div>
@@ -496,15 +511,15 @@
 
     <!-- 1. ENCABEZADO DEL MÓDULO -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+         style="background: linear-gradient(135deg, #FAF8F5 0%, #F5F2EB 50%, var(--color-acento) 100%); border: 1px solid var(--color-acento);">
         <div class="row align-items-center">
             <div class="col-lg-7 position-relative z-1 d-flex align-items-center gap-3">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
-                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                     style="background: #ffffff; color: var(--color-principal); width: 62px; height: 62px; border: 1px solid var(--color-acento);">
                     <i class="bi bi-journal-check" style="font-size: 2rem;"></i>
                 </div>
                 <div>
-                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                    <div class="text-uppercase fw-bold mb-1" style="color: var(--color-principal); font-size: 0.76rem; letter-spacing: 0.6px;">
                         Módulo de Trabajo Pedagógico
                     </div>
                     <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
@@ -518,7 +533,7 @@
             <div class="col-lg-5 text-end position-relative z-1 mt-3 mt-lg-0">
                 <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
                         data-bs-toggle="modal" data-bs-target="#modalCrearActividadDocente" id="btn-crear-actividad"
-                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.9rem;">
+                        style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.9rem;">
                     <i class="bi bi-plus-circle-fill"></i> + CREAR ACTIVIDAD / TAREA
                 </button>
             </div>
@@ -530,7 +545,7 @@
         <!-- 1. Total actividades -->
         <div class="col-6 col-md-2">
             <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
-                 onclick="filtrarPorEstadoRapido('todos');" style="border-color: #fce7f3 !important; cursor: pointer;">
+                 onclick="filtrarPorEstadoRapido('todos');" style="border-color: var(--color-acento) !important; cursor: pointer;">
                 <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Total actividades</span>
                 <div class="d-flex align-items-baseline gap-1.5">
                     <h4 class="fw-bold text-dark mb-0">{{ resumen_actividades.total }}</h4>
@@ -542,7 +557,7 @@
         <!-- 2. Publicadas -->
         <div class="col-6 col-md-2">
             <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
-                 onclick="filtrarPorEstadoRapido('Publicada');" style="border-color: #fce7f3 !important; cursor: pointer;">
+                 onclick="filtrarPorEstadoRapido('Publicada');" style="border-color: var(--color-acento) !important; cursor: pointer;">
                 <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Publicadas</span>
                 <div class="d-flex align-items-baseline gap-1.5">
                     <h4 class="fw-bold mb-0" style="color: #047857;">{{ resumen_actividades.publicadas }}</h4>
@@ -554,7 +569,7 @@
         <!-- 3. Borradores -->
         <div class="col-6 col-md-2">
             <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
-                 onclick="filtrarPorEstadoRapido('Borrador');" style="border-color: #fce7f3 !important; cursor: pointer;">
+                 onclick="filtrarPorEstadoRapido('Borrador');" style="border-color: var(--color-acento) !important; cursor: pointer;">
                 <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Borradores</span>
                 <div class="d-flex align-items-baseline gap-1.5">
                     <h4 class="fw-bold text-muted mb-0">{{ resumen_actividades.borradores }}</h4>
@@ -565,7 +580,7 @@
 
         <!-- 4. Pendientes de entrega -->
         <div class="col-6 col-md-2">
-            <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                 <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Pendientes entrega</span>
                 <div class="d-flex align-items-baseline gap-1.5">
                     <h4 class="fw-bold mb-0" style="color: #d97706;">{{ resumen_actividades.pendientes_entrega }}</h4>
@@ -577,10 +592,10 @@
         <!-- 5. Pendientes por calificar -->
         <div class="col-6 col-md-2">
             <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
-                 onclick="filtrarSoloPendientesCalificar();" style="border-color: #fce7f3 !important; cursor: pointer;">
+                 onclick="filtrarSoloPendientesCalificar();" style="border-color: var(--color-acento) !important; cursor: pointer;">
                 <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Por calificar</span>
                 <div class="d-flex align-items-baseline gap-1.5">
-                    <h4 class="fw-bold mb-0" style="color: #db2777;">{{ resumen_actividades.pendientes_calificar }}</h4>
+                    <h4 class="fw-bold mb-0" style="color: var(--color-principal);">{{ resumen_actividades.pendientes_calificar }}</h4>
                     <small class="text-muted" style="font-size: 0.7rem;">entregas</small>
                 </div>
             </div>
@@ -589,7 +604,7 @@
         <!-- 6. Vencidas -->
         <div class="col-6 col-md-2">
             <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100 cursor-pointer transition hover-shadow" 
-                 onclick="filtrarPorEstadoRapido('Vencida');" style="border-color: #fce7f3 !important; cursor: pointer;">
+                 onclick="filtrarPorEstadoRapido('Vencida');" style="border-color: var(--color-acento) !important; cursor: pointer;">
                 <span class="text-muted small d-block mb-1" style="font-size: 0.74rem;">Vencidas</span>
                 <div class="d-flex align-items-baseline gap-1.5">
                     <h4 class="fw-bold text-danger mb-0">{{ resumen_actividades.vencidas }}</h4>
@@ -600,7 +615,7 @@
     </div>
 
     <!-- 3. BARRA DE BÚSQUEDA Y FILTROS -->
-    <div class="card border rounded-4 p-3.5 bg-white shadow-2xs mb-4" style="border-color: #fce7f3 !important;">
+    <div class="card border rounded-4 p-3.5 bg-white shadow-2xs mb-4" style="border-color: var(--color-acento) !important;">
         <div class="row g-2.5 align-items-center">
             <!-- Buscador -->
             <div class="col-md-3">
@@ -608,14 +623,14 @@
                     <i class="bi bi-search position-absolute top-50 translate-middle-y text-muted" style="left: 14px;"></i>
                     <input type="text" id="buscar-actividad-input" onkeyup="aplicarFiltrosActividades();" 
                            class="form-control form-control-sm rounded-pill ps-5 pe-3 py-2 border bg-white shadow-2xs" 
-                           style="border-color: #fce7f3; font-size: 0.85rem;" 
+                           style="border-color: var(--color-acento); font-size: 0.85rem;" 
                            placeholder="Buscar actividad o tema...">
                 </div>
             </div>
 
             <!-- Asignatura -->
             <div class="col-6 col-md-2">
-                <select id="filtro-act-asig" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3; font-size: 0.82rem;">
+                <select id="filtro-act-asig" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.82rem;">
                     <option value="todas">Todas las Asignaturas</option>
                     <option value="Matemáticas">Matemáticas</option>
                     <option value="Informática">Informática</option>
@@ -624,7 +639,7 @@
 
             <!-- Grado -->
             <div class="col-6 col-md-2">
-                <select id="filtro-act-grado" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3; font-size: 0.82rem;">
+                <select id="filtro-act-grado" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.82rem;">
                     <option value="todos">Todos los Grados</option>
                     <option value="10">Grado 10°</option>
                     <option value="11">Grado 11°</option>
@@ -633,7 +648,7 @@
 
             <!-- Grupo -->
             <div class="col-6 col-md-2">
-                <select id="filtro-act-grupo" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: #fce7f3; font-size: 0.82rem;">
+                <select id="filtro-act-grupo" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.82rem;">
                     <option value="todos">Todos los Grupos</option>
                     <option value="10°A">Grupo 10°A</option>
                     <option value="11°A">Grupo 11°A</option>
@@ -642,7 +657,7 @@
 
             <!-- Estado -->
             <div class="col-6 col-md-3 text-end d-flex gap-2">
-                <select id="filtro-act-estado" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2 flex-grow-1" style="border-color: #fce7f3; font-size: 0.82rem;">
+                <select id="filtro-act-estado" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2 flex-grow-1" style="border-color: var(--color-acento); font-size: 0.82rem;">
                     <option value="todos">Todos los Estados</option>
                     <option value="Publicada">Publicadas</option>
                     <option value="Borrador">Borradores</option>
@@ -657,7 +672,7 @@
     <!-- PESTAÑAS DE ACCESO RÁPIDO Y FILTRADO POR ESTADO -->
     <div class="d-flex align-items-center gap-2 mb-3.5 flex-wrap" id="actividades-tabs-bar">
         <button type="button" class="btn rounded-pill px-4 py-2 fw-bold small transition tab-btn-act is-active shadow-2xs" id="tab-btn-todos" onclick="filtrarPorEstadoRapido('todos');"
-                style="background: #db2777; color: #ffffff; border: 1.5px solid #db2777; font-size: 0.84rem;">
+                style="background: var(--color-principal); color: #ffffff; border: 1.5px solid var(--color-principal); font-size: 0.84rem;">
             Todas ({{ resumen_actividades.total }})
         </button>
         <button type="button" class="btn rounded-pill px-4 py-2 fw-bold small transition tab-btn-act shadow-2xs" id="tab-btn-Publicada" onclick="filtrarPorEstadoRapido('Publicada');"
@@ -669,7 +684,7 @@
             <i class="bi bi-pencil-square me-1"></i> Borradores ({{ resumen_actividades.borradores }})
         </button>
         <button type="button" class="btn rounded-pill px-4 py-2 fw-bold small transition tab-btn-act shadow-2xs" id="tab-btn-por_calificar" onclick="filtrarSoloPendientesCalificar();"
-                style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.84rem;">
+                style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.84rem;">
             <i class="bi bi-clock-history me-1"></i> Por calificar ({{ resumen_actividades.pendientes_calificar }})
         </button>
         <button type="button" class="btn rounded-pill px-4 py-2 fw-bold small transition tab-btn-act shadow-2xs" id="tab-btn-Vencida" onclick="filtrarPorEstadoRapido('Vencida');"
@@ -679,31 +694,31 @@
     </div>
 
     <!-- 4. LISTADO PRINCIPAL DE ACTIVIDADES (TABLA OFICIAL) -->
-    <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-5" style="border-color: #fce7f3 !important;">
+    <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-5" style="border-color: var(--color-acento) !important;">
         <div class="table-responsive">
             <table class="table align-middle table-hover mb-0" id="tabla-actividades-docente">
-                <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
                     <tr>
-                        <th class="text-center py-3" style="width: 45px; color: #be185d; font-size: 0.76rem;">#</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ACTIVIDAD</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ASIGNATURA</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">GRADO / GRUPO</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA ENTREGA</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO</th>
-                        <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">ENTREGAS</th>
-                        <th class="py-3 text-center" style="color: #be185d; font-size: 0.76rem;">CALIFICADAS</th>
-                        <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem;">ACCIONES</th>
+                        <th class="text-center py-3" style="width: 45px; color: var(--color-secundario); font-size: 0.76rem;">#</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ACTIVIDAD</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ASIGNATURA</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">GRADO / GRUPO</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">FECHA ENTREGA</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ESTADO</th>
+                        <th class="py-3 text-center" style="color: var(--color-secundario); font-size: 0.76rem;">ENTREGAS</th>
+                        <th class="py-3 text-center" style="color: var(--color-secundario); font-size: 0.76rem;">CALIFICADAS</th>
+                        <th class="py-3 text-end" style="color: var(--color-secundario); font-size: 0.76rem;">ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody id="tbody-actividades-lista">
                     <!-- Fila de Estado Vacío Profesional Dinámico -->
                     <tr id="fila-estado-vacio-actividades" style="display: none;">
                         <td colspan="9" class="text-center py-5">
-                            <div class="p-4 rounded-4 mx-auto text-center" style="max-width: 460px; background: #fafafa; border: 1.5px dashed #fce7f3;">
-                                <i class="bi bi-journal-x fs-1 d-block mb-2" style="color: #db2777;"></i>
+                            <div class="p-4 rounded-4 mx-auto text-center" style="max-width: 460px; background: #fafafa; border: 1.5px dashed var(--color-acento);">
+                                <i class="bi bi-journal-x fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
                                 <h5 class="fw-bold text-dark mb-1" id="vacio-titulo">No hay actividades en borrador.</h5>
                                 <p class="text-muted small mb-3" id="vacio-mensaje">No existen actividades en este estado actualmente.</p>
-                                <a href="{% url 'crear_actividad_digital' %}" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777; font-size: 0.86rem;">
+                                <a href="{% url 'crear_actividad_digital' %}" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.86rem;">
                                     <i class="bi bi-plus-circle-fill me-1.5"></i> + Crear Nueva Actividad
                                 </a>
                             </div>
@@ -718,17 +733,17 @@
                         data-grupo="{{ t.grupo_display }}"
                         data-estado="{% if t.esta_vencida and t.estado != 'Cerrada' %}Vencida{% else %}{{ t.estado }}{% endif %}"
                         data-porcalificar="{{ t.pendientes_calificar_count }}"
-                        style="border-bottom: 1px solid #fce7f3;">
+                        style="border-bottom: 1px solid var(--color-acento);">
                         <td class="text-center text-muted small fw-bold">{{ forloop.counter }}</td>
                         <td>
                             <div class="d-flex align-items-center gap-2.5">
                                 <div class="rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0"
-                                     style="background: #fff0f3; color: #db2777; width: 36px; height: 36px;">
+                                     style="background: #F5F2EB; color: var(--color-principal); width: 36px; height: 36px;">
                                     <i class="bi bi-file-earmark-text-fill"></i>
                                 </div>
                                 <div>
-                                    <a href="{% url 'actividades_tareas' %}?tarea_id={{ t.id }}" 
-                                       class="text-dark fw-bold text-decoration-none d-block hover-pink" style="font-size: 0.9rem;">
+                                    <a href="{% url 'temas_actividades' %}?tarea_id={{ t.id }}" 
+                                       class="text-dark fw-bold text-decoration-none d-block hover-coffee" style="font-size: 0.9rem;">
                                         {{ t.titulo }}
                                     </a>
                                     <small class="text-muted" style="font-size: 0.75rem;">
@@ -738,7 +753,7 @@
                             </div>
                         </td>
                         <td>
-                            <span class="badge rounded-pill px-2.5 py-1" style="background: #fdf2f8; color: #be185d; font-size: 0.76rem;">
+                            <span class="badge rounded-pill px-2.5 py-1" style="background: var(--color-acento); color: var(--color-secundario); font-size: 0.76rem;">
                                 {{ t.materia_nombre }}
                             </span>
                         </td>
@@ -790,19 +805,19 @@
                             <div class="dropdown d-inline-block">
                                 <button class="btn rounded-pill px-3 py-1.5 fw-bold small shadow-2xs dropdown-toggle d-inline-flex align-items-center gap-1.5"
                                         type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                                        style="background: #ffffff; color: #db2777; border: 1.5px solid #fce7f3; font-size: 0.82rem;">
+                                        style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.82rem;">
                                     Acciones
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 p-1.5" style="border-color: #fce7f3; font-size: 0.84rem;">
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 p-1.5" style="border-color: var(--color-acento); font-size: 0.84rem;">
                                     <li>
                                         <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
-                                           href="{% url 'actividades_tareas' %}?tarea_id={{ t.id }}">
+                                           href="{% url 'temas_actividades' %}?tarea_id={{ t.id }}">
                                             <i class="bi bi-eye text-muted"></i> Ver actividad y entregas
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
-                                           href="{% url 'actividades_tareas' %}?tarea_id={{ t.id }}">
+                                           href="{% url 'temas_actividades' %}?tarea_id={{ t.id }}">
                                             <i class="bi bi-award-fill text-warning"></i> Calificar entregas
                                         </a>
                                     </li>
@@ -828,7 +843,7 @@
                                         </form>
                                     </li>
                                     {% endif %}
-                                    <li><hr class="dropdown-divider my-1" style="border-color: #fce7f3;"></li>
+                                    <li><hr class="dropdown-divider my-1" style="border-color: var(--color-acento);"></li>
                                     <li>
                                         <form method="POST" action="{% url 'instructor_dashboard' %}" class="m-0" onsubmit="return confirm('¿Está seguro de eliminar esta actividad? Se trasladará a la Papelera de reciclaje.');">
                                             {% csrf_token %}
@@ -847,10 +862,10 @@
                     <tr>
                         <td colspan="9" class="text-center py-5">
                             <div class="py-4">
-                                <i class="bi bi-journal-plus fs-1 d-block mb-3" style="color: #db2777;"></i>
+                                <i class="bi bi-journal-plus fs-1 d-block mb-3" style="color: var(--color-principal);"></i>
                                 <h6 class="fw-bold text-dark mb-1">No hay actividades publicadas</h6>
                                 <p class="text-muted small mb-3">Aún no has registrado tareas o evaluaciones para tus grupos.</p>
-                                <a href="{% url 'crear_actividad_digital' %}" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                                <a href="{% url 'crear_actividad_digital' %}" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem;">
                                     <i class="bi bi-plus-circle-fill me-1"></i> + Crear actividad
                                 </a>
                             </div>
@@ -861,7 +876,7 @@
             </table>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center p-3.5 border-top bg-white" style="border-color: #fce7f3 !important;">
+        <div class="d-flex justify-content-between align-items-center p-3.5 border-top bg-white" style="border-color: var(--color-acento) !important;">
             <span class="text-muted small" id="contador-actividades-footer">
                 Mostrando {{ tareas_publicadas|length }} actividades del docente
             </span>
@@ -875,10 +890,10 @@
     <div class="modal fade" id="modalCrearActividadDocente" tabindex="-1" aria-labelledby="modalCrearActividadLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+                <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
                     <div class="d-flex align-items-center gap-2.5">
                         <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" 
-                             style="background: #ffffff; color: #db2777; width: 36px; height: 36px; border: 1px solid #fce7f3;">
+                             style="background: #ffffff; color: var(--color-principal); width: 36px; height: 36px; border: 1px solid var(--color-acento);">
                             <i class="bi bi-plus-circle-fill fs-5"></i>
                         </div>
                         <div>
@@ -942,7 +957,7 @@
 
                             <!-- VINCULAR GUÍA Y RESULTADO DE APRENDIZAJE -->
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-journal-bookmark me-1" style="color: #db2777;"></i> Guía de Aprendizaje (Recursos)</label>
+                                <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-journal-bookmark me-1" style="color: var(--color-principal);"></i> Guía de Aprendizaje (Recursos)</label>
                                 <select name="guia_id" class="form-select rounded-pill px-3 py-2">
                                     <option value="">[ Opcional: Vincular guía de la biblioteca ]</option>
                                     {% for g in guias_biblioteca %}
@@ -951,7 +966,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-bullseye me-1" style="color: #db2777;"></i> Resultado de Aprendizaje (RAP) *</label>
+                                <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-bullseye me-1" style="color: var(--color-principal);"></i> Resultado de Aprendizaje (RAP) *</label>
                                 <select name="rap_id" class="form-select rounded-pill px-3 py-2" required>
                                     <option value="">-- Seleccionar Resultado de Aprendizaje --</option>
                                     {% for r in raps_docente %}
@@ -1011,13 +1026,13 @@
                         </div>
                     </div>
 
-                    <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                    <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center" style="border-color: var(--color-acento) !important;">
                         <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
                         <div class="d-flex gap-2">
                             <button type="submit" name="estado" value="Borrador" class="btn rounded-pill px-4 py-2 fw-bold text-muted border shadow-2xs bg-white" style="border-color: #cbd5e1;">
                                 <i class="bi bi-file-earmark me-1"></i> Guardar como Borrador
                             </button>
-                            <button type="submit" name="estado" value="Publicada" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                            <button type="submit" name="estado" value="Publicada" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
                                 <i class="bi bi-send-fill me-1"></i> Publicar Inmediatamente
                             </button>
                         </div>
@@ -1108,13 +1123,13 @@ function aplicarFiltrosActividades() {
         const btn = document.getElementById(`tab-btn-${t}`);
         if (btn) {
             if (t === estado) {
-                btn.style.background = '#db2777';
+                btn.style.background = 'var(--color-principal)';
                 btn.style.color = '#ffffff';
-                btn.style.borderColor = '#db2777';
+                btn.style.borderColor = 'var(--color-principal)';
             } else {
                 btn.style.background = '#ffffff';
-                btn.style.color = (t === 'Publicada' ? '#047857' : (t === 'Borrador' ? '#475569' : (t === 'por_calificar' ? '#db2777' : (t === 'Vencida' ? '#b91c1c' : '#0f172a'))));
-                btn.style.borderColor = (t === 'Publicada' ? '#a7f3d0' : (t === 'Borrador' ? '#cbd5e1' : (t === 'por_calificar' ? '#fce7f3' : (t === 'Vencida' ? '#fecaca' : '#fce7f3'))));
+                btn.style.color = (t === 'Publicada' ? '#047857' : (t === 'Borrador' ? '#475569' : (t === 'por_calificar' ? 'var(--color-principal)' : (t === 'Vencida' ? '#b91c1c' : '#0f172a'))));
+                btn.style.borderColor = (t === 'Publicada' ? '#a7f3d0' : (t === 'Borrador' ? '#cbd5e1' : (t === 'por_calificar' ? 'var(--color-acento)' : (t === 'Vencida' ? '#fecaca' : 'var(--color-acento)'))));
             }
         }
     });
@@ -1212,9 +1227,9 @@ function abrirModalCalificar(estudianteId, nombre, calificacion, retroalimentaci
             <form method="post" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="crear_tarea">
-                <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1.5px solid #fce7f3;">
+                <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1.5px solid var(--color-acento);">
                     <div class="d-flex align-items-center gap-2">
-                        <div class="rounded-3 p-2 text-white" style="background: #db2777;">
+                        <div class="rounded-3 p-2 text-white" style="background: var(--color-principal);">
                             <i class="bi bi-journal-plus fs-5"></i>
                         </div>
                         <div>
@@ -1274,13 +1289,13 @@ function abrirModalCalificar(estudianteId, nombre, calificacion, retroalimentaci
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center" style="border-color: #fce7f3 !important;">
+                <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center" style="border-color: var(--color-acento) !important;">
                     <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
                     <div class="d-flex gap-2">
                         <button type="submit" name="estado" value="Borrador" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold">
                             <i class="bi bi-file-earmark me-1"></i> Guardar como Borrador
                         </button>
-                        <button type="submit" name="estado" value="Publicada" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border-color: #db2777;">
+                        <button type="submit" name="estado" value="Publicada" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border-color: var(--color-principal);">
                             <i class="bi bi-send-check-fill me-1"></i> Publicar Actividad
                         </button>
                     </div>

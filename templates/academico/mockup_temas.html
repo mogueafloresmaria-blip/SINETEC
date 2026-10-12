@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Temas - SINETEC{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #f8f9fa; }
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+    .tema-card {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid #eaeaea;
+        text-align: center;
+    }
+    .tema-header {
+        background: #1e3a8a; /* Azul oscuro */
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+    .tema-header i { font-size: 3rem; }
+    .tema-body { padding: 15px; }
+    .tema-title { font-weight: 700; color: #1e293b; font-size: 1.05rem; margin-bottom: 5px; }
+    .tema-subtitle { color: #64748b; font-size: 0.8rem; margin-bottom: 12px; }
+    
+    .tema-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 15px; }
+    .badge-aprobado { background: #dcfce7; color: #166534; font-size: 0.65rem; font-weight: 600; padding: 3px 6px; border-radius: 4px; }
+    .badge-publicado { background: #1e293b; color: white; font-size: 0.65rem; font-weight: 600; padding: 3px 6px; border-radius: 4px; }
+    .badge-tarjetas { background: #f1f5f9; color: #475569; font-size: 0.65rem; font-weight: 600; padding: 3px 6px; border-radius: 4px; border: 1px solid #e2e8f0; }
+    
+    .tema-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+    .tema-actions .btn { font-size: 0.75rem; padding: 4px 8px; font-weight: 600; border-radius: 4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1 fw-bold"><i class="bi bi-journal-bookmark-fill me-2 text-primary"></i> Temas / Guías</h3>
+            <p class="text-muted mb-0">Crea temas manualmente y genera contenido editable para revisión</p>
+        </div>
+        <button class="btn text-white" style="background-color: #1e3a8a;"><i class="bi bi-plus"></i> Nuevo Tema</button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body py-3">
+            <div class="row align-items-center g-3">
+                <div class="col-md-3">
+                    <label class="small text-muted mb-1">Buscar</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" placeholder="Tema, grado o materia...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label class="small text-muted mb-1">Estado</label>
+                    <select class="form-select">
+                        <option>Todos</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="small text-muted mb-1">Por página</label>
+                    <select class="form-select">
+                        <option>8</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="small text-muted mb-1">Grado</label>
+                    <select class="form-select">
+                        <option>Todos</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="small text-muted mb-1">Materia</label>
+                    <select class="form-select">
+                        <option>Todas</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <p class="text-muted small">Mostrando 1-{{ temas|length }} de 12 resultados</p>
+
+    <!-- Grid de Temas -->
+    <div class="card-grid">
+        {% for t in temas %}
+        <div class="tema-card">
+            <div class="tema-header">
+                <i class="bi bi-journal-text"></i>
+            </div>
+            <div class="tema-body">
+                <div class="tema-title">{{ t.titulo }}</div>
+                <div class="tema-subtitle">{{ t.subtitulo }}</div>
+                
+                <div class="tema-badges">
+                    <span class="badge-aprobado">aprobado</span>
+                    <span class="badge-publicado">Publicado</span>
+                    <span class="badge-tarjetas">{{ t.tarjetas }} tarjetas</span>
+                    <span class="badge-tarjetas">{{ t.preguntas }} preguntas</span>
+                </div>
+                
+                <div class="tema-actions">
+                    <button class="btn text-white" style="background-color: #1e3a8a;" data-bs-toggle="modal" data-bs-target="#modalTema"><i class="bi bi-eye"></i> Revisar</button>
+                    <button class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i> Editar</button>
+                    <button class="btn btn-outline-success"><i class="bi bi-magic"></i> Generar</button>
+                    <button class="btn btn-outline-secondary"><i class="bi bi-check2"></i> Despublicar</button>
+                    <button class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal Revisar Tema -->
+<div class="modal fade" id="modalTema" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h4 class="modal-title fw-bold" style="color: #1e293b;">Ecología de poblaciones.</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 pt-2 pb-4">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge-aprobado" style="font-size: 0.75rem;">aprobado</span>
+                    <span class="badge-publicado" style="font-size: 0.75rem;">Publicado</span>
+                    <span class="text-muted" style="font-size: 0.85rem; font-weight: 500;">Séptimo Grado - Ciencias</span>
+                </div>
+                
+                <p class="text-muted small mb-4" style="line-height: 1.6;">
+                    Explicar el tema "Ecología de poblaciones." con lenguaje claro y adecuado para el grado seleccionado. Incluir una introducción, conceptos importantes, ejemplos sencillos, tarjetas de estudio y preguntas tipo quiz. Basado en el libro de ciencia y tecnología 7 grado del los libros de MINEDUCYT
+                </p>
+                
+                <h5 class="fw-bold mb-3" style="color: #1e3a8a;"><i class="bi bi-book-half me-2"></i>Ecología de poblaciones</h5>
+                
+                <p style="font-size: 0.9rem; color: #334155; line-height: 1.6;">La ecología de poblaciones es una rama de la biología que estudia cómo viven y cambian las poblaciones de organismos en un lugar y tiempo determinados. Aprenderemos cómo las poblaciones crecen, interactúan y afectan su entorno, lo que nos ayuda a entender mejor la naturaleza que nos rodea.</p>
+                
+                <h6 class="fw-bold mt-4 mb-2" style="color: #1e293b;">¿Qué es una población?</h6>
+                <p style="font-size: 0.9rem; color: #334155; line-height: 1.6;">Una población es un grupo de organismos de la misma especie que viven juntos en un área específica. Por ejemplo, un grupo de ardillas en un parque o un conjunto de ranas en un lago forman poblaciones. Estudiar las poblaciones nos ayuda a conocer cuántos animales o plantas hay y cómo cambian con el tiempo.</p>
+                
+                <h6 class="fw-bold mt-4 mb-2" style="color: #1e293b;">Características de las poblaciones</h6>
+                <p style="font-size: 0.9rem; color: #334155; line-height: 1.6;">Las poblaciones tienen características importantes como el tamaño (cuántos individuos hay), la densidad (cuántos organismos por espacio), la distribución (cómo están repartidos) y la tasa de crecimiento (cómo aumenta o disminuye su número). Estas características se pueden medir para entender la salud de la población.</p>
+                
+                <h6 class="fw-bold mt-4 mb-2" style="color: #1e293b;">Factores que afectan el crecimiento poblacional</h6>
+                <p style="font-size: 0.9rem; color: #334155; line-height: 1.6;">El crecimiento de una población depende del nacimiento de nuevos individuos, la muerte de algunos, la inmigración (llegada de individuos) y la emigración (salida de individuos). Además, factores como el alimento, el espacio y los depredadores influyen en cómo cambia la población con el tiempo.</p>
+
+                <h6 class="fw-bold mt-4 mb-2" style="color: #1e293b;">Ejemplos sencillos de ecología de poblaciones</h6>
+                <p style="font-size: 0.9rem; color: #334155; line-height: 1.6;">Por ejemplo, si en un bosque hay muchas liebres, sus depredadores, como zorros, tendrán suficiente alimento y crecerán. Pero si las liebres disminuyen, disminuyen también los zorros porque hay menos comida. Así, las poblaciones están conectadas y afectan unas a otras.</p>
+                
+                <h6 class="fw-bold mt-4 mb-2" style="color: #1e293b;">Importancia de estudiar las poblaciones</h6>
+                <p style="font-size: 0.9rem; color: #334155; line-height: 1.6;">Estudiar las poblaciones nos ayuda a proteger animales y plantas, evitar que se extingan, y mantener el equilibrio en la naturaleza. También nos permite entender problemas como la sobrepoblación o la pérdida de biodiversidad, importantes para cuidar el medio ambiente.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

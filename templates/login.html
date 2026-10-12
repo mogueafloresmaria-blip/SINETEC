@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,21 +14,35 @@
     
     <style>
         :root {
-            --bg-deep: #FDF2F4;
-            --bg-surface: #FFFFFF;
-            --bg-card: #FFFFFF;
-            --border-subtle: #FCE7F3;
-            --border-focus: #DB2777;
+            /* Variables Dinamicas Inyectadas */
+            --color-principal: {{ tema_colores.color_primario|default:'#8B5E3C' }};
+            --color-secundario: {{ tema_colores.color_secundario|default:'#5A3825' }};
+            --color-acento: {{ tema_colores.color_acento|default:'#EFEBE4' }};
+            --color-fondo: {{ tema_colores.color_fondo|default:'#F8F6F0' }};
+            --color-titulo: {{ tema_colores.color_titulos|default:'#2D231E' }};
+            --color-texto: {{ tema_colores.color_texto|default:'#3E322A' }};
+            --color-boton: {{ tema_colores.color_botones|default:'#8B5E3C' }};
+            --color-texto-boton: {{ tema_colores.color_texto_botones|default:'#FFFFFF' }};
+            --color-enlace: {{ tema_colores.color_enlaces|default:'#8B5E3C' }};
+            --color-tarjeta: {{ tema_colores.color_tarjetas|default:'#FFFFFF' }};
+            --color-navbar: {{ tema_colores.color_navbar|default:'#FFFFFF' }};
+            --color-texto-nav: {{ tema_colores.color_texto_nav|default:'#2D231E' }};
+
+            --bg-deep: var(--color-fondo);
+            --bg-surface: var(--color-tarjeta);
+            --bg-card: var(--color-tarjeta);
+            --border-subtle: #E5DFD5;
+            --border-focus: var(--color-principal);
             
-            --primary-accent: #DB2777;
-            --primary-light: #F472B6;
-            --accent-sky: #FCE7F3;
-            --primary-gradient: linear-gradient(135deg, #DB2777 0%, #831843 100%);
-            --accent-glow: rgba(219, 39, 119, 0.28);
+            --primary-accent: var(--color-principal);
+            --primary-light: #B8977E;
+            --accent-sky: var(--color-acento);
+            --primary-gradient: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-principal) 100%);
+            --accent-glow: rgba(139, 94, 60, 0.22);
             
-            --text-heading: #1E293B;
-            --text-body: #334155;
-            --text-muted: #64748B;
+            --text-heading: var(--color-titulo);
+            --text-body: var(--color-texto);
+            --text-muted: #75675E;
             --emerald-accent: #10B981;
         }
 
@@ -40,9 +54,9 @@
             background-color: var(--bg-deep);
             color: var(--text-body);
             background-image: 
-                radial-gradient(circle at 12% 15%, rgba(251, 207, 232, 0.50), transparent 45%),
-                radial-gradient(circle at 88% 75%, rgba(244, 114, 182, 0.30), transparent 50%),
-                radial-gradient(circle at 50% 90%, rgba(253, 242, 244, 0.70), transparent 60%);
+                radial-gradient(circle at 12% 15%, rgba(229, 223, 213, 0.60), transparent 45%),
+                radial-gradient(circle at 88% 75%, rgba(184, 151, 126, 0.25), transparent 50%),
+                radial-gradient(circle at 50% 90%, rgba(248, 246, 240, 0.80), transparent 60%);
             background-attachment: fixed;
             display: flex;
             align-items: center;
@@ -66,7 +80,7 @@
             border: 1px solid var(--border-subtle);
             border-radius: 26px;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(219, 39, 119, 0.12), 0 2px 10px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 50px rgba(90, 56, 37, 0.10), 0 2px 10px rgba(0, 0, 0, 0.04);
             position: relative;
             z-index: 1;
         }
@@ -83,7 +97,7 @@
 
         /* Left Hero Panel */
         .login-hero {
-            background: linear-gradient(155deg, #FFF1F2 0%, #FCE7F3 100%);
+            background: linear-gradient(155deg, #FAF8F5 0%, var(--color-acento) 100%);
             border-right: 1px solid var(--border-subtle);
             padding: clamp(36px, 5vw, 56px) clamp(28px, 4vw, 48px);
             color: var(--text-heading);
@@ -102,7 +116,7 @@
             width: 320px;
             height: 320px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(244, 114, 182, 0.35) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(184, 151, 126, 0.25) 0%, transparent 70%);
             pointer-events: none;
         }
 
@@ -121,21 +135,21 @@
             background: #FFFFFF;
             display: grid;
             place-items: center;
-            box-shadow: 0 4px 16px rgba(219, 39, 119, 0.25);
-            border: 1px solid #FCE7F3;
+            box-shadow: 0 4px 16px rgba(90, 56, 37, 0.15);
+            border: 1px solid #E5DFD5;
         }
 
         .hero-brand-name {
             font-size: 1.5rem;
             font-weight: 800;
-            color: #831843;
+            color: var(--color-secundario);
             letter-spacing: -0.02em;
             line-height: 1.1;
         }
 
         .hero-brand-sub {
             font-size: 0.78rem;
-            color: #BE185D;
+            color: var(--color-secundario);
             font-weight: 600;
         }
 
@@ -144,14 +158,14 @@
             align-items: center;
             gap: 8px;
             background: #FFFFFF;
-            border: 1px solid #FBCFE8;
+            border: 1px solid #E0D8CE;
             padding: 6px 16px;
             border-radius: 999px;
             font-size: 0.8rem;
             font-weight: 700;
-            color: #9D174D;
+            color: var(--color-secundario);
             margin-bottom: 22px;
-            box-shadow: 0 2px 8px rgba(219, 39, 119, 0.10);
+            box-shadow: 0 2px 8px rgba(90, 56, 37, 0.06);
         }
 
         .hero-badge-pill .dot {
@@ -172,14 +186,14 @@
         }
 
         .hero-title .gradient-text {
-            background: linear-gradient(135deg, #831843 0%, #BE185D 60%, #DB2777 100%);
+            background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 60%, var(--color-principal) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .hero-desc {
             font-size: 0.94rem;
-            color: #475569;
+            color: #5A4A42;
             line-height: 1.6;
             margin-bottom: 28px;
         }
@@ -197,17 +211,17 @@
             align-items: center;
             gap: 12px;
             background: #FFFFFF;
-            border: 1px solid rgba(244, 114, 182, 0.40);
+            border: 1px solid #E5DFD5;
             border-radius: 14px;
             padding: 10px 14px;
             font-size: 0.82rem;
-            box-shadow: 0 2px 6px rgba(219, 39, 119, 0.05);
+            box-shadow: 0 2px 6px rgba(90, 56, 37, 0.04);
             transition: all 0.2s ease;
         }
 
         .role-preview-item:hover {
-            background: #FFF1F2;
-            border-color: #DB2777;
+            background: #FAF8F5;
+            border-color: var(--color-principal);
             transform: translateX(4px);
         }
 
@@ -297,7 +311,7 @@
             display: block;
             font-size: 0.84rem;
             font-weight: 700;
-            color: #1E293B;
+            color: var(--color-titulo);
             margin-bottom: 8px;
             letter-spacing: 0.01em;
         }
@@ -310,11 +324,11 @@
 
         .input-icon-group input {
             width: 100%;
-            background: #F8FAFC;
-            border: 1px solid #CBD5E1;
+            background: #FAF8F5;
+            border: 1px solid #E5DFD5;
             border-radius: 12px;
             padding: 13px 44px 13px 44px;
-            color: #0F172A;
+            color: var(--color-titulo);
             font-size: 0.95rem;
             font-family: inherit;
             outline: none;
@@ -323,14 +337,14 @@
 
         .input-icon-group input:focus {
             background: #FFFFFF;
-            border-color: #DB2777;
-            box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.22);
+            border-color: var(--color-principal);
+            box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.20);
         }
 
         .input-icon-group .icon-left {
             position: absolute;
             left: 15px;
-            color: #64748B;
+            color: #75675E;
             font-size: 1.15rem;
             pointer-events: none;
         }
@@ -340,7 +354,7 @@
             right: 14px;
             background: transparent;
             border: none;
-            color: #64748B;
+            color: #75675E;
             cursor: pointer;
             padding: 4px;
             font-size: 1.15rem;
@@ -350,7 +364,7 @@
         }
 
         .password-toggle-btn:hover {
-            color: #0F172A;
+            color: var(--color-titulo);
         }
 
         .form-options {
@@ -365,34 +379,34 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #475569;
+            color: #5A4A42;
             cursor: pointer;
             font-weight: 500;
         }
 
         .form-options input[type="checkbox"] {
-            accent-color: #DB2777;
+            accent-color: var(--color-principal);
             width: 16px;
             height: 16px;
             border-radius: 4px;
         }
 
         .forgot-link {
-            color: #DB2777;
+            color: var(--color-principal);
             text-decoration: none;
             font-weight: 600;
             transition: color 0.2s;
         }
 
         .forgot-link:hover {
-            color: #BE185D;
+            color: var(--color-secundario);
             text-decoration: underline;
         }
 
         .btn-submit {
             width: 100%;
-            background: linear-gradient(135deg, #DB2777 0%, #BE185D 100%);
-            color: #FFFFFF;
+            background: var(--color-boton);
+            color: var(--color-texto-boton);
             border: none;
             padding: 14px 24px;
             border-radius: 12px;
@@ -403,21 +417,22 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            box-shadow: 0 6px 20px rgba(219, 39, 119, 0.35);
+            box-shadow: 0 6px 20px rgba(90, 56, 37, 0.28);
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 28px rgba(219, 39, 119, 0.45);
-            background: linear-gradient(135deg, #BE185D 0%, #831843 100%);
+            box-shadow: 0 10px 28px rgba(90, 56, 37, 0.38);
+            background: var(--color-boton);
+            filter: brightness(0.9);
         }
 
         /* Demo Role Quick Switcher for evaluation */
         .demo-roles-box {
             margin-top: 26px;
             padding-top: 20px;
-            border-top: 1px solid #E2E8F0;
+            border-top: 1px solid #E5DFD5;
             text-align: center;
         }
 
@@ -425,7 +440,7 @@
             font-size: 0.74rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #475569;
+            color: #5A4A42;
             font-weight: 800;
             margin-bottom: 12px;
             display: flex;
@@ -446,11 +461,11 @@
 
         .btn-role-quick {
             background: #FFFFFF;
-            border: 1px solid #FCE7F3;
+            border: 1px solid #E5DFD5;
             border-radius: 10px;
             padding: 8px 6px;
             font-size: 0.76rem;
-            color: #831843;
+            color: var(--color-secundario);
             font-weight: 700;
             cursor: pointer;
             display: flex;
@@ -459,14 +474,22 @@
             gap: 5px;
             transition: all 0.2s ease;
             text-align: center;
-            box-shadow: 0 1px 3px rgba(219, 39, 119, 0.05);
+            box-shadow: 0 1px 3px rgba(90, 56, 37, 0.04);
         }
 
         .btn-role-quick:hover {
-            background: #FFF1F2;
-            border-color: #DB2777;
-            color: #BE185D;
+            background: #FAF8F5;
+            border-color: var(--color-principal);
+            color: var(--color-secundario);
             transform: translateY(-1px);
+        }
+
+        .demo-student-notice {
+            display: none;
+            margin: 0 0 14px;
+            color: #047857;
+            font-size: 0.84rem;
+            font-weight: 600;
         }
 
         .login-back-nav {
@@ -475,7 +498,7 @@
         }
 
         .login-back-nav a {
-            color: #64748B;
+            color: #75675E;
             font-size: 0.84rem;
             font-weight: 600;
             text-decoration: none;
@@ -486,7 +509,7 @@
         }
 
         .login-back-nav a:hover {
-            color: #DB2777;
+            color: var(--color-principal);
         }
     </style>
 </head>
@@ -577,7 +600,7 @@
         <section class="login-panel">
             <div class="login-header">
                 <h1>Iniciar Sesión</h1>
-                <p>Ingresa tus credenciales para acceder a tu panel institucional</p>
+                <p id="loginInstructions">Ingresa tus credenciales para acceder a tu panel institucional</p>
             </div>
 
             {% if error_message %}
@@ -598,8 +621,9 @@
 
             <form method="post" autocomplete="off" id="sinetecLoginForm">
                 {% csrf_token %}
+                <input type="hidden" name="demo_access" id="demoAccess" value="">
 
-                <div class="form-group">
+                <div class="form-group" id="usernameGroup">
                     <label class="form-label" for="username">Usuario o Documento de Identidad</label>
                     <div class="input-icon-group">
                         <i class="bi bi-person icon-left"></i>
@@ -607,7 +631,7 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="passwordGroup">
                     <label class="form-label" for="password">Contraseña de Seguridad</label>
                     <div class="input-icon-group">
                         <i class="bi bi-lock icon-left"></i>
@@ -618,7 +642,7 @@
                     </div>
                 </div>
 
-                <div class="form-options">
+                <div class="form-options" id="loginOptions">
                     <label>
                         <input type="checkbox" name="remember_me">
                         <span>Recordar sesión</span>
@@ -626,8 +650,11 @@
                     <a href="{% url 'recuperar_contrasena' %}" class="forgot-link">¿Olvidaste tu clave?</a>
                 </div>
 
+                <p class="demo-student-notice" id="demoStudentNotice" role="status">
+                    Cuenta estudiantil de demostración seleccionada. Presiona “Entrar” para abrir el panel.
+                </p>
                 <button class="btn-submit" type="submit" id="btnSubmitLogin">
-                    <span>Ingresar al Sistema</span>
+                    <span id="submitLabel">Ingresar al Sistema</span>
                     <i class="bi bi-arrow-right-short" style="font-size: 1.3rem;"></i>
                 </button>
             </form>
@@ -639,24 +666,24 @@
                     <span>Cuentas de Prueba para Evaluación</span>
                 </div>
                 <div class="demo-buttons-grid">
-                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('admin', 'Admin2026*')">
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('admin', '{{ demo_password }}')">
                         👑 Admin
                     </button>
-                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('rector', 'Rector2026*')">
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('rector', '{{ demo_password }}')">
                         🏫 Rectoría
                     </button>
-                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('secretaria', 'Secretaria2026*')">
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('secretaria', '{{ demo_password }}')">
                         📋 Secretaría
                     </button>
-                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('docente', 'Docente2026*')">
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('docente', '{{ demo_password }}')">
                         👩‍🏫 Docente
                     </button>
-                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('est1', 'Estudiante10*')">
-                        👨‍🎓 Estudiante (10°)
+                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('1001001001', '{{ demo_password_estudiante|default:"1001001001" }}')">
+                        👨‍🎓 Estudiante
                     </button>
-                    <button type="button" class="btn-role-quick" onclick="autocompletarCredenciales('familia', 'Familia2026*')">
+                    <a href="{% url 'familia_portal' %}" class="btn-role-quick text-decoration-none d-inline-flex align-items-center justify-content-center">
                         👨‍👩‍👧 Familia
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -683,11 +710,50 @@
         }
 
         function autocompletarCredenciales(user, pass) {
+            if (user === 'familia') {
+                window.location.href = "{% url 'familia_portal' %}";
+                return;
+            }
             const userInput = document.getElementById('username');
             const passInput = document.getElementById('password');
+            const demoAccess = document.getElementById('demoAccess');
+            const usernameGroup = document.getElementById('usernameGroup');
+            const passwordGroup = document.getElementById('passwordGroup');
+            const loginOptions = document.getElementById('loginOptions');
+            const demoStudentNotice = document.getElementById('demoStudentNotice');
+            const loginInstructions = document.getElementById('loginInstructions');
+            const submitLabel = document.getElementById('submitLabel');
+            demoAccess.value = '';
+            [userInput, passInput].forEach(function(input) {
+                input.disabled = false;
+                input.required = true;
+            });
+            usernameGroup.hidden = false;
+            passwordGroup.hidden = false;
+            loginOptions.hidden = false;
+            demoStudentNotice.style.display = 'none';
+            loginInstructions.textContent = 'Ingresa tus credenciales para acceder a tu panel institucional';
+            submitLabel.textContent = 'Ingresar al Sistema';
             userInput.value = user;
             passInput.value = pass;
             userInput.focus();
+        }
+
+        function seleccionarDemoEstudiante() {
+            const userInput = document.getElementById('username');
+            const passInput = document.getElementById('password');
+            document.getElementById('demoAccess').value = 'student';
+            [userInput, passInput].forEach(function(input) {
+                input.value = '';
+                input.required = false;
+                input.disabled = true;
+            });
+            document.getElementById('usernameGroup').hidden = true;
+            document.getElementById('passwordGroup').hidden = true;
+            document.getElementById('loginOptions').hidden = true;
+            document.getElementById('demoStudentNotice').style.display = 'block';
+            document.getElementById('loginInstructions').textContent = 'Acceso de demostración para estudiante';
+            document.getElementById('submitLabel').textContent = 'Entrar como Estudiante';
         }
     </script>
 </body>

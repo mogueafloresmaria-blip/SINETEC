@@ -44,15 +44,14 @@ body{background:#f3f5f9 !important;}
       <i class="bi bi-people-fill text-primary" style="font-size:1.4rem;"></i>
       <h1 class="h3 fw-bold mb-0">Directorio de Estudiantes</h1>
     </div>
-    <div class="d-flex gap-2">
-      <a href="{% url 'importar_estudiantes_masivo' %}" class="btn btn-primary fw-bold rounded-pill px-3 shadow-sm">
-        <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> + Carga Masiva
-      </a>
-      <a href="{% url 'registrar_aprendiz' %}" class="btn btn-success fw-bold rounded-pill px-3 shadow-sm">
-        <i class="bi bi-person-plus-fill me-1"></i> + Matricular Estudiante
-      </a>
-    </div>
   </div>
+
+  {% if error_importacion %}
+  <div class="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error_importacion }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  </div>
+  {% endif %}
 
   <!-- 3 STAT CARDS -->
   <div class="row g-3 mb-4">
@@ -85,18 +84,15 @@ body{background:#f3f5f9 !important;}
     </div>
   </div>
 
-  <!-- BARRA DE BÚSQUEDA + BOTÓN NUEVO ALUMNO -->
+  <!-- BARRA DE BÚSQUEDA -->
   <div class="dir-searchbar d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between">
-    <form method="get" action="" class="d-flex gap-2 flex-grow-1" style="max-width:480px;">
+    <form method="get" action="" class="d-flex gap-2 flex-grow-1" style="max-width:540px;">
       <div class="input-group">
         <span class="input-group-text bg-white border-end-0 text-muted" style="border-color:#e2e8f0;"><i class="bi bi-search"></i></span>
-        <input type="text" name="q" value="{{ query }}" class="form-control border-start-0 ps-0" placeholder="Buscar alumno..." style="border-color:#e2e8f0;font-size:.9rem;">
+        <input type="text" name="q" value="{{ query }}" class="form-control border-start-0 ps-0" placeholder="Buscar alumno por nombre, apellido, documento o grado..." style="border-color:#e2e8f0;font-size:.9rem;">
       </div>
       <button type="submit" class="btn btn-outline-secondary px-3" style="border-radius:8px;font-size:.9rem;">Buscar</button>
     </form>
-    <a href="{% url 'registrar_aprendiz' %}" class="btn text-white fw-semibold px-4 py-2 d-inline-flex align-items-center gap-2" style="background:linear-gradient(135deg,#4f46e5,#6366f1);border-radius:9px;border:none;font-size:.9rem;white-space:nowrap;">
-      <i class="bi bi-person-plus-fill"></i> + Nuevo Alumno
-    </a>
   </div>
 
   <!-- TABLA DE ALUMNOS -->
@@ -105,16 +101,17 @@ body{background:#f3f5f9 !important;}
       <table class="table table-hover mb-0">
         <thead>
           <tr>
-            <th class="ps-4">ALUMNO</th>
-            <th>DNI / PASAPORTE</th>
-            <th>CORREO</th>
-            <th class="text-center">ESTADO</th>
+            <th class="ps-4">NOMBRE</th>
+            <th>DOCUMENTO</th>
+            <th>TARJETA DEL ESTUDIANTE</th>
+            <th>GRADO Y GRUPO</th>
+            <th class="text-center">CUENTA</th>
             <th class="text-end pe-4">ACCIONES</th>
           </tr>
         </thead>
         <tbody>
           {% for m in matriculas %}
-          {% with colors="#6366f1,#8b5cf6,#06b6d4,#10b981,#f59e0b,#f43f5e,#14b8a6,#ec4899" %}
+          {% with colors="#6366f1,#8b5cf6,#06b6d4,#10b981,#f59e0b,#A98D77,#14b8a6,var(--color-principal)" %}
           <tr>
             <td class="ps-4">
               <div class="d-flex align-items-center gap-3">
@@ -128,17 +125,17 @@ body{background:#f3f5f9 !important;}
               </div>
             </td>
             <td><span class="font-monospace fw-semibold text-dark" style="font-size:.88rem;">{{ m.aprendiz.perfil.numero_documento|default:'—' }}</span></td>
-            <td class="text-muted" style="font-size:.85rem;">{{ m.aprendiz.email|default:'—' }}</td>
+            <td><span class="font-monospace text-secondary" style="font-size:.88rem;">{{ m.aprendiz.perfil.numero_tarjeta_estudiante|default:'—' }}</span></td>
+            <td class="text-muted" style="font-size:.85rem;">{{ m.grado_escolar }}° {{ m.seccion }}</td>
             <td class="text-center">
-              {% if m.estado_formacion == 'En Formacion' %}<span class="dir-badge-act">Activo</span>
-              {% elif m.estado_formacion == 'Certificado' %}<span class="dir-badge-cer">Certificado</span>
-              {% else %}<span class="dir-badge-baja">{{ m.get_estado_formacion_display }}</span>{% endif %}
+              {% if m.aprendiz.is_active %}<span class="dir-badge-act">Activa</span>
+              {% else %}<span class="dir-badge-baja">Inactiva</span>{% endif %}
             </td>
             <td class="text-end pe-4">
               <div class="d-inline-flex gap-1">
-                <a href="{% url 'estudiante_detalle' m.aprendiz.pk %}" class="dir-btn dir-btn-edit" title="Editar"><i class="bi bi-pencil-fill"></i></a>
-                <a href="{% url 'estudiante_cambiar_estado' m.pk %}?estado=Desertado" class="dir-btn dir-btn-del" title="Dar de baja"
-                   onclick="return confirm('¿Dar de baja a este alumno?');"><i class="bi bi-person-x-fill"></i></a>
+                <a href="{% url 'estudiante_detalle' m.aprendiz.pk %}" class="dir-btn dir-btn-edit text-primary border-primary bg-white" title="Ver"><i class="bi bi-eye-fill"></i></a>
+                <a href="{% url 'estudiante_editar' m.aprendiz.pk %}" class="dir-btn dir-btn-edit" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                <a href="{% url 'editar_usuario' m.aprendiz.pk %}" class="dir-btn border-secondary bg-light text-secondary" title="Gestionar cuenta"><i class="bi bi-gear-fill"></i></a>
               </div>
             </td>
           </tr>

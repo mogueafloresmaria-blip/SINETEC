@@ -7,15 +7,15 @@
 
     <!-- HERO BANNER EVENTOS -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+         style="background: linear-gradient(135deg, #FAF8F5 0%, #F5F2EB 50%, var(--color-acento) 100%); border: 1px solid var(--color-acento);">
         <div class="row align-items-center">
             <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
-                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                     style="background: #ffffff; color: var(--color-principal); width: 62px; height: 62px; border: 1px solid var(--color-acento);">
                     <i class="bi bi-calendar3-event-fill" style="font-size: 2rem;"></i>
                 </div>
                 <div>
-                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                    <div class="text-uppercase fw-bold mb-1" style="color: var(--color-principal); font-size: 0.76rem; letter-spacing: 0.6px;">
                         Cronograma Institucional
                     </div>
                     <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
@@ -29,7 +29,7 @@
             <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
                 <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
                         data-bs-toggle="modal" data-bs-target="#modalCrearEvento"
-                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                        style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem;">
                     <i class="bi bi-calendar-plus"></i> + Programar Evento
                 </button>
             </div>
@@ -39,29 +39,29 @@
     <!-- LISTA DE EVENTOS PROGRAMADOS Y ACTIVIDADES CON ENTREGA -->
     <div class="row g-4">
         <div class="col-lg-7">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-calendar-check-fill fs-5" style="color: #db2777;"></i>
+                        <i class="bi bi-calendar-check-fill fs-5" style="color: var(--color-principal);"></i>
                         <h6 class="fw-bold text-dark mb-0">Eventos Institucionales Registrados</h6>
                     </div>
-                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3;">
+                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: var(--color-acento); color: var(--color-principal); border: 1px solid var(--color-acento);">
                         {{ eventos_lista|length }} eventos
                     </span>
                 </div>
 
                 <div class="d-flex flex-column gap-3">
                     {% for ev in eventos_lista %}
-                    <div class="p-3.5 rounded-4 border bg-white shadow-2xs d-flex align-items-start gap-3" style="border-color: #fce7f3 !important;">
+                    <div class="p-3.5 rounded-4 border bg-white shadow-2xs d-flex align-items-start gap-3" style="border-color: var(--color-acento) !important;">
                         <div class="text-center px-3 py-2 rounded-3 fw-bold flex-shrink-0"
-                             style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3; min-width: 65px;">
+                             style="background: #F5F2EB; color: var(--color-principal); border: 1px solid var(--color-acento); min-width: 65px;">
                             <div class="fs-5 lh-1">{{ ev.fecha|date:"d" }}</div>
                             <small class="text-uppercase" style="font-size: 0.68rem;">{{ ev.fecha|date:"M" }}</small>
                         </div>
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <strong class="text-dark" style="font-size: 0.95rem;">{{ ev.titulo }}</strong>
-                                <span class="badge rounded-pill px-2.5 py-0.5" style="background: #fdf2f8; color: #db2777; font-size: 0.72rem;">
+                                <span class="badge rounded-pill px-2.5 py-0.5" style="background: var(--color-acento); color: var(--color-principal); font-size: 0.72rem;">
                                     {{ ev.tipo_evento|default:'Académico' }}
                                 </span>
                             </div>
@@ -73,7 +73,7 @@
                     </div>
                     {% empty %}
                     <div class="text-center py-5 text-muted">
-                        <i class="bi bi-calendar-x fs-1 d-block mb-2" style="color: #db2777;"></i>
+                        <i class="bi bi-calendar-x fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
                         <h6 class="fw-bold text-dark">No hay eventos adicionales programados</h6>
                         <small class="text-muted">Utilice el botón superior para agendar reuniones o jornadas pedagógicas.</small>
                     </div>
@@ -83,10 +83,10 @@
         </div>
 
         <div class="col-lg-5">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: #fce7f3 !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-clock-history fs-5" style="color: #db2777;"></i>
+                        <i class="bi bi-clock-history fs-5" style="color: var(--color-principal);"></i>
                         <h6 class="fw-bold text-dark mb-0">Próximos Vencimientos de Tareas</h6>
                     </div>
                 </div>
@@ -99,7 +99,7 @@
                             <strong class="text-dark d-block small">{{ t.titulo }}</strong>
                             <small class="text-muted">{{ t.materia_nombre }} · Grado {{ t.grupo_display }}</small>
                         </div>
-                        <span class="badge rounded-pill px-2.5 py-1 text-danger fw-bold" style="background: #fff1f2; border: 1px solid #fecdd3; font-size: 0.72rem;">
+                        <span class="badge rounded-pill px-2.5 py-1 text-danger fw-bold" style="background: var(--color-fondo); border: 1px solid #fecdd3; font-size: 0.72rem;">
                             {{ t.fecha_limite|date:"d/m H:i" }}
                         </span>
                     </div>
@@ -118,9 +118,9 @@
 <div class="modal fade" id="modalCrearEvento" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-calendar-plus fs-5" style="color: #db2777;"></i>
+                    <i class="bi bi-calendar-plus fs-5" style="color: var(--color-principal);"></i>
                     <h6 class="modal-title fw-bold text-dark">Programar Evento / Reunión</h6>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -158,9 +158,9 @@
                         <textarea name="descripcion" rows="2" class="form-control rounded-4 px-3 py-2" placeholder="Detalle los objetivos del evento o reunión..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: var(--color-acento) !important;">
                     <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
                         <i class="bi bi-save me-1"></i> Guardar Evento
                     </button>
                 </div>

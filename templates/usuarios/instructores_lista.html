@@ -34,7 +34,10 @@ body { background: #f3f5f9 !important; }
       <h1 class="h3 fw-bold text-dark mb-0">Gestión de Profesores y Docentes</h1>
       <p class="text-muted small mb-0 mt-1">Directorio oficial, especialidades, asignaciones lectivas y horarios pedagógicos.</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
+      <button type="button" class="btn fw-bold rounded-3 px-3.5 py-2 d-inline-flex align-items-center gap-1.5 shadow-sm text-dark bg-white border" data-bs-toggle="modal" data-bs-target="#modalImportarInstructores" style="border-color: #cbd5e1 !important;">
+        <i class="bi bi-file-earmark-spreadsheet-fill text-success"></i> Carga Masiva de Instructores
+      </button>
       <a href="{% url 'crear_instructor' %}" class="btn-doc-new">
         <i class="bi bi-person-plus-fill"></i> + Registrar Profesor
       </a>
@@ -185,5 +188,105 @@ body { background: #f3f5f9 !important; }
     </div>
   </div>
 
+</div>
+
+<!-- Modal Institucional para Registro Masivo de Instructores -->
+<div class="modal fade" id="modalImportarInstructores" tabindex="-1" aria-labelledby="modalImportarInstructoresLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header text-white px-4 py-3" style="background-color: #04324D;">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="p-2 rounded-3 bg-white bg-opacity-10 text-white">
+                        <i class="bi bi-file-earmark-spreadsheet-fill fs-5" style="color: #29AAE3;"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalImportarInstructoresLabel">
+                            Registro Masivo de Profesores / Docentes
+                        </h5>
+                        <small class="text-white-50">Planta Docente Institucional · EDUNOVA</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <form method="post" action="{% url 'importar_instructores_masivo' %}?next={% url 'instructores_lista' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'instructores_lista' %}">
+                <div class="modal-body p-4">
+                    <!-- Paso 1: Descargar Plantilla Oficial -->
+                    <div class="card border border-success border-opacity-25 bg-success bg-opacity-10 rounded-3 p-3 mb-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div>
+                                <h6 class="fw-bold text-success mb-1">
+                                    <i class="bi bi-download me-1"></i> 1. Descargue la Plantilla Oficial Excel
+                                </h6>
+                                <p class="text-muted small mb-0">
+                                    Utilice el formato estandarizado para evitar errores en las columnas y datos obligatorios.
+                                </p>
+                            </div>
+                            <div>
+                                <a href="{% url 'plantilla_instructores' %}" class="btn btn-sm text-white fw-semibold px-3 py-2 text-nowrap" style="background-color: var(--color-principal);">
+                                    <i class="bi bi-file-earmark-excel-fill me-1"></i> Descargar Plantilla .XLSX
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 2: Instrucciones y Reglas de Negocio -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 h-100 bg-light">
+                                <h6 class="fw-bold text-dark mb-2 small text-uppercase">
+                                    <i class="bi bi-check2-circle text-success me-1"></i> Columnas Requeridas
+                                </h6>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li><strong>tipo_documento:</strong> CC, CE, PEP, PPT</li>
+                                    <li><strong>numero_documento:</strong> Documento único</li>
+                                    <li><strong>nombres:</strong> Nombres del profesor</li>
+                                    <li><strong>apellidos:</strong> Apellidos del profesor</li>
+                                    <li><strong>correo:</strong> Correo institucional o personal</li>
+                                    <li><strong>telefono:</strong> Opcional</li>
+                                    <li><strong>especialidad:</strong> Asignatura o área asignada</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 h-100 bg-light">
+                                <h6 class="fw-bold text-dark mb-2 small text-uppercase">
+                                    <i class="bi bi-shield-lock-fill text-primary me-1"></i> Seguridad y Acceso
+                                </h6>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li>Se asigna automáticamente el rol <strong>Docente</strong>.</li>
+                                    <li>Usuario generado: <code>prof_&lt;documento&gt;</code></li>
+                                    <li>Contraseña inicial: <code>Edu&lt;4_últimos_dígitos&gt;*</code></li>
+                                    <li>Verificación atómica en base de datos.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 3: Selección del Archivo -->
+                    <div class="mb-3">
+                        <label for="archivoInstructores" class="form-label fw-bold text-dark">
+                            2. Seleccione el archivo diligenciado (.xlsx o .csv):
+                        </label>
+                        <input class="form-control form-control-lg border-2" type="file" id="archivoInstructores" name="archivo" accept=".xlsx,.csv,.txt" required>
+                        <div class="form-text small">
+                            Formatos aceptados: Libros de Excel (.xlsx) o archivos delimitados por comas (.csv).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn text-white fw-bold px-4" style="background-color: #04324D;">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Procesar e Importar Instructores
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

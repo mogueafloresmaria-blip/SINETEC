@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 {% load static %}
 <html lang="es" class="scroll-smooth">
 <head>
@@ -14,6 +14,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Colores Personalizados Globales EDUNOVA -->
+    <style>
+        :root {
+            --color-principal: {{ tema_colores.color_primario|default:'#8B5E3C' }};
+            --color-secundario: {{ tema_colores.color_secundario|default:'#5A3825' }};
+            --color-acento: {{ tema_colores.color_acento|default:'#EFEBE4' }};
+            --color-fondo: {{ tema_colores.color_fondo|default:'#F8F6F0' }};
+            --color-titulo: {{ tema_colores.color_titulos|default:'#2D231E' }};
+            --color-texto: {{ tema_colores.color_texto|default:'#3E322A' }};
+            --color-boton: {{ tema_colores.color_botones|default:'#8B5E3C' }};
+            --color-texto-boton: {{ tema_colores.color_texto_botones|default:'#FFFFFF' }};
+            --color-enlace: {{ tema_colores.color_enlaces|default:'#8B5E3C' }};
+            --color-tarjeta: {{ tema_colores.color_tarjetas|default:'#FFFFFF' }};
+            --color-navbar: {{ tema_colores.color_navbar|default:'#FFFFFF' }};
+            --color-texto-nav: {{ tema_colores.color_texto_nav|default:'#2D231E' }};
+        }
+    </style>
     <script>
         tailwind.config = {
             theme: {
@@ -22,9 +39,9 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        primary: '#db2777',
-                        primaryDark: '#831843',
-                        accent: '#f472b6',
+                        primary: 'var(--color-boton)',
+                        primaryDark: 'var(--color-boton)',
+                        accent: 'var(--color-acento)',
                     }
                 }
             }
@@ -95,7 +112,7 @@
             </div>
 
             <div class="flex items-center gap-4">
-                <a href="{% url 'login' %}" class="bg-primary hover:bg-primaryDark text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
+                <a href="{% url 'login' %}" class="bg-primary hover:bg-primaryDark text-[var(--color-texto-boton)] px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
                     <i class="bi bi-box-arrow-in-right"></i>
                     <span class="hidden sm:inline">Ingresar a la Plataforma</span>
                 </a>
@@ -122,11 +139,11 @@
                 </p>
                 
                 <div class="flex flex-wrap gap-4 mt-4">
-                    <a href="{% url 'login' %}" class="bg-primary hover:bg-primaryDark text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2 text-lg">
+                    <a href="{% url 'login' %}" class="bg-primary hover:bg-primaryDark text-[var(--color-texto-boton)] px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2 text-lg">
                         <i class="bi bi-box-arrow-in-right text-xl"></i>
                         Ingresar a la Plataforma
                     </a>
-                    <a href="#modulos" class="glass-panel hover:bg-white/20 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2 text-lg border border-white/40">
+                    <a href="#modulos" class="glass-panel hover:bg-white/20 text-[var(--color-texto-boton)] px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2 text-lg border border-white/40">
                         <i class="bi bi-grid-3x3-gap-fill text-xl"></i>
                         Portales Institucionales
                     </a>
@@ -161,11 +178,11 @@
                 <!-- Card 3 -->
                 <div onclick="window.location.href='{% url 'login' %}'" class="glass-card cursor-pointer p-6 rounded-3xl flex flex-col items-start gap-4">
                     <div class="bg-amber-100 p-3 rounded-2xl text-amber-600 text-3xl shadow-inner">
-                        <i class="bi bi-cash-coin"></i>
+                        <i class="bi bi-calendar-check-fill"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-1">Centro Financiero</h3>
-                        <p class="text-gray-600 text-sm font-medium">Recaudos, pensiones y certificados financieros.</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Control de Asistencia</h3>
+                        <p class="text-gray-600 text-sm font-medium">Registro en tiempo real de asistencia diaria y excusas escolares.</p>
                     </div>
                 </div>
 
@@ -182,7 +199,7 @@
 
                 <!-- Card 5 -->
                 <div onclick="window.location.href='{% url 'login' %}'" class="glass-card cursor-pointer p-6 rounded-3xl flex flex-col items-start gap-4">
-                    <div class="bg-rose-100 p-3 rounded-2xl text-rose-600 text-3xl shadow-inner">
+                    <div class="p-3 rounded-2xl text-3xl shadow-inner" style="background-color: var(--color-acento); color: var(--color-secundario);">
                         <i class="bi bi-printer-fill"></i>
                     </div>
                     <div>
@@ -232,7 +249,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Mensaje</label>
                     <textarea required rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none" placeholder="Escriba su consulta aquí..."></textarea>
                 </div>
-                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-3.5 rounded-xl font-bold text-lg transition-all shadow-md hover:shadow-lg mt-2 flex justify-center items-center gap-2">
+                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-[var(--color-texto-boton)] py-3.5 rounded-xl font-bold text-lg transition-all shadow-md hover:shadow-lg mt-2 flex justify-center items-center gap-2">
                     <i class="bi bi-send-fill"></i> Enviar Mensaje
                 </button>
             </form>

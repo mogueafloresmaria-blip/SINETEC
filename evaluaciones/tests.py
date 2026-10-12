@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from instituciones.models import InstitucionEducativa
 from academico.models import ProgramaFormacion, Competencia, ResultadoAprendizaje, Ficha, Matricula
+from usuarios.models import Rol
 from .models import JuicioEvaluativo
 
 
@@ -35,6 +36,9 @@ class EvaluacionesModelTest(TestCase):
             first_name="Roberto",
             last_name="Peña"
         )
+        rol_instructor, _ = Rol.objects.get_or_create(nombre='Instructor SENA')
+        self.instructor.perfil.rol = rol_instructor
+        self.instructor.perfil.save()
         self.ficha = Ficha.objects.create(
             codigo_ficha="2501452",
             programa=self.programa,
@@ -140,6 +144,10 @@ class EvaluacionesModelTest(TestCase):
         self.assertEqual(response.json()['aprendices'][0]['juicio'], 'A')
 
     def test_exportar_sabana_excel_aplica_periodo_y_trimestre(self):
+        rol_instructor, _ = Rol.objects.get_or_create(nombre='Instructor SENA')
+        self.instructor.perfil.rol = rol_instructor
+        self.instructor.perfil.save()
+
         juicio = JuicioEvaluativo.objects.create(
             matricula=self.matricula,
             resultado_aprendizaje=self.rap,

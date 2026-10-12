@@ -1,17 +1,19 @@
 from io import BytesIO
 
 from openpyxl import Workbook
-from django.test import TestCase
+from django.core import mail
+from django.core.exceptions import PermissionDenied
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from instituciones.models import InstitucionEducativa
 from academico.models import Competencia, Ficha, Matricula, ProgramaFormacion, ResultadoAprendizaje
 from evaluaciones.models import JuicioEvaluativo
-from seguimiento.models import BitacoraSeguimiento
-from seguimiento.models import AsistenciaAprendiz
+from seguimiento.models import AsistenciaAprendiz, BitacoraSeguimiento, ComunicadoEscolar
 from usuarios.views import alertas_desercion_para_matricula
-from .models import Rol, PerfilUsuario
+from usuarios.decorators import validar_propietario_o_coordinador
+from .models import FamiliaAcudiente, Rol, PerfilUsuario
 
 
 class UsuarioModelTest(TestCase):
@@ -57,8 +59,317 @@ class UsuarioModelTest(TestCase):
         self.client.force_login(self.user)
         response = self.client.get('/estudiantes/')
         self.assertContains(response, 'Escanear carnet QR')
-        self.assertContains(response, 'html5-qrcode')
         self.assertContains(response, 'manifest.webmanifest')
+
+        respuesta_escaner = self.client.get('/asistencia/escanear/')
+        self.assertContains(respuesta_escaner, 'html5-qrcode')
+
+    def test_paneles_docentes_asistencia_y_calificaciones_renderizan(self):
+        rol_docente, _ = Rol.objects.get_or_create(nombre='Instructor SENA')
+        docente = User.objects.create_user(username='docente_panel')
+        docente.perfil.rol = rol_docente
+        docente.perfil.save()
+        self.client.force_login(docente)
+
+        for subpanel, contenido in (
+            ('asistencia', 'Registra y consulta la asistencia'),
+            ('calificaciones', 'Registro Oficial de Calificaciones'),
+        ):
+            with self.subTest(subpanel=subpanel):
+                response = self.client.get('/instructor/', {'subpanel': subpanel})
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, contenido)
+
+    def test_comunicado_individual_no_se_muestra_a_otro_estudiante(self):
+        rol_estudiante, _ = Rol.objects.get_or_create(nombre='Estudiante')
+        destinatario = User.objects.create_user(username='estudiante_destinatario')
+        destinatario.perfil.rol = rol_estudiante
+        destinatario.perfil.save()
+        otro_estudiante = User.objects.create_user(username='estudiante_no_destinatario')
+        otro_estudiante.perfil.rol = rol_estudiante
+        otro_estudiante.perfil.save()
+        ComunicadoEscolar.objects.create(
+            remitente=self.user,
+            estamento_destinatario='Estudiantes',
+            estudiante_destinatario=destinatario,
+            asunto='Mensaje confidencial para destinatario',
+            mensaje='Contenido dirigido a una sola persona.',
+        )
+
+        self.client.force_login(destinatario)
+        respuesta_destinatario = self.client.get('/comunicaciones/')
+        self.assertContains(respuesta_destinatario, 'Mensaje confidencial para destinatario')
+
+        self.client.force_login(otro_estudiante)
+        respuesta_otro = self.client.get('/comunicaciones/')
+        self.assertNotContains(respuesta_otro, 'Mensaje confidencial para destinatario')
+
+    def test_login_no_cambia_contrasena_por_claves_demo_y_exige_csrf(self):
+        usuario = User.objects.create_user(
+            username='login_seguro',
+            password='ContrasenaReal-2026',
+        )
+        usuario.perfil.numero_documento = '1082999001'
+        usuario.perfil.save()
+
+        respuesta = self.client.post('/accounts/login/', {
+            'username': usuario.username,
+            'password': '1234',
+        })
+        usuario.refresh_from_db()
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(respuesta.wsgi_request.user.is_authenticated)
+        self.assertTrue(usuario.check_password('ContrasenaReal-2026'))
+        self.assertFalse(usuario.check_password('1234'))
+
+        self.client.post('/recuperar-contrasena/', {
+            'usuario_id': str(usuario.pk),
+            'nueva_contrasena': 'ClaveIntrusa-2026',
+            'confirmar_contrasena': 'ClaveIntrusa-2026',
+        })
+        usuario.refresh_from_db()
+        self.assertTrue(usuario.check_password('ContrasenaReal-2026'))
+        self.assertFalse(usuario.check_password('ClaveIntrusa-2026'))
+
+        cliente_con_csrf = Client(enforce_csrf_checks=True)
+        respuesta_login = cliente_con_csrf.get('/accounts/login/')
+        csrf_token = respuesta_login.cookies['csrftoken'].value
+        respuesta_sin_csrf = cliente_con_csrf.post('/accounts/login/', {
+            'username': usuario.username,
+            'password': 'ContrasenaReal-2026',
+        })
+        self.assertRedirects(respuesta_sin_csrf, '/login/', fetch_redirect_response=False)
+        respuesta_con_csrf = cliente_con_csrf.post(
+            '/accounts/login/',
+            {'username': usuario.username, 'password': 'ContrasenaReal-2026'},
+            HTTP_X_CSRFTOKEN=csrf_token,
+        )
+        self.assertEqual(respuesta_con_csrf.status_code, 302)
+        self.assertTrue(respuesta_con_csrf.wsgi_request.user.is_authenticated)
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+    def test_recuperacion_solo_cambia_clave_con_token_enviado_al_correo(self):
+        usuario = User.objects.create_user(
+            username='recuperacion_segura',
+            email='recuperacion@example.com',
+            password='ClaveAnterior-2026',
+        )
+
+        response = self.client.post('/recuperar-contrasena/', {
+            'identificador': usuario.username,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Si existe una cuenta activa')
+        self.assertNotContains(response, usuario.username)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [usuario.email])
+
+        reset_url = mail.outbox[0].body.split('Sigue este enlace para restablecer tu contraseña: ', 1)[1].strip()
+        reset_path = reset_url.removeprefix('http://testserver')
+        respuesta_enlace = self.client.get(reset_path)
+        self.assertEqual(respuesta_enlace.status_code, 200)
+        self.assertTrue(respuesta_enlace.context['token_valido'])
+
+        respuesta_cambio = self.client.post(reset_path, {
+            'nueva_contrasena': 'Nueva-Clave-Segura-2026',
+            'confirmar_contrasena': 'Nueva-Clave-Segura-2026',
+        })
+        self.assertRedirects(respuesta_cambio, '/login/', fetch_redirect_response=False)
+        usuario.refresh_from_db()
+        self.assertTrue(usuario.check_password('Nueva-Clave-Segura-2026'))
+        self.assertFalse(usuario.check_password('ClaveAnterior-2026'))
+
+        respuesta_reuso = self.client.get(reset_path)
+        self.assertEqual(respuesta_reuso.status_code, 400)
+        self.assertTrue(respuesta_reuso.context['token_invalido'])
+
+        respuesta_usuario_inexistente = self.client.post('/recuperar-contrasena/', {
+            'identificador': 'no-existe',
+        })
+        self.assertContains(respuesta_usuario_inexistente, 'Si existe una cuenta activa')
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_login_rechaza_redireccion_externa_en_next(self):
+        usuario = User.objects.create_user(
+            username='login_sin_redireccion_externa',
+            password='ContrasenaReal-2026',
+        )
+        usuario.perfil.rol = self.rol_coordinador
+        usuario.perfil.save()
+
+        response = self.client.post('/accounts/login/?next=https://sitio-malicioso.example/', {
+            'username': usuario.username,
+            'password': 'ContrasenaReal-2026',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn('sitio-malicioso.example', response['Location'])
+
+    def test_familia_no_se_asocia_automaticamente_al_usuario_est1(self):
+        rol_familia, _ = Rol.objects.get_or_create(nombre='Familia')
+        rol_estudiante, _ = Rol.objects.get_or_create(nombre='Estudiante')
+        estudiante = User.objects.create_user(username='est1')
+        estudiante.perfil.rol = rol_estudiante
+        estudiante.perfil.save()
+        familia_existente = FamiliaAcudiente.objects.create(
+            nombre_acudiente='Familia de prueba',
+            parentesco='Madre',
+            documento='1000000001',
+            telefono='3000000000',
+            email='otra-familia@example.com',
+        )
+        familia_existente.estudiantes.add(estudiante)
+
+        cuenta_familia = User.objects.create_user(
+            username='familia_sin_asociacion',
+            email='sin-asociacion@example.com',
+            first_name='Cuenta',
+            last_name='Sin Asociacion',
+        )
+        cuenta_familia.perfil.rol = rol_familia
+        cuenta_familia.perfil.numero_documento = '1000000002'
+        cuenta_familia.perfil.save()
+
+        self.client.force_login(cuenta_familia)
+        response = self.client.get('/familia/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.context['acudiente'])
+        self.assertFalse(response.context['hijos_qs'].exists())
+        self.assertEqual(FamiliaAcudiente.objects.count(), 1)
+        self.assertContains(response, 'Sin estudiantes asociados directamente')
+
+    def test_panel_familia_no_muestra_porcentajes_si_no_hay_datos(self):
+        rol_familia, _ = Rol.objects.get_or_create(nombre='Familia')
+        rol_estudiante, _ = Rol.objects.get_or_create(nombre='Estudiante')
+        estudiante = User.objects.create_user(username='estudiante_sin_registros')
+        estudiante.perfil.rol = rol_estudiante
+        estudiante.perfil.save()
+        familia = FamiliaAcudiente.objects.create(
+            nombre_acudiente='Acudiente de prueba',
+            telefono='3000000001',
+            email='acudiente-prueba@example.com',
+        )
+        familia.estudiantes.add(estudiante)
+        cuenta_familia = User.objects.create_user(
+            username='familia_con_hijo',
+            email='acudiente-prueba@example.com',
+        )
+        cuenta_familia.perfil.rol = rol_familia
+        cuenta_familia.perfil.save()
+
+        self.client.force_login(cuenta_familia)
+        response = self.client.get('/familia/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.context['hijos_data'][0]['tasa_aprobacion'])
+        self.assertIsNone(response.context['hijos_data'][0]['pct_asistencia'])
+        self.assertContains(response, 'Sin evaluaciones')
+        self.assertContains(response, 'Sin registros')
+        self.assertNotContains(response, '100.0%')
+
+    def test_comunicado_individual_para_una_familia_no_se_muestra_a_otra(self):
+        rol_familia, _ = Rol.objects.get_or_create(nombre='Familia')
+        rol_estudiante, _ = Rol.objects.get_or_create(nombre='Estudiante')
+
+        estudiantes = []
+        familias_usuario = []
+        for indice in (1, 2):
+            estudiante = User.objects.create_user(username=f'estudiante_familia_{indice}')
+            estudiante.perfil.rol = rol_estudiante
+            estudiante.perfil.save()
+            estudiantes.append(estudiante)
+
+            usuario_familia = User.objects.create_user(
+                username=f'acudiente_familia_{indice}',
+                email=f'acudiente_{indice}@example.com',
+            )
+            usuario_familia.perfil.rol = rol_familia
+            usuario_familia.perfil.numero_documento = f'100000000{indice}'
+            usuario_familia.perfil.save()
+            familias_usuario.append(usuario_familia)
+
+            familia = FamiliaAcudiente.objects.create(
+                nombre_acudiente=f'Acudiente {indice}',
+                telefono=f'300000000{indice}',
+                email=usuario_familia.email,
+            )
+            familia.estudiantes.add(estudiante)
+
+        ComunicadoEscolar.objects.create(
+            remitente=self.user,
+            estamento_destinatario='Familias',
+            estudiante_destinatario=estudiantes[0],
+            asunto='Circular privada familia uno',
+            mensaje='Este aviso corresponde a un solo hogar.',
+        )
+        ComunicadoEscolar.objects.create(
+            remitente=self.user,
+            estamento_destinatario='Familias',
+            asunto='Circular general para todas las familias',
+            mensaje='Este aviso sí es institucional.',
+        )
+
+        self.client.force_login(familias_usuario[0])
+        respuesta_familia_destino = self.client.get('/familia/')
+        self.assertContains(respuesta_familia_destino, 'Circular privada familia uno')
+        self.assertContains(respuesta_familia_destino, 'Circular general para todas las familias')
+
+        self.client.force_login(familias_usuario[1])
+        respuesta_otra_familia = self.client.get('/familia/')
+        self.assertNotContains(respuesta_otra_familia, 'Circular privada familia uno')
+        self.assertContains(respuesta_otra_familia, 'Circular general para todas las familias')
+
+    def test_verificacion_de_familiar_no_coincide_con_apellido_vacio(self):
+        rol_familia, _ = Rol.objects.get_or_create(nombre='Familia')
+        rol_estudiante, _ = Rol.objects.get_or_create(nombre='Estudiante')
+        estudiante = User.objects.create_user(username='estudiante_privado')
+        estudiante.perfil.rol = rol_estudiante
+        estudiante.perfil.save()
+
+        familia = FamiliaAcudiente.objects.create(
+            nombre_acudiente='Hogar ajeno',
+            telefono='3000000002',
+            email='hogar-ajeno@example.com',
+        )
+        familia.estudiantes.add(estudiante)
+        usuario_familia = User.objects.create_user(
+            username='familia_sin_identificadores',
+            first_name='Sin',
+            last_name='',
+        )
+        usuario_familia.perfil.rol = rol_familia
+        usuario_familia.perfil.save()
+
+        request = RequestFactory().get('/')
+        request.user = usuario_familia
+
+        with self.assertRaises(PermissionDenied):
+            validar_propietario_o_coordinador(request, estudiante)
+
+    def test_api_asistencia_qr_exige_personal_autorizado_para_identificador(self):
+        rol_estudiante, _ = Rol.objects.get_or_create(nombre='Estudiante')
+        estudiante = User.objects.create_user(username='aprendiz_qr_privado')
+        estudiante.perfil.rol = rol_estudiante
+        estudiante.perfil.numero_documento = '1002003013'
+        estudiante.perfil.save()
+        url_api = '/asistencia/api/escanear-qr/'
+
+        respuesta_anonima = self.client.post(url_api, {'raw_data': '1002003013'})
+        self.assertEqual(respuesta_anonima.status_code, 401)
+
+        self.client.force_login(estudiante)
+        respuesta_aprendiz = self.client.post(url_api, {'raw_data': '1002003013'})
+        self.assertEqual(respuesta_aprendiz.status_code, 403)
+        respuesta_qr_sesion_aprendiz = self.client.get(
+            '/seguimiento/asistencia/marcar-sesion/1/?fecha=2026-10-01&token=token-invalido'
+        )
+        self.assertRedirects(respuesta_qr_sesion_aprendiz, '/aprendiz/', fetch_redirect_response=False)
+
+        self.client.force_login(self.user)
+        respuesta_personal = self.client.post(url_api, {'raw_data': '1002003013'})
+        self.assertEqual(respuesta_personal.status_code, 404)
+        self.assertFalse(AsistenciaAprendiz.objects.exists())
 
     def test_regla_rn001_unicidad_documento(self):
         """Verifica la regla RN-001: No pueden existir dos personas con el mismo número de documento"""
@@ -191,7 +502,8 @@ class UsuarioModelTest(TestCase):
         self.assertEqual(pdf_response.status_code, 200)
         self.assertEqual(pdf_response['Content-Type'], 'application/pdf')
         self.assertTrue(pdf_response.content.startswith(b'%PDF-1.4'))
-        self.assertIn(b'SINETEC - BOLETIN OFICIAL', pdf_response.content)
+        self.assertIn(b'EDUNOVA', pdf_response.content)
+        self.assertIn(b'Sin calificaciones registradas.', pdf_response.content)
 
     def test_alerta_por_cuatro_ausencias_consecutivas(self):
         rol_estudiante = Rol.objects.create(nombre='Estudiante')
@@ -373,4 +685,3 @@ class UsuarioModelTest(TestCase):
         self.assertIn('alimentacion', keys)
         self.assertIn('transporte', keys)
         self.assertIn('contrato', keys)
-

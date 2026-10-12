@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Directorio de Alumnos · EDUNOVA{% endblock %}
 
@@ -118,7 +118,7 @@
                     <tr style="border-bottom: 1px solid #F1F5F9;">
                         <td class="ps-4 py-3">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #EC4899, #D946EF); font-size: 0.85rem; flex-shrink: 0;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-principal), #D946EF); font-size: 0.85rem; flex-shrink: 0;">
                                     C
                                 </div>
                                 <div>
@@ -274,7 +274,7 @@
                     <tr style="border-bottom: 1px solid #F1F5F9;">
                         <td class="ps-4 py-3">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #F43F5E, #E11D48); font-size: 0.85rem; flex-shrink: 0;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-principal), var(--color-secundario)); font-size: 0.85rem; flex-shrink: 0;">
                                     A
                                 </div>
                                 <div>
@@ -398,7 +398,7 @@
                                         <i class="bi bi-person fs-4"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <input type="file" class="form-control form-control-sm" accept="image/*" onchange="previewFoto(this, 'modalDjangoFotoPreview')">
+                                        <input type="file" name="foto_perfil" class="form-control form-control-sm" accept="image/*" onchange="previewFoto(this, 'modalDjangoFotoPreview')">
                                     </div>
                                 </div>
                             </div>

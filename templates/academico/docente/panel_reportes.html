@@ -7,15 +7,15 @@
 
     <!-- HERO BANNER REPORTES -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+         style="background: linear-gradient(135deg, #FAF8F5 0%, #F5F2EB 50%, var(--color-acento) 100%); border: 1px solid var(--color-acento);">
         <div class="row align-items-center">
             <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
-                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
+                     style="background: #ffffff; color: var(--color-principal); width: 62px; height: 62px; border: 1px solid var(--color-acento);">
                     <i class="bi bi-bar-chart-line-fill" style="font-size: 2rem;"></i>
                 </div>
                 <div>
-                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                    <div class="text-uppercase fw-bold mb-1" style="color: var(--color-principal); font-size: 0.76rem; letter-spacing: 0.6px;">
                         Centro de Informes
                     </div>
                     <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
@@ -29,7 +29,7 @@
             <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
                 <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
                         onclick="window.print();"
-                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                        style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem;">
                     <i class="bi bi-printer-fill"></i> Imprimir / Exportar PDF
                 </button>
             </div>
@@ -40,16 +40,16 @@
     <div class="row g-4 mb-4">
         <!-- 1. Reporte de Estudiantes -->
         <div class="col-md-6 col-lg-3">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-color: var(--color-acento) !important;">
                 <div>
                     <div class="rounded-4 p-3 d-inline-flex align-items-center justify-content-center mb-3"
-                         style="background: #fdf2f8; color: #db2777; width: 50px; height: 50px; border: 1px solid #fce7f3;">
+                         style="background: var(--color-acento); color: var(--color-principal); width: 50px; height: 50px; border: 1px solid var(--color-acento);">
                         <i class="bi bi-people-fill fs-4"></i>
                     </div>
                     <h5 class="fw-bold text-dark mb-1">Nómina Oficial</h5>
                     <p class="text-muted small mb-3">Listado completo de los 4 estudiantes asignados en Grados 10° y 11° con datos de acudiente.</p>
                 </div>
-                <a href="{% url 'mis_estudiantes' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold" style="background: #fff0f3; color: #db2777; border: 1px solid #fce7f3;">
+                <a href="{% url 'mis_estudiantes' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold" style="background: #F5F2EB; color: var(--color-principal); border: 1px solid var(--color-acento);">
                     Consultar Nómina →
                 </a>
             </div>
@@ -57,7 +57,7 @@
 
         <!-- 2. Reporte de Asistencia -->
         <div class="col-md-6 col-lg-3">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-color: var(--color-acento) !important;">
                 <div>
                     <div class="rounded-4 p-3 d-inline-flex align-items-center justify-content-center mb-3"
                          style="background: #ecfdf5; color: #059669; width: 50px; height: 50px; border: 1px solid #a7f3d0;">
@@ -74,7 +74,7 @@
 
         <!-- 3. Sábana de Calificaciones -->
         <div class="col-md-6 col-lg-3">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-color: var(--color-acento) !important;">
                 <div>
                     <div class="rounded-4 p-3 d-inline-flex align-items-center justify-content-center mb-3"
                          style="background: #eff6ff; color: #2563eb; width: 50px; height: 50px; border: 1px solid #bfdbfe;">
@@ -91,7 +91,7 @@
 
         <!-- 4. Actividades y Entregas -->
         <div class="col-md-6 col-lg-3">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-color: var(--color-acento) !important;">
                 <div>
                     <div class="rounded-4 p-3 d-inline-flex align-items-center justify-content-center mb-3"
                          style="background: #faf5ff; color: #7c3aed; width: 50px; height: 50px; border: 1px solid #e9d5ff;">
@@ -100,7 +100,7 @@
                     <h5 class="fw-bold text-dark mb-1">Actividades y Tareas</h5>
                     <p class="text-muted small mb-3">Seguimiento de tareas publicadas, entregas recibidas y actividades pendientes de calificar.</p>
                 </div>
-                <a href="{% url 'actividades_tareas' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-purple" style="background: #faf5ff; color: #7c3aed; border: 1px solid #e9d5ff;">
+                <a href="{% url 'temas_actividades' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-purple" style="background: #faf5ff; color: #7c3aed; border: 1px solid #e9d5ff;">
                     Ver Actividades →
                 </a>
             </div>
@@ -108,10 +108,10 @@
     </div>
 
     <!-- CONSOLIDADO DE MATRÍCULAS Y DATOS OFICIALES -->
-    <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
-        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
+    <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: var(--color-acento) !important;">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--color-acento) !important;">
             <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-file-earmark-spreadsheet-fill fs-5" style="color: #db2777;"></i>
+                <i class="bi bi-file-earmark-spreadsheet-fill fs-5" style="color: var(--color-principal);"></i>
                 <h6 class="fw-bold text-dark mb-0">Consolidado General de Estudiantes (Base de Datos Real)</h6>
             </div>
             <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
@@ -121,24 +121,24 @@
 
         <div class="table-responsive">
             <table class="table align-middle mb-0">
-                <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
+                <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
                     <tr>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTUDIANTE</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">DOCUMENTO</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">GRADO Y GRUPO</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ASIGNATURAS A CARGO</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">ESTADO</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ESTUDIANTE</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">DOCUMENTO</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">GRADO Y GRUPO</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ASIGNATURAS A CARGO</th>
+                        <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ESTADO</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for m in todos_mis_estudiantes %}
-                    <tr style="border-bottom: 1px solid #fce7f3;">
+                    <tr style="border-bottom: 1px solid var(--color-acento);">
                         <td>
                             <strong class="text-dark d-block">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
                             <small class="text-muted">{{ m.aprendiz.email|default:'estudiante@edunova.edu.co' }}</small>
                         </td>
                         <td><code>{{ m.aprendiz.username }}</code></td>
-                        <td><span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3;">Grado {{ m.grupo_display }}</span></td>
+                        <td><span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--color-acento); color: var(--color-principal); border: 1px solid var(--color-acento);">Grado {{ m.grupo_display }}</span></td>
                         <td class="small text-muted">{{ m.asignaturas_docente_str }}</td>
                         <td><span class="badge rounded-pill px-2.5 py-1 text-success fw-bold" style="background: #ecfdf5; border: 1px solid #a7f3d0;">Activo</span></td>
                     </tr>

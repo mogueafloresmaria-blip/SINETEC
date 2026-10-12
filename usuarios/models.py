@@ -87,6 +87,9 @@ class PerfilUsuario(models.Model):
         null=True,
         verbose_name="Teléfono de Contacto"
     )
+    numero_tarjeta_estudiante = models.CharField(
+        max_length=50, blank=True, null=True, verbose_name="Número de Tarjeta del Estudiante"
+    )
     genero = models.CharField(max_length=20, blank=True, default='', verbose_name="Género")
     fecha_nacimiento = models.DateField(blank=True, null=True, verbose_name="Fecha de Nacimiento")
     foto_perfil = models.ImageField(upload_to='perfiles/', blank=True, null=True, verbose_name="Foto de Perfil")
@@ -255,9 +258,33 @@ class ConfiguracionColegio(models.Model):
     telefono = models.CharField(max_length=50, blank=True, default="(605) 421-9988", verbose_name="Teléfono")
     email = models.EmailField(blank=True, default="contacto@colegio.edu.co", verbose_name="Correo Electrónico")
     sitio_web = models.URLField(blank=True, default="https://www.colegio.edu.co", verbose_name="Sitio Web")
-    color_primario = models.CharField(max_length=20, default="#0F2942", verbose_name="Color Principal (Azul Petróleo)")
-    color_secundario = models.CharField(max_length=20, default="#3B82F6", verbose_name="Color Secundario (Azul Suave)")
-    color_acento = models.CharField(max_length=20, default="#EEF2FF", verbose_name="Color Acento (Lavanda Suave)")
+    # Colores institucionales: se aplican globalmente mediante variables CSS (--edu-*).
+    COLORES_POR_DEFECTO = {
+        'color_primario': '#8B5E3C',
+        'color_secundario': '#5A3825',
+        'color_acento': '#EFEBE4',
+        'color_fondo': '#F8F6F0',
+        'color_texto': '#2D231E',
+        'color_titulos': '#2D231E',
+        'color_botones': '#8B5E3C',
+        'color_texto_botones': '#FFFFFF',
+        'color_enlaces': '#8B5E3C',
+        'color_tarjetas': '#FFFFFF',
+        'color_navbar': '#FFFFFF',
+        'color_texto_nav': '#2D231E',
+    }
+    color_primario = models.CharField(max_length=20, default="#8B5E3C", verbose_name="Color Principal")
+    color_secundario = models.CharField(max_length=20, default="#5A3825", verbose_name="Color Secundario")
+    color_acento = models.CharField(max_length=20, default="#EFEBE4", verbose_name="Color de Acento")
+    color_fondo = models.CharField(max_length=20, default="#F8F6F0", verbose_name="Color de Fondo")
+    color_texto = models.CharField(max_length=20, default="#2D231E", verbose_name="Color de Texto")
+    color_titulos = models.CharField(max_length=20, default="#2D231E", verbose_name="Color de Títulos")
+    color_botones = models.CharField(max_length=20, default="#8B5E3C", verbose_name="Color de Botones")
+    color_texto_botones = models.CharField(max_length=20, default="#FFFFFF", verbose_name="Color de Texto de Botones")
+    color_enlaces = models.CharField(max_length=20, default="#8B5E3C", verbose_name="Color de Enlaces")
+    color_tarjetas = models.CharField(max_length=20, default="#FFFFFF", verbose_name="Color de Tarjetas")
+    color_navbar = models.CharField(max_length=20, default="#FFFFFF", verbose_name="Color de Barra de Navegación")
+    color_texto_nav = models.CharField(max_length=20, default="#2D231E", verbose_name="Color de Texto de Navegación")
     logo = models.ImageField(upload_to='colegio/', blank=True, null=True, verbose_name="Escudo o Logo del Colegio")
 
     class Meta:
@@ -271,6 +298,19 @@ class ConfiguracionColegio(models.Model):
     def get_solo(cls):
         obj, _ = cls.objects.get_or_create(id=1)
         return obj
+
+    @staticmethod
+    def es_color_hex_valido(valor):
+        import re
+        return bool(re.fullmatch(r'#[0-9A-Fa-f]{6}', str(valor or '').strip()))
+
+    def paleta(self):
+        """Paleta vigente validada; cualquier valor inválido cae al color por defecto."""
+        paleta = {}
+        for campo, defecto in self.COLORES_POR_DEFECTO.items():
+            valor = str(getattr(self, campo, '') or '').strip()
+            paleta[campo] = valor.upper() if self.es_color_hex_valido(valor) else defecto
+        return paleta
 
 
 class FamiliaAcudiente(models.Model):
@@ -361,6 +401,19 @@ class PapeleraReciclaje(models.Model):
         ('Matricula', 'Matrícula'),
         ('Horario', 'Clase / Horario'),
         ('Docente', 'Docente / Profesor'),
+        ('Ficha', 'Ficha / Grupo'),
+        ('Programa', 'Programa / Asignatura'),
+        ('Evaluacion', 'Evaluación / Calificación'),
+        ('TareaClase', 'Actividad / Tarea'),
+        ('EntregaTarea', 'Respuesta / Entrega de Alumno'),
+        ('ActividadClase', 'Actividad de Clase'),
+        ('GuiaClase', 'Guía Pedagógica'),
+        ('MaterialClase', 'Material de Clase'),
+        ('Comunicado', 'Comunicado Escolar'),
+        ('Transporte', 'Ruta de Transporte'),
+        ('CargaAcademica', 'Asignación / Carga Académica'),
+        ('Bitacora', 'Bitácora de Seguimiento'),
+        ('Usuario', 'Usuario'),
         ('Otro', 'Otro Registro'),
     ]
 
@@ -368,6 +421,7 @@ class PapeleraReciclaje(models.Model):
     objeto_id = models.IntegerField(verbose_name="ID Original del Objeto")
     titulo = models.CharField(max_length=200, verbose_name="Identificador / Nombre")
     subtitulo = models.CharField(max_length=255, blank=True, default='', verbose_name="Detalles")
+    modulo_origen = models.CharField(max_length=120, blank=True, default='', verbose_name="Módulo de Origen")
     datos_recuperacion = models.JSONField(blank=True, null=True, verbose_name="Snapshot de Datos")
     eliminado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='elementos_eliminados')
     fecha_eliminacion = models.DateTimeField(auto_now_add=True)
@@ -380,4 +434,61 @@ class PapeleraReciclaje(models.Model):
         ordering = ['-fecha_eliminacion']
 
     def __str__(self):
-        return f"{self.tipo_objeto}: {self.titulo} (Eliminado {self.fecha_eliminacion:%d/%m/%Y})"
+        return f"{self.tipo_objeto}: {self.titulo} (Eliminado {self.fecha_eliminacion:%d/%m/%Y})"
+
+
+class Docente(models.Model):
+    """Información extendida para los docentes de la institución."""
+    ESTADOS = [
+        ('ACTIVO', 'Activo'),
+        ('INACTIVO', 'Inactivo'),
+        ('LICENCIA', 'En Licencia'),
+        ('RETIRADO', 'Retirado'),
+    ]
+
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='docente_perfil', verbose_name="Usuario Asociado")
+    direccion = models.CharField(max_length=255, blank=True, null=True, verbose_name="Dirección")
+    barrio = models.CharField(max_length=150, blank=True, null=True, verbose_name="Barrio")
+    
+    # Información Académica Institucional
+    area = models.CharField(max_length=150, blank=True, null=True, verbose_name="Área")
+    escalafon = models.CharField(max_length=100, blank=True, null=True, verbose_name="Escalafón")
+    estado_docente = models.CharField(max_length=20, choices=ESTADOS, default='ACTIVO', verbose_name="Estado")
+    nro_resolucion = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nro de Resolución")
+    profesion = models.CharField(max_length=150, blank=True, null=True, verbose_name="Profesión")
+    fecha_ingreso = models.DateField(blank=True, null=True, verbose_name="Fecha de Ingreso")
+    fecha_retiro = models.DateField(blank=True, null=True, verbose_name="Fecha de Retiro")
+
+    class Meta:
+        verbose_name = "Docente"
+        verbose_name_plural = "Docentes"
+
+    def __str__(self):
+        return f"Docente: {self.usuario.get_full_name()}"
+
+
+class ExperienciaAcademica(models.Model):
+    docente = models.ForeignKey(Docente, on_delete=models.CASCADE, related_name='experiencias', verbose_name="Docente")
+    institucion = models.CharField(max_length=255, verbose_name="Institución donde ha Trabajado")
+    anos = models.PositiveIntegerField(verbose_name="Años de Experiencia")
+
+    class Meta:
+        verbose_name = "Experiencia Académica"
+        verbose_name_plural = "Experiencias Académicas"
+
+    def __str__(self):
+        return f"{self.institucion} ({self.anos} años)"
+
+
+class EstudioRealizado(models.Model):
+    docente = models.ForeignKey(Docente, on_delete=models.CASCADE, related_name='estudios', verbose_name="Docente")
+    titulo = models.CharField(max_length=255, verbose_name="Maestría, Curso, Seminario u Otro")
+    institucion = models.CharField(max_length=255, verbose_name="Institución")
+    ano = models.PositiveIntegerField(verbose_name="Año")
+
+    class Meta:
+        verbose_name = "Estudio Realizado"
+        verbose_name_plural = "Estudios Realizados"
+
+    def __str__(self):
+        return f"{self.titulo} - {self.institucion} ({self.ano})"

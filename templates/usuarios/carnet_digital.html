@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Carnet Escolar Digital · EDUNOVA{% endblock %}
@@ -56,7 +56,7 @@
         left: 0;
         right: 0;
         height: 12px;
-        background: linear-gradient(90deg, #0F2942 0%, #1E3A8A 50%, #3B82F6 100%);
+        background: linear-gradient(90deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%);
         overflow: hidden;
         z-index: 5;
     }
@@ -68,7 +68,7 @@
         justify-content: space-between;
         position: relative;
         z-index: 2;
-        border-bottom: 1.5px solid #E2E8F0;
+        border-bottom: 1.5px solid #E5DFD5;
         padding-bottom: 10px;
         margin-bottom: 12px;
     }
@@ -83,7 +83,7 @@
         width: 38px;
         height: 38px;
         border-radius: 10px;
-        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+        background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-principal) 100%);
         color: #FFFFFF;
         display: flex;
         align-items: center;
@@ -95,15 +95,15 @@
         font-weight: 800;
         font-size: 0.88rem;
         line-height: 1.2;
-        color: #0F2942;
+        color: var(--color-secundario);
         text-transform: uppercase;
         letter-spacing: -0.01em;
     }
 
     .pvc-tag-year {
-        background: #EEF2FF;
-        color: #1E3A8A;
-        border: 1px solid #C7D2FE;
+        background: var(--color-acento);
+        color: var(--color-secundario);
+        border: 1px solid #E0D8CE;
         font-size: 0.72rem;
         font-weight: 800;
         padding: 4px 10px;
@@ -131,11 +131,11 @@
     .pvc-photo-frame {
         width: 120px;
         height: 150px;
-        border: 2px solid #3B82F6;
+        border: 2px solid var(--color-principal);
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
-        background: #F8FAFC;
+        box-shadow: 0 4px 10px rgba(90, 56, 37, 0.08);
+        background: var(--color-fondo);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -157,8 +157,8 @@
     .pvc-avatar-fallback {
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #EEF2FF 0%, #DBEAFE 100%);
-        color: #1E3A8A;
+        background: linear-gradient(135deg, var(--color-fondo) 0%, var(--color-acento) 100%);
+        color: var(--color-secundario);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -170,7 +170,7 @@
     .pvc-student-role {
         font-size: 0.7rem;
         font-weight: 800;
-        color: #2563EB;
+        color: var(--color-principal);
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-bottom: 2px;

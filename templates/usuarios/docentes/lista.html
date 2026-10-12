@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Docentes{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1" style="color: var(--color-titulo); font-weight: 700;">Gestión de Docentes</h2>
+            <p class="text-muted mb-0">Administración de la planta docente de la institución</p>
+        </div>
+        <a href="{% url 'docente_nuevo' %}" class="btn text-white shadow-sm" style="background-color: var(--color-botones); border-radius: 8px;">
+            <i class="bi bi-person-plus-fill me-2"></i> Nuevo Docente
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm border-0" style="border-radius: 12px; background: var(--color-tarjetas);">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background-color: var(--color-fondo); border-bottom: 2px solid var(--color-acento);">
+                        <tr>
+                            <th class="py-3 px-4 text-uppercase" style="font-size: 0.8rem; font-weight: 700; color: var(--color-texto); border: none;">Nombre del Docente</th>
+                            <th class="py-3 px-4 text-uppercase" style="font-size: 0.8rem; font-weight: 700; color: var(--color-texto); border: none;">Identificación</th>
+                            <th class="py-3 px-4 text-uppercase" style="font-size: 0.8rem; font-weight: 700; color: var(--color-texto); border: none;">Área</th>
+                            <th class="py-3 px-4 text-uppercase" style="font-size: 0.8rem; font-weight: 700; color: var(--color-texto); border: none;">Estado</th>
+                            <th class="py-3 px-4 text-end text-uppercase" style="font-size: 0.8rem; font-weight: 700; color: var(--color-texto); border: none;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in docentes %}
+                        <tr style="border-bottom: 1px solid #f1f1f1;">
+                            <td class="px-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3 text-secondary" style="width: 40px; height: 40px; font-weight: 600; background-color: var(--color-acento) !important;">
+                                        {{ d.usuario.first_name|first|upper }}{{ d.usuario.last_name|first|upper }}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--color-texto);">{{ d.usuario.get_full_name }}</div>
+                                        <div style="font-size: 0.85rem; color: #777;">{{ d.usuario.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span style="font-weight: 500; color: var(--color-texto);">{{ d.usuario.perfil.tipo_documento }} {{ d.usuario.perfil.numero_documento }}</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                {{ d.area|default:"No asignada" }}
+                            </td>
+                            <td class="px-4 py-3">
+                                {% if d.estado_docente == 'ACTIVO' %}
+                                <span class="badge" style="background-color: #d1fae5; color: #065f46; font-weight: 600; border-radius: 6px; padding: 5px 10px;">{{ d.estado_docente }}</span>
+                                {% elif d.estado_docente == 'INACTIVO' %}
+                                <span class="badge" style="background-color: #fee2e2; color: #991b1b; font-weight: 600; border-radius: 6px; padding: 5px 10px;">{{ d.estado_docente }}</span>
+                                {% else %}
+                                <span class="badge" style="background-color: #fef3c7; color: #92400e; font-weight: 600; border-radius: 6px; padding: 5px 10px;">{{ d.estado_docente }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-end">
+                                <div class="btn-group shadow-sm" role="group">
+                                    <a href="{% url 'docente_editar' d.id %}" class="btn btn-sm text-primary" style="background: var(--color-fondo); border: 1px solid var(--color-acento);" title="Editar">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-person-slash d-block mb-3" style="font-size: 3rem; color: #ccc;"></i>
+                                <h5 class="mb-1">No hay docentes registrados</h5>
+                                <p class="mb-3">Comienza agregando el personal docente de la institución.</p>
+                                <a href="{% url 'docente_nuevo' %}" class="btn btn-sm text-white" style="background-color: var(--color-botones);">Agregar Primer Docente</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

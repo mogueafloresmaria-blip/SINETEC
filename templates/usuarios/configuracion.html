@@ -184,6 +184,103 @@
             </div>
         </div>
 
+            <!-- 4. Configuración de Colores Institucionales -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mt-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                    <div class="p-2 rounded-3 text-white" style="background-color: var(--color-principal);">
+                        <i class="bi bi-palette fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">Colores Institucionales</h5>
+                        <small class="text-muted">Personalice los colores de la plataforma para ajustarse a su identidad visual</small>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="colores">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Color Principal</label>
+                            <input type="color" name="color_primario" id="color_primario" class="form-control form-control-color w-100" value="{{ colegio.color_primario }}" title="Color Principal">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Color Secundario</label>
+                            <input type="color" name="color_secundario" id="color_secundario" class="form-control form-control-color w-100" value="{{ colegio.color_secundario }}" title="Color Secundario">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Color de Acento</label>
+                            <input type="color" name="color_acento" id="color_acento" class="form-control form-control-color w-100" value="{{ colegio.color_acento }}" title="Color Acento">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Color de Fondo</label>
+                            <input type="color" name="color_fondo" id="color_fondo" class="form-control form-control-color w-100" value="{{ colegio.color_fondo }}" title="Color de Fondo">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Color de Texto</label>
+                            <input type="color" name="color_texto" id="color_texto" class="form-control form-control-color w-100" value="{{ colegio.color_texto }}" title="Color de Texto">
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Color de Títulos</label>
+                            <input type="color" name="color_titulos" id="color_titulos" class="form-control form-control-color w-100" value="{{ colegio.color_titulos }}" title="Color de Títulos">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Color de Botones</label>
+                            <input type="color" name="color_botones" id="color_botones" class="form-control form-control-color w-100" value="{{ colegio.color_botones }}" title="Color de Botones">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Texto de Botones</label>
+                            <input type="color" name="color_texto_botones" id="color_texto_botones" class="form-control form-control-color w-100" value="{{ colegio.color_texto_botones }}" title="Texto de Botones">
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Color de Enlaces</label>
+                            <input type="color" name="color_enlaces" id="color_enlaces" class="form-control form-control-color w-100" value="{{ colegio.color_enlaces }}" title="Color de Enlaces">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Color de Tarjetas</label>
+                            <input type="color" name="color_tarjetas" id="color_tarjetas" class="form-control form-control-color w-100" value="{{ colegio.color_tarjetas }}" title="Color de Tarjetas">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Navegación / Navbar</label>
+                            <input type="color" name="color_navbar" id="color_navbar" class="form-control form-control-color w-100" value="{{ colegio.color_navbar }}" title="Navegación / Navbar">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Texto de Navegación</label>
+                            <input type="color" name="color_texto_nav" id="color_texto_nav" class="form-control form-control-color w-100" value="{{ colegio.color_texto_nav }}" title="Texto de Navegación">
+                        </div>
+                    </div>
+                    
+                    <!-- Vista Previa -->
+                    <div class="mt-4 p-3 border rounded" id="vista_previa_contenedor" style="background-color: {{ colegio.color_fondo }}; transition: all 0.3s;">
+                        <h6 class="fw-bold mb-3" style="color: {{ colegio.color_titulos }};" id="vp_titulo">Vista Previa del Sistema</h6>
+                        
+                        <div class="p-2 mb-3 rounded d-flex align-items-center" id="vp_navbar" style="background-color: {{ colegio.color_navbar }}; border-bottom: 2px solid {{ colegio.color_acento }};">
+                            <span class="fw-bold" id="vp_texto_nav" style="color: {{ colegio.color_texto_nav }};">EDUNOVA Navbar</span>
+                        </div>
+                        
+                        <div class="card mb-3 border-0 shadow-sm" id="vp_tarjeta" style="background-color: {{ colegio.color_tarjetas }};">
+                            <div class="card-body">
+                                <h5 class="card-title" id="vp_card_titulo" style="color: {{ colegio.color_titulos }};">Ejemplo de Tarjeta</h5>
+                                <p class="card-text" id="vp_texto" style="color: {{ colegio.color_texto }};">Este es un ejemplo de texto normal dentro de una tarjeta del sistema.</p>
+                                <a href="#" class="me-3 fw-bold" id="vp_enlace" style="color: {{ colegio.color_enlaces }};">Enlace de ejemplo</a>
+                                <button type="button" class="btn" id="vp_boton" style="background-color: {{ colegio.color_botones }}; color: {{ colegio.color_texto_botones }}; border-color: {{ colegio.color_botones }};">Botón de acción</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-2 d-flex justify-content-between align-items-center">
+                        <button type="submit" name="restaurar_colores" value="1" class="btn btn-outline-danger fw-semibold rounded-3 px-3">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar colores originales
+                        </button>
+                        <button type="submit" class="btn text-white fw-semibold px-4 rounded-3" style="background-color: var(--color-principal);">
+                            <i class="bi bi-floppy me-1"></i> 💾 Guardar colores
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Columna Derecha: Información del Entorno Institucional -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
@@ -244,5 +341,45 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del preview
+            const vpContenedor = document.getElementById('vista_previa_contenedor');
+            const vpTitulo = document.getElementById('vp_titulo');
+            const vpNavbar = document.getElementById('vp_navbar');
+            const vpTextoNav = document.getElementById('vp_texto_nav');
+            const vpTarjeta = document.getElementById('vp_tarjeta');
+            const vpCardTitulo = document.getElementById('vp_card_titulo');
+            const vpTexto = document.getElementById('vp_texto');
+            const vpEnlace = document.getElementById('vp_enlace');
+            const vpBoton = document.getElementById('vp_boton');
+            
+            // Inputs de color
+            const inputs = {
+                fondo: document.getElementById('color_fondo'),
+                titulos: document.getElementById('color_titulos'),
+                navbar: document.getElementById('color_navbar'),
+                texto_nav: document.getElementById('color_texto_nav'),
+                tarjetas: document.getElementById('color_tarjetas'),
+                texto: document.getElementById('color_texto'),
+                enlaces: document.getElementById('color_enlaces'),
+                botones: document.getElementById('color_botones'),
+                texto_botones: document.getElementById('color_texto_botones'),
+                acento: document.getElementById('color_acento')
+            };
+
+            // Event Listeners
+            inputs.fondo.addEventListener('input', (e) => { vpContenedor.style.backgroundColor = e.target.value; });
+            inputs.titulos.addEventListener('input', (e) => { vpTitulo.style.color = e.target.value; vpCardTitulo.style.color = e.target.value; });
+            inputs.navbar.addEventListener('input', (e) => { vpNavbar.style.backgroundColor = e.target.value; });
+            inputs.texto_nav.addEventListener('input', (e) => { vpTextoNav.style.color = e.target.value; });
+            inputs.tarjetas.addEventListener('input', (e) => { vpTarjeta.style.backgroundColor = e.target.value; });
+            inputs.texto.addEventListener('input', (e) => { vpTexto.style.color = e.target.value; });
+            inputs.enlaces.addEventListener('input', (e) => { vpEnlace.style.color = e.target.value; });
+            inputs.botones.addEventListener('input', (e) => { vpBoton.style.backgroundColor = e.target.value; vpBoton.style.borderColor = e.target.value; });
+            inputs.texto_botones.addEventListener('input', (e) => { vpBoton.style.color = e.target.value; });
+            inputs.acento.addEventListener('input', (e) => { vpNavbar.style.borderBottomColor = e.target.value; });
+        });
+    </script>
 </div>
 {% endblock %}

@@ -6,14 +6,14 @@
 {% block extra_css %}
 <style>
     :root {
-        --act-border: #F0D9E5;
-        --act-accent: #8E5266;
-        --act-dark: #4A2834;
-        --sena-green: #29AAE3;
+        --act-border: #E5DFD5;
+        --act-accent: var(--color-principal);
+        --act-dark: var(--color-secundario);
+        --sena-green: var(--color-principal);
     }
 
     .act-header {
-        background: linear-gradient(135deg, #FFFFFF 0%, #FBF3F7 100%);
+        background: linear-gradient(135deg, #FFFFFF 0%, var(--color-fondo) 100%);
         border: 1px solid var(--act-border);
         border-radius: 24px;
         padding: 28px;
@@ -68,7 +68,7 @@
         border-color: var(--sena-green);
         background: var(--sena-green);
         color: #FFFFFF;
-        box-shadow: 0 8px 18px rgba(57, 169, 0, 0.25);
+        box-shadow: 0 8px 18px rgba(139, 94, 60, 0.25);
     }
     .lifecycle-step.active .step-label {
         color: var(--act-dark);
@@ -76,7 +76,7 @@
 
     .lifecycle-step.completed .step-circle {
         border-color: var(--sena-green);
-        background: #EDF7EA;
+        background: var(--color-acento);
         color: var(--sena-green);
     }
 

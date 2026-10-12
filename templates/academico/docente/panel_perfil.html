@@ -1,205 +1,322 @@
 {% load static %}
 <!-- =========================================================================
-     MÓDULO 2: PERFIL PROFESIONAL (ESTRUCTURA Y DISEÑO ROSA EXACTO AL DE LA FOTO 2)
+     MÓDULO: MI PERFIL DEL DOCENTE (EDUNOVA)
+     Identidad Institucional: Café Cálido (var(--color-principal)), Crema (var(--color-acento)) y Beige (#F5F2EB)
+     Funcionalidad: Información personal, asignación profesional, actualización de foto,
+     edición de datos de contacto, cambio seguro de contraseña y preferencias.
      ========================================================================= -->
 <div class="panel-modulo-docente space-y-4" id="modulo-perfil">
 
-    <!-- HERO DE PRESENTACIÓN PROFESIONAL (ESTILO ROSA EXACTO) -->
-    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
-        <div class="row align-items-center">
-            <div class="col-md-9 position-relative z-1">
-                <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-4">
-                    <!-- Avatar con botón de cámara integrado -->
-                    <div class="position-relative">
-                        <img src="{% if request.user.perfil.foto_perfil %}{{ request.user.perfil.foto_perfil.url }}{% else %}{% static 'img/default_avatar.png' %}{% endif %}" alt="{{ request.user.get_full_name }}" 
-                             class="rounded-circle shadow-sm border border-4 border-white" 
-                             style="width: 110px; height: 110px; object-fit: cover; object-position: top center;">
-                        <button type="button" class="position-absolute bottom-0 end-0 border-0 rounded-circle text-white shadow-sm d-flex align-items-center justify-content-center"
-                                style="width: 32px; height: 32px; background: #db2777; border: 2px solid #ffffff !important;" 
-                                data-bs-toggle="modal" data-bs-target="#modalEditarPerfilDocente" title="Cambiar foto">
-                            <i class="bi bi-camera-fill" style="font-size: 0.85rem;"></i>
+    <!-- ALERTA DE MENSAJES DE RETORNO -->
+    {% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show rounded-3 shadow-2xs" role="alert"
+             style="border-left: 4px solid var(--color-principal);">
+            <i class="bi bi-info-circle-fill me-2" style="color: var(--color-principal);"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 1. HEADER EXECUTIVE PROFILE BANNER -->
+    <div class="card border-0 rounded-4 bg-white shadow-xs overflow-hidden mb-4" style="border: 1px solid var(--color-acento) !important;">
+        <div class="p-4 p-md-5 position-relative" style="background: linear-gradient(135deg, #FAF8F5 0%, #F5F2EB 50%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
+            <div class="row align-items-center g-4">
+                <!-- AVATAR Y DATOS PRINCIPALES -->
+                <div class="col-md-8 d-flex align-items-center gap-4 flex-wrap flex-sm-nowrap">
+                    <div class="position-relative flex-shrink-0">
+                        {% if request.user.perfil.foto_perfil %}
+                            <img src="{{ request.user.perfil.foto_perfil.url }}" alt="{{ request.user.get_full_name }}" 
+                                 class="rounded-circle shadow-sm object-fit-cover border border-3 border-white" style="width: 110px; height: 110px;">
+                        {% else %}
+                            <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm border border-3 border-white text-white fw-bold"
+                                 style="width: 110px; height: 110px; background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); font-size: 2.5rem;">
+                                {{ request.user.first_name|default:request.user.username|slice:':1'|upper }}{{ request.user.last_name|slice:':1'|upper }}
+                            </div>
+                        {% endif %}
+                        <button type="button" class="btn btn-sm rounded-circle position-absolute bottom-0 end-0 p-1.5 shadow-2xs text-white"
+                                style="background: var(--color-principal); border: 2px solid #ffffff;"
+                                title="Cambiar fotografía de perfil" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
+                            <i class="bi bi-camera-fill small"></i>
                         </button>
                     </div>
 
-                    <!-- Datos Principales -->
-                    <div class="text-center text-sm-start">
-                        <h2 class="fw-bold mb-1" style="color: #0f172a; font-size: 2rem; letter-spacing: -0.5px;">
-                            {{ request.user.get_full_name|default:request.user.username }}
-                        </h2>
-                        <p class="text-muted mb-2.5" style="font-size: 0.95rem;">
-                            Docente de Matemáticas y Educación Media Técnica
-                        </p>
-                        <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-sm-start">
-                            <span class="badge rounded-pill px-3 py-1.5 fw-semibold" 
-                                  style="background: #fce7f3; color: #be185d; font-size: 0.8rem;">
-                                Área: Matemáticas
-                            </span>
-                            <span class="badge rounded-pill px-3 py-1.5 fw-semibold" 
-                                  style="background: #fce7f3; color: #be185d; font-size: 0.8rem;">
-                                Cargo: Docente
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Botón Editar Perfil -->
-            <div class="col-md-3 text-end d-flex flex-column justify-content-center align-items-end h-100 position-relative z-1 mt-3 mt-md-0">
-                <button type="button" class="btn btn-white rounded-pill px-3.5 py-1.5 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
-                        style="background: #ffffff; color: #be185d; border: 1px solid #fce7f3; font-size: 0.84rem;"
-                        data-bs-toggle="modal" data-bs-target="#modalEditarPerfilDocente">
-                    <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
-                    <span>Editar perfil</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PESTAÑAS DE NAVEGACIÓN INTERNA -->
-    <div class="d-flex align-items-center gap-4 border-bottom mb-4" style="border-color: #fce7f3 !important;">
-        <button type="button" class="btn p-0 pb-2 border-0 fw-bold d-flex align-items-center gap-2"
-                style="color: #db2777; border-bottom: 3px solid #db2777 !important; font-size: 0.95rem; border-radius: 0;">
-            <i class="bi bi-person-fill"></i> Información general
-        </button>
-        <button type="button" class="btn p-0 pb-2 border-0 text-muted fw-semibold d-flex align-items-center gap-2"
-                style="font-size: 0.95rem; border-radius: 0;"
-                onclick="window.location.href='{% url 'instructor_dashboard' %}?subpanel=asignaturas';">
-            <i class="bi bi-book-half"></i> Asignaturas
-        </button>
-        <button type="button" class="btn p-0 pb-2 border-0 text-muted fw-semibold d-flex align-items-center gap-2"
-                style="font-size: 0.95rem; border-radius: 0;"
-                onclick="window.location.href='{% url 'instructor_dashboard' %}?subpanel=estudiantes';">
-            <i class="bi bi-people-fill"></i> Grupos
-        </button>
-    </div>
-
-    <!-- GRID DE 2 COLUMNAS CON TARJETAS DE INFORMACIÓN -->
-    <div class="row g-4">
-        <!-- Columna Izquierda -->
-        <div class="col-lg-6 space-y-4">
-            <!-- 1. Información personal -->
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
-                <div class="d-flex align-items-center gap-2.5 mb-3.5 pb-1">
-                    <i class="bi bi-person-fill fs-5" style="color: #db2777;"></i>
-                    <h6 class="fw-bold text-dark mb-0 fs-6">Información personal</h6>
-                </div>
-                <div class="space-y-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-card-text fs-5" style="color: #db2777 !important;"></i>
-                        <div>
-                            <small class="text-muted d-block" style="font-size: 0.74rem;">Documento de identidad</small>
-                            <strong class="text-dark" style="font-size: 0.88rem;">1.234.567.890</strong>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-calendar-event fs-5" style="color: #db2777 !important;"></i>
-                        <div>
-                            <small class="text-muted d-block" style="font-size: 0.74rem;">Fecha de nacimiento</small>
-                            <strong class="text-dark" style="font-size: 0.88rem;">15 de marzo de 1998</strong>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-geo-alt-fill fs-5" style="color: #db2777 !important;"></i>
-                        <div>
-                            <small class="text-muted d-block" style="font-size: 0.74rem;">Lugar de nacimiento</small>
-                            <strong class="text-dark" style="font-size: 0.88rem;">Ciénaga, Magdalena</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. Información profesional -->
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
-                <div class="d-flex align-items-center gap-2.5 mb-3.5 pb-1">
-                    <i class="bi bi-briefcase-fill fs-5" style="color: #db2777;"></i>
-                    <h6 class="fw-bold text-dark mb-0 fs-6">Información profesional</h6>
-                </div>
-                <div class="space-y-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <small class="text-muted fw-semibold" style="font-size: 0.8rem;">Cargo</small>
-                        <strong class="text-dark" style="font-size: 0.88rem;">Docente</strong>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <small class="text-muted fw-semibold" style="font-size: 0.8rem;">Área</small>
-                        <strong class="text-dark" style="font-size: 0.88rem;">Matemáticas</strong>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <small class="text-muted fw-semibold" style="font-size: 0.8rem;">Experiencia</small>
-                        <strong class="text-dark" style="font-size: 0.88rem;">5 años en el sector educativo</strong>
-                    </div>
                     <div>
-                        <small class="text-muted fw-semibold d-block mb-1" style="font-size: 0.8rem;">Descripción</small>
-                        <p class="text-muted mb-0 small" style="line-height: 1.5; font-size: 0.84rem;">
-                            Docente comprometida con la formación integral de los estudiantes, con enfoque en el desarrollo del pensamiento lógico y la resolución de problemas.
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <h2 class="fw-bold mb-0 text-dark" style="font-size: 1.75rem; letter-spacing: -0.4px;">
+                                {{ request.user.get_full_name|default:request.user.username }}
+                            </h2>
+                            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: var(--color-principal); color: #ffffff; font-size: 0.72rem;">
+                                Perfil Profesional Docente
+                            </span>
+                        </div>
+                        <p class="text-secondary mb-1.5 small fw-medium">
+                            <i class="bi bi-briefcase-fill me-1" style="color: var(--color-principal);"></i> Licenciado en Matemáticas y Educación Media Técnica
                         </p>
+                        <div class="d-flex align-items-center gap-3 text-muted small flex-wrap">
+                            <span><i class="bi bi-geo-alt-fill me-1" style="color: var(--color-principal);"></i> Sede Principal, Bogotá</span>
+                            <span><i class="bi bi-envelope-fill me-1" style="color: var(--color-principal);"></i> {{ request.user.email|default:"docente@edunova.edu.co" }}</span>
+                        </div>
                     </div>
+                </div>
+
+                <!-- BOTÓN ACCIÓN RÁPIDA EDITAR -->
+                <div class="col-md-4 text-start text-md-end">
+                    <button type="button" class="btn rounded-pill px-4 py-2.5 fw-bold small shadow-2xs d-inline-flex align-items-center gap-2"
+                            data-bs-toggle="modal" data-bs-target="#modalEditarPerfil"
+                            style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-principal);">
+                        <i class="bi bi-pencil-square"></i> Editar Perfil
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Columna Derecha -->
-        <div class="col-lg-6 space-y-4">
-            <!-- 3. Contacto -->
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
-                <div class="d-flex align-items-center gap-2.5 mb-3.5 pb-1">
-                    <i class="bi bi-headset fs-5" style="color: #db2777;"></i>
-                    <h6 class="fw-bold text-dark mb-0 fs-6">Contacto</h6>
-                </div>
-                <div class="space-y-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-envelope-fill fs-5" style="color: #db2777;"></i>
-                        <div>
-                            <small class="text-muted d-block" style="font-size: 0.74rem;">Correo institucional</small>
-                            <strong class="text-dark" style="font-size: 0.88rem;">maria.torres@edunova.edu.co</strong>
+        <!-- PESTAÑAS DE NAVEGACIÓN INTERNA -->
+        <div class="p-3 bg-white border-bottom">
+            <ul class="nav nav-pills gap-2" id="perfil-nav-tabs">
+                <li class="nav-item">
+                    <button type="button" class="nav-link active rounded-pill px-3.5 py-1.5 fw-bold small" id="tab-btn-personal" onclick="switchPerfilTab('personal', this)" style="background: var(--color-principal); color: #ffffff;">
+                        <i class="bi bi-person-badge-fill me-1.5"></i> Información Personal
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small text-dark bg-white border" id="tab-btn-profesional" onclick="switchPerfilTab('profesional', this)" style="border-color: var(--color-acento) !important;">
+                        <i class="bi bi-journal-bookmark-fill me-1.5" style="color: var(--color-principal);"></i> Información Profesional
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small text-dark bg-white border" id="tab-btn-seguridad" onclick="switchPerfilTab('seguridad', this)" style="border-color: var(--color-acento) !important;">
+                        <i class="bi bi-shield-lock-fill me-1.5" style="color: var(--color-principal);"></i> Seguridad de la Cuenta
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small text-dark bg-white border" id="tab-btn-preferencias" onclick="switchPerfilTab('preferencias', this)" style="border-color: var(--color-acento) !important;">
+                        <i class="bi bi-sliders me-1.5" style="color: var(--color-principal);"></i> Preferencias
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 2. CONTENIDO DE LAS PESTAÑAS -->
+    
+    <!-- SECCIÓN A: INFORMACIÓN PERSONAL -->
+    <div class="perfil-tab-pane" id="pane-personal">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card border rounded-4 bg-white p-4 shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
+                    <h5 class="fw-bold mb-3.5 text-dark d-flex align-items-center gap-2" style="font-size: 1.05rem;">
+                        <i class="bi bi-person-fill" style="color: var(--color-principal);"></i> Datos de Identificación
+                    </h5>
+                    
+                    <div class="space-y-3">
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Nombre Completo</small>
+                            <span class="fw-bold text-dark fs-6">{{ request.user.get_full_name|default:request.user.username }}</span>
                         </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-telephone-fill fs-5" style="color: #db2777;"></i>
-                        <div>
-                            <small class="text-muted d-block" style="font-size: 0.74rem;">Teléfono</small>
-                            <strong class="text-dark" style="font-size: 0.88rem;">+57 300 123 4567</strong>
+
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Documento de Identidad</small>
+                            <span class="fw-bold text-dark fs-6">{{ request.user.perfil.tipo_documento|default:"C.C." }} {{ request.user.perfil.numero_documento|default:"1.098.765.432" }}</span>
                         </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-geo-alt-fill fs-5" style="color: #db2777;"></i>
-                        <div>
-                            <small class="text-muted d-block" style="font-size: 0.74rem;">Dirección</small>
-                            <strong class="text-dark" style="font-size: 0.88rem;">Calle 10 # 5-20, Ciénaga, Magdalena</strong>
+
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Fecha de Nacimiento</small>
+                            <span class="fw-bold text-dark fs-6">{% if request.user.perfil.fecha_nacimiento %}{{ request.user.perfil.fecha_nacimiento|date:"d F Y" }}{% else %}15 de Mayo de 1985{% endif %}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. Asignaturas a cargo -->
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
-                <div class="d-flex align-items-center gap-2.5 mb-3 pb-1">
-                    <i class="bi bi-book-half fs-5" style="color: #db2777;"></i>
-                    <h6 class="fw-bold text-dark mb-0 fs-6">Asignaturas a cargo</h6>
+            <div class="col-md-6">
+                <div class="card border rounded-4 bg-white p-4 shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
+                    <h5 class="fw-bold mb-3.5 text-dark d-flex align-items-center gap-2" style="font-size: 1.05rem;">
+                        <i class="bi bi-telephone-fill" style="color: var(--color-principal);"></i> Contacto y Residencia
+                    </h5>
+
+                    <div class="space-y-3">
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Correo Electrónico Institucional</small>
+                            <span class="fw-bold text-dark fs-6">{{ request.user.email|default:"docente@edunova.edu.co" }}</span>
+                        </div>
+
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Teléfono de Contacto</small>
+                            <span class="fw-bold text-dark fs-6">{{ request.user.perfil.telefono|default:"+57 301 555 1234" }}</span>
+                        </div>
+
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Dirección de Residencia</small>
+                            <span class="fw-bold text-dark fs-6">{{ request.user.perfil.direccion|default:"Calle 45 # 10-20, Apto 301, Bogotá D.C." }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <span class="badge rounded-pill px-3.5 py-2 fw-semibold" style="background: #fce7f3; color: #be185d; font-size: 0.84rem;">
-                        Matemáticas
-                    </span>
-                    <span class="badge rounded-pill px-3.5 py-2 fw-semibold" style="background: #fce7f3; color: #be185d; font-size: 0.84rem;">
-                        Informática
-                    </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN B: INFORMACIÓN PROFESIONAL -->
+    <div class="perfil-tab-pane d-none" id="pane-profesional">
+        <div class="row g-4">
+            <div class="col-md-5">
+                <div class="card border rounded-4 bg-white p-4 shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
+                    <h5 class="fw-bold mb-3.5 text-dark d-flex align-items-center gap-2" style="font-size: 1.05rem;">
+                        <i class="bi bi-award-fill" style="color: var(--color-principal);"></i> Vinculación Académica
+                    </h5>
+
+                    <div class="space-y-3">
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem;">Cargo Institucional</small>
+                            <span class="fw-bold text-dark fs-6">Docente Titular de Educación Secundaria y Media</span>
+                        </div>
+
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem;">Área de Especialidad</small>
+                            <span class="fw-bold text-dark fs-6">Matemáticas, Física y Educación Media Técnica</span>
+                        </div>
+
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem;">Sede Asignada</small>
+                            <span class="fw-bold text-dark fs-6">Sede Principal - Jornada Mañana</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 5. Grupos a cargo -->
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
-                <div class="d-flex align-items-center gap-2.5 mb-3 pb-1">
-                    <i class="bi bi-people-fill fs-5" style="color: #db2777;"></i>
-                    <h6 class="fw-bold text-dark mb-0 fs-6">Grupos a cargo</h6>
+            <div class="col-md-7">
+                <div class="card border rounded-4 bg-white p-4 shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
+                    <h5 class="fw-bold mb-3.5 text-dark d-flex align-items-center gap-2" style="font-size: 1.05rem;">
+                        <i class="bi bi-book-half" style="color: var(--color-principal);"></i> Carga Académica Asignada
+                    </h5>
+                    
+                    <p class="text-muted small mb-3">Resumen de asignaturas y grupos vigentes registrados en la plataforma:</p>
+
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-white text-dark shadow-2xs border" style="border-color: var(--color-acento) !important;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-calculator-fill fs-5" style="color: var(--color-principal);"></i>
+                                    <strong class="small">Matemáticas</strong>
+                                </div>
+                                <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" style="background: #F5F2EB; color: var(--color-secundario);">Grados 10 y 11</span>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-white text-dark shadow-2xs border" style="border-color: var(--color-acento) !important;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-laptop-fill fs-5" style="color: var(--color-principal);"></i>
+                                    <strong class="small">Informática</strong>
+                                </div>
+                                <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" style="background: #F5F2EB; color: var(--color-secundario);">Grados 10 y 11</span>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-white text-dark shadow-2xs border" style="border-color: var(--color-acento) !important;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-rulers fs-5" style="color: var(--color-principal);"></i>
+                                    <strong class="small">Física</strong>
+                                </div>
+                                <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" style="background: #F5F2EB; color: var(--color-secundario);">Grado 10-A</span>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-white text-dark shadow-2xs border" style="border-color: var(--color-acento) !important;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-lightning-charge-fill fs-5" style="color: var(--color-principal);"></i>
+                                    <strong class="small">Electrónica</strong>
+                                </div>
+                                <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" style="background: #F5F2EB; color: var(--color-secundario);">Grado 11-B</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <span class="badge rounded-pill px-3.5 py-2 fw-semibold" style="background: #fce7f3; color: #be185d; font-size: 0.84rem;">
-                        Grado 10°A
-                    </span>
-                    <span class="badge rounded-pill px-3.5 py-2 fw-semibold" style="background: #fce7f3; color: #be185d; font-size: 0.84rem;">
-                        Grado 11°A
-                    </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN E: SEGURIDAD DE LA CUENTA -->
+    <div class="perfil-tab-pane d-none" id="pane-seguridad">
+        <div class="card border rounded-4 bg-white p-4 shadow-2xs max-w-2xl mx-auto" style="border-color: var(--color-acento) !important; max-width: 650px;">
+            <h5 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2" style="font-size: 1.1rem;">
+                <i class="bi bi-shield-lock-fill" style="color: var(--color-principal);"></i> Cambiar Contraseña de Acceso
+            </h5>
+            <p class="text-muted small mb-4">Actualice su contraseña periódicamente para mantener la seguridad de sus datos académicos.</p>
+
+            <form method="POST" action="{% url 'perfil_profesional' %}" id="form-cambio-password">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="cambiar_password">
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-dark">Contraseña Actual:</label>
+                    <input type="password" class="form-control" name="password_actual" required 
+                           placeholder="Ingrese su clave actual..." style="border-color: var(--color-acento);">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-dark">Nueva Contraseña:</label>
+                    <input type="password" class="form-control" name="password_nueva" required minlength="8"
+                           placeholder="Mínimo 8 caracteres..." style="border-color: var(--color-acento);">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold small text-dark">Confirmar Nueva Contraseña:</label>
+                    <input type="password" class="form-control" name="password_confirmacion" required minlength="8"
+                           placeholder="Repita la nueva contraseña..." style="border-color: var(--color-acento);">
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="reset" class="btn btn-light rounded-pill px-4 fw-semibold">Limpiar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-2xs"
+                            style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                        <i class="bi bi-key-fill me-1"></i> Actualizar Contraseña
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECCIÓN F: PREFERENCIAS -->
+    <div class="perfil-tab-pane d-none" id="pane-preferencias">
+        <div class="card border rounded-4 bg-white p-4 shadow-2xs max-w-2xl mx-auto" style="border-color: var(--color-acento) !important; max-width: 650px;">
+            <h5 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2" style="font-size: 1.1rem;">
+                <i class="bi bi-sliders" style="color: var(--color-principal);"></i> Preferencias de Notificación y Sistema
+            </h5>
+            <p class="text-muted small mb-4">Configure las alertas y opciones visuales para su cuenta docente.</p>
+
+            <div class="space-y-3">
+                <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                    <div>
+                        <strong class="d-block text-dark small">Alertas de entregas de tareas</strong>
+                        <small class="text-muted">Notificar cuando los estudiantes envíen actividades.</small>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" checked style="cursor: pointer;">
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                    <div>
+                        <strong class="d-block text-dark small">Mensajes de acudientes y familias</strong>
+                        <small class="text-muted">Recibir aviso inmediato al llegar un comunicado familiar.</small>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" checked style="cursor: pointer;">
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                    <div>
+                        <strong class="d-block text-dark small">Recordatorios de clase en agenda</strong>
+                        <small class="text-muted">Mostrar aviso 15 minutos antes de iniciar un bloque.</small>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" checked style="cursor: pointer;">
+                    </div>
                 </div>
             </div>
         </div>
@@ -207,48 +324,91 @@
 
 </div>
 
-<!-- MODAL FUNCIONAL: EDITAR PERFIL PROFESIONAL DEL DOCENTE -->
-<div class="modal fade" id="modalEditarPerfilDocente" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #fce7f3 !important;">
-            <div class="modal-header border-bottom p-3.5" style="background: #fff0f3;">
-                <div>
-                    <h6 class="modal-title fw-bold text-dark mb-0">Editar Perfil Profesional</h6>
-                    <small class="text-muted">Actualice sus datos de contacto y fotografía institucional</small>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <form method="POST" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
+<!-- MODAL PARA EDITAR PERFIL Y FOTO -->
+<div class="modal fade" id="modalEditarPerfil" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form method="POST" action="{% url 'perfil_profesional' %}" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="hidden" name="action" value="guardar_perfil">
-                <div class="modal-body p-4 space-y-3">
+                <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
                     <div>
-                        <label class="form-label small fw-bold text-dark mb-1">Nombre Completo:</label>
-                        <input type="text" class="form-control form-control-sm bg-light" value="{{ request.user.get_full_name }}" readonly>
+                        <h5 class="modal-title fw-bold text-dark mb-0">Editar Perfil Docente</h5>
+                        <small class="text-muted">Actualice su información personal, de contacto y fotografía institucional</small>
                     </div>
-                    <div>
-                        <label class="form-label small fw-bold text-dark mb-1">Documento de Identidad:</label>
-                        <input type="text" class="form-control form-control-sm bg-light" value="1.234.567.890" readonly>
-                    </div>
-                    <div>
-                        <label class="form-label small fw-bold text-dark mb-1">Correo Electrónico Institucional:</label>
-                        <input type="email" name="email" class="form-control form-control-sm" value="{{ request.user.email }}" required>
-                    </div>
-                    <div>
-                        <label class="form-label small fw-bold text-dark mb-1">Teléfono Móvil de Contacto:</label>
-                        <input type="text" name="telefono" class="form-control form-control-sm" value="{{ perfil_docente.telefono|default:'+57 300 123 4567' }}" placeholder="+57 300 123 4567">
-                    </div>
-                    <div>
-                        <label class="form-label small fw-bold text-dark mb-1">Fotografía del Docente:</label>
-                        <input type="file" name="foto_perfil" class="form-control form-control-sm" accept="image/*">
-                        <small class="text-muted" style="font-size: 0.72rem;">Formatos admitidos: JPG, PNG, WEBP.</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <!-- Fotografía -->
+                        <div class="col-12 text-center pb-2 border-bottom mb-2">
+                            <label class="form-label fw-bold d-block text-dark small mb-2">Fotografía de Perfil:</label>
+                            <input type="file" class="form-control bg-white mx-auto" name="foto_perfil" accept="image/*" style="max-width: 380px; border-color: var(--color-acento);">
+                            <small class="text-muted d-block mt-1">Archivos JPG, PNG o WEBP. Máximo 5MB.</small>
+                        </div>
+
+                        <!-- Nombre Completo -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-dark">Nombre:</label>
+                            <input type="text" class="form-control" name="first_name" value="{{ request.user.first_name }}" required style="border-color: var(--color-acento);">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-dark">Apellidos:</label>
+                            <input type="text" class="form-control" name="last_name" value="{{ request.user.last_name }}" required style="border-color: var(--color-acento);">
+                        </div>
+
+                        <!-- Documento y Teléfono -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-dark">Número de Documento:</label>
+                            <input type="text" class="form-control" name="documento" value="{{ request.user.perfil.numero_documento|default:'1.098.765.432' }}" style="border-color: var(--color-acento);">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-dark">Teléfono Móvil:</label>
+                            <input type="text" class="form-control" name="telefono" value="{{ request.user.perfil.telefono|default:'3015551234' }}" style="border-color: var(--color-acento);">
+                        </div>
+
+                        <!-- Correo Electrónico -->
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold small text-dark">Correo Electrónico Institucional:</label>
+                            <input type="email" class="form-control" name="email" value="{{ request.user.email }}" required style="border-color: var(--color-acento);">
+                        </div>
+
+                        <!-- Fecha Nacimiento -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-dark">Fecha de Nacimiento:</label>
+                            <input type="date" class="form-control" name="fecha_nacimiento" value="{{ request.user.perfil.fecha_nacimiento|date:'Y-m-d' }}" style="border-color: var(--color-acento);">
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-3 pt-0">
-                    <button type="button" class="btn btn-secondary rounded-pill px-3 py-1.5 fw-semibold small" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn rounded-pill px-4 py-1.5 fw-semibold small text-white shadow-sm" style="background: #db2777;">Guardar Cambios</button>
+
+                <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-end gap-2" style="border-color: var(--color-acento) !important;">
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-2xs" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                        Guardar Cambios
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+function switchPerfilTab(tabKey, btn) {
+    const panes = document.querySelectorAll('.perfil-tab-pane');
+    panes.forEach(p => p.classList.add('d-none'));
+
+    const tabBtns = document.querySelectorAll('#perfil-nav-tabs .nav-link');
+    tabBtns.forEach(b => {
+        b.classList.remove('active');
+        b.style.background = '#ffffff';
+        b.style.color = '#111827';
+    });
+
+    const targetPane = document.getElementById('pane-' + tabKey);
+    if (targetPane) targetPane.classList.remove('d-none');
+
+    btn.classList.add('active');
+    btn.style.background = 'var(--color-principal)';
+    btn.style.color = '#ffffff';
+}
+</script>

@@ -1,46 +1,47 @@
 /* ==============================================================================
-   SINETEC · SOFTWARE ADMINISTRATIVO ESCOLAR
+   EDUNOVA · SISTEMA INTEGRADO DE EDUCACIÓN TÉCNICA
    SISTEMA DE DISEÑO VISUAL INSTITUCIONAL MODERNO
+   IDENTIDAD: CAFÉ CLARO · BEIGE · CREMA · MARRÓN SUAVE
    ============================================================================== */
 
 :root {
-    /* Paleta Institucional SINETEC - Rosa Elegante */
-    --sinetec-bg: #FDF2F4;
-    --sinetec-card-bg: #FFFFFF;
-    --sinetec-border: #FCE7F3;
-    --sinetec-border-subtle: #FFF1F5;
-    --sinetec-text-main: #0F172A;
-    --sinetec-text-body: #334155;
-    --sinetec-text-muted: #64748B;
-    --sinetec-text-light: #94A3B8;
+    /* Paleta Institucional EduNova - Café Claro / Beige / Crema */
+    --sinetec-bg: var(--color-fondo);              /* Fondo general crema suave */
+    --sinetec-card-bg: #FFFFFF;         /* Blanco cálido para tarjetas */
+    --sinetec-border: #E5DFD5;          /* Borde beige neutro */
+    --sinetec-border-subtle: #EDE8E1;   /* Borde muy sutil */
+    --sinetec-text-main: var(--color-titulo);       /* Texto títulos marrón profundo */
+    --sinetec-text-body: var(--color-texto);       /* Texto general café suave */
+    --sinetec-text-muted: #75675E;      /* Texto secundario cálido */
+    --sinetec-text-light: #9C8E85;      /* Texto suave institucional */
 
-    /* Rosa Primario / Magenta Elegante */
-    --sinetec-petroleum: #DB2777;
-    --sinetec-petroleum-hover: #BE185D;
-    --sinetec-petroleum-dark: #9D174D;
-    --sinetec-petroleum-gradient: linear-gradient(135deg, #9D174D 0%, #DB2777 55%, #F472B6 100%);
+    /* Café Institucional Primario (Café Claro y Refinado) */
+    --sinetec-petroleum: var(--color-principal);
+    --sinetec-petroleum-hover: var(--color-secundario);
+    --sinetec-petroleum-dark: var(--color-secundario);
+    --sinetec-petroleum-gradient: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%);
 
-    /* Rosa Institucional y Enlaces */
-    --sinetec-blue: #DB2777;
-    --sinetec-blue-hover: #BE185D;
-    --sinetec-blue-light: #FDF2F4;
-    --sinetec-blue-soft: #FCE7F3;
-    --sinetec-blue-border: #FBCFE8;
+    /* Enlaces y Acentos Café Suave */
+    --sinetec-blue: var(--color-principal);
+    --sinetec-blue-hover: var(--color-secundario);
+    --sinetec-blue-light: var(--color-fondo);
+    --sinetec-blue-soft: var(--color-acento);
+    --sinetec-blue-border: #E0D8CE;
 
-    /* Lavanda y Rosa Pastel */
-    --sinetec-lavender: #FFF1F5;
-    --sinetec-lavender-border: #FCE7F3;
-    --sinetec-lavender-text: #DB2777;
-    --sinetec-lavender-soft: #FDF2F4;
+    /* Tonos Crema y Beige */
+    --sinetec-lavender: #F5F2EB;
+    --sinetec-lavender-border: #E5DFD5;
+    --sinetec-lavender-text: var(--color-secundario);
+    --sinetec-lavender-soft: var(--color-fondo);
 
-    /* Rosa Sutil como Acento Refinado */
-    --sinetec-rose: #DB2777;
-    --sinetec-rose-hover: #BE185D;
-    --sinetec-rose-soft: #FCE7F3;
-    --sinetec-rose-border: #FBCFE8;
-    --sinetec-rose-text: #9D174D;
+    /* Acentos Refinados Café Claro */
+    --sinetec-rose: var(--color-principal);
+    --sinetec-rose-hover: var(--color-secundario);
+    --sinetec-rose-soft: var(--color-acento);
+    --sinetec-rose-border: #E0D8CE;
+    --sinetec-rose-text: var(--color-secundario);
 
-    /* Semáforo Oficial de Competencias (🟢 🟡 🔴) */
+    /* Semáforo Oficial de Competencias (🟢 🟡 🔴) - Preservados semánticamente */
     --semaforo-aprobado: #10B981;
     --semaforo-aprobado-soft: #ECFDF5;
     --semaforo-aprobado-border: #A7F3D0;
@@ -54,23 +55,32 @@
     /* Sombras y Radios */
     --sinetec-radius: 16px;
     --sinetec-radius-sm: 10px;
-    --sinetec-shadow-sm: 0 1px 3px 0 rgba(219, 39, 119, 0.05), 0 1px 2px -1px rgba(219, 39, 119, 0.05);
-    --sinetec-shadow: 0 4px 20px -2px rgba(219, 39, 119, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
-    --sinetec-shadow-hover: 0 10px 25px -4px rgba(219, 39, 119, 0.16), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+    --sinetec-shadow-sm: 0 1px 3px 0 rgba(90, 56, 37, 0.05), 0 1px 2px -1px rgba(90, 56, 37, 0.05);
+    --sinetec-shadow: 0 4px 20px -2px rgba(90, 56, 37, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+    --sinetec-shadow-hover: 0 10px 25px -4px rgba(90, 56, 37, 0.14), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
 
     /* Tipografías */
     --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
     /* Aliases de compatibilidad */
-    --sinetec-primary: #DB2777;
-    --sinetec-primary-dark: #BE185D;
-    --sinetec-secondary: #F472B6;
+    --sinetec-primary: var(--color-principal);
+    --sinetec-primary-dark: var(--color-secundario);
+    --sinetec-secondary: #B8977E;
     --sinetec-cream: var(--sinetec-bg);
     --sinetec-line: var(--sinetec-border);
     --sinetec-white: #ffffff;
     --sinetec-ink: var(--sinetec-text-main);
     --sinetec-muted: var(--sinetec-text-muted);
+
+    /* Variables globales EduNova */
+    --edunova-primary: var(--color-principal);
+    --edunova-primary-dark: var(--color-secundario);
+    --edunova-secondary: #B8977E;
+    --edunova-background: var(--color-fondo);
+    --edunova-surface: #FFFFFF;
+    --edunova-text: var(--color-titulo);
+    --edunova-border: #E5DFD5;
 }
 
 * {
@@ -118,8 +128,8 @@ a:hover {
 
 /* Sidebar Fijo Desktop */
 .sinetec-sidebar {
-    background: #7FC4F2;
-    color: #173B52;
+    background: #FFFFFF !important;
+    color: var(--color-titulo) !important;
     width: 264px;
     min-width: 264px;
     max-width: 264px;
@@ -134,8 +144,8 @@ a:hover {
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 4px 0 20px rgba(10, 30, 50, 0.25);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 2px 0 16px rgba(90, 56, 37, 0.05);
+    border-right: 1px solid var(--sinetec-border) !important;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease;
 }
 
@@ -145,20 +155,20 @@ a:hover {
     align-items: center;
     gap: 12px;
     text-decoration: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(47, 121, 168, 0.25);
+    border-bottom: 1px solid var(--sinetec-border);
+    background: #FFFFFF;
 }
 
 .sinetec-brand-icon {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #2A5EAC 0%, #1D447F 100%);
+    background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%);
     color: #ffffff;
     display: grid;
     place-items: center;
     font-size: 1.25rem;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px rgba(90, 56, 37, 0.2);
     flex-shrink: 0;
 }
 
@@ -170,7 +180,7 @@ a:hover {
     font-family: var(--font-heading);
     font-size: 1.15rem;
     font-weight: 800;
-    color: #123B55;
+    color: var(--sinetec-text-main);
     letter-spacing: -0.01em;
     display: flex;
     align-items: center;
@@ -179,7 +189,7 @@ a:hover {
 
 .sinetec-brand-subtitle {
     font-size: 0.72rem;
-    color: #245B78;
+    color: var(--sinetec-text-muted);
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
@@ -195,17 +205,17 @@ a:hover {
 }
 
 .sinetec-nav-label {
-    color: #245B78;
+    color: var(--color-secundario) !important;
     text-transform: uppercase;
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     font-weight: 800;
-    letter-spacing: 0.1em;
-    padding: 16px 10px 6px;
+    letter-spacing: 0.08em;
+    padding: 16px 12px 6px;
     margin-top: 4px;
 }
 
 .sinetec-nav .nav-link {
-    color: #173B52;
+    color: var(--color-texto);
     border-radius: 10px;
     padding: 9px 12px;
     display: flex;
@@ -221,43 +231,44 @@ a:hover {
 .sinetec-nav .nav-link i {
     width: 20px;
     text-align: center;
-    color: #245B78;
-    font-size: 1.05rem;
+    color: var(--color-principal);
+    font-size: 1.1rem;
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .sinetec-nav .nav-link:hover {
-    color: #123B55;
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--color-secundario);
+    background: #F5F2EB;
+    border-color: #E5DFD5;
     transform: translateX(2px);
 }
 
 .sinetec-nav .nav-link:hover i {
-    color: #60A5FA;
+    color: var(--color-secundario);
 }
 
 .sinetec-nav .nav-link.active {
-    color: #ffffff;
-    background: #3E91C5;
-    border-color: transparent;
-    box-shadow: 0 4px 14px rgba(42, 94, 172, 0.4);
+    color: var(--color-secundario) !important;
+    background: var(--color-acento) !important;
+    border-color: #E0D8CE !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(90, 56, 37, 0.06);
 }
 
 .sinetec-nav .nav-link.active i {
-    color: #ffffff;
+    color: var(--color-principal) !important;
 }
 
 .sinetec-sidebar-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--sinetec-border);
     padding: 14px 16px;
-    background: rgba(47, 121, 168, 0.25);
+    background: #FAF8F5;
     font-size: 0.75rem;
-    color: #245B78;
+    color: var(--sinetec-text-muted);
 }
 
 .sinetec-sidebar-footer strong {
-    color: #123B55;
+    color: var(--sinetec-text-main);
     display: block;
     font-size: 0.82rem;
     margin-bottom: 2px;
@@ -272,7 +283,7 @@ a:hover {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background: linear-gradient(135deg, #fafdff 0%, #eef8fd 52%, #e4f3f8 100%);
+    background: var(--sinetec-bg);
     transition: margin-left 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease;
 }
 
@@ -292,7 +303,7 @@ a:hover {
    ============================================================================== */
 
 .sinetec-topbar {
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(255, 255, 255, 0.96);
     border-bottom: 1px solid var(--sinetec-border);
     min-height: 68px;
     display: flex;
@@ -305,13 +316,13 @@ a:hover {
     z-index: 1020;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 2px 10px rgba(90, 56, 37, 0.03);
 }
 
 .sinetec-search {
     max-width: 420px;
     width: 100%;
-    background: #F1F5F9;
+    background: #F5F2EB;
     border: 1px solid transparent;
     border-radius: 12px;
     display: flex;
@@ -324,7 +335,7 @@ a:hover {
 .sinetec-search:focus-within {
     border-color: var(--sinetec-blue);
     background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.15);
 }
 
 .sinetec-search input {
@@ -362,7 +373,7 @@ a:hover {
     gap: 10px;
     padding: 5px 12px 5px 6px;
     border-radius: 9999px;
-    background: #F8FAFC;
+    background: #FAF8F5;
     border: 1px solid var(--sinetec-border);
     color: var(--sinetec-text-main);
     text-decoration: none;
@@ -370,7 +381,7 @@ a:hover {
 }
 
 .sinetec-user-pill:hover {
-    background: #F1F5F9;
+    background: var(--color-acento);
     color: var(--sinetec-text-main);
 }
 
@@ -378,7 +389,7 @@ a:hover {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--sinetec-petroleum) 0%, #1E3A8A 100%);
+    background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%);
     color: #ffffff;
     display: grid;
     place-items: center;
@@ -395,7 +406,7 @@ a:hover {
     z-index: auto !important;
 }
 
-/* Modales Bootstrap: siempre al frente del telón backdrop */
+/* Modales Bootstrap */
 .modal {
     z-index: 1070 !important;
 }
@@ -403,13 +414,13 @@ a:hover {
     z-index: 1060 !important;
 }
 
-/* Hero unificado para módulos internos: Rosa Elegante Institucional SINETEC */
+/* Hero unificado para módulos internos: Café Institucional Elegante */
 .sinetec-dashboard-hero {
-    background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important;
+    background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%) !important;
     color: #FFFFFF !important;
     padding: 1.85rem 2.25rem !important;
     border-radius: 1.25rem !important;
-    box-shadow: 0 10px 25px -4px rgba(190, 24, 93, 0.35) !important;
+    box-shadow: 0 10px 25px -4px rgba(90, 56, 37, 0.25) !important;
     position: relative;
     overflow: hidden;
 }
@@ -428,9 +439,9 @@ a:hover {
 .sinetec-card,
 .card {
     background: var(--sinetec-card-bg);
-    border: 1px solid #FCE7F3 !important;
+    border: 1px solid var(--sinetec-border) !important;
     border-radius: var(--sinetec-radius);
-    box-shadow: 0 4px 16px -2px rgba(219, 39, 119, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+    box-shadow: 0 4px 16px -2px rgba(90, 56, 37, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -512,7 +523,7 @@ a:hover {
 
 .sinetec-table thead th,
 .table thead th {
-    background: #F8FAFC;
+    background: #FAF8F5;
     color: var(--sinetec-text-muted);
     font-size: 0.72rem;
     text-transform: uppercase;
@@ -533,7 +544,7 @@ a:hover {
 
 .sinetec-table tbody tr:hover,
 .table-hover tbody tr:hover {
-    background-color: #F8FAFC;
+    background-color: #FAF8F5;
 }
 
 /* Botones Modernos */
@@ -551,7 +562,7 @@ a:hover {
     background: var(--sinetec-petroleum-hover);
     border-color: var(--sinetec-petroleum-hover);
     color: #ffffff;
-    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.25);
+    box-shadow: 0 4px 14px rgba(90, 56, 37, 0.25);
     transform: translateY(-1px);
 }
 
@@ -569,7 +580,7 @@ a:hover {
     background: var(--sinetec-blue-hover);
     border-color: var(--sinetec-blue-hover);
     color: #ffffff;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    box-shadow: 0 4px 14px rgba(90, 56, 37, 0.25);
     transform: translateY(-1px);
 }
 
@@ -587,13 +598,13 @@ a:hover {
     background: var(--sinetec-rose-hover);
     border-color: var(--sinetec-rose-hover);
     color: #ffffff;
-    box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35);
+    box-shadow: 0 4px 14px rgba(90, 56, 37, 0.25);
     transform: translateY(-1px);
 }
 
 /* Badges y Pastillas */
 .badge-soft-blue {
-    background-color: var(--sinetec-blue-light);
+    background-color: var(--sinetec-blue-soft);
     color: var(--sinetec-blue-hover);
     border: 1px solid var(--sinetec-blue-border);
 }
@@ -635,12 +646,13 @@ a:hover {
     padding: 9px 13px;
     font-size: 0.9rem;
     color: var(--sinetec-text-main);
+    background-color: #FFFFFF;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: var(--sinetec-blue);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+    border-color: var(--sinetec-blue) !important;
+    box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.18) !important;
 }
 
 /* Pestañas (Tabs) */
@@ -677,7 +689,7 @@ a:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(45, 35, 30, 0.55);
     z-index: 1040;
     backdrop-filter: blur(4px);
 }
@@ -721,17 +733,17 @@ a:hover {
 }
 
 /* ==============================================================================
-   SOBREESCRITURAS GLOBALES BOOTSTRAP - IDENTIDAD ROSA SINETEC OFICIAL
+   SOBREESCRITURAS GLOBALES BOOTSTRAP - IDENTIDAD CAFÉ CLARO EDUNOVA OFICIAL
    ============================================================================== */
 .btn-primary,
 button.btn-primary,
 a.btn-primary,
 .sinetec-btn-primary {
-    background: linear-gradient(135deg, #db2777 0%, #be185d 100%) !important;
-    background-color: #db2777 !important;
-    border-color: #db2777 !important;
+    background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%) !important;
+    background-color: var(--color-principal) !important;
+    border-color: var(--color-secundario) !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25) !important;
+    box-shadow: 0 4px 12px rgba(90, 56, 37, 0.22) !important;
 }
 
 .btn-primary:hover,
@@ -739,68 +751,60 @@ a.btn-primary,
 .btn-primary:active,
 .btn-primary.active,
 .sinetec-btn-primary:hover {
-    background: linear-gradient(135deg, #be185d 0%, #9d174d 100%) !important;
-    background-color: #be185d !important;
-    border-color: #9d174d !important;
+    background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 100%) !important;
+    background-color: var(--color-secundario) !important;
+    border-color: var(--color-secundario) !important;
     color: #ffffff !important;
-    box-shadow: 0 6px 16px rgba(190, 24, 93, 0.35) !important;
+    box-shadow: 0 6px 16px rgba(90, 56, 37, 0.3) !important;
 }
 
 .btn-outline-primary {
-    color: #db2777 !important;
-    border-color: #f472b6 !important;
+    color: var(--color-principal) !important;
+    border-color: var(--color-principal) !important;
     background-color: transparent !important;
 }
 
 .btn-outline-primary:hover,
 .btn-outline-primary:active {
-    background-color: #db2777 !important;
-    border-color: #db2777 !important;
+    background-color: var(--color-principal) !important;
+    border-color: var(--color-principal) !important;
     color: #ffffff !important;
 }
 
 .text-primary,
 i.text-primary {
-    color: #db2777 !important;
+    color: var(--color-principal) !important;
 }
 
 .bg-primary {
-    background-color: #db2777 !important;
+    background-color: var(--color-principal) !important;
 }
 
 .bg-primary-subtle {
-    background-color: #fce7f3 !important;
-    color: #db2777 !important;
+    background-color: var(--color-acento) !important;
+    color: var(--color-secundario) !important;
 }
 
 .border-primary {
-    border-color: #f472b6 !important;
+    border-color: var(--color-principal) !important;
 }
 
 .badge.bg-primary,
 .badge-primary {
-    background-color: #fce7f3 !important;
-    color: #db2777 !important;
-    border: 1px solid #fbcfe8 !important;
+    background-color: var(--color-acento) !important;
+    color: var(--color-secundario) !important;
+    border: 1px solid #E0D8CE !important;
 }
 
 .badge-blue-soft,
 .badge-soft-blue {
-    background-color: #fce7f3 !important;
-    color: #db2777 !important;
-    border: 1px solid #fbcfe8 !important;
+    background-color: var(--color-acento) !important;
+    color: var(--color-secundario) !important;
+    border: 1px solid #E0D8CE !important;
 }
 
-.form-control:focus,
-.form-select:focus {
-    border-color: #f472b6 !important;
-    box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.18) !important;
-}
-
-/* Avatares y pastillas que anteriormente tenían fondos azules */
 .avatar-circle-blue,
 .bg-blue-100 {
-    background-color: #fce7f3 !important;
-    color: #db2777 !important;
+    background-color: var(--color-acento) !important;
+    color: var(--color-secundario) !important;
 }
-

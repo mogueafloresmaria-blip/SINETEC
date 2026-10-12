@@ -1,163 +1,586 @@
 {% load static %}
 <!-- =========================================================================
-     MÓDULO: DOCUMENTOS INSTITUCIONALES Y ACADÉMICOS
-     Permite subir, consultar y descargar documentos escolares reales
+     MÓDULO: GESTIÓN DOCUMENTAL DEL DOCENTE (EDUNOVA)
+     Estructura Oficial en EXACTAMENTE 3 Opciones Rigurosas:
+     1. 📘 GUÍA (Botón: "Publicar guía", DB tipo: 'GUIA')
+     2. 📚 MATERIAL PEDAGÓGICO (Botón: "Material pedagógico", DB tipo: 'MATERIAL_PEDAGOGICO')
+     3. 📎 MATERIAL DE APOYO (Botón: "Material de apoyo", DB tipo: 'MATERIAL_APOYO')
      ========================================================================= -->
 <div class="panel-modulo-docente space-y-4" id="modulo-documentos">
 
     <!-- HERO BANNER DOCUMENTOS -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1px solid #fce7f3;">
+         style="background: linear-gradient(135deg, #FAF8F5 0%, #F5F2EB 50%, var(--color-acento) 100%); border: 1px solid var(--color-acento);">
         <div class="row align-items-center">
-            <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
+            <div class="col-lg-7 position-relative z-1 d-flex align-items-center gap-3">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
-                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1px solid #fce7f3;">
-                    <i class="bi bi-file-earmark-text-fill" style="font-size: 2rem;"></i>
+                     style="background: #ffffff; color: var(--color-principal); width: 62px; height: 62px; border: 1px solid var(--color-acento);">
+                    <i class="bi bi-folder2-open" style="font-size: 2rem;"></i>
                 </div>
                 <div>
-                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
-                        Gestión Documental
+                    <div class="text-uppercase fw-bold mb-1" style="color: var(--color-principal); font-size: 0.76rem; letter-spacing: 0.6px;">
+                        Gestión Documental Escolar · EDUNOVA
                     </div>
                     <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
-                        Documentos Académicos
+                        Documentos y Recursos Académicos
                     </h2>
                     <p class="mb-0 text-muted" style="font-size: 0.88rem;">
-                        Repositorio de documentos curriculares, formatos institucionales, actas y circulares escolares.
+                        Administre y publique guías oficiales, material pedagógico estructurado y material de apoyo para sus estudiantes.
                     </p>
                 </div>
             </div>
-            <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
-                <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
-                        data-bs-toggle="modal" data-bs-target="#modalSubirDocumento"
-                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
-                    <i class="bi bi-cloud-arrow-up-fill"></i> + Subir Documento
-                </button>
+            <div class="col-lg-5 text-end position-relative z-1 mt-3 mt-lg-0">
+                <div class="d-inline-flex align-items-center gap-2 flex-wrap justify-content-end">
+                    <!-- Botón 1: Publicar guía -->
+                    <button type="button" class="btn text-white rounded-pill px-3 py-2 fw-bold shadow-2xs small d-inline-flex align-items-center gap-1.5"
+                            data-bs-toggle="modal" data-bs-target="#modalPublicarGuia"
+                            style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                        <i class="bi bi-journal-bookmark-fill"></i> Publicar guía
+                    </button>
+                    <!-- Botón 2: Material pedagógico -->
+                    <button type="button" class="btn rounded-pill px-3 py-2 fw-bold shadow-2xs small d-inline-flex align-items-center gap-1.5"
+                            data-bs-toggle="modal" data-bs-target="#modalPublicarMaterialPedagogico"
+                            style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-principal);">
+                        <i class="bi bi-book-half"></i> Material pedagógico
+                    </button>
+                    <!-- Botón 3: Material de apoyo -->
+                    <button type="button" class="btn rounded-pill px-3 py-2 fw-bold shadow-2xs small d-inline-flex align-items-center gap-1.5"
+                            data-bs-toggle="modal" data-bs-target="#modalPublicarMaterialApoyo"
+                            style="background: #F5F2EB; color: var(--color-secundario); border: 1.5px solid #E0D8CE;">
+                        <i class="bi bi-paperclip"></i> Material de apoyo
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- LISTADO DE DOCUMENTOS EN TABLA -->
-    <div class="card border rounded-4 p-4 bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
-        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #fce7f3 !important;">
-            <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-files fs-5" style="color: #db2777;"></i>
-                <h6 class="fw-bold text-dark mb-0">Archivos y Documentos Disponibles</h6>
+    <!-- PESTAÑAS DE NAVEGACIÓN EN EXACTAMENTE 3 CATEGORÍAS -->
+    <ul class="nav nav-pills p-1.5 rounded-4 bg-white border shadow-2xs mb-4" id="pills-documentos-tab" role="tablist" style="border-color: var(--color-acento) !important; max-width: 780px;">
+        <!-- Pestaña 1: GUÍA -->
+        <li class="nav-item flex-fill" role="presentation">
+            <button class="nav-link w-100 rounded-pill fw-bold text-center py-2.5 {% if tab_docs == 'guias' or not tab_docs or tab_docs == 'info' %}active{% endif %}"
+                    id="tab-guias-btn" data-bs-toggle="pill" data-bs-target="#panel-guias" type="button" role="tab"
+                    style="font-size: 0.84rem;">
+                <i class="bi bi-journal-bookmark-fill me-1.5"></i> 📘 GUÍA
+                <span class="badge rounded-pill ms-1.5 px-2 py-0.5" style="background: rgba(0,0,0,0.08);">{{ docs_guias|length }}</span>
+            </button>
+        </li>
+        <!-- Pestaña 2: MATERIAL PEDAGÓGICO -->
+        <li class="nav-item flex-fill" role="presentation">
+            <button class="nav-link w-100 rounded-pill fw-bold text-center py-2.5 {% if tab_docs == 'pedagogico' %}active{% endif %}"
+                    id="tab-pedagogico-btn" data-bs-toggle="pill" data-bs-target="#panel-pedagogico" type="button" role="tab"
+                    style="font-size: 0.84rem;">
+                <i class="bi bi-book-half me-1.5"></i> 📚 MATERIAL PEDAGÓGICO
+                <span class="badge rounded-pill ms-1.5 px-2 py-0.5" style="background: rgba(0,0,0,0.08);">{{ docs_material_pedagogico|length }}</span>
+            </button>
+        </li>
+        <!-- Pestaña 3: MATERIAL DE APOYO -->
+        <li class="nav-item flex-fill" role="presentation">
+            <button class="nav-link w-100 rounded-pill fw-bold text-center py-2.5 {% if tab_docs == 'apoyo' %}active{% endif %}"
+                    id="tab-apoyo-btn" data-bs-toggle="pill" data-bs-target="#panel-apoyo" type="button" role="tab"
+                    style="font-size: 0.84rem;">
+                <i class="bi bi-paperclip me-1.5"></i> 📎 MATERIAL DE APOYO
+                <span class="badge rounded-pill ms-1.5 px-2 py-0.5" style="background: rgba(0,0,0,0.08);">{{ docs_material_apoyo|length }}</span>
+            </button>
+        </li>
+    </ul>
+
+    <!-- CONTENEDOR DE PANELES -->
+    <div class="tab-content" id="pills-documentos-tabContent">
+
+        <!-- ================================================================= -->
+        <!-- SECCIÓN 1: 📘 GUÍAS -->
+        <!-- ================================================================= -->
+        <div class="tab-pane fade {% if tab_docs == 'guias' or not tab_docs or tab_docs == 'info' %}show active{% endif %}" id="panel-guias" role="tabpanel">
+            <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-4" style="border-color: var(--color-acento) !important;">
+                <div class="p-4 border-bottom" style="background: #FAF8F5; border-color: var(--color-acento) !important;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="badge rounded-pill px-3 py-1 fw-bold mb-1.5" style="background: var(--color-acento); color: var(--color-principal);">
+                                Repositorio Oficial
+                            </span>
+                            <h5 class="fw-bold text-dark mb-1">📘 Guías de Clase</h5>
+                            <p class="text-muted small mb-0">
+                                Guías de aprendizaje oficiales asignadas a sus grupos académicos. Los elementos eliminados se trasladan a la Papelera de Reciclaje.
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--color-principal); color: #ffffff; font-size: 0.78rem;">
+                                {{ docs_guias|length }} guías activas
+                            </span>
+                            <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white shadow-2xs"
+                                    data-bs-toggle="modal" data-bs-target="#modalPublicarGuia"
+                                    style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                                <i class="bi bi-plus-circle me-1"></i> Publicar guía
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" id="tabla-guias">
+                        <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
+                            <tr>
+                                <th class="py-3 px-4" style="color: var(--color-secundario); font-size: 0.76rem;">TÍTULO DE LA GUÍA</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ASIGNATURA Y GRUPO</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">INSTRUCCIONES / DETALLE</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">FECHA DE PUBLICACIÓN</th>
+                                <th class="py-3 px-4 text-end" style="color: var(--color-secundario); font-size: 0.76rem;">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in docs_guias %}
+                            <tr style="border-bottom: 1px solid var(--color-acento);">
+                                <td class="px-4">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center shadow-2xs"
+                                             style="background: var(--color-acento); color: var(--color-principal); width: 38px; height: 38px;">
+                                            <i class="bi bi-journal-bookmark-fill fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ doc.titulo }}</strong>
+                                            <span class="text-muted small font-monospace">Tipo: Guía Oficial</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if doc.carga_academica %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #F5F2EB; color: var(--color-secundario); border: 1px solid #E0D8CE; font-size: 0.74rem;">
+                                        {{ doc.carga_academica.programa.denominacion|default:'Matemáticas' }} — Grado {{ doc.carga_academica.grado }}°{{ doc.carga_academica.seccion }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #F5F2EB; color: var(--color-secundario); font-size: 0.74rem;">Todos los grupos</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="text-muted small" style="max-width: 250px; display: inline-block;">
+                                        {{ doc.instrucciones|truncatechars:90|default:"Sin instrucciones adicionales." }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-dark d-block small fw-semibold">{{ doc.fecha_publicacion|date:"d/m/Y" }}</span>
+                                    <span class="text-muted" style="font-size: 0.72rem;">{{ doc.fecha_publicacion|time:"h:i A" }}</span>
+                                </td>
+                                <td class="px-4 text-end">
+                                    <div class="d-inline-flex align-items-center gap-1.5">
+                                        {% if doc.archivo %}
+                                        <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1 fw-bold shadow-2xs text-decoration-none"
+                                           style="background: #ffffff; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.78rem;">
+                                            <i class="bi bi-eye me-1"></i> Ver
+                                        </a>
+                                        <a href="{{ doc.archivo.url }}" download class="btn btn-sm rounded-pill px-3 py-1 fw-bold shadow-2xs text-decoration-none text-white"
+                                           style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.78rem;">
+                                            <i class="bi bi-download me-1"></i> Descargar
+                                        </a>
+                                        {% endif %}
+                                        <!-- Botón Eliminar -> Trasladar a Papelera -->
+                                        <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline" onsubmit="return confirm('¿Desea enviar la guía \'{{ doc.titulo|escapejs }}\' a la Papelera de Reciclaje?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="eliminar_documento">
+                                            <input type="hidden" name="documento_id" value="{{ doc.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle p-1 d-inline-flex align-items-center justify-content-center"
+                                                    style="width: 30px; height: 30px;" title="Enviar a la Papelera">
+                                                <i class="bi bi-trash3 fs-6"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-journal-x fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
+                                    <h6 class="fw-bold text-dark">No hay guías de clase publicadas.</h6>
+                                    <small class="text-muted">Utilice el botón "Publicar guía" para subir su primera guía.</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3;">
-                {{ documentos_lista|length }} registros en base de datos
-            </span>
         </div>
 
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead style="background: #fff0f3; border-bottom: 2px solid #fce7f3;">
-                    <tr>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">NOMBRE DEL DOCUMENTO</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">TIPO / CATEGORÍA</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">FECHA DE SUBIDA</th>
-                        <th class="py-3" style="color: #be185d; font-size: 0.76rem;">SUBIDO POR</th>
-                        <th class="py-3 text-end" style="color: #be185d; font-size: 0.76rem;">ACCIONES</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for doc in documentos_lista %}
-                    <tr style="border-bottom: 1px solid #fce7f3;">
-                        <td>
-                            <div class="d-flex align-items-center gap-2.5">
-                                <i class="bi bi-file-earmark-pdf-fill fs-4 text-danger"></i>
-                                <div>
-                                    <strong class="text-dark d-block" style="font-size: 0.88rem;">{{ doc.titulo }}</strong>
-                                    <small class="text-muted" style="font-size: 0.76rem;">{{ doc.descripcion|default:'Sin descripción adicional' }}</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.74rem;">
-                                {{ doc.categoria|default:'Documento Institucional' }}
+        <!-- ================================================================= -->
+        <!-- SECCIÓN 2: 📚 MATERIAL PEDAGÓGICO -->
+        <!-- ================================================================= -->
+        <div class="tab-pane fade {% if tab_docs == 'pedagogico' %}show active{% endif %}" id="panel-pedagogico" role="tabpanel">
+            <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-4" style="border-color: var(--color-acento) !important;">
+                <div class="p-4 border-bottom" style="background: #FAF8F5; border-color: var(--color-acento) !important;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="badge rounded-pill px-3 py-1 fw-bold mb-1.5" style="background: var(--color-acento); color: var(--color-principal);">
+                                Recursos Didácticos
                             </span>
-                        </td>
-                        <td class="small text-muted">{{ doc.fecha_subida|date:"d/m/Y H:i" }}</td>
-                        <td class="small text-muted">{{ doc.subido_por.get_full_name|default:doc.subido_por.username|default:'Coordinación' }}</td>
-                        <td class="text-end">
-                            <div class="d-flex align-items-center justify-content-end gap-1.5">
-                                {% if doc.archivo %}
-                                <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm btn-white border rounded-pill px-3 py-1 fw-bold shadow-2xs" style="color: #475569; font-size: 0.78rem;">
-                                    <i class="bi bi-download text-primary me-1"></i> Abrir
-                                </a>
-                                {% endif %}
-                                <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline" onsubmit="return confirm('¿Desea eliminar este documento?');">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="eliminar_documento_docente">
-                                    <input type="hidden" name="documento_id" value="{{ doc.id }}">
-                                    <button type="submit" class="btn btn-link text-danger p-1" title="Eliminar documento">
-                                        <i class="bi bi-trash3"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
-                            <i class="bi bi-folder-x fs-1 d-block mb-2" style="color: #db2777;"></i>
-                            <h6 class="fw-bold text-dark">No hay documentos cargados en el repositorio</h6>
-                            <small class="text-muted">Utilice el botón superior para subir documentos oficiales.</small>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            <h5 class="fw-bold text-dark mb-1">📚 Material Pedagógico</h5>
+                            <p class="text-muted small mb-0">
+                                Contenido didáctico, módulos y presentaciones estructuradas para el desarrollo temático de las asignaturas.
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--color-principal); color: #ffffff; font-size: 0.78rem;">
+                                {{ docs_material_pedagogico|length }} materiales activos
+                            </span>
+                            <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white shadow-2xs"
+                                    data-bs-toggle="modal" data-bs-target="#modalPublicarMaterialPedagogico"
+                                    style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                                <i class="bi bi-plus-circle me-1"></i> Material pedagógico
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" id="tabla-material-pedagogico">
+                        <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
+                            <tr>
+                                <th class="py-3 px-4" style="color: var(--color-secundario); font-size: 0.76rem;">NOMBRE DEL MATERIAL</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ASIGNATURA Y GRUPO</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">DESCRIPCIÓN</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">FECHA DE PUBLICACIÓN</th>
+                                <th class="py-3 px-4 text-end" style="color: var(--color-secundario); font-size: 0.76rem;">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in docs_material_pedagogico %}
+                            <tr style="border-bottom: 1px solid var(--color-acento);">
+                                <td class="px-4">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center shadow-2xs"
+                                             style="background: #F5F2EB; color: var(--color-secundario); width: 38px; height: 38px;">
+                                            <i class="bi bi-book-half fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ doc.titulo }}</strong>
+                                            <span class="text-muted small font-monospace">Tipo: Material Pedagógico</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if doc.carga_academica %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #F5F2EB; color: var(--color-secundario); border: 1px solid #E0D8CE; font-size: 0.74rem;">
+                                        {{ doc.carga_academica.programa.denominacion|default:'Matemáticas' }} — Grado {{ doc.carga_academica.grado }}°{{ doc.carga_academica.seccion }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #F5F2EB; color: var(--color-secundario); font-size: 0.74rem;">Todos los grupos</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="text-muted small" style="max-width: 250px; display: inline-block;">
+                                        {{ doc.instrucciones|truncatechars:90|default:"Sin descripción." }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-dark d-block small fw-semibold">{{ doc.fecha_publicacion|date:"d/m/Y" }}</span>
+                                    <span class="text-muted" style="font-size: 0.72rem;">{{ doc.fecha_publicacion|time:"h:i A" }}</span>
+                                </td>
+                                <td class="px-4 text-end">
+                                    <div class="d-inline-flex align-items-center gap-1.5">
+                                        {% if doc.archivo %}
+                                        <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1 fw-bold shadow-2xs text-decoration-none"
+                                           style="background: #ffffff; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.78rem;">
+                                            <i class="bi bi-eye me-1"></i> Ver
+                                        </a>
+                                        <a href="{{ doc.archivo.url }}" download class="btn btn-sm rounded-pill px-3 py-1 fw-bold shadow-2xs text-decoration-none text-white"
+                                           style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.78rem;">
+                                            <i class="bi bi-download me-1"></i> Descargar
+                                        </a>
+                                        {% endif %}
+                                        <!-- Botón Eliminar -> Trasladar a Papelera -->
+                                        <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline" onsubmit="return confirm('¿Desea enviar el material pedagógico \'{{ doc.titulo|escapejs }}\' a la Papelera de Reciclaje?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="eliminar_documento">
+                                            <input type="hidden" name="documento_id" value="{{ doc.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle p-1 d-inline-flex align-items-center justify-content-center"
+                                                    style="width: 30px; height: 30px;" title="Enviar a la Papelera">
+                                                <i class="bi bi-trash3 fs-6"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-book fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
+                                    <h6 class="fw-bold text-dark">No hay material pedagógico registrado.</h6>
+                                    <small class="text-muted">Utilice el botón "Material pedagógico" para publicar nuevos recursos didácticos.</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+
+        <!-- ================================================================= -->
+        <!-- SECCIÓN 3: 📎 MATERIAL DE APOYO -->
+        <!-- ================================================================= -->
+        <div class="tab-pane fade {% if tab_docs == 'apoyo' %}show active{% endif %}" id="panel-apoyo" role="tabpanel">
+            <div class="card border rounded-4 bg-white shadow-2xs overflow-hidden mb-4" style="border-color: var(--color-acento) !important;">
+                <div class="p-4 border-bottom" style="background: #FAF8F5; border-color: var(--color-acento) !important;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="badge rounded-pill px-3 py-1 fw-bold mb-1.5" style="background: var(--color-acento); color: var(--color-principal);">
+                                Recursos Complementarios
+                            </span>
+                            <h5 class="fw-bold text-dark mb-1">📎 Material de Apoyo</h5>
+                            <p class="text-muted small mb-0">
+                                Documentos de consulta complementaria, lecturas sugeridas, tablas y anexos de refuerzo formativo.
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--color-principal); color: #ffffff; font-size: 0.78rem;">
+                                {{ docs_material_apoyo|length }} materiales de apoyo
+                            </span>
+                            <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white shadow-2xs"
+                                    data-bs-toggle="modal" data-bs-target="#modalPublicarMaterialApoyo"
+                                    style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                                <i class="bi bi-plus-circle me-1"></i> Material de apoyo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" id="tabla-material-apoyo">
+                        <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
+                            <tr>
+                                <th class="py-3 px-4" style="color: var(--color-secundario); font-size: 0.76rem;">NOMBRE DEL DOCUMENTO</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ASIGNATURA Y GRUPO</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">DESCRIPCIÓN</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">FECHA DE PUBLICACIÓN</th>
+                                <th class="py-3 px-4 text-end" style="color: var(--color-secundario); font-size: 0.76rem;">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in docs_material_apoyo %}
+                            <tr style="border-bottom: 1px solid var(--color-acento);">
+                                <td class="px-4">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center shadow-2xs"
+                                             style="background: #FAF8F5; color: var(--color-principal); width: 38px; height: 38px; border: 1px solid var(--color-acento);">
+                                            <i class="bi bi-paperclip fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ doc.titulo }}</strong>
+                                            <span class="text-muted small font-monospace">Tipo: Material de Apoyo</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if doc.carga_academica %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #F5F2EB; color: var(--color-secundario); border: 1px solid #E0D8CE; font-size: 0.74rem;">
+                                        {{ doc.carga_academica.programa.denominacion|default:'Matemáticas' }} — Grado {{ doc.carga_academica.grado }}°{{ doc.carga_academica.seccion }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #F5F2EB; color: var(--color-secundario); font-size: 0.74rem;">Todos los grupos</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="text-muted small" style="max-width: 250px; display: inline-block;">
+                                        {{ doc.instrucciones|truncatechars:90|default:"Sin descripción." }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-dark d-block small fw-semibold">{{ doc.fecha_publicacion|date:"d/m/Y" }}</span>
+                                    <span class="text-muted" style="font-size: 0.72rem;">{{ doc.fecha_publicacion|time:"h:i A" }}</span>
+                                </td>
+                                <td class="px-4 text-end">
+                                    <div class="d-inline-flex align-items-center gap-1.5">
+                                        {% if doc.archivo %}
+                                        <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1 fw-bold shadow-2xs text-decoration-none"
+                                           style="background: #ffffff; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.78rem;">
+                                            <i class="bi bi-eye me-1"></i> Ver
+                                        </a>
+                                        <a href="{{ doc.archivo.url }}" download class="btn btn-sm rounded-pill px-3 py-1 fw-bold shadow-2xs text-decoration-none text-white"
+                                           style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.78rem;">
+                                            <i class="bi bi-download me-1"></i> Descargar
+                                        </a>
+                                        {% endif %}
+                                        <!-- Botón Eliminar -> Trasladar a Papelera -->
+                                        <form method="POST" action="{% url 'instructor_dashboard' %}" class="d-inline" onsubmit="return confirm('¿Desea enviar el material de apoyo \'{{ doc.titulo|escapejs }}\' a la Papelera de Reciclaje?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="eliminar_documento">
+                                            <input type="hidden" name="documento_id" value="{{ doc.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle p-1 d-inline-flex align-items-center justify-content-center"
+                                                    style="width: 30px; height: 30px;" title="Enviar a la Papelera">
+                                                <i class="bi bi-trash3 fs-6"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-paperclip fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
+                                    <h6 class="fw-bold text-dark">No hay material de apoyo registrado.</h6>
+                                    <small class="text-muted">Utilice el botón "Material de apoyo" para adjuntar lecturas o anexos.</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>
 
-<!-- MODAL: SUBIR DOCUMENTO -->
-<div class="modal fade" id="modalSubirDocumento" tabindex="-1" aria-hidden="true">
+<!-- =========================================================================
+     MODAL 1: PUBLICAR GUÍA (TIPO 'GUIA')
+     ========================================================================= -->
+<div class="modal fade" id="modalPublicarGuia" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1px solid #fce7f3;">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-cloud-arrow-up-fill fs-5" style="color: #db2777;"></i>
-                    <h6 class="modal-title fw-bold text-dark">Subir Documento Académico</h6>
+                    <i class="bi bi-journal-bookmark-fill fs-5" style="color: var(--color-principal);"></i>
+                    <h6 class="modal-title fw-bold text-dark mb-0">Publicar Guía Oficial</h6>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <form method="POST" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="hidden" name="action" value="subir_documento_docente">
+                <input type="hidden" name="action" value="publicar_guia">
                 <div class="modal-body p-4 space-y-3">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark mb-1">Nombre / Título del Documento *</label>
-                        <input type="text" name="titulo" class="form-control rounded-pill px-3 py-2" placeholder="Ej: Plan de Área Matemáticas 2026" required>
+                        <label class="form-label small fw-bold text-dark mb-1">Título de la Guía *</label>
+                        <input type="text" name="titulo" class="form-control rounded-pill px-3 py-2" placeholder="Ej: Guía de Matemáticas N° 1 - Funciones Reales" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark mb-1">Tipo de Documento *</label>
-                        <select name="tipo_documento" class="form-select rounded-pill px-3 py-2" required>
-                            <option value="Guía Curricular">Guía Curricular</option>
-                            <option value="Plan de Área">Plan de Área</option>
-                            <option value="Rúbrica de Evaluación">Rúbrica de Evaluación</option>
-                            <option value="Formato Institucional">Formato Institucional</option>
-                            <option value="Circular Docente">Circular Docente</option>
-                            <option value="Material de Apoyo">Material de Apoyo</option>
+                        <label class="form-label small fw-bold text-dark mb-1">Asignatura y Grupo Asignado *</label>
+                        <select name="carga_id" class="form-select rounded-pill px-3 py-2" required>
+                            {% for c in cargas %}
+                            <option value="{{ c.id }}">
+                                {{ c.programa.denominacion|default:'Matemáticas' }} — Grado {{ c.grado }}°{{ c.seccion }}
+                            </option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark mb-1">Descripción</label>
-                        <textarea name="descripcion" rows="2" class="form-control rounded-4 px-3 py-2" placeholder="Breve descripción del alcance del documento..."></textarea>
+                        <label class="form-label small fw-bold text-dark mb-1">Instrucciones y Metodología</label>
+                        <textarea name="instrucciones" rows="3" class="form-control rounded-4 px-3 py-2" placeholder="Instrucciones para el desarrollo de la guía..."></textarea>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label small fw-bold text-dark mb-1">Seleccionar Archivo *</label>
+                        <label class="form-label small fw-bold text-dark mb-1">Archivo de la Guía (PDF o Documento) *</label>
                         <input type="file" name="archivo" class="form-control rounded-pill px-3 py-2" required>
                     </div>
                 </div>
-                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: var(--color-acento) !important;">
                     <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
-                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Subir Documento
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Publicar guía
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- =========================================================================
+     MODAL 2: MATERIAL PEDAGÓGICO (TIPO 'MATERIAL_PEDAGOGICO')
+     ========================================================================= -->
+<div class="modal fade" id="modalPublicarMaterialPedagogico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-book-half fs-5" style="color: var(--color-principal);"></i>
+                    <h6 class="modal-title fw-bold text-dark mb-0">Publicar Material Pedagógico</h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="publicar_material_pedagogico">
+                <div class="modal-body p-4 space-y-3">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Título del Material Pedagógico *</label>
+                        <input type="text" name="titulo" class="form-control rounded-pill px-3 py-2" placeholder="Ej: Módulo Pedagógico: Álgebra Lineal y Matrices" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Asignatura y Grupo Asignado *</label>
+                        <select name="carga_id" class="form-select rounded-pill px-3 py-2" required>
+                            {% for c in cargas %}
+                            <option value="{{ c.id }}">
+                                {{ c.programa.denominacion|default:'Matemáticas' }} — Grado {{ c.grado }}°{{ c.seccion }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Descripción Pedagógica</label>
+                        <textarea name="instrucciones" rows="3" class="form-control rounded-4 px-3 py-2" placeholder="Describa el objetivo pedagógico y contenidos del material..."></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-dark mb-1">Archivo Digital (PDF / Presentación) *</label>
+                        <input type="file" name="archivo" class="form-control rounded-pill px-3 py-2" required>
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: var(--color-acento) !important;">
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Material pedagógico
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL 3: MATERIAL DE APOYO (TIPO 'MATERIAL_APOYO')
+     ========================================================================= -->
+<div class="modal fade" id="modalPublicarMaterialApoyo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-paperclip fs-5" style="color: var(--color-secundario);"></i>
+                    <h6 class="modal-title fw-bold text-dark mb-0">Publicar Material de Apoyo</h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_dashboard' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="publicar_material_apoyo">
+                <div class="modal-body p-4 space-y-3">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Título del Material de Apoyo *</label>
+                        <input type="text" name="titulo" class="form-control rounded-pill px-3 py-2" placeholder="Ej: Fórmulas de Geometría y Tablas de Apoyo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Asignatura y Grupo Asignado *</label>
+                        <select name="carga_id" class="form-select rounded-pill px-3 py-2" required>
+                            {% for c in cargas %}
+                            <option value="{{ c.id }}">
+                                {{ c.programa.denominacion|default:'Matemáticas' }} — Grado {{ c.grado }}°{{ c.seccion }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Notas y Recomendaciones de Consulta</label>
+                        <textarea name="instrucciones" rows="3" class="form-control rounded-4 px-3 py-2" placeholder="Indicaciones para el uso de este material de apoyo..."></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-dark mb-1">Archivo de Apoyo (PDF / Documento) *</label>
+                        <input type="file" name="archivo" class="form-control rounded-pill px-3 py-2" required>
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: var(--color-acento) !important;">
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Material de apoyo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

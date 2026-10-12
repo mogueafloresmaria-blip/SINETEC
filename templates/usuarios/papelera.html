@@ -84,6 +84,12 @@
                 <a href="?tipo=Todos{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Todos' or not tipo_sel %}btn-dark{% else %}btn-outline-secondary{% endif %}">
                     Todos ({{ total_general }})
                 </a>
+                <a href="?tipo=TareaClase{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'TareaClase' %}btn-success{% else %}btn-outline-success{% endif %}">
+                    <i class="bi bi-journal-text me-1"></i> Actividades ({{ total_actividades }})
+                </a>
+                <a href="?tipo=EntregaTarea{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'EntregaTarea' %}btn-info text-dark{% else %}btn-outline-info text-dark{% endif %}">
+                    <i class="bi bi-file-earmark-check me-1"></i> Respuestas / Entregas ({{ total_entregas }})
+                </a>
                 <a href="?tipo=Estudiante{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Estudiante' %}btn-danger{% else %}btn-outline-danger{% endif %}">
                     <i class="bi bi-person-x me-1"></i> Estudiantes ({{ total_estudiantes }})
                 </a>
@@ -93,6 +99,16 @@
                 <a href="?tipo=Horario{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Horario' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">
                     <i class="bi bi-clock-history me-1"></i> Horarios ({{ total_horarios }})
                 </a>
+                {% if total_transportes %}
+                <a href="?tipo=Transporte{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Transporte' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                    <i class="bi bi-bus-front me-1"></i> Rutas ({{ total_transportes }})
+                </a>
+                {% endif %}
+                {% if total_comunicados %}
+                <a href="?tipo=Comunicado{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Comunicado' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                    <i class="bi bi-envelope me-1"></i> Comunicados ({{ total_comunicados }})
+                </a>
+                {% endif %}
             </div>
 
             <!-- Buscador -->
@@ -125,10 +141,10 @@
                     <thead class="table-light small text-uppercase" style="font-size: 0.74rem;">
                         <tr>
                             <th class="ps-4 py-3">Tipo</th>
-                            <th class="py-3">Identificador / Nombre</th>
-                            <th class="py-3">Detalles</th>
-                            <th class="py-3">Eliminado Por</th>
-                            <th class="py-3">Fecha de Baja</th>
+                            <th class="py-3">Nombre / Identificador</th>
+                            <th class="py-3">Módulo de Origen</th>
+                            <th class="py-3">Usuario que Eliminó</th>
+                            <th class="py-3">Fecha de Eliminación</th>
                             <th class="py-3">Motivo Registrado</th>
                             <th class="pe-4 py-3 text-end">Acciones de Recuperación</th>
                         </tr>
@@ -137,7 +153,15 @@
                         {% for item in items %}
                         <tr>
                             <td class="ps-4">
-                                {% if item.tipo_objeto == 'Estudiante' %}
+                                {% if item.tipo_objeto == 'TareaClase' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                        <i class="bi bi-journal-text me-1"></i> Actividad
+                                    </span>
+                                {% elif item.tipo_objeto == 'EntregaTarea' %}
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-bold" style="color: #0891b2 !important;">
+                                        <i class="bi bi-file-earmark-check me-1"></i> Respuesta / Entrega
+                                    </span>
+                                {% elif item.tipo_objeto == 'Estudiante' %}
                                     <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-1 fw-bold">
                                         <i class="bi bi-person-fill me-1"></i> Estudiante
                                     </span>
@@ -148,6 +172,18 @@
                                 {% elif item.tipo_objeto == 'Horario' %}
                                     <span class="badge bg-warning bg-opacity-10 text-warning text-dark border border-warning border-opacity-25 rounded-pill px-2 py-1 fw-bold">
                                         <i class="bi bi-calendar2-week-fill me-1"></i> Horario
+                                    </span>
+                                {% elif item.tipo_objeto == 'GuiaClase' %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning text-dark border border-warning border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                        <i class="bi bi-file-earmark-text me-1"></i> Documento / Guía
+                                    </span>
+                                {% elif item.tipo_objeto == 'Transporte' %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
+                                        <i class="bi bi-bus-front me-1"></i> Ruta Escolar
+                                    </span>
+                                {% elif item.tipo_objeto == 'Comunicado' %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
+                                        <i class="bi bi-envelope me-1"></i> Comunicado
                                     </span>
                                 {% else %}
                                     <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1">
@@ -160,7 +196,9 @@
                                 <span class="text-muted small">ID Registro: #{{ item.objeto_id }}</span>
                             </td>
                             <td>
-                                <span class="text-muted">{{ item.subtitulo|default:"Sin detalles adicionales" }}</span>
+                                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1 fw-semibold">
+                                    <i class="bi bi-geo-alt me-1 text-muted"></i>{{ item.modulo_origen|default:item.subtitulo|default:"Módulo General" }}
+                                </span>
                             </td>
                             <td>
                                 <span class="text-dark fw-semibold"><i class="bi bi-person-circle me-1 text-muted"></i>{{ item.eliminado_por.get_full_name|default:item.eliminado_por.username|default:"Sistema" }}</span>
@@ -174,11 +212,11 @@
                             </td>
                             <td class="pe-4 text-end">
                                 <div class="d-inline-flex gap-2">
-                                    <!-- Botón Restaurar -->
-                                    <form method="post" action="{% url 'restaurar_elemento_papelera' item.pk %}" class="d-inline" onsubmit="return confirm('¿Desea restaurar a {{ item.titulo|escapejs }} al estado activo del sistema?');">
+                                    <!-- Botón Recuperar -->
+                                    <form method="post" action="{% url 'restaurar_elemento_papelera' item.pk %}" class="d-inline" onsubmit="return confirm('¿Desea recuperar a {{ item.titulo|escapejs }} al estado activo del sistema?');">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" title="Restaurar al sistema">
-                                            <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" title="Recuperar elemento al sistema">
+                                            <i class="bi bi-recycle me-1"></i> ♻️ Recuperar
                                         </button>
                                     </form>
 

@@ -34,9 +34,9 @@
         height: 100%;
     }
     .resource-card:hover {
-        border-color: #8E5266;
+        border-color: var(--color-principal);
         transform: translateY(-3px);
-        box-shadow: 0 10px 24px rgba(94, 43, 60, 0.08);
+        box-shadow: 0 10px 24px rgba(139, 94, 60, 0.08);
     }
     .category-badge {
         font-size: 0.72rem;
@@ -60,20 +60,20 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid #E0D0D8;
-        background: #FDF7FA;
-        color: #8E5266;
+        border: 1px solid #E5DFD5;
+        background: var(--color-acento);
+        color: var(--color-principal);
         transition: all 0.2s;
     }
     .bookmark-btn:hover {
-        background: #8E5266;
+        background: var(--color-principal);
         color: #ffffff;
-        border-color: #8E5266;
+        border-color: var(--color-principal);
     }
     .bookmark-btn.active {
-        background: #8E5266;
+        background: var(--color-principal);
         color: #ffffff;
-        border-color: #8E5266;
+        border-color: var(--color-principal);
     }
 </style>
 {% endblock %}
@@ -292,7 +292,7 @@
     {% else %}
         <!-- Estado Vacío Profesional -->
         <div class="sinetec-card text-center p-5 my-4">
-            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 70px; height: 70px; background-color: #FDF7FA; color: #8E5266;">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 70px; height: 70px; background-color: var(--color-acento); color: var(--color-principal);">
                 <i class="bi bi-journal-x fs-2"></i>
             </div>
             <h4 class="h5 fw-bold text-dark mb-1">

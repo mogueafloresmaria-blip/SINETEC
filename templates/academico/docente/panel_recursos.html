@@ -7,15 +7,15 @@
 
     <!-- HERO BANNER RECURSOS E IDEAS -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 50%, #fce7f3 100%); border: 1.5px solid #fce7f3;">
+         style="background: linear-gradient(135deg, #FAF8F5 0%, #F5F2EB 50%, var(--color-acento) 100%); border: 1.5px solid var(--color-acento);">
         <div class="row align-items-center">
             <div class="col-lg-8 position-relative z-1 d-flex align-items-center gap-3">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
-                     style="background: #ffffff; color: #db2777; width: 62px; height: 62px; border: 1.5px solid #fce7f3;">
+                     style="background: #ffffff; color: var(--color-principal); width: 62px; height: 62px; border: 1.5px solid var(--color-acento);">
                     <i class="bi bi-lightbulb-fill" style="font-size: 2rem;"></i>
                 </div>
                 <div>
-                    <div class="text-uppercase fw-bold mb-1" style="color: #db2777; font-size: 0.76rem; letter-spacing: 0.6px;">
+                    <div class="text-uppercase fw-bold mb-1" style="color: var(--color-principal); font-size: 0.76rem; letter-spacing: 0.6px;">
                         Espacio de Innovación y Apoyo
                     </div>
                     <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
@@ -29,7 +29,7 @@
             <div class="col-lg-4 text-end position-relative z-1 mt-3 mt-lg-0">
                 <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
                         data-bs-toggle="modal" data-bs-target="#modalAgregarRecurso"
-                        style="background: #db2777; border: 1px solid #db2777; font-size: 0.88rem;">
+                        style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem;">
                     <i class="bi bi-plus-circle-fill"></i> + Agregar Recurso
                 </button>
             </div>
@@ -40,10 +40,10 @@
     <div class="row g-3 mb-4">
         {% for g in guias_biblioteca %}
         <div class="col-md-6 col-lg-4">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between hover-shadow transition" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 d-flex flex-column justify-content-between hover-shadow transition" style="border-color: var(--color-acento) !important;">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-2.5">
-                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fdf2f8; color: #db2777; border: 1px solid #fce7f3; font-size: 0.74rem;">
+                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--color-acento); color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.74rem;">
                             {{ g.carga_academica.programa.denominacion|default:'Matemáticas' }}
                         </span>
                         <span class="badge rounded-pill px-2.5 py-1 text-muted" style="background: #f1f5f9; font-size: 0.72rem;">
@@ -57,7 +57,7 @@
                     </p>
                 </div>
 
-                <div class="pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #fce7f3 !important;">
+                <div class="pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: var(--color-acento) !important;">
                     {% if g.archivo %}
                     <a href="{{ g.archivo.url }}" target="_blank" class="btn btn-sm btn-white border rounded-pill px-3 py-1 fw-semibold small shadow-2xs" style="color: #475569; font-size: 0.8rem;">
                         <i class="bi bi-file-earmark-arrow-down text-danger me-1"></i> Descargar Material
@@ -66,7 +66,7 @@
                     <span class="badge bg-light text-muted border px-2.5 py-1 small" style="font-size: 0.75rem;">Material Digital</span>
                     {% endif %}
 
-                    <a href="{% url 'actividades_tareas' %}?guia_id={{ g.id }}" class="btn btn-sm text-white rounded-pill px-3 py-1 fw-bold shadow-2xs" style="background: #db2777; font-size: 0.8rem;">
+                    <a href="{% url 'temas_actividades' %}?guia_id={{ g.id }}" class="btn btn-sm text-white rounded-pill px-3 py-1 fw-bold shadow-2xs" style="background: var(--color-principal); font-size: 0.8rem;">
                         <i class="bi bi-plus-circle me-1"></i> Usar en Actividad
                     </a>
                 </div>
@@ -74,9 +74,9 @@
         </div>
         {% empty %}
         <div class="col-12">
-            <div class="card border rounded-4 p-5 text-center bg-white shadow-2xs" style="border-color: #fce7f3 !important;">
+            <div class="card border rounded-4 p-5 text-center bg-white shadow-2xs" style="border-color: var(--color-acento) !important;">
                 <div class="rounded-circle mx-auto p-3 d-flex align-items-center justify-content-center mb-3" 
-                     style="background: #fff0f3; color: #db2777; width: 68px; height: 68px;">
+                     style="background: #F5F2EB; color: var(--color-principal); width: 68px; height: 68px;">
                     <i class="bi bi-journal-bookmark fs-1"></i>
                 </div>
                 <h5 class="fw-bold text-dark mb-1">No tienes recursos registrados todavía.</h5>
@@ -85,7 +85,7 @@
                 </p>
                 <div>
                     <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold small shadow-sm" 
-                            data-bs-toggle="modal" data-bs-target="#modalAgregarRecurso" style="background: #db2777; border: 1px solid #db2777;">
+                            data-bs-toggle="modal" data-bs-target="#modalAgregarRecurso" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
                         <i class="bi bi-plus-lg me-1.5"></i> Agregar recurso
                     </button>
                 </div>
@@ -100,9 +100,9 @@
 <div class="modal fade" id="modalAgregarRecurso" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #fff0f3 0%, #fdf2f8 100%); border-bottom: 1.5px solid #fce7f3;">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1.5px solid var(--color-acento);">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-lightbulb-fill fs-5" style="color: #db2777;"></i>
+                    <i class="bi bi-lightbulb-fill fs-5" style="color: var(--color-principal);"></i>
                     <h6 class="modal-title fw-bold text-dark">Nuevo Recurso o Idea Pedagógica</h6>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -152,9 +152,9 @@
                         <input type="file" name="archivo" class="form-control rounded-pill px-3 py-2">
                     </div>
                 </div>
-                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: #fce7f3 !important;">
+                <div class="modal-footer px-4 py-3 bg-light border-top" style="border-color: var(--color-acento) !important;">
                     <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: #db2777; border: 1px solid #db2777;">
+                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); border: 1px solid var(--color-principal);">
                         <i class="bi bi-save me-1.5"></i> Guardar Recurso
                     </button>
                 </div>
@@ -162,3 +162,4 @@
         </div>
     </div>
 </div>
+

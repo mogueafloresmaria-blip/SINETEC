@@ -7,7 +7,7 @@
 <div class="container-fluid px-0 py-2">
 
     <!-- Header Hero Escolar EDUNOVA -->
-    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(190, 24, 93, 0.35);">
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(90, 56, 37, 0.35);">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div>
                 <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
@@ -58,7 +58,7 @@
                             <h2 class="h5 fw-bold mb-1 text-dark">{{ estudiante_sel.get_full_name|default:estudiante_sel.username }}</h2>
                             <div class="text-muted small">
                                 Documento: <strong>{{ estudiante_sel.perfil.numero_documento|default:"N/A" }}</strong> · 
-                                Grado Escolar: <strong>{{ matricula_sel.grado_escolar|default:"10" }}° - Sección {{ matricula_sel.seccion|default:"A" }}</strong> · 
+                                Grado Escolar: <strong>{% if matricula_sel %}{{ matricula_sel.get_grado_escolar_display }} - Sección {{ matricula_sel.seccion }}{% else %}Sin matrícula registrada{% endif %}</strong> ·
                                 Año Lectivo: <strong>2026</strong>
                             </div>
                         </div>
@@ -67,12 +67,17 @@
                 <div class="col-md-5 text-md-end">
                     <div class="d-inline-flex flex-column align-items-md-end p-3 rounded-3 bg-light border">
                         <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Promedio del Periodo</span>
-                        <div class="h3 fw-bold mb-0 {% if promedio_general >= 4.0 %}text-success{% elif promedio_general >= 3.0 %}text-primary{% else %}text-danger{% endif %}">
-                            {{ promedio_general|floatformat:2 }} <span class="fs-6 text-muted">/ 5.0</span>
-                        </div>
-                        <small class="fw-semibold {% if promedio_general >= 4.6 %}text-success{% elif promedio_general >= 4.0 %}text-primary{% elif promedio_general >= 3.0 %}text-warning text-dark{% else %}text-danger{% endif %}">
-                            {% if promedio_general >= 4.6 %}🟢 Desempeño Superior{% elif promedio_general >= 4.0 %}🔵 Desempeño Alto{% elif promedio_general >= 3.0 %}🟡 Desempeño Básico{% else %}🔴 Desempeño Bajo{% endif %}
-                        </small>
+                        {% if total_materias %}
+                            <div class="h3 fw-bold mb-0 {% if promedio_general >= 4.0 %}text-success{% elif promedio_general >= 3.0 %}text-primary{% else %}text-danger{% endif %}">
+                                {{ promedio_general|floatformat:2 }} <span class="fs-6 text-muted">/ 5.0</span>
+                            </div>
+                            <small class="fw-semibold {% if promedio_general >= 4.6 %}text-success{% elif promedio_general >= 4.0 %}text-primary{% elif promedio_general >= 3.0 %}text-warning text-dark{% else %}text-danger{% endif %}">
+                                {% if promedio_general >= 4.6 %}🟢 Desempeño Superior{% elif promedio_general >= 4.0 %}🔵 Desempeño Alto{% elif promedio_general >= 3.0 %}🟡 Desempeño Básico{% else %}🔴 Desempeño Bajo{% endif %}
+                            </small>
+                        {% else %}
+                            <div class="h3 fw-bold mb-0 text-muted">Sin calificaciones</div>
+                            <small class="text-muted">No hay notas numéricas registradas</small>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -128,7 +133,7 @@
                                 <span class="text-muted" style="font-size: 0.72rem;">Plan Curricular Obligatorio</span>
                             </td>
                             <td>
-                                <i class="bi bi-person-fill text-muted me-1"></i>{{ item.docente }}
+                                {% if item.docente %}<i class="bi bi-person-fill text-muted me-1"></i>{{ item.docente }}{% else %}<span class="text-muted">No registrado</span>{% endif %}
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-light text-dark border">{{ item.periodo }}</span>

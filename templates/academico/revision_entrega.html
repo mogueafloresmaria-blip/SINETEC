@@ -66,21 +66,21 @@
                 <div class="mb-5">
                     <label class="block text-sm font-bold text-gray-800 mb-2">Calificación obtenida:</label>
                     <div class="flex items-center gap-3">
-                        <input type="number" step="0.1" min="0" max="{{ entrega.tarea.puntaje_maximo }}" name="calificacion" value="{{ entrega.calificacion|default:'' }}" class="w-32 border-gray-300 rounded-lg shadow-sm focus:border-pink-500 focus:ring-pink-500 font-bold text-lg text-center" required>
+                        <input type="number" step="0.1" min="0" max="{{ entrega.tarea.puntaje_maximo }}" name="calificacion" value="{{ entrega.calificacion|default:'' }}" class="w-32 border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 font-bold text-lg text-center" required>
                         <span class="text-gray-500 font-medium text-lg">/ {{ entrega.tarea.puntaje_maximo|default:"5.0" }}</span>
                     </div>
                 </div>
 
                 <div class="mb-5 flex-grow flex flex-col">
                     <label class="block text-sm font-bold text-gray-800 mb-2">Retroalimentación del docente:</label>
-                    <textarea name="retroalimentacion" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-pink-500 focus:ring-pink-500 p-3 flex-grow resize-none" placeholder="Escriba aquí las observaciones para el aprendiz..." required>{{ entrega.retroalimentacion|default:'' }}</textarea>
+                    <textarea name="retroalimentacion" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 flex-grow resize-none" placeholder="Escriba aquí las observaciones para el aprendiz..." required>{{ entrega.retroalimentacion|default:'' }}</textarea>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-                    <button type="submit" name="guardar" value="1" class="flex-1 bg-white border-2 border-pink-600 text-pink-600 hover:bg-pink-50 font-bold py-3 rounded-lg transition shadow-sm">
+                    <button type="submit" name="guardar" value="1" class="flex-1 bg-white border-2 font-bold py-3 rounded-lg transition shadow-sm" style="border-color: var(--color-principal); color: var(--color-principal);">
                         Guardar calificación
                     </button>
-                    <button type="submit" name="guardar_continuar" value="1" class="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg transition shadow-sm">
+                    <button type="submit" name="guardar_continuar" value="1" class="flex-1 text-white font-bold py-3 rounded-lg transition shadow-sm" style="background-color: var(--color-principal);">
                         Guardar y continuar <i class="bi bi-arrow-right"></i>
                     </button>
                 </div>

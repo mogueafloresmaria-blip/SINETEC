@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil · EDUNOVA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h5 class="mb-0 fw-bold d-flex align-items-center gap-2" style="color: var(--color-principal);">
+                        <i class="bi bi-person-badge-fill"></i> Mi Perfil Institucional
+                    </h5>
+                </div>
+                
+                <div class="card-body p-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Sección de Foto -->
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                <div id="perfilFotoPreview" class="rounded-circle shadow-sm border bg-light d-flex align-items-center justify-content-center" style="width: 120px; height: 120px; overflow: hidden; margin: 0 auto;">
+                                    {% if user.perfil and user.perfil.foto_perfil %}
+                                        <img src="{{ user.perfil.foto_perfil.url }}" alt="Foto de Perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% else %}
+                                        <i class="bi bi-person text-secondary" style="font-size: 4rem;"></i>
+                                    {% endif %}
+                                </div>
+                                <label for="foto_perfil" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+                                <input type="file" id="foto_perfil" name="foto_perfil" accept="image/*" class="d-none" onchange="const r=new FileReader(); r.onload=function(e){document.getElementById('perfilFotoPreview').innerHTML='<img src=\''+e.target.result+'\' style=\'width:100%;height:100%;object-fit:cover;\'>'}; r.readAsDataURL(this.files[0]);">
+                            </div>
+                            <p class="small text-muted mt-2 mb-0">Seleccione una imagen para actualizar su foto (Max. 2MB)</p>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small mb-1">Nombre</label>
+                                <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small mb-1">Apellidos</label>
+                                <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small mb-1">Correo Electrónico</label>
+                                <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small mb-1">Nombre de Usuario</label>
+                                <input type="text" class="form-control bg-light" value="{{ user.username }}" readonly disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small mb-1">Rol Asignado</label>
+                                <input type="text" class="form-control bg-light" value="{{ user.perfil.rol.nombre|default:'Usuario Institucional' }}" readonly disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small mb-1">Número de Documento</label>
+                                <input type="text" class="form-control bg-light" value="{{ user.perfil.numero_documento|default:'No registrado' }}" readonly disabled>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary px-4 fw-bold rounded-3">Volver</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold rounded-3">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from instituciones.models import InstitucionEducativa
-from usuarios.models import PerfilUsuario
+from usuarios.models import PerfilUsuario, Rol
 from .models import ProgramaFormacion, Competencia, ResultadoAprendizaje, Ficha, Matricula
 
 
@@ -27,6 +27,9 @@ class AcademicoModelTest(TestCase):
             first_name="Carlos",
             last_name="Martínez"
         )
+        rol_instructor, _ = Rol.objects.get_or_create(nombre='Instructor SENA')
+        self.instructor.perfil.rol = rol_instructor
+        self.instructor.perfil.save()
         self.ficha = Ficha.objects.create(
             codigo_ficha="2501234",
             programa=self.programa,

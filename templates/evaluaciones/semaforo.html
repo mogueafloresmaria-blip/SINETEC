@@ -17,7 +17,7 @@
                 </ol>
             </nav>
             <h1 class="h3 fw-bold text-dark mb-1 d-flex align-items-center gap-2">
-                <span class="d-inline-flex align-items-center justify-content-center rounded-3 px-2 py-1" style="background: #FFF0F3; color: #E11D48; border: 1px solid #FFE4E6;">
+                <span class="d-inline-flex align-items-center justify-content-center rounded-3 px-2 py-1" style="background: var(--color-acento); color: var(--color-principal); border: 1px solid #E0D8CE;">
                     <i class="bi bi-traffic-light-fill"></i>
                 </span>
                 Semáforo de Competencias Laborales
@@ -186,10 +186,10 @@
 
     <!-- BANNER DE INFORMACIÓN DE COMPETENCIA ACTIVA -->
     {% if competencia_actual %}
-        <div class="card border-0 shadow-sm rounded-4 mb-4 p-3" style="background: linear-gradient(135deg, #FFF0F3 0%, #FFFFFF 100%); border-left: 4px solid #E11D48 !important;">
+        <div class="card border-0 shadow-sm rounded-4 mb-4 p-3" style="background: linear-gradient(135deg, #F5F2EB 0%, #FFFFFF 100%); border-left: 4px solid var(--color-principal) !important;">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
                 <div>
-                    <span class="badge px-2.5 py-1 text-white rounded-pill fw-bold" style="background: #E11D48; font-size: 0.72rem;">Norma de Competencia</span>
+                    <span class="badge px-2.5 py-1 text-white rounded-pill fw-bold" style="background: var(--color-principal); font-size: 0.72rem;">Norma de Competencia</span>
                     <strong class="text-dark ms-2">{{ competencia_actual.codigo }}</strong> · <span class="text-secondary">{{ competencia_actual.descripcion }}</span>
                 </div>
                 <div class="text-muted small">
@@ -241,7 +241,7 @@
                                 <!-- Estudiante -->
                                 <td>
                                     <div class="d-flex align-items-center gap-2.5">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 38px; height: 38px; background: #FFF0F3; color: #E11D48; border: 1px solid #FFE4E6; flex-shrink: 0; font-size: 0.85rem;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 38px; height: 38px; background: var(--color-acento); color: var(--color-principal); border: 1px solid #E0D8CE; flex-shrink: 0; font-size: 0.85rem;">
                                             {{ item.matricula.aprendiz.first_name|default:item.matricula.aprendiz.username|slice:':1'|upper }}
                                         </div>
                                         <div>

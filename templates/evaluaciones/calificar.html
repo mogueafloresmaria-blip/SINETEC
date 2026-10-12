@@ -5,14 +5,18 @@
 {% block content %}
 <style>
   :root {
-    --sena-primary: #29AAE3;
-    --sena-dark: #1E293B;
-    --sena-light: #F8FAFC;
-    --sena-border: #E2E8F0;
-    --pink-primary: #29AAE3;
-    --pink-light: #F8FAFC;
-    --pink-dark: #1E293B;
-    --pink-accent: #2e8800;
+    --sena-primary: var(--color-principal);
+    --sena-dark: #3D2B1F;
+    --sena-light: var(--color-fondo);
+    --sena-border: #E5DFD5;
+    --edunova-primary: var(--color-principal);
+    --edunova-dark: #3D2B1F;
+    --edunova-light: var(--color-fondo);
+    --edunova-accent: var(--color-secundario);
+    --pink-primary: var(--color-principal);
+    --pink-light: var(--color-fondo);
+    --pink-dark: #3D2B1F;
+    --pink-accent: var(--color-secundario);
     --pink-card-bg: #ffffff;
   }
 
@@ -20,6 +24,7 @@
     background-color: var(--sena-light) !important;
   }
 
+  .sinetec-card-subtle,
   .sinetec-card-pink {
     background: #ffffff;
     border: 1px solid var(--sena-border);
@@ -30,25 +35,27 @@
   .tarjeta-evaluacion-interactiva {
     cursor: pointer;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
-    border: 1px solid #EAD8E2 !important;
+    border: 1px solid #E5DFD5 !important;
   }
 
   .tarjeta-evaluacion-interactiva:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(142, 82, 102, 0.12) !important;
-    border-color: #8E5266 !important;
+    box-shadow: 0 8px 20px rgba(139, 94, 60, 0.12) !important;
+    border-color: var(--color-principal) !important;
   }
 
+  .btn-sinetec-primary,
   .btn-pink-primary {
-    background-color: #29AAE3;
+    background-color: var(--color-principal);
     color: #ffffff;
     font-weight: 600;
     border: none;
     transition: background-color 0.2s ease;
   }
 
+  .btn-sinetec-primary:hover,
   .btn-pink-primary:hover {
-    background-color: #2e8800;
+    background-color: var(--color-secundario);
     color: #ffffff;
   }
 
@@ -57,7 +64,7 @@
     background: #ffffff;
     border-radius: 16px;
     padding: 25px;
-    border: 2px solid #29AAE3;
+    border: 2px solid var(--color-principal);
     animation: fadeIn 0.3s ease-in-out;
   }
 

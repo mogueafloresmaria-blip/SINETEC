@@ -12,8 +12,10 @@ def notificaciones_context(request):
     """
     try:
         colegio = ConfiguracionColegio.get_solo()
+        tema_colores = colegio.paleta()
     except Exception:
         colegio = None
+        tema_colores = dict(ConfiguracionColegio.COLORES_POR_DEFECTO)
 
     if not request.user.is_authenticated:
         return {
@@ -21,6 +23,7 @@ def notificaciones_context(request):
             'num_notificaciones_no_leidas': 0,
             'tiene_alertas_admin': False,
             'colegio': colegio,
+            'tema_colores': tema_colores,
         }
 
     user = request.user
@@ -45,4 +48,5 @@ def notificaciones_context(request):
         'num_notificaciones_no_leidas': total_badge,
         'tiene_alertas_admin': alertas_admin_count > 0,
         'colegio': colegio,
+        'tema_colores': tema_colores,
     }

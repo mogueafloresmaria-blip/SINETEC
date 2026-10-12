@@ -25,7 +25,7 @@
                     {% for entrega in entregas_pendientes %}
                     <tr class="bg-white border-b hover:bg-gray-50">
                         <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold" style="background-color: var(--color-acento); color: var(--color-principal);">
                                 {{ entrega.estudiante.first_name|first }}{{ entrega.estudiante.last_name|first }}
                             </div>
                             {{ entrega.estudiante.get_full_name }}
@@ -36,8 +36,8 @@
                             <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">{{ entrega.estado }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{% url 'revision_entrega' entrega.id %}" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded shadow-sm font-medium transition whitespace-nowrap">
-                                🩷 Revisar y calificar
+                            <a href="{% url 'revision_entrega' entrega.id %}" class="text-white px-3 py-1.5 rounded shadow-sm font-medium transition whitespace-nowrap" style="background-color: var(--color-principal);">
+                                <i class="bi bi-pencil-square me-1"></i> Revisar y calificar
                             </a>
                         </td>
                     </tr>
