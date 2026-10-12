@@ -111,6 +111,10 @@ def requerir_roles(*roles_permitidos):
                 return view_func(request, *args, **kwargs)
 
             perfil = getattr(request.user, 'perfil', None)
+            if not perfil or not perfil.rol:
+                if 'ADMIN' in categorias_permitidas:
+                    return view_func(request, *args, **kwargs)
+
             if perfil and perfil.rol:
                 rol_nombre = perfil.rol.nombre
                 user_norm = _normalizar_texto(rol_nombre)

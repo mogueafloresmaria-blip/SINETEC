@@ -11,6 +11,7 @@ import qrcode
 from datetime import timedelta, date
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseForbidden, Http404, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.db import models
@@ -35,7 +36,10 @@ from seguimiento.models import (
 )
 from evaluaciones.models import JuicioEvaluativo
 from django.utils import timezone
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
+from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -72,7 +76,6 @@ def csrf_failure(request, reason=""):
     return redirect('login_short')
 
 
-@csrf_exempt
 def custom_login_view(request):
     """
     Inicio de sesión seguro y robusto para la plataforma SINETEC.
@@ -124,7 +127,7 @@ def custom_login_view(request):
                     user = authenticate(request, username=perfil.usuario.username, password=password)
 
             # Flexibilidad de soporte institucional para contraseñas de desarrollo/demo
-            if not user and password in ['1234', '12345', 'maria', 'admin', 'Admin2026*', 'Rector2026*', 'Secretaria2026*', 'Docente2026*', 'Estudiante2026*', 'Familia2026*', 'Sena2026*']:
+            if not user and settings.DEBUG and identifier.lower() in ['admin', 'rector', 'secretaria', 'docente', 'familia', 'acudiente'] and password in ['1234', '12345', 'maria', 'admin', 'Admin2026*', 'Rector2026*', 'Secretaria2026*', 'Docente2026*', 'Familia2026*', 'Sena2026*']:
                 u = User.objects.filter(Q(username__iexact=identifier) | Q(perfil__numero_documento=identifier)).first()
                 if u:
                     u.set_password(password)
@@ -160,6 +163,8 @@ def custom_login_view(request):
                 pass
 
             next_url = request.GET.get('next') or request.POST.get('next')
+            if next_url and not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                next_url = None
             if not next_url:
                 next_url = obtener_url_redireccion_por_rol(user)
             return redirect(next_url)
@@ -179,16 +184,14 @@ def custom_logout_view(request):
 @csrf_exempt
 def recuperar_contrasena(request):
     """
-    Portal oficial de recuperación de credenciales SINETEC.
-    Permite a instructores y aprendices restablecer su acceso mediante verificación
-    de documento de identidad o nombre de usuario institucional.
+    Portal oficial de recuperación de credenciales EduNova.
+    Envía enlace seguro de recuperación por token al correo electrónico registrado.
     """
     if request.user.is_authenticated:
         return redirect('dashboard')
 
     mensaje_exito = None
     mensaje_error = None
-    usuario_encontrado = None
 
     if request.method == 'POST':
         identificador = request.POST.get('identificador', '').strip()
@@ -196,41 +199,49 @@ def recuperar_contrasena(request):
         confirmar_clave = request.POST.get('confirmar_contrasena', '').strip()
         usuario_id = request.POST.get('usuario_id', '').strip()
 
-        # Acción 1: Restablecimiento directo de contraseña
-        if nueva_clave:
+        # Soporte para cambio directo autenticado por ID solo si no hay proceso de token pendiente
+        if nueva_clave and usuario_id:
             if nueva_clave != confirmar_clave:
                 mensaje_error = "Las contraseñas no coinciden. Por favor verifica e intenta nuevamente."
             elif len(nueva_clave) < 4:
                 mensaje_error = "La nueva contraseña debe tener como mínimo 4 caracteres."
             else:
                 user_obj = User.objects.filter(pk=usuario_id).first()
-                if user_obj:
+                if user_obj and (settings.DEBUG and getattr(user_obj, 'username', '') in ['docente', 'est1']):
                     user_obj.set_password(nueva_clave)
                     user_obj.save()
-                    messages.success(request, f"¡Contraseña actualizada con éxito para {user_obj.get_full_name() or user_obj.username}! Ya puedes iniciar sesión con tu nueva clave.")
+                    messages.success(request, f"¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.")
                     return redirect('login_short')
-                else:
-                    mensaje_error = "No se pudo identificar la cuenta a restablecer. Por favor reinicia el proceso."
 
-        # Acción 2: Búsqueda y validación de usuario
-        elif identificador:
+        if identificador:
             u = User.objects.filter(
                 Q(username__iexact=identificador) |
                 Q(perfil__numero_documento=identificador) |
                 Q(email__iexact=identificador)
-            ).select_related('perfil').first()
+            ).first()
 
-            if u:
-                usuario_encontrado = u
-                doc_num = getattr(u.perfil, 'numero_documento', None) if hasattr(u, 'perfil') else None
-                mensaje_exito = f"Cuenta identificada: {u.get_full_name() or u.username} ({'Doc: ' + doc_num if doc_num else 'Usuario registrado'}). Define tu nueva contraseña a continuación."
-            else:
-                mensaje_error = f"No encontramos ninguna cuenta asociada al documento o usuario '{identificador}'. Si eres un nuevo aprendiz, verifica el número registrado en Sofia Plus."
+            if u and u.email:
+                uid = urlsafe_base64_encode(force_bytes(u.pk))
+                token = default_token_generator.make_token(u)
+                reset_url = request.build_absolute_uri(
+                    reverse('confirmar_recuperacion', kwargs={'uidb64': uid, 'token': token})
+                )
+                try:
+                    send_mail(
+                        'Restablecer contraseña - EduNova',
+                        f'Sigue este enlace para restablecer tu contraseña: {reset_url}',
+                        getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@edunova.edu'),
+                        [u.email],
+                        fail_silently=False
+                    )
+                except Exception:
+                    pass
+
+            mensaje_exito = 'Si existe una cuenta activa asociada a este identificador, enviamos un enlace de recuperación.'
 
     return render(request, 'usuarios/recuperar_contrasena.html', {
         'mensaje_exito': mensaje_exito,
         'mensaje_error': mensaje_error,
-        'usuario_encontrado': usuario_encontrado,
     })
 
 
@@ -1867,10 +1878,10 @@ def mensajeria(request):
         ficha_u = matricula.ficha if matricula else None
         cond_est = (
             Q(estudiante_destinatario=request.user) |
-            Q(estamento_destinatario__in=['Estudiantes', 'Toda', 'Todos', 'General'])
+            (Q(estudiante_destinatario__isnull=True) & Q(estamento_destinatario__in=['Estudiantes', 'Toda', 'Todos', 'General']))
         )
         if ficha_u:
-            cond_est = cond_est | Q(curso=ficha_u)
+            cond_est = cond_est | (Q(estudiante_destinatario__isnull=True) & Q(curso=ficha_u))
         comunicados_qs = comunicados_qs.filter(cond_est)
         if matricula and matricula.ficha:
             destinatarios_instructores = User.objects.filter(
@@ -1891,20 +1902,17 @@ def mensajeria(request):
         hijos_ids = set()
         for fa in FamiliaAcudiente.objects.filter(
             Q(email__iexact=request.user.email) |
-            Q(nombre_acudiente__icontains=request.user.last_name or 'xyz999') |
-            Q(nombre_acudiente__icontains=request.user.first_name or 'xyz999')
+            Q(documento__iexact=getattr(getattr(request.user, 'perfil', None), 'numero_documento', ''))
         ):
             hijos_ids.update(fa.estudiantes.values_list('id', flat=True))
-        if request.user.last_name:
-            hijos_ids.update(User.objects.filter(matriculas_academicas__acudiente_nombre__icontains=request.user.last_name).values_list('id', flat=True))
-        hijos_u = list(User.objects.filter(id__in=hijos_ids))
+        hijos_u = list(User.objects.filter(id__in=hijos_ids)) if hijos_ids else []
         fichas_hijos = list(Ficha.objects.filter(matriculas__aprendiz__in=hijos_u)) if hijos_u else []
         cond_fam = (
-            Q(estamento_destinatario__in=['Familias', 'Toda', 'Todos', 'General']) |
-            Q(estudiante_destinatario__in=hijos_u)
+            (Q(estudiante_destinatario__isnull=True) & Q(estamento_destinatario__in=['Familias', 'Toda', 'Todos', 'General'])) |
+            (Q(estudiante_destinatario__in=hijos_u) if hijos_u else Q(pk__isnull=True))
         )
         if fichas_hijos:
-            cond_fam = cond_fam | Q(curso__in=fichas_hijos)
+            cond_fam = cond_fam | (Q(estudiante_destinatario__isnull=True) & Q(curso__in=fichas_hijos))
         comunicados_qs = comunicados_qs.filter(cond_fam)
         destinatarios_instructores = User.objects.filter(perfil__rol__nombre__icontains='Docente')[:10]
         destinatarios_aprendices = User.objects.none()
@@ -2448,14 +2456,14 @@ def familia_portal(request):
             total_j = juicios.count()
             aprobados = juicios.filter(juicio_valor='A').count()
             por_mejorar = juicios.filter(juicio_valor='D').count()
-            tasa = round((aprobados / total_j * 100), 1) if total_j > 0 else 100.0
+            tasa = round((aprobados / total_j * 100), 1) if total_j > 0 else None
             asistencias = AsistenciaAprendiz.objects.filter(matricula__aprendiz=hijo)
             total_asist = asistencias.count()
             asist_p = asistencias.filter(estado='P').count()
             asist_a = asistencias.filter(estado='A').count()
             asist_t = asistencias.filter(estado='T').count()
             asist_j = asistencias.filter(estado='J').count()
-            pct_asist = round((asist_p / total_asist * 100), 1) if total_asist > 0 else 100.0
+            pct_asist = round((asist_p / total_asist * 100), 1) if total_asist > 0 else None
             horarios = HorarioFicha.objects.filter(ficha=ficha, activo=True).order_by('dia', 'hora_inicio') if ficha else []
             pagos = PagoPension.objects.filter(estudiante=hijo).order_by('-fecha_pago')
             hijos_data.append({
@@ -2477,11 +2485,16 @@ def familia_portal(request):
                 'pagos': pagos[:6],
             })
     from seguimiento.models import ComunicadoEscolar
-    filtro_circ = Q(estamento_destinatario__in=['Familias', 'Toda', 'Todos']) | Q(estamento_destinatario__icontains='familia')
-    if request.user and request.user.is_authenticated:
-        filtro_circ |= Q(estudiante_destinatario=request.user)
-    if estudiante_sel:
-        filtro_circ |= Q(estudiante_destinatario=estudiante_sel)
+    familia_estudiantes = list(hijos_qs) if hijos_qs else []
+    if estudiante_sel and estudiante_sel not in familia_estudiantes:
+        familia_estudiantes.append(estudiante_sel)
+
+    filtro_circ = (
+        (Q(estamento_destinatario__in=['Familias', 'Toda', 'Todos']) | Q(estamento_destinatario__icontains='familia'))
+        & Q(estudiante_destinatario__isnull=True)
+    )
+    if familia_estudiantes:
+        filtro_circ |= Q(estudiante_destinatario__in=familia_estudiantes)
 
     circulares = list(ComunicadoEscolar.objects.filter(filtro_circ).select_related('remitente').order_by('-fecha_creacion')[:8])
     if not circulares:
@@ -3154,6 +3167,19 @@ def api_registrar_asistencia_qr(request):
                 'success': False,
                 'mensaje': 'Para registrar asistencia con el QR proyectado de la clase debes iniciar sesión con tu cuenta de aprendiz.'
             }, status=401)
+    else:
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'success': False,
+                'mensaje': 'Autenticación requerida para registrar asistencia.'
+            }, status=401)
+        perfil_req = getattr(request.user, 'perfil', None)
+        rol_req = perfil_req.rol.nombre if perfil_req and perfil_req.rol else ''
+        if rol_req.lower() in ['estudiante', 'aprendiz', 'alumno']:
+            return JsonResponse({
+                'success': False,
+                'mensaje': 'No tienes permisos para registrar asistencia mediante identificadores.'
+            }, status=403)
 
     # 3. Buscar por token UUID del aprendiz
     token_str = None
@@ -3180,6 +3206,9 @@ def api_registrar_asistencia_qr(request):
     matricula = Matricula.objects.filter(aprendiz=perfil.usuario).select_related(
         'ficha', 'ficha__programa', 'ficha__institucion'
     ).first()
+
+    if not matricula:
+        return JsonResponse({'success': False, 'mensaje': 'El aprendiz no cuenta con matrícula activa.'}, status=404)
 
     registrador = request.user if request.user.is_authenticated else perfil.usuario
 
@@ -3336,11 +3365,11 @@ def boletin_estudiante(request, pk):
     response['Content-Disposition'] = f'inline; filename="Boletin_Escolar_{doc_num}_{safe_nombre[:20]}.pdf"'
 
     documento = canvas.Canvas(response, pagesize=letter, pageCompression=0, pdfVersion=(1, 4))
-    documento.setTitle(f'Boletín de Notas - {nom_comp}')
-    documento.setAuthor('Institución Educativa Distrital SINETEC')
+    documento.setTitle(f'Boletín de Notas EDUNOVA - {nom_comp}')
+    documento.setAuthor('Institución Educativa Distrital EDUNOVA - SINETEC')
 
     # 1. ENCABEZADO INSTITUCIONAL ESCOLAR
-    # Franja azul superior
+    # Franja superior
     documento.setFillColor(colors.HexColor('#1E3A8A'))
     documento.rect(0, 750, 612, 42, fill=1, stroke=0)
 
@@ -3348,7 +3377,7 @@ def boletin_estudiante(request, pk):
     documento.setFillColor(colors.white)
     documento.drawCentredString(306, 768, "REPÚBLICA DE COLOMBIA · SECRETARÍA DE EDUCACIÓN DISTRITAL")
     documento.setFont('Helvetica-Bold', 9)
-    documento.drawCentredString(306, 755, "INSTITUCIÓN EDUCATIVA DISTRITAL SINETEC · DANE: 147001000123")
+    documento.drawCentredString(306, 755, "INSTITUCIÓN EDUCATIVA DISTRITAL EDUNOVA · SINETEC · DANE: 147001000123")
 
     # Título del boletín
     documento.setFont('Helvetica-Bold', 14)
@@ -3423,57 +3452,57 @@ def boletin_estudiante(request, pk):
 
             materias_data.append((nom_mat, doc_nom[:24], round(nota_val, 1), nivel_str, 'APROBADO' if nota_val >= 3.0 else 'REPROBADO'))
 
-    if not materias_data:
-        materias_data = [
-            ('Matemáticas', 'Docente Titular', 4.8, 'SUPERIOR', 'APROBADO'),
-            ('Lengua Castellana', 'Docente Titular', 4.5, 'ALTO', 'APROBADO'),
-            ('Ciencias Naturales y Química', 'Docente Titular', 4.7, 'SUPERIOR', 'APROBADO'),
-            ('Ciencias Sociales e Historia', 'Docente Titular', 4.2, 'ALTO', 'APROBADO'),
-            ('Inglés Técnico y Comunicativo', 'Docente Titular', 4.6, 'SUPERIOR', 'APROBADO'),
-            ('Educación Física y Deportes', 'Docente Titular', 5.0, 'SUPERIOR', 'APROBADO'),
-        ]
-
     y_tbl -= 20
     documento.setStrokeColor(colors.HexColor('#E2E8F0'))
     documento.setLineWidth(0.6)
 
     total_suma = 0.0
-    for idx, (mat_nom, doc_tit, n_val, niv, est_str) in enumerate(materias_data):
-        total_suma += n_val
-        # Fondo alterno
-        bg_col = colors.HexColor('#FFFFFF') if idx % 2 == 0 else colors.HexColor('#F8FAFC')
-        documento.setFillColor(bg_col)
-        documento.rect(50, y_tbl, 512, 19, fill=1, stroke=0)
-
-        documento.setFont('Helvetica-Bold', 8.5)
-        documento.setFillColor(colors.HexColor('#0F172A'))
-        documento.drawString(62, y_tbl + 5, mat_nom)
-
-        documento.setFont('Helvetica', 8)
-        documento.setFillColor(colors.HexColor('#475569'))
-        documento.drawString(245, y_tbl + 5, doc_tit)
-
-        # Calificación numérica
+    if not materias_data:
+        documento.setFillColor(colors.HexColor('#FFFFFF'))
+        documento.rect(50, y_tbl, 512, 24, fill=1, stroke=0)
         documento.setFont('Helvetica-Bold', 9)
-        documento.setFillColor(colors.HexColor('#1E3A8A'))
-        documento.drawCentredString(385, y_tbl + 5, f"{n_val:.1f}")
-
-        # Nivel de desempeño
-        documento.setFont('Helvetica-Bold', 7.5)
-        if niv == 'SUPERIOR': documento.setFillColor(colors.HexColor('#15803D'))
-        elif niv == 'ALTO': documento.setFillColor(colors.HexColor('#2563EB'))
-        elif niv == 'BÁSICO': documento.setFillColor(colors.HexColor('#D97706'))
-        else: documento.setFillColor(colors.HexColor('#DC2626'))
-        documento.drawCentredString(455, y_tbl + 5, niv)
-
-        documento.setFont('Helvetica', 8)
-        documento.setFillColor(colors.HexColor('#15803D') if est_str == 'APROBADO' else colors.HexColor('#DC2626'))
-        documento.drawCentredString(525, y_tbl + 5, est_str)
-
+        documento.setFillColor(colors.HexColor('#64748B'))
+        documento.drawCentredString(306, y_tbl + 7, "Sin calificaciones registradas.")
         documento.line(50, y_tbl, 562, y_tbl)
-        y_tbl -= 19
+        y_tbl -= 24
+        promedio_final = 0.0
+    else:
+        for idx, (mat_nom, doc_tit, n_val, niv, est_str) in enumerate(materias_data):
+            total_suma += n_val
+            # Fondo alterno
+            bg_col = colors.HexColor('#FFFFFF') if idx % 2 == 0 else colors.HexColor('#F8FAFC')
+            documento.setFillColor(bg_col)
+            documento.rect(50, y_tbl, 512, 19, fill=1, stroke=0)
 
-    promedio_final = round(total_suma / max(1, len(materias_data)), 2)
+            documento.setFont('Helvetica-Bold', 8.5)
+            documento.setFillColor(colors.HexColor('#0F172A'))
+            documento.drawString(62, y_tbl + 5, mat_nom)
+
+            documento.setFont('Helvetica', 8)
+            documento.setFillColor(colors.HexColor('#475569'))
+            documento.drawString(245, y_tbl + 5, doc_tit)
+
+            # Calificación numérica
+            documento.setFont('Helvetica-Bold', 9)
+            documento.setFillColor(colors.HexColor('#1E3A8A'))
+            documento.drawCentredString(385, y_tbl + 5, f"{n_val:.1f}")
+
+            # Nivel de desempeño
+            documento.setFont('Helvetica-Bold', 7.5)
+            if niv == 'SUPERIOR': documento.setFillColor(colors.HexColor('#15803D'))
+            elif niv == 'ALTO': documento.setFillColor(colors.HexColor('#2563EB'))
+            elif niv == 'BÁSICO': documento.setFillColor(colors.HexColor('#D97706'))
+            else: documento.setFillColor(colors.HexColor('#DC2626'))
+            documento.drawCentredString(455, y_tbl + 5, niv)
+
+            documento.setFont('Helvetica', 8)
+            documento.setFillColor(colors.HexColor('#15803D') if est_str == 'APROBADO' else colors.HexColor('#DC2626'))
+            documento.drawCentredString(525, y_tbl + 5, est_str)
+
+            documento.line(50, y_tbl, 562, y_tbl)
+            y_tbl -= 19
+
+        promedio_final = round(total_suma / max(1, len(materias_data)), 2)
 
     # 4. RESUMEN ACADÉMICO DEL PERIODO
     y_tbl -= 8
@@ -6365,6 +6394,8 @@ def aprendiz_dashboard(request):
 
     ficha = matricula.ficha if matricula else None
 
+    from academico.models import TareaClase, GuiaClase, MaterialClase, AvisoClase, CargaAcademica, EntregaTarea
+
     if ficha or matricula:
         pendientes = EvidenciaTaller.objects.filter(
             Q(ficha=ficha) | Q(ficha__isnull=True)
@@ -6385,18 +6416,20 @@ def aprendiz_dashboard(request):
         dia_semana_str = str(hoy.isoweekday()) if hoy.isoweekday() <= 5 else '1'
         horarios_hoy = todos_horarios.filter(dia=dia_semana_str)
 
-        from academico.models import TareaClase, GuiaClase, MaterialClase, AvisoClase, CargaAcademica, EntregaTarea
         cargas_estudiante = CargaAcademica.objects.filter(
             Q(grado__icontains=grado_num),
             Q(seccion__iexact=secc) | Q(seccion__isnull=True) | Q(seccion='')
-        )
+        ).select_related('profesor', 'programa')
 
-        # Tareas no entregadas por este estudiante
-        tareas_clase_list = list(TareaClase.objects.filter(carga_academica__in=cargas_estudiante).exclude(entregas__estudiante=request.user).select_related('carga_academica', 'carga_academica__profesor', 'carga_academica__programa').order_by('-fecha_publicacion'))
+        # Tareas publicadas no entregadas por este estudiante
+        tareas_clase_list = list(TareaClase.objects.filter(
+            carga_academica__in=cargas_estudiante,
+            estado='Publicada'
+        ).exclude(entregas__estudiante=request.user).select_related('carga_academica', 'carga_academica__profesor', 'carga_academica__programa').order_by('-fecha_publicacion'))
         for t in tareas_clase_list:
             t.esta_vencida = bool(t.fecha_limite and timezone.now() > t.fecha_limite)
         tareas_clase = tareas_clase_list
-        guias_clase = GuiaClase.objects.filter(carga_academica__in=cargas_estudiante).order_by('-fecha_publicacion')
+        guias_clase = GuiaClase.objects.filter(carga_academica__in=cargas_estudiante, estado='ACTIVO').order_by('-fecha_publicacion')
         materiales_clase = MaterialClase.objects.filter(carga_academica__in=cargas_estudiante).order_by('-fecha_publicacion')
         avisos_clase = AvisoClase.objects.filter(carga_academica__in=cargas_estudiante).order_by('-fecha_publicacion')
         
@@ -6406,6 +6439,7 @@ def aprendiz_dashboard(request):
         pendientes = EvidenciaTaller.objects.none()
         todos_horarios = HorarioFicha.objects.none()
         horarios_hoy = []
+        cargas_estudiante = CargaAcademica.objects.none()
         tareas_clase = []
         guias_clase = []
         materiales_clase = []
@@ -6526,6 +6560,10 @@ def aprendiz_dashboard(request):
 
     solicitudes = SolicitudSecretaria.objects.filter(aprendiz=request.user).order_by('-fecha_creacion')[:5]
     logros = LogroAprendiz.objects.filter(aprendiz=request.user)
+    documentos_institucionales = DocumentoInstitucional.objects.filter(
+        Q(roles_permitidos__icontains='Estudiante') | Q(roles_permitidos__icontains='Todos')
+    ).order_by('-fecha_subida')[:15]
+    notificaciones_estudiante = Notificacion.objects.filter(usuario=request.user).order_by('-fecha_creacion')[:15]
 
     return render(request, 'aprendiz.html', {
         'perfil': perfil,
@@ -6560,6 +6598,9 @@ def aprendiz_dashboard(request):
         'avisos_clase': avisos_clase,
         'entregas_tareas_clase': entregas_tareas_clase,
         'docentes_lista': docentes_lista,
+        'asignaturas_docentes': cargas_estudiante,
+        'documentos_institucionales': documentos_institucionales,
+        'notificaciones_estudiante': notificaciones_estudiante,
     })
 
 
@@ -9449,7 +9490,8 @@ def etapa_productiva_dashboard(request):
         'matricula__aprendiz', 'matricula__ficha', 'matricula__ficha__programa', 'empresa', 'instructor_seguimiento'
     )
 
-    if rol_nombre in ['Estudiante', 'Aprendiz']:
+    rol_lower = rol_nombre.lower()
+    if rol_lower in ['estudiante', 'aprendiz', 'alumno']:
         etapas_qs = etapas_qs.filter(matricula__aprendiz=request.user)
     elif 'Instructor' in rol_nombre:
         etapas_qs = etapas_qs.filter(Q(instructor_seguimiento=request.user) | Q(matricula__ficha__instructor_lider=request.user))
@@ -9478,7 +9520,14 @@ def etapa_productiva_dashboard(request):
 @login_required
 def innovacion_dashboard(request):
     """Centro de Innovación Tecnológica y Banco de Proyectos Formativos SENNOVA."""
+    perfil = getattr(request.user, 'perfil', None)
+    rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+    rol_lower = rol_nombre.lower()
+
     proyectos = ProyectoInnovacion.objects.select_related('ficha', 'ficha__programa', 'instructor_asesor', 'lider').order_by('-fecha_creacion')
+    if rol_lower in ['estudiante', 'aprendiz', 'alumno']:
+        proyectos = proyectos.filter(Q(ficha__matriculas__aprendiz=request.user) | Q(lider=request.user)).distinct()
+
     estado = request.GET.get('estado', '').strip()
     cat = request.GET.get('categoria', '').strip()
     if estado:
@@ -9502,12 +9551,25 @@ def innovacion_proyecto_detalle(request, pk):
     Ficha técnica, expediente de investigación y espacio de trabajo de proyecto SENNOVA.
     Permite ingresar a ver la descripción completa, impacto regional, aprendices involucrados y entregables.
     """
+    perfil = getattr(request.user, 'perfil', None)
+    rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+    rol_lower = rol_nombre.lower()
+
     proyecto = get_object_or_404(
         ProyectoInnovacion.objects.select_related(
             'ficha', 'ficha__programa', 'ficha__institucion', 'instructor_asesor', 'lider'
         ),
         pk=pk
     )
+
+    if rol_lower in ['estudiante', 'aprendiz', 'alumno']:
+        pertenece = False
+        if proyecto.lider == request.user:
+            pertenece = True
+        elif proyecto.ficha and proyecto.ficha.matriculas.filter(aprendiz=request.user).exists():
+            pertenece = True
+        if not pertenece:
+            raise Http404("No tienes permiso para consultar este proyecto formativo.")
 
     aprendices_ficha = []
     if proyecto.ficha:
@@ -10476,7 +10538,50 @@ def mi_perfil_view(request):
     return render(request, 'usuarios/mi_perfil.html')
 
 def confirmar_recuperacion(request, uidb64, token):
-    return render(request, 'usuarios/recuperar_contrasena.html', {'token': token, 'uidb64': uidb64})
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    token_valido = bool(user and default_token_generator.check_token(user, token))
+    token_invalido = not token_valido
+
+    if request.method == 'POST':
+        if not token_valido:
+            return render(request, 'usuarios/recuperar_contrasena.html', {
+                'token_valido': False,
+                'token_invalido': True,
+                'error_message': 'El enlace de recuperación es inválido o ha caducado.',
+            }, status=400)
+        nueva_clave = request.POST.get('nueva_contrasena', '').strip()
+        confirmar_clave = request.POST.get('confirmar_contrasena', '').strip()
+        if nueva_clave and nueva_clave == confirmar_clave:
+            user.set_password(nueva_clave)
+            user.save()
+            messages.success(request, '¡Contraseña restablecida exitosamente! Inicia sesión con tu nueva clave.')
+            return redirect('login_short')
+        else:
+            return render(request, 'usuarios/recuperar_contrasena.html', {
+                'token_valido': True,
+                'token_invalido': False,
+                'uidb64': uidb64,
+                'token': token,
+                'error_message': 'Las contraseñas no coinciden.',
+            })
+
+    if token_invalido:
+        return render(request, 'usuarios/recuperar_contrasena.html', {
+            'token_valido': False,
+            'token_invalido': True,
+        }, status=400)
+
+    return render(request, 'usuarios/recuperar_contrasena.html', {
+        'token_valido': True,
+        'token_invalido': False,
+        'uidb64': uidb64,
+        'token': token,
+    })
 
 @login_required
 def abrir_notificacion_view(request, pk):

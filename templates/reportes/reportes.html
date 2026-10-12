@@ -261,29 +261,7 @@
                 </div>
             </div>
 
-            <!-- 7. Tesorería -->
-            <div class="edunova-card" style="border-top: 3px solid #059669 !important;">
-                <div class="edunova-card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #059669; font-size: 0.72rem;">TESORERÍA Y CAJA</span>
-                        <div class="p-2 rounded-3 bg-white text-success shadow-xs">
-                            <i class="bi bi-cash-stack fs-5" style="color: #059669;"></i>
-                        </div>
-                    </div>
-                    <h6 class="fw-bold text-dark mb-1">Recaudos y Pensiones</h6>
-                    <p class="edunova-card-desc">Libro diario de ingresos, números de recibo, matrícula, mensualidades cobradas y métodos de pago.</p>
-                </div>
-                <div class="edunova-card-footer">
-                    <a href="{% url 'exportar_reporte_excel' %}?entidad=pensiones" class="btn btn-sm btn-outline-primary edunova-btn-export">
-                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                    </a>
-                    <a href="{% url 'exportar_reporte_pdf' %}?entidad=pensiones" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
-                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                    </a>
-                </div>
-            </div>
-
-            <!-- 8. Control Escolar -->
+            <!-- 7. Control Escolar -->
             <div class="edunova-card" style="border-top: 3px solid #4F46E5 !important;">
                 <div class="edunova-card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -300,28 +278,6 @@
                         <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
                     </a>
                     <a href="{% url 'exportar_reporte_pdf' %}?entidad=asistencia" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
-                        <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
-                    </a>
-                </div>
-            </div>
-
-            <!-- 9. Ruta -->
-            <div class="edunova-card" style="border-top: 3px solid #0891B2 !important;">
-                <div class="edunova-card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0891B2; font-size: 0.72rem;">TRANSPORTE Y RUTA</span>
-                        <div class="p-2 rounded-3 bg-white text-info shadow-xs">
-                            <i class="bi bi-bus-front-fill fs-5" style="color: #0891B2;"></i>
-                        </div>
-                    </div>
-                    <h6 class="fw-bold text-dark mb-1">Rutas Escolares</h6>
-                    <p class="edunova-card-desc">Detalle operativo de vehículos, placas, conductores asignados, capacidad y número de estudiantes a bordo.</p>
-                </div>
-                <div class="edunova-card-footer">
-                    <a href="{% url 'exportar_reporte_excel' %}?entidad=transportes" class="btn btn-sm btn-outline-primary edunova-btn-export">
-                        <i class="bi bi-file-earmark-excel me-1 text-success"></i> Excel (.xlsx)
-                    </a>
-                    <a href="{% url 'exportar_reporte_pdf' %}?entidad=transportes" target="_blank" class="btn btn-sm btn-outline-danger edunova-btn-export">
                         <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF (.pdf)
                     </a>
                 </div>

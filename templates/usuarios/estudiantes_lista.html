@@ -3,6 +3,8 @@
 {% block title %}Directorio de Alumnos &middot; EDUNOVA{% endblock %}
 
 {% block extra_head %}
+<link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+<!-- Escanear carnet QR (compatibilidad de lectura) -->
 <style>
 body{background:#f3f5f9 !important;}
 .dir-wrap{padding:1rem 1.2rem;}

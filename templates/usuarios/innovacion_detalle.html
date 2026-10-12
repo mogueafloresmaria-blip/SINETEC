@@ -268,7 +268,7 @@
                             <i class="bi bi-person-workspace"></i>
                         </div>
                         <div>
-                            <div class="fw-bold text-dark">{{ proyecto.instructor_asesor.get_full_name|default:proyecto.instructor_asesor.username|default:'Sin asignar' }}</div>
+                            <div class="fw-bold text-dark">{% if proyecto.instructor_asesor %}{{ proyecto.instructor_asesor.get_full_name|default:proyecto.instructor_asesor.username }}{% else %}Sin asignar{% endif %}</div>
                             <small class="text-muted">Instructor SENA · Regional Magdalena</small>
                         </div>
                     </div>
@@ -283,7 +283,7 @@
                             <i class="bi bi-mortarboard-fill"></i>
                         </div>
                         <div>
-                            <div class="fw-bold text-dark">{{ proyecto.lider.get_full_name|default:proyecto.lider.username }}</div>
+                            <div class="fw-bold text-dark">{% if proyecto.lider %}{{ proyecto.lider.get_full_name|default:proyecto.lider.username }}{% else %}Sin asignar{% endif %}</div>
                             <small class="text-muted">Líder de Investigación Formativa</small>
                         </div>
                     </div>

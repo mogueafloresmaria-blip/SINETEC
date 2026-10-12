@@ -117,7 +117,11 @@
         <div class="family-welcome-card">
             <h1 class="family-welcome-title">Bienvenido al Panel de<br>Familia</h1>
             <p class="family-welcome-text">Introduce el número de documento de tu hijo o hija</p>
-            
+            {% if not acudiente %}
+            <div class="alert alert-warning py-2 px-3 small rounded-3 mb-3 text-center">
+                <i class="bi bi-info-circle me-1"></i> Sin estudiantes asociados directamente
+            </div>
+            {% endif %}
             <form method="GET" action="{% url 'familia_portal' %}">
                 <input type="text" class="family-input" name="documento" placeholder="Número de documento" required autofocus>
                 <button type="submit" class="family-btn">Consultar estudiante</button>

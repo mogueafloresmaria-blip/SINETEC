@@ -121,7 +121,7 @@
                 </h1>
                 <p class="text-white text-opacity-90 mb-0" style="font-size: 0.98rem; max-width: 650px;">
                     {% if matricula %}
-                        Grado <strong class="text-warning">{{ matricula.get_grado_escolar_display|default:matricula.grado_escolar }}</strong> · Grupo {{ ficha.codigo_ficha }} ({{ ficha.programa.denominacion }})
+                        Grado <strong class="text-warning">{% if matricula.get_grado_escolar_display %}{{ matricula.get_grado_escolar_display }}{% else %}{{ matricula.grado_escolar }}{% endif %}</strong> · Grupo {{ ficha.codigo_ficha }} ({{ ficha.programa.denominacion }})
                     {% else %}
                         Consulta tu rendimiento académico, horario semanal, tareas y comunicados oficiales.
                     {% endif %}
@@ -181,7 +181,7 @@
                         <div class="quick-access-icon mb-3">
                             <i class="bi bi-calendar-week-fill"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Mi horario</h6>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Mi Horario</h6>
                         <p class="text-muted small mb-0" style="font-size: 0.78rem;">Horario semanal de clases</p>
                     </div>
                     <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
@@ -191,7 +191,24 @@
                 </div>
             </div>
 
-            <!-- Card 3: Tareas -->
+            <!-- Card 3: Asignaturas y Docentes -->
+            <div class="col-6 col-md-3">
+                <div class="quick-access-card" onclick="activarTab('tab-asignaturas');">
+                    <div>
+                        <div class="quick-access-icon mb-3">
+                            <i class="bi bi-book-half"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Asignaturas</h6>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Materias y docentes</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
+                        <span style="font-size: 0.75rem;">Ver materias</span>
+                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Tareas y Actividades -->
             <div class="col-6 col-md-3">
                 <div class="quick-access-card" onclick="activarTab('tab-actividades');">
                     <div>
@@ -211,7 +228,24 @@
                 </div>
             </div>
 
-            <!-- Card 4: Asistencia -->
+            <!-- Card 5: Temas Publicados -->
+            <div class="col-6 col-md-3">
+                <div class="quick-access-card" onclick="activarTab('tab-temas');">
+                    <div>
+                        <div class="quick-access-icon mb-3">
+                            <i class="bi bi-journal-text"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Temas y Guías</h6>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Materiales y contenidos</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
+                        <span style="font-size: 0.75rem;">Ver temas</span>
+                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6: Asistencia -->
             <div class="col-6 col-md-3">
                 <div class="quick-access-card" onclick="activarTab('tab-asistencia');">
                     <div>
@@ -219,7 +253,7 @@
                             <i class="bi bi-check2-square"></i>
                         </div>
                         <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Asistencia</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Historial de asistencia</p>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Historial escolar</p>
                     </div>
                     <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
                         <span class="fw-bold text-success" style="font-size: 0.75rem;">{{ porcentaje_asistencia|default:100 }}%</span>
@@ -228,58 +262,58 @@
                 </div>
             </div>
 
-            <!-- Card 5: Comunicados -->
+            <!-- Card 7: Comunicaciones -->
             <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-comunicados');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-megaphone-fill"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Comunicados</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Avisos institucionales</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Ver avisos</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 6: Mensajería -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-mensajeria');">
+                <div class="quick-access-card" onclick="activarTab('tab-comunicaciones');">
                     <div>
                         <div class="quick-access-icon mb-3">
                             <i class="bi bi-chat-dots-fill"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Mensajería</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Escribir a profesores</p>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Comunicaciones</h6>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Mensajes y circulares</p>
                     </div>
                     <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Abrir chat</span>
+                        <span style="font-size: 0.75rem;">Bandeja</span>
                         <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 7: Portafolio -->
+            <!-- Card 8: Notificaciones -->
             <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="window.location.href='{% url 'portafolio_aprendiz' %}';">
+                <div class="quick-access-card" onclick="activarTab('tab-notificaciones');">
                     <div>
                         <div class="quick-access-icon mb-3">
-                            <i class="bi bi-journal-bookmark-fill"></i>
+                            <i class="bi bi-bell-fill"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Portafolio</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Evidencias de aprendizaje</p>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Notificaciones</h6>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Alertas y recordatorios</p>
                     </div>
                     <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Mi portafolio</span>
+                        <span style="font-size: 0.75rem;">Ver alertas</span>
                         <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 8: Perfil del estudiante -->
+            <!-- Card 9: Documentos -->
+            <div class="col-6 col-md-3">
+                <div class="quick-access-card" onclick="activarTab('tab-documentos');">
+                    <div>
+                        <div class="quick-access-icon mb-3">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Documentos</h6>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Manual y formatos</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
+                        <span style="font-size: 0.75rem;">Descargar</span>
+                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 10: Mi Perfil -->
             <div class="col-6 col-md-3">
                 <div class="quick-access-card" onclick="activarTab('tab-perfil');">
                     <div>
@@ -287,7 +321,7 @@
                             <i class="bi bi-person-badge-fill"></i>
                         </div>
                         <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Mi Perfil</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Fotografía y datos personales</p>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Fotografía y contacto</p>
                     </div>
                     <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
                         <span style="font-size: 0.75rem;">Ver perfil</span>
@@ -440,6 +474,75 @@
                                     <i class="bi bi-clipboard-check fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
                                     <h6 class="fw-bold text-dark">No hay registros de semáforo asentados para tu matrícula.</h6>
                                     <p class="small mb-0">Los docentes registrarán las valoraciones a medida que avance el periodo académico.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- JUICIOS EVALUATIVOS Y RESULTADOS DE APRENDIZAJE -->
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-journal-check fs-5" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark mb-0">Juicios Evaluativos Oficiales y Logros</h6>
+                    </div>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                        Registro Oficial Institucional
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle table-stu-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th class="py-3 ps-3">Resultado de Aprendizaje / Materia</th>
+                                <th class="py-3">Docente Evaluador</th>
+                                <th class="py-3 text-center">Juicio Valorativo</th>
+                                <th class="py-3">Observaciones y Retroalimentación</th>
+                                <th class="py-3 text-center">Fecha Evaluación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for j in juicios %}
+                            <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
+                                <td class="ps-3">
+                                    <strong class="text-dark d-block">{{ j.resultado_aprendizaje.descripcion }}</strong>
+                                    <small class="text-muted">Cód: {{ j.resultado_aprendizaje.codigo }}</small>
+                                </td>
+                                <td>
+                                    <i class="bi bi-person me-1" style="color: var(--stu-coffee-primary);"></i>
+                                    {{ j.instructor.get_full_name|default:j.instructor.username }}
+                                </td>
+                                <td class="text-center">
+                                    {% if j.juicio_valor == 'A' %}
+                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                            <i class="bi bi-check-circle me-1"></i> Aprobado
+                                        </span>
+                                    {% elif j.juicio_valor == 'D' %}
+                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
+                                            <i class="bi bi-x-circle me-1"></i> Deficiente (No Aprobado)
+                                        </span>
+                                    {% else %}
+                                        <span class="badge rounded-pill px-3 py-1 fw-bold bg-secondary text-white">
+                                            {{ j.get_juicio_valor_display }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    {{ j.observaciones|default:"Sin observaciones registradas." }}
+                                </td>
+                                <td class="text-center small text-muted">
+                                    {{ j.fecha_evaluacion|date:"d/m/Y"|default:"N/A" }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="bi bi-clipboard2-check fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                                    <p class="small mb-0">No hay juicios evaluativos registrados aún para esta matrícula.</p>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -911,7 +1014,7 @@
 
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold text-muted mb-1">Grado Escolar Asignado</label>
-                                    <input type="text" class="form-control rounded-pill bg-light" value="{{ matricula.get_grado_escolar_display|default:matricula.grado_escolar|default:'10° Grado (Bachillerato)' }}" readonly>
+                                    <input type="text" class="form-control rounded-pill bg-light" value="{% if matricula %}{% if matricula.get_grado_escolar_display %}{{ matricula.get_grado_escolar_display }}{% else %}{{ matricula.grado_escolar }}{% endif %}{% else %}10° Grado (Bachillerato){% endif %}" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold text-muted mb-1">Grupo / Ficha Oficial</label>
@@ -950,6 +1053,193 @@
                             </form>
                         </div>
                     </div>
+                </div>
+        <!-- PESTAÑA 8: ASIGNATURAS Y DOCENTES -->
+        <div class="tab-pane fade" id="tab-asignaturas" role="tabpanel">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-book-half fs-5" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark mb-0">Mis Asignaturas y Docentes Responsables</h6>
+                    </div>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                        Carga Académica Oficial
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle table-stu-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th class="py-3 ps-3">Asignatura</th>
+                                <th class="py-3">Docente Titular</th>
+                                <th class="py-3">Grupo / Grado</th>
+                                <th class="py-3 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in asignaturas_docentes %}
+                            <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
+                                <td class="ps-3 fw-bold text-dark">
+                                    <i class="bi bi-journal-bookmark me-1.5" style="color: var(--stu-coffee-primary);"></i> {{ a.nombre }}
+                                </td>
+                                <td>
+                                    <span class="fw-semibold text-dark">{{ a.profesor }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill px-2.5 py-1" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
+                                        Grado {{ matricula.grado_escolar|default:"10" }} - {{ matricula.seccion|default:"A" }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" onclick="abrirMensajeConProfesor('{{ a.profesor_id }}', '{{ a.profesor|escapejs }}');" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
+                                        <i class="bi bi-chat-dots-fill me-1"></i> Contactar
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="bi bi-book fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                                    <h6 class="fw-bold text-dark">No hay asignaturas registradas para tu curso actualmente.</h6>
+                                    <p class="small mb-0">La Secretaría Académica asignará las materias de tu plan de estudios.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 9: TEMAS Y GUÍAS PUBLICADAS -->
+        <div class="tab-pane fade" id="tab-temas" role="tabpanel">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-journal-text fs-5" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark mb-0">Temas de Clase, Guías y Material Pedagógico</h6>
+                    </div>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                        Recursos Educativos Oficiales
+                    </span>
+                </div>
+
+                <div class="row g-3">
+                    {% for g in guias_clase %}
+                    <div class="col-md-6">
+                        <div class="p-3.5 rounded-4 border bg-white h-100 d-flex flex-column justify-content-between shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
+                                        {{ g.carga_academica.programa.denominacion|default:"Guía Pedagógica" }}
+                                    </span>
+                                    <small class="text-muted">{{ g.fecha_publicacion|date:"d M Y" }}</small>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">{{ g.titulo }}</h6>
+                                <p class="text-muted small mb-2">{{ g.descripcion|default:"Guía temática oficial de la asignatura."|truncatechars:120 }}</p>
+                            </div>
+                            {% if g.archivo %}
+                            <div class="pt-2 border-top">
+                                <a href="{{ g.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold text-decoration-none" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
+                                    <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Guía Oficial
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5 text-muted">
+                        <i class="bi bi-journal-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark">No hay guías de clase publicadas actualmente.</h6>
+                        <p class="small mb-0">Tus docentes compartirán aquí los materiales pedagógicos de cada periodo.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 10: NOTIFICACIONES INSTITUCIONALES -->
+        <div class="tab-pane fade" id="tab-notificaciones" role="tabpanel">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-bell-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark mb-0">Notificaciones y Alertas del Sistema</h6>
+                    </div>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                        Bandeja de Avisos
+                    </span>
+                </div>
+
+                <div class="list-group list-group-flush gap-2">
+                    {% for n in notificaciones_estudiante %}
+                    <div class="list-group-item rounded-3 border p-3 d-flex align-items-start justify-content-between bg-white shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center mt-1" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); width: 36px; height: 36px;">
+                                <i class="bi bi-bell-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">{{ n.titulo }}</h6>
+                                <p class="text-secondary small mb-1">{{ n.mensaje }}</p>
+                                <small class="text-muted" style="font-size: 0.75rem;">{{ n.fecha_creacion|date:"d M Y, h:i A" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-bell-slash fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark">No tienes notificaciones pendientes.</h6>
+                        <p class="small mb-0">Estás al día con todos tus eventos y novedades académicas.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 11: DOCUMENTOS INSTITUCIONALES -->
+        <div class="tab-pane fade" id="tab-documentos" role="tabpanel">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-text-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark mb-0">Documentos y Formatos Institucionales</h6>
+                    </div>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                        Biblioteca Oficial
+                    </span>
+                </div>
+
+                <div class="row g-3">
+                    {% for doc in documentos_institucionales %}
+                    <div class="col-md-6">
+                        <div class="p-3.5 rounded-4 border bg-white h-100 d-flex flex-column justify-content-between shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
+                                        {{ doc.get_categoria_display|default:doc.categoria|default:"Institucional" }}
+                                    </span>
+                                    <small class="text-muted">{{ doc.fecha_subida|date:"d M Y" }}</small>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">{{ doc.titulo }}</h6>
+                                <p class="text-muted small mb-2">{{ doc.descripcion|default:"Documento normativo o curricular expedido por la institución."|truncatechars:120 }}</p>
+                            </div>
+                            {% if doc.archivo %}
+                            <div class="pt-2 border-top">
+                                <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold text-decoration-none" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
+                                    <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Documento
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5 text-muted">
+                        <i class="bi bi-folder-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark">No hay documentos institucionales disponibles por ahora.</h6>
+                        <p class="small mb-0">Los manuales de convivencia y formatos se publicarán aquí cuando estén disponibles.</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>

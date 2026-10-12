@@ -99,11 +99,6 @@
                 <a href="?tipo=Horario{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Horario' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">
                     <i class="bi bi-clock-history me-1"></i> Horarios ({{ total_horarios }})
                 </a>
-                {% if total_transportes %}
-                <a href="?tipo=Transporte{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Transporte' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
-                    <i class="bi bi-bus-front me-1"></i> Rutas ({{ total_transportes }})
-                </a>
-                {% endif %}
                 {% if total_comunicados %}
                 <a href="?tipo=Comunicado{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Comunicado' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
                     <i class="bi bi-envelope me-1"></i> Comunicados ({{ total_comunicados }})

@@ -461,36 +461,41 @@
                     </a>
 
                 {% elif 'Estudiante' in rol or 'Aprendiz' in rol or 'Alumno' in rol %}
-                    <!-- 2. ESTUDIANTE -->
+                    <!-- 2. ESTUDIANTE: MENÚ LATERAL OFICIAL EDUNOVA -->
                     <div class="sinetec-nav-label">Académico</div>
-                    <a class="nav-link active" id="student-nav-home" href="{% url 'aprendiz_dashboard' %}">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'aprendiz_dashboard' and not request.GET.subpanel %}active{% endif %}" id="student-nav-home" href="{% url 'aprendiz_dashboard' %}">
                         <i class="bi bi-house-door-fill"></i> Inicio
                     </a>
-                    <a class="nav-link" id="student-nav-calificaciones" href="{% url 'aprendiz_dashboard' %}#tab-calificaciones">
-                        <i class="bi bi-clipboard2-data-fill"></i> Calificaciones
+                    <a class="nav-link" id="student-nav-perfil" href="{% url 'aprendiz_dashboard' %}#tab-perfil">
+                        <i class="bi bi-person-circle"></i> Mi Perfil
                     </a>
                     <a class="nav-link" id="student-nav-horario" href="{% url 'aprendiz_dashboard' %}#tab-horario">
-                        <i class="bi bi-calendar2-week-fill"></i> Mi horario
+                        <i class="bi bi-calendar2-week-fill"></i> Mi Horario
                     </a>
-                    <a class="nav-link" id="student-nav-actividades" href="{% url 'aprendiz_dashboard' %}#tab-actividades">
-                        <i class="bi bi-pencil-square"></i> Tareas
+                    <a class="nav-link" id="student-nav-asignaturas" href="{% url 'aprendiz_dashboard' %}#tab-asignaturas">
+                        <i class="bi bi-book-half"></i> Asignaturas y Docentes
+                    </a>
+                    <a class="nav-link" id="student-nav-calificaciones" href="{% url 'aprendiz_dashboard' %}#tab-calificaciones">
+                        <i class="bi bi-mortarboard-fill"></i> Calificaciones
                     </a>
                     <a class="nav-link" id="student-nav-asistencia" href="{% url 'aprendiz_dashboard' %}#tab-asistencia">
                         <i class="bi bi-check2-square"></i> Asistencia
                     </a>
-                    <div class="sinetec-nav-label">Comunicación & Portafolio</div>
-                    <a class="nav-link" id="student-nav-comunicados" href="{% url 'aprendiz_dashboard' %}#tab-comunicados">
-                        <i class="bi bi-megaphone-fill"></i> Comunicados
+                    <a class="nav-link" id="student-nav-actividades" href="{% url 'aprendiz_dashboard' %}#tab-actividades">
+                        <i class="bi bi-pencil-square"></i> Tareas y Actividades
                     </a>
-                    <a class="nav-link" id="student-nav-mensajeria" href="{% url 'aprendiz_dashboard' %}#tab-mensajeria">
-                        <i class="bi bi-chat-dots-fill"></i> Mensajería
+                    <a class="nav-link" id="student-nav-temas" href="{% url 'aprendiz_dashboard' %}#tab-temas">
+                        <i class="bi bi-journal-text"></i> Temas Publicados
                     </a>
-                    <a class="nav-link {% if 'portafolio' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'portafolio_aprendiz' %}">
-                        <i class="bi bi-journal-bookmark-fill"></i> Portafolio
+                    <div class="sinetec-nav-label">Comunicación & Recursos</div>
+                    <a class="nav-link" id="student-nav-comunicaciones" href="{% url 'aprendiz_dashboard' %}#tab-comunicaciones">
+                        <i class="bi bi-chat-dots-fill"></i> Comunicaciones
                     </a>
-                    <div class="sinetec-nav-label">Mi Cuenta</div>
-                    <a class="nav-link" id="student-nav-perfil" href="{% url 'aprendiz_dashboard' %}#tab-perfil">
-                        <i class="bi bi-person-badge-fill"></i> Perfil del estudiante
+                    <a class="nav-link" id="student-nav-notificaciones" href="{% url 'aprendiz_dashboard' %}#tab-notificaciones">
+                        <i class="bi bi-bell-fill"></i> Notificaciones
+                    </a>
+                    <a class="nav-link" id="student-nav-documentos" href="{% url 'aprendiz_dashboard' %}#tab-documentos">
+                        <i class="bi bi-file-earmark-text-fill"></i> Documentos
                     </a>
 
                 {% elif 'Familia' in rol or 'Acudiente' in rol or 'Padre' in rol or 'Madre' in rol %}
