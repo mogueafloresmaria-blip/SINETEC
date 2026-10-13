@@ -10772,7 +10772,7 @@ def marcar_todas_notificaciones_leidas_view(request):
     messages.success(request, 'Todas las notificaciones han sido marcadas como leídas.')
     return redirect(f"{reverse('instructor_dashboard')}?subpanel=notificaciones")
 
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse, Http404
 @login_required
 def marcar_notificacion_leida_ajax(request, pk):
     from seguimiento.models import Notificacion
@@ -10781,4 +10781,28 @@ def marcar_notificacion_leida_ajax(request, pk):
         notif.leida = True
         notif.save(update_fields=['leida'])
     return JsonResponse({'status': 'ok', 'leida': True})
+
+
+def descargar_documentacion_docx(request):
+    ruta = os.path.join(settings.BASE_DIR, 'docs', 'Documentacion_Tecnica_EduNova_Produccion.docx')
+    if os.path.exists(ruta):
+        return FileResponse(
+            open(ruta, 'rb'),
+            as_attachment=True,
+            filename='Documentacion_Tecnica_EduNova_Produccion.docx',
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+    raise Http404("Documento DOCX no encontrado")
+
+
+def descargar_documentacion_pdf(request):
+    ruta = os.path.join(settings.BASE_DIR, 'docs', 'Documentacion_Tecnica_EduNova_Produccion.pdf')
+    if os.path.exists(ruta):
+        return FileResponse(
+            open(ruta, 'rb'),
+            as_attachment=True,
+            filename='Documentacion_Tecnica_EduNova_Produccion.pdf',
+            content_type='application/pdf'
+        )
+    raise Http404("Documento PDF no encontrado")
 

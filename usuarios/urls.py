@@ -165,4 +165,8 @@ urlpatterns = [
     path('docentes/gestion/nuevo/', views_docentes.docente_editar, name='docente_nuevo'),
     path('docentes/gestion/<int:pk>/editar/', views_docentes.docente_editar, name='docente_editar'),
     path('docentes/gestion/<int:pk>/eliminar/', views_docentes.docente_eliminar, name='docente_eliminar'),
+    
+    # Descargas oficiales de Documentación Técnica en Producción
+    path('descargar-documentacion/docx/', views.descargar_documentacion_docx, name='descargar_documentacion_docx'),
+    path('descargar-documentacion/pdf/', views.descargar_documentacion_pdf, name='descargar_documentacion_pdf'),
 ]

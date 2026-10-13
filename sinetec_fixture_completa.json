@@ -10,7 +10,7 @@
   "model": "auth.user",
   "fields": {
     "password": "pbkdf2_sha256$720000$Di7doJ8WVKDB8Fv0kTYUZC$FqD9OKn8T9Y6HbhaqgrlU8/pOAAJk6Vrtrl3UfyHXSM=",
-    "last_login": "2026-10-13T04:17:16.752Z",
+    "last_login": "2026-10-13T10:55:21.189Z",
     "is_superuser": true,
     "username": "admin",
     "first_name": "ADMIN",
@@ -27,7 +27,7 @@
   "model": "auth.user",
   "fields": {
     "password": "pbkdf2_sha256$720000$331gPHQeehF1r3qioUrTrc$KKfu/08oVIAFbKqACpuEnxu9GEM2dJGJwzYaSpp+7u0=",
-    "last_login": "2026-10-13T04:17:17.647Z",
+    "last_login": "2026-10-13T10:52:27.012Z",
     "is_superuser": false,
     "username": "rector",
     "first_name": "Carlos",
@@ -44,7 +44,7 @@
   "model": "auth.user",
   "fields": {
     "password": "pbkdf2_sha256$720000$qPzxvGkwVjgA9PUgce2zfd$mxu/zN3RLbwyGRoQBlZQ4GsCZpMkAiWVes6dBmuWw2Q=",
-    "last_login": "2026-10-13T04:17:17.733Z",
+    "last_login": "2026-10-13T10:52:27.249Z",
     "is_superuser": false,
     "username": "secretaria",
     "first_name": "Laura",
@@ -60,8 +60,8 @@
 {
   "model": "auth.user",
   "fields": {
-    "password": "pbkdf2_sha256$720000$o0bz785W7YphSvYhJMi4Bx$igGX2DEYx0Dt9WIRcq7CuGXfTLd1NEPS30Amr80gClY=",
-    "last_login": "2026-10-13T04:33:56.856Z",
+    "password": "pbkdf2_sha256$720000$GWutOax0US5fz6wbOSceA3$ZhcWaAXZmKFaxMC+i8+fjizQMRJ5LybtTiOsilRGGrk=",
+    "last_login": "2026-10-13T10:55:18.307Z",
     "is_superuser": false,
     "username": "docente",
     "first_name": "Miguel",
@@ -78,7 +78,7 @@
   "model": "auth.user",
   "fields": {
     "password": "pbkdf2_sha256$720000$tx0vIJLg22y8keKYDyLBuf$cGueCTNiMJRNijaXdCr950qVCfHBkDAZ8/4RparhkKU=",
-    "last_login": "2026-10-12T13:06:20.576Z",
+    "last_login": "2026-10-13T10:55:20.340Z",
     "is_superuser": false,
     "username": "acudiente",
     "first_name": "Rosa",
@@ -95,7 +95,7 @@
   "model": "auth.user",
   "fields": {
     "password": "pbkdf2_sha256$720000$Csj2f9U2T7VtqhoQQO0Lfs$uwQGUIp5QaPVqpH3jYFBMwRoK8+6BZ27wRDUBmR5dZU=",
-    "last_login": "2026-10-13T04:17:18.093Z",
+    "last_login": "2026-10-13T10:52:29.188Z",
     "is_superuser": false,
     "username": "familia",
     "first_name": "Carmen",
@@ -112,7 +112,7 @@
   "model": "auth.user",
   "fields": {
     "password": "pbkdf2_sha256$720000$tS8snCp90Rr7aIhcPGu2E7$lrlzcsKdZVoIVPkZNvpbRXMHHwlfqxJ0LF7r2O4vDXw=",
-    "last_login": "2026-10-13T04:43:44.794Z",
+    "last_login": "2026-10-13T10:55:20.251Z",
     "is_superuser": false,
     "username": "est1",
     "first_name": "Juan",
@@ -1214,6 +1214,14 @@
   "fields": {
     "session_data": ".eJxVjEsOwiAUAO_C2hB-peDSfc9AHvCeVA0kpV0Z725IutDtzGTeLMCxl3B03MKa2ZVJq9jll0ZIT6xD5QfUe-Op1X1bIx8JP23nS8v4up3t36BAL2NsyFPKVhqHRgCABatQG6GnBNErS1MkI8l74xIpOTtBEhLOqDN5CezzBTpHOMo:1xEphB:i4VdtRNwwB2n50VVuW9WPmh9-sXXbzVMoorGGXL47-Q",
     "expire_date": "2026-10-22T15:06:09.758Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "2ss3g9iu3lzih9o2xoidco243hzs69t2",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2pChUAZcuvcMZAZQqgaS0q6Md7dNutDtf-_9twi0LiWsPc9hSuIslEFx-l2Z4jPXHaUH1XuTsdVlnljuijxol9eW8utyuH8HhXrZatSI48hOYQRgD1FljV47IGDlIpBFHPygLGjK6sbGeuuN47g52mQtPl_1uDbB:1xGa8e:y0z0K8H23f4aY78Vbmjvb9SGMYfO4d5a9acJdomPZhs",
+    "expire_date": "2026-10-27T10:53:44.001Z"
   }
 },
 {
@@ -3986,6 +3994,14 @@
 },
 {
   "model": "sessions.session",
+  "pk": "ea3i7rv795uxbdwgabyymuc2rqpyhd23",
+  "fields": {
+    "session_data": ".eJxVjDsOwyAQRO9CHSG-Xjtlep8BLbAEJxFIxq6i3D1YcpF0o3lv5s0c7lt2e6PVLZFdmTQTu_y2HsOTyoHiA8u98lDLti6eHwo_aeNzjfS6ne7fQcaW-1prm6yiQUShMUlpIBkKMKEI2pNVQmkjkXoiMLInCTHEAQDsOJI27PMFIjU30g:1xGaAC:Pfd8BywkiSOViYInPotDiQHuSewISbFBqhs9MmfFRIk",
+    "expire_date": "2026-10-27T10:55:20.343Z"
+  }
+},
+{
+  "model": "sessions.session",
   "pk": "eamwwqf3vtqcptkdi37szocybn3zs068",
   "fields": {
     "session_data": ".eJxVjcsOwiAURP-FtSFc5PJw6d5vIDwuUjWQlHZl_HfbpAvdzjkz82Y-rEv166DZT5ldGCCy028aQ3pS21F-hHbvPPW2zFPku8IPOvitZ3pdD_dvoIZRtzaBkTaDPiMpqQJB0RK3N0IoiNIlpVyUjmwURCqKkFFkbQxojKqAZZ8vDnY3fg:1xBDew:sydMkDnlHJ3zqhwiUXQMmhAnaeSEMaZV4T3w5aiemJ4",
@@ -6642,6 +6658,14 @@
 },
 {
   "model": "sessions.session",
+  "pk": "om6lfqjab4fj5ktyw9qyvttd9yaws95y",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2pChUAZcuvcMZAZQqgaS0q6Md7dNutDtf-_9twi0LiWsPc9hSuIslEFx-l2Z4jPXHaUH1XuTsdVlnljuijxol9eW8utyuH8HhXrZatSI48hOYQRgD1FljV47IGDlIpBFHPygLGjK6sbGeuuN47g52mQtPl_1uDbB:1xGaAA:O3ZzbcMgRULtO93jBdXOC-4b7b77a7784HrvcQ_7MuM",
+    "expire_date": "2026-10-27T10:55:18.324Z"
+  }
+},
+{
+  "model": "sessions.session",
   "pk": "ond1gli4uihxwgyi7lj212sf6hvlsowk",
   "fields": {
     "session_data": ".eJxVjEEOgjAQRe_StWk6lE7BpXvP0My0M4IaSCisjHdXEha6_e-9_zKJtnVIW5UljcWcDfRgTr8rU37ItKNyp-k22zxP6zKy3RV70Gqvc5Hn5XD_Dgaqw7d2rXiGDiGT06CiCIFUuVeFzAItQWHfsAQMGn3XIHiMWTqnirFl8_4AURE4-Q:1xE72R:BP589kuJynvS3YiSyvCGSG8s9pBv4jkwa3J-Fw2kN34",
@@ -8290,6 +8314,14 @@
 },
 {
   "model": "sessions.session",
+  "pk": "tx9rgns2pfo1ou3amshvsootijdckzog",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2pAyhSm4dO8ZyACDVA0kpV0Z765NutDtf-_9l_C0rcVvnRc_J3EWSpx-t0DxwXUH6U711mRsdV3mIHdFHrTLa0v8vBzu30GhXr51oAQZWE2MQ4QIaWBwTqPC0TDqcXLJxkyI2mLOxpBxAcA6hmycwijeH-LvN40:1xGaAD:llONlLBJwiEcMeBQL3LaXOonSF322DrS3T-IOv89Lh0",
+    "expire_date": "2026-10-27T10:55:21.192Z"
+  }
+},
+{
+  "model": "sessions.session",
   "pk": "txp69c7bph8g4pnl88mva0442l8k410q",
   "fields": {
     "session_data": ".eJxVjEEOgjAQRe_StWk6lE7BpXvP0My0M4IaSCisjHdXEha6_e-9_zKJtnVIW5UljcWcDfRgTr8rU37ItKNyp-k22zxP6zKy3RV70Gqvc5Hn5XD_Dgaqw7d2rXiGDiGT06CiCIFUuVeFzAItQWHfsAQMGn3XIHiMWTqnirFl8_4AURE4-Q:1xFALJ:grRyMb0xDplr_Xekzei-tjhHNUgS_dwleQi4DDonroU",
@@ -8318,6 +8350,14 @@
   "fields": {
     "session_data": ".eJxVjMsOwiAQRf-FtSFDCxRcuvcbyDAz2KqBpI-V8d-1SRe6veec-1IJt3VM2yJzmlidlVGn3y0jPaTugO9Yb01Tq-s8Zb0r-qCLvjaW5-Vw_w5GXMZvDX6QjpgcSOepZyQP2BWTMQcLiBBKNi7kMFiDDBJtH7H0DBSdFW_V-wP6EDhH:1x7oXO:6fEqnVrpslAE0bBgubOuOZ9sxDuIxuouVfkWjwOi6GI",
     "expire_date": "2026-10-03T06:27:02.791Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "u1qv2lrm10eker0sxj3krealfzj1505w",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hAGkCku3XsGMjAgVUOT0q6Md7dNutDtf-_9twi0LjWsPc9hZHER4EGcftdI6ZnbjvhB7T7JNLVlHqPcFXnQLm8T59f1cP8OKvW61VRsHgBIJY-srTOKwXr2aAYgjSqzI47agDOISm8kQbFnm1wq6LMSny8aTzet:1xGaAC:2-JGdDkkzqdu32Ix-s3mrnSybu-gId2bX6F_tb16KAY",
+    "expire_date": "2026-10-27T10:55:20.256Z"
   }
 },
 {
@@ -15940,6 +15980,46 @@
   }
 },
 {
+  "model": "academico.tareaclase",
+  "pk": 57,
+  "fields": {
+    "carga_academica": 68,
+    "tema": null,
+    "tipo_actividad": "Tarea",
+    "competencia": null,
+    "objetivo": null,
+    "resultado_aprendizaje": null,
+    "criterio_evaluacion": null,
+    "titulo": "Taller Práctico de Funciones Lineales",
+    "instrucciones": "Resolver los ejercicios 1 al 10 de la guía de trabajo.",
+    "archivo": "",
+    "fecha_publicacion": "2026-10-13T10:55:19.597Z",
+    "fecha_limite": "2026-10-18T10:55:19.593Z",
+    "puntaje_maximo": "5.00",
+    "estado": "Publicada",
+    "porcentaje": "20.00",
+    "es_calificada": true,
+    "enlace_externo": null,
+    "periodo": "Periodo 1"
+  }
+},
+{
+  "model": "academico.entregatarea",
+  "pk": 112,
+  "fields": {
+    "tarea": 57,
+    "estudiante": [
+      "est1"
+    ],
+    "respuesta": "Profesora María, adjunto el desarrollo de los 10 ejercicios del taller.",
+    "archivo": "",
+    "fecha_entrega": "2026-10-13T10:55:19.616Z",
+    "calificacion": "4.80",
+    "retroalimentacion": "Excelente demostración de procesos analíticos y puntualidad.",
+    "estado": "CALIFICADA"
+  }
+},
+{
   "model": "academico.guiaclase",
   "pk": 28,
   "fields": {
@@ -16124,6 +16204,22 @@
   }
 },
 {
+  "model": "academico.calificacionescolar",
+  "pk": 111,
+  "fields": {
+    "matricula": 142,
+    "profesor": [
+      "docente"
+    ],
+    "carga_academica": 68,
+    "periodo": "Periodo 1",
+    "nota": "4.80",
+    "desempeno": "Superior",
+    "observaciones": "Nota de Taller Práctico de Funciones Lineales: Excelente demostración de procesos analíticos y puntualidad.",
+    "fecha_registro": "2026-10-13T10:55:19.656Z"
+  }
+},
+{
   "model": "academico.comunicacionmensaje",
   "pk": 22,
   "fields": {
@@ -16138,6 +16234,26 @@
     "mensaje": "Estimado profesor, le escribo para consultar el material de clase.",
     "archivo": "",
     "fecha_envio": "2026-10-13T04:31:38.387Z",
+    "leido": false,
+    "eliminado_por_remitente": false,
+    "eliminado_por_destinatario": false
+  }
+},
+{
+  "model": "academico.comunicacionmensaje",
+  "pk": 23,
+  "fields": {
+    "remitente": [
+      "est1"
+    ],
+    "destinatario": [
+      "docente"
+    ],
+    "grupo_destino": null,
+    "asunto": "Consulta Académica",
+    "mensaje": "Muchas gracias profesora María, seguiré practicando para el examen.",
+    "archivo": "",
+    "fecha_envio": "2026-10-13T10:55:20.306Z",
     "leido": false,
     "eliminado_por_remitente": false,
     "eliminado_por_destinatario": false
@@ -16223,6 +16339,21 @@
     ],
     "carga_academica": 68,
     "periodo": "1"
+  }
+},
+{
+  "model": "seguimiento.asistenciaaprendiz",
+  "pk": 437,
+  "fields": {
+    "matricula": 142,
+    "fecha": "2026-10-13",
+    "estado": "A",
+    "observaciones": "[Informática] Inasistencia no justificada",
+    "registrado_por": [
+      "docente"
+    ],
+    "carga_academica": 68,
+    "periodo": "Periodo 1"
   }
 },
 {
@@ -16331,6 +16462,81 @@
     "tipo": "warning",
     "leida": false,
     "fecha_creacion": "2026-10-13T04:33:58.534Z"
+  }
+},
+{
+  "model": "seguimiento.notificacion",
+  "pk": 1552,
+  "fields": {
+    "usuario": [
+      "est1"
+    ],
+    "titulo": "Asistencia Informática: Ausencia",
+    "mensaje": "Se registró Ausencia en la clase del 13/10/2026. Inasistencia no justificada",
+    "enlace": "",
+    "tipo": "warning",
+    "leida": false,
+    "fecha_creacion": "2026-10-13T10:53:45.730Z"
+  }
+},
+{
+  "model": "seguimiento.notificacion",
+  "pk": 1553,
+  "fields": {
+    "usuario": [
+      "est1"
+    ],
+    "titulo": "Calificación: Taller Práctico de Funciones Lineales",
+    "mensaje": "Tu entrega fue calificada con 4.8/5.00. Excelente demostración de procesos analíticos y puntualidad.",
+    "enlace": "/aprendiz/",
+    "tipo": "success",
+    "leida": false,
+    "fecha_creacion": "2026-10-13T10:55:19.661Z"
+  }
+},
+{
+  "model": "seguimiento.notificacion",
+  "pk": 1554,
+  "fields": {
+    "usuario": [
+      "est1"
+    ],
+    "titulo": "Nuevo mensaje de Prof. Miguel González",
+    "mensaje": "Hola Juan, felicitaciones por tu excelente entrega del taller de funciones.",
+    "enlace": "/aprendiz/",
+    "tipo": "info",
+    "leida": false,
+    "fecha_creacion": "2026-10-13T10:55:20.229Z"
+  }
+},
+{
+  "model": "seguimiento.notificacion",
+  "pk": 1555,
+  "fields": {
+    "usuario": [
+      "docente"
+    ],
+    "titulo": "Mensaje de Juan Pérez",
+    "mensaje": "Muchas gracias profesora María, seguiré practicando para el examen.",
+    "enlace": "/instructor/?subpanel=comunicaciones&chat_user=191&chat_tipo=estudiante",
+    "tipo": "info",
+    "leida": false,
+    "fecha_creacion": "2026-10-13T10:55:20.313Z"
+  }
+},
+{
+  "model": "seguimiento.notificacion",
+  "pk": 1556,
+  "fields": {
+    "usuario": [
+      "docente"
+    ],
+    "titulo": "Mensaje de acudiente",
+    "mensaje": "Buenas tardes profesora, quedo atenta al informe bimestral de Juan.",
+    "enlace": "/instructor/?subpanel=comunicaciones&chat_user=1&chat_tipo=familia",
+    "tipo": "info",
+    "leida": false,
+    "fecha_creacion": "2026-10-13T10:55:20.367Z"
   }
 },
 {
@@ -21926,6 +22132,42 @@
     "descripcion": "Taller de pedagogía activa para docentes articulados.",
     "estado": "Programado",
     "fecha_registro": "2026-09-22T16:01:55.964Z"
+  }
+},
+{
+  "model": "seguimiento.comunicadoescolar",
+  "pk": 146,
+  "fields": {
+    "remitente": [
+      "docente"
+    ],
+    "estamento_destinatario": "Estudiantes",
+    "curso": null,
+    "estudiante_destinatario": [
+      "est1"
+    ],
+    "asunto": "[Mensaje a Juan Pérez] Prof. Miguel González",
+    "mensaje": "Hola Juan, felicitaciones por tu excelente entrega del taller de funciones.",
+    "urgente": false,
+    "fecha_creacion": "2026-10-13T10:55:20.222Z"
+  }
+},
+{
+  "model": "seguimiento.comunicadoescolar",
+  "pk": 147,
+  "fields": {
+    "remitente": [
+      "acudiente"
+    ],
+    "estamento_destinatario": "Docentes",
+    "curso": null,
+    "estudiante_destinatario": [
+      "acudiente"
+    ],
+    "asunto": "[Mensaje de Familia] Acudiente de Estudiante",
+    "mensaje": "Buenas tardes profesora, quedo atenta al informe bimestral de Juan.",
+    "urgente": false,
+    "fecha_creacion": "2026-10-13T10:55:20.363Z"
   }
 },
 {
