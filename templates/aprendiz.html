@@ -20,7 +20,7 @@
         background: linear-gradient(135deg, #5a3825 0%, #3d2417 60%, #2a180e 100%);
         color: #ffffff;
         border-radius: 24px;
-        padding: clamp(24px, 3.8vw, 40px);
+        padding: clamp(24px, 3.8vw, 36px);
         box-shadow: 0 12px 32px rgba(61, 36, 23, 0.22);
         position: relative;
         overflow: hidden;
@@ -37,39 +37,30 @@
         pointer-events: none;
     }
 
-    /* Tarjetas Quick-Access en Home */
-    .quick-access-card {
+    /* KPI Summary Cards en Inicio */
+    .stu-kpi-card {
         background: #ffffff;
         border: 1.5px solid var(--stu-coffee-border);
         border-radius: 20px;
-        padding: 22px 20px;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
+        padding: 20px;
         height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 10px rgba(90, 56, 37, 0.04);
     }
-    .quick-access-card:hover {
-        transform: translateY(-4px);
+    .stu-kpi-card:hover {
+        transform: translateY(-3px);
         border-color: #B8977E;
-        box-shadow: 0 12px 28px rgba(90, 56, 37, 0.12);
-        background: #FDFCF9;
+        box-shadow: 0 8px 24px rgba(90, 56, 37, 0.1);
     }
-    .quick-access-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
+    .stu-kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
         background: var(--stu-coffee-soft);
         color: var(--stu-coffee-primary);
         display: grid;
         place-items: center;
-        font-size: 1.5rem;
-        transition: all 0.25s ease;
-    }
-    .quick-access-card:hover .quick-access-icon {
-        background: var(--stu-coffee-primary);
-        color: #ffffff;
+        font-size: 1.35rem;
     }
 
     /* Tarjetas de Tareas Limpias */
@@ -98,284 +89,872 @@
         text-transform: uppercase;
         font-weight: 700;
     }
+
+    .subpanel-section {
+        animation: fadeInSubpanel 0.2s ease-in-out;
+    }
+    @keyframes fadeInSubpanel {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid px-3 px-md-4 py-3">
 
-    <!-- =========================================================================
-         1. HERO BANNER DE BIENVENIDA DEL ESTUDIANTE
-         ========================================================================= -->
-    <div class="estudiante-hero-banner mb-4">
-        <div class="row align-items-center position-relative" style="z-index: 2;">
-            <div class="col-lg-8 mb-3 mb-lg-0">
-                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                    <span class="badge rounded-pill px-3 py-1.5 small fw-bold" style="background: rgba(255,255,255,0.18); color: #ffffff; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.25);">
-                        <i class="bi bi-mortarboard-fill me-1.5" style="color: #f59e0b;"></i> Portal Institucional del Estudiante
-                    </span>
-                    <span class="text-white-50 small"><i class="bi bi-building me-1"></i> {{ colegio.nombre|default:"Institución Educativa Distrital" }}</span>
+    <!-- ALERTAS Y MENSAJES DEL SISTEMA -->
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show rounded-4 shadow-2xs border-0" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                <h1 class="h2 fw-bold text-white mb-2">
-                    ¡Bienvenido, {{ user.first_name|default:user.username }}! 👋
-                </h1>
-                <p class="text-white text-opacity-90 mb-0" style="font-size: 0.98rem; max-width: 650px;">
-                    {% if matricula %}
-                        Grado <strong class="text-warning">{% if matricula.get_grado_escolar_display %}{{ matricula.get_grado_escolar_display }}{% else %}{{ matricula.grado_escolar }}{% endif %}</strong> · Grupo {{ ficha.codigo_ficha }} ({{ ficha.programa.denominacion }})
-                    {% else %}
-                        Consulta tu rendimiento académico, horario semanal, tareas y comunicados oficiales.
-                    {% endif %}
-                </p>
-            </div>
-            <div class="col-lg-4 text-lg-end">
-                <a href="#tab-perfil" onclick="activarTab('tab-perfil'); return false;" class="d-inline-flex align-items-center gap-3 p-2.5 px-3 rounded-4 text-decoration-none transition" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);">
-                    {% if perfil.foto_perfil %}
-                        <img src="{{ perfil.foto_perfil.url }}" alt="{{ user.get_full_name }}" class="rounded-circle object-fit-cover shadow-sm" style="width: 48px; height: 48px; border: 2px solid #ffffff;">
-                    {% else %}
-                        <div class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 48px; height: 48px; color: var(--stu-coffee-primary) !important;">
-                            {{ user.first_name|slice:':1'|default:'E' }}{{ user.last_name|slice:':1'|default:'S' }}
-                        </div>
-                    {% endif %}
-                    <div class="text-start">
-                        <div class="text-white fw-bold small mb-0.5">{{ user.get_full_name|default:user.username }}</div>
-                        <div class="text-white-50 small" style="font-size: 0.78rem;"><i class="bi bi-camera me-1"></i>Mi Perfil & Foto</div>
-                    </div>
-                </a>
-            </div>
+            {% endfor %}
         </div>
-    </div>
+    {% endif %}
 
     <!-- =========================================================================
-         2. PANEL PRINCIPAL EN INICIO: ACCESO RÁPIDO (CARDS MODERNAS)
+         1. SUBPANEL: INICIO (RESUMEN BREVE SIN REPETIR LAS DEMÁS PÁGINAS)
          ========================================================================= -->
-    <section id="student-home-content" class="mb-4">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                <i class="bi bi-grid-fill" style="color: var(--stu-coffee-primary);"></i> Módulos y Accesos Principales
-            </h5>
-            <span class="text-muted small">Selecciona una sección para ver los detalles</span>
-        </div>
-
-        <div class="row g-3">
-            <!-- Card 1: Calificaciones -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-calificaciones');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-award-fill"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Calificaciones</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Notas y valoraciones</p>
+    <section id="student-home-content" class="subpanel-section {% if subpanel_activo and subpanel_activo != 'inicio' %}d-none{% endif %}">
+        <div id="estudianteTabsContent" class="tab-content d-none" hidden></div>
+        
+        <!-- BANNER DE BIENVENIDA -->
+        <div class="estudiante-hero-banner mb-4">
+            <div class="row align-items-center position-relative" style="z-index: 2;">
+                <div class="col-lg-8 mb-3 mb-lg-0">
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="badge rounded-pill px-3 py-1.5 small fw-bold" style="background: rgba(255,255,255,0.18); color: #ffffff; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.25);">
+                            <i class="bi bi-mortarboard-fill me-1.5" style="color: #f59e0b;"></i> Portal Institucional del Estudiante
+                        </span>
+                        <span class="text-white-50 small"><i class="bi bi-building me-1"></i> {{ ficha.institucion.nombre|default:"Institución Educativa Distrital" }}</span>
                     </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Consultar notas</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
+                    <h1 class="h2 fw-bold text-white mb-2">
+                        ¡Bienvenido, {{ user.first_name|default:user.username }}! 👋
+                    </h1>
+                    <p class="text-white text-opacity-90 mb-0" style="font-size: 0.95rem; max-width: 650px;">
+                        {% if matricula %}
+                            Estudiante de Grado <strong class="text-warning">{% if matricula.get_grado_escolar_display %}{{ matricula.get_grado_escolar_display }}{% else %}{{ matricula.grado_escolar }}{% endif %}</strong> · Sección {{ matricula.seccion|default:'A' }} · Año Lectivo 2026
+                        {% else %}
+                            Consulta tu información académica oficial, asignaturas, horarios y tareas asignadas.
+                        {% endif %}
+                    </p>
                 </div>
-            </div>
-
-            <!-- Card 2: Mi Horario -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-horario');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-calendar-week-fill"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Mi Horario</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Horario semanal de clases</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Ver horario</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3: Asignaturas y Docentes -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-asignaturas');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-book-half"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Asignaturas</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Materias y docentes</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Ver materias</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 4: Tareas y Actividades -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-actividades');">
-                    <div>
-                        <div class="quick-access-icon mb-3 position-relative">
-                            <i class="bi bi-pencil-square"></i>
-                            {% if conteo_pendientes > 0 %}
-                            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-                            {% endif %}
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Tareas</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Actividades y entregas</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span class="badge rounded-pill" style="background: #fff7ed; color: #c2410c; font-size: 0.7rem;">{{ conteo_pendientes|default:0 }} pendientes</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 5: Temas Publicados -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-temas');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-journal-text"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Temas y Guías</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Materiales y contenidos</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Ver temas</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 6: Asistencia -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-asistencia');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-check2-square"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Asistencia</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Historial escolar</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span class="fw-bold text-success" style="font-size: 0.75rem;">{{ porcentaje_asistencia|default:100 }}%</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 7: Comunicaciones -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-comunicaciones');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-chat-dots-fill"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Comunicaciones</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Mensajes y circulares</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Bandeja</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 8: Notificaciones -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-notificaciones');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-bell-fill"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Notificaciones</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Alertas y recordatorios</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Ver alertas</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 9: Documentos -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-documentos');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-file-earmark-text-fill"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Documentos</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Manual y formatos</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Descargar</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 10: Mi Perfil -->
-            <div class="col-6 col-md-3">
-                <div class="quick-access-card" onclick="activarTab('tab-perfil');">
-                    <div>
-                        <div class="quick-access-icon mb-3">
-                            <i class="bi bi-person-badge-fill"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Mi Perfil</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Fotografía y contacto</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                        <span style="font-size: 0.75rem;">Ver perfil</span>
-                        <i class="bi bi-arrow-right" style="color: var(--stu-coffee-primary);"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RESUMEN EN HOME: TAREAS PENDIENTES PRÓXIMAS -->
-        <div class="card border rounded-4 p-4 bg-white shadow-2xs mt-4" style="border-color: var(--stu-coffee-border) !important;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); width: 38px; height: 38px;">
-                        <i class="bi bi-clock-history fs-5"></i>
-                    </div>
-                    <div>
-                        <h6 class="fw-bold text-dark mb-0">Próximos Vencimientos y Actividades</h6>
-                        <small class="text-muted">Desarrolla tus compromisos antes de la fecha límite</small>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" onclick="activarTab('tab-actividades');" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
-                    Ver todas las tareas <i class="bi bi-chevron-right ms-1"></i>
-                </button>
-            </div>
-
-            <div class="row g-3">
-                {% for tarea in tareas_clase|slice:":3" %}
-                <div class="col-md-4">
-                    <div class="tarea-card-modern h-100 d-flex flex-column justify-content-between">
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
-                                    {{ tarea.tipo_actividad|default:"Tarea" }}
-                                </span>
-                                <small class="text-muted" style="font-size: 0.75rem;">
-                                    <i class="bi bi-calendar-event me-1"></i> {{ tarea.fecha_limite|date:"d/m H:i"|default:"Sin límite" }}
-                                </small>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="{% url 'estudiante_dashboard' %}?subpanel=perfil" onclick="activarSubpanel('perfil'); return false;" class="d-inline-flex align-items-center gap-3 p-2.5 px-3 rounded-4 text-decoration-none transition" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);">
+                        {% if perfil.foto_perfil %}
+                            <img src="{{ perfil.foto_perfil.url }}" alt="{{ user.get_full_name }}" class="rounded-circle object-fit-cover shadow-sm" style="width: 48px; height: 48px; border: 2px solid #ffffff;">
+                        {% else %}
+                            <div class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 48px; height: 48px; color: var(--stu-coffee-primary) !important;">
+                                {{ user.first_name|slice:':1'|default:'E' }}{{ user.last_name|slice:':1'|default:'S' }}
                             </div>
-                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">{{ tarea.titulo }}</h6>
-                            <p class="text-muted small mb-3" style="font-size: 0.82rem;">{{ tarea.instrucciones|truncatechars:85 }}</p>
+                        {% endif %}
+                        <div class="text-start">
+                            <div class="text-white fw-bold small mb-0.5">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="text-white-50 small" style="font-size: 0.78rem;"><i class="bi bi-person-circle me-1"></i>Ver Mi Perfil</div>
                         </div>
-                        <div class="pt-2 border-top d-flex justify-content-between align-items-center">
-                            <small class="text-muted"><i class="bi bi-person me-1"></i>{{ tarea.carga_academica.profesor.get_full_name|default:"Docente Titular" }}</small>
-                            <a href="{% url 'entregar_tarea_clase' tarea.id %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold text-white shadow-2xs" style="background: var(--stu-coffee-primary); border: none; font-size: 0.78rem;">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESUMEN BREVE: 4 TARJETAS CLAVE -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="stu-kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-bold text-uppercase">Grado y Sección</span>
+                        <div class="stu-kpi-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">
+                        {% if matricula %}
+                            {{ matricula.grado_escolar }}° - Sec. {{ matricula.seccion|default:'A' }}
+                        {% else %}
+                            10° - A
+                        {% endif %}
+                    </h5>
+                    <small class="text-muted d-block">Ficha: {{ ficha.codigo_ficha|default:'10-A' }}</small>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="stu-kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-bold text-uppercase">Estado de Matrícula</span>
+                        <div class="stu-kpi-icon"><i class="bi bi-patch-check-fill"></i></div>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">
+                        {% if matricula.estado_formacion == 'En Formacion' or matricula.estado_formacion == 'MATRICULADO' %}
+                            <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Matriculado</span>
+                        {% else %}
+                            {{ matricula.get_estado_formacion_display|default:'Activo' }}
+                        {% endif %}
+                    </h5>
+                    <small class="text-muted d-block">Periodo Activo 2026</small>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="stu-kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-bold text-uppercase">Asistencia General</span>
+                        <div class="stu-kpi-icon"><i class="bi bi-check2-square"></i></div>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">
+                        <span class="text-success">{{ porcentaje_asistencia|default:100 }}%</span>
+                    </h5>
+                    <small class="text-muted d-block">{{ asistencias_p|default:0 }} sesiones asistidas</small>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="stu-kpi-card">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-bold text-uppercase">Tareas Pendientes</span>
+                        <div class="stu-kpi-icon"><i class="bi bi-pencil-square"></i></div>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">
+                        {% if conteo_pendientes > 0 %}
+                            <span class="text-warning">{{ conteo_pendientes }} pendiente{{ conteo_pendientes|pluralize }}</span>
+                        {% else %}
+                            <span class="text-success">0 pendientes</span>
+                        {% endif %}
+                    </h5>
+                    <small class="text-muted d-block">Actividades por entregar</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESUMEN BREVE: PRÓXIMOS VENCIMIENTOS Y COMUNICADOS RECIENTES -->
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-clock-history fs-5" style="color: var(--stu-coffee-primary);"></i>
+                            <h6 class="fw-bold text-dark mb-0">Próximos Vencimientos de Actividades</h6>
+                        </div>
+                        <button type="button" onclick="activarSubpanel('actividades');" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border); font-size: 0.78rem;">
+                            Ver Tareas <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+
+                    {% for tarea in tareas_clase|slice:":3" %}
+                    <div class="tarea-card-modern mb-2.5">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <div>
+                                <span class="badge rounded-pill px-2.5 py-0.5 fw-bold mb-1" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); font-size: 0.72rem;">
+                                    {{ tarea.carga_academica.programa.denominacion|default:"Asignatura" }}
+                                </span>
+                                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">{{ tarea.titulo }}</h6>
+                            </div>
+                            <span class="badge rounded-pill px-2.5 py-1 text-nowrap" style="background: #fff7ed; color: #c2410c; font-size: 0.72rem;">
+                                <i class="bi bi-calendar-event me-1"></i>{{ tarea.fecha_limite|date:"d/m H:i"|default:"Sin fecha límite" }}
+                            </span>
+                        </div>
+                        <p class="text-muted small mb-2" style="font-size: 0.8rem;">{{ tarea.instrucciones|truncatechars:95 }}</p>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                                <i class="bi bi-person me-1"></i>Prof. {{ tarea.carga_academica.profesor.get_full_name|default:tarea.carga_academica.profesor.username }}
+                            </small>
+                            <a href="{% url 'entregar_tarea_clase' tarea.id %}" class="btn btn-sm text-white rounded-pill px-3 py-0.5 fw-bold" style="background: var(--stu-coffee-primary); font-size: 0.75rem;">
                                 Entregar
                             </a>
                         </div>
                     </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-1"></i>
+                        <span class="small">No tienes tareas pendientes próximas en este momento.</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-megaphone fs-5" style="color: var(--stu-coffee-primary);"></i>
+                            <h6 class="fw-bold text-dark mb-0">Circulares y Comunicados</h6>
+                        </div>
+                        <button type="button" onclick="activarSubpanel('comunicaciones');" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border); font-size: 0.78rem;">
+                            Ver todos <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+
+                    {% for c in comunicados_estudiante|slice:":3" %}
+                    <div class="p-3 mb-2 rounded-3 border bg-light" style="border-color: var(--stu-coffee-border) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark small d-block">{{ c.titulo|truncatechars:40 }}</strong>
+                            <span class="text-muted" style="font-size: 0.72rem;">{{ c.fecha_creacion|date:"d/m/Y" }}</span>
+                        </div>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">{{ c.contenido|truncatechars:80 }}</p>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-chat-left-dots fs-3 d-block mb-1" style="color: var(--stu-coffee-primary);"></i>
+                        No hay comunicados escolares recientes.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- =========================================================================
+         2. SUBPANEL: MI PERFIL (INFORMACIÓN PERSONAL Y ACADÉMICA BÁSICA)
+         ========================================================================= -->
+    <section id="subpanel-perfil" class="subpanel-section {% if subpanel_activo != 'perfil' %}d-none{% endif %}">
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-person-badge-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Mi Perfil de Estudiante y Fotografía Oficial</h6>
+                </div>
+                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
+                    Rol: Estudiante
+                </span>
+            </div>
+
+            <div class="row g-4">
+                <!-- Fotografía de Perfil con Previsualización y Formulario -->
+                <div class="col-lg-4 text-center">
+                    <div class="p-4 rounded-4 border bg-light h-100 d-flex flex-column align-items-center justify-content-between" style="border-color: var(--stu-coffee-border) !important;">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-3" style="font-size: 0.95rem;">Fotografía Oficial</h6>
+                            
+                            <div class="position-relative d-inline-block mb-3">
+                                {% if perfil.foto_perfil %}
+                                    <img id="preview-foto-perfil" src="{{ perfil.foto_perfil.url }}" alt="Foto de {{ user.get_full_name }}" class="rounded-circle object-fit-cover shadow-sm border border-3 border-white" style="width: 140px; height: 140px;">
+                                {% else %}
+                                    <div id="preview-avatar-fallback" class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center fw-bold shadow-sm border border-3 border-white" style="width: 140px; height: 140px; font-size: 3rem; color: var(--stu-coffee-primary) !important;">
+                                        {{ user.first_name|slice:':1'|default:'E' }}{{ user.last_name|slice:':1'|default:'S' }}
+                                    </div>
+                                    <img id="preview-foto-perfil" src="" alt="Vista previa" class="rounded-circle object-fit-cover shadow-sm border border-3 border-white d-none" style="width: 140px; height: 140px;">
+                                {% endif %}
+                            </div>
+
+                            <p class="text-muted small mb-3" style="font-size: 0.78rem;">
+                                Formatos admitidos: <strong>JPG, PNG, WEBP</strong><br>
+                                Tamaño máximo: <strong>5 MB</strong>
+                            </p>
+                        </div>
+
+                        <form method="post" action="{% url 'estudiante_dashboard' %}" enctype="multipart/form-data" class="w-100">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="actualizar_foto_perfil">
+                            <div class="mb-3">
+                                <input type="file" name="foto" id="input-foto-estudiante" class="form-control form-control-sm rounded-pill" accept="image/jpeg,image/png,image/webp" required onchange="previsualizarFotoEstudiante(this);">
+                            </div>
+                            <button type="submit" class="btn btn-sm text-white rounded-pill px-4 py-2 fw-bold w-100 shadow-2xs" style="background: var(--stu-coffee-primary); border: none;">
+                                <i class="bi bi-cloud-arrow-up-fill me-1"></i> Guardar Fotografía
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Datos Personales y Académicos Básicos -->
+                <div class="col-lg-8">
+                    <div class="p-4 rounded-4 border bg-white h-100 shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
+                        <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom d-flex align-items-center gap-2" style="font-size: 0.95rem; border-color: var(--stu-coffee-border) !important;">
+                            <i class="bi bi-card-text" style="color: var(--stu-coffee-primary);"></i> Información Académica y Personal
+                        </h6>
+
+                        <div class="alert rounded-3 py-2 px-3 small mb-3" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                            <i class="bi bi-shield-check text-success me-1"></i> 
+                            Datos registrados en el sistema institucional EduNova para <strong>{{ user.get_full_name|default:user.username }}</strong>.
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted mb-1">Nombre Completo</label>
+                                <input type="text" class="form-control rounded-pill bg-light" value="{{ user.get_full_name|default:user.username }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted mb-1">Tipo y Documento de Identidad</label>
+                                <input type="text" class="form-control rounded-pill bg-light" value="{{ perfil.get_tipo_documento_display|default:'TI' }} - {{ perfil.numero_documento|default:user.username }}" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted mb-1">Grado Escolar Asignado</label>
+                                <input type="text" class="form-control rounded-pill bg-light" value="{% if matricula %}{% if matricula.get_grado_escolar_display %}{{ matricula.get_grado_escolar_display }}{% else %}{{ matricula.grado_escolar }}° Grado{% endif %}{% else %}10° Grado (Bachillerato){% endif %}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted mb-1">Grupo / Sección</label>
+                                <input type="text" class="form-control rounded-pill bg-light" value="Sección {{ matricula.seccion|default:'A' }} (Ficha {{ ficha.codigo_ficha|default:'Asignada' }})" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted mb-1">Institución / Sede</label>
+                                <input type="text" class="form-control rounded-pill bg-light" value="{{ ficha.institucion.nombre|default:'I.E.D. Nuevo Horizonte' }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted mb-1">Programa / Énfasis</label>
+                                <input type="text" class="form-control rounded-pill bg-light" value="{{ ficha.programa.denominacion|default:'Media Técnica / Académica' }}" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted mb-1">Rol de Acceso</label>
+                                <input type="text" class="form-control rounded-pill bg-light" value="{{ perfil.rol.nombre|default:'Estudiante' }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted mb-1">Correo Institucional</label>
+                                <input type="email" class="form-control rounded-pill bg-light" value="{{ user.email|default:'estudiante@edunova.edu.co' }}" readonly>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" style="border-color: var(--stu-coffee-border);">
+
+                        <!-- Formulario de Teléfono de Contacto -->
+                        <form method="post" action="{% url 'estudiante_dashboard' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="actualizar_contacto">
+                            <div class="row align-items-end g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label small fw-bold text-dark mb-1">
+                                        <i class="bi bi-telephone-fill me-1" style="color: var(--stu-coffee-primary);"></i> Teléfono de Contacto (Actualizable por el estudiante)
+                                    </label>
+                                    <input type="text" name="telefono" class="form-control rounded-pill px-3" value="{{ perfil.telefono|default:'' }}" placeholder="Ingresa tu teléfono de contacto..." style="border-color: var(--stu-coffee-border);">
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold w-100 shadow-2xs" style="background: var(--stu-coffee-primary); border: none;">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Guardar Teléfono
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         3. SUBPANEL: MI HORARIO (HORARIO SEMANAL REAL DE CLASES)
+         ========================================================================= -->
+    <section id="subpanel-horario" class="subpanel-section {% if subpanel_activo != 'horario' %}d-none{% endif %}">
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-calendar-week-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Mi Horario Semanal de Clases</h6>
+                </div>
+                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                    Jornada Escolar Activa
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-stu-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th class="py-3 ps-3">Día</th>
+                            <th class="py-3">Horario</th>
+                            <th class="py-3">Asignatura / Materia</th>
+                            <th class="py-3">Docente a Cargo</th>
+                            <th class="py-3">Salón / Aula</th>
+                            <th class="py-3 text-center">Modalidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in todos_horarios %}
+                        <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
+                            <td class="ps-3 fw-bold text-dark">
+                                <i class="bi bi-calendar-event me-1.5" style="color: var(--stu-coffee-primary);"></i> {{ h.get_dia_display }}
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
+                                    {{ h.hora_inicio|time:"h:i A" }} - {{ h.hora_fin|time:"h:i A" }}
+                                </span>
+                            </td>
+                            <td><strong class="text-dark">{{ h.nombre_materia|default:h.programa.denominacion }}</strong></td>
+                            <td class="small text-muted">
+                                {% if h.instructor %}
+                                    Prof. {{ h.instructor.get_full_name|default:h.instructor.username }}
+                                {% else %}
+                                    <span>Docente Asignado</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill px-2.5 py-1" style="background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;">
+                                    <i class="bi bi-geo-alt me-1"></i>{{ h.ambiente|default:"Aula Principal" }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                    {{ h.modalidad|default:"Presencial" }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar2-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                                <h6 class="fw-bold text-dark">No hay bloques de horario asignados para tu grupo en este momento.</h6>
+                                <p class="small mb-0">La coordinación académica publicará el horario oficial próximamente.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         4. SUBPANEL: MIS ASIGNATURAS (ASIGNATURAS REALES DEL ESTUDIANTE)
+         ========================================================================= -->
+    <section id="subpanel-asignaturas" class="subpanel-section {% if subpanel_activo != 'asignaturas' %}d-none{% endif %}">
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-book-half fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Mis Asignaturas y Docentes Responsables</h6>
+                </div>
+                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                    Carga Académica Oficial
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-stu-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th class="py-3 ps-3">Asignatura</th>
+                            <th class="py-3">Docente Titular</th>
+                            <th class="py-3">Grupo / Grado</th>
+                            <th class="py-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in asignaturas_docentes %}
+                        <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
+                            <td class="ps-3 fw-bold text-dark">
+                                <i class="bi bi-journal-bookmark me-1.5" style="color: var(--stu-coffee-primary);"></i> {{ a.programa.denominacion }}
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-dark">Prof. {{ a.profesor.get_full_name|default:a.profesor.username }}</span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill px-2.5 py-1" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
+                                    Grado {{ a.grado }} - Sección {{ a.seccion }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" onclick="abrirMensajeConProfesor('{{ a.profesor.id }}', '{{ a.profesor.get_full_name|escapejs }}');" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
+                                    <i class="bi bi-chat-dots-fill me-1"></i> Contactar
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-book fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                                <h6 class="fw-bold text-dark">No hay asignaturas registradas para tu curso actualmente.</h6>
+                                <p class="small mb-0">La Secretaría Académica asignará las materias de tu plan de estudios.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         5. SUBPANEL: MIS CALIFICACIONES (SOLO CALIFICACIONES REGISTRADAS)
+         ========================================================================= -->
+    <section id="subpanel-calificaciones" class="subpanel-section {% if subpanel_activo != 'calificaciones' %}d-none{% endif %}">
+        
+        <!-- TARJETAS DE PERÍODOS ACADÉMICOS -->
+        <div class="row g-3 mb-4">
+            {% for p in periodos_academicos %}
+            <div class="col-6 col-md-3">
+                <div class="card border rounded-4 p-3 bg-white h-100 shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); font-size: 0.78rem;">
+                            {{ p.nombre }}
+                        </span>
+                        {% if p.cerrado %}
+                            <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: #fef2f2; color: #b91c1c; font-size: 0.68rem;">
+                                <i class="bi bi-lock-fill"></i> Cerrado
+                            </span>
+                        {% elif p.estado == 'En Curso' %}
+                            <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: #ecfdf5; color: #047857; font-size: 0.68rem;">
+                                🟢 En Curso
+                            </span>
+                        {% else %}
+                            <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: #f8fafc; color: #64748b; font-size: 0.68rem;">
+                                ⚪ Pendiente
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="small text-muted mb-1" style="font-size: 0.74rem;">
+                        <i class="bi bi-calendar-event me-1"></i> {{ p.fecha_inicio|date:"d M" }} - {{ p.fecha_fin|date:"d M" }}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2 pt-1 border-top" style="border-color: var(--stu-coffee-border) !important;">
+                        <span class="text-muted" style="font-size: 0.72rem;">Promedio:</span>
+                        {% if p.promedio_estudiante %}
+                        <strong class="fw-bold {% if p.promedio_estudiante >= 3.0 %}text-success{% else %}text-danger{% endif %}" style="font-size: 0.88rem;">
+                            {{ p.promedio_estudiante }}
+                        </strong>
+                        {% else %}
+                        <span class="text-muted" style="font-size: 0.72rem;">Sin notas</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- TABLA DE CALIFICACIONES ESCOLARES -->
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-mortarboard-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Boletín Oficial de Calificaciones por Asignatura (2026)</h6>
+                </div>
+                {% if promedio_general_acumulado %}
+                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.85rem;">
+                    Promedio Acumulado: {{ promedio_general_acumulado }} / 5.0
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-stu-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th class="py-3 ps-3">Asignatura / Área</th>
+                            <th class="py-3">Docente Titular</th>
+                            <th class="py-3 text-center">Período</th>
+                            <th class="py-3 text-center">Nota Numérica</th>
+                            <th class="py-3 text-center">Desempeño</th>
+                            <th class="py-3">Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in calificaciones_escolares %}
+                        <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
+                            <td class="ps-3">
+                                <strong class="text-dark d-block">{{ c.carga_academica.programa.denominacion|default:"Formación Académica" }}</strong>
+                                <small class="text-muted">Grado {{ c.carga_academica.grado|default:matricula.grado_escolar }}°{{ c.carga_academica.seccion|default:matricula.seccion }}</small>
+                            </td>
+                            <td>
+                                <i class="bi bi-person me-1" style="color: var(--stu-coffee-primary);"></i>
+                                {{ c.profesor.get_full_name|default:c.profesor.username }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                                    {{ c.periodo }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <strong class="fs-6 {% if c.nota >= 3.0 %}text-success{% else %}text-danger{% endif %}">
+                                    {{ c.nota }}
+                                </strong>
+                            </td>
+                            <td class="text-center">
+                                {% if c.desempeno == 'Superior' or c.desempeno == 'Alto' %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">{{ c.desempeno }}</span>
+                                {% elif c.desempeno == 'Básico' %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fefce8; color: #854d0e; border: 1px solid #fef08a;">{{ c.desempeno }}</span>
+                                {% else %}
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">{{ c.desempeno }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">
+                                {{ c.observaciones|default:"Sin observaciones registradas." }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-clipboard2-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                                <h6 class="fw-bold text-dark">Aún no tienes calificaciones registradas</h6>
+                                <p class="small mb-0">Tus docentes registrarán las valoraciones cuando se cierren las evaluaciones del periodo.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- JUICIOS EVALUATIVOS (SOLO SI EXISTEN) -->
+        {% if juicios %}
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-journal-check fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Juicios Evaluativos Oficiales</h6>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle table-stu-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th class="py-3 ps-3">Resultado de Aprendizaje / Materia</th>
+                            <th class="py-3">Docente Evaluador</th>
+                            <th class="py-3 text-center">Juicio Valorativo</th>
+                            <th class="py-3">Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for j in juicios %}
+                        <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
+                            <td class="ps-3">
+                                <strong class="text-dark d-block">{{ j.resultado_aprendizaje.descripcion }}</strong>
+                                <small class="text-muted">Cód: {{ j.resultado_aprendizaje.codigo }}</small>
+                            </td>
+                            <td>{{ j.instructor.get_full_name|default:j.instructor.username }}</td>
+                            <td class="text-center">
+                                {% if j.juicio_valor == 'A' %}
+                                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857;">Aprobado</span>
+                                {% else %}
+                                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c;">Por Mejorar</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ j.observaciones|default:"Sin observaciones." }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </section>
+
+    <!-- =========================================================================
+         6. SUBPANEL: TAREAS Y ACTIVIDADES (ASIGNADAS AL ESTUDIANTE O SU GRUPO)
+         ========================================================================= -->
+    <section id="subpanel-actividades" class="subpanel-section {% if subpanel_activo != 'actividades' %}d-none{% endif %}">
+        <div class="row g-4">
+            <!-- Tareas Pendientes -->
+            <div class="col-lg-7">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-pencil-square fs-5" style="color: var(--stu-coffee-primary);"></i>
+                            <h6 class="fw-bold text-dark mb-0">Tareas y Actividades Asignadas</h6>
+                        </div>
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;">
+                            {{ conteo_pendientes|default:0 }} pendientes
+                        </span>
+                    </div>
+
+                    {% for tarea in tareas_clase %}
+                    <div class="tarea-card-modern mb-3">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
+                                        {{ tarea.tipo_actividad }}
+                                    </span>
+                                    <strong class="text-dark d-block" style="font-size: 1rem;">{{ tarea.titulo }}</strong>
+                                </div>
+                                <div class="d-flex flex-wrap gap-3 small text-muted mb-2" style="font-size: 0.8rem;">
+                                    <span><i class="bi bi-book me-1" style="color: var(--stu-coffee-primary);"></i>{{ tarea.carga_academica.programa.denominacion|default:"Asignatura" }}</span>
+                                    <span><i class="bi bi-calendar-event me-1 text-warning"></i>Límite: {{ tarea.fecha_limite|date:'d/m/Y h:i A'|default:"Sin límite" }}</span>
+                                    <span><i class="bi bi-person me-1"></i>Prof. {{ tarea.carga_academica.profesor.get_full_name|default:tarea.carga_academica.profesor.username }}</span>
+                                </div>
+                                <p class="text-muted small mb-2">{{ tarea.instrucciones|truncatechars:140 }}</p>
+                                {% if tarea.archivo %}
+                                <div>
+                                    <a href="{{ tarea.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-decoration-none" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border); font-size: 0.78rem;">
+                                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Adjunto / Guía
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% if tarea.esta_vencida %}
+                            <span class="badge rounded-pill px-3 py-1.5 fw-semibold small" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
+                                <i class="bi bi-lock-fill me-1"></i> Entrega Cerrada
+                            </span>
+                            {% else %}
+                            <a href="{% url 'entregar_tarea_clase' tarea.id %}" class="btn btn-sm text-white rounded-pill px-4 py-2 fw-bold shadow-2xs text-nowrap" style="background: var(--stu-coffee-primary); border: none; font-size: 0.82rem;">
+                                <i class="bi bi-upload me-1.5"></i> Resolver / Entregar
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark">Todavía no tienes tareas o actividades asignadas</h6>
+                        <p class="small mb-0">Tus docentes publicarán las actividades correspondientes a tu curso.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Historial de Entregas -->
+            <div class="col-lg-5">
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                        <i class="bi bi-check2-circle fs-5" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark mb-0">Mis Entregas y Calificaciones</h6>
+                    </div>
+
+                    {% for e in entregas_tareas_clase %}
+                    <div class="p-3 mb-2.5 rounded-4 border bg-light" style="border-color: var(--stu-coffee-border) !important;">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <strong class="text-dark small d-block">{{ e.tarea.titulo }}</strong>
+                            {% if e.estado == 'CALIFICADA' %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                    Nota: {{ e.calificacion }}
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;">
+                                    En Revisión
+                                </span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">Entregado: {{ e.fecha_entrega|date:'d/m/Y h:i A' }}</small>
+                        {% if e.retroalimentacion %}
+                            <div class="p-2.5 bg-white rounded-3 border small mt-2" style="border-color: var(--stu-coffee-border);">
+                                <strong class="text-dark d-block mb-0.5" style="font-size: 0.76rem;"><i class="bi bi-chat-quote-fill me-1" style="color: var(--stu-coffee-primary);"></i> Retroalimentación Docente:</strong>
+                                <span class="text-muted">{{ e.retroalimentacion }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-inbox fs-3 d-block mb-1" style="color: var(--stu-coffee-primary);"></i>
+                        Aún no has entregado actividades este periodo.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         7. SUBPANEL: ASISTENCIA
+         ========================================================================= -->
+    <section id="subpanel-asistencia" class="subpanel-section {% if subpanel_activo != 'asistencia' %}d-none{% endif %}">
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-check2-square fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Control y Registro de Asistencia Escolar</h6>
+                </div>
+                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                    {{ porcentaje_asistencia|default:100 }}% Asistencia
+                </span>
+            </div>
+
+            <!-- Stats Rápidas -->
+            <div class="row g-3 mb-4">
+                <div class="col-4">
+                    <div class="p-3 rounded-4 border bg-light text-center" style="border-color: var(--stu-coffee-border) !important;">
+                        <h4 class="fw-bold text-success mb-0">{{ asistencias_p|default:0 }}</h4>
+                        <small class="text-muted fw-bold" style="font-size: 0.75rem;">PRESENTE</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-3 rounded-4 border bg-light text-center" style="border-color: var(--stu-coffee-border) !important;">
+                        <h4 class="fw-bold text-danger mb-0">{{ asistencias_a|default:0 }}</h4>
+                        <small class="text-muted fw-bold" style="font-size: 0.75rem;">AUSENTE</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-3 rounded-4 border bg-light text-center" style="border-color: var(--stu-coffee-border) !important;">
+                        <h4 class="fw-bold text-warning mb-0">{{ asistencias_j|default:0 }}</h4>
+                        <small class="text-muted fw-bold" style="font-size: 0.75rem;">JUSTIFICADA</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-stu-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th class="py-3 ps-3">Fecha</th>
+                            <th class="py-3 text-center">Estado</th>
+                            <th class="py-3">Registrado Por</th>
+                            <th class="py-3">Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in historial_asistencias %}
+                        <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
+                            <td class="ps-3 fw-bold text-dark">{{ a.fecha|date:"d/m/Y" }}</td>
+                            <td class="text-center">
+                                {% if a.estado == 'P' %}
+                                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857;">Presente</span>
+                                {% elif a.estado == 'A' %}
+                                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c;">Ausente</span>
+                                {% else %}
+                                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fefce8; color: #854d0e;">Justificada</span>
+                                {% endif %}
+                            </td>
+                            <td>Prof. {{ a.registrado_por.get_full_name|default:a.registrado_por.username|default:"Docente Titular" }}</td>
+                            <td class="small text-muted">{{ a.observacion|default:"Sin novedad registrada." }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-check fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                                <h6 class="fw-bold text-dark">No hay registros de asistencia en el historial</h6>
+                                <p class="small mb-0">Los llamados a lista se reflejarán automáticamente en esta tabla.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         8. SUBPANEL: TEMAS PUBLICADOS Y GUÍAS
+         ========================================================================= -->
+    <section id="subpanel-temas" class="subpanel-section {% if subpanel_activo != 'temas' %}d-none{% endif %}">
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-journal-text fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Temas de Clase, Guías y Material Pedagógico</h6>
+                </div>
+                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                    Recursos Educativos Oficiales
+                </span>
+            </div>
+
+            <div class="row g-3">
+                {% for g in guias_clase %}
+                <div class="col-md-6">
+                    <div class="p-3.5 rounded-4 border bg-white h-100 d-flex flex-column justify-content-between shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
+                                    {{ g.carga_academica.programa.denominacion }}
+                                </span>
+                                <small class="text-muted" style="font-size: 0.75rem;">{{ g.fecha_publicacion|date:"d/m/Y" }}</small>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">{{ g.titulo }}</h6>
+                            <p class="text-muted small mb-3">{{ g.descripcion|truncatechars:120 }}</p>
+                        </div>
+                        {% if g.archivo %}
+                        <div class="pt-2 border-top">
+                            <a href="{{ g.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1 fw-bold w-100" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
+                                <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Guía Oficial
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
                 {% empty %}
-                <div class="col-12 text-center py-4 text-muted">
-                    <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-1"></i>
-                    <span class="small">¡Excelente! No tienes tareas pendientes próximas en este momento.</span>
+                <div class="col-12 text-center py-5 text-muted">
+                    <i class="bi bi-journal-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark">No hay temas o guías publicadas por tus docentes por ahora.</h6>
+                    <p class="small mb-0">Los materiales educativos se compartirán a través de este módulo.</p>
                 </div>
                 {% endfor %}
             </div>
@@ -383,916 +962,206 @@
     </section>
 
     <!-- =========================================================================
-         3. CONTENIDO DE LAS PESTAÑAS DETALLADAS (OCULTO EN HOME, VISIBLE AL DAR CLICK)
+         9. SUBPANEL: COMUNICACIONES (CIRCULARES Y MENSAJES CON DOCENTES)
          ========================================================================= -->
-    <div class="tab-content d-none" id="estudianteTabsContent" hidden>
-
-        <!-- BOTÓN DE REGRESO A HOME -->
-        <div class="mb-3 d-flex justify-content-between align-items-center">
-            <button type="button" onclick="activarTab('');" class="btn rounded-pill px-4 py-2 fw-bold text-decoration-none shadow-2xs d-inline-flex align-items-center gap-2 transition" style="background: #ffffff; color: var(--stu-coffee-primary); border: 1.5px solid var(--stu-coffee-border); font-size: 0.88rem;">
-                <i class="bi bi-arrow-left"></i> Regresar al Menú Principal
-            </button>
-            <div class="d-flex gap-2">
-                <button type="button" class="btn text-white rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalMensajeDocente" style="background: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-primary); font-size: 0.84rem;">
-                    <i class="bi bi-chat-dots-fill"></i> Contactar Docente
+    <section id="subpanel-comunicaciones" class="subpanel-section {% if subpanel_activo != 'comunicaciones' %}d-none{% endif %}">
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-chat-dots-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Bandeja de Comunicaciones Institucionales</h6>
+                </div>
+                <button type="button" class="btn text-white rounded-pill px-3.5 py-1.5 fw-bold shadow-2xs" data-bs-toggle="modal" data-bs-target="#modalMensajeDocente" style="background: var(--stu-coffee-primary); border: none; font-size: 0.84rem;">
+                    <i class="bi bi-send-fill me-1"></i> Escribir a un Docente
                 </button>
             </div>
-        </div>
 
-        <!-- PESTAÑA 1: CALIFICACIONES Y SEMÁFORO -->
-        <div class="tab-pane fade" id="tab-calificaciones" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-award-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Calificaciones por Competencia y Semáforo Escolar</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                        Escala Nacional Colombia
-                    </span>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table align-middle table-stu-custom mb-0">
-                        <thead>
-                            <tr>
-                                <th class="py-3 ps-3">Asignatura / Competencia</th>
-                                <th class="py-3">Logro / Resultado de Aprendizaje</th>
-                                <th class="py-3">Docente Evaluador</th>
-                                <th class="py-3 text-center">Estado Semáforo</th>
-                                <th class="py-3">Observaciones Pedagógicas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in semaforo_list %}
-                            <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
-                                <td class="ps-3">
-                                    <strong class="text-dark d-block">{{ item.competencia.descripcion|truncatechars:45 }}</strong>
-                                    <small class="text-muted">Cód: {{ item.competencia.codigo }}</small>
-                                </td>
-                                <td>
-                                    {% if item.resultado_aprendizaje %}
-                                        <span class="fw-semibold text-dark">{{ item.resultado_aprendizaje.codigo }}:</span>
-                                        <span class="text-muted">{{ item.resultado_aprendizaje.descripcion|truncatechars:65 }}</span>
-                                    {% else %}
-                                        <span class="text-muted">General de la Asignatura</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if item.profesor %}
-                                        <i class="bi bi-person me-1" style="color: var(--stu-coffee-primary);"></i>{{ item.profesor.get_full_name|default:item.profesor.username }}
-                                    {% else %}
-                                        <span class="text-muted">Docente Titular</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    {% if item.estado == 'APROBADO' %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
-                                            🟢 Aprobado
-                                        </span>
-                                    {% elif item.estado == 'EN_PROCESO' %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;">
-                                            🟡 En Proceso
-                                        </span>
-                                    {% elif item.estado == 'RECUPERAR' %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
-                                            🔴 Por Recuperar
-                                        </span>
-                                    {% else %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;">
-                                            ⚪ Pendiente
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="small text-muted">
-                                    {{ item.observaciones|default:"Desempeño acorde a los criterios de evaluación pedagógica."|truncatechars:75 }}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
-                                    <i class="bi bi-clipboard-check fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                                    <h6 class="fw-bold text-dark">No hay registros de semáforo asentados para tu matrícula.</h6>
-                                    <p class="small mb-0">Los docentes registrarán las valoraciones a medida que avance el periodo académico.</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- JUICIOS EVALUATIVOS Y RESULTADOS DE APRENDIZAJE -->
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-journal-check fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Juicios Evaluativos Oficiales y Logros</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                        Registro Oficial Institucional
-                    </span>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table align-middle table-stu-custom mb-0">
-                        <thead>
-                            <tr>
-                                <th class="py-3 ps-3">Resultado de Aprendizaje / Materia</th>
-                                <th class="py-3">Docente Evaluador</th>
-                                <th class="py-3 text-center">Juicio Valorativo</th>
-                                <th class="py-3">Observaciones y Retroalimentación</th>
-                                <th class="py-3 text-center">Fecha Evaluación</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for j in juicios %}
-                            <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
-                                <td class="ps-3">
-                                    <strong class="text-dark d-block">{{ j.resultado_aprendizaje.descripcion }}</strong>
-                                    <small class="text-muted">Cód: {{ j.resultado_aprendizaje.codigo }}</small>
-                                </td>
-                                <td>
-                                    <i class="bi bi-person me-1" style="color: var(--stu-coffee-primary);"></i>
-                                    {{ j.instructor.get_full_name|default:j.instructor.username }}
-                                </td>
-                                <td class="text-center">
-                                    {% if j.juicio_valor == 'A' %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
-                                            <i class="bi bi-check-circle me-1"></i> Aprobado
-                                        </span>
-                                    {% elif j.juicio_valor == 'D' %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
-                                            <i class="bi bi-x-circle me-1"></i> Deficiente (No Aprobado)
-                                        </span>
-                                    {% else %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold bg-secondary text-white">
-                                            {{ j.get_juicio_valor_display }}
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="small text-muted">
-                                    {{ j.observaciones|default:"Sin observaciones registradas." }}
-                                </td>
-                                <td class="text-center small text-muted">
-                                    {{ j.fecha_evaluacion|date:"d/m/Y"|default:"N/A" }}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">
-                                    <i class="bi bi-clipboard2-check fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                                    <p class="small mb-0">No hay juicios evaluativos registrados aún para esta matrícula.</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- PESTAÑA 2: HORARIO ESCOLAR -->
-        <div class="tab-pane fade" id="tab-horario" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-calendar-week-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Mi Horario Semanal de Clases</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                        Jornada Escolar Activa
-                    </span>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table align-middle table-stu-custom mb-0">
-                        <thead>
-                            <tr>
-                                <th class="py-3 ps-3">Día</th>
-                                <th class="py-3">Horario</th>
-                                <th class="py-3">Asignatura / Materia</th>
-                                <th class="py-3">Docente a Cargo</th>
-                                <th class="py-3">Salón / Aula</th>
-                                <th class="py-3 text-center">Modalidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for h in todos_horarios %}
-                            <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
-                                <td class="ps-3 fw-bold text-dark">
-                                    <i class="bi bi-calendar-event me-1.5" style="color: var(--stu-coffee-primary);"></i> {{ h.get_dia_display }}
-                                </td>
-                                <td>
-                                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
-                                        {{ h.hora_inicio|time:"h:i A" }} - {{ h.hora_fin|time:"h:i A" }}
-                                    </span>
-                                </td>
-                                <td><strong class="text-dark">{{ h.nombre_materia }}</strong></td>
-                                <td class="small text-muted">
-                                    {% if h.instructor %}
-                                        {{ h.instructor.get_full_name|default:h.instructor.username }}
-                                    {% else %}
-                                        <span>Docente Asignado</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <span class="badge rounded-pill px-2.5 py-1" style="background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;">
-                                        <i class="bi bi-geo-alt me-1"></i>{{ h.ambiente|default:"Aula Principal" }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
-                                        {{ h.modalidad|default:"Presencial" }}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-calendar2-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                                    <h6 class="fw-bold text-dark">No hay bloques de horario asignados para tu grupo en este momento.</h6>
-                                    <p class="small mb-0">La coordinación académica publicará el horario oficial próximamente.</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- PESTAÑA 3: TAREAS Y ACTIVIDADES -->
-        <div class="tab-pane fade" id="tab-actividades" role="tabpanel">
+            <!-- Conversaciones / Mensajes -->
             <div class="row g-4">
-                <!-- Talleres Pendientes -->
                 <div class="col-lg-7">
-                    <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-pencil-square fs-5" style="color: var(--stu-coffee-primary);"></i>
-                                <h6 class="fw-bold text-dark mb-0">Talleres y Actividades Pendientes</h6>
-                            </div>
-                            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;">
-                                {{ conteo_pendientes|default:0 }} pendientes
-                            </span>
-                        </div>
-
-                        {% for tarea in tareas_clase %}
-                        <div class="tarea-card-modern mb-3">
-                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
-                                <div>
-                                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
-                                            {{ tarea.tipo_actividad }}
-                                        </span>
-                                        <strong class="text-dark d-block" style="font-size: 1rem;">{{ tarea.titulo }}</strong>
-                                    </div>
-                                    <div class="d-flex flex-wrap gap-3 small text-muted mb-2" style="font-size: 0.8rem;">
-                                        <span><i class="bi bi-book me-1" style="color: var(--stu-coffee-primary);"></i>{{ tarea.carga_academica.programa.denominacion|default:"Asignatura" }}</span>
-                                        <span><i class="bi bi-calendar-event me-1 text-warning"></i>Límite: {{ tarea.fecha_limite|date:'d/m/Y h:i A'|default:"Sin límite" }}</span>
-                                        <span><i class="bi bi-person me-1"></i>{{ tarea.carga_academica.profesor.get_full_name|default:tarea.carga_academica.profesor.username }}</span>
-                                    </div>
-                                    <p class="text-muted small mb-2">{{ tarea.instrucciones|truncatechars:120 }}</p>
-                                    {% if tarea.archivo %}
-                                    <div>
-                                        <a href="{{ tarea.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-decoration-none" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border); font-size: 0.78rem;">
-                                            <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Guía / Adjunto
-                                        </a>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% if tarea.esta_vencida %}
-                                <span class="badge rounded-pill px-3 py-1.5 fw-semibold small" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
-                                    <i class="bi bi-lock-fill me-1"></i> Entrega Cerrada
-                                </span>
+                    <h6 class="fw-bold text-dark mb-3 small text-uppercase">Mensajes Recientes</h6>
+                    {% for msg in mensajes_conversacion %}
+                    <div class="p-3 mb-2.5 rounded-3 border bg-light" style="border-color: var(--stu-coffee-border) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark small">
+                                {% if msg.remitente == user %}
+                                    <span class="text-muted">Tú para:</span> Prof. {{ msg.destinatario.get_full_name|default:msg.destinatario.username }}
                                 {% else %}
-                                <a href="{% url 'entregar_tarea_clase' tarea.id %}" class="btn btn-sm text-white rounded-pill px-4 py-2 fw-bold shadow-2xs text-nowrap" style="background: var(--stu-coffee-primary); border: none; font-size: 0.82rem;">
-                                    <i class="bi bi-upload me-1.5"></i> Resolver / Entregar
-                                </a>
+                                    Prof. {{ msg.remitente.get_full_name|default:msg.remitente.username }}
                                 {% endif %}
-                            </div>
+                            </strong>
+                            <small class="text-muted" style="font-size: 0.72rem;">{{ msg.fecha_envio|date:"d/m H:i" }}</small>
                         </div>
-                        {% empty %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-check-circle-fill text-success fs-1 d-block mb-2"></i>
-                            <h6 class="fw-bold text-dark">¡Estás al día!</h6>
-                            <p class="small mb-0">No tienes tareas ni talleres pendientes de entrega en este momento.</p>
-                        </div>
-                        {% endfor %}
+                        <div class="fw-semibold text-dark small mb-1">{{ msg.asunto }}</div>
+                        <p class="text-muted small mb-0">{{ msg.mensaje }}</p>
                     </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-chat-left-dots fs-3 d-block mb-1" style="color: var(--stu-coffee-primary);"></i>
+                        No tienes mensajes directos con tus profesores.
+                    </div>
+                    {% endfor %}
                 </div>
 
-                <!-- Historial de Entregas -->
                 <div class="col-lg-5">
-                    <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                            <i class="bi bi-check2-circle fs-5" style="color: var(--stu-coffee-primary);"></i>
-                            <h6 class="fw-bold text-dark mb-0">Mis Entregas y Calificaciones</h6>
+                    <h6 class="fw-bold text-dark mb-3 small text-uppercase">Circulares Escolares</h6>
+                    {% for c in comunicados_estudiante %}
+                    <div class="p-3 mb-2 rounded-3 border bg-white shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark small">{{ c.titulo }}</strong>
+                            <span class="text-muted" style="font-size: 0.72rem;">{{ c.fecha_creacion|date:"d/m/Y" }}</span>
                         </div>
-
-                        {% for e in entregas_tareas_clase %}
-                        <div class="p-3 mb-2.5 rounded-4 border bg-light" style="border-color: var(--stu-coffee-border) !important;">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                <strong class="text-dark small d-block">{{ e.tarea.titulo }}</strong>
-                                {% if e.estado == 'CALIFICADA' %}
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
-                                        Nota: {{ e.calificacion }}
-                                    </span>
-                                {% else %}
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;">
-                                        En Revisión
-                                    </span>
-                                {% endif %}
-                            </div>
-                            <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">Entregado: {{ e.fecha_entrega|date:'d/m/Y h:i A' }}</small>
-                            {% if e.retroalimentacion %}
-                                <div class="p-2.5 bg-white rounded-3 border small mt-2" style="border-color: var(--stu-coffee-border);">
-                                    <strong class="text-dark d-block mb-0.5" style="font-size: 0.76rem;"><i class="bi bi-chat-quote-fill me-1" style="color: var(--stu-coffee-primary);"></i> Retroalimentación Docente:</strong>
-                                    <span class="text-muted">{{ e.retroalimentacion }}</span>
-                                </div>
-                            {% endif %}
-                        </div>
-                        {% empty %}
-                        <div class="text-center py-4 text-muted small">
-                            <i class="bi bi-inbox fs-3 d-block mb-1" style="color: var(--stu-coffee-primary);"></i>
-                            Aún no has entregado actividades este periodo.
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- PESTAÑA 4: ASISTENCIA -->
-        <div class="tab-pane fade" id="tab-asistencia" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-check2-square fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Historial de Asistencia Escolar</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
-                        {{ porcentaje_asistencia|default:100 }}% de Cumplimiento
-                    </span>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table align-middle table-stu-custom mb-0">
-                        <thead>
-                            <tr>
-                                <th class="py-3 ps-3">Fecha de la Sesión</th>
-                                <th class="py-3 text-center">Estado Registrado</th>
-                                <th class="py-3">Docente Registrador</th>
-                                <th class="py-3">Observaciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for a in historial_asistencias %}
-                            <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
-                                <td class="ps-3 fw-bold text-dark">
-                                    <i class="bi bi-calendar-check me-1.5" style="color: var(--stu-coffee-primary);"></i> {{ a.fecha|date:"l, d M Y" }}
-                                </td>
-                                <td class="text-center">
-                                    {% if a.estado == 'P' %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
-                                            🟢 Presente
-                                        </span>
-                                    {% elif a.estado == 'A' %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
-                                            🔴 Ausente
-                                        </span>
-                                    {% elif a.estado == 'J' %}
-                                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;">
-                                            🟡 Justificado
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="small text-muted">
-                                    {% if a.registrado_por %}
-                                        {{ a.registrado_por.get_full_name|default:a.registrado_por.username }}
-                                    {% else %}
-                                        <span>Docente Titular</span>
-                                    {% endif %}
-                                </td>
-                                <td class="small text-muted">
-                                    {{ a.observaciones|default:"Registro regular de asistencia en aula." }}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">
-                                    <i class="bi bi-calendar-check fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                                    <h6 class="fw-bold text-dark">No hay inasistencias registradas para tu perfil.</h6>
-                                    <p class="small mb-0">Mantienes un cumplimiento del 100% en tus jornadas escolares.</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- PESTAÑA 5: COMUNICADOS INSTITUCIONALES -->
-        <div class="tab-pane fade" id="tab-comunicados" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-megaphone-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Comunicados Oficiales y Circulares Escolares</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                        Información Institucional Oficial
-                    </span>
-                </div>
-
-                <div class="row g-3">
-                    {% for com in comunicados_estudiante %}
-                    <div class="col-md-6">
-                        <div class="p-4 rounded-4 border bg-white h-100 d-flex flex-column justify-content-between shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
-                            <div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
-                                        {{ com.remitente.perfil.rol.nombre|default:"Institución" }}
-                                    </span>
-                                    <small class="text-muted" style="font-size: 0.75rem;">{{ com.fecha_creacion|date:"d M Y, h:i A" }}</small>
-                                </div>
-                                <h6 class="fw-bold text-dark mb-2">{{ com.asunto }}</h6>
-                                <p class="text-secondary small mb-3">{{ com.mensaje|linebreaksbr }}</p>
-                            </div>
-                            <div class="pt-2 border-top d-flex justify-content-between align-items-center small text-muted">
-                                <span>Emite: <strong>{{ com.remitente.get_full_name|default:com.remitente.username }}</strong></span>
-                                {% if com.urgente %}
-                                    <span class="badge rounded-pill px-2.5 py-1" style="background: #fef2f2; color: #b91c1c;">Prioritario</span>
-                                {% endif %}
-                            </div>
-                        </div>
+                        <p class="text-muted small mb-0">{{ c.contenido }}</p>
                     </div>
                     {% empty %}
-                    <div class="col-12 text-center py-5 text-muted">
-                        <i class="bi bi-bell-slash fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark">No tienes comunicados por el momento.</h6>
-                        <p class="small mb-0">Las novedades institucionales oficiales se publicarán aquí tan pronto sean emitidas.</p>
+                    <div class="text-center py-4 text-muted small">
+                        No hay circulares publicadas para tu grupo.
                     </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- PESTAÑA 6: MENSAJERÍA DIRECTA CON PROFESORES -->
-        <div class="tab-pane fade" id="tab-mensajeria" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-chat-dots-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Mensajería Directa con Docentes Autorizados</h6>
-                    </div>
-                    <button type="button" class="btn btn-sm text-white rounded-pill px-3.5 py-1.5 fw-bold" data-bs-toggle="modal" data-bs-target="#modalMensajeDocente" style="background: var(--stu-coffee-primary); border-color: var(--stu-coffee-primary);">
-                        <i class="bi bi-pencil-square me-1"></i> Redactar Nuevo Mensaje
-                    </button>
+    <!-- =========================================================================
+         10. SUBPANEL: NOTIFICACIONES
+         ========================================================================= -->
+    <section id="subpanel-notificaciones" class="subpanel-section {% if subpanel_activo != 'notificaciones' %}d-none{% endif %}">
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-bell-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Mis Notificaciones Académicas</h6>
                 </div>
-
-                <div class="row g-4">
-                    <!-- Lista de Profesores / Contactos Permitidos -->
-                    <div class="col-lg-4">
-                        <div class="p-3 rounded-4 border bg-light h-100" style="border-color: var(--stu-coffee-border) !important;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.9rem;">Profesores de tu Grado</h6>
-                                <span class="badge rounded-pill bg-white text-muted border">{{ docentes_lista|length }} contactos</span>
-                            </div>
-                            <p class="text-muted small mb-3" style="font-size: 0.78rem;">Selecciona un docente para escribirle directamente:</p>
-                            
-                            <div class="list-group list-group-flush gap-1.5">
-                                {% for d in docentes_lista %}
-                                <div class="list-group-item list-group-item-action rounded-3 border-0 p-2.5 d-flex align-items-center justify-content-between bg-white shadow-2xs mb-1">
-                                    <div class="d-flex align-items-center gap-2.5">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold small" style="width: 38px; height: 38px; background: var(--stu-coffee-primary);">
-                                            {{ d.first_name|slice:':1'|default:'P' }}{{ d.last_name|slice:':1'|default:'D' }}
-                                        </div>
-                                        <div>
-                                            <strong class="text-dark d-block small mb-0">{{ d.get_full_name|default:d.username }}</strong>
-                                            <span class="text-muted" style="font-size: 0.72rem;">Docente Titular</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-1" onclick="abrirMensajeConProfesor('{{ d.id }}', '{{ d.get_full_name|default:d.username|escapejs }}');">
-                                        <i class="bi bi-chat-text-fill"></i>
-                                    </button>
-                                </div>
-                                {% empty %}
-                                <div class="text-center py-4 text-muted small">
-                                    No hay profesores asignados en tu grado actualmente.
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Historial de Conversaciones del Estudiante -->
-                    <div class="col-lg-8">
-                        <div class="p-3.5 rounded-4 border bg-white h-100 d-flex flex-column justify-content-between shadow-2xs" style="border-color: var(--stu-coffee-border) !important; min-height: 420px;">
-                            <div>
-                                <h6 class="fw-bold text-dark mb-2 pb-2 border-bottom d-flex align-items-center gap-2" style="font-size: 0.92rem; border-color: var(--stu-coffee-border) !important;">
-                                    <i class="bi bi-chat-left-text text-muted"></i> Historial de Conversaciones Privadas
-                                </h6>
-
-                                <div class="d-flex flex-column gap-2.5 overflow-auto pe-1" style="max-height: 380px;">
-                                    {% for m in mensajes_conversacion %}
-                                    <div class="p-3 rounded-4 {% if m.remitente == user %}ms-auto bg-light border text-end{% else %}me-auto bg-white border text-start{% endif %}" style="max-width: 85%; border-color: var(--stu-coffee-border) !important;">
-                                        <div class="d-flex align-items-center justify-content-between gap-3 mb-1 small text-muted" style="font-size: 0.75rem;">
-                                            <span>
-                                                {% if m.remitente == user %}
-                                                    <i class="bi bi-person-fill text-muted me-1"></i> Tú
-                                                {% else %}
-                                                    <i class="bi bi-person-badge-fill me-1" style="color: var(--stu-coffee-primary);"></i> Prof. {{ m.remitente.get_full_name|default:m.remitente.username }}
-                                                {% endif %}
-                                            </span>
-                                            <span>{{ m.fecha_envio|date:"d/m/Y h:i A" }}</span>
-                                        </div>
-                                        <strong class="text-dark d-block small mb-1">{{ m.asunto }}</strong>
-                                        <p class="mb-1 text-secondary small text-start" style="white-space: pre-line;">{{ m.mensaje }}</p>
-                                        <div class="text-muted" style="font-size: 0.7rem;">
-                                            {% if m.leido %}
-                                                <i class="bi bi-check2-all text-primary me-1"></i> Leído
-                                            {% else %}
-                                                <i class="bi bi-check2 text-muted me-1"></i> Enviado
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    {% empty %}
-                                    <div class="text-center py-5 text-muted">
-                                        <i class="bi bi-chat-square-dots fs-1 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                                        <h6 class="fw-bold text-dark">No tienes mensajes en tu historial.</h6>
-                                        <p class="small mb-0">Escríbele a un docente para iniciar una conversación privada.</p>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                            <div class="pt-3 border-top mt-3" style="border-color: var(--stu-coffee-border) !important;">
-                                <button type="button" class="btn text-white rounded-pill px-4 py-2 fw-bold w-100 shadow-2xs" data-bs-toggle="modal" data-bs-target="#modalMensajeDocente" style="background: var(--stu-coffee-primary); border: none;">
-                                    <i class="bi bi-send-fill me-1.5"></i> Escribir Mensaje al Docente
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- PESTAÑA 7: PERFIL DEL ESTUDIANTE Y FOTOGRAFÍA -->
-        <div class="tab-pane fade" id="tab-perfil" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-person-badge-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Mi Perfil de Estudiante y Fotografía Oficial</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
-                        Rol: Estudiante
-                    </span>
-                </div>
-
-                <div class="row g-4">
-                    <!-- Fotografía de Perfil con Carga Segura y Previsualización -->
-                    <div class="col-lg-4 text-center">
-                        <div class="p-4 rounded-4 border bg-light h-100 d-flex flex-column align-items-center justify-content-between" style="border-color: var(--stu-coffee-border) !important;">
-                            <div>
-                                <h6 class="fw-bold text-dark mb-3" style="font-size: 0.95rem;">Fotografía de Perfil</h6>
-                                
-                                <div class="position-relative d-inline-block mb-3">
-                                    {% if perfil.foto_perfil %}
-                                        <img id="preview-foto-perfil" src="{{ perfil.foto_perfil.url }}" alt="Foto de {{ user.get_full_name }}" class="rounded-circle object-fit-cover shadow-sm border border-3 border-white" style="width: 140px; height: 140px;">
-                                    {% else %}
-                                        <div id="preview-avatar-fallback" class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center fw-bold shadow-sm border border-3 border-white" style="width: 140px; height: 140px; font-size: 3rem; color: var(--stu-coffee-primary) !important;">
-                                            {{ user.first_name|slice:':1'|default:'E' }}{{ user.last_name|slice:':1'|default:'S' }}
-                                        </div>
-                                        <img id="preview-foto-perfil" src="" alt="Vista previa" class="rounded-circle object-fit-cover shadow-sm border border-3 border-white d-none" style="width: 140px; height: 140px;">
-                                    {% endif %}
-                                </div>
-
-                                <p class="text-muted small mb-3" style="font-size: 0.78rem;">
-                                    Formatos admitidos: <strong>JPG, PNG, WEBP</strong><br>
-                                    Tamaño máximo: <strong>5 MB</strong>
-                                </p>
-                            </div>
-
-                            <form method="post" action="{% url 'aprendiz_dashboard' %}" enctype="multipart/form-data" class="w-100">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="actualizar_foto_perfil">
-                                <div class="mb-3">
-                                    <input type="file" name="foto" id="input-foto-estudiante" class="form-control form-control-sm rounded-pill" accept="image/jpeg,image/png,image/webp" required onchange="previsualizarFotoEstudiante(this);">
-                                </div>
-                                <button type="submit" class="btn btn-sm text-white rounded-pill px-4 py-2 fw-bold w-100 shadow-2xs" style="background: var(--stu-coffee-primary); border: none;">
-                                    <i class="bi bi-cloud-arrow-up-fill me-1"></i> Guardar Fotografía
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Datos Personales y Académicos (Lectura Protegida vs Editables) -->
-                    <div class="col-lg-8">
-                        <div class="p-4 rounded-4 border bg-white h-100 shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
-                            <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom d-flex align-items-center gap-2" style="font-size: 0.95rem; border-color: var(--stu-coffee-border) !important;">
-                                <i class="bi bi-card-text" style="color: var(--stu-coffee-primary);"></i> Información Registrada en el Sistema
-                            </h6>
-
-                            <div class="alert rounded-3 py-2 px-3 small mb-3" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                                <i class="bi bi-info-circle-fill me-1 text-primary"></i> 
-                                Los campos académicos y de identidad están protegidos y solo pueden ser modificados por <strong>Administración</strong> o <strong>Secretaría</strong>.
-                            </div>
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-muted mb-1">Nombre Completo</label>
-                                    <input type="text" class="form-control rounded-pill bg-light" value="{{ user.get_full_name|default:user.username }}" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-muted mb-1">Tipo y Documento de Identidad</label>
-                                    <input type="text" class="form-control rounded-pill bg-light" value="{{ perfil.get_tipo_documento_display|default:'TI' }} - {{ perfil.numero_documento|default:user.username }}" readonly>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-muted mb-1">Grado Escolar Asignado</label>
-                                    <input type="text" class="form-control rounded-pill bg-light" value="{% if matricula %}{% if matricula.get_grado_escolar_display %}{{ matricula.get_grado_escolar_display }}{% else %}{{ matricula.grado_escolar }}{% endif %}{% else %}10° Grado (Bachillerato){% endif %}" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-muted mb-1">Grupo / Ficha Oficial</label>
-                                    <input type="text" class="form-control rounded-pill bg-light" value="Sección {{ matricula.seccion|default:'A' }} (Ficha {{ ficha.codigo_ficha|default:'Asignada' }})" readonly>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-muted mb-1">Rol de Acceso</label>
-                                    <input type="text" class="form-control rounded-pill bg-light" value="{{ perfil.rol.nombre|default:'Estudiante' }}" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-muted mb-1">Correo Institucional</label>
-                                    <input type="email" class="form-control rounded-pill bg-light" value="{{ user.email|default:'estudiante@edunova.edu' }}" readonly>
-                                </div>
-                            </div>
-
-                            <hr class="my-4" style="border-color: var(--stu-coffee-border);">
-
-                            <!-- Campo Editable de Contacto -->
-                            <form method="post" action="{% url 'aprendiz_dashboard' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="actualizar_contacto">
-                                <div class="row align-items-end g-3">
-                                    <div class="col-md-8">
-                                        <label class="form-label small fw-bold text-dark mb-1">
-                                            <i class="bi bi-telephone-fill me-1" style="color: var(--stu-coffee-primary);"></i> Teléfono de Contacto (Actualizable por el estudiante)
-                                        </label>
-                                        <input type="text" name="telefono" class="form-control rounded-pill px-3" value="{{ perfil.telefono|default:'' }}" placeholder="Ingresa tu teléfono de contacto..." style="border-color: var(--stu-coffee-border);">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold w-100 shadow-2xs" style="background: var(--stu-coffee-primary); border: none;">
-                                            <i class="bi bi-check-circle-fill me-1"></i> Guardar Teléfono
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-        <!-- PESTAÑA 8: ASIGNATURAS Y DOCENTES -->
-        <div class="tab-pane fade" id="tab-asignaturas" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-book-half fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Mis Asignaturas y Docentes Responsables</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                        Carga Académica Oficial
-                    </span>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table align-middle table-stu-custom mb-0">
-                        <thead>
-                            <tr>
-                                <th class="py-3 ps-3">Asignatura</th>
-                                <th class="py-3">Docente Titular</th>
-                                <th class="py-3">Grupo / Grado</th>
-                                <th class="py-3 text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for a in asignaturas_docentes %}
-                            <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
-                                <td class="ps-3 fw-bold text-dark">
-                                    <i class="bi bi-journal-bookmark me-1.5" style="color: var(--stu-coffee-primary);"></i> {{ a.nombre }}
-                                </td>
-                                <td>
-                                    <span class="fw-semibold text-dark">{{ a.profesor }}</span>
-                                </td>
-                                <td>
-                                    <span class="badge rounded-pill px-2.5 py-1" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
-                                        Grado {{ matricula.grado_escolar|default:"10" }} - {{ matricula.seccion|default:"A" }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" onclick="abrirMensajeConProfesor('{{ a.profesor_id }}', '{{ a.profesor|escapejs }}');" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
-                                        <i class="bi bi-chat-dots-fill me-1"></i> Contactar
-                                    </button>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">
-                                    <i class="bi bi-book fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                                    <h6 class="fw-bold text-dark">No hay asignaturas registradas para tu curso actualmente.</h6>
-                                    <p class="small mb-0">La Secretaría Académica asignará las materias de tu plan de estudios.</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- PESTAÑA 9: TEMAS Y GUÍAS PUBLICADAS -->
-        <div class="tab-pane fade" id="tab-temas" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-journal-text fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Temas de Clase, Guías y Material Pedagógico</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                        Recursos Educativos Oficiales
-                    </span>
-                </div>
-
-                <div class="row g-3">
-                    {% for g in guias_clase %}
-                    <div class="col-md-6">
-                        <div class="p-3.5 rounded-4 border bg-white h-100 d-flex flex-column justify-content-between shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
-                            <div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
-                                        {{ g.carga_academica.programa.denominacion|default:"Guía Pedagógica" }}
-                                    </span>
-                                    <small class="text-muted">{{ g.fecha_publicacion|date:"d M Y" }}</small>
-                                </div>
-                                <h6 class="fw-bold text-dark mb-1">{{ g.titulo }}</h6>
-                                <p class="text-muted small mb-2">{{ g.descripcion|default:"Guía temática oficial de la asignatura."|truncatechars:120 }}</p>
-                            </div>
-                            {% if g.archivo %}
-                            <div class="pt-2 border-top">
-                                <a href="{{ g.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold text-decoration-none" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
-                                    <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Guía Oficial
-                                </a>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="col-12 text-center py-5 text-muted">
-                        <i class="bi bi-journal-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark">No hay guías de clase publicadas actualmente.</h6>
-                        <p class="small mb-0">Tus docentes compartirán aquí los materiales pedagógicos de cada periodo.</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- PESTAÑA 10: NOTIFICACIONES INSTITUCIONALES -->
-        <div class="tab-pane fade" id="tab-notificaciones" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-bell-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Notificaciones y Alertas del Sistema</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                        Bandeja de Avisos
-                    </span>
-                </div>
-
-                <div class="list-group list-group-flush gap-2">
-                    {% for n in notificaciones_estudiante %}
-                    <div class="list-group-item rounded-3 border p-3 d-flex align-items-start justify-content-between bg-white shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
-                        <div class="d-flex align-items-start gap-3">
-                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center mt-1" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); width: 36px; height: 36px;">
-                                <i class="bi bi-bell-fill"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold text-dark mb-1">{{ n.titulo }}</h6>
-                                <p class="text-secondary small mb-1">{{ n.mensaje }}</p>
-                                <small class="text-muted" style="font-size: 0.75rem;">{{ n.fecha_creacion|date:"d M Y, h:i A" }}</small>
-                            </div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="text-center py-5 text-muted">
-                        <i class="bi bi-bell-slash fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark">No tienes notificaciones pendientes.</h6>
-                        <p class="small mb-0">Estás al día con todos tus eventos y novedades académicas.</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- PESTAÑA 11: DOCUMENTOS INSTITUCIONALES -->
-        <div class="tab-pane fade" id="tab-documentos" role="tabpanel">
-            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-file-earmark-text-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark mb-0">Documentos y Formatos Institucionales</h6>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                        Biblioteca Oficial
-                    </span>
-                </div>
-
-                <div class="row g-3">
-                    {% for doc in documentos_institucionales %}
-                    <div class="col-md-6">
-                        <div class="p-3.5 rounded-4 border bg-white h-100 d-flex flex-column justify-content-between shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
-                            <div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
-                                        {{ doc.get_categoria_display|default:doc.categoria|default:"Institucional" }}
-                                    </span>
-                                    <small class="text-muted">{{ doc.fecha_subida|date:"d M Y" }}</small>
-                                </div>
-                                <h6 class="fw-bold text-dark mb-1">{{ doc.titulo }}</h6>
-                                <p class="text-muted small mb-2">{{ doc.descripcion|default:"Documento normativo o curricular expedido por la institución."|truncatechars:120 }}</p>
-                            </div>
-                            {% if doc.archivo %}
-                            <div class="pt-2 border-top">
-                                <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold text-decoration-none" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
-                                    <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Documento
-                                </a>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="col-12 text-center py-5 text-muted">
-                        <i class="bi bi-folder-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark">No hay documentos institucionales disponibles por ahora.</h6>
-                        <p class="small mb-0">Los manuales de convivencia y formatos se publicarán aquí cuando estén disponibles.</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- MODAL ENVIAR MENSAJE A DOCENTE -->
-    <div class="modal fade" id="modalMensajeDocente" tabindex="-1" aria-labelledby="modalMensajeDocenteLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
-                <form method="post" action="{% url 'aprendiz_dashboard' %}">
+                <form method="post" action="{% url 'marcar_todas_notificaciones_leidas' %}" class="d-inline m-0">
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="enviar_mensaje_docente">
-                    <div class="modal-header border-bottom py-3 text-white" style="background: linear-gradient(135deg, #5a3825 0%, #3d2417 100%);">
-                        <h6 class="modal-title fw-bold text-white d-flex align-items-center gap-2" id="modalMensajeDocenteLabel">
-                            <i class="bi bi-chat-left-dots-fill"></i> Enviar Mensaje a mi Docente
-                        </h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark">Seleccionar Docente / Asignatura</label>
-                            <select id="select-docente-modal" class="form-select rounded-pill px-3 py-2" name="docente_id" style="border-color: var(--stu-coffee-border);" required>
-                                {% for d in docentes_lista %}
-                                    <option value="{{ d.id }}">Prof. {{ d.get_full_name|default:d.username }} (Docente Titular)</option>
-                                {% empty %}
-                                    <option value="">Docente Titular de Grado</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark">Asunto</label>
-                            <input type="text" class="form-control rounded-pill px-3 py-2" name="asunto" style="border-color: var(--stu-coffee-border);" placeholder="Asunto o motivo de la consulta..." value="Consulta Académica">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark">Tu Mensaje o Consulta</label>
-                            <textarea class="form-control rounded-4 px-3 py-2" name="mensaje" rows="4" style="border-color: var(--stu-coffee-border);" placeholder="Escribe tu mensaje, duda académica o solicitud al docente..." required></textarea>
-                        </div>
-                        <div class="form-text small text-muted">
-                            <i class="bi bi-shield-check text-success me-1"></i> Mensajería institucional protegida de EduNova.
-                        </div>
-                    </div>
-                    <div class="modal-footer border-top py-2.5 bg-light">
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-sm text-white rounded-pill px-4 fw-bold" style="background: var(--stu-coffee-primary); border-color: var(--stu-coffee-primary);">
-                            <i class="bi bi-send-fill me-1.5"></i> Enviar Mensaje
-                        </button>
-                    </div>
+                    <button type="submit" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border); font-size: 0.78rem;">
+                        <i class="bi bi-check2-all me-1"></i> Marcar todas como leídas
+                    </button>
                 </form>
             </div>
+
+            <div class="list-group list-group-flush">
+                {% for n in notificaciones_estudiante %}
+                <div class="list-group-item px-0 py-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--stu-coffee-border) !important;">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            {% if not n.leida %}
+                                <span class="badge rounded-pill bg-danger" style="font-size: 0.65rem;">Nueva</span>
+                            {% endif %}
+                            <strong class="text-dark" style="font-size: 0.92rem;">{{ n.titulo }}</strong>
+                        </div>
+                        <p class="text-muted small mb-0">{{ n.mensaje }}</p>
+                        <small class="text-muted" style="font-size: 0.72rem;">{{ n.fecha_creacion|timesince }} atrás</small>
+                    </div>
+                    {% if not n.leida %}
+                    <form method="post" action="{% url 'marcar_notificacion_leida' n.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-0.5" style="font-size: 0.75rem;">
+                            Leída
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell-slash fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark">No tienes notificaciones pendientes</h6>
+                    <p class="small mb-0">Te avisaremos sobre nuevas tareas, valoraciones y circulares escolares.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         11. SUBPANEL: DOCUMENTOS
+         ========================================================================= -->
+    <section id="subpanel-documentos" class="subpanel-section {% if subpanel_activo != 'documentos' %}d-none{% endif %}">
+        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-text-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark mb-0">Documentos Institucionales y Formatos</h6>
+                </div>
+                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                    Descargas Oficiales
+                </span>
+            </div>
+
+            <div class="row g-3">
+                {% for doc in documentos_institucionales %}
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 border bg-white h-100 d-flex justify-content-between align-items-center" style="border-color: var(--stu-coffee-border) !important;">
+                        <div>
+                            <strong class="text-dark d-block mb-1" style="font-size: 0.92rem;">{{ doc.titulo }}</strong>
+                            <small class="text-muted d-block">{{ doc.categoria|default:"Institucional" }} · {{ doc.fecha_subida|date:"d/m/Y" }}</small>
+                        </div>
+                        {% if doc.archivo %}
+                        <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm text-white rounded-pill px-3 py-1 fw-bold" style="background: var(--stu-coffee-primary);">
+                            <i class="bi bi-download"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5 text-muted">
+                    <i class="bi bi-folder-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark">No hay documentos institucionales disponibles por ahora.</h6>
+                    <p class="small mb-0">Los manuales de convivencia y formatos se publicarán aquí cuando estén disponibles.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- MODAL ENVIAR MENSAJE A DOCENTE -->
+<div class="modal fade" id="modalMensajeDocente" tabindex="-1" aria-labelledby="modalMensajeDocenteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <form method="post" action="{% url 'estudiante_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="enviar_mensaje_docente">
+                <div class="modal-header border-bottom py-3 text-white" style="background: linear-gradient(135deg, #5a3825 0%, #3d2417 100%);">
+                    <h6 class="modal-title fw-bold text-white d-flex align-items-center gap-2" id="modalMensajeDocenteLabel">
+                        <i class="bi bi-chat-left-dots-fill"></i> Enviar Mensaje a mi Docente
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Seleccionar Docente / Asignatura</label>
+                        <select id="select-docente-modal" class="form-select rounded-pill px-3 py-2" name="docente_id" style="border-color: var(--stu-coffee-border);" required>
+                            {% for d in docentes_lista %}
+                                <option value="{{ d.id }}">Prof. {{ d.get_full_name|default:d.username }} (Docente Titular)</option>
+                            {% empty %}
+                                <option value="">Docente Titular de Grado</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Asunto</label>
+                        <input type="text" class="form-control rounded-pill px-3 py-2" name="asunto" style="border-color: var(--stu-coffee-border);" placeholder="Asunto o motivo de la consulta..." value="Consulta Académica">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Tu Mensaje o Consulta</label>
+                        <textarea class="form-control rounded-4 px-3 py-2" name="mensaje" rows="4" style="border-color: var(--stu-coffee-border);" placeholder="Escribe tu mensaje o duda académica al docente..." required></textarea>
+                    </div>
+                    <div class="form-text small text-muted">
+                        <i class="bi bi-shield-check text-success me-1"></i> Mensajería institucional protegida de EduNova.
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-2.5 bg-light">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-sm text-white rounded-pill px-4 fw-bold" style="background: var(--stu-coffee-primary); border-color: var(--stu-coffee-primary);">
+                        <i class="bi bi-send-fill me-1.5"></i> Enviar Mensaje
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -1322,7 +1191,7 @@
 
     function abrirMensajeConProfesor(docenteId, nombreDocente) {
         const select = document.getElementById('select-docente-modal');
-        if (select) {
+        if (select && docenteId) {
             select.value = docenteId;
         }
         const modalEl = document.getElementById('modalMensajeDocente');
@@ -1332,52 +1201,55 @@
         }
     }
 
-    function activarTab(tabId) {
-        if (tabId === 'tab-comunicaciones') tabId = 'tab-comunicados';
+    function activarSubpanel(subpanelName) {
+        if (!subpanelName) subpanelName = 'inicio';
+        if (subpanelName === 'tareas') subpanelName = 'actividades';
+        if (subpanelName === 'mensajeria' || subpanelName === 'comunicados') subpanelName = 'comunicaciones';
 
-        const homeSection = document.getElementById('student-home-content');
-        const tabsContainer = document.getElementById('estudianteTabsContent');
-
-        if (!tabId || tabId === '' || tabId === 'tab-home') {
-            if (homeSection) homeSection.classList.remove('d-none');
-            if (tabsContainer) {
-                tabsContainer.classList.add('d-none');
-                tabsContainer.hidden = true;
-            }
-            window.location.hash = '';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            return;
-        }
-
-        if (homeSection) homeSection.classList.add('d-none');
-        if (tabsContainer) {
-            tabsContainer.classList.remove('d-none');
-            tabsContainer.hidden = false;
-        }
-
-        document.querySelectorAll('#estudianteTabsContent .tab-pane').forEach(function(pane) {
-            pane.classList.remove('show', 'active');
+        // Ocultar todas las secciones
+        document.querySelectorAll('.subpanel-section').forEach(function(el) {
+            el.classList.add('d-none');
         });
 
-        const targetPane = document.getElementById(tabId);
-        if (targetPane) {
-            targetPane.classList.add('show', 'active');
+        // Mostrar la seleccionada
+        const targetSection = (subpanelName === 'inicio') ? document.getElementById('student-home-content') : document.getElementById('subpanel-' + subpanelName);
+        if (targetSection) {
+            targetSection.classList.remove('d-none');
+        } else {
+            const homeSection = document.getElementById('student-home-content') || document.getElementById('subpanel-inicio');
+            if (homeSection) homeSection.classList.remove('d-none');
+            subpanelName = 'inicio';
         }
-        window.location.hash = tabId;
+
+        // Actualizar active class en el menú lateral
+        document.querySelectorAll('#sinetecSidebar .nav-link').forEach(function(link) {
+            link.classList.remove('active');
+            if (link.getAttribute('data-subpanel') === subpanelName) {
+                link.classList.add('active');
+            }
+        });
+
+        // Actualizar URL sin recargar
+        const url = new URL(window.location);
+        url.searchParams.set('subpanel', subpanelName);
+        window.history.pushState({ subpanel: subpanelName }, '', url.toString());
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function syncTabFromHash() {
-        let hash = window.location.hash.replace('#', '');
-        if (hash === 'tab-comunicaciones') hash = 'tab-comunicados';
-        if (hash && document.getElementById(hash)) {
-            activarTab(hash);
-        } else {
-            activarTab('');
+    function syncSubpanelFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let subpanel = urlParams.get('subpanel');
+        if (!subpanel) {
+            const hash = window.location.hash.replace('#tab-', '').replace('#', '');
+            if (hash) subpanel = hash;
+        }
+        if (subpanel) {
+            activarSubpanel(subpanel);
         }
     }
 
-    window.addEventListener('hashchange', syncTabFromHash);
-    document.addEventListener('DOMContentLoaded', syncTabFromHash);
+    window.addEventListener('popstate', syncSubpanelFromUrl);
+    window.addEventListener('hashchange', syncSubpanelFromUrl);
+    document.addEventListener('DOMContentLoaded', syncSubpanelFromUrl);
 </script>
-{% endblock %}
+{% endblock %}

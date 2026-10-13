@@ -47,6 +47,69 @@
         </div>
     </div>
 
+    <!-- 4 TARJETAS DE PERÍODOS ACADÉMICOS INTERACTIVAS -->
+    <div class="row g-3 mb-4">
+        {% for p in periodos_academicos %}
+        <div class="col-6 col-md-3">
+            <a href="{% url 'calificaciones_docente' %}?carga={{ carga_seleccionada.id }}&periodo={{ p.codigo_periodo }}&tab={{ tab_calif|default:'planilla' }}"
+               class="text-decoration-none d-block h-100">
+                <div class="card border rounded-4 p-3 bg-white h-100 transition shadow-2xs hover-shadow"
+                     style="{% if periodo_seleccionado == p.codigo_periodo or periodo_seleccionado == p.nombre %}border: 2px solid var(--color-secundario) !important; background: #FAF8F5 !important; box-shadow: 0 6px 18px rgba(90, 56, 37, 0.15);{% else %}border-color: var(--color-acento) !important;{% endif %}">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" 
+                              style="{% if periodo_seleccionado == p.codigo_periodo or periodo_seleccionado == p.nombre %}background: var(--color-principal); color: #fff;{% else %}background: #F5F2EB; color: var(--color-principal);{% endif %} font-size: 0.76rem;">
+                            {{ p.nombre }}
+                        </span>
+                        {% if p.cerrado %}
+                            <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: #fef2f2; color: #b91c1c; font-size: 0.68rem;">
+                                <i class="bi bi-lock-fill"></i> Cerrado
+                            </span>
+                        {% elif p.estado == 'En Curso' %}
+                            <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: #ecfdf5; color: #047857; font-size: 0.68rem;">
+                                🟢 En Curso
+                            </span>
+                        {% elif p.estado == 'Pendiente' %}
+                            <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: #f8fafc; color: #64748b; font-size: 0.68rem;">
+                                ⚪ Pendiente
+                            </span>
+                        {% else %}
+                            <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: #eff6ff; color: #1d4ed8; font-size: 0.68rem;">
+                                🔵 Finalizado
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="small text-muted mb-1" style="font-size: 0.75rem;">
+                        <i class="bi bi-calendar-range me-1"></i> {{ p.fecha_inicio|date:"d M" }} - {{ p.fecha_fin|date:"d M" }}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2 pt-1 border-top" style="border-color: var(--color-acento) !important;">
+                        <span class="text-muted" style="font-size: 0.72rem;">Ponderación: {{ p.porcentaje|floatformat:0 }}%</span>
+                        {% if periodo_seleccionado == p.codigo_periodo or periodo_seleccionado == p.nombre %}
+                        <span class="fw-bold" style="color: var(--color-secundario); font-size: 0.75rem;"><i class="bi bi-check-circle-fill"></i> Seleccionado</span>
+                        {% else %}
+                        <span class="text-muted" style="font-size: 0.72rem;">Ver notas &rarr;</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- ALERTA SI EL PERÍODO ESTÁ CERRADO -->
+    {% if periodo_esta_cerrado %}
+    <div class="alert alert-danger border-0 rounded-4 p-3.5 mb-4 shadow-sm" style="background: #fef2f2; border-left: 5px solid #dc2626 !important;">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-lock-fill fs-3 text-danger"></i>
+            <div>
+                <strong class="d-block text-danger mb-0.5">Período Académico Cerrado Formalmente:</strong>
+                <p class="mb-0 text-dark small">
+                    El <strong>{{ periodo_obj_actual.nombre }}</strong> ha sido cerrado formalmente. Las calificaciones y promedios se encuentran en modo de <strong>solo lectura</strong> para preservar la inmutabilidad de los registros oficiales.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- PANEL DE SELECCIÓN Y FILTROS ESTRATÉGICOS -->
     <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--color-acento) !important;">
         <form method="GET" action="{% url 'calificaciones_docente' %}" id="form-filtro-calificaciones" class="row g-3 align-items-end">
@@ -78,20 +141,30 @@
                 <div class="input-group">
                     <span class="input-group-text bg-white" style="border-color: var(--color-acento); color: var(--color-principal);"><i class="bi bi-bookmark-star-fill"></i></span>
                     <select name="periodo" class="form-select fw-bold text-dark" style="border-color: var(--color-acento); font-size: 0.88rem; background-color: #faf8f5;" onchange="this.form.submit();">
-                        <option value="Periodo 1" {% if periodo_seleccionado == 'Periodo 1' %}selected{% endif %}>Periodo 1 (Actual)</option>
+                        {% for p in periodos_academicos %}
+                        <option value="{{ p.codigo_periodo }}" {% if periodo_seleccionado == p.codigo_periodo or periodo_seleccionado == p.nombre %}selected{% endif %}>
+                            {{ p.nombre }} ({{ p.fecha_inicio|date:"d/m" }} - {{ p.fecha_fin|date:"d/m" }}) - {{ p.estado }}
+                        </option>
+                        {% empty %}
+                        <option value="Periodo 1" {% if periodo_seleccionado == 'Periodo 1' %}selected{% endif %}>Periodo 1</option>
                         <option value="Periodo 2" {% if periodo_seleccionado == 'Periodo 2' %}selected{% endif %}>Periodo 2</option>
                         <option value="Periodo 3" {% if periodo_seleccionado == 'Periodo 3' %}selected{% endif %}>Periodo 3</option>
                         <option value="Periodo 4" {% if periodo_seleccionado == 'Periodo 4' %}selected{% endif %}>Periodo 4</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
 
             <!-- Botón Consultar / Actualizar -->
-            <div class="col-md-3">
-                <button type="submit" class="btn w-100 rounded-pill py-2.5 text-white fw-bold shadow-2xs d-flex align-items-center justify-content-center gap-2 transition hover-shadow"
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn flex-grow-1 rounded-pill py-2.5 text-white fw-bold shadow-2xs d-flex align-items-center justify-content-center gap-2 transition hover-shadow"
                         style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem;">
-                    <i class="bi bi-arrow-repeat fs-6"></i> Cargar Planilla
+                    <i class="bi bi-arrow-repeat fs-6"></i> Cargar
                 </button>
+                <a href="{% url 'configurar_periodos_academicos' %}" class="btn rounded-pill px-3 py-2.5 fw-bold d-flex align-items-center gap-1 shadow-2xs"
+                   style="background: #FAF8F5; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.82rem;" title="Configurar Períodos">
+                    <i class="bi bi-gear-fill"></i>
+                </a>
             </div>
         </form>
     </div>
@@ -186,10 +259,17 @@
                         <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #F5F2EB; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.8rem;">
                             {{ carga_seleccionada.programa.denominacion|default:'Matemáticas' }} · Grado {{ carga_seleccionada.grado }}°{{ carga_seleccionada.seccion }}
                         </span>
+                        {% if periodo_esta_cerrado %}
+                        <button type="button" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
+                                style="background: #94a3b8; border: none; font-size: 0.86rem;" disabled title="Este período ha sido cerrado formalmente">
+                            <i class="bi bi-lock-fill"></i> Período Cerrado
+                        </button>
+                        {% else %}
                         <button type="submit" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm d-inline-flex align-items-center gap-1.5 transition hover-shadow"
                                 style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.86rem;">
                             <i class="bi bi-floppy-fill"></i> Guardar Planilla
                         </button>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -254,13 +334,14 @@
                                     <input type="number" step="0.1" min="0.0" max="5.0" name="nota_{{ m.id }}" 
                                            value="{{ m.promedio_calculado|default:'0.0' }}" 
                                            class="form-control form-control-sm text-center fw-bold rounded-pill mx-auto shadow-2xs"
-                                           style="border: 1.5px solid var(--color-acento); color: #0f172a; max-width: 105px; font-size: 0.95rem;" required>
+                                           style="border: 1.5px solid var(--color-acento); color: #0f172a; max-width: 105px; font-size: 0.95rem; {% if periodo_esta_cerrado %}background-color: #f1f5f9; cursor: not-allowed;{% endif %}" 
+                                           {% if periodo_esta_cerrado %}readonly disabled{% else %}required{% endif %}>
                                 </td>
 
                                 <!-- Nivel de Desempeño Cualitativo -->
                                 <td class="text-center">
                                     <span class="badge rounded-pill px-2.5 py-1 fw-bold" 
-                                          style="{% if m.desempeno_calculado == 'Superior' or m.desempeno_calculado == 'Alto' %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% elif m.desempeno_calculado == 'Básico' %}background: #fefce8; color: #ca8a04; border: 1px solid #fef08a;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %} font-size: 0.75rem;">
+                                           style="{% if m.desempeno_calculado == 'Superior' or m.desempeno_calculado == 'Alto' %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% elif m.desempeno_calculado == 'Básico' %}background: #fefce8; color: #ca8a04; border: 1px solid #fef08a;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %} font-size: 0.75rem;">
                                         {{ m.desempeno_calculado }}
                                     </span>
                                 </td>
@@ -271,7 +352,8 @@
                                            value="{{ m.calificacion_actual.observaciones|default:'' }}" 
                                            class="form-control form-control-sm rounded-pill px-3" 
                                            placeholder="Retroalimentación general del periodo..."
-                                           style="border: 1px solid var(--color-acento); font-size: 0.82rem;">
+                                           style="border: 1px solid var(--color-acento); font-size: 0.82rem; {% if periodo_esta_cerrado %}background-color: #f1f5f9; cursor: not-allowed;{% endif %}"
+                                           {% if periodo_esta_cerrado %}readonly disabled{% endif %}>
                                 </td>
                             </tr>
                             {% empty %}

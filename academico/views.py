@@ -1775,3 +1775,75 @@ def mockup_trabajos_ia(request):
 
 def mockup_progreso(request):
     return render(request, 'academico/mockup_progreso.html')
+
+
+@login_required
+def configurar_periodos_academicos(request):
+    """
+    Gestión oficial de los 4 períodos académicos por año lectivo (Período 1, 2, 3 y 4).
+    Permite a los administradores, rectoría y secretaría editar fechas de inicio/fin,
+    porcentajes y estados de cierre formal, con validación de fechas y advertencia de cruces.
+    """
+    from .models import PeriodoAcademico
+    from datetime import date
+    from decimal import Decimal
+    from django.urls import reverse
+
+    anio_sel = request.GET.get('anio', '2026')
+    periodos = PeriodoAcademico.obtener_periodos_anio(anio_sel)
+
+    if request.method == 'POST':
+        periodo_id = request.POST.get('periodo_id')
+        p_obj = PeriodoAcademico.objects.filter(id=periodo_id).first()
+        if p_obj:
+            f_ini_str = request.POST.get('fecha_inicio')
+            f_fin_str = request.POST.get('fecha_fin')
+            porc_str = request.POST.get('porcentaje', '25.0')
+            cerrado_val = request.POST.get('cerrado') in ['1', 'true', 'True', 'on']
+
+            if not f_ini_str or not f_fin_str:
+                messages.error(request, 'Debes ingresar fecha de inicio y finalización.')
+            else:
+                try:
+                    f_ini = date.fromisoformat(f_ini_str)
+                    f_fin = date.fromisoformat(f_fin_str)
+                    if f_fin < f_ini:
+                        messages.error(request, f'Error en {p_obj.nombre}: La fecha final ({f_fin}) no puede ser anterior a la inicial ({f_ini}).')
+                    else:
+                        p_obj.fecha_inicio = f_ini
+                        p_obj.fecha_fin = f_fin
+                        try:
+                            p_obj.porcentaje = Decimal(porc_str)
+                        except Exception:
+                            p_obj.porcentaje = Decimal('25.00')
+                        p_obj.cerrado = cerrado_val
+                        p_obj.save()
+
+                        cruces = PeriodoAcademico.validar_cruces(anio_sel)
+                        if cruces:
+                            for c in cruces:
+                                messages.warning(request, f'Advertencia de solapamiento: {c}')
+
+                        messages.success(request, f'¡{p_obj.nombre} actualizado correctamente!')
+                        try:
+                            from seguimiento.models import RegistroAuditoria
+                            RegistroAuditoria.registrar(
+                                usuario=request.user,
+                                modulo='Periodos Académicos',
+                                accion='Actualización de Periodo',
+                                detalles=f'Modificó fechas de {p_obj.nombre} ({f_ini} a {f_fin}, cerrado={cerrado_val})',
+                                request=request
+                            )
+                        except Exception:
+                            pass
+                except Exception as e:
+                    messages.error(request, f'Error procesando fechas: {str(e)}')
+            return redirect(f"{reverse('configurar_periodos_academicos')}?anio={anio_sel}")
+
+    cruces = PeriodoAcademico.validar_cruces(anio_sel)
+    return render(request, 'academico/periodos_academicos.html', {
+        'periodos': periodos,
+        'anio_sel': anio_sel,
+        'cruces': cruces,
+    })
+

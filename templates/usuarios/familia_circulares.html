@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Circulares Oficiales · Portal de Familias{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0 py-2">
+
+    <!-- Header Hero Escolar -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(90, 56, 37, 0.25);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-megaphone-fill me-1"></i> Comunicación Institucional Directa
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Circulares y Comunicados Oficiales</h1>
+                <p class="mb-0 text-white-50 small">
+                    Avisos, directrices, citaciones e información escolar autorizada para padres y acudientes.
+                </p>
+            </div>
+            <div>
+                <span class="badge bg-white text-dark px-3 py-2 rounded-pill fw-bold fs-6 shadow-sm">
+                    {{ total_circulares|default:circulares|length }} Circulares Oficiales
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de Estudiante (Si hay más de 1 acudido) -->
+    {% if hijos_qs|length > 1 %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <span class="fw-bold text-dark small"><i class="bi bi-person-fill text-primary me-1"></i> Estudiante a cargo:</span>
+            <div class="d-flex flex-wrap gap-2">
+                {% for h in hijos_qs %}
+                    <span class="badge px-3 py-2 rounded-pill fw-bold" style="background: var(--color-acento); color: var(--color-principal);">
+                        <i class="bi bi-person me-1"></i> {{ h.get_full_name|default:h.username }}
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Listado Oficial de Circulares -->
+    <div class="row g-3">
+        {% for circ in circulares %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 bg-white p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge rounded-pill small px-2.5 py-1" style="background: #EAF4FB; color: #2F79A8; border: 1px solid #BAE6FD;">
+                            {{ circ.get_estamento_destinatario_display|default:"Familias" }}
+                        </span>
+                        <small class="text-muted"><i class="bi bi-calendar-event me-1"></i> {{ circ.fecha_creacion|date:"d M Y" }}</small>
+                    </div>
+                    <h6 class="fw-bold mb-2 text-dark">{{ circ.asunto }}</h6>
+                    <p class="small text-secondary mb-3" style="white-space: pre-line;">{{ circ.mensaje }}</p>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mt-auto border-top pt-2">
+                    <small class="text-muted">
+                        Emite: <strong>{{ circ.remitente.get_full_name|default:circ.remitente.username }}</strong>
+                    </small>
+                    {% if circ.urgente %}
+                        <span class="badge bg-danger rounded-pill px-2.5 py-1">Prioritario</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+                <i class="bi bi-inbox fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
+                <h5 class="fw-bold text-dark mb-1">No hay circulares publicadas</h5>
+                <p class="small text-muted mb-0">Los comunicados emitidos por las directivas o docentes aparecerán en esta sección.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

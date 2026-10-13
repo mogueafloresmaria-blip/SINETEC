@@ -1,4 +1,6 @@
-import os, sys, django
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import django
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sinetec_project.settings')
@@ -49,7 +51,9 @@ def run_all_tests():
     # Obtener o asignar matrícula real para la prueba
     from academico.models import Ficha
     ficha_obj = Ficha.objects.first()
-    mat = Matricula.objects.filter(estado_formacion='En Formacion').first()
+    mat = Matricula.objects.filter(aprendiz__username='est1').first()
+    if not mat:
+        mat = Matricula.objects.filter(estado_formacion='En Formacion').first()
     if not mat:
         est_u, _ = User.objects.get_or_create(username='est_prueba_asist', defaults={'first_name': 'Carlos', 'last_name': 'Gomez'})
         mat = Matricula.objects.create(

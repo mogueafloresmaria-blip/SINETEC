@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configuración de Períodos Académicos · EDUNOVA{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --cafe-principal: #5a3825;
+    --cafe-suave: #8B5E3C;
+    --cafe-fondo: #F5F2EB;
+    --cafe-borde: #E0D8CE;
+    --cafe-crema: #FAF8F5;
+}
+.periodo-card {
+    background: #ffffff;
+    border: 1.5px solid var(--cafe-borde);
+    border-radius: 18px;
+    padding: 1.5rem;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(90, 56, 37, 0.05);
+}
+.periodo-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(90, 56, 37, 0.12);
+    border-color: var(--cafe-suave);
+}
+.periodo-header-badge {
+    background: var(--cafe-fondo);
+    color: var(--cafe-principal);
+    border: 1px solid var(--cafe-borde);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+.badge-en-curso {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+.badge-pendiente {
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+.badge-finalizado {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+.badge-cerrado {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+</style>
+
+<div class="container-fluid px-3 px-md-4 py-4" style="max-width: 1200px;">
+
+    <!-- ENCABEZADO PRINCIPAL -->
+    <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm"
+         style="background: linear-gradient(135deg, #5a3825 0%, #3d2417 70%, #29170e 100%); color: #ffffff;">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: rgba(255,255,255,0.2); color: #fff;">
+                        AÑO LECTIVO {{ anio_sel }}
+                    </span>
+                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fefce8; color: #854d0e;">
+                        4 PERÍODOS OFICIALES
+                    </span>
+                </div>
+                <h1 class="h3 fw-bold mb-2 text-white">
+                    <i class="bi bi-calendar4-range me-2 text-warning"></i>Configuración de Períodos Académicos
+                </h1>
+                <p class="mb-0 text-white-50 small">
+                    Administra las fechas de inicio, finalización y estado de cierre de los cuatro períodos académicos del año lectivo. La información configurada se sincroniza en tiempo real con las calificaciones de Docentes, Estudiantes y Familias.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <a href="{% url 'matriculas_lista' %}" class="btn btn-outline-light rounded-pill px-3.5 py-2 fw-bold small">
+                    <i class="bi bi-arrow-left me-1"></i> Volver a Matrículas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADVERTENCIAS DE SOLAPAMIENTO / CRUCES -->
+    {% if cruces %}
+    <div class="alert alert-warning border-0 rounded-4 p-3.5 mb-4 shadow-sm" style="background: #fffbeb; border-left: 5px solid #f59e0b !important;">
+        <div class="d-flex align-items-start gap-3">
+            <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+            <div>
+                <strong class="d-block text-dark mb-1">Advertencia de Cruce en Períodos:</strong>
+                <ul class="mb-0 small text-dark ps-3">
+                    {% for c in cruces %}
+                    <li>{{ c }}</li>
+                    {% endfor %}
+                </ul>
+                <small class="text-muted mt-1 d-block">Por favor ajusta las fechas para garantizar que no exista solapamiento entre períodos lectivos.</small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- LAS 4 TARJETAS DE PERÍODOS ACADÉMICOS -->
+    <div class="row g-4 mb-4">
+        {% for p in periodos %}
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="periodo-card h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <!-- Encabezado de la Tarjeta -->
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="badge rounded-pill px-3 py-1.5 periodo-header-badge">
+                            {{ p.nombre }}
+                        </span>
+                        {% if p.cerrado %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold badge-cerrado">
+                                <i class="bi bi-lock-fill me-1"></i> Cerrado
+                            </span>
+                        {% elif p.estado == 'En Curso' %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold badge-en-curso">
+                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> En Curso
+                            </span>
+                        {% elif p.estado == 'Pendiente' %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold badge-pendiente">
+                                <i class="bi bi-hourglass-split me-1"></i> Pendiente
+                            </span>
+                        {% else %}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-bold badge-finalizado">
+                                <i class="bi bi-check-all me-1"></i> Finalizado
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Datos del período -->
+                    <h5 class="fw-bold text-dark mb-2" style="font-size: 1.15rem;">
+                        {{ p.nombre }}
+                    </h5>
+                    
+                    <div class="mb-3 small">
+                        <div class="text-muted mb-1 d-flex align-items-center gap-1.5">
+                            <i class="bi bi-calendar-event text-secondary"></i>
+                            <span>Inicio:</span>
+                            <strong class="text-dark">{{ p.fecha_inicio|date:"d/m/Y" }}</strong>
+                        </div>
+                        <div class="text-muted mb-1 d-flex align-items-center gap-1.5">
+                            <i class="bi bi-calendar-check text-secondary"></i>
+                            <span>Fin:</span>
+                            <strong class="text-dark">{{ p.fecha_fin|date:"d/m/Y" }}</strong>
+                        </div>
+                        <div class="text-muted d-flex align-items-center gap-1.5">
+                            <i class="bi bi-pie-chart-fill text-secondary"></i>
+                            <span>Ponderación:</span>
+                            <strong class="text-dark">{{ p.porcentaje|floatformat:0 }}%</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón para Editar Período -->
+                <div class="pt-3 border-top" style="border-color: var(--cafe-borde) !important;">
+                    <button type="button" class="btn btn-sm w-100 rounded-pill py-2 fw-bold text-white d-flex align-items-center justify-content-center gap-1.5"
+                            style="background: var(--cafe-principal); border: none;"
+                            data-bs-toggle="modal" data-bs-target="#modalEditarPeriodo{{ p.id }}">
+                        <i class="bi bi-pencil-square"></i> Editar Fechas
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE EDICIÓN PARA CADA PERÍODO -->
+        <div class="modal fade" id="modalEditarPeriodo{{ p.id }}" tabindex="-1" aria-labelledby="modalLabel{{ p.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <div class="modal-header text-white p-3.5" style="background: linear-gradient(135deg, #5a3825, #8B5E3C); border-radius: 16px 16px 0 0;">
+                        <h6 class="modal-title fw-bold" id="modalLabel{{ p.id }}">
+                            <i class="bi bi-calendar3 me-1.5"></i> Editar Fechas: {{ p.nombre }}
+                        </h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="{% url 'configurar_periodos_academicos' %}?anio={{ anio_sel }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="periodo_id" value="{{ p.id }}">
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">Fecha de Inicio *</label>
+                                <input type="date" name="fecha_inicio" class="form-control rounded-3" value="{{ p.fecha_inicio|date:'Y-m-d' }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">Fecha de Finalización *</label>
+                                <input type="date" name="fecha_fin" class="form-control rounded-3" value="{{ p.fecha_fin|date:'Y-m-d' }}" required>
+                                <small class="text-muted d-block mt-1">La fecha de finalización debe ser posterior o igual a la de inicio.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">Ponderación Académica (%)</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.5" min="1" max="100" name="porcentaje" class="form-control rounded-start-3" value="{{ p.porcentaje|floatformat:1 }}" required>
+                                    <span class="input-group-text rounded-end-3 bg-light">%</span>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch p-3 rounded-3" style="background: #FAF8F5; border: 1px solid var(--cafe-borde);">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="switchCerrado{{ p.id }}" name="cerrado" value="1" {% if p.cerrado %}checked{% endif %}>
+                                <label class="form-check-label fw-bold small text-dark" for="switchCerrado{{ p.id }}">
+                                    Cerrar formalmente este período
+                                </label>
+                                <small class="text-muted d-block mt-0.5 ps-4">
+                                    Si se activa, los docentes no podrán editar ni agregar calificaciones para este período.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="modal-footer p-3 bg-light border-top" style="border-radius: 0 0 16px 16px;">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-sm text-white rounded-pill px-4 fw-bold" style="background: var(--cafe-principal);">
+                                <i class="bi bi-check2-circle me-1"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- TABLA RESUMEN Y REGLAS DE NEGOCIO -->
+    <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--cafe-borde) !important;">
+        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: var(--cafe-borde) !important;">
+            <i class="bi bi-info-circle-fill fs-5" style="color: var(--cafe-principal);"></i>
+            <h6 class="fw-bold text-dark mb-0">Reglas Oficiales del Sistema de Calificaciones EduNova</h6>
+        </div>
+        <div class="row g-3 small text-muted">
+            <div class="col-md-6">
+                <div class="p-3 rounded-3" style="background: var(--cafe-crema); border: 1px solid var(--cafe-borde);">
+                    <strong class="text-dark d-block mb-1"><i class="bi bi-award me-1" style="color: var(--cafe-principal);"></i> Escala Valorativa Nacional (Decreto 1290):</strong>
+                    <ul class="mb-0 ps-3">
+                        <li><strong>Superior:</strong> 4.6 a 5.0 (Rendimiento excepcional)</li>
+                        <li><strong>Alto:</strong> 4.0 a 4.5 (Criterios alcanzados satisfactoriamente)</li>
+                        <li><strong>Básico:</strong> 3.0 a 3.9 (Desempeño mínimo aprobatorio)</li>
+                        <li><strong>Bajo:</strong> 1.0 a 2.9 (Requiere plan de mejoramiento pedagógico)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 rounded-3" style="background: var(--cafe-crema); border: 1px solid var(--cafe-borde);">
+                    <strong class="text-dark d-block mb-1"><i class="bi bi-shield-lock me-1" style="color: var(--cafe-principal);"></i> Inmutabilidad y Cierre de Períodos:</strong>
+                    <p class="mb-1">
+                        Cada período se distribuye equitativamente (25% cada uno) para conformar el 100% del año lectivo.
+                    </p>
+                    <p class="mb-0">
+                        Al marcar un período como <strong>Cerrado</strong>, el sistema bloquea de inmediato la carga de notas para preservar la validez legal de las actas y boletines emitidos.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

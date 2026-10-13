@@ -16,7 +16,11 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-sinetec-adsi-magdalen
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS_ENV = config('ALLOWED_HOSTS', default='')
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',') if h.strip()]
+else:
+    ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.onrender.com',
@@ -25,6 +29,11 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]
+CSRF_TRUSTED_ORIGINS_ENV = config('CSRF_TRUSTED_ORIGINS', default='')
+if CSRF_TRUSTED_ORIGINS_ENV:
+    for origin in CSRF_TRUSTED_ORIGINS_ENV.split(','):
+        if origin.strip() and origin.strip() not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin.strip())
 
 CSRF_FAILURE_VIEW = 'usuarios.views.csrf_failure'
 CSRF_COOKIE_HTTPONLY = False
@@ -32,6 +41,14 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+    SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+    CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
 
 # Application definition
 INSTALLED_APPS = [
@@ -81,9 +98,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sinetec_project.wsgi.application'
 
-# Database: Detección inteligente para despliegue Cloud (Render) y Desarrollo Local
+# Database: Detección inteligente para Producción (MySQL), Cloud (DATABASE_URL) y Desarrollo
 DATABASE_URL = config('DATABASE_URL', default=None)
-IS_CLOUD = os.environ.get('RENDER') == 'true' or bool(os.environ.get('DYNO')) or sys.platform != 'win32'
+USE_SQLITE = config('USE_SQLITE', default=False, cast=bool)
+IS_CLOUD_DEFAULT = os.environ.get('RENDER') == 'true' or bool(os.environ.get('DYNO'))
 
 if DATABASE_URL and dj_database_url:
     DATABASES = {
@@ -93,7 +111,7 @@ if DATABASE_URL and dj_database_url:
             conn_health_checks=True,
         )
     }
-elif IS_CLOUD:
+elif USE_SQLITE or (IS_CLOUD_DEFAULT and not config('DB_HOST', default=None)):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

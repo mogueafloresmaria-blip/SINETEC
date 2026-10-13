@@ -385,9 +385,9 @@
 
             <!-- Navegación Estructurada y Filtrada Exclusivamente por Rol -->
             <nav class="sinetec-nav">
-                {% if '/familia/' in request.path or request.resolver_match.url_name == 'familia_portal' or request.resolver_match.url_name == 'familia_portal_alt' or request.resolver_match.url_name == 'familia_matricula' or request.resolver_match.url_name == 'familia_boletines' or request.resolver_match.url_name == 'familia_asistencia' %}
-                    <!-- 3. FAMILIA / ACUDIENTE (Solo activo tras consultar estudiante) -->
-                    {% if request.session.estudiante_fam_doc or estudiante_sel %}
+                {% if 'Familia' in rol or 'Acudiente' in rol or '/familia/' in request.path or request.resolver_match.url_name == 'familia_portal' or request.resolver_match.url_name == 'familia_portal_alt' or request.resolver_match.url_name == 'familia_matricula' or request.resolver_match.url_name == 'familia_boletines' or request.resolver_match.url_name == 'familia_asistencia' or request.resolver_match.url_name == 'familia_circulares' %}
+                    <!-- 3. FAMILIA / ACUDIENTE -->
+                    {% if request.session.estudiante_fam_doc or estudiante_sel or 'Familia' in rol or 'Acudiente' in rol %}
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_portal' or request.resolver_match.url_name == 'familia_portal_alt' %}active{% endif %}" href="{% url 'familia_portal' %}">
                             <i class="bi bi-house-heart-fill"></i> Inicio
                         </a>
@@ -401,11 +401,11 @@
                             <i class="bi bi-calendar-check-fill"></i> Asistencia de Hijos
                         </a>
                         <div class="sinetec-nav-label">Comunicación</div>
-                        <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'familia_circulares' or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familia_circulares' %}">
                             <i class="bi bi-megaphone-fill"></i> Circulares Oficiales
                         </a>
                     {% else %}
-                        <!-- Panel lateral completamente VACÍO antes de ingresar documento de estudiante -->
+                        <!-- Panel lateral antes de seleccionar estudiante -->
                     {% endif %}
 
                 {% elif request.user.is_superuser or 'Admin' in rol %}
@@ -463,38 +463,38 @@
                 {% elif 'Estudiante' in rol or 'Aprendiz' in rol or 'Alumno' in rol %}
                     <!-- 2. ESTUDIANTE: MENÚ LATERAL OFICIAL EDUNOVA -->
                     <div class="sinetec-nav-label">Académico</div>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'aprendiz_dashboard' and not request.GET.subpanel %}active{% endif %}" id="student-nav-home" href="{% url 'aprendiz_dashboard' %}">
+                    <a class="nav-link {% if not subpanel_activo or subpanel_activo == 'inicio' %}active{% endif %}" id="student-nav-home" data-subpanel="inicio" href="{% url 'estudiante_dashboard' %}?subpanel=inicio">
                         <i class="bi bi-house-door-fill"></i> Inicio
                     </a>
-                    <a class="nav-link" id="student-nav-perfil" href="{% url 'aprendiz_dashboard' %}#tab-perfil">
+                    <a class="nav-link {% if subpanel_activo == 'perfil' %}active{% endif %}" id="student-nav-perfil" data-subpanel="perfil" href="{% url 'estudiante_dashboard' %}?subpanel=perfil">
                         <i class="bi bi-person-circle"></i> Mi Perfil
                     </a>
-                    <a class="nav-link" id="student-nav-horario" href="{% url 'aprendiz_dashboard' %}#tab-horario">
+                    <a class="nav-link {% if subpanel_activo == 'horario' %}active{% endif %}" id="student-nav-horario" data-subpanel="horario" href="{% url 'estudiante_dashboard' %}?subpanel=horario">
                         <i class="bi bi-calendar2-week-fill"></i> Mi Horario
                     </a>
-                    <a class="nav-link" id="student-nav-asignaturas" href="{% url 'aprendiz_dashboard' %}#tab-asignaturas">
-                        <i class="bi bi-book-half"></i> Asignaturas y Docentes
+                    <a class="nav-link {% if subpanel_activo == 'asignaturas' %}active{% endif %}" id="student-nav-asignaturas" data-subpanel="asignaturas" href="{% url 'estudiante_dashboard' %}?subpanel=asignaturas">
+                        <i class="bi bi-book-half"></i> Mis Asignaturas
                     </a>
-                    <a class="nav-link" id="student-nav-calificaciones" href="{% url 'aprendiz_dashboard' %}#tab-calificaciones">
-                        <i class="bi bi-mortarboard-fill"></i> Calificaciones
+                    <a class="nav-link {% if subpanel_activo == 'calificaciones' %}active{% endif %}" id="student-nav-calificaciones" data-subpanel="calificaciones" href="{% url 'estudiante_dashboard' %}?subpanel=calificaciones">
+                        <i class="bi bi-mortarboard-fill"></i> Mis Calificaciones
                     </a>
-                    <a class="nav-link" id="student-nav-asistencia" href="{% url 'aprendiz_dashboard' %}#tab-asistencia">
-                        <i class="bi bi-check2-square"></i> Asistencia
-                    </a>
-                    <a class="nav-link" id="student-nav-actividades" href="{% url 'aprendiz_dashboard' %}#tab-actividades">
+                    <a class="nav-link {% if subpanel_activo == 'actividades' %}active{% endif %}" id="student-nav-actividades" data-subpanel="actividades" href="{% url 'estudiante_dashboard' %}?subpanel=actividades">
                         <i class="bi bi-pencil-square"></i> Tareas y Actividades
                     </a>
-                    <a class="nav-link" id="student-nav-temas" href="{% url 'aprendiz_dashboard' %}#tab-temas">
+                    <a class="nav-link {% if subpanel_activo == 'asistencia' %}active{% endif %}" id="student-nav-asistencia" data-subpanel="asistencia" href="{% url 'estudiante_dashboard' %}?subpanel=asistencia">
+                        <i class="bi bi-check2-square"></i> Asistencia
+                    </a>
+                    <a class="nav-link {% if subpanel_activo == 'temas' %}active{% endif %}" id="student-nav-temas" data-subpanel="temas" href="{% url 'estudiante_dashboard' %}?subpanel=temas">
                         <i class="bi bi-journal-text"></i> Temas Publicados
                     </a>
                     <div class="sinetec-nav-label">Comunicación & Recursos</div>
-                    <a class="nav-link" id="student-nav-comunicaciones" href="{% url 'aprendiz_dashboard' %}#tab-comunicaciones">
+                    <a class="nav-link {% if subpanel_activo == 'comunicaciones' %}active{% endif %}" id="student-nav-comunicaciones" data-subpanel="comunicaciones" href="{% url 'estudiante_dashboard' %}?subpanel=comunicaciones">
                         <i class="bi bi-chat-dots-fill"></i> Comunicaciones
                     </a>
-                    <a class="nav-link" id="student-nav-notificaciones" href="{% url 'aprendiz_dashboard' %}#tab-notificaciones">
+                    <a class="nav-link {% if subpanel_activo == 'notificaciones' %}active{% endif %}" id="student-nav-notificaciones" data-subpanel="notificaciones" href="{% url 'estudiante_dashboard' %}?subpanel=notificaciones">
                         <i class="bi bi-bell-fill"></i> Notificaciones
                     </a>
-                    <a class="nav-link" id="student-nav-documentos" href="{% url 'aprendiz_dashboard' %}#tab-documentos">
+                    <a class="nav-link {% if subpanel_activo == 'documentos' %}active{% endif %}" id="student-nav-documentos" data-subpanel="documentos" href="{% url 'estudiante_dashboard' %}?subpanel=documentos">
                         <i class="bi bi-file-earmark-text-fill"></i> Documentos
                     </a>
 

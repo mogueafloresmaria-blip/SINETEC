@@ -854,3 +854,99 @@ class ComunicacionMensaje(models.Model):
         verbose_name = "Comunicación"
         verbose_name_plural = "Comunicaciones"
         ordering = ['-fecha_envio']
+
+
+class PeriodoAcademico(models.Model):
+    """
+    Períodos académicos oficiales configurables por año lectivo (Período 1, 2, 3, 4).
+    RN: Cuatro períodos por año lectivo, fecha inicio y fin editables desde la interfaz,
+    validación fecha_fin >= fecha_inicio, advertencia de cruces y estados dinámicos
+    (Pendiente, En Curso, Finalizado, Cerrado).
+    """
+    NUMERO_CHOICES = [
+        (1, 'Período 1'),
+        (2, 'Período 2'),
+        (3, 'Período 3'),
+        (4, 'Período 4'),
+    ]
+    anio_lectivo = models.CharField(max_length=10, default='2026', verbose_name="Año Lectivo")
+    numero = models.PositiveSmallIntegerField(choices=NUMERO_CHOICES, default=1, verbose_name="Número de Período")
+    nombre = models.CharField(max_length=50, blank=True, verbose_name="Nombre Oficial")
+    fecha_inicio = models.DateField(verbose_name="Fecha de Inicio")
+    fecha_fin = models.DateField(verbose_name="Fecha de Finalización")
+    cerrado = models.BooleanField(default=False, verbose_name="¿Cerrado Formalmente para Calificaciones?")
+    porcentaje = models.DecimalField(max_digits=5, decimal_places=2, default=25.00, verbose_name="Porcentaje / Ponderación (%)")
+
+    class Meta:
+        verbose_name = "Período Académico"
+        verbose_name_plural = "Períodos Académicos"
+        ordering = ['anio_lectivo', 'numero']
+        constraints = [
+            models.UniqueConstraint(fields=['anio_lectivo', 'numero'], name='periodo_academico_unico_anio_numero')
+        ]
+
+    def clean(self):
+        if self.fecha_inicio and self.fecha_fin and self.fecha_fin < self.fecha_inicio:
+            raise ValidationError("La fecha de finalización no puede ser anterior a la fecha de inicio.")
+
+    def save(self, *args, **kwargs):
+        if not self.nombre:
+            self.nombre = f"Período {self.numero}"
+        self.clean()
+        super().save(*args, **kwargs)
+
+    @property
+    def codigo_periodo(self):
+        return f"Periodo {self.numero}"
+
+    @property
+    def estado(self):
+        if self.cerrado:
+            return "Cerrado"
+        from django.utils import timezone
+        hoy = timezone.localdate()
+        if hoy < self.fecha_inicio:
+            return "Pendiente"
+        elif self.fecha_inicio <= hoy <= self.fecha_fin:
+            return "En Curso"
+        else:
+            return "Finalizado"
+
+    def __str__(self):
+        return f"{self.nombre} ({self.anio_lectivo}) [{self.estado}]"
+
+    @classmethod
+    def obtener_periodos_anio(cls, anio='2026'):
+        from datetime import date
+        periodos = list(cls.objects.filter(anio_lectivo=anio).order_by('numero'))
+        if not periodos:
+            defaults = [
+                (1, date(int(anio), 1, 20), date(int(anio), 4, 3)),
+                (2, date(int(anio), 4, 6), date(int(anio), 6, 19)),
+                (3, date(int(anio), 7, 6), date(int(anio), 9, 18)),
+                (4, date(int(anio), 9, 21), date(int(anio), 11, 27)),
+            ]
+            for num, f_ini, f_fin in defaults:
+                cls.objects.create(
+                    anio_lectivo=anio,
+                    numero=num,
+                    nombre=f"Período {num}",
+                    fecha_inicio=f_ini,
+                    fecha_fin=f_fin,
+                    porcentaje=25.00
+                )
+            periodos = list(cls.objects.filter(anio_lectivo=anio).order_by('numero'))
+        return periodos
+
+    @classmethod
+    def validar_cruces(cls, anio='2026'):
+        periodos = cls.objects.filter(anio_lectivo=anio).order_by('fecha_inicio')
+        cruces = []
+        lista = list(periodos)
+        for i in range(len(lista)):
+            for j in range(i + 1, len(lista)):
+                p1, p2 = lista[i], lista[j]
+                if p1.fecha_fin and p2.fecha_inicio and p1.fecha_fin >= p2.fecha_inicio:
+                    cruces.append(f"{p1.nombre} ({p1.fecha_inicio} a {p1.fecha_fin}) se cruza con {p2.nombre} ({p2.fecha_inicio} a {p2.fecha_fin})")
+        return cruces
+
