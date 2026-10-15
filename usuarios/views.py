@@ -217,10 +217,13 @@ def recuperar_contrasena(request):
 
         if identificador:
             id_limpio = identificador.replace('.', '').replace('-', '').replace(' ', '')
+            
+            # Validar contra la base de datos real
             u = User.objects.filter(
-                Q(username__iexact=identificador) |
                 Q(perfil__numero_documento=identificador) |
                 Q(perfil__numero_documento=id_limpio) |
+                Q(username__iexact=identificador) |
+                Q(username__iexact=id_limpio) |
                 Q(email__iexact=identificador)
             ).first()
 
@@ -242,13 +245,26 @@ def recuperar_contrasena(request):
                         )
                     except Exception:
                         pass
-
-            mensaje_exito = 'Si existe una cuenta activa asociada a este identificador, enviamos un enlace de recuperación.'
+                    
+                    # Enmascarar el correo para privacidad
+                    partes = u.email.split('@')
+                    user_part = partes[0]
+                    domain_part = partes[1] if len(partes) > 1 else ''
+                    enmascarado = f"{user_part[:2]}***@{domain_part}" if len(user_part) >= 2 else f"{user_part}***@{domain_part}"
+                    mensaje_exito = f"Se ha enviado el enlace de recuperación al correo registrado ({enmascarado}). Por favor revisa tu bandeja de entrada o spam para restablecer tu contraseña."
+                else:
+                    mensaje_exito = "Cuenta localizada con éxito en el sistema. Puedes restablecer tu contraseña a continuación."
+            else:
+                # Si la cuenta NO existe: NO SIMULAR EL ENVÍO
+                mensaje_error = f"No se encontró ninguna cuenta registrada con el número de identificación \"{identificador}\". Por favor verifica el número o comunícate con la Secretaría Académica."
+        elif not nueva_clave:
+            mensaje_error = "Por favor ingresa tu número de identificación."
 
     return render(request, 'usuarios/recuperar_contrasena.html', {
         'mensaje_exito': mensaje_exito,
         'mensaje_error': mensaje_error,
         'reset_directo_url': reset_directo_url,
+        'identificador_previo': identificador if mensaje_error else '',
     })
 
 

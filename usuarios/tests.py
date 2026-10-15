@@ -159,7 +159,7 @@ class UsuarioModelTest(TestCase):
             'identificador': usuario.username,
         })
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Si existe una cuenta activa')
+        self.assertContains(response, 'Se ha enviado el enlace de recuperación al correo registrado')
         self.assertNotContains(response, usuario.username)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [usuario.email])
@@ -186,7 +186,7 @@ class UsuarioModelTest(TestCase):
         respuesta_usuario_inexistente = self.client.post('/recuperar-contrasena/', {
             'identificador': 'no-existe',
         })
-        self.assertContains(respuesta_usuario_inexistente, 'Si existe una cuenta activa')
+        self.assertContains(respuesta_usuario_inexistente, 'No se encontró ninguna cuenta registrada')
         self.assertEqual(len(mail.outbox), 1)
 
     def test_login_rechaza_redireccion_externa_en_next(self):
