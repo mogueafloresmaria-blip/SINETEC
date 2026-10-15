@@ -185,13 +185,15 @@ def custom_logout_view(request):
 def recuperar_contrasena(request):
     """
     Portal oficial de recuperación de credenciales EduNova.
-    Envía enlace seguro de recuperación por token al correo electrónico registrado.
+    Envía enlace seguro de recuperación por token al correo electrónico registrado
+    y genera acceso directo para entornos de evaluación y soporte institucional.
     """
     if request.user.is_authenticated:
         return redirect('dashboard')
 
     mensaje_exito = None
     mensaje_error = None
+    reset_directo_url = None
 
     if request.method == 'POST':
         identificador = request.POST.get('identificador', '').strip()
@@ -214,34 +216,39 @@ def recuperar_contrasena(request):
                     return redirect('login_short')
 
         if identificador:
+            id_limpio = identificador.replace('.', '').replace('-', '').replace(' ', '')
             u = User.objects.filter(
                 Q(username__iexact=identificador) |
                 Q(perfil__numero_documento=identificador) |
+                Q(perfil__numero_documento=id_limpio) |
                 Q(email__iexact=identificador)
             ).first()
 
-            if u and u.email:
+            if u:
                 uid = urlsafe_base64_encode(force_bytes(u.pk))
                 token = default_token_generator.make_token(u)
-                reset_url = request.build_absolute_uri(
-                    reverse('confirmar_recuperacion', kwargs={'uidb64': uid, 'token': token})
-                )
-                try:
-                    send_mail(
-                        'Restablecer contraseña - EduNova',
-                        f'Sigue este enlace para restablecer tu contraseña: {reset_url}',
-                        getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@edunova.edu'),
-                        [u.email],
-                        fail_silently=False
-                    )
-                except Exception:
-                    pass
+                reset_path = reverse('confirmar_recuperacion', kwargs={'uidb64': uid, 'token': token})
+                reset_url = request.build_absolute_uri(reset_path)
+                reset_directo_url = reset_path
+
+                if u.email:
+                    try:
+                        send_mail(
+                            'Restablecer contraseña - EduNova',
+                            f'Sigue este enlace para restablecer tu contraseña: {reset_url}',
+                            getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@edunova.edu'),
+                            [u.email],
+                            fail_silently=False
+                        )
+                    except Exception:
+                        pass
 
             mensaje_exito = 'Si existe una cuenta activa asociada a este identificador, enviamos un enlace de recuperación.'
 
     return render(request, 'usuarios/recuperar_contrasena.html', {
         'mensaje_exito': mensaje_exito,
         'mensaje_error': mensaje_error,
+        'reset_directo_url': reset_directo_url,
     })
 
 
@@ -520,13 +527,14 @@ def dashboard(request):
     total_programas = ProgramaFormacion.objects.count()
     total_fichas = Ficha.objects.count()
     fichas_activas = Ficha.objects.filter(estado='En Ejecucion').count()
-    total_aprendices = Matricula.objects.count()
-    aprendices_activos = Matricula.objects.filter(estado_formacion='En Formacion').count()
-    matriculas_anio = Matricula.objects.filter(fecha_matricula__year=ano_actual).count()
+    total_aprendices = Matricula.objects.filter(estado_formacion__in=['En Formacion', 'Activo'], aprendiz__is_active=True).count()
+    aprendices_activos = Matricula.objects.filter(estado_formacion='En Formacion', aprendiz__is_active=True).count()
+    matriculas_anio = Matricula.objects.filter(fecha_matricula__year=ano_actual, estado_formacion__in=['En Formacion', 'Activo'], aprendiz__is_active=True).count()
     total_instructores = User.objects.filter(
-        Q(perfil__rol__nombre__icontains='Instructor') |
         Q(perfil__rol__nombre__icontains='Docente') |
-        Q(fichas_asignadas__isnull=False)
+        Q(perfil__rol__nombre__icontains='Profesor') |
+        Q(perfil__rol__nombre__icontains='Instructor'),
+        is_active=True
     ).distinct().count()
     total_contactos = ContactoInstitucional.objects.count()
     total_seguimientos = BitacoraSeguimiento.objects.count()
@@ -540,8 +548,8 @@ def dashboard(request):
     proximos_eventos = EventoCalendario.objects.filter(fecha__gte=hoy).order_by('fecha', 'hora')[:5]
 
     # Datos para gráficas del panel de inicio (estilo escolar)
-    grado_10 = Matricula.objects.filter(estado_formacion='En Formacion', grado_escolar='10').count()
-    grado_11 = Matricula.objects.filter(estado_formacion='En Formacion', grado_escolar='11').count()
+    grado_10 = Matricula.objects.filter(estado_formacion='En Formacion', aprendiz__is_active=True, grado_escolar__icontains='10').count()
+    grado_11 = Matricula.objects.filter(estado_formacion='En Formacion', aprendiz__is_active=True, grado_escolar__icontains='11').count()
     chart_alumnado_nivel = {
         'labels': ['Grado 10\u00b0', 'Grado 11\u00b0'],
         'data': [grado_10, grado_11]
@@ -602,7 +610,10 @@ def dashboard(request):
         'institucion', 'programa', 'instructor_lider'
     ).order_by('-id')[:5]
 
-    ultimas_matriculas = Matricula.objects.select_related(
+    ultimas_matriculas = Matricula.objects.filter(
+        estado_formacion__in=['En Formacion', 'Activo'],
+        aprendiz__is_active=True
+    ).select_related(
         'aprendiz', 'ficha', 'ficha__programa', 'ficha__institucion'
     ).order_by('-fecha_matricula', '-id')[:8]
 
@@ -4490,7 +4501,7 @@ def instructor_dashboard(request):
                 usuario=estudiante,
                 titulo=f"{'Calificación' if estado_calif == 'CALIFICADA' else 'Devolución'}: {tarea_obj.titulo[:100]}",
                 mensaje=f"{msg_notif} {retro_val}",
-                enlace="/aprendiz/",
+                enlace="/estudiante/?subpanel=actividades",
                 tipo=tipo_notif
             )
             messages.success(request, f'Entrega de {estudiante.get_full_name()} {"calificada exitosamente" if estado_calif == "CALIFICADA" else "devuelta para corrección"}.')
@@ -4681,6 +4692,7 @@ def instructor_dashboard(request):
                             usuario=m.aprendiz,
                             titulo=f"Calificación publicada: {tarea_obj.titulo}",
                             mensaje=f"Tu nota en '{tarea_obj.titulo}' es {nota_num}/5.0. {retro_val}",
+                            enlace="/estudiante/?subpanel=calificaciones",
                             tipo='success' if nota_num >= 3.0 else 'warning'
                         )
 
@@ -4745,6 +4757,15 @@ def instructor_dashboard(request):
                         except Exception:
                             nota_num = 4.0
 
+                        if nota_num >= 4.6:
+                            desemp_v = 'Superior'
+                        elif nota_num >= 4.0:
+                            desemp_v = 'Alto'
+                        elif nota_num >= 3.0:
+                            desemp_v = 'Básico'
+                        else:
+                            desemp_v = 'Bajo'
+
                         CalificacionEscolar.objects.update_or_create(
                             matricula=m,
                             carga_academica=c_obj,
@@ -4752,6 +4773,7 @@ def instructor_dashboard(request):
                             defaults={
                                 'profesor': request.user,
                                 'nota': nota_num,
+                                'desempeno': desemp_v,
                                 'observaciones': obs_v or 'Calificación asignada en planilla oficial',
                             }
                         )
@@ -4766,6 +4788,15 @@ def instructor_dashboard(request):
                                     'estado': estado_v,
                                     'observaciones': f"[{periodo_n}] Nota: {nota_num} · {obs_v}" if obs_v else f"[{periodo_n}] Nota: {nota_num}"
                                 }
+                            )
+                        if m.aprendiz:
+                            asig_nom = c_obj.programa.denominacion if (c_obj and c_obj.programa) else 'Asignatura'
+                            Notificacion.objects.create(
+                                usuario=m.aprendiz,
+                                titulo=f"Calificación Registrada: {asig_nom} ({periodo_n})",
+                                mensaje=f"Tu docente {request.user.get_full_name() or request.user.username} ha registrado tu calificación de {nota_num}/5.0 en {asig_nom} ({periodo_n}).",
+                                enlace="/estudiante/?subpanel=calificaciones",
+                                tipo='success' if nota_num >= 3.0 else 'warning'
                             )
                         guardadas_n += 1
                 messages.success(request, f"Planilla de calificaciones del {periodo_n} guardada correctamente ({guardadas_n} alumnos calificados).")
@@ -5366,18 +5397,20 @@ def instructor_dashboard(request):
     # Horarios del docente
     hoy_date = timezone.localdate()
     hora_actual = timezone.localtime().time()
-    dia_num = str(hoy_date.weekday() + 1) if hoy_date.weekday() < 5 else '1'
     clases_qs = HorarioFicha.objects.filter(instructor=request.user, activo=True).order_by('dia', 'hora_inicio')
 
-    clases_hoy = clases_qs.filter(dia=dia_num)
-    if not clases_hoy.exists():
-        clases_hoy = clases_qs
+    if hoy_date.weekday() < 5:
+        dia_num = str(hoy_date.weekday() + 1)
+        clases_hoy = clases_qs.filter(dia=dia_num)
+    else:
+        dia_num = None
+        clases_hoy = HorarioFicha.objects.none()
 
     dias_con_clases = [
         {
             'codigo': d_cod,
             'nombre': d_nom,
-            'es_hoy': (dia_num == d_cod),
+            'es_hoy': (dia_num == d_cod) if dia_num else False,
             'clases': list(clases_qs.filter(dia=d_cod))
         }
         for d_cod, d_nom in [('1', 'Lunes'), ('2', 'Martes'), ('3', 'Miércoles'), ('4', 'Jueves'), ('5', 'Viernes')]
@@ -5494,11 +5527,16 @@ def instructor_dashboard(request):
     for c in cargas_unicas:
         g_num_c = ''.join(ch for ch in str(c.grado) if ch.isdigit())
         mats_c = list(Matricula.objects.filter(
-            grado_escolar__icontains=g_num_c, seccion=c.seccion
+            grado_escolar__icontains=g_num_c,
+            seccion=c.seccion,
+            estado_formacion__in=['En Formacion', 'Activo'],
+            aprendiz__is_active=True
         ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name'))
         if not mats_c:
             mats_c = list(Matricula.objects.filter(
-                grado_escolar__icontains=g_num_c
+                grado_escolar__icontains=g_num_c,
+                estado_formacion__in=['En Formacion', 'Activo'],
+                aprendiz__is_active=True
             ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name'))
 
         for m in mats_c:
@@ -5525,18 +5563,14 @@ def instructor_dashboard(request):
             'estudiantes': mats_c
         })
 
-    # Obtener todas las matrículas reales de los grupos asignados al docente (Grados 10° y 11°)
+    # Obtener todas las matrículas reales y activas de los grupos asignados al docente
     if todos_mis_estudiantes_map:
         todos_mis_estudiantes = list(todos_mis_estudiantes_map.values())
     else:
         todos_mis_estudiantes = list(Matricula.objects.filter(
-            estado_formacion__in=['En Formacion', 'Activo']
+            estado_formacion__in=['En Formacion', 'Activo'],
+            aprendiz__is_active=True
         ).select_related('aprendiz', 'aprendiz__perfil').order_by('grado_escolar', 'aprendiz__last_name', 'aprendiz__first_name'))
-
-    # Si existen los 4 estudiantes oficiales de prueba (est1..est4), priorizarlos para exactitud de datos
-    est_oficiales = [m for m in todos_mis_estudiantes if m.aprendiz.username in ['est1', 'est2', 'est3', 'est4']]
-    if len(est_oficiales) >= 4:
-        todos_mis_estudiantes = est_oficiales
 
     todos_mis_estudiantes.sort(key=lambda x: (str(x.grado_escolar), x.aprendiz.last_name or '', x.aprendiz.first_name or ''))
 
@@ -5612,18 +5646,14 @@ def instructor_dashboard(request):
             asig_item['grados'].add(g_clean)
         asig_item['secciones'].add(c.seccion or 'A')
 
-        if g_clean == '10':
-            for est_m in estudiantes_grado_10:
-                if est_m.aprendiz_id not in asig_item['estudiantes_ids']:
-                    asig_item['estudiantes_ids'].add(est_m.aprendiz_id)
+        for est_m in getattr(c, 'matriculas_lista', []):
+            if est_m.aprendiz_id not in asig_item['estudiantes_ids']:
+                asig_item['estudiantes_ids'].add(est_m.aprendiz_id)
+                asig_item['estudiantes_todos'].append(est_m)
+                if '10' in str(est_m.grado_escolar):
                     asig_item['estudiantes_10'].append(est_m)
-                    asig_item['estudiantes_todos'].append(est_m)
-        elif g_clean == '11':
-            for est_m in estudiantes_grado_11:
-                if est_m.aprendiz_id not in asig_item['estudiantes_ids']:
-                    asig_item['estudiantes_ids'].add(est_m.aprendiz_id)
+                elif '11' in str(est_m.grado_escolar):
                     asig_item['estudiantes_11'].append(est_m)
-                    asig_item['estudiantes_todos'].append(est_m)
 
     asignaturas_metricas = []
     for prog_id, asig in asignaturas_dict.items():
@@ -5691,7 +5721,7 @@ def instructor_dashboard(request):
         if califs_est:
             estudiante_seleccionado.promedio_calculado = round(sum(c.nota for c in califs_est) / len(califs_est), 1)
         else:
-            estudiante_seleccionado.promedio_calculado = 4.4
+            estudiante_seleccionado.promedio_calculado = None
 
         # 3. Asistencias detalladas y porcentajes
         asists_est = list(AsistenciaAprendiz.objects.filter(matricula=estudiante_seleccionado).order_by('-fecha')[:25])
@@ -5702,12 +5732,12 @@ def instructor_dashboard(request):
         tard_asist = sum(1 for a in asists_est if a.estado == 'T')
         estudiante_seleccionado.asistencias_lista = asists_est
         estudiante_seleccionado.asistencia_stats = {
-            'total': total_asist or 20,
-            'presentes': pres_asist or 19,
-            'ausentes': aus_asist or 1,
-            'justificadas': just_asist or 1,
-            'tardanzas': tard_asist or 0,
-            'porcentaje': round(((pres_asist or 19) / (total_asist or 20)) * 100)
+            'total': total_asist,
+            'presentes': pres_asist,
+            'ausentes': aus_asist,
+            'justificadas': just_asist,
+            'tardanzas': tard_asist,
+            'porcentaje': round((pres_asist / total_asist) * 100) if total_asist > 0 else 0
         }
 
         # 4. Tareas y actividades con estado de entrega y nota
@@ -6044,12 +6074,13 @@ def instructor_dashboard(request):
     notificaciones_docente = list(Notificacion.objects.filter(usuario=request.user).order_by('-fecha_creacion')[:30])
     total_notificaciones_sin_leer = sum(1 for n in notificaciones_docente if not n.leida)
 
-    # Clase actual en curso para el docente
+    # Clase actual en curso para el docente (únicamente si hoy es día lectivo y coincide el bloque de horario)
     clase_actual = None
-    for h in clases_hoy:
-        if h.hora_inicio <= hora_actual <= h.hora_fin:
-            clase_actual = h
-            break
+    if dia_num and clases_hoy.exists():
+        for h in clases_hoy:
+            if h.hora_inicio <= hora_actual <= h.hora_fin:
+                clase_actual = h
+                break
 
     # Papelera de reciclaje completa y real
     if request.user.is_superuser:
@@ -6266,6 +6297,9 @@ def instructor_dashboard(request):
         'total_cursos': len(cargas_unicas),
         'grupos_lista': grupos_lista,
         'guias_biblioteca': guias_biblioteca,
+        'docs_guias': list(GuiaClase.objects.filter(profesor=request.user)) or guias_biblioteca,
+        'docs_material_pedagogico': documentos_lista,
+        'docs_material_apoyo': documentos_lista,
         'mis_documentos': list(GuiaClase.objects.filter(profesor=request.user)) or guias_biblioteca,
         'material_pedagogico': guias_biblioteca,
         'documentos_institucionales': documentos_lista,
@@ -6551,9 +6585,13 @@ def aprendiz_dashboard(request, subpanel_directo=None):
     from academico.models import TareaClase, GuiaClase, MaterialClase, AvisoClase, CargaAcademica, EntregaTarea
 
     if ficha or matricula:
-        pendientes = EvidenciaTaller.objects.filter(
-            Q(ficha=ficha) | Q(ficha__isnull=True)
-        ).exclude(calificaciones__aprendiz=request.user).order_by('fecha_limite') if ficha else EvidenciaTaller.objects.none()
+        es_escolar = bool(getattr(matricula, 'grado_escolar', None))
+        if es_escolar:
+            pendientes = EvidenciaTaller.objects.none()
+        else:
+            pendientes = EvidenciaTaller.objects.filter(
+                Q(ficha=ficha) | Q(ficha__isnull=True)
+            ).exclude(calificaciones__aprendiz=request.user).order_by('fecha_limite') if ficha else EvidenciaTaller.objects.none()
         
         grado_num = ''.join(c for c in str(getattr(matricula, 'grado_escolar', '')) if c.isdigit())
         secc = getattr(matricula, 'seccion', 'A') or 'A'
@@ -6570,16 +6608,89 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         dia_semana_str = str(hoy.isoweekday()) if hoy.isoweekday() <= 5 else '1'
         horarios_hoy = todos_horarios.filter(dia=dia_semana_str)
 
+        dias_semana_nombres = [
+            ('1', 'Lunes'),
+            ('2', 'Martes'),
+            ('3', 'Miércoles'),
+            ('4', 'Jueves'),
+            ('5', 'Viernes'),
+        ]
+        dia_hoy_iso = str(hoy.isoweekday())
+        horario_semanal_grid = []
+        for d_num, d_nom in dias_semana_nombres:
+            bloques_raw = [h for h in todos_horarios if str(h.dia) == d_num]
+            bloques_procesados = []
+            for b in bloques_raw:
+                mat_nombre = (b.nombre_materia or (b.programa.denominacion if b.programa else 'Asignatura')).strip()
+                mat_lower = mat_nombre.lower()
+                if 'matem' in mat_lower:
+                    theme = {
+                        'bg': '#ffedd5',
+                        'border': '#fed7aa',
+                        'pill_bg': '#fed7aa',
+                        'pill_color': '#c2410c',
+                    }
+                elif any(k in mat_lower for k in ['infor', 'tecno', 'software', 'sistema', 'comput']):
+                    theme = {
+                        'bg': '#e0f2fe',
+                        'border': '#bae6fd',
+                        'pill_bg': '#bae6fd',
+                        'pill_color': '#0369a1',
+                    }
+                elif any(k in mat_lower for k in ['lengua', 'castell', 'españ', 'human']):
+                    theme = {
+                        'bg': '#f3e8ff',
+                        'border': '#e9d5ff',
+                        'pill_bg': '#e9d5ff',
+                        'pill_color': '#7e22ce',
+                    }
+                elif 'ingl' in mat_lower:
+                    theme = {
+                        'bg': '#dcfce7',
+                        'border': '#bbf7d0',
+                        'pill_bg': '#bbf7d0',
+                        'pill_color': '#15803d',
+                    }
+                elif any(k in mat_lower for k in ['físi', 'fisi', 'quím', 'quim', 'biol', 'cien']):
+                    theme = {
+                        'bg': '#fee2e2',
+                        'border': '#fecaca',
+                        'pill_bg': '#fecaca',
+                        'pill_color': '#b91c1c',
+                    }
+                else:
+                    theme = {
+                        'bg': '#fef3c7',
+                        'border': '#fde68a',
+                        'pill_bg': '#fde68a',
+                        'pill_color': '#b45309',
+                    }
+                b.theme = theme
+                b.materia_titulo = mat_nombre
+                bloques_procesados.append(b)
+
+            horario_semanal_grid.append({
+                'numero': d_num,
+                'nombre': d_nom,
+                'es_hoy': (d_num == dia_hoy_iso),
+                'bloques': bloques_procesados,
+            })
+
         cargas_estudiante = CargaAcademica.objects.filter(
             Q(grado__icontains=grado_num),
             Q(seccion__iexact=secc) | Q(seccion__isnull=True) | Q(seccion='')
         ).select_related('profesor', 'programa')
 
         # Tareas publicadas no entregadas por este estudiante
+        entregadas_ids = EntregaTarea.objects.filter(
+            estudiante=request.user,
+            estado__in=['ENTREGADA', 'CALIFICADA', 'DEVUELTA']
+        ).values_list('tarea_id', flat=True)
+
         tareas_clase_list = list(TareaClase.objects.filter(
             carga_academica__in=cargas_estudiante,
             estado='Publicada'
-        ).exclude(entregas__estudiante=request.user).select_related('carga_academica', 'carga_academica__profesor', 'carga_academica__programa').order_by('-fecha_publicacion'))
+        ).exclude(id__in=entregadas_ids).select_related('carga_academica', 'carga_academica__profesor', 'carga_academica__programa').order_by('-fecha_publicacion'))
         for t in tareas_clase_list:
             t.esta_vencida = bool(t.fecha_limite and timezone.now() > t.fecha_limite)
         tareas_clase = tareas_clase_list
@@ -6587,12 +6698,17 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         materiales_clase = MaterialClase.objects.filter(carga_academica__in=cargas_estudiante).order_by('-fecha_publicacion')
         avisos_clase = AvisoClase.objects.filter(carga_academica__in=cargas_estudiante).order_by('-fecha_publicacion')
         
-        entregas_tareas_clase = EntregaTarea.objects.filter(estudiante=request.user).select_related('tarea').order_by('-fecha_entrega')
+        entregas_tareas_clase = EntregaTarea.objects.filter(
+            estudiante=request.user
+        ).exclude(estado='PENDIENTE').select_related(
+            'tarea', 'tarea__carga_academica', 'tarea__carga_academica__profesor', 'tarea__carga_academica__programa'
+        ).order_by('-fecha_entrega')
 
     else:
         pendientes = EvidenciaTaller.objects.none()
         todos_horarios = HorarioFicha.objects.none()
         horarios_hoy = []
+        horario_semanal_grid = []
         cargas_estudiante = CargaAcademica.objects.none()
         tareas_clase = []
         guias_clase = []
@@ -6610,14 +6726,14 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         asistencias_a = asistencias_qs.filter(estado='A').count()
         asistencias_j = asistencias_qs.filter(estado='J').count()
         total_asist = asistencias_p + asistencias_a + asistencias_j
-        porcentaje_asistencia = round((asistencias_p / total_asist * 100), 1) if total_asist > 0 else 100.0
+        porcentaje_asistencia = round((asistencias_p / total_asist * 100), 1) if total_asist > 0 else None
         historial_asistencias = asistencias_qs.select_related('registrado_por').order_by('-fecha')[:20]
 
         juicios = JuicioEvaluativo.objects.filter(matricula=matricula).select_related('resultado_aprendizaje', 'instructor')
         juicios_aprobados = juicios.filter(juicio_valor='A').count()
         juicios_deficientes = juicios.filter(juicio_valor='D').count()
         total_j = juicios.count()
-        progreso_global = min(100, int((juicios_aprobados / max(1, total_j)) * 100)) if total_j > 0 else 100
+        progreso_global = min(100, int((juicios_aprobados / max(1, total_j)) * 100)) if total_j > 0 else None
 
         semaforo_list = SemaforoCompetencia.objects.filter(matricula=matricula).select_related(
             'competencia', 'resultado_aprendizaje', 'profesor'
@@ -6629,12 +6745,12 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         asistencias_p = 0
         asistencias_a = 0
         asistencias_j = 0
-        porcentaje_asistencia = 100.0
+        porcentaje_asistencia = None
         historial_asistencias = []
         juicios = []
         juicios_aprobados = 0
         juicios_deficientes = 0
-        progreso_global = 100
+        progreso_global = None
         semaforo_list = []
         compromisos = []
         alertas = []
@@ -6658,7 +6774,9 @@ def aprendiz_dashboard(request, subpanel_directo=None):
                 else:
                     if perfil:
                         perfil.foto_perfil = foto
-                        perfil.save(update_fields=['foto_perfil'])
+                        perfil.save()
+                        if hasattr(request.user, 'perfil'):
+                            request.user.perfil.refresh_from_db()
                         messages.success(request, '¡Fotografía de perfil actualizada con éxito!')
                     else:
                         messages.error(request, 'No se encontró el perfil del estudiante.')
@@ -6724,10 +6842,62 @@ def aprendiz_dashboard(request, subpanel_directo=None):
     promedios_periodo = {}
     total_acumulado = 0.0
     periodos_con_nota = 0
+    cargas_lista = list(cargas_estudiante)
+
     for p in periodos_academicos:
-        califs_p = [float(c.nota) for c in calificaciones_escolares if c.periodo in [p.codigo_periodo, p.nombre]]
-        if califs_p:
-            prom_p = round(sum(califs_p) / len(califs_p), 2)
+        p_num = str(p.numero)
+        p.numero_str = p_num
+        p_cod = (p.codigo_periodo or p.nombre or f"Periodo {p_num}").strip()
+        
+        califs_p = [
+            c for c in calificaciones_escolares
+            if str(c.periodo).strip().lower() in [
+                p_cod.lower(),
+                p.nombre.strip().lower(),
+                f"periodo {p_num}",
+                f"período {p_num}",
+                p_num
+            ]
+        ]
+        califs_map = {c.carga_academica_id: c for c in califs_p}
+
+        asignaturas_periodo = []
+        notas_p = []
+        for carga in cargas_lista:
+            calif = califs_map.get(carga.id)
+            if calif and calif.nota is not None:
+                nota_f = float(calif.nota)
+                notas_p.append(nota_f)
+                desemp = calif.desempeno
+                if not desemp:
+                    if nota_f >= 4.6: desemp = 'Superior'
+                    elif nota_f >= 4.0: desemp = 'Alto'
+                    elif nota_f >= 3.0: desemp = 'Básico'
+                    else: desemp = 'Bajo'
+                asignaturas_periodo.append({
+                    'carga': carga,
+                    'asignatura': carga.programa.denominacion if carga.programa else 'Asignatura',
+                    'docente': carga.profesor.get_full_name() if carga.profesor else (carga.profesor.username if carga.profesor else 'Docente Titular'),
+                    'nota': nota_f,
+                    'desempeno': desemp,
+                    'observaciones': calif.observaciones or 'Calificación registrada oficialmente.',
+                    'tiene_nota': True,
+                })
+            else:
+                asignaturas_periodo.append({
+                    'carga': carga,
+                    'asignatura': carga.programa.denominacion if carga.programa else 'Asignatura',
+                    'docente': carga.profesor.get_full_name() if carga.profesor else (carga.profesor.username if carga.profesor else 'Docente Titular'),
+                    'nota': None,
+                    'desempeno': None,
+                    'observaciones': 'Aún no tienes calificaciones registradas en este período.',
+                    'tiene_nota': False,
+                })
+
+        p.asignaturas = asignaturas_periodo
+        p.tiene_calificaciones = len(notas_p) > 0
+        if notas_p:
+            prom_p = round(sum(notas_p) / len(notas_p), 2)
             p.promedio_estudiante = prom_p
             promedios_periodo[p.codigo_periodo] = prom_p
             total_acumulado += prom_p
@@ -6735,6 +6905,7 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         else:
             p.promedio_estudiante = None
             promedios_periodo[p.codigo_periodo] = None
+
     promedio_general_acumulado = round(total_acumulado / periodos_con_nota, 2) if periodos_con_nota > 0 else None
 
     return render(request, 'aprendiz.html', {
@@ -6743,7 +6914,7 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         'matricula': matricula,
         'entregas': entregas,
         'pendientes': pendientes,
-        'conteo_pendientes': (pendientes.count() if hasattr(pendientes, 'count') else len(pendientes)) + len(tareas_clase),
+        'conteo_pendientes': len(tareas_clase) if getattr(matricula, 'grado_escolar', None) else ((pendientes.count() if hasattr(pendientes, 'count') else len(pendientes)) + len(tareas_clase)),
         'progreso_global': progreso_global,
         'porcentaje_asistencia': porcentaje_asistencia,
         'asistencias_p': asistencias_p,
@@ -6763,6 +6934,7 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         'alertas': alertas,
         'todos_horarios': todos_horarios,
         'horarios_hoy': horarios_hoy,
+        'horario_semanal_grid': horario_semanal_grid,
         'comunicados_estudiante': comunicados_estudiante,
         'solicitudes': solicitudes,
         'logros': logros,
@@ -8596,6 +8768,15 @@ def marcar_notificacion_leida(request, pk):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'status': 'ok'})
     messages.success(request, 'Notificación marcada como leída.')
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER')
+    if next_url and '/login' not in next_url:
+        return redirect(next_url)
+    rol = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+    rol_nombre = str(rol.nombre) if rol else ''
+    if any(r in rol_nombre for r in ['Estudiante', 'Aprendiz', 'Alumno']):
+        return redirect(f"{reverse('estudiante_dashboard')}?subpanel=notificaciones")
+    elif any(r in rol_nombre for r in ['Docente', 'Instructor', 'Profesor']):
+        return redirect(f"{reverse('instructor_dashboard')}?subpanel=notificaciones")
     return redirect('notificaciones_lista')
 
 
@@ -10612,7 +10793,7 @@ def entregar_tarea_clase(request, pk):
             )
 
         messages.success(request, f'¡Tu entrega para "{tarea.titulo}" fue enviada exitosamente al profesor!')
-        return redirect('aprendiz_dashboard')
+        return redirect(f"{reverse('aprendiz_dashboard')}?subpanel=actividades")
     return render(request, 'usuarios/entregar_tarea.html', {
         'tarea': tarea,
         'mi_entrega': mi_entrega,
@@ -10721,27 +10902,42 @@ def confirmar_recuperacion(request, uidb64, token):
                 'token_valido': False,
                 'token_invalido': True,
                 'error_message': 'El enlace de recuperación es inválido o ha caducado.',
+                'mensaje_error': 'El enlace de recuperación es inválido o ha caducado.',
             }, status=400)
         nueva_clave = request.POST.get('nueva_contrasena', '').strip()
         confirmar_clave = request.POST.get('confirmar_contrasena', '').strip()
-        if nueva_clave and nueva_clave == confirmar_clave:
-            user.set_password(nueva_clave)
-            user.save()
-            messages.success(request, '¡Contraseña restablecida exitosamente! Inicia sesión con tu nueva clave.')
-            return redirect('login_short')
-        else:
+
+        if not nueva_clave or len(nueva_clave) < 4:
             return render(request, 'usuarios/recuperar_contrasena.html', {
                 'token_valido': True,
                 'token_invalido': False,
                 'uidb64': uidb64,
                 'token': token,
-                'error_message': 'Las contraseñas no coinciden.',
+                'error_message': 'La nueva contraseña debe tener como mínimo 4 caracteres.',
+                'mensaje_error': 'La nueva contraseña debe tener como mínimo 4 caracteres.',
             })
+
+        if nueva_clave != confirmar_clave:
+            return render(request, 'usuarios/recuperar_contrasena.html', {
+                'token_valido': True,
+                'token_invalido': False,
+                'uidb64': uidb64,
+                'token': token,
+                'error_message': 'Las contraseñas no coinciden. Por favor verifica e intenta nuevamente.',
+                'mensaje_error': 'Las contraseñas no coinciden. Por favor verifica e intenta nuevamente.',
+            })
+
+        user.set_password(nueva_clave)
+        user.save()
+        messages.success(request, '¡Contraseña restablecida exitosamente! Ya puedes iniciar sesión con tu nueva clave.')
+        return redirect('login_short')
 
     if token_invalido:
         return render(request, 'usuarios/recuperar_contrasena.html', {
             'token_valido': False,
             'token_invalido': True,
+            'error_message': 'El enlace de recuperación es inválido o ha caducado.',
+            'mensaje_error': 'El enlace de recuperación es inválido o ha caducado.',
         }, status=400)
 
     return render(request, 'usuarios/recuperar_contrasena.html', {
@@ -10760,7 +10956,16 @@ def abrir_notificacion_view(request, pk):
         notif.save(update_fields=['leida'])
         if notif.enlace:
             return redirect(notif.enlace)
-    return redirect(f"{reverse('instructor_dashboard')}?subpanel=notificaciones")
+    next_url = request.META.get('HTTP_REFERER')
+    if next_url and '/login' not in next_url:
+        return redirect(next_url)
+    rol = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+    rol_nombre = str(rol.nombre) if rol else ''
+    if any(r in rol_nombre for r in ['Estudiante', 'Aprendiz', 'Alumno']):
+        return redirect(f"{reverse('estudiante_dashboard')}?subpanel=notificaciones")
+    elif any(r in rol_nombre for r in ['Docente', 'Instructor', 'Profesor']):
+        return redirect(f"{reverse('instructor_dashboard')}?subpanel=notificaciones")
+    return redirect('notificaciones_lista')
 
 @login_required
 def marcar_todas_notificaciones_leidas_view(request):
@@ -10770,7 +10975,16 @@ def marcar_todas_notificaciones_leidas_view(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
         return JsonResponse({'status': 'ok', 'message': 'Todas las notificaciones marcadas como leídas.'})
     messages.success(request, 'Todas las notificaciones han sido marcadas como leídas.')
-    return redirect(f"{reverse('instructor_dashboard')}?subpanel=notificaciones")
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER')
+    if next_url and '/login' not in next_url:
+        return redirect(next_url)
+    rol = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+    rol_nombre = str(rol.nombre) if rol else ''
+    if any(r in rol_nombre for r in ['Estudiante', 'Aprendiz', 'Alumno']):
+        return redirect(f"{reverse('estudiante_dashboard')}?subpanel=notificaciones")
+    elif any(r in rol_nombre for r in ['Docente', 'Instructor', 'Profesor']):
+        return redirect(f"{reverse('instructor_dashboard')}?subpanel=notificaciones")
+    return redirect('notificaciones_lista')
 
 from django.http import JsonResponse, FileResponse, Http404
 @login_required

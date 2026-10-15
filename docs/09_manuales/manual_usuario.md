@@ -1,115 +1,136 @@
-# MANUAL DE USUARIO FINAL
-### SISTEMA DE INFORMACIÓN SINETEC (Versión 1.0)
-**Centro de Logística y Promoción Ecoturística del Magdalena**
-*Regional Magdalena – SENA ADSI Ficha 228106*
+# MANUAL DE USUARIO OFICIAL DEL SISTEMA DE INFORMACIÓN EDUNOVA
+### Sistema Integrado de Educación Técnica (Anteriormente SINETEC)
+**SENA Regional Magdalena — Centro de Logística y Promoción Ecoturística del Magdalena**  
+**Programa:** Tecnología en Análisis y Desarrollo de Sistemas de Información (ADSI)  
+**Ficha de Caracterización:** 3173430  
+**Instructor Evaluador:** Ing. Anybal López  
+**Aprendices Desarrolladoras:** Aminta María Moguea Florez y Dulce María Figueroa  
+**Publicación en Producción:** [https://sinetec-1.onrender.com/](https://sinetec-1.onrender.com/)  
+**Versión Actual:** 2.4.0 (Octubre de 2026)
 
 ---
 
 ## 1. INTRODUCCIÓN Y PROPÓSITO
-¡Bienvenido a **SINETEC** (*Sistema de Integración Técnica Education*)!  
-Este manual práctico está diseñado para guiar paso a paso a coordinadores, instructores, rectores y docentes enlace en el uso de la plataforma web para el seguimiento y evaluación del proceso de articulación con la Media Técnica en el Departamento del Magdalena.
+¡Bienvenido a **EduNova**! EduNova es una plataforma web integral basada en software libre (Python, Django, MySQL Server y Nginx) diseñada para centralizar, digitalizar y automatizar la gestión académica, formativa y administrativa de las Instituciones Educativas articuladas con la Media Técnica en el Departamento del Magdalena.
+
+Este manual práctico está dirigido a toda la comunidad educativa: **Administradores**, **Rectoría**, **Secretaría Académica**, **Docentes/Instructores**, **Estudiantes (Aprendices)** y **Familias/Acudientes**.
 
 ---
 
 ## 2. REQUISITOS PARA EL ACCESO
-Para utilizar SINETEC únicamente necesita:
-* Un computador, tableta o teléfono inteligente con conexión a red (local o internet).
+Para utilizar EduNova únicamente necesita:
+* Un computador, tableta o teléfono inteligente con conexión a internet.
 * Un navegador web moderno (Google Chrome, Mozilla Firefox, Microsoft Edge o Safari).
-* Sus credenciales de acceso asignadas (Usuario o Documento y Contraseña).
+* Sus credenciales institucionales asignadas (Usuario o Documento y Contraseña).
+* **Dirección oficial en producción:** `https://sinetec-1.onrender.com/` (o `http://127.0.0.1:8000/` en servidor local).
 
 ---
 
-## 3. CÓMO INICIAR SESIÓN EN SINETEC
+## 3. CÓMO INICIAR Y CERRAR SESIÓN
 
-1. Abra su navegador web e ingrese a la dirección: `http://127.0.0.1:8000/login/` (o la dirección oficial asignada por su Centro).
-2. En la pantalla de bienvenida:
-   * Digite su **Usuario o Número de Cédula** en el primer campo.
-   * Digite su **Contraseña Segura** en el segundo campo.
-3. Presione el botón azul **"Ingresar a la Plataforma"**.
-4. Si los datos son correctos, el sistema lo recibirá con un mensaje de bienvenida y lo dirigirá automáticamente a su **Panel de Control (Dashboard)**.
-5. *Nota de Seguridad:* Para cerrar sesión, haga clic sobre su nombre en la esquina superior derecha y seleccione **"Cerrar Sesión"**.
+1. Abra su navegador e ingrese a: `https://sinetec-1.onrender.com/accounts/login/` (o presione **"Ingresar a la Plataforma"** en la página principal).
+2. En el formulario de autenticación:
+   * Ingrese su **Usuario institucional o Número de Documento** en el primer campo.
+   * Ingrese su **Contraseña** en el segundo campo.
+3. Presione el botón **"Iniciar Sesión"**. El sistema validará su perfil activo y lo dirigirá automáticamente a su portal correspondiente.
+4. **Cierre de Sesión Seguro:** En la barra superior, abra el menú desplegable con su nombre o avatar y seleccione **"Cerrar sesión"**.
 
----
-
-## 4. GUÍA POR ROLES Y MÓDULOS DEL SISTEMA
-
-### 4.1 Módulo: Panel de Control (Dashboard)
-* **Para quién es:** Principalmente para la Coordinación de Articulación y los Instructores.
-* **Qué encontrará aquí:**
-  * **Tarjetas de Indicadores:** Visualice al instante cuántos colegios están activos, cuántos aprendices están matriculados en 10° y 11°, y el porcentaje global de aprobación académica.
-  * **Últimas Bitácoras:** Monitoree en tiempo real las visitas más recientes realizadas por los instructores a los colegios, identificando rápidamente aquellas que tienen compromisos de mejora pendientes.
+> **Nota para entornos de prueba:** En modo desarrollo (`DEBUG=True`), se habilita un acceso directo para demostraciones de interfaz (*demo_estudiante*). En producción (`DEBUG=False`), dicho acceso se encuentra deshabilitado por seguridad, requiriendo siempre credenciales válidas.
 
 ---
 
-### 4.2 Módulo: Instituciones Educativas (Colegios Articulados)
-* **Cómo acceder:** En el menú superior, haga clic en **"Colegios"**.
-* **Funcionalidades:**
-  * **Buscador Dinámico:** Escriba parte del nombre del colegio, código DANE o nombre del rector en la barra de búsqueda y presione *Filtrar*.
-  * **Filtro por Municipio:** Seleccione un municipio específico del Magdalena (ej. *Ciénaga*, *Santa Marta*, *Aracataca*) para ver solo sus instituciones.
-  * **Registrar un Nuevo Colegio:**
-    1. Presione el botón **"Vincular Nueva Institución"**.
-    2. Diligencie el Código DANE oficial, nombre completo, municipio, dirección y datos del docente enlace.
-    3. Presione **"Guardar Institución"**.
-  * **Ver Ficha del Colegio:** Al hacer clic en el nombre de un colegio o en el ícono del ojo, podrá ver todas las fichas técnicas que operan en esa sede.
+## 4. LIBRETO GUÍA PARA DEMOSTRACIÓN INSTITUCIONAL (20 MINUTOS)
+
+| Tiempo | Módulo / Pantalla | Acciones a Demostrar |
+| :--- | :--- | :--- |
+| **0:00–1:00** | Acceso y Bienvenida | Inicio de sesión, validación de credenciales y selección de portal según el rol asignado. |
+| **1:00–4:00** | Panel de Administrador | Dashboard general (`/dashboard/`), alumnos, matrículas, carga académica (en dos columnas balanceadas), usuarios y papelera de reciclaje. |
+| **4:00–6:00** | Portal de Rectoría | Indicadores de gestión (`/rectoria/`), rendimiento por periodos, circulares institucionales y reportes. |
+| **6:00–8:30** | Portal de Secretaría | Búsqueda de matrículas (`/secretaria/`), registro de estudiantes, certificados y caja/pensiones. |
+| **8:30–11:30** | Portal Docente | Listado de grupos (`/docentes/dashboard/`), asistencia diaria con escáner, publicación de actividades y calificación por RAPs. |
+| **11:30–14:00** | Portal de Estudiante | Horario de clases (`/estudiantes/dashboard/`), consulta de calificaciones, boletines y entrega de actividades. |
+| **14:00–16:30** | Portal de Familia | Monitoreo del estudiante acudido (`/familia/dashboard/`), observaciones, estado de pensiones y comunicación. |
+| **16:30–19:00** | Recorrido Conectado | Publicación de un taller por el docente Miguel González y consulta/entrega inmediata desde el perfil de Juan Pérez (10°A). |
+| **19:00–20:00** | Cierre de Auditoría | Verificación de políticas RBAC, aislamiento de perfiles y cierre de sesión. |
 
 ---
 
-### 4.3 Módulo: Fichas Técnicas y Matrícula de Aprendices
-* **Cómo acceder:** En el menú superior, haga clic en **"Fichas"**.
-* **Cómo ver el expediente de una Ficha:**
-  1. Localice la ficha en la lista y presione el botón **"Expediente"**.
-  2. Encontrará tres pestañas organizadas:
-     * **Aprendices Matriculados:** Listado de estudiantes de 10° u 11° con sus documentos y teléfonos de contacto del acudiente.
-     * **Bitácoras de Visita:** Historial de acompañamientos pedagógicos realizados a este grupo.
-     * **Competencias y RAP:** Estructura curricular con enlaces directos para calificar cada resultado.
-* **Cómo matricular a un nuevo estudiante en la ficha:**
-  1. Dentro del expediente de la ficha, presione el botón azul **"Matricular Aprendiz"**.
-  2. Ingrese tipo de documento, número de identificación, nombres, apellidos, correo electrónico, grado escolar (10° u 11°) y datos del acudiente.
-  3. Presione **"Confirmar Matrícula"**. El sistema validará que el documento no esté duplicado (**RN-001**) y creará el registro de inmediato.
+## 5. GUÍA DETALLADA DE LOS SEIS (6) PANELES DEL SISTEMA
+
+### 5.1 Portal de Administrador (`/dashboard/`)
+El Administrador cuenta con el control técnico y operativo global del sistema:
+* **Alumnos y Matrículas (`/estudiantes/`, `/matriculas/`):** Consulta del padrón general, filtros por grado (10° y 11°) y edición de expedientes.
+* **Carga Académica y Malla Curricular (`/carga-academica/`):** Formulario ergonómico distribuido en dos columnas que permite vincular asignaturas, docentes, niveles y cursos sin recargar la página.
+* **Horarios y Cursos:** Programación de bloques académicos semanales y asignación de aulas.
+* **Pensiones y Caja (`/pensiones/`):** Control general de cobros y estados de cuenta.
+* **Usuarios y Roles (`/usuarios/`):** Creación de cuentas, restablecimiento de contraseñas y asignación de roles RBAC.
+* **Auditoría Forense (`/auditoria/`):** Registro cronológico de acciones ejecutadas en la plataforma con timestamp e IP.
+* **Papelera de Reciclaje (`/papelera/`):** Mecanismo de borrado lógico (*soft delete*) que permite recuperar matrículas, notas o registros eliminados accidentalmente.
 
 ---
 
-### 4.4 Módulo: Bitácora de Seguimiento y Visitas Técnicas
-* **Cómo acceder:** En el menú superior, haga clic en **"Seguimiento"**.
-* **Cómo registrar una nueva visita a un colegio:**
-  1. Presione el botón **"Registrar Nueva Visita"** (o **"Nueva Visita"** desde el Dashboard).
-  2. Seleccione la **Ficha Técnica** visitada.
-  3. *(Opcional)* Si el seguimiento es por un problema disciplinario o académico de un solo estudiante, selecciónelo en la lista de aprendices; si fue una clase general, déjelo en blanco.
-  4. Indique la **Fecha de la Visita** y la modalidad (ej. *Visita Presencial en Aula*, *Revisión de Taller*).
-  5. Escriba sus **Observaciones Técnicas y Pedagógicas**.
-  6. **Importante (Regla RN-006):** Si registra acuerdos o compromisos en el campo de *Plan de Acción*, el sistema le exigirá obligatoriamente indicar una **Fecha Límite de Verificación** para poder guardar.
-  7. *(Opcional)* Puede adjuntar el acta escaneada o fotografía del soporte firmado presionando *Seleccionar archivo*.
-  8. Presione **"Guardar Bitácora"**.
+### 5.2 Portal de Rectoría y Coordinación (`/rectoria/`, `/coordinacion/`)
+Orientado a la toma de decisiones gerenciales y supervisión formativa:
+* **Tablero de Indicadores:** Estadísticas consolidadas de cobertura escolar, porcentaje de aprobación y alertas tempranas de deserción.
+* **Supervisión de Notas:** Consulta de sábanas académicas consolidadas por periodo.
+* **Circulares y Comunicados:** Redacción y difusión de noticias o circulares oficiales dirigidas a docentes o familias.
+* **Informes Directivos:** Exportación de reportes institucionales en formato PDF y Excel.
 
 ---
 
-### 4.5 Módulo: Calificación de Resultados de Aprendizaje (Sábana de Notas)
-* **Cómo acceder:** En el menú superior, haga clic en **"Calificaciones"**.
-* **Paso a paso para asentar notas:**
-  1. Seleccione la **Ficha Técnica** deseada en el primer selector.
-  2. Seleccione el **Resultado de Aprendizaje (RAP)** que va a calificar en el segundo selector.
-  3. Presione **"Cargar Lista"**.
-  4. El sistema desplegará la sábana con todos los aprendices matriculados:
-     * Marque el botón verde **A** si el aprendiz alcanzó los logros (**Aprobado**).
-     * Marque el botón rojo **D** si el aprendiz no alcanzó los logros y requiere plan de mejoramiento (**No Aprobado**).
-     * En el campo de texto adyacente puede escribir recomendaciones o retroalimentación formativa.
-  5. Presione el botón azul **"Guardar Sábana de Calificaciones"**. El sistema guardará todas las notas en base de datos.
-* **Control de Cierre Formal de Periodos (Regla RN-004):**
-  * Si la Coordinación ya ejecutó el cierre formal del periodo para esa ficha, verá una alerta roja indicando que el periodo está cerrado y los botones de calificación aparecerán deshabilitados para evitar alteraciones no autorizadas.
-  * Para reabrir un periodo formal, el Coordinador puede pulsar el botón *"Reabrir Periodo"* en el expediente de la ficha técnica.
+### 5.3 Portal de Secretaría Académica (`/secretaria/`)
+Dedicado a la gestión documental y trámites administrativos:
+* **Búsqueda Avanzada de Expedientes:** Localización instantánea de estudiantes por documento, nombre o acudiente.
+* **Registro de Estudiantes (`/estudiantes/registrar/`):** Registro de nuevos aprendices vinculándolos directamente a su ficha y grado formativo.
+* **Emisión de Certificados:** Generación de constancias de estudio y certificados de notas oficiales.
+* **Caja y Pensiones:** Registro de pagos en taquilla y generación de comprobantes de pago.
+* **Bandeja de Solicitudes:** Recepción y trámite de peticiones y traslados escolares.
 
 ---
 
-## 5. PREGUNTAS FRECUENTES (FAQ)
-
-1. **¿Qué hago si al matricular un aprendiz el sistema dice que el documento ya existe?**  
-   *Respuesta:* Significa que el estudiante ya fue registrado en el sistema previamente (por la regla RN-001). Verifique el número de documento con la fotocopia de la tarjeta de identidad.
-2. **¿Puedo calificar con notas numéricas como 3.5 o 4.0?**  
-   *Respuesta:* No. Siguiendo el reglamento pedagógico oficial del SENA (regla RN-003), los juicios son cualitativos: únicamente se califica con **A (Aprobado)** o **D (No Aprobado / Por Mejorar)**.
-3. **¿Cómo descargo un acta o formato de seguimiento firmado?**  
-   *Respuesta:* Ingrese al módulo de *Seguimiento*, localice la visita deseada y presione el ícono del ojo. Si el instructor adjuntó el documento, encontrará un botón directo para ver y descargar el archivo PDF.
+### 5.4 Portal de Docentes e Instructores (`/docentes/dashboard/`)
+Centro de gestión académica y pedagógica para los profesores:
+* **Mis Grupos y Asignaturas:** Visualización de las asignaciones de clase correspondientes a su carga académica.
+* **Control de Asistencia (`/asistencia/`):** Pase de lista diario por asignatura con estados (Presente, Ausente, Excusa, Retardo). Incluye lector de código QR para registro rápido.
+* **Actividades y Tareas (`/actividades-y-tareas/`):** Creación de talleres y tareas con fecha límite de entrega, archivos adjuntos e instrucciones detalladas.
+* **Planilla de Calificaciones:** Asentamiento de notas cuantitativas y juicios cualitativos por Resultados de Aprendizaje (RAP: Aprobado / No Aprobado) según el modelo SENA.
+* **Horario del Docente:** Consulta del cronograma semanal de clases asignadas.
 
 ---
 
-## 6. APORTE A LOS RESULTADOS DE APRENDIZAJE SENA
-*Esta actividad contribuye al resultado de aprendizaje relacionado con **elaborar el manual de usuario del sistema de información según las necesidades de los usuarios y las funciones del software**, porque proporciona guías ilustradas paso a paso adaptadas al lenguaje y contexto operativo de los coordinadores, instructores y colegios del Magdalena.*
+### 5.5 Portal de Estudiantes y Aprendices (`/estudiantes/dashboard/`)
+Interfaz personal, intuitiva y protegida para el estudiante (ejemplo validado: *Juan Pérez en 10°A*):
+* **Mi Perfil:** Consulta de datos personales y académicos verificados en base de datos.
+* **Mis Calificaciones:** Visualización transparente de notas parciales y juicios de RAPs asentados por sus profesores. Si no hay notas registradas, el sistema muestra: *"Aún no tienes calificaciones registradas"*.
+* **Tareas y Actividades:** Bandeja de actividades pendientes con opción para adjuntar archivos de respuesta y consultar retroalimentaciones.
+* **Mi Horario Escolar:** Consulta del horario de clases organizado por días y bloques formativos.
+* **Mi Asistencia:** Porcentaje de asistencia acumulada y registro de inasistencias.
+* **Avisos Institucionales:** Recepción de circulares y comunicados de rectoría y docentes.
+
+---
+
+### 5.6 Portal de Familias y Acudientes (`/familia/dashboard/`)
+Permite a padres y tutores realizar el seguimiento formativo de sus hijos:
+* **Expediente del Acudido:** Consulta de la ficha de matrícula y datos del aprendiz.
+* **Boletines Periódicos:** Descarga directa de los boletines de calificaciones al cierre de cada periodo.
+* **Control de Asistencia:** Notificación y seguimiento diario de inasistencias o retardos.
+* **Estado de Pensiones:** Consulta del historial de pagos y cuotas pendientes.
+* **Comunicación con Docentes:** Canal directo de mensajería para contactar a directores de grupo.
+
+---
+
+## 6. PREGUNTAS FRECUENTES Y SOLUCIÓN DE PROBLEMAS (FAQ)
+
+1. **¿Qué hago si olvidé mi contraseña de acceso?**  
+   *Respuesta:* Solicite el restablecimiento de su clave ante la Secretaría Académica o el Administrador del sistema mediante el módulo de usuarios.
+2. **¿Por qué un docente no puede calificar a un grupo?**  
+   *Respuesta:* Verifique que la Asignación Docente (Carga Académica) se encuentre registrada y activa para esa materia, grado y ficha específica.
+3. **¿Cómo recupero un registro borrado por error?**  
+   *Respuesta:* El Administrador puede ingresar a la ruta `/papelera/` y pulsar el botón **"Restaurar"** sobre el elemento enviado a eliminación lógica.
+4. **¿Cómo se visualiza el sistema en teléfonos celulares?**  
+   *Respuesta:* EduNova cuenta con diseño responsivo (responsive design). Ingrese desde cualquier navegador móvil (Chrome o Safari) a `https://sinetec-1.onrender.com/` y los menús se adaptarán automáticamente a la pantalla.
+
+---
+
+## 7. CRÉDITOS Y CERTIFICACIÓN FORMATIVA
+Manual elaborado y verificado en cumplimiento del Resultado de Aprendizaje del SENA Regional Magdalena por las aprendices **Aminta María Moguea Florez** y **Dulce María Figueroa**, bajo la dirección del instructor **Ing. Anybal López**. Ficha de caracterización: **3173430**.
