@@ -142,18 +142,25 @@
                         {% endif %}
                     </p>
                 </div>
-                <div class="col-lg-4 text-lg-end">
-                    <a href="{% url 'estudiante_dashboard' %}?subpanel=perfil" onclick="activarSubpanel('perfil'); return false;" class="d-inline-flex align-items-center gap-3 p-2.5 px-3 rounded-4 text-decoration-none transition" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);">
+                <div class="col-lg-5 text-lg-end d-flex align-items-center justify-content-lg-end gap-2 flex-wrap mt-3 mt-lg-0">
+                    <a href="{% url 'estudiante_dashboard' %}?subpanel=horario" onclick="activarSubpanel('horario'); return false;" class="d-inline-flex align-items-center gap-2 p-2.5 px-3 rounded-4 text-decoration-none transition text-white shadow-2xs" style="background: rgba(37, 99, 235, 0.45); border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px);">
+                        <i class="bi bi-calendar3 fs-5"></i>
+                        <div class="text-start">
+                            <div class="fw-bold small mb-0">Mi Horario</div>
+                            <div class="text-white-50" style="font-size: 0.72rem;">Clases y Jornada</div>
+                        </div>
+                    </a>
+                    <a href="{% url 'estudiante_dashboard' %}?subpanel=perfil" onclick="activarSubpanel('perfil'); return false;" class="d-inline-flex align-items-center gap-2.5 p-2 px-3 rounded-4 text-decoration-none transition" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);">
                         {% if perfil.foto_perfil %}
-                            <img src="{{ perfil.foto_perfil.url }}" alt="{{ user.get_full_name }}" class="rounded-circle object-fit-cover shadow-sm" style="width: 48px; height: 48px; border: 2px solid #ffffff;">
+                            <img src="{{ perfil.foto_perfil.url }}" alt="{{ user.get_full_name }}" class="rounded-circle object-fit-cover shadow-sm" style="width: 44px; height: 44px; border: 2px solid #ffffff;">
                         {% else %}
-                            <div class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center fw-bold fs-5 shadow-sm" style="width: 48px; height: 48px; color: var(--stu-coffee-primary) !important;">
+                            <div class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center fw-bold fs-6 shadow-sm" style="width: 44px; height: 44px; color: var(--stu-coffee-primary) !important;">
                                 {{ user.first_name|slice:':1'|default:'E' }}{{ user.last_name|slice:':1'|default:'S' }}
                             </div>
                         {% endif %}
                         <div class="text-start">
-                            <div class="text-white fw-bold small mb-0.5">{{ user.get_full_name|default:user.username }}</div>
-                            <div class="text-white-50 small" style="font-size: 0.78rem;"><i class="bi bi-person-circle me-1"></i>Ver Mi Perfil</div>
+                            <div class="text-white fw-bold small mb-0">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="text-white-50" style="font-size: 0.72rem;"><i class="bi bi-person-circle me-1"></i>Mi Perfil</div>
                         </div>
                     </a>
                 </div>
@@ -203,9 +210,19 @@
                         <div class="stu-kpi-icon"><i class="bi bi-check2-square"></i></div>
                     </div>
                     <h5 class="fw-bold text-dark mb-1">
-                        <span class="text-success">{{ porcentaje_asistencia|default:100 }}%</span>
+                        {% if porcentaje_asistencia is not None %}
+                            <span class="text-success">{{ porcentaje_asistencia }}%</span>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
                     </h5>
-                    <small class="text-muted d-block">{{ asistencias_p|default:0 }} sesiones asistidas</small>
+                    <small class="text-muted d-block">
+                        {% if porcentaje_asistencia is not None %}
+                            {{ asistencias_p|default:0 }} sesiones asistidas
+                        {% else %}
+                            Sin registros de asistencia
+                        {% endif %}
+                    </small>
                 </div>
             </div>
 
@@ -222,7 +239,13 @@
                             <span class="text-success">0 pendientes</span>
                         {% endif %}
                     </h5>
-                    <small class="text-muted d-block">Actividades por entregar</small>
+                    <small class="text-muted d-block">
+                        {% if conteo_pendientes > 0 %}
+                            Actividades por entregar
+                        {% else %}
+                            Sin tareas pendientes
+                        {% endif %}
+                    </small>
                 </div>
             </div>
         </div>
@@ -437,70 +460,97 @@
          3. SUBPANEL: MI HORARIO (HORARIO SEMANAL REAL DE CLASES)
          ========================================================================= -->
     <section id="subpanel-horario" class="subpanel-section {% if subpanel_activo != 'horario' %}d-none{% endif %}">
-        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-calendar-week-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                    <h6 class="fw-bold text-dark mb-0">Mi Horario Semanal de Clases</h6>
+        <div class="card border rounded-4 p-3 p-md-4 bg-white shadow-2xs mb-4" style="border-color: #e2e8f0 !important;">
+            <!-- Cabecera del Horario idéntica a la foto oficial -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom flex-wrap gap-3" style="border-color: #e2e8f0 !important;">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-3 text-white shadow-xs" style="width: 44px; height: 44px; background: #2563eb;">
+                        <i class="bi bi-calendar3 fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0" style="letter-spacing: -0.3px;">Horario de Clases, Jornada y Programa</h5>
+                        <small class="text-muted">Grado {{ matricula.grado_escolar|default:'10' }}° Sección {{ matricula.seccion|default:'A' }} · Calendario Oficial</small>
+                    </div>
                 </div>
-                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                    Jornada Escolar Activa
-                </span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold text-white shadow-xs" style="background: #1d4ed8; font-size: 0.8rem;">
+                        Vista Semanal
+                    </span>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-semibold text-muted bg-white border shadow-2xs" style="font-size: 0.8rem; border-color: #cbd5e1 !important;">
+                        Vista Diaria
+                    </span>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold text-white shadow-xs" style="background: #0f172a; font-size: 0.8rem;">
+                        Periodo Académico 2026-B
+                    </span>
+                </div>
             </div>
 
-            <div class="table-responsive">
-                <table class="table align-middle table-stu-custom mb-0">
-                    <thead>
-                        <tr>
-                            <th class="py-3 ps-3">Día</th>
-                            <th class="py-3">Horario</th>
-                            <th class="py-3">Asignatura / Materia</th>
-                            <th class="py-3">Docente a Cargo</th>
-                            <th class="py-3">Salón / Aula</th>
-                            <th class="py-3 text-center">Modalidad</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for h in todos_horarios %}
-                        <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
-                            <td class="ps-3 fw-bold text-dark">
-                                <i class="bi bi-calendar-event me-1.5" style="color: var(--stu-coffee-primary);"></i> {{ h.get_dia_display }}
-                            </td>
-                            <td>
-                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
-                                    {{ h.hora_inicio|time:"h:i A" }} - {{ h.hora_fin|time:"h:i A" }}
-                                </span>
-                            </td>
-                            <td><strong class="text-dark">{{ h.nombre_materia|default:h.programa.denominacion }}</strong></td>
-                            <td class="small text-muted">
-                                {% if h.instructor %}
-                                    Prof. {{ h.instructor.get_full_name|default:h.instructor.username }}
-                                {% else %}
-                                    <span>Docente Asignado</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge rounded-pill px-2.5 py-1" style="background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;">
-                                    <i class="bi bi-geo-alt me-1"></i>{{ h.ambiente|default:"Aula Principal" }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
-                                    {{ h.modalidad|default:"Presencial" }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="bi bi-calendar2-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                                <h6 class="fw-bold text-dark">No hay bloques de horario asignados para tu grupo en este momento.</h6>
-                                <p class="small mb-0">La coordinación académica publicará el horario oficial próximamente.</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <!-- Grilla Semanal: 5 Columnas (Lunes a Viernes) -->
+            <div class="row g-2.5 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5">
+                {% for dia in horario_semanal_grid %}
+                <div class="col">
+                    <div class="h-100 p-2.5 rounded-4 d-flex flex-column"
+                         style="{% if dia.es_hoy %}border: 2px solid #2563eb; background: #f0f7ff; box-shadow: 0 4px 16px rgba(37,99,235,0.08);{% else %}border: 1px solid #e2e8f0; background: #f8fafc;{% endif %}">
+                        
+                        <!-- Etiqueta del Día -->
+                        <div class="text-center mb-2.5 position-relative">
+                            {% if dia.es_hoy %}
+                                <div class="mb-1">
+                                    <span class="badge rounded-pill px-2.5 py-0.5 fw-bold text-white shadow-2xs" style="background: #2563eb; font-size: 0.68rem; letter-spacing: 0.5px;">
+                                        Hoy
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <h6 class="fw-bold text-dark mb-0" style="font-size: 1rem;">{{ dia.nombre }}</h6>
+                        </div>
+
+                        <!-- Bloques del Día: Estilo Cortito, Compacto y con Paleta Cálida/Naranja de la Foto -->
+                        <div class="d-flex flex-column gap-2 flex-grow-1">
+                            {% for b in dia.bloques %}
+                            <div class="schedule-compact-card rounded-3 transition shadow-2xs"
+                                 style="background: {{ b.theme.bg|default:'#fff7ed' }}; border: 1px solid {{ b.theme.border|default:'#fed7aa' }}; padding: 8px 10px;">
+                                
+                                <!-- Pastilla de Hora -->
+                                <div class="mb-1">
+                                    <span class="badge rounded-pill px-2 py-0.5 fw-bold"
+                                          style="background: {{ b.theme.pill_bg|default:'#ffedd5' }}; color: {{ b.theme.pill_color|default:'#c2410c' }}; font-size: 0.68rem; letter-spacing: -0.2px;">
+                                        {{ b.hora_inicio|time:"h:i a" }} - {{ b.hora_fin|time:"h:i a" }}
+                                    </span>
+                                </div>
+
+                                <!-- Materia / Asignatura -->
+                                <div class="fw-bold text-dark mb-1" style="font-size: 0.88rem; line-height: 1.25;">
+                                    {{ b.materia_titulo|default:b.nombre_materia|default:b.programa.denominacion }}
+                                </div>
+
+                                <!-- Docente -->
+                                <div class="text-muted small mb-0.5 d-flex align-items-center gap-1" style="font-size: 0.74rem;">
+                                    <i class="bi bi-person text-secondary"></i>
+                                    <span class="text-truncate">Docente: {% if b.instructor %}{{ b.instructor.get_full_name|default:b.instructor.username }}{% else %}Docente Titular{% endif %}</span>
+                                </div>
+
+                                <!-- Aula y Modalidad -->
+                                <div class="text-muted small d-flex align-items-center gap-1" style="font-size: 0.72rem;">
+                                    <i class="bi bi-geo-alt text-secondary"></i>
+                                    <span>Aula: {{ b.ambiente|default:"10-A" }} • {{ b.modalidad|default:"Presencial" }}</span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-4 my-auto text-muted" style="min-height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <i class="bi bi-calendar-check fs-4 d-block mb-1 opacity-30"></i>
+                                <span class="small text-muted" style="font-size: 0.74rem;">Sin clases</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5 text-muted">
+                    <i class="bi bi-calendar2-x fs-1 d-block mb-2 text-primary"></i>
+                    <h6 class="fw-bold text-dark">No hay bloques de horario asignados para tu grupo en este momento.</h6>
+                    <p class="small mb-0">La coordinación académica publicará el horario oficial próximamente.</p>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </section>
@@ -570,11 +620,14 @@
          ========================================================================= -->
     <section id="subpanel-calificaciones" class="subpanel-section {% if subpanel_activo != 'calificaciones' %}d-none{% endif %}">
         
-        <!-- TARJETAS DE PERÍODOS ACADÉMICOS -->
+        <!-- TARJETAS INTERACTIVAS DE PERÍODOS ACADÉMICOS -->
         <div class="row g-3 mb-4">
             {% for p in periodos_academicos %}
             <div class="col-6 col-md-3">
-                <div class="card border rounded-4 p-3 bg-white h-100 shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="card border rounded-4 p-3 bg-white h-100 shadow-2xs card-periodo-tab {% if forloop.first %}border-primary periodo-active{% endif %}"
+                     id="card-periodo-{{ p.numero_str }}"
+                     onclick="cambiarPeriodoCalificaciones('{{ p.numero_str }}')"
+                     style="border-color: var(--stu-coffee-border) !important; cursor: pointer; transition: all 0.2s ease;">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); font-size: 0.78rem;">
                             {{ p.nombre }}
@@ -598,92 +651,139 @@
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-2 pt-1 border-top" style="border-color: var(--stu-coffee-border) !important;">
                         <span class="text-muted" style="font-size: 0.72rem;">Promedio:</span>
-                        {% if p.promedio_estudiante %}
+                        {% if p.promedio_estudiante is not None %}
                         <strong class="fw-bold {% if p.promedio_estudiante >= 3.0 %}text-success{% else %}text-danger{% endif %}" style="font-size: 0.88rem;">
                             {{ p.promedio_estudiante }}
                         </strong>
                         {% else %}
-                        <span class="text-muted" style="font-size: 0.72rem;">Sin notas</span>
+                        <span class="text-muted fw-bold" style="font-size: 0.85rem;">—</span>
                         {% endif %}
+                    </div>
+                    <div class="text-center mt-2 pt-1 border-top" style="border-color: rgba(0,0,0,0.05) !important;">
+                        <span class="small fw-semibold text-primary" style="font-size: 0.72rem;">
+                            <i class="bi bi-chevron-down me-0.5"></i> Ver Período
+                        </span>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
 
-        <!-- TABLA DE CALIFICACIONES ESCOLARES -->
-        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-mortarboard-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                    <h6 class="fw-bold text-dark mb-0">Boletín Oficial de Calificaciones por Asignatura (2026)</h6>
-                </div>
-                {% if promedio_general_acumulado %}
-                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.85rem;">
-                    Promedio Acumulado: {{ promedio_general_acumulado }} / 5.0
-                </span>
-                {% endif %}
+        <!-- SELECTOR RÁPIDO DE PERÍODOS -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div class="btn-group rounded-pill p-1 shadow-2xs border bg-white" style="border-color: var(--stu-coffee-border) !important;">
+                {% for p in periodos_academicos %}
+                <button type="button"
+                        class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold nav-periodo-btn {% if forloop.first %}btn-primary active text-white{% else %}btn-light text-secondary{% endif %}"
+                        id="tab-btn-periodo-{{ p.numero_str }}"
+                        onclick="cambiarPeriodoCalificaciones('{{ p.numero_str }}')"
+                        style="font-size: 0.82rem;">
+                    {{ p.nombre }}
+                </button>
+                {% endfor %}
             </div>
+            {% if promedio_general_acumulado %}
+            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.85rem;">
+                Promedio General Acumulado: {{ promedio_general_acumulado }} / 5.0
+            </span>
+            {% endif %}
+        </div>
 
-            <div class="table-responsive">
-                <table class="table align-middle table-stu-custom mb-0">
-                    <thead>
-                        <tr>
-                            <th class="py-3 ps-3">Asignatura / Área</th>
-                            <th class="py-3">Docente Titular</th>
-                            <th class="py-3 text-center">Período</th>
-                            <th class="py-3 text-center">Nota Numérica</th>
-                            <th class="py-3 text-center">Desempeño</th>
-                            <th class="py-3">Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for c in calificaciones_escolares %}
-                        <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
-                            <td class="ps-3">
-                                <strong class="text-dark d-block">{{ c.carga_academica.programa.denominacion|default:"Formación Académica" }}</strong>
-                                <small class="text-muted">Grado {{ c.carga_academica.grado|default:matricula.grado_escolar }}°{{ c.carga_academica.seccion|default:matricula.seccion }}</small>
-                            </td>
-                            <td>
-                                <i class="bi bi-person me-1" style="color: var(--stu-coffee-primary);"></i>
-                                {{ c.profesor.get_full_name|default:c.profesor.username }}
-                            </td>
-                            <td class="text-center">
-                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                                    {{ c.periodo }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <strong class="fs-6 {% if c.nota >= 3.0 %}text-success{% else %}text-danger{% endif %}">
-                                    {{ c.nota }}
-                                </strong>
-                            </td>
-                            <td class="text-center">
-                                {% if c.desempeno == 'Superior' or c.desempeno == 'Alto' %}
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">{{ c.desempeno }}</span>
-                                {% elif c.desempeno == 'Básico' %}
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fefce8; color: #854d0e; border: 1px solid #fef08a;">{{ c.desempeno }}</span>
-                                {% else %}
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">{{ c.desempeno }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="small text-muted">
-                                {{ c.observaciones|default:"Sin observaciones registradas." }}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="bi bi-clipboard2-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                                <h6 class="fw-bold text-dark">Aún no tienes calificaciones registradas</h6>
-                                <p class="small mb-0">Tus docentes registrarán las valoraciones cuando se cierren las evaluaciones del periodo.</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- SECCIONES INDEPENDIENTES PARA CADA PERÍODO -->
+        {% for p in periodos_academicos %}
+        <div id="contenedor-periodo-{{ p.numero_str }}" class="periodo-calif-pane {% if not forloop.first %}d-none{% endif %}">
+            <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2" style="border-color: var(--stu-coffee-border) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-mortarboard-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark mb-0">Boletín Oficial de Calificaciones · {{ p.nombre }} (2026)</h6>
+                    </div>
+                    {% if p.tiene_calificaciones %}
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.85rem;">
+                        Promedio del Período: {{ p.promedio_estudiante }} / 5.0
+                    </span>
+                    {% endif %}
+                </div>
+
+                {% if not p.tiene_calificaciones %}
+                <div class="alert alert-light border rounded-4 d-flex align-items-center gap-3 p-3 mb-3" style="border-color: var(--stu-coffee-border) !important; background-color: #faf8f5;">
+                    <i class="bi bi-info-circle-fill fs-4" style="color: var(--stu-coffee-primary);"></i>
+                    <div>
+                        <strong class="text-dark d-block" style="font-size: 0.9rem;">Aún no tienes calificaciones registradas en este período</strong>
+                        <span class="text-muted small">Tus docentes registrarán tus notas y valoraciones de desempeño en cada asignatura a medida que se completen las evaluaciones de este período.</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="table-responsive">
+                    <table class="table align-middle table-stu-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th class="py-3 ps-3">Asignatura / Área</th>
+                                <th class="py-3">Docente Titular</th>
+                                <th class="py-3 text-center">Período</th>
+                                <th class="py-3 text-center">Nota Numérica</th>
+                                <th class="py-3 text-center">Desempeño</th>
+                                <th class="py-3">Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in p.asignaturas %}
+                            <tr style="border-bottom: 1px solid var(--stu-coffee-border);">
+                                <td class="ps-3">
+                                    <strong class="text-dark d-block">{{ a.asignatura }}</strong>
+                                    <small class="text-muted">Grado {{ matricula.grado_escolar }}°{{ matricula.seccion|default:'A' }}</small>
+                                </td>
+                                <td>
+                                    <i class="bi bi-person me-1" style="color: var(--stu-coffee-primary);"></i>
+                                    {{ a.docente }}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                                        {{ p.nombre }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    {% if a.tiene_nota %}
+                                        <strong class="fs-6 {% if a.nota >= 3.0 %}text-success{% else %}text-danger{% endif %}">
+                                            {{ a.nota }}
+                                        </strong>
+                                    {% else %}
+                                        <span class="text-muted fw-bold fs-6">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if a.desempeno %}
+                                        {% if a.desempeno == 'Superior' or a.desempeno == 'Alto' %}
+                                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">{{ a.desempeno }}</span>
+                                        {% elif a.desempeno == 'Básico' %}
+                                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fefce8; color: #854d0e; border: 1px solid #fef08a;">{{ a.desempeno }}</span>
+                                        {% else %}
+                                            <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">{{ a.desempeno }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    {{ a.observaciones }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-clipboard2-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                                    <h6 class="fw-bold text-dark">Aún no tienes calificaciones registradas en este período</h6>
+                                    <p class="small mb-0">No se encontraron asignaturas matriculadas para este período.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+        {% endfor %}
 
         <!-- JUICIOS EVALUATIVOS (SOLO SI EXISTEN) -->
         {% if juicios %}
@@ -765,29 +865,91 @@
                                 </div>
                                 <p class="text-muted small mb-2">{{ tarea.instrucciones|truncatechars:140 }}</p>
                                 {% if tarea.archivo %}
-                                <div>
+                                <div class="mb-2">
                                     <a href="{{ tarea.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-decoration-none" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border); font-size: 0.78rem;">
                                         <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Adjunto / Guía
                                     </a>
                                 </div>
                                 {% endif %}
                             </div>
-                            {% if tarea.esta_vencida %}
-                            <span class="badge rounded-pill px-3 py-1.5 fw-semibold small" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
-                                <i class="bi bi-lock-fill me-1"></i> Entrega Cerrada
-                            </span>
-                            {% else %}
-                            <a href="{% url 'entregar_tarea_clase' tarea.id %}" class="btn btn-sm text-white rounded-pill px-4 py-2 fw-bold shadow-2xs text-nowrap" style="background: var(--stu-coffee-primary); border: none; font-size: 0.82rem;">
-                                <i class="bi bi-upload me-1.5"></i> Resolver / Entregar
-                            </a>
-                            {% endif %}
+                            <div class="d-flex flex-sm-column gap-2 text-nowrap">
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold border" data-bs-toggle="modal" data-bs-target="#modalDetalleTarea{{ tarea.id }}" style="font-size: 0.8rem; background: #faf8f5;">
+                                    <i class="bi bi-eye me-1"></i> Ver Detalles
+                                </button>
+                                {% if tarea.esta_vencida %}
+                                <span class="badge rounded-pill px-3 py-1.5 fw-semibold small text-center" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
+                                    <i class="bi bi-lock-fill me-1"></i> Cerrada
+                                </span>
+                                {% else %}
+                                <a href="{% url 'entregar_tarea_clase' tarea.id %}" class="btn btn-sm text-white rounded-pill px-4 py-2 fw-bold shadow-2xs text-center" style="background: var(--stu-coffee-primary); border: none; font-size: 0.82rem;">
+                                    <i class="bi bi-upload me-1.5"></i> Resolver / Entregar
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Detalle de Tarea -->
+                    <div class="modal fade" id="modalDetalleTarea{{ tarea.id }}" tabindex="-1" aria-labelledby="modalDetalleTareaLabel{{ tarea.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content rounded-4 border-0 shadow">
+                                <div class="modal-header border-bottom p-3" style="border-color: var(--stu-coffee-border) !important;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
+                                            {{ tarea.tipo_actividad }}
+                                        </span>
+                                        <h6 class="modal-title fw-bold text-dark mb-0" id="modalDetalleTareaLabel{{ tarea.id }}">{{ tarea.titulo }}</h6>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <div class="row g-3 mb-3 p-3 rounded-3 bg-light border" style="border-color: var(--stu-coffee-border) !important;">
+                                        <div class="col-sm-6">
+                                            <small class="text-muted d-block">Asignatura:</small>
+                                            <strong class="text-dark">{{ tarea.carga_academica.programa.denominacion|default:"Formación Académica" }}</strong>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <small class="text-muted d-block">Docente:</small>
+                                            <strong class="text-dark">{{ tarea.carga_academica.profesor.get_full_name|default:tarea.carga_academica.profesor.username }}</strong>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <small class="text-muted d-block">Fecha Límite:</small>
+                                            <strong class="text-dark"><i class="bi bi-calendar-event me-1 text-warning"></i>{{ tarea.fecha_limite|date:'d/m/Y h:i A'|default:"Sin límite estricto" }}</strong>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <small class="text-muted d-block">Puntaje / Ponderación:</small>
+                                            <strong class="text-dark">{{ tarea.puntaje_maximo|default:5.0 }} pts ({% if tarea.porcentaje %}{{ tarea.porcentaje }}%{% else %}Calificación oficial{% endif %})</strong>
+                                        </div>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2">Instrucciones de la Actividad:</h6>
+                                    <div class="p-3 rounded-3 border bg-white mb-3" style="border-color: var(--stu-coffee-border); white-space: pre-line;">
+                                        {{ tarea.instrucciones|default:"Sin instrucciones adicionales descritas por el docente." }}
+                                    </div>
+                                    {% if tarea.archivo %}
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold text-dark mb-1">Material o Guía Adjunta:</h6>
+                                        <a href="{{ tarea.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
+                                            <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Archivo Adjunto
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="modal-footer border-top p-3" style="border-color: var(--stu-coffee-border) !important;">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5" data-bs-dismiss="modal">Cerrar</button>
+                                    {% if not tarea.esta_vencida %}
+                                    <a href="{% url 'entregar_tarea_clase' tarea.id %}" class="btn btn-sm text-white rounded-pill px-4 py-1.5 fw-bold" style="background: var(--stu-coffee-primary);">
+                                        <i class="bi bi-upload me-1.5"></i> Ir a Entregar
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {% empty %}
                     <div class="text-center py-5 text-muted">
                         <i class="bi bi-inbox fs-1 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                        <h6 class="fw-bold text-dark">Todavía no tienes tareas o actividades asignadas</h6>
-                        <p class="small mb-0">Tus docentes publicarán las actividades correspondientes a tu curso.</p>
+                        <h6 class="fw-bold text-dark">No tienes tareas pendientes por el momento</h6>
+                        <p class="small mb-0">Cuando tu profesor cree y asigne una tarea a tu grupo, aparecerá automáticamente aquí.</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -804,10 +966,17 @@
                     {% for e in entregas_tareas_clase %}
                     <div class="p-3 mb-2.5 rounded-4 border bg-light" style="border-color: var(--stu-coffee-border) !important;">
                         <div class="d-flex justify-content-between align-items-start mb-1">
-                            <strong class="text-dark small d-block">{{ e.tarea.titulo }}</strong>
+                            <div>
+                                <strong class="text-dark small d-block">{{ e.tarea.titulo }}</strong>
+                                <small class="text-muted" style="font-size: 0.74rem;">{{ e.tarea.carga_academica.programa.denominacion|default:"Asignatura" }}</small>
+                            </div>
                             {% if e.estado == 'CALIFICADA' %}
                                 <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
                                     Nota: {{ e.calificacion }}
+                                </span>
+                            {% elif e.estado == 'DEVUELTA' %}
+                                <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;">
+                                    Devuelta
                                 </span>
                             {% else %}
                                 <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;">
@@ -815,18 +984,32 @@
                                 </span>
                             {% endif %}
                         </div>
-                        <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">Entregado: {{ e.fecha_entrega|date:'d/m/Y h:i A' }}</small>
+                        <div class="d-flex justify-content-between align-items-center small text-muted my-1" style="font-size: 0.75rem;">
+                            <span><i class="bi bi-clock-history me-1"></i>{{ e.fecha_entrega|date:'d/m/Y h:i A' }}</span>
+                            {% if e.archivo %}
+                            <a href="{{ e.archivo.url }}" target="_blank" class="text-primary text-decoration-none fw-semibold">
+                                <i class="bi bi-file-earmark-check me-1"></i> Ver mi archivo
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% if e.respuesta %}
+                        <div class="p-2 bg-white rounded-3 border small mt-1 text-muted" style="font-size: 0.76rem; border-color: var(--stu-coffee-border);">
+                            <strong class="text-dark d-block" style="font-size: 0.74rem;">Mi respuesta:</strong>
+                            {{ e.respuesta|truncatechars:100 }}
+                        </div>
+                        {% endif %}
                         {% if e.retroalimentacion %}
-                            <div class="p-2.5 bg-white rounded-3 border small mt-2" style="border-color: var(--stu-coffee-border);">
-                                <strong class="text-dark d-block mb-0.5" style="font-size: 0.76rem;"><i class="bi bi-chat-quote-fill me-1" style="color: var(--stu-coffee-primary);"></i> Retroalimentación Docente:</strong>
-                                <span class="text-muted">{{ e.retroalimentacion }}</span>
-                            </div>
+                        <div class="p-2.5 bg-white rounded-3 border small mt-2" style="border-color: var(--stu-coffee-border);">
+                            <strong class="text-dark d-block mb-0.5" style="font-size: 0.76rem;"><i class="bi bi-chat-quote-fill me-1" style="color: var(--stu-coffee-primary);"></i> Retroalimentación Docente:</strong>
+                            <span class="text-muted">{{ e.retroalimentacion }}</span>
+                        </div>
                         {% endif %}
                     </div>
                     {% empty %}
-                    <div class="text-center py-4 text-muted small">
-                        <i class="bi bi-inbox fs-3 d-block mb-1" style="color: var(--stu-coffee-primary);"></i>
-                        Aún no has entregado actividades este periodo.
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.92rem;">No tienes entregas registradas por el momento</h6>
+                        <p class="small text-muted mb-0">Las actividades que envíes a tus docentes aparecerán aquí con su estado y retroalimentación.</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -844,11 +1027,18 @@
                     <i class="bi bi-check2-square fs-5" style="color: var(--stu-coffee-primary);"></i>
                     <h6 class="fw-bold text-dark mb-0">Control y Registro de Asistencia Escolar</h6>
                 </div>
+                {% if porcentaje_asistencia is not None %}
                 <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
-                    {{ porcentaje_asistencia|default:100 }}% Asistencia
+                    {{ porcentaje_asistencia }}% Asistencia
                 </span>
+                {% else %}
+                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
+                    Sin registros de asistencia
+                </span>
+                {% endif %}
             </div>
 
+            {% if porcentaje_asistencia is not None %}
             <!-- Stats Rápidas -->
             <div class="row g-3 mb-4">
                 <div class="col-4">
@@ -897,18 +1087,17 @@
                             <td>Prof. {{ a.registrado_por.get_full_name|default:a.registrado_por.username|default:"Docente Titular" }}</td>
                             <td class="small text-muted">{{ a.observacion|default:"Sin novedad registrada." }}</td>
                         </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">
-                                <i class="bi bi-calendar-check fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                                <h6 class="fw-bold text-dark">No hay registros de asistencia en el historial</h6>
-                                <p class="small mb-0">Los llamados a lista se reflejarán automáticamente en esta tabla.</p>
-                            </td>
-                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar2-check fs-1 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                <h5 class="fw-bold text-dark">Todavía no hay registros de asistencia</h5>
+                <p class="small text-muted mb-0">Tus llamados a lista y porcentajes oficiales se calcularán cuando tus docentes registren la asistencia de clase.</p>
+            </div>
+            {% endif %}
         </div>
     </section>
 
@@ -932,29 +1121,93 @@
                 <div class="col-md-6">
                     <div class="p-3.5 rounded-4 border bg-white h-100 d-flex flex-column justify-content-between shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
                         <div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
                                 <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary);">
                                     {{ g.carga_academica.programa.denominacion }}
                                 </span>
-                                <small class="text-muted" style="font-size: 0.75rem;">{{ g.fecha_publicacion|date:"d/m/Y" }}</small>
+                                <small class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-calendar3 me-1"></i>{{ g.fecha_publicacion|date:"d/m/Y h:i A" }}</small>
                             </div>
-                            <h6 class="fw-bold text-dark mb-1">{{ g.titulo }}</h6>
-                            <p class="text-muted small mb-3">{{ g.descripcion|truncatechars:120 }}</p>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size: 1rem;">{{ g.titulo }}</h6>
+                            <div class="small text-muted mb-2" style="font-size: 0.8rem;">
+                                <i class="bi bi-person me-1"></i>Prof. {% if g.carga_academica.profesor %}{{ g.carga_academica.profesor.get_full_name|default:g.carga_academica.profesor.username }}{% elif g.profesor %}{{ g.profesor.get_full_name|default:g.profesor.username }}{% else %}Docente Titular{% endif %}
+                            </div>
+                            <p class="text-muted small mb-3" style="font-size: 0.82rem; line-height: 1.45;">
+                                {{ g.instrucciones|striptags|truncatechars:150|default:"Contenido pedagógico oficial disponible para lectura y descarga." }}
+                            </p>
                         </div>
-                        {% if g.archivo %}
-                        <div class="pt-2 border-top">
-                            <a href="{{ g.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1 fw-bold w-100" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);">
-                                <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Guía Oficial
+                        <div class="pt-2 border-top d-flex gap-2 flex-wrap" style="border-color: var(--stu-coffee-border) !important;">
+                            <button type="button" class="btn btn-sm text-white rounded-pill px-3 py-1.5 fw-bold flex-grow-1" data-bs-toggle="modal" data-bs-target="#modalVerTema{{ g.id }}" style="background: var(--stu-coffee-primary); border: none;">
+                                <i class="bi bi-book-half me-1.5"></i> Leer Tema Completo
+                            </button>
+                            {% if g.archivo %}
+                            <a href="{{ g.archivo.url }}" target="_blank" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); border: 1px solid var(--stu-coffee-border);" title="Descargar documento">
+                                <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Guía
                             </a>
+                            {% endif %}
                         </div>
-                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- MODAL DE LECTURA COMPLETA DEL TEMA -->
+                <div class="modal fade" id="modalVerTema{{ g.id }}" tabindex="-1" aria-labelledby="modalVerTemaLabel{{ g.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+                            <div class="modal-header border-bottom py-3 text-white" style="background: linear-gradient(135deg, #5a3825 0%, #3d2417 100%);">
+                                <div>
+                                    <span class="badge rounded-pill px-2.5 py-1 small fw-bold mb-1" style="background: rgba(255,255,255,0.2); color: #fff;">
+                                        {{ g.carga_academica.programa.denominacion }}
+                                    </span>
+                                    <h5 class="modal-title fw-bold text-white mb-0" id="modalVerTemaLabel{{ g.id }}">
+                                        {{ g.titulo }}
+                                    </h5>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body p-4 bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2 text-muted small" style="border-color: var(--stu-coffee-border) !important;">
+                                    <div>
+                                        <i class="bi bi-person-circle me-1" style="color: var(--stu-coffee-primary);"></i>
+                                        <strong>Docente Titular:</strong> Prof. {% if g.carga_academica.profesor %}{{ g.carga_academica.profesor.get_full_name|default:g.carga_academica.profesor.username }}{% elif g.profesor %}{{ g.profesor.get_full_name|default:g.profesor.username }}{% else %}Docente Titular{% endif %}
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-calendar3 me-1" style="color: var(--stu-coffee-primary);"></i>
+                                        <strong>Fecha:</strong> {{ g.fecha_publicacion|date:"d/m/Y h:i A" }}
+                                    </div>
+                                </div>
+
+                                <div class="p-3.5 rounded-4 bg-light border mb-4" style="border-color: var(--stu-coffee-border) !important; font-size: 0.93rem; line-height: 1.7; color: #2d3748;">
+                                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-card-text me-1" style="color: var(--stu-coffee-primary);"></i> Contenido y Guía Pedagógica:</h6>
+                                    {{ g.instrucciones|linebreaks }}
+                                </div>
+
+                                {% if g.archivo %}
+                                <div class="p-3 rounded-4 border d-flex justify-content-between align-items-center flex-wrap gap-2" style="background: var(--stu-coffee-soft); border-color: var(--stu-coffee-border) !important;">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-3 p-2 text-white" style="background: var(--stu-coffee-primary);">
+                                            <i class="bi bi-file-earmark-pdf fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark small d-block">Documento / Guía Adjunta Oficial</strong>
+                                            <small class="text-muted">Archivo pedagógico compartido por el docente</small>
+                                        </div>
+                                    </div>
+                                    <a href="{{ g.archivo.url }}" target="_blank" class="btn btn-sm text-white rounded-pill px-4 py-2 fw-bold" style="background: var(--stu-coffee-primary);">
+                                        <i class="bi bi-download me-1.5"></i> Descargar Documento
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="modal-footer border-top py-2.5 bg-light">
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {% empty %}
                 <div class="col-12 text-center py-5 text-muted">
-                    <i class="bi bi-journal-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                    <h6 class="fw-bold text-dark">No hay temas o guías publicadas por tus docentes por ahora.</h6>
-                    <p class="small mb-0">Los materiales educativos se compartirán a través de este módulo.</p>
+                    <i class="bi bi-journal-x fs-1 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
+                    <h6 class="fw-bold text-dark">Todavía no tienes temas publicados</h6>
+                    <p class="small mb-0">Cuando tu profesor agregue y publique un tema para tu grupo, podrás consultarlo y descargarlo aquí.</p>
                 </div>
                 {% endfor %}
             </div>
@@ -979,7 +1232,12 @@
             <!-- Conversaciones / Mensajes -->
             <div class="row g-4">
                 <div class="col-lg-7">
-                    <h6 class="fw-bold text-dark mb-3 small text-uppercase">Mensajes Recientes</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-dark mb-0 small text-uppercase">Mensajes Recientes</h6>
+                        <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); font-size: 0.72rem;">
+                            {{ mensajes_conversacion|length }} mensaje{{ mensajes_conversacion|length|pluralize }}
+                        </span>
+                    </div>
                     {% for msg in mensajes_conversacion %}
                     <div class="p-3 mb-2.5 rounded-3 border bg-light" style="border-color: var(--stu-coffee-border) !important;">
                         <div class="d-flex justify-content-between align-items-center mb-1">
@@ -998,7 +1256,7 @@
                     {% empty %}
                     <div class="text-center py-4 text-muted small">
                         <i class="bi bi-chat-left-dots fs-3 d-block mb-1" style="color: var(--stu-coffee-primary);"></i>
-                        No tienes mensajes directos con tus profesores.
+                        No tienes mensajes todavía.
                     </div>
                     {% endfor %}
                 </div>
@@ -1043,30 +1301,45 @@
 
             <div class="list-group list-group-flush">
                 {% for n in notificaciones_estudiante %}
-                <div class="list-group-item px-0 py-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--stu-coffee-border) !important;">
+                <div class="list-group-item px-0 py-3 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3" style="border-color: var(--stu-coffee-border) !important;">
                     <div>
                         <div class="d-flex align-items-center gap-2 mb-1">
                             {% if not n.leida %}
                                 <span class="badge rounded-pill bg-danger" style="font-size: 0.65rem;">Nueva</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-light text-muted border" style="font-size: 0.65rem;">Leída</span>
                             {% endif %}
-                            <strong class="text-dark" style="font-size: 0.92rem;">{{ n.titulo }}</strong>
+                            {% if n.enlace %}
+                                <a href="{% url 'abrir_notificacion' n.id %}" class="text-decoration-none text-dark">
+                                    <strong style="font-size: 0.92rem;">{{ n.titulo }}</strong>
+                                </a>
+                            {% else %}
+                                <strong class="text-dark" style="font-size: 0.92rem;">{{ n.titulo }}</strong>
+                            {% endif %}
                         </div>
-                        <p class="text-muted small mb-0">{{ n.mensaje }}</p>
-                        <small class="text-muted" style="font-size: 0.72rem;">{{ n.fecha_creacion|timesince }} atrás</small>
+                        <p class="text-muted small mb-1">{{ n.mensaje }}</p>
+                        <small class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-clock me-1"></i>{{ n.fecha_creacion|timesince }} atrás</small>
                     </div>
-                    {% if not n.leida %}
-                    <form method="post" action="{% url 'marcar_notificacion_leida' n.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-0.5" style="font-size: 0.75rem;">
-                            Leída
-                        </button>
-                    </form>
-                    {% endif %}
+                    <div class="d-flex align-items-center gap-2 flex-nowrap">
+                        {% if n.enlace %}
+                        <a href="{% url 'abrir_notificacion' n.id %}" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-decoration-none text-white text-nowrap" style="background: var(--stu-coffee-primary); font-size: 0.75rem;">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> Abrir
+                        </a>
+                        {% endif %}
+                        {% if not n.leida %}
+                        <form method="post" action="{% url 'marcar_notificacion_leida' n.id %}" class="d-inline m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 text-nowrap" style="font-size: 0.75rem;">
+                                <i class="bi bi-check2 me-1"></i> Marcar leída
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
                 </div>
                 {% empty %}
                 <div class="text-center py-5 text-muted">
                     <i class="bi bi-bell-slash fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                    <h6 class="fw-bold text-dark">No tienes notificaciones pendientes</h6>
+                    <h6 class="fw-bold text-dark">No tienes notificaciones por el momento</h6>
                     <p class="small mb-0">Te avisaremos sobre nuevas tareas, valoraciones y circulares escolares.</p>
                 </div>
                 {% endfor %}
@@ -1198,6 +1471,35 @@
         if (modalEl) {
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
+        }
+    }
+
+    function cambiarPeriodoCalificaciones(num) {
+        if (!num) num = '1';
+        document.querySelectorAll('.periodo-calif-pane').forEach(function(pane) {
+            pane.classList.add('d-none');
+        });
+        const target = document.getElementById('contenedor-periodo-' + num);
+        if (target) {
+            target.classList.remove('d-none');
+        }
+
+        document.querySelectorAll('.card-periodo-tab').forEach(function(card) {
+            card.classList.remove('border-primary', 'shadow-sm', 'periodo-active');
+        });
+        const cardTarget = document.getElementById('card-periodo-' + num);
+        if (cardTarget) {
+            cardTarget.classList.add('border-primary', 'shadow-sm', 'periodo-active');
+        }
+
+        document.querySelectorAll('.nav-periodo-btn').forEach(function(btn) {
+            btn.classList.remove('btn-primary', 'active', 'text-white');
+            btn.classList.add('btn-light', 'text-secondary');
+        });
+        const btnTarget = document.getElementById('tab-btn-periodo-' + num);
+        if (btnTarget) {
+            btnTarget.classList.remove('btn-light', 'text-secondary');
+            btnTarget.classList.add('btn-primary', 'active', 'text-white');
         }
     }
 

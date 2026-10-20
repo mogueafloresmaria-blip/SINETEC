@@ -4,151 +4,772 @@
 
 {% block extra_head %}
 <style>
-body{background:#f3f5f9 !important;}
-.ca-wrap{padding:1.1rem 1.35rem 2rem;}
-.ca-title{font-size:1.45rem;font-weight:800;color:#0f172a;letter-spacing:-.02em;margin:0;}
-.ca-sub{color:#75675E;font-size:.9rem;margin:.15rem 0 1.15rem;}
-.ca-card{background:#fff;border:1px solid #E5DFD5;border-radius:16px;box-shadow:0 1px 4px rgba(15,23,42,.04);padding:1.25rem 1.3rem;}
-.ca-card-title{display:flex;align-items:center;gap:.5rem;font-weight:800;color:var(--color-titulo);margin-bottom:1.05rem;}
-.ca-dot{width:18px;height:18px;border-radius:50%;background:var(--color-principal);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem;}
-.ca-label{font-size:.68rem;font-weight:800;letter-spacing:.05em;color:#75675E;margin-bottom:.35rem;}
-.ca-card .form-select{border-radius:10px;border-color:#E5DFD5;font-weight:500;}
-.ca-btn{background:var(--color-principal);border:none;color:#fff;font-weight:700;border-radius:12px;padding:.75rem 1rem;width:100%;transition:background .15s;}
-.ca-btn:hover{background:var(--color-secundario);color:#fff;}
-.ca-sec-title{display:flex;align-items:center;gap:.45rem;font-size:.78rem;font-weight:800;letter-spacing:.06em;color:#75675E;margin:1.1rem 0 .85rem;}
-.ca-asig{background:#fff;border:1px solid #E5DFD5;border-radius:14px;padding:1rem 1.05rem;position:relative;box-shadow:0 1px 2px rgba(15,23,42,.03);height:100%;}
-.ca-asig-name{font-size:1.05rem;font-weight:800;color:var(--color-titulo);margin:0 1.6rem .55rem 0;}
-.ca-asig-prof{display:flex;align-items:center;gap:.5rem;color:#75675E;font-size:.82rem;font-weight:600;}
-.ca-av{width:28px;height:28px;border-radius:50%;background:var(--color-principal);color:#fff;font-size:.7rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;}
-.ca-pill{display:inline-block;margin-top:.75rem;background:#F5F2EB;color:var(--color-secundario);border:1px solid #E0D8CE;font-size:.68rem;font-weight:800;letter-spacing:.04em;padding:.28rem .65rem;border-radius:999px;text-transform:uppercase;}
-.ca-x{position:absolute;top:.7rem;right:.7rem;width:28px;height:28px;border:none;background:transparent;color:#dc2626;font-size:1.05rem;}
-.ca-empty{color:#94a3b8;font-size:.85rem;padding:.4rem 0 1rem;}
+/* ==========================================================================
+   CARGA ACADÉMICA INSTITUCIONAL - SISTEMA DE DISEÑO EDUNOVA
+   Paleta: Café Cálido, Crema, Acentos Suaves y Tipografía Institucional
+   ========================================================================== */
+body { background: var(--color-fondo, #f8fafc) !important; }
+.ca-wrap { padding: 1.5rem 1.75rem 2.5rem; max-width: 1440px; margin: 0 auto; }
+.ca-title { font-size: 1.65rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; margin: 0; }
+.ca-sub { color: #64748b; font-size: 0.92rem; margin: 0.25rem 0 0; }
+
+/* KPI Cards Superiores */
+.ca-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.15rem 1.35rem;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.ca-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15,23,42,0.06);
+}
+.ca-kpi-val { font-size: 1.8rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
+.ca-kpi-lbl { font-size: 0.76rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.ca-kpi-ico {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+/* Panel Izquierdo: Formulario de Carga Académica */
+.ca-form-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 2px 10px rgba(15,23,42,0.04);
+  padding: 1.5rem 1.65rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.ca-form-card.modo-edicion {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15), 0 4px 16px rgba(245, 158, 11, 0.12) !important;
+}
+.ca-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 1.15rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+.ca-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+.ca-form-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #334155;
+  margin-bottom: 0.45rem;
+  display: flex;
+  align-items: center;
+}
+.ca-input {
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.65rem 0.85rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background-color: #ffffff;
+}
+.ca-input:focus {
+  border-color: var(--color-principal, #5a3825);
+  box-shadow: 0 0 0 3px rgba(90, 56, 37, 0.12);
+  outline: none;
+}
+
+/* Vista Previa de la Asignación */
+.ca-preview-box {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 0.82rem;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+.ca-preview-box.activo {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+
+/* Pestañas de Filtrado */
+.ca-nav-tabs {
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.15rem;
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 2px;
+}
+.ca-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 0.55rem 0.95rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: -4px;
+  border-radius: 6px 6px 0 0;
+}
+.ca-tab-btn:hover { color: var(--color-principal, #5a3825); background: #f8fafc; }
+.ca-tab-btn.active {
+  color: var(--color-principal, #5a3825);
+  border-bottom-color: var(--color-principal, #5a3825);
+  background: #ffffff;
+}
+
+/* Tarjetas de Asignaciones (Grid) */
+.ca-asig-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.15rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.ca-asig-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15,23,42,0.06);
+  border-color: #cbd5e1;
+}
+.ca-asig-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.badge-media { background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8; }
+.badge-secundaria { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.badge-primaria { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-inicial { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
+
+.ca-asig-materia {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0.5rem 0 0.35rem;
+  line-height: 1.25;
+}
+.ca-asig-docente {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.55rem 0 0.75rem;
+}
+.ca-docente-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-principal, #5a3825), var(--color-secundario, #3d2417));
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ca-docente-nombre {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.2;
+}
+.ca-docente-rol {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.ca-asig-footer {
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.btn-ca-action {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-ca-action:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+.btn-ca-delete:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+.btn-ca-edit:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+@media (min-width: 992px) {
+  .ca-sticky-form {
+    position: sticky;
+    top: 1.25rem;
+  }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 {{ grados_por_nivel|json_script:"grados-por-nivel" }}
-<div class="ca-wrap">
-  <h1 class="ca-title">Carga Académica</h1>
-  <p class="ca-sub">Gestión de cursos y docentes.</p>
 
-  <div class="row g-4">
-    <div class="col-lg-4">
-      <div class="ca-card">
-        <div class="ca-card-title"><span class="ca-dot">+</span> Nueva Asignación</div>
-        <form method="post">
+<div class="ca-wrap">
+  <!-- Encabezado Principal de Carga Académica -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h1 class="ca-title">Carga Académica</h1>
+        <span class="badge rounded-pill bg-light text-dark border px-2.5 py-1 fw-bold" style="font-size:0.75rem;">
+          <i class="bi bi-calendar2-check-fill text-primary me-1"></i>Vigencia 2026
+        </span>
+      </div>
+      <p class="ca-sub">Gestión oficial de asignaciones de docentes a materias, grados y secciones escolares.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn text-white rounded-pill px-3.5 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2" style="background:var(--color-principal, #5a3825); font-size:0.86rem;" onclick="prepararNuevaAsignacion()">
+        <i class="bi bi-plus-circle-fill"></i> Nueva Asignación
+      </button>
+    </div>
+  </div>
+
+  <!-- Métricas Clave de Carga (3 KPI Cards) -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+      <div class="ca-kpi-card d-flex align-items-center justify-content-between">
+        <div>
+          <div class="ca-kpi-lbl">Total Asignaciones</div>
+          <div class="ca-kpi-val">{{ total_cargas }}</div>
+          <div class="text-muted small mt-1"><i class="bi bi-journal-check text-success me-1"></i>Asignaturas activas</div>
+        </div>
+        <div class="ca-kpi-ico" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;">
+          <i class="bi bi-journal-bookmark-fill"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="ca-kpi-card d-flex align-items-center justify-content-between">
+        <div>
+          <div class="ca-kpi-lbl">Docentes con Carga</div>
+          <div class="ca-kpi-val">{{ total_docentes_asignados }}</div>
+          <div class="text-muted small mt-1"><i class="bi bi-person-check text-primary me-1"></i>Planta docente asignada</div>
+        </div>
+        <div class="ca-kpi-ico" style="background:#fdf2f8;color:#db2777;border:1px solid #fbcfe8;">
+          <i class="bi bi-person-workspace"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="ca-kpi-card d-flex align-items-center justify-content-between">
+        <div>
+          <div class="ca-kpi-lbl">Grupos Cubiertos</div>
+          <div class="ca-kpi-val">{{ total_grados_cubiertos }}</div>
+          <div class="text-muted small mt-1"><i class="bi bi-mortarboard text-warning me-1"></i>Grados y cursos con horario</div>
+        </div>
+        <div class="ca-kpi-ico" style="background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;">
+          <i class="bi bi-people-fill"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estructura Principal Balanceada: 2 Columnas Maestras -->
+  <div class="row g-4 align-items-start">
+
+    <!-- COLUMNA IZQUIERDA: FORMULARIO DE ASIGNACIÓN / EDICIÓN (Compacto, Equilibrado, en 2 Columnas) -->
+    <div class="col-12 col-lg-5 col-xl-5">
+      <div class="ca-form-card ca-sticky-form" id="cardFormularioCarga">
+        
+        <!-- Cabecera del Formulario -->
+        <div class="ca-card-head">
+          <div>
+            <h2 class="ca-card-title">
+              <i class="bi bi-pencil-square" style="color:var(--color-principal, #5a3825);"></i>
+              <span id="formTituloPrincipal">Asignación de Carga Académica</span>
+            </h2>
+            <div class="text-muted small mt-1" id="formSubtitulo">
+              Selecciona el docente, asignatura, nivel, grado y grupo para registrar o actualizar.
+            </div>
+          </div>
+          <span class="badge rounded-pill px-3 py-1.5 fw-bold" id="badgeModo" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;font-size:0.75rem;">
+            <i class="bi bi-plus-circle me-1"></i> Modo Asignación
+          </span>
+        </div>
+
+        <!-- Formulario -->
+        <form method="post" id="formCargaAcademica" onsubmit="return validarFormularioCarga()">
           {% csrf_token %}
-          <div class="mb-3">
-            <div class="ca-label">1. SELECCIONA DOCENTE</div>
-            <select name="profesor_id" class="form-select" required>
-              <option value="">-- Seleccionar Profesor --</option>
-              {% for d in docentes %}
-              <option value="{{ d.id }}">{{ d.last_name }}{% if d.last_name and d.first_name %}, {% endif %}{{ d.first_name }}{% if not d.first_name and not d.last_name %}{{ d.username }}{% endif %}</option>
-              {% endfor %}
-            </select>
+          <input type="hidden" name="carga_id" id="inputCargaId" value="">
+
+          <!-- Fila 1 de Campos (2 Columnas): Docente y Asignatura -->
+          <div class="row g-2.5 mb-3">
+            <div class="col-12 col-sm-6">
+              <label class="ca-form-label" for="selectDocente">
+                <i class="bi bi-person-fill text-primary me-1"></i> DOCENTE TITULAR <span class="text-danger ms-0.5">*</span>
+              </label>
+              <select name="profesor_id" id="selectDocente" class="form-select ca-input" required onchange="actualizarVistaPrevia()">
+                <option value="">-- Docente --</option>
+                {% for d in docentes %}
+                <option value="{{ d.id }}">
+                  {{ d.last_name }}{% if d.last_name and d.first_name %}, {% endif %}{{ d.first_name }}{% if not d.first_name and not d.last_name %}{{ d.username }}{% endif %} (@{{ d.username }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label class="ca-form-label" for="selectPrograma">
+                <i class="bi bi-book-fill text-primary me-1"></i> ASIGNATURA / CURSO <span class="text-danger ms-0.5">*</span>
+              </label>
+              <select name="programa_id" id="selectPrograma" class="form-select ca-input" required onchange="actualizarVistaPrevia()">
+                <option value="">-- Asignatura --</option>
+                {% for p in programas %}
+                <option value="{{ p.id }}">{{ p.denominacion }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </div>
-          <div class="mb-3">
-            <div class="ca-label">2. FILTRAR POR NIVEL</div>
-            <select id="asigNivel" name="nivel" class="form-select" required onchange="filtrarGradosCarga()">
-              <option value="">-- Seleccionar Nivel --</option>
-              <option value="Inicial">Inicial</option>
-              <option value="Primaria">Primaria</option>
-              <option value="Secundaria">Secundaria</option>
-            </select>
+
+          <!-- Fila 2 de Campos (2 Columnas): Nivel y Grado -->
+          <div class="row g-2.5 mb-3">
+            <div class="col-12 col-sm-6">
+              <label class="ca-form-label" for="asigNivel">
+                <i class="bi bi-layers-fill text-primary me-1"></i> NIVEL EDUCATIVO <span class="text-danger ms-0.5">*</span>
+              </label>
+              <select id="asigNivel" name="nivel" class="form-select ca-input" required onchange="filtrarGradosCarga(); actualizarVistaPrevia();">
+                <option value="">-- Nivel --</option>
+                <option value="Educación Media">Educación Media (10° y 11°)</option>
+                <option value="Secundaria">Secundaria (6° a 9°)</option>
+                <option value="Primaria">Primaria (1° a 5°)</option>
+                <option value="Inicial">Inicial / Preescolar</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label class="ca-form-label" for="asigGrado">
+                <i class="bi bi-mortarboard-fill text-primary me-1"></i> GRADO ESCOLAR <span class="text-danger ms-0.5">*</span>
+              </label>
+              <select name="grado" id="asigGrado" class="form-select ca-input" required onchange="actualizarVistaPrevia()">
+                <option value="">-- Grado --</option>
+              </select>
+            </div>
           </div>
+
+          <!-- Fila 3 de Campos: Curso / Sección / Grupo -->
           <div class="mb-3">
-            <div class="ca-label">3. SELECCIONAR GRADO</div>
-            <select name="grado" id="asigGrado" class="form-select" required>
-              <option value="">-- Seleccionar Grado --</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <div class="ca-label">4. SELECCIONAR CURSO</div>
-            <select name="programa_id" class="form-select" required>
-              <option value="">-- Seleccionar Curso --</option>
-              {% for p in programas %}
-              <option value="{{ p.id }}">{{ p.denominacion }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="mb-4">
-            <div class="ca-label">5. ASIGNAR SECCIÓN</div>
-            <select name="seccion" class="form-select" required>
+            <label class="ca-form-label" for="selectSeccion">
+              <i class="bi bi-grid-3x3-gap-fill text-primary me-1"></i> CURSO / SECCIÓN / GRUPO <span class="text-danger ms-0.5">*</span>
+            </label>
+            <select name="seccion" id="selectSeccion" class="form-select ca-input" required onchange="actualizarVistaPrevia()">
               {% for s in secciones %}
-              <option value="{{ s }}">Sección "{{ s }}"</option>
+              <option value="{{ s }}">Grupo / Sección "{{ s }}"</option>
               {% endfor %}
             </select>
           </div>
-          <button type="submit" class="ca-btn">Asignar Carga</button>
+
+          <!-- Caja de Vista Previa en Tiempo Real -->
+          <div class="ca-preview-box mb-3.5" id="boxVistaPrevia">
+            <div class="d-flex align-items-center gap-1.5 mb-1 text-muted" style="font-size:0.75rem; font-weight:700;">
+              <i class="bi bi-eye"></i> VISTA PREVIA DE LA ASIGNACIÓN:
+            </div>
+            <div id="textoVistaPrevia" class="fw-bold" style="font-size:0.86rem; color:#1e293b;">
+              Selecciona los campos para ver el resumen interactivo.
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="d-flex flex-column gap-2 pt-2 border-top">
+            <button type="submit" id="btnSubmitCarga" class="btn text-white rounded-pill py-2.5 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" style="background:var(--color-principal, #5a3825); font-size:0.92rem;">
+              <i class="bi bi-check2-circle fs-6"></i>
+              <span id="btnSubmitTexto">Guardar Asignación</span>
+            </button>
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" id="btnCancelarEdicion" class="btn btn-outline-secondary rounded-pill py-2 fw-bold w-100 d-none" onclick="cancelarEdicion()" style="font-size:0.84rem;">
+                <i class="bi bi-x-circle me-1"></i> Cancelar Edición
+              </button>
+              <button type="button" class="btn btn-light border rounded-pill py-2 fw-semibold w-100 text-muted" onclick="limpiarFormularioCarga()" style="font-size:0.84rem;">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Limpiar
+              </button>
+            </div>
+          </div>
+          <div class="text-muted text-center small mt-2" style="font-size:0.74rem;">
+            <i class="bi bi-info-circle me-1"></i> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios.
+          </div>
         </form>
       </div>
     </div>
 
-    <div class="col-lg-8">
-      <div class="ca-sec-title" style="margin-top:0;">
-        <i class="bi bi-mortarboard-fill" style="color:#f59e0b;"></i> NIVEL PRIMARIA
+    <!-- COLUMNA DERECHA: CATÁLOGO DE ASIGNACIONES GUARDADAS (Búsqueda, Filtros y Tarjetas) -->
+    <div class="col-12 col-lg-7 col-xl-7">
+      
+      <!-- Barra Superior de Búsqueda y Título -->
+      <div class="ca-card-head flex-wrap gap-2 mb-3 pb-2 border-bottom">
+        <div>
+          <h3 class="fw-bold text-dark m-0" style="font-size:1.25rem;">
+            Asignaciones Registradas
+            <span class="badge rounded-pill bg-light text-dark border ms-1.5" style="font-size:0.76rem;">{{ total_cargas }} en total</span>
+          </h3>
+          <div class="text-muted small">Carga académica oficial vinculada a docentes y grupos escolares.</div>
+        </div>
+        <div style="min-width: 260px;" class="flex-grow-1 flex-md-grow-0">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0 rounded-start-pill text-muted ps-3">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" id="filtroTextoCargas" class="form-control border-start-0 rounded-end-pill py-1.5" placeholder="Buscar materia, docente o grado..." onkeyup="filtrarCardsCargas()" style="font-size:0.86rem;">
+          </div>
+        </div>
       </div>
-      <div class="row g-3">
-        {% for a in cargas_primaria %}
-        <div class="col-md-6">
-          <div class="ca-asig">
-            <form method="post" action="{% url 'carga_eliminar' a.pk %}">
-              {% csrf_token %}
-              <button class="ca-x" onclick="return confirm('¿Retirar esta asignación?');" title="Quitar">&times;</button>
-            </form>
-            <div class="ca-asig-name">{{ a.programa.denominacion }}</div>
-            <div class="ca-asig-prof">
-              <span class="ca-av">{{ a.profesor.first_name|slice:":1"|upper }}{{ a.profesor.last_name|slice:":1"|upper }}</span>
-              {{ a.profesor.last_name }}{% if a.profesor.last_name and a.profesor.first_name %}, {% endif %}{{ a.profesor.first_name }}
+
+      <!-- Pestañas de Filtrado por Nivel -->
+      <div class="ca-nav-tabs">
+        <button type="button" class="ca-tab-btn active" onclick="cambiarTabNivel('todos', this)">
+          <i class="bi bi-grid-fill me-1"></i> Todas ({{ total_cargas }})
+        </button>
+        <button type="button" class="ca-tab-btn" onclick="cambiarTabNivel('media', this)">
+          <i class="bi bi-mortarboard-fill me-1"></i> Ed. Media ({{ cargas_media|length }})
+        </button>
+        <button type="button" class="ca-tab-btn" onclick="cambiarTabNivel('secundaria', this)">
+          <i class="bi bi-journal-text me-1"></i> Secundaria ({{ cargas_secundaria|length }})
+        </button>
+        <button type="button" class="ca-tab-btn" onclick="cambiarTabNivel('primaria', this)">
+          <i class="bi bi-pencil-fill me-1"></i> Primaria ({{ cargas_primaria|length }})
+        </button>
+        <button type="button" class="ca-tab-btn" onclick="cambiarTabNivel('inicial', this)">
+          <i class="bi bi-stars me-1"></i> Inicial ({{ cargas_inicial|length }})
+        </button>
+      </div>
+
+      <!-- Grid de Tarjetas de Asignaciones (2 Columnas dentro del panel derecho) -->
+      <div class="row g-3 row-cols-1 row-cols-md-2" id="gridCargasCards">
+        {% for a in todas_cargas %}
+        <div class="col item-carga-col" 
+             data-nivel="{% if 'media' in a.nivel|lower or a.grado == '10' or a.grado == '11' or '10' in a.grado or '11' in a.grado %}media{% elif 'secund' in a.nivel|lower %}secundaria{% elif 'primar' in a.nivel|lower %}primaria{% else %}inicial{% endif %}"
+             data-busqueda="{{ a.programa.denominacion|lower }} {{ a.profesor.get_full_name|lower }} {{ a.profesor.username|lower }} {{ a.grado }} {{ a.seccion }}">
+          <div class="ca-asig-card">
+            <div>
+              <!-- Cabecera de la Tarjeta con Badges y Acciones -->
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="ca-asig-badge {% if 'media' in a.nivel|lower or a.grado == '10' or a.grado == '11' or '10' in a.grado or '11' in a.grado %}badge-media{% elif 'secund' in a.nivel|lower %}badge-secundaria{% elif 'primar' in a.nivel|lower %}badge-primaria{% else %}badge-inicial{% endif %}">
+                  <i class="bi bi-mortarboard"></i> Grado {{ a.grado }}°{{ a.seccion }} · {{ a.nivel }}
+                </span>
+                <div class="d-flex align-items-center gap-1">
+                  <button type="button" class="btn-ca-action btn-ca-edit" 
+                          onclick="editarCarga('{{ a.id }}', '{{ a.profesor_id }}', '{{ a.programa_id }}', '{{ a.nivel }}', '{{ a.grado }}', '{{ a.seccion }}')" 
+                          title="Editar Asignación">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <form method="post" action="{% url 'carga_eliminar' a.pk %}" class="d-inline" onsubmit="return confirm('¿Seguro que deseas retirar la asignación de {{ a.programa.denominacion }} para el Grado {{ a.grado }}°{{ a.seccion }}?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-ca-action btn-ca-delete" title="Quitar Asignación">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Nombre de la Materia -->
+              <h4 class="ca-asig-materia">{{ a.programa.denominacion }}</h4>
+
+              <!-- Información del Docente Titular -->
+              <div class="ca-asig-docente">
+                <div class="ca-docente-avatar">
+                  {{ a.profesor.first_name|slice:":1"|upper }}{{ a.profesor.last_name|slice:":1"|upper }}
+                </div>
+                <div>
+                  <div class="ca-docente-nombre">
+                    {{ a.profesor.last_name }}{% if a.profesor.last_name and a.profesor.first_name %}, {% endif %}{{ a.profesor.first_name }}
+                  </div>
+                  <div class="ca-docente-rol">Docente Titular · @{{ a.profesor.username }}</div>
+                </div>
+              </div>
             </div>
-            <span class="ca-pill">{{ a.grado }} "{{ a.seccion }}"</span>
+
+            <!-- Footer de la Tarjeta con Estudiantes Reales -->
+            <div class="ca-asig-footer">
+              <div>
+                <i class="bi bi-people-fill text-primary me-1"></i>
+                <strong>{{ a.num_estudiantes }}</strong> estudiante{{ a.num_estudiantes|pluralize:"s" }}
+              </div>
+              <div class="text-muted">
+                <i class="bi bi-calendar3 me-1"></i> Año {{ a.anio_lectivo }}
+              </div>
+            </div>
           </div>
         </div>
         {% empty %}
-        <div class="col-12 ca-empty">No hay asignaciones en Primaria.</div>
+        <div class="col-12 py-5 text-center text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+          <h5>No hay asignaciones académicas registradas.</h5>
+          <p class="small">Utiliza el formulario de la izquierda para registrar una nueva asignación docente.</p>
+        </div>
         {% endfor %}
       </div>
 
-      <div class="ca-sec-title">
-        <i class="bi bi-mortarboard-fill" style="color:#f59e0b;"></i> NIVEL SECUNDARIA
+      <!-- Estado vacío para filtros sin resultados -->
+      <div id="noResultsCards" class="text-center py-5 d-none text-muted">
+        <i class="bi bi-search fs-2 d-block mb-2 opacity-50"></i>
+        <p class="mb-0">No se encontraron asignaciones que coincidan con la búsqueda o filtro seleccionado.</p>
       </div>
-      <div class="row g-3">
-        {% for a in cargas_secundaria %}
-        <div class="col-md-6">
-          <div class="ca-asig">
-            <form method="post" action="{% url 'carga_eliminar' a.pk %}">
-              {% csrf_token %}
-              <button class="ca-x" onclick="return confirm('¿Retirar esta asignación?');" title="Quitar">&times;</button>
-            </form>
-            <div class="ca-asig-name">{{ a.programa.denominacion }}</div>
-            <div class="ca-asig-prof">
-              <span class="ca-av">{{ a.profesor.first_name|slice:":1"|upper }}{{ a.profesor.last_name|slice:":1"|upper }}</span>
-              {{ a.profesor.last_name }}{% if a.profesor.last_name and a.profesor.first_name %}, {% endif %}{{ a.profesor.first_name }}
-            </div>
-            <span class="ca-pill">{{ a.grado }} "{{ a.seccion }}"</span>
-          </div>
-        </div>
-        {% empty %}
-        <div class="col-12 ca-empty">No hay asignaciones en Secundaria.</div>
-        {% endfor %}
-      </div>
+
     </div>
   </div>
 </div>
 
 <script>
 const GRADOS_CA = JSON.parse(document.getElementById('grados-por-nivel').textContent);
-function filtrarGradosCarga() {
+
+// Normalizar y obtener opciones de grado por nivel
+function obtenerOpcionesNivel(nivel) {
+  if (!nivel) return [];
+  if (GRADOS_CA[nivel]) return GRADOS_CA[nivel];
+  const nLow = nivel.toLowerCase();
+  for (const k in GRADOS_CA) {
+    if (k.toLowerCase() === nLow || nLow.includes(k.toLowerCase()) || k.toLowerCase().includes(nLow)) {
+      return GRADOS_CA[k];
+    }
+  }
+  if (nLow.includes('media')) {
+    return ['10mo Grado', '11mo Grado', '10', '11'];
+  }
+  return ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado', '6to Grado', '7mo Grado', '8vo Grado', '9no Grado', '10mo Grado', '11mo Grado'];
+}
+
+function filtrarGradosCarga(gradoSeleccionado = null) {
   const nivel = document.getElementById('asigNivel').value;
   const sel = document.getElementById('asigGrado');
-  const opts = GRADOS_CA[nivel] || [];
-  sel.innerHTML = '<option value="">-- Seleccionar --</option>';
+  const opts = obtenerOpcionesNivel(nivel);
+  
+  sel.innerHTML = '<option value="">-- Seleccionar Grado --</option>';
   opts.forEach(g => {
     const o = document.createElement('option');
-    o.value = g; o.textContent = g;
+    o.value = g;
+    o.textContent = g;
+    if (gradoSeleccionado && (g === gradoSeleccionado || g.startsWith(gradoSeleccionado) || gradoSeleccionado.startsWith(g))) {
+      o.selected = true;
+    }
     sel.appendChild(o);
   });
+  
+  if (gradoSeleccionado && !opts.includes(gradoSeleccionado)) {
+    const oCustom = document.createElement('option');
+    oCustom.value = gradoSeleccionado;
+    oCustom.textContent = gradoSeleccionado;
+    oCustom.selected = true;
+    sel.appendChild(oCustom);
+  }
+  actualizarVistaPrevia();
 }
+
+// Vista previa en vivo de los datos seleccionados
+function actualizarVistaPrevia() {
+  const docSel = document.getElementById('selectDocente');
+  const progSel = document.getElementById('selectPrograma');
+  const nivSel = document.getElementById('asigNivel');
+  const gradSel = document.getElementById('asigGrado');
+  const secSel = document.getElementById('selectSeccion');
+  const box = document.getElementById('boxVistaPrevia');
+  const txt = document.getElementById('textoVistaPrevia');
+
+  const docente = docSel.options[docSel.selectedIndex]?.text || '';
+  const programa = progSel.options[progSel.selectedIndex]?.text || '';
+  const nivel = nivSel.value || '';
+  const grado = gradSel.value || '';
+  const seccion = secSel.value || '';
+
+  if (docSel.value && progSel.value && nivel && grado) {
+    box.classList.add('activo');
+    txt.innerHTML = `<span class="text-primary">${docente.split('(@')[0].trim()}</span> impartirá <strong>${programa}</strong> en <strong>Grado ${grado}°${seccion}</strong> (${nivel})`;
+  } else if (docSel.value || progSel.value) {
+    box.classList.remove('activo');
+    const dText = docSel.value ? docente.split('(@')[0].trim() : 'Docente pendiente';
+    const pText = progSel.value ? programa : 'Materia pendiente';
+    txt.textContent = `${dText} → ${pText}`;
+  } else {
+    box.classList.remove('activo');
+    txt.textContent = 'Selecciona los campos para ver el resumen interactivo.';
+  }
+}
+
+// Validación antes de enviar
+function validarFormularioCarga() {
+  const doc = document.getElementById('selectDocente').value;
+  const prog = document.getElementById('selectPrograma').value;
+  const niv = document.getElementById('asigNivel').value;
+  const grad = document.getElementById('asigGrado').value;
+  const sec = document.getElementById('selectSeccion').value;
+
+  if (!doc || !prog || !niv || !grad || !sec) {
+    alert('Por favor completa todos los campos obligatorios marcados con asterisco (*).');
+    return false;
+  }
+  return true;
+}
+
+// Modo edición interactivo
+function editarCarga(id, profesorId, programaId, nivel, grado, seccion) {
+  const card = document.getElementById('cardFormularioCarga');
+  card.classList.add('modo-edicion');
+  
+  document.getElementById('inputCargaId').value = id;
+  document.getElementById('selectDocente').value = profesorId;
+  document.getElementById('selectPrograma').value = programaId;
+  
+  const selectNivel = document.getElementById('asigNivel');
+  let matchedNivel = false;
+  for (let i = 0; i < selectNivel.options.length; i++) {
+    const optVal = selectNivel.options[i].value;
+    if (optVal.toLowerCase() === (nivel || '').toLowerCase() || 
+        optVal.toLowerCase().includes((nivel || '').toLowerCase()) ||
+        (nivel || '').toLowerCase().includes(optVal.toLowerCase())) {
+      selectNivel.selectedIndex = i;
+      matchedNivel = true;
+      break;
+    }
+  }
+  if (!matchedNivel && (grado === '10' || grado === '11' || (grado || '').includes('10') || (grado || '').includes('11'))) {
+    selectNivel.value = 'Educación Media';
+  }
+
+  filtrarGradosCarga(grado);
+  
+  if (seccion) {
+    document.getElementById('selectSeccion').value = seccion;
+  }
+
+  document.getElementById('formTituloPrincipal').textContent = 'Editar Asignación Académica';
+  document.getElementById('formSubtitulo').textContent = 'Modifica el docente, materia o grupo para actualizar la asignación existente.';
+  document.getElementById('badgeModo').className = 'badge rounded-pill px-3 py-1.5 fw-bold';
+  document.getElementById('badgeModo').style.cssText = 'background:#fef3c7;color:#b45309;border:1px solid #fde68a;font-size:0.75rem;';
+  document.getElementById('badgeModo').innerHTML = '<i class="bi bi-pencil-fill me-1"></i> Modo Edición (ID #' + id + ')';
+  
+  document.getElementById('btnSubmitTexto').textContent = 'Actualizar Asignación';
+  document.getElementById('btnCancelarEdicion').classList.remove('d-none');
+
+  actualizarVistaPrevia();
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelarEdicion() {
+  const card = document.getElementById('cardFormularioCarga');
+  card.classList.remove('modo-edicion');
+  
+  document.getElementById('formCargaAcademica').reset();
+  document.getElementById('inputCargaId').value = '';
+  
+  document.getElementById('formTituloPrincipal').textContent = 'Asignación de Carga Académica';
+  document.getElementById('formSubtitulo').textContent = 'Selecciona el docente, asignatura, nivel, grado y grupo para registrar o actualizar.';
+  document.getElementById('badgeModo').className = 'badge rounded-pill px-3 py-1.5 fw-bold';
+  document.getElementById('badgeModo').style.cssText = 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;font-size:0.75rem;';
+  document.getElementById('badgeModo').innerHTML = '<i class="bi bi-plus-circle me-1"></i> Modo Asignación';
+  
+  document.getElementById('btnSubmitTexto').textContent = 'Guardar Asignación';
+  document.getElementById('btnCancelarEdicion').classList.add('d-none');
+  
+  filtrarGradosCarga();
+  actualizarVistaPrevia();
+}
+
+function limpiarFormularioCarga() {
+  cancelarEdicion();
+}
+
+function prepararNuevaAsignacion() {
+  cancelarEdicion();
+  document.getElementById('selectDocente').focus();
+}
+
+// Filtros por Pestañas de Nivel y Búsqueda de Texto
+let tabNivelActivo = 'todos';
+
+function cambiarTabNivel(nivel, btn) {
+  tabNivelActivo = nivel;
+  document.querySelectorAll('.ca-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  aplicarFiltrosCards();
+}
+
+function filtrarCardsCargas() {
+  aplicarFiltrosCards();
+}
+
+function aplicarFiltrosCards() {
+  const texto = (document.getElementById('filtroTextoCargas').value || '').trim().toLowerCase();
+  const items = document.querySelectorAll('.item-carga-col');
+  let visibles = 0;
+
+  items.forEach(item => {
+    const itemNivel = item.getAttribute('data-nivel') || '';
+    const itemBusqueda = item.getAttribute('data-busqueda') || '';
+
+    const coincideNivel = (tabNivelActivo === 'todos') || (itemNivel === tabNivelActivo);
+    const coincideTexto = !texto || itemBusqueda.includes(texto);
+
+    if (coincideNivel && coincideTexto) {
+      item.classList.remove('d-none');
+      visibles++;
+    } else {
+      item.classList.add('d-none');
+    }
+  });
+
+  const noRes = document.getElementById('noResultsCards');
+  if (visibles === 0 && items.length > 0) {
+    noRes.classList.remove('d-none');
+  } else {
+    noRes.classList.add('d-none');
+  }
+}
+
+// Inicialización automática
 filtrarGradosCarga();
+actualizarVistaPrevia();
 </script>
 {% endblock %}

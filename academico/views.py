@@ -606,7 +606,8 @@ def _docentes_activos():
     return User.objects.filter(
         Q(perfil__rol__nombre__icontains='Instructor') |
         Q(perfil__rol__nombre__icontains='Profesor') |
-        Q(perfil__rol__nombre__icontains='Docente')
+        Q(perfil__rol__nombre__icontains='Docente'),
+        is_active=True
     ).distinct().order_by('last_name', 'first_name')
 
 
@@ -649,8 +650,9 @@ def lista_cursos(request):
 @login_required
 @solo_instructor
 def lista_programas(request):
-    """Carga académica: asignación de docentes a materias, grados y secciones."""
+    """Carga académica: asignación y edición de docentes a materias, grados y secciones."""
     if request.method == 'POST':
+        carga_id = request.POST.get('carga_id')
         profesor_id = request.POST.get('profesor_id')
         programa_id = request.POST.get('programa_id') or request.POST.get('curso_id')
         nivel = (request.POST.get('nivel') or '').strip()
@@ -658,58 +660,117 @@ def lista_programas(request):
         seccion = (request.POST.get('seccion') or 'A').strip() or 'A'
 
         if not all([profesor_id, programa_id, nivel, grado, seccion]):
-            messages.error(request, 'Todos los campos son obligatorios para asignar la carga académica.')
-        elif CargaAcademica.objects.filter(
-            programa_id=programa_id,
-            grado=grado,
-            seccion=seccion,
-            anio_lectivo=2026
-        ).exists():
-            carga_exist = CargaAcademica.objects.filter(
-                programa_id=programa_id, grado=grado, seccion=seccion, anio_lectivo=2026
-            ).select_related('profesor', 'programa').first()
-            nom_p = carga_exist.profesor.get_full_name() if carga_exist.profesor else 'Otro docente'
-            messages.error(request, f'No se puede duplicar la asignación: La materia "{carga_exist.programa.denominacion}" ya está asignada al {grado} Sección "{seccion}" a cargo de {nom_p}.')
+            messages.error(request, 'Todos los campos son obligatorios para guardar la asignación académica.')
         else:
-            # Validar límite de materias por profesor (máximo 2 materias distintas)
-            materias_actuales = set(
-                CargaAcademica.objects.filter(profesor_id=profesor_id)
-                .exclude(programa_id__isnull=True)
-                .values_list('programa_id', flat=True)
-            )
-            try:
-                prog_int = int(programa_id)
-            except (ValueError, TypeError):
-                prog_int = None
-            if prog_int and prog_int not in materias_actuales and len(materias_actuales) >= 2:
-                messages.error(request, 'El docente ya está inscrito en el número máximo de materias permitidas (máximo 2 materias distintas). Ya está inscrito en otras asignaturas.')
-                return redirect('programas_lista')
+            if carga_id:
+                # EDICIÓN DE CARGA EXISTENTE
+                carga_existente = CargaAcademica.objects.filter(id=carga_id).first()
+                if not carga_existente:
+                    messages.error(request, 'La asignación académica que intenta editar no fue encontrada.')
+                    return redirect('programas_lista')
 
-            CargaAcademica.objects.create(
-                profesor_id=profesor_id,
-                programa_id=programa_id,
-                nivel=nivel,
-                grado=grado,
-                seccion=seccion,
-                anio_lectivo=2026,
-            )
-            messages.success(request, 'Carga académica asignada.')
-        return redirect('programas_lista')
+                duplicado = CargaAcademica.objects.filter(
+                    programa_id=programa_id,
+                    grado=grado,
+                    seccion=seccion,
+                    anio_lectivo=2026
+                ).exclude(id=carga_id).select_related('profesor', 'programa').first()
+
+                if duplicado:
+                    nom_p = duplicado.profesor.get_full_name() if duplicado.profesor else 'Otro docente'
+                    messages.error(request, f'No se puede duplicar la asignación: La materia ya está asignada al Grado {grado}°{seccion} a cargo de {nom_p}.')
+                    return redirect('programas_lista')
+
+                carga_existente.profesor_id = profesor_id
+                carga_existente.programa_id = programa_id
+                carga_existente.nivel = nivel
+                carga_existente.grado = grado
+                carga_existente.seccion = seccion
+                carga_existente.save()
+
+                # Sincronizar horarios asociados si el docente cambió
+                g_num = ''.join(ch for ch in str(carga_existente.grado) if ch.isdigit())
+                HorarioFicha.objects.filter(
+                    Q(programa_id=carga_existente.programa_id) | Q(tema__iexact=carga_existente.programa.denominacion if carga_existente.programa else ''),
+                    grado__icontains=g_num,
+                    seccion__iexact=carga_existente.seccion
+                ).update(instructor_id=profesor_id)
+
+                messages.success(request, f'¡Asignación académica de "{carga_existente.programa.denominacion if carga_existente.programa else "Materia"}" para {grado}°{seccion} actualizada exitosamente!')
+                return redirect('programas_lista')
+            else:
+                # CREACIÓN NUEVA
+                carga_exist = CargaAcademica.objects.filter(
+                    programa_id=programa_id,
+                    grado=grado,
+                    seccion=seccion,
+                    anio_lectivo=2026
+                ).select_related('profesor', 'programa').first()
+
+                if carga_exist:
+                    nom_p = carga_exist.profesor.get_full_name() if carga_exist.profesor else 'Otro docente'
+                    messages.error(request, f'No se puede duplicar la asignación: La materia "{carga_exist.programa.denominacion}" ya está asignada al Grado {grado}°{seccion} a cargo de {nom_p}.')
+                else:
+                    nueva_c = CargaAcademica.objects.create(
+                        profesor_id=profesor_id,
+                        programa_id=programa_id,
+                        nivel=nivel,
+                        grado=grado,
+                        seccion=seccion,
+                        anio_lectivo=2026,
+                    )
+                    messages.success(request, f'¡Carga académica de "{nueva_c.programa.denominacion}" asignada exitosamente para Grado {grado}°{seccion}!')
+                return redirect('programas_lista')
 
     docentes = _docentes_activos()
     if not docentes.exists():
-        docentes = User.objects.exclude(
-            perfil__rol__nombre='Estudiante'
+        docentes = User.objects.filter(
+            Q(perfil__rol__nombre__icontains='Docente') |
+            Q(perfil__rol__nombre__icontains='Profesor') |
+            Q(perfil__rol__nombre__icontains='Instructor'),
+            is_active=True
         ).order_by('last_name', 'first_name')
-    cargas = CargaAcademica.objects.select_related('profesor', 'profesor__perfil', 'programa')
+    if not docentes.exists():
+        docentes = User.objects.filter(is_active=True).exclude(perfil__rol__nombre='Estudiante').order_by('last_name', 'first_name')
+
+    cargas_qs = CargaAcademica.objects.select_related('profesor', 'profesor__perfil', 'programa').all().order_by('grado', 'seccion', 'programa__denominacion')
+    cargas_lista = []
+    docentes_con_carga_ids = set()
+    grados_con_carga = set()
+
+    for c in cargas_qs:
+        g_clean = ''.join(ch for ch in str(c.grado) if ch.isdigit())
+        num_est = Matricula.objects.filter(
+            grado_escolar__icontains=g_clean,
+            seccion=c.seccion,
+            estado_formacion__in=['En Formacion', 'Activo'],
+            aprendiz__is_active=True
+        ).count()
+        c.num_estudiantes = num_est
+        if c.profesor_id:
+            docentes_con_carga_ids.add(c.profesor_id)
+        if c.grado:
+            grados_con_carga.add(f"{c.grado}°{c.seccion}")
+        cargas_lista.append(c)
+
+    cargas_media = [c for c in cargas_lista if 'media' in str(c.nivel).lower() or str(c.grado) in ['10', '11']]
+    cargas_secundaria = [c for c in cargas_lista if 'secund' in str(c.nivel).lower() and str(c.grado) not in ['10', '11']]
+    cargas_primaria = [c for c in cargas_lista if 'primar' in str(c.nivel).lower()]
+    cargas_inicial = [c for c in cargas_lista if 'inic' in str(c.nivel).lower() or 'pre' in str(c.nivel).lower()]
+
     context = {
         'docentes': docentes,
         'programas': ProgramaFormacion.objects.filter(activo=True).order_by('denominacion'),
         'grados_por_nivel': GRADOS_POR_NIVEL,
         'secciones': SECCIONES_ESCOLARES,
-        'cargas_primaria': cargas.filter(nivel='Primaria'),
-        'cargas_secundaria': cargas.filter(nivel='Secundaria'),
-        'cargas_inicial': cargas.filter(nivel='Inicial'),
+        'todas_cargas': cargas_lista,
+        'cargas_media': cargas_media,
+        'cargas_secundaria': cargas_secundaria,
+        'cargas_primaria': cargas_primaria,
+        'cargas_inicial': cargas_inicial,
+        'total_cargas': len(cargas_lista),
+        'total_docentes_asignados': len(docentes_con_carga_ids),
+        'total_grados_cubiertos': len(grados_con_carga),
     }
     return render(request, 'academico/malla_curricular.html', context)
 

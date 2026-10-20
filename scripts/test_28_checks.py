@@ -1,5 +1,10 @@
 import os
+import sys
 import django
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sinetec_project.settings')
 django.setup()
@@ -23,6 +28,10 @@ def run_tests():
     client = Client()
 
     # PRUEBA 1: Login docente
+    u_doc = User.objects.filter(username='docente').first()
+    if u_doc:
+        u_doc.set_password('Docente2026*')
+        u_doc.save()
     login_docente = client.login(username='docente', password='Docente2026*')
     assert login_docente, "Error en login docente"
     results['PRUEBA 1: Login docente'] = True

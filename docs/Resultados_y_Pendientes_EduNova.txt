@@ -1,0 +1,86 @@
+================================================================================
+EDUNOVA (SINETEC) — RESUMEN EJECUTIVO DE VERIFICACIONES, PRUEBAS Y PENDIENTES
+Proyecto Formativo ADSI | Ficha 3173430 | Regional Magdalena | SENA
+Instructor: Anybal López | Aprendiz: Aminta María Moguea Florez
+Fecha de Verificación: 19 de Octubre de 2026
+================================================================================
+
+1. VERIFICACIONES TÉCNICAS EFECTUADAS (ESTADO COMPROBADO)
+--------------------------------------------------------------------------------
+* Lenguaje y Entorno Local: Python 3.13 en entorno virtual aislado (C:\SINETEC\SINETEC\venv).
+* Framework Web: Django 5.0.14 configurado con arquitectura desacoplada en 6 aplicaciones.
+* Base de Datos Local Activa: MySQL Server 8.0 en localhost:3306 (BD: 'sinetec', driver PyMySQL 1.2.3).
+* Base de Datos Secundaria: SQLite (db.sqlite3, 1.6 MB) disponible para respaldo local y offline.
+* Despliegue en la Nube: Render PaaS (Plan Free, Región Oregon, Python 3.11.9, Gunicorn 26.2.0).
+* URL Pública Comprobada: https://sinetec-1.onrender.com/ (HTTP 200 OK, SSL Let's Encrypt TLS 1.3).
+* Servidor de Archivos Estáticos: WhiteNoise 6.12.0 con compresión y almacenamiento en staticfiles.
+* Generadores Multimedia: ReportLab 5.0.1 (PDFs oficiales), python-docx (informes Word), QRCode 8.2 y Pillow 12.3.0 (carnets).
+
+2. SUITE DE PRUEBAS AUTOMATIZADAS Y AUDITORÍA
+--------------------------------------------------------------------------------
+* Suite Unitaria Oficial Django:
+  - Comando: python manage.py test academico usuarios evaluaciones instituciones seguimiento convenios
+  - Pruebas Descubiertas: 83 pruebas unitarias.
+  - Pruebas Aprobadas con Éxito: 83 pruebas (100% de aprobación).
+  - Fallos / Errores: 0 fallos, 0 errores.
+  - Tiempo de Ejecución: 89.084 segundos.
+  - Estado: OK (Base de datos de prueba creada y destruida limpiamente en MySQL).
+
+* Suite de Auditoría de Demostración (test_auditoria_completa_edunova.py):
+  - Estado de Demostración: 1 Docente activo (Miguel González), 1 Estudiante activo (Juan Pérez en Grado 10°A), 1 Acudiente (Carmen Gómez de Rodríguez), 1 Matrícula activa.
+  - Cero tareas ficticias, cero notificaciones ficticias y cero comunicados residuales.
+  - Operaciones CRUD de Carga Académica: Crear (ID #78), Editar a 8vo A y Eliminar limpia y verificada.
+  - Resultado: 100% APROBADA.
+
+* Suite de Auditoría de los Seis Paneles (test_seis_paneles_auditoria.py):
+  - Panel Administrador (/dashboard/): HTTP 200 OK.
+  - Panel Rectoría (/rectoria/): HTTP 200 OK.
+  - Panel Secretaría (/secretaria/): HTTP 200 OK.
+  - Panel Docente (/docente/): HTTP 200 OK (Contadores exactos: 1 estudiante en Matemáticas).
+  - Panel Familia (/familia/): HTTP 200 OK (Estudiante Juan Pérez vinculado correctamente).
+  - Panel Estudiante (/estudiante/): HTTP 200 OK (Subpaneles de notas, horario, materias interactivos).
+  - Horario Coordinado: 6 bloques de clase sincronizados en Grado 10°A.
+  - Resultado: 100% APROBADA.
+
+3. MEDIDAS DE SEGURIDAD COMPROBADAS
+--------------------------------------------------------------------------------
+[x] Control de Acceso Basado en Roles (RBAC) para 6 perfiles diferenciados.
+[x] Hash criptográfico de contraseñas con algoritmo PBKDF2 y salting SHA-256.
+[x] Protección contra Cross-Site Request Forgery (CSRF) con token obligatorio en formularios.
+[x] Mitigación de Clickjacking mediante cabecera X-Frame-Options: DENY.
+[x] Prevención nativa de Inyección SQL (SQLi) mediante parametrización ORM de Django.
+[x] Carnetización estudiantil inteligente con token UUID v4 y rotación diaria del código QR.
+[x] Aislamiento de credenciales mediante variables de entorno .env con python-decouple.
+[x] Reglas de Integridad de Negocio validadas en modelo: RN-001 (Doc único), RN-002 (Matrícula única), RN-003 (Juicio SENA A/D), RN-004 (Inmutabilidad por cierre de periodo).
+
+4. LIMITACIONES TÉCNICAS IDENTIFICADAS
+--------------------------------------------------------------------------------
+* Reposo del Servidor Gratuito en la Nube (Cold Start):
+  En el plan Free de Render, la aplicación entra en suspensión tras 15 minutos de inactividad. La primera petición subsiguiente tarda entre 40 y 50 segundos en despertar el contenedor.
+* Persistencia en el Plan Gratuito:
+  Al reconstruirse el contenedor en Render sin una base de datos PostgreSQL administrada adjunta, los datos se reinicializan desde el fixture sinetec_fixture_completa.json.
+* Script de Diagnóstico Menor:
+  El script utilitario inspect_db.py intentó leer f.usuario en FamiliaAcudiente; este modelo asocia estudiantes directamente por ManyToManyField sin campo OneToOne a User.
+
+5. TAREAS PENDIENTES Y RECOMENDACIONES DE MEJORA
+--------------------------------------------------------------------------------
+[ ] Base de Datos PostgreSQL Administrada:
+    Vincular una base de datos PostgreSQL externa (ej. Render Postgres, Supabase o Neon) para persistencia permanente 24/7 en la nube sin depender del disco efímero.
+[ ] Rate Limiting en Vistas de Autenticación:
+    Implementar django-ratelimit para limitar las solicitudes a máximo 5 intentos por minuto en /login/ y /recuperar-contrasena/.
+[ ] Restricción de Cabecera Host en Producción:
+    Cambiar ALLOWED_HOSTS = ['*'] en render.yaml por la lista explícita de dominios: ['sinetec-1.onrender.com', 'edunova.edu.co'].
+[ ] Cabecera HSTS:
+    Habilitar SECURE_HSTS_SECONDS = 31536000 en settings.py para forzar navegación HTTPS estricta durante un año.
+[ ] Servicio de Correo Transaccional en Producción:
+    Configurar credenciales SMTP de un servicio profesional (SendGrid, Amazon SES o Google Workspace) en las variables EMAIL_HOST_USER y EMAIL_HOST_PASSWORD del dashboard de Render.
+
+6. RUTAS DE ARCHIVOS DOCUMENTALES GENERADOS
+--------------------------------------------------------------------------------
+* Documento Word Editable:
+  C:\SINETEC\SINETEC\docs\Informe_Tecnico_EduNova_RAP.docx
+* Versión PDF de Alta Calidad:
+  C:\SINETEC\SINETEC\docs\Informe_Tecnico_EduNova_RAP.pdf
+* Resumen de Verificaciones y Pendientes:
+  C:\SINETEC\SINETEC\docs\Resultados_y_Pendientes_EduNova.txt
+================================================================================

@@ -159,7 +159,7 @@
                         <td class="small text-muted">{{ item.fecha_eliminacion|date:"d/m/Y H:i" }}</td>
                         <td>
                             <span class="small fw-semibold text-dark">
-                                <i class="bi bi-person-circle me-1 text-muted"></i>{{ item.eliminado_por.get_full_name|default:item.eliminado_por.username|default:"Docente" }}
+                                <i class="bi bi-person-circle me-1 text-muted"></i>{% if item.eliminado_por %}{{ item.eliminado_por.get_full_name|default:item.eliminado_por.username }}{% else %}Docente{% endif %}
                             </span>
                         </td>
                         <td class="px-3 text-end">

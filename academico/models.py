@@ -14,12 +14,14 @@ NIVELES_ESCOLARES = [
     ('Inicial', 'Inicial'),
     ('Primaria', 'Primaria'),
     ('Secundaria', 'Secundaria'),
+    ('Educación Media', 'Educación Media'),
 ]
 
 GRADOS_POR_NIVEL = {
     'Inicial': ['3 años', '4 años', '5 años'],
     'Primaria': ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado'],
     'Secundaria': ['6to Grado', '7mo Grado', '8vo Grado', '9no Grado', '10mo Grado', '11mo Grado'],
+    'Educación Media': ['10mo Grado', '11mo Grado', '10', '11'],
 }
 
 SECCIONES_ESCOLARES = ['A', 'B', 'C']
