@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from decouple import config
+from django.core.exceptions import ImproperlyConfigured
 
 try:
     import dj_database_url
@@ -39,6 +40,9 @@ CSRF_FAILURE_VIEW = 'usuarios.views.csrf_failure'
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 días de persistencia
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = False
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -77,12 +81,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'edunova-fast-cache',
+        'TIMEOUT': 300,
+    }
+}
+
 ROOT_URLCONF = 'sinetec_project.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'usuarios' / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,12 +110,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sinetec_project.wsgi.application'
 
-# Database: Detección inteligente para Producción (MySQL), Cloud (DATABASE_URL) y Desarrollo
+# ==============================================================================
+# CONFIGURACIÓN OFICIAL DE BASE DE DATOS: MYSQL SERVER (EDUNOVA)
+# ==============================================================================
+# Motor relacional obligatorio: MySQL ('django.db.backends.mysql')
+# Conexión directa a la base de datos institucional 'sinetec' en MySQL Server (Puerto 3306)
 DATABASE_URL = config('DATABASE_URL', default=None)
-USE_SQLITE = config('USE_SQLITE', default=False, cast=bool)
-IS_CLOUD_DEFAULT = os.environ.get('RENDER') == 'true' or bool(os.environ.get('DYNO'))
 
-if DATABASE_URL and dj_database_url:
+if DATABASE_URL:
+    if dj_database_url is None:
+        raise ImproperlyConfigured(
+            'DATABASE_URL está definido, pero falta la dependencia dj-database-url.'
+        )
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
@@ -111,24 +129,20 @@ if DATABASE_URL and dj_database_url:
             conn_health_checks=True,
         )
     }
-elif USE_SQLITE or (IS_CLOUD_DEFAULT and not config('DB_HOST', default=None)):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+    if DATABASES['default']['ENGINE'] != 'django.db.backends.mysql':
+        DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
 else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': config('DB_NAME', default='sinetec'),
             'USER': config('DB_USER', default='root'),
-            'PASSWORD': config('DB_PASSWORD', default='12345'),
+            'PASSWORD': config('DB_PASSWORD', default=''),
             'HOST': config('DB_HOST', default='localhost'),
             'PORT': config('DB_PORT', default='3306'),
             'OPTIONS': {
                 'charset': 'utf8mb4',
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             },
         }
     }
@@ -163,10 +177,11 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = (
-    'whitenoise.storage.CompressedStaticFilesStorage'
-    if DEBUG or 'test' in sys.argv
-    else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+            'whitenoise.storage.CompressedStaticFilesStorage'
+            if DEBUG or 'test' in sys.argv
+            else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 )
+WHITENOISE_MAX_AGE = 31536000 if not DEBUG else 0
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -176,12 +191,21 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Email Configuration (SENA / SINETEC)
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'SINETEC SENA <notificaciones@sena.edu.co>')
+
+# ==============================================================================
+# CONFIGURACIÓN ROBUSTA DE SESIONES Y PERSISTENCIA (RECORDAR SESIÓN)
+# ==============================================================================
+# 30 días de persistencia cuando el usuario selecciona "Recordar mi inicio de sesión"
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 días en segundos (2,592,000s)
+# False permite que request.session.set_expiry(0) controle la expiración al cerrar el navegador
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False if DEBUG else config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+
+# Autenticación y Redirecciones
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/login/'

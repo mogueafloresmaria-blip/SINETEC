@@ -55,15 +55,62 @@
                         <small class="text-muted"><i class="bi bi-calendar-event me-1"></i> {{ circ.fecha_creacion|date:"d M Y" }}</small>
                     </div>
                     <h6 class="fw-bold mb-2 text-dark">{{ circ.asunto }}</h6>
-                    <p class="small text-secondary mb-3" style="white-space: pre-line;">{{ circ.mensaje }}</p>
+                    <p class="small text-secondary mb-3" style="white-space: pre-line;">{{ circ.mensaje|truncatechars:120 }}</p>
                 </div>
                 <div class="d-flex align-items-center justify-content-between mt-auto border-top pt-2">
                     <small class="text-muted">
-                        Emite: <strong>{{ circ.remitente.get_full_name|default:circ.remitente.username }}</strong>
+                        {% if circ.leida_por_mi %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 rounded-pill small"><i class="bi bi-check2-all me-1"></i> Leída</span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2 rounded-pill small"><i class="bi bi-clock-history me-1"></i> Pendiente de acuse</span>
+                        {% endif %}
                     </small>
-                    {% if circ.urgente %}
-                        <span class="badge bg-danger rounded-pill px-2.5 py-1">Prioritario</span>
-                    {% endif %}
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5" data-bs-toggle="modal" data-bs-target="#modalFamCirc{{ circ.id }}" title="Abrir circular oficial">
+                        <i class="bi bi-eye me-1"></i> Consultar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Lectura Familia -->
+            <div class="modal fade text-start" id="modalFamCirc{{ circ.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+                        <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-principal) 100%);">
+                            <h6 class="modal-title fw-bold"><i class="bi bi-envelope-open-fill me-2"></i>{{ circ.asunto }}</h6>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4 bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <small class="text-muted">Emite: <strong>{{ circ.remitente.get_full_name|default:circ.remitente.username }}</strong></small>
+                                <small class="text-muted">{{ circ.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <div class="p-3 bg-light rounded-3 text-dark border">
+                                {{ circ.mensaje|linebreaks }}
+                            </div>
+                            {% if circ.leida_por_mi %}
+                            <div class="mt-3 p-2.5 bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 text-success small d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-check2-all me-1"></i> Acuse de lectura confirmado por el acudiente</span>
+                                {% if circ.fecha_mi_lectura %}<span class="text-muted small">{{ circ.fecha_mi_lectura|date:"d/m/Y H:i" }}</span>{% endif %}
+                            </div>
+                            {% else %}
+                            <div class="mt-3 p-3 bg-light border rounded-3 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+                                <div class="small text-muted">
+                                    <i class="bi bi-info-circle me-1 text-primary"></i> Al confirmar la lectura se registrará su acuse de recibo oficial en el sistema.
+                                </div>
+                                <form method="post" action="{% url 'leer_circular' circ.id %}" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'familia_circulares' %}">
+                                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold shadow-xs text-nowrap" style="background: var(--color-principal); border: none;">
+                                        <i class="bi bi-check2-circle me-1"></i> Confirmar Lectura y Acuse
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer bg-light py-2">
+                            <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

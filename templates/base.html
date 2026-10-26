@@ -4,16 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
     <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
     <title>{% block title %}EDUNOVA · Sistema Integrado de Educación Técnica{% endblock %}</title>
+    
+    <!-- Preconexión y Aceleración DNS -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Google Fonts con swap display para carga instantánea de texto -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     
     <!-- Sistema de Diseño EDUNOVA Escolar -->
@@ -21,6 +27,26 @@
     <link rel="stylesheet" href="{% static 'css/sinetec_custom.css' %}?v=20261005coffee">
 
     <style>
+        /* FLUIDEZ Y RENDIMIENTO EN DISPOSITIVOS TÁCTILES Y MÓVILES */
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+        body {
+            -webkit-overflow-scrolling: touch;
+            text-rendering: optimizeLegibility;
+        }
+        button, a, input, select, textarea, .nav-link, .btn {
+            touch-action: manipulation;
+        }
+        /* Respuesta táctil inmediata (sin retraso de 300ms) */
+        .btn:active,
+        button:active,
+        .nav-link:active {
+            transform: scale(0.98);
+            transition: transform 0.08s ease;
+        }
+
         /* SISTEMA INSTITUCIONAL EDUNOVA - PALETA CAFÉ CLARO Y BEIGE UNIFICADA */
         body,
         body.role-docente,
@@ -61,7 +87,7 @@
             top: 0 !important;
             bottom: 0 !important;
             left: 0 !important;
-            z-index: 1025 !important;
+            z-index: 1050;
             overflow-y: auto !important;
             overflow-x: hidden !important;
             overscroll-behavior: contain !important;
@@ -69,6 +95,19 @@
             flex-direction: column !important;
             scrollbar-width: thin !important;
             scrollbar-color: #B8977E var(--color-fondo) !important;
+        }
+
+        @media (max-width: 991.98px) {
+            .sinetec-sidebar,
+            body.role-docente .sinetec-sidebar,
+            .sinetec-sidebar.is-docente-sidebar {
+                z-index: 1050 !important;
+                -webkit-font-smoothing: antialiased;
+            }
+            .sinetec-sidebar.is-open {
+                z-index: 1060 !important;
+                visibility: visible !important;
+            }
         }
 
         .sinetec-sidebar::-webkit-scrollbar,
@@ -280,6 +319,18 @@
             --color-navbar: {{ tema_colores.color_navbar }};
             --color-texto-nav: {{ tema_colores.color_texto_nav }};
 
+            /* Variables CSS Centralizadas Solicitadas */
+            --color-primary: {{ tema_colores.color_primary|default:tema_colores.color_primario }};
+            --color-secondary: {{ tema_colores.color_secondary|default:tema_colores.color_secundario }};
+            --color-background: {{ tema_colores.color_background|default:tema_colores.color_fondo }};
+            --color-surface: {{ tema_colores.color_surface|default:tema_colores.color_tarjetas }};
+            --color-text: {{ tema_colores.color_text|default:tema_colores.color_texto }};
+            --color-button: {{ tema_colores.color_button|default:tema_colores.color_botones }};
+            --color-button-hover: {{ tema_colores.color_button_hover|default:tema_colores.color_secundario }};
+            --color-border: {{ tema_colores.color_border|default:tema_colores.color_acento }};
+            --color-sidebar: {{ tema_colores.color_sidebar|default:tema_colores.color_navbar }};
+            --color-header: {{ tema_colores.color_header|default:tema_colores.color_navbar }};
+
             /* Colores Base y Sistema (Backgrounds y Textos) */
             --sinetec-bg: var(--color-fondo);
             --sinetec-text-main: var(--color-titulo);
@@ -314,39 +365,121 @@
         .sinetec-main, body.role-docente .sinetec-main, body.role-docente .docente-shell {
             background-color: {{ tema_colores.color_fondo }} !important;
             background: {{ tema_colores.color_fondo }} !important;
-        }
-        body, body.role-docente, body.bg-edunova-shell {
             color: {{ tema_colores.color_texto }} !important;
         }
-        
+
         /* Títulos */
-        h1, h2, h3, h4, h5, h6, .text-dark, .font-heading {
+        h1, h2, h3, h4, h5, h6, .font-heading {
             color: {{ tema_colores.color_titulos }} !important;
         }
-        
+
         /* Enlaces */
-        a, .text-primary {
+        a:not(.btn):not(.nav-link):not(.dropdown-item):not(.text-muted):not(.text-white):not(.badge):not(.page-link),
+        .text-primary {
             color: {{ tema_colores.color_enlaces }} !important;
         }
-        
-        /* Botones Principales */
-        .btn-primary, .bg-primary, .btn-petroleum, button[type="submit"], .btn.text-white {
+
+        /* Botones Principales y Acciones Principales */
+        .btn-primary,
+        button.btn-primary,
+        a.btn-primary,
+        .btn-petroleum,
+        .sinetec-btn-primary,
+        .btn-sinetec-primary,
+        .btn-sinetec-rose,
+        .btn-submit,
+        button[type="submit"]:not(.btn-danger):not(.btn-success):not(.btn-warning):not(.btn-secondary):not(.btn-info):not(.btn-outline-danger):not(.btn-outline-success):not(.btn-outline-warning):not(.btn-outline-secondary):not(.btn-close) {
             background-color: {{ tema_colores.color_botones }} !important;
+            background: {{ tema_colores.color_botones }} !important;
             border-color: {{ tema_colores.color_botones }} !important;
             color: {{ tema_colores.color_texto_botones }} !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
         }
-        
+
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active,
+        .btn-primary.active,
+        .btn-petroleum:hover,
+        .sinetec-btn-primary:hover,
+        .btn-sinetec-primary:hover,
+        .btn-sinetec-rose:hover,
+        .btn-submit:hover,
+        button[type="submit"]:not(.btn-danger):not(.btn-success):not(.btn-warning):not(.btn-secondary):not(.btn-info):not(.btn-outline-danger):not(.btn-outline-success):not(.btn-outline-warning):not(.btn-outline-secondary):not(.btn-close):hover {
+            background-color: {{ tema_colores.color_secundario }} !important;
+            background: {{ tema_colores.color_secundario }} !important;
+            border-color: {{ tema_colores.color_secundario }} !important;
+            color: {{ tema_colores.color_texto_botones }} !important;
+        }
+
+        /* Botones Outline Primarios */
+        .btn-outline-primary {
+            color: {{ tema_colores.color_primario }} !important;
+            border-color: {{ tema_colores.color_primario }} !important;
+            background-color: transparent !important;
+        }
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus,
+        .btn-outline-primary:active {
+            background-color: {{ tema_colores.color_primario }} !important;
+            border-color: {{ tema_colores.color_primario }} !important;
+            color: {{ tema_colores.color_texto_botones }} !important;
+        }
+
+        /* Protección Estricta de Botones Semánticos (No homogeneizar indiscriminadamente) */
+        .btn-success, a.btn-success, button.btn-success {
+            background-color: #16a34a !important;
+            background: #16a34a !important;
+            border-color: #15803d !important;
+            color: #ffffff !important;
+        }
+        .btn-danger, a.btn-danger, button.btn-danger {
+            background-color: #dc2626 !important;
+            background: #dc2626 !important;
+            border-color: #b91c1c !important;
+            color: #ffffff !important;
+        }
+        .btn-warning, a.btn-warning, button.btn-warning {
+            background-color: #d97706 !important;
+            background: #d97706 !important;
+            border-color: #b45309 !important;
+            color: #ffffff !important;
+        }
+        .btn-info, a.btn-info, button.btn-info {
+            background-color: #0284c7 !important;
+            background: #0284c7 !important;
+            border-color: #0369a1 !important;
+            color: #ffffff !important;
+        }
+
         /* Tarjetas (Cards) */
-        .card, .bg-white {
+        .card:not(.bg-transparent):not(.bg-success):not(.bg-danger):not(.bg-warning):not(.bg-info):not(.bg-primary):not(.text-bg-primary):not(.text-bg-dark) {
             background-color: {{ tema_colores.color_tarjetas }} !important;
+            border-color: {{ tema_colores.color_acento }} !important;
         }
-        
+
+        /* Formularios en foco */
+        .form-control:focus, .form-select:focus {
+            border-color: {{ tema_colores.color_primario }} !important;
+            box-shadow: 0 0 0 0.25rem rgba(139, 94, 60, 0.18) !important;
+        }
+
         /* Barra de Navegación Lateral y Topbar */
         .sinetec-sidebar, .sinetec-topbar {
             background-color: {{ tema_colores.color_navbar }} !important;
+            border-color: {{ tema_colores.color_acento }} !important;
         }
-        .sinetec-nav .nav-link, .sinetec-topbar, .sinetec-topbar a, .sinetec-sidebar, .sinetec-sidebar a {
+        .sinetec-nav .nav-link,
+        .sinetec-topbar,
+        .sinetec-topbar a:not(.btn),
+        .sinetec-sidebar,
+        .sinetec-sidebar a:not(.btn):not(.btn-role-quick) {
             color: {{ tema_colores.color_texto_nav }} !important;
+        }
+        .sinetec-nav .nav-link:hover,
+        .sinetec-nav .nav-link.active {
+            background-color: {{ tema_colores.color_acento }} !important;
+            color: {{ tema_colores.color_primario }} !important;
         }
     </style>
     {% endif %}
@@ -356,11 +489,11 @@
     <div class="sinetec-shell {% if request.resolver_match.url_name == 'home' or request.path == '/' %}is-home-landing{% endif %}" id="sinetecShell">
         {% if request.resolver_match.url_name != 'home' and request.path != '/' %}
         <!-- SIDEBAR INSTITUCIONAL ESCOLAR -->
-        <aside class="sinetec-sidebar {% if 'Docente' in request.user.perfil.rol.nombre and not request.user.is_superuser and not 'Admin' in request.user.perfil.rol.nombre or 'Instructor' in request.user.perfil.rol.nombre and not request.user.is_superuser and not 'Admin' in request.user.perfil.rol.nombre or 'Profesor' in request.user.perfil.rol.nombre and not request.user.is_superuser and not 'Admin' in request.user.perfil.rol.nombre %}is-docente-sidebar{% endif %}" id="sinetecSidebar">
+        <aside class="sinetec-sidebar notranslate {% if 'Docente' in request.user.perfil.rol.nombre and not request.user.is_superuser and not 'Admin' in request.user.perfil.rol.nombre or 'Instructor' in request.user.perfil.rol.nombre and not request.user.is_superuser and not 'Admin' in request.user.perfil.rol.nombre or 'Profesor' in request.user.perfil.rol.nombre and not request.user.is_superuser and not 'Admin' in request.user.perfil.rol.nombre %}is-docente-sidebar{% endif %}" id="sinetecSidebar" translate="no">
             <!-- Barra superior móvil con botón de cierre -->
             <div class="d-flex align-items-center justify-content-between p-3 border-bottom border-white border-opacity-10 d-lg-none" style="background: rgba(0,0,0,0.2);">
                 <div class="d-flex align-items-center gap-2 text-white">
-                    <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" style="width: 28px; height: 28px; object-fit: contain;">
+                    <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain;" loading="eager" decoding="async">
                     <strong class="font-heading">EDUNOVA</strong>
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-light rounded-circle" onclick="toggleSinetecSidebar();" aria-label="Cerrar menú">
@@ -372,7 +505,7 @@
             <!-- Marca e Identidad Institucional EDUNOVA -->
             <a class="sinetec-brand" href="{% if request.user.is_superuser or 'Admin' in rol %}{% url 'dashboard' %}{% elif 'Estudiante' in rol or 'Aprendiz' in rol or 'Alumno' in rol %}{% url 'aprendiz_dashboard' %}{% elif 'Familia' in rol or 'Acudiente' in rol or 'Padre' in rol or 'Madre' in rol %}{% url 'familia_portal' %}{% elif 'Docente' in rol or 'Instructor' in rol %}{% url 'instructor_dashboard' %}{% elif 'Secretar' in rol %}{% url 'secretaria_dashboard' %}{% elif 'Rector' in rol %}{% url 'rectoria_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}">
                 <div class="sinetec-brand-icon" style="background: #ffffff !important; border: 1.5px solid #E5DFD5 !important; box-shadow: 0 2px 8px rgba(90,56,37,0.06); display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; padding: 3px;">
-                    <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" style="width: 36px; height: 36px; object-fit: contain;">
+                    <img src="{% static 'img/edunova_logo_transparent.png' %}" alt="EDUNOVA" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain;" loading="eager" decoding="async">
                 </div>
                 <div class="sinetec-brand-text">
                     <div class="sinetec-brand-title" title="EDUNOVA — Sistema Integrado de Educación Técnica" style="color: var(--color-titulo); font-weight: 800; display: flex; align-items: center; gap: 6px;">
@@ -385,27 +518,35 @@
 
             <!-- Navegación Estructurada y Filtrada Exclusivamente por Rol -->
             <nav class="sinetec-nav">
-                {% if 'Familia' in rol or 'Acudiente' in rol or '/familia/' in request.path or request.resolver_match.url_name == 'familia_portal' or request.resolver_match.url_name == 'familia_portal_alt' or request.resolver_match.url_name == 'familia_matricula' or request.resolver_match.url_name == 'familia_boletines' or request.resolver_match.url_name == 'familia_asistencia' or request.resolver_match.url_name == 'familia_circulares' %}
-                    <!-- 3. FAMILIA / ACUDIENTE -->
+                {% if 'Familia' in rol or 'Acudiente' in rol or 'Padre' in rol or 'Madre' in rol or '/familia/' in request.path or 'familia_' in request.resolver_match.url_name %}
+                    <!-- 3. FAMILIA / ACUDIENTE: MÓDULOS OFICIALES Y NAVEGACIÓN -->
                     {% if request.session.estudiante_fam_doc or estudiante_sel or 'Familia' in rol or 'Acudiente' in rol %}
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_portal' or request.resolver_match.url_name == 'familia_portal_alt' %}active{% endif %}" href="{% url 'familia_portal' %}">
                             <i class="bi bi-house-heart-fill"></i> Inicio
                         </a>
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_matricula' %}active{% endif %}" href="{% url 'familia_matricula' %}">
-                            <i class="bi bi-person-vcard-fill"></i> Ficha de Matrícula
+                            <i class="bi bi-person-vcard-fill"></i> Ficha de matrícula
                         </a>
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_boletines' %}active{% endif %}" href="{% url 'familia_boletines' %}">
-                            <i class="bi bi-clipboard2-data-fill"></i> Boletines y Notas
+                            <i class="bi bi-clipboard2-data-fill"></i> Boletín de calificaciones
                         </a>
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_asistencia' %}active{% endif %}" href="{% url 'familia_asistencia' %}">
-                            <i class="bi bi-calendar-check-fill"></i> Asistencia de Hijos
+                            <i class="bi bi-calendar-check-fill"></i> Asistencia del hijo
                         </a>
-                        <div class="sinetec-nav-label">Comunicación</div>
+                        <div class="sinetec-nav-label">Comunicación & Documentos</div>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'familia_comunicaciones' %}active{% endif %}" href="{% url 'familia_comunicaciones' %}">
+                            <i class="bi bi-chat-dots-fill"></i> Comunicaciones del estudiante
+                        </a>
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_circulares' or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familia_circulares' %}">
-                            <i class="bi bi-megaphone-fill"></i> Circulares Oficiales
+                            <i class="bi bi-megaphone-fill"></i> Circulares oficiales
+                        </a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'familia_pdf_oficial' %}active{% endif %}" href="{% url 'familia_pdf_oficial' %}" target="_blank">
+                            <i class="bi bi-file-earmark-pdf-fill"></i> PDF oficiales
                         </a>
                     {% else %}
-                        <!-- Panel lateral antes de seleccionar estudiante -->
+                        <a class="nav-link active" href="{% url 'familia_portal' %}">
+                            <i class="bi bi-house-heart-fill"></i> Inicio
+                        </a>
                     {% endif %}
 
                 {% elif request.user.is_superuser or 'Admin' in rol %}
@@ -498,27 +639,7 @@
                         <i class="bi bi-file-earmark-text-fill"></i> Documentos
                     </a>
 
-                {% elif 'Familia' in rol or 'Acudiente' in rol or 'Padre' in rol or 'Madre' in rol %}
-                    <!-- 3. FAMILIA / ACUDIENTE -->
-                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_portal' or request.resolver_match.url_name == 'familia_portal_alt' %}active{% endif %}" href="{% url 'familia_portal' %}">
-                        <i class="bi bi-house-heart-fill"></i> Inicio
-                    </a>
 
-                    {% if request.session.estudiante_fam_doc %}
-                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_matricula' %}active{% endif %}" href="{% url 'familia_matricula' %}">
-                        <i class="bi bi-person-vcard-fill"></i> Ficha de Matrícula
-                    </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_boletines' %}active{% endif %}" href="{% url 'familia_boletines' %}">
-                        <i class="bi bi-clipboard2-data-fill"></i> Boletines y Notas
-                    </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_asistencia' %}active{% endif %}" href="{% url 'familia_asistencia' %}">
-                        <i class="bi bi-calendar-check-fill"></i> Asistencia de Hijos
-                    </a>
-                    <div class="sinetec-nav-label">Comunicación</div>
-                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
-                        <i class="bi bi-megaphone-fill"></i> Circulares Oficiales
-                    </a>
-                    {% endif %}
 
                 {% elif 'Docente' in rol or 'Instructor' in rol or 'Profesor' in rol %}
                     <!-- 4. DOCENTE: MENÚ LATERAL OFICIAL EDUNOVA DIRECTO (SIN DESPLEGABLE) -->
@@ -551,6 +672,12 @@
                         <a href="{% url 'temas_actividades' %}" class="teacher-nav-item {% if request.resolver_match.url_name == 'temas_actividades' or subpanel_activo == 'temas_actividades' %}is-active{% endif %}" id="nav-item-actividades">
                             <i class="bi bi-journal-text teacher-icon-nav"></i>
                             <span class="teacher-label-text">Temas y Actividades</span>
+                        </a>
+
+                        <!-- 5b. Revisar entregas y retroalimentación -->
+                        <a href="{% url 'mis_actividades_docente' %}" class="teacher-nav-item {% if request.resolver_match.url_name == 'mis_actividades_docente' or 'revisar_entregas' in request.resolver_match.url_name %}is-active{% endif %}" id="nav-item-revisar-entregas">
+                            <i class="bi bi-clipboard-check-fill teacher-icon-nav"></i>
+                            <span class="teacher-label-text">Revisar entregas</span>
                         </a>
 
                         <!-- 6. Calificaciones -->
@@ -632,6 +759,9 @@
                     <a class="nav-link {% if 'familia' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familias_lista' %}">
                         <i class="bi bi-person-vcard-fill"></i> Familias y Acudientes
                     </a>
+                    <a class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'instructores_lista' %}">
+                        <i class="bi bi-person-badge-fill"></i> Directorio Docente
+                    </a>
                     <div class="sinetec-nav-label">Administración</div>
 
                     <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
@@ -692,6 +822,9 @@
                     </a>
                     <a class="nav-link {% if 'auditoria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'auditoria_lista' %}">
                         <i class="bi bi-shield-check"></i> Auditoría
+                    </a>
+                    <a class="nav-link {% if 'configuracion' in request.resolver_match.url_name or request.path == '/configuracion/' %}active{% endif %}" href="{% url 'configuracion_sistema' %}">
+                        <i class="bi bi-sliders"></i> Configuración
                     </a>
 
                 {% else %}
@@ -778,7 +911,7 @@
         <div class="sinetec-main {% if request.resolver_match.url_name == 'home' or request.path == '/' %}w-100 p-0 m-0{% endif %}">
             {% if request.resolver_match.url_name != 'home' and request.path != '/' %}
             <!-- BARRA SUPERIOR (TOPBAR) -->
-            <header class="sinetec-topbar">
+            <header class="sinetec-topbar notranslate" translate="no">
                 <div class="d-flex align-items-center gap-3">
                     <button class="sinetec-icon-btn d-none d-lg-grid" type="button" aria-label="Contraer menú lateral" onclick="toggleSinetecCollapse();" title="Contraer / Expandir menú">
                         <i class="bi bi-layout-sidebar-inset"></i>
@@ -831,7 +964,7 @@
                     <div class="dropdown">
                         <button class="sinetec-user-pill border-0 text-start d-flex align-items-center gap-2 p-1 pe-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: transparent;">
                             {% if request.user.perfil.foto_perfil %}
-                            <img src="{{ request.user.perfil.foto_perfil.url }}" alt="{{ user.get_full_name }}" class="rounded-circle shadow-sm border border-2 border-white" style="width: 38px; height: 38px; object-fit: cover;">
+                            <img src="{{ request.user.perfil.foto_perfil.url }}" alt="{{ user.get_full_name }}" width="38" height="38" class="rounded-circle shadow-sm border border-2 border-white" style="width: 38px; height: 38px; object-fit: cover;" loading="lazy" decoding="async">
                             {% else %}
                             <span class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; background: var(--color-principal); font-size: 0.95rem;">
                                 {{ user.first_name|default:user.username|slice:':1'|upper }}{{ user.last_name|slice:':1'|upper }}
@@ -908,9 +1041,9 @@
                     <div class="dropdown">
                         <button class="sinetec-user-pill border-0 text-start d-flex align-items-center gap-2 p-1 pe-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: transparent;">
                             {% if request.user.perfil.foto_perfil %}
-                            <img src="{{ request.user.perfil.foto_perfil.url }}" alt="{{ request.user.get_full_name }}" class="sinetec-avatar rounded-circle shadow-xs" style="width: 36px; height: 36px; object-fit: cover; object-position: top center; border: 2px solid var(--color-acento);">
+                            <img src="{{ request.user.perfil.foto_perfil.url }}" alt="{{ request.user.get_full_name }}" width="36" height="36" class="sinetec-avatar rounded-circle shadow-xs" style="width: 36px; height: 36px; object-fit: cover; object-position: top center; border: 2px solid var(--color-acento);" loading="lazy" decoding="async">
                             {% elif user.perfil.foto_perfil %}
-                            <img src="{{ user.perfil.foto_perfil.url }}" alt="{{ user.get_full_name }}" class="sinetec-avatar rounded-circle shadow-xs" style="width: 36px; height: 36px; object-fit: cover; object-position: top center; border: 2px solid var(--color-acento);">
+                            <img src="{{ user.perfil.foto_perfil.url }}" alt="{{ user.get_full_name }}" width="36" height="36" class="sinetec-avatar rounded-circle shadow-xs" style="width: 36px; height: 36px; object-fit: cover; object-position: top center; border: 2px solid var(--color-acento);" loading="lazy" decoding="async">
                             {% else %}
                             <span class="sinetec-avatar overflow-hidden p-0 d-inline-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 36px; height: 36px; background: var(--color-principal); border-radius: 50%; font-size: 0.95rem;">
                                 {{ user.first_name|default:user.username|slice:':1'|upper }}
@@ -1094,6 +1227,19 @@
                     const modales = document.querySelectorAll('.modal');
                     modales.forEach(function(modal) {
                         document.body.appendChild(modal);
+                    });
+
+                    // Prevención de envíos múltiples accidentales en formularios POST
+                    document.querySelectorAll('form[method="post"]').forEach(function(form) {
+                        form.addEventListener('submit', function() {
+                            const submitBtn = form.querySelector('button[type="submit"]');
+                            if (submitBtn && !submitBtn.disabled) {
+                                setTimeout(function() {
+                                    submitBtn.disabled = true;
+                                    submitBtn.style.opacity = '0.75';
+                                }, 50);
+                            }
+                        });
                     });
                 });
             </script>

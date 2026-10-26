@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Carga Masiva de Docentes · EDUNOVA{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: #faf8f5 !important; }
+.import-wrap { max-width: 960px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
+.import-hero { background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff; border-radius: 18px; padding: 1.75rem 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(15,23,42,0.08); }
+.import-card { background: #fff; border: 1.5px solid var(--color-acento); border-radius: 18px; box-shadow: 0 2px 12px rgba(90,56,37,0.04); overflow: hidden; }
+.dropzone-box { border: 2px dashed #94a3b8; border-radius: 14px; background: #faf8f5; padding: 2.5rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+.dropzone-box:hover { border-color: var(--color-principal); background: #f5f0eb; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="import-wrap">
+  <!-- ENCABEZADO -->
+  <div class="import-hero d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: rgba(255,255,255,0.15); color: #fff;">SECRETARÍA ACADÉMICA</span>
+        <span class="text-light small opacity-75">Planta Docente Institucional</span>
+      </div>
+      <h1 class="h3 fw-bold mb-1 text-white">
+        <i class="bi bi-person-badge-fill me-2 text-warning"></i> Carga Masiva de Docentes y Profesores
+      </h1>
+      <p class="small mb-0 text-light opacity-75">
+        Importa y registra de forma masiva profesores mediante plantillas Excel (.xlsx) o CSV con creación automática de credenciales.
+      </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{% url 'descargar_plantilla_instructores' %}" class="btn btn-warning fw-bold text-dark rounded-pill px-3 shadow-sm">
+        <i class="bi bi-download me-1"></i> Plantilla Excel (.xlsx)
+      </a>
+      <a href="{% url 'descargar_plantilla_instructores' %}?formato=csv" class="btn btn-outline-light rounded-pill px-3">
+        <i class="bi bi-filetype-csv me-1"></i> Plantilla CSV
+      </a>
+      <a href="{% url 'instructores_lista' %}" class="btn btn-outline-light rounded-pill px-3">
+        <i class="bi bi-arrow-left me-1"></i> Lista de Docentes
+      </a>
+    </div>
+  </div>
+
+  {% if procesado %}
+  <!-- RESULTADOS DEL PROCESAMIENTO -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+    <div class="card-header {% if errores %}bg-warning-subtle text-dark{% else %}bg-success text-white{% endif %} py-3 px-4 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0">
+        <i class="bi {% if errores %}bi-exclamation-triangle-fill text-warning{% else %}bi-check-circle-fill{% endif %} me-2"></i>
+        Resultado de la Carga de Docentes: {{ archivo_nombre }}
+      </h5>
+      <span class="badge bg-dark text-white rounded-pill px-3 py-1">{{ total_filas }} registros evaluados</span>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="p-3 bg-success-subtle text-success rounded-3 border border-success border-opacity-25 text-center">
+            <div class="h2 fw-bold mb-0">{{ creados }}</div>
+            <div class="small fw-semibold">Docentes Creados / Vinculados</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-danger-subtle text-danger rounded-3 border border-danger border-opacity-25 text-center">
+            <div class="h2 fw-bold mb-0">{{ errores|length }}</div>
+            <div class="small fw-semibold">Filas con Errores</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-secondary-subtle text-secondary rounded-3 border border-secondary border-opacity-25 text-center">
+            <div class="h2 fw-bold mb-0">{{ omitidos }}</div>
+            <div class="small fw-semibold">Omitidos por Cédula Duplicada</div>
+          </div>
+        </div>
+      </div>
+
+      {% if cuentas_creadas %}
+      <div class="alert alert-success border-0 rounded-3 mb-4">
+        <h6 class="fw-bold mb-2"><i class="bi bi-person-check-fill me-1"></i> Cuentas docentes activadas exitosamente ({{ cuentas_creadas|length }}):</h6>
+        <div class="table-responsive bg-white rounded-3 p-2 border">
+          <table class="table table-sm table-hover mb-0" style="font-size: 0.84rem;">
+            <thead>
+              <tr class="text-muted">
+                <th>Docente</th>
+                <th>Usuario (Documento)</th>
+                <th>Rol Asignado</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in cuentas_creadas %}
+              <tr>
+                <td class="fw-semibold">{{ c.nombre }}</td>
+                <td><code>{{ c.username }}</code></td>
+                <td><span class="badge bg-primary-subtle text-primary">Docente</span></td>
+                <td><span class="badge bg-success-subtle text-success">Activo</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <small class="text-muted mt-2 d-block">Los docentes ingresan con su número de documento institucional y pueden gestionar calificaciones, asistencias y materias.</small>
+      </div>
+      {% endif %}
+
+      {% if errores %}
+      <div class="alert alert-warning border-0 rounded-3 mb-4">
+        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-1"></i> Detalle de incidencias:</h6>
+        <ul class="mb-0 small ps-3">
+          {% for err in errores %}
+            <li>{{ err }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-end gap-2">
+        <a href="{% url 'importar_instructores_masivo' %}" class="btn btn-outline-secondary rounded-pill px-3">
+          Cargar otro archivo
+        </a>
+        <a href="{% url 'instructores_lista' %}" class="btn text-white rounded-pill px-4 fw-bold" style="background: var(--color-principal);">
+          Ver lista de profesores <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- FORMULARIO DE CARGA -->
+  <div class="import-card p-4">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="desde_pagina" value="1">
+      <div class="mb-4">
+        <label class="form-label fw-bold text-dark fs-6 mb-2">Selecciona el archivo Excel (.xlsx) o CSV con el listado de docentes:</label>
+        <div class="dropzone-box" onclick="document.getElementById('inputArchivoDocentes').click();">
+          <i class="bi bi-cloud-arrow-up-fill fs-1 mb-2 d-block" style="color: var(--color-principal);"></i>
+          <h5 class="fw-bold text-dark mb-1">Haz clic para elegir el archivo o arrástralo aquí</h5>
+          <p class="text-muted small mb-2">Formatos compatibles: Microsoft Excel (.xlsx) o Delimitado por comas (.csv)</p>
+          <div id="nombreArchivoDocente" class="badge bg-primary px-3 py-2 fs-6 d-none"></div>
+          <input type="file" name="archivo" id="inputArchivoDocentes" class="d-none" accept=".xlsx, .csv, .txt" required onchange="mostrarNombreArchivoDoc(this);">
+        </div>
+      </div>
+
+      <div class="alert alert-light border rounded-3 p-3 mb-4 small">
+        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-lightbulb-fill text-warning me-1"></i> Columnas de la plantilla de docentes:</h6>
+        <div class="row g-2 text-muted">
+          <div class="col-md-6">
+            • <code>tipo_documento</code>: CC, CE, PEP, PPT (Default: CC)<br>
+            • <code>numero_documento</code>: <strong>Obligatorio</strong> (Cédula del docente)<br>
+            • <code>nombres</code>: <strong>Obligatorio</strong><br>
+            • <code>apellidos</code>: <strong>Obligatorio</strong>
+          </div>
+          <div class="col-md-6">
+            • <code>correo</code>: <strong>Obligatorio</strong> (Correo electrónico institucional o personal)<br>
+            • <code>telefono</code>: Opcional<br>
+            • <code>especialidad</code>: Área o asignatura principal (ej. Matemáticas, Lenguaje, Ciencias)
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center pt-2">
+        <a href="{% url 'descargar_plantilla_instructores' %}" class="btn btn-outline-secondary rounded-pill px-3">
+          <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar formato modelo (.xlsx)
+        </a>
+        <button type="submit" class="btn text-white fw-bold rounded-pill px-4 shadow-sm" style="background: var(--color-principal);">
+          <i class="bi bi-upload me-1"></i> Procesar y Registrar Docentes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function mostrarNombreArchivoDoc(input) {
+  const badge = document.getElementById('nombreArchivoDocente');
+  if (input.files && input.files[0]) {
+    badge.textContent = 'Archivo seleccionado: ' + input.files[0].name;
+    badge.classList.remove('d-none');
+  }
+}
+</script>
+{% endblock %}

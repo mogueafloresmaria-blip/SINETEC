@@ -6,10 +6,10 @@
 {% block content %}
 <style>
 :root {
-    --cafe-principal: #5a3825;
-    --cafe-suave: #8B5E3C;
-    --cafe-fondo: #F5F2EB;
-    --cafe-borde: #E0D8CE;
+    --cafe-principal: var(--color-secundario, #5a3825);
+    --cafe-suave: var(--color-principal, #8B5E3C);
+    --cafe-fondo: var(--color-fondo, #F5F2EB);
+    --cafe-borde: var(--color-acento, #E0D8CE);
     --cafe-crema: #FAF8F5;
 }
 .periodo-card {
@@ -171,7 +171,7 @@
         <div class="modal fade" id="modalEditarPeriodo{{ p.id }}" tabindex="-1" aria-labelledby="modalLabel{{ p.id }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content rounded-4 border-0 shadow-lg">
-                    <div class="modal-header text-white p-3.5" style="background: linear-gradient(135deg, #5a3825, #8B5E3C); border-radius: 16px 16px 0 0;">
+                    <div class="modal-header text-white p-3.5" style="background: linear-gradient(135deg, var(--color-secundario, #5a3825), var(--color-principal, #8B5E3C)); border-radius: 16px 16px 0 0;">
                         <h6 class="modal-title fw-bold" id="modalLabel{{ p.id }}">
                             <i class="bi bi-calendar3 me-1.5"></i> Editar Fechas: {{ p.nombre }}
                         </h6>

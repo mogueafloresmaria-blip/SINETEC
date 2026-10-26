@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Boletines y Calificaciones · EDUNOVA{% endblock %}
@@ -51,9 +51,18 @@
             <div class="row align-items-center g-3">
                 <div class="col-md-7">
                     <div class="d-flex align-items-center gap-3">
+                        {% if estudiante_sel.perfil.foto_perfil %}
+                        <div class="rounded-circle shadow-sm overflow-hidden position-relative" style="width: 58px; height: 58px; border: 2px solid var(--color-acento); background: #f8fafc;">
+                            <img src="{{ estudiante_sel.perfil.foto_perfil.url }}" alt="{{ estudiante_sel.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; document.getElementById('bol_foto_fb').style.display='flex';">
+                            <div id="bol_foto_fb" class="align-items-center justify-content-center text-white fw-bold fs-3 w-100 h-100" style="display: none; background: linear-gradient(135deg, #1E3A8A, #3B82F6);">
+                                {{ estudiante_sel.first_name|default:estudiante_sel.username|slice:":1"|upper }}
+                            </div>
+                        </div>
+                        {% else %}
                         <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-3 shadow-sm" style="width: 58px; height: 58px; background: linear-gradient(135deg, #1E3A8A, #3B82F6);">
                             {{ estudiante_sel.first_name|default:estudiante_sel.username|slice:":1"|upper }}
                         </div>
+                        {% endif %}
                         <div>
                             <h2 class="h5 fw-bold mb-1 text-dark">{{ estudiante_sel.get_full_name|default:estudiante_sel.username }}</h2>
                             <div class="text-muted small">
@@ -67,7 +76,7 @@
                 <div class="col-md-5 text-md-end">
                     <div class="d-inline-flex flex-column align-items-md-end p-3 rounded-3 bg-light border">
                         <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Promedio del Periodo</span>
-                        {% if total_materias %}
+                        {% if promedio_general is not None and total_materias > 0 %}
                             <div class="h3 fw-bold mb-0 {% if promedio_general >= 4.0 %}text-success{% elif promedio_general >= 3.0 %}text-primary{% else %}text-danger{% endif %}">
                                 {{ promedio_general|floatformat:2 }} <span class="fs-6 text-muted">/ 5.0</span>
                             </div>
@@ -75,8 +84,8 @@
                                 {% if promedio_general >= 4.6 %}🟢 Desempeño Superior{% elif promedio_general >= 4.0 %}🔵 Desempeño Alto{% elif promedio_general >= 3.0 %}🟡 Desempeño Básico{% else %}🔴 Desempeño Bajo{% endif %}
                             </small>
                         {% else %}
-                            <div class="h3 fw-bold mb-0 text-muted">Sin calificaciones</div>
-                            <small class="text-muted">No hay notas numéricas registradas</small>
+                            <div class="h5 fw-bold mb-0 text-muted">Sin calificaciones registradas</div>
+                            <small class="text-muted">Pendiente de calificar por el docente</small>
                         {% endif %}
                     </div>
                 </div>
@@ -98,7 +107,7 @@
             </div>
         </div>
         <span class="badge bg-light text-muted border px-3 py-2">
-            Total asignaturas evaluadas: <strong>{{ total_materias }}</strong>
+            Asignaturas con nota asentada: <strong>{{ total_materias }}</strong>
         </span>
     </div>
 
@@ -139,7 +148,11 @@
                                 <span class="badge bg-light text-dark border">{{ item.periodo }}</span>
                             </td>
                             <td class="text-center">
-                                <span class="fw-bold fs-6 text-primary">{{ item.nota }}</span>
+                                {% if item.nota is not None %}
+                                    <span class="fw-bold fs-6 text-primary">{{ item.nota|floatformat:1 }}</span>
+                                {% else %}
+                                    <span class="text-muted fst-italic">Pendiente</span>
+                                {% endif %}
                             </td>
                             <td class="text-center">
                                 <span class="badge {{ item.badge_class }} rounded-pill px-3 py-1">
@@ -147,13 +160,19 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                {% if item.estado == 'Aprobado' %}
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1">
-                                        <i class="bi bi-check-circle-fill me-1"></i> Aprobado
-                                    </span>
+                                {% if item.nota is not None %}
+                                    {% if item.estado == 'Aprobado' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Aprobado
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-1">
+                                            <i class="bi bi-x-circle-fill me-1"></i> Por Mejorar
+                                        </span>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-1">
-                                        <i class="bi bi-x-circle-fill me-1"></i> Por Mejorar
+                                    <span class="badge bg-light text-secondary border rounded-pill px-2 py-1">
+                                        <i class="bi bi-clock me-1"></i> Sin calificar
                                     </span>
                                 {% endif %}
                             </td>

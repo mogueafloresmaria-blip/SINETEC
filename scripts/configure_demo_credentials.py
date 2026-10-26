@@ -15,28 +15,32 @@ def configurar_credenciales():
     print("=" * 70)
 
     # 1. Roles con clave '12345'
-    cuentas_12345 = ['admin', 'rector', 'secretaria', 'docente', 'familia', 'acudiente']
+    cuentas_12345 = [
+        'admin', 'rector', 'secretaria', 'docente', 'docente_laura', 'docente_patricia',
+        'docente_andres', 'docente_diana', 'docente_felipe', 'familia', 'acudiente',
+        'est1', 'estudiante', 'est_nuevo'
+    ]
     for username in cuentas_12345:
         u = User.objects.filter(username=username).first()
         if u:
             u.set_password('12345')
+            u.is_active = True
             u.save()
             rol = u.perfil.rol.nombre if (hasattr(u, 'perfil') and u.perfil.rol) else 'Sin Rol'
-            print(f"[OK] Usuario: {u.username:12s} | Rol: {rol:20s} | Contraseña configurada: 12345")
+            print(f"[OK] Usuario: {u.username:16s} | Rol: {rol:20s} | Contraseña: 12345")
         else:
             print(f"[ALERTA] Usuario no encontrado: {username}")
 
-    # 2. Estudiantes con clave = numero_documento
+    # 2. Estudiantes con clave = numero_documento (y soporte de 12345)
     estudiantes = PerfilUsuario.objects.filter(rol__nombre__icontains='estudiante').select_related('usuario', 'rol')
     for perfil in estudiantes:
         u = perfil.usuario
         doc = (perfil.numero_documento or '').strip()
         if u and doc:
-            u.set_password(doc)
-            u.save()
-            print(f"[OK] Estudiante: {u.username:12s} | Nombre: {u.get_full_name():20s} | Doc / Clave: {doc}")
-        else:
-            print(f"[ALERTA] Estudiante sin documento o sin usuario: {u}")
+            if u.username not in ['est1', 'estudiante', 'est_nuevo']:
+                u.set_password(doc)
+                u.save()
+            print(f"[OK] Estudiante: {u.username:16s} | Nombre: {u.get_full_name():20s} | Doc: {doc}")
 
     print("\n" + "=" * 70)
     print("¡CREDENCIALES DE DEMOSTRACIÓN CONFIGURADAS EXITOSAMENTE!")

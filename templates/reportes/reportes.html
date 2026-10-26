@@ -30,6 +30,121 @@
         </div>
     </div>
 
+    <!-- 1. MÓDULO INTERACTIVO DE GENERACIÓN Y VISTA PREVIA DE REPORTES ESCOLARES -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden" style="border: 1.5px solid #E5DFD5 !important;">
+        <div class="p-3 px-4 d-flex align-items-center justify-content-between" style="background: linear-gradient(135deg, #ffffff 0%, #F5F2EB 100%); border-bottom: 1.5px solid #E5DFD5;">
+            <div>
+                <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                    <i class="bi bi-funnel-fill text-primary"></i> Generador Oficial de Reportes
+                </h5>
+                <small class="text-muted">Configure los parámetros, visualice los registros en vivo y exporte en el formato requerido.</small>
+            </div>
+            <span class="badge py-1.5 px-3 rounded-pill fw-bold" style="background: var(--color-acento); color: var(--color-secundario); border: 1px solid #E0D8CE;">
+                <i class="bi bi-cpu-fill me-1"></i> Consultas en Tiempo Real
+            </span>
+        </div>
+        <div class="card-body p-4">
+            <form method="get" action="{% url 'centro_reportes' %}" class="row g-3 align-items-end">
+                <input type="hidden" name="generar" value="1">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-secondary mb-1">Tipo de Reporte *</label>
+                    <select name="tipo_reporte" class="form-select form-select-sm" required>
+                        <option value="estudiantes" {% if tipo_reporte == 'estudiantes' %}selected{% endif %}>Estudiantes Matriculados</option>
+                        <option value="calificaciones" {% if tipo_reporte == 'calificaciones' %}selected{% endif %}>Consolidado de Calificaciones</option>
+                        <option value="asistencia" {% if tipo_reporte == 'asistencia' %}selected{% endif %}>Asistencia Escolar</option>
+                        <option value="docentes" {% if tipo_reporte == 'docentes' %}selected{% endif %}>Cuerpo Docente y Asignaciones</option>
+                        <option value="cursos" {% if tipo_reporte == 'cursos' %}selected{% endif %}>Cursos y Grupos Escolares</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-secondary mb-1">Grado Escolar</label>
+                    <select name="grado_filtro" class="form-select form-select-sm">
+                        <option value="">-- Todos los Grados --</option>
+                        {% for g in grados_catalogo %}
+                        <option value="{{ g }}" {% if grado_filtro == g %}selected{% endif %}>Grado {{ g }}°</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-secondary mb-1">Sección / Grupo</label>
+                    <select name="seccion_filtro" class="form-select form-select-sm">
+                        <option value="">-- Todas las Secciones --</option>
+                        <option value="A" {% if seccion_filtro == 'A' %}selected{% endif %}>Sección A</option>
+                        <option value="B" {% if seccion_filtro == 'B' %}selected{% endif %}>Sección B</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-secondary mb-1">Período Académico</label>
+                    <select name="periodo_filtro" class="form-select form-select-sm">
+                        <option value="">-- Todos los Períodos --</option>
+                        <option value="Periodo 1" {% if periodo_filtro == 'Periodo 1' %}selected{% endif %}>Periodo 1</option>
+                        <option value="Periodo 2" {% if periodo_filtro == 'Periodo 2' %}selected{% endif %}>Periodo 2</option>
+                        <option value="Periodo 3" {% if periodo_filtro == 'Periodo 3' %}selected{% endif %}>Periodo 3</option>
+                        <option value="Periodo 4" {% if periodo_filtro == 'Periodo 4' %}selected{% endif %}>Periodo 4</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold w-100 shadow-xs" style="background: var(--color-principal); border: none;">
+                        <i class="bi bi-funnel-fill me-1"></i> Generar Reporte
+                    </button>
+                    {% if reporte_generado %}
+                    <a href="{% url 'centro_reportes' %}" class="btn btn-sm btn-light border rounded-pill px-2 py-1.5 text-secondary" title="Limpiar filtros">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            {% if reporte_generado %}
+            <div class="mt-4 pt-3 border-top">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                            <i class="bi bi-table text-success"></i> {{ reporte_titulo }}
+                        </h6>
+                        <small class="text-muted">{{ reporte_total }} registro(s) encontrado(s) en la base de datos.</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ export_excel_url }}" class="btn btn-sm btn-success rounded-pill px-3 fw-bold text-white shadow-xs">
+                            <i class="bi bi-file-earmark-excel-fill me-1"></i> Exportar a Excel (.xlsx)
+                        </a>
+                        <a href="{{ export_pdf_url }}" target="_blank" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold text-white shadow-xs">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Exportar a PDF (.pdf)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive rounded-3 border" style="max-height: 420px; overflow-y: auto;">
+                    <table class="table table-sm table-hover table-striped align-middle mb-0 small">
+                        <thead class="table-light sticky-top" style="z-index: 1;">
+                            <tr>
+                                {% for col in reporte_columnas %}
+                                <th class="py-2.5 px-3 fw-bold text-uppercase text-secondary" style="font-size: 0.72rem;">{{ col }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fila in reporte_filas %}
+                            <tr>
+                                {% for celda in fila %}
+                                <td class="py-2 px-3">{{ celda|default:"—" }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="{{ reporte_columnas|length }}" class="text-center py-4 text-muted fst-italic">
+                                    No se encontraron registros que coincidan con los filtros seleccionados.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
     <!-- SECCIÓN PRINCIPAL: CONSOLIDADOS OFICIALES DIRECTOS -->
     <div class="sinetec-card-modern p-4 mb-4 bg-white rounded-4 shadow-sm border">
         <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
@@ -144,10 +259,10 @@
             </div>
 
             <!-- 2. Cursos y Grupos -->
-            <div class="edunova-card" style="border-top: 3px solid #1E3A8A !important;">
+            <div class="edunova-card" style="border-top: 3px solid var(--color-secundario, #5A3825) !important;">
                 <div class="edunova-card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: #0F2942; font-size: 0.72rem;">CURSOS Y GRUPOS</span>
+                        <span class="badge px-2.5 py-1 text-white rounded-pill" style="background-color: var(--color-principal, #8B5E3C); font-size: 0.72rem;">CURSOS Y GRUPOS</span>
                         <div class="p-2 rounded-3 bg-white text-dark shadow-xs">
                             <i class="bi bi-journal-bookmark-fill fs-5"></i>
                         </div>

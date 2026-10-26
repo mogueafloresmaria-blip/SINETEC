@@ -193,31 +193,35 @@
                                 {% endif %}
                             </td>
                             <td class="pe-3 text-end">
-                                <div class="btn-group btn-group-sm">
-                                    {% if u.perfil.rol.nombre in 'Estudiante Aprendiz' and u.perfil %}
-                                        <a href="{% url 'estudiante_detalle' u.perfil.pk %}" class="btn btn-outline-primary" title="Ver Expediente del Alumno">
-                                            <i class="bi bi-eye"></i>
+                                {% if es_secretaria and u.is_superuser or es_secretaria and u.perfil.rol.nombre in 'Administrador Rectoría Rector Coordinador' %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2.5 py-1.5" title="Cuenta con privilegios directivos protegidos"><i class="bi bi-shield-lock me-1"></i>Directivo Protegido</span>
+                                {% else %}
+                                    <div class="btn-group btn-group-sm">
+                                        {% if u.perfil.rol.nombre in 'Estudiante Aprendiz' and u.perfil %}
+                                            <a href="{% url 'estudiante_detalle' u.perfil.pk %}" class="btn btn-outline-primary" title="Ver Expediente del Alumno">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        {% elif 'Docente' in u.perfil.rol.nombre or 'Instructor' in u.perfil.rol.nombre or 'Profesor' in u.perfil.rol.nombre %}
+                                            <a href="{% url 'instructor_detalle' u.pk %}" class="btn btn-outline-primary" title="Ver Ficha del Docente">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        {% endif %}
+                                        <a href="{% url 'editar_usuario' u.pk %}" class="btn btn-outline-secondary" title="Editar Usuario y Roles">
+                                            <i class="bi bi-pencil-square"></i>
                                         </a>
-                                    {% elif 'Docente' in u.perfil.rol.nombre or 'Instructor' in u.perfil.rol.nombre or 'Profesor' in u.perfil.rol.nombre %}
-                                        <a href="{% url 'instructor_detalle' u.pk %}" class="btn btn-outline-primary" title="Ver Ficha del Docente">
-                                            <i class="bi bi-eye"></i>
+                                        <a href="{% url 'usuario_toggle_activo' u.pk %}" class="btn {% if u.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="{% if u.is_active %}Desactivar Acceso{% else %}Habilitar Acceso{% endif %}">
+                                            {% if u.is_active %}<i class="bi bi-toggle-on"></i>{% else %}<i class="bi bi-toggle-off"></i>{% endif %}
                                         </a>
-                                    {% endif %}
-                                    <a href="{% url 'editar_usuario' u.pk %}" class="btn btn-outline-secondary" title="Editar Usuario y Roles">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <a href="{% url 'usuario_toggle_activo' u.pk %}" class="btn {% if u.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="{% if u.is_active %}Desactivar Acceso{% else %}Habilitar Acceso{% endif %}">
-                                        {% if u.is_active %}<i class="bi bi-toggle-on"></i>{% else %}<i class="bi bi-toggle-off"></i>{% endif %}
-                                    </a>
-                                    {% if 'Docente' in u.perfil.rol.nombre or 'Profesor' in u.perfil.rol.nombre or 'Instructor' in u.perfil.rol.nombre or 'Coordinador' in u.perfil.rol.nombre %}
-                                    <a href="{% url 'retirar_instructor' u.pk %}" class="btn btn-outline-danger" title="Retirar / Reasignar Grupos del Funcionario">
-                                        <i class="bi bi-person-x"></i>
-                                    </a>
-                                    {% endif %}
-                                    <a href="{% url 'usuario_reset_clave' u.pk %}" class="btn btn-outline-dark" title="Restablecer Contraseña" onclick="return confirm('¿Restablecer contraseña para {{ u.username }}?');">
-                                        <i class="bi bi-key"></i>
-                                    </a>
-                                </div>
+                                        {% if 'Docente' in u.perfil.rol.nombre or 'Profesor' in u.perfil.rol.nombre or 'Instructor' in u.perfil.rol.nombre or 'Coordinador' in u.perfil.rol.nombre %}
+                                        <a href="{% url 'retirar_instructor' u.pk %}" class="btn btn-outline-danger" title="Retirar / Reasignar Grupos del Funcionario">
+                                            <i class="bi bi-person-x"></i>
+                                        </a>
+                                        {% endif %}
+                                        <a href="{% url 'usuario_reset_clave' u.pk %}" class="btn btn-outline-dark" title="Restablecer Contraseña" onclick="return confirm('¿Restablecer contraseña para {{ u.username }}?');">
+                                            <i class="bi bi-key"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
                             </td>
                         </tr>
                     {% empty %}

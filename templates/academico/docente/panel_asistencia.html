@@ -129,10 +129,10 @@
             </form>
         </div>
 
-        <!-- 5 TARJETAS MÉTRICAS DE ASISTENCIA EN TIEMPO REAL -->
+        <!-- 6 TARJETAS MÉTRICAS DE ASISTENCIA EN TIEMPO REAL -->
         <div class="row g-3 mb-4">
             <!-- 1. Total estudiantes -->
-            <div class="col-6 col-md">
+            <div class="col-6 col-md-2">
                 <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center justify-content-between mb-1.5">
                         <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Total Alumnos</span>
@@ -145,7 +145,7 @@
             </div>
 
             <!-- 2. Presentes -->
-            <div class="col-6 col-md">
+            <div class="col-6 col-md-2">
                 <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center justify-content-between mb-1.5">
                         <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Presentes</span>
@@ -158,7 +158,7 @@
             </div>
 
             <!-- 3. Ausentes -->
-            <div class="col-6 col-md">
+            <div class="col-6 col-md-2">
                 <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center justify-content-between mb-1.5">
                         <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Ausentes</span>
@@ -171,7 +171,7 @@
             </div>
 
             <!-- 4. Tardanzas -->
-            <div class="col-6 col-md">
+            <div class="col-6 col-md-2">
                 <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center justify-content-between mb-1.5">
                         <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Tardanzas</span>
@@ -184,7 +184,7 @@
             </div>
 
             <!-- 5. Excusas -->
-            <div class="col-6 col-md">
+            <div class="col-6 col-md-2">
                 <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
                     <div class="d-flex align-items-center justify-content-between mb-1.5">
                         <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Excusas</span>
@@ -193,6 +193,19 @@
                         </div>
                     </div>
                     <h3 class="fw-bold mb-0 text-primary" id="kpi-excusas" style="font-size: 1.6rem;">{{ asist_kpi_excusas }}</h3>
+                </div>
+            </div>
+
+            <!-- 6. Pendientes de registrar -->
+            <div class="col-6 col-md-2">
+                <div class="card border rounded-4 p-3 bg-white shadow-2xs h-100" style="border-color: var(--color-acento) !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-1.5">
+                        <span class="text-muted fw-medium small" style="font-size: 0.76rem;">Pendientes</span>
+                        <div class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" style="background: #f1f5f9; color: #64748b; width: 32px; height: 32px;">
+                            <i class="bi bi-hourglass-split fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-0 text-secondary" id="kpi-pendientes" style="font-size: 1.6rem;">{{ asist_kpi_pendientes }}</h3>
                 </div>
             </div>
         </div>
@@ -222,7 +235,7 @@
                     <div class="d-flex align-items-center gap-2">
                         <button type="submit" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm d-inline-flex align-items-center gap-2 transition hover-shadow"
                                 style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem;">
-                            <i class="bi bi-floppy-fill"></i> GUARDAR ASISTENCIA
+                            <i class="bi bi-floppy-fill"></i> GUARDAR ASISTENCIA DEL GRUPO
                         </button>
                     </div>
                 </div>
@@ -235,27 +248,45 @@
                         <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
                             <tr>
                                 <th class="text-center py-3" style="width: 45px; color: var(--color-secundario); font-size: 0.76rem;">#</th>
-                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ESTUDIANTE</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ESTUDIANTE Y ALERTAS</th>
                                 <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">DOCUMENTO</th>
                                 <th class="py-3 text-center" style="width: 320px; color: var(--color-secundario); font-size: 0.76rem;">ESTADO DE ASISTENCIA</th>
-                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">OBSERVACIÓN INDIVIDUAL</th>
+                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">OBSERVACIÓN</th>
+                                <th class="py-3 text-end" style="width: 140px; color: var(--color-secundario); font-size: 0.76rem;">ACCIONES</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for m in estudiantes_carga_sel %}
-                            <tr style="border-bottom: 1px solid var(--color-acento);">
+                            <tr style="border-bottom: 1px solid var(--color-acento);" data-matricula-id="{{ m.id }}" id="fila-est-{{ m.id }}">
                                 <td class="text-center fw-bold text-muted small">{{ forloop.counter }}</td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2.5">
-                                        <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs" 
+                                        <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs flex-shrink-0" 
                                              style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); width: 36px; height: 36px; font-size: 0.8rem;">
                                             {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
                                         </div>
                                         <div>
                                             <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
-                                            <span class="badge rounded-pill px-2 py-0.5 text-muted" style="background: #f1f5f9; font-size: 0.7rem;">
-                                                Grado {{ m.grado_escolar }}°{{ m.seccion }} · {{ m.resumen_asist.porcentaje }}% asist. general
-                                            </span>
+                                            <div class="d-flex align-items-center gap-1.5 flex-wrap mt-0.5">
+                                                <span class="badge rounded-pill px-2 py-0.5 text-muted" style="background: #f1f5f9; font-size: 0.7rem;">
+                                                    Grado {{ m.grado_escolar }}°{{ m.seccion }} · {{ m.resumen_asist.porcentaje }}% asist.
+                                                </span>
+                                                {% if not m.asistencia_estado %}
+                                                <span class="badge rounded-pill px-2 py-0.5" style="background: #f1f5f9; color: #64748b; font-size: 0.68rem; border: 1px dashed #cbd5e1;">
+                                                    <i class="bi bi-hourglass-split"></i> Pendiente hoy
+                                                </span>
+                                                {% endif %}
+                                                {% for alr in m.alertas_asistencia %}
+                                                <span class="badge rounded-pill px-2 py-0.5" 
+                                                      style="font-size: 0.68rem; 
+                                                             background: {% if alr.tipo == 'danger' %}#fef2f2{% elif alr.tipo == 'warning' %}#fefce8{% elif alr.tipo == 'primary' %}#eff6ff{% elif alr.tipo == 'success' %}#ecfdf5{% else %}#f8fafc{% endif %}; 
+                                                             color: {% if alr.tipo == 'danger' %}#b91c1c{% elif alr.tipo == 'warning' %}#a16207{% elif alr.tipo == 'primary' %}#1d4ed8{% elif alr.tipo == 'success' %}#047857{% else %}#475569{% endif %}; 
+                                                             border: 1px solid {% if alr.tipo == 'danger' %}#fecaca{% elif alr.tipo == 'warning' %}#fef08a{% elif alr.tipo == 'primary' %}#bfdbfe{% elif alr.tipo == 'success' %}#a7f3d0{% else %}#e2e8f0{% endif %};" 
+                                                      title="{{ alr.descripcion }}">
+                                                    <i class="bi bi-{{ alr.icono }} me-0.5"></i> {{ alr.titulo }}
+                                                </span>
+                                                {% endfor %}
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -292,15 +323,32 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="text" name="obs_{{ m.id }}" value="{{ m.asistencia_obs_limpia }}"
+                                    <input type="text" name="obs_{{ m.id }}" id="obs_{{ m.id }}" value="{{ m.asistencia_obs_limpia }}"
                                            class="form-control form-control-sm rounded-pill px-3" 
                                            placeholder="Ej: Llegó 15 min tarde, presentó excusa médica..."
                                            style="border: 1px solid var(--color-acento); font-size: 0.82rem;">
                                 </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex align-items-center gap-1">
+                                        <button type="button" onclick="guardarAsistenciaIndividual({{ m.id }});"
+                                                class="btn btn-sm rounded-pill px-2.5 py-1 text-white fw-bold shadow-2xs transition hover-shadow"
+                                                style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.74rem;"
+                                                id="btn-guardar-ind-{{ m.id }}"
+                                                title="Guardar solo a este estudiante">
+                                            <i class="bi bi-floppy"></i>
+                                        </button>
+                                        <button type="button" onclick="abrirModalHistorialEstudiante({{ m.id }}, '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}');"
+                                                class="btn btn-sm rounded-pill px-2.5 py-1 bg-white fw-bold shadow-2xs transition hover-shadow"
+                                                style="color: var(--color-secundario); border: 1px solid var(--color-acento); font-size: 0.74rem;"
+                                                title="Ver historial completo y alertas">
+                                            <i class="bi bi-clock-history"></i>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-people fs-2 d-block mb-2" style="color: var(--color-principal);"></i>
                                     No hay estudiantes registrados en este curso.
                                 </td>
@@ -575,7 +623,98 @@
 </div>
 
 <!-- =========================================================================
-     JAVASCRIPT: INTERACTIVIDAD Y MARCAR TODOS
+     MODAL: HISTORIAL INDIVIDUAL Y ALERTAS DEL ESTUDIANTE
+     ========================================================================= -->
+<div class="modal fade" id="modalHistorialEstudiante" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header text-white p-3.5" style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-clock-history fs-5"></i>
+                    <h5 class="modal-title fw-bold mb-0" id="historialModalTitulo" style="font-size: 1.05rem;">Historial de Asistencia</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body p-4" id="historialModalCuerpo">
+                <div class="text-center py-5 text-muted" id="historialModalLoading">
+                    <div class="spinner-border text-primary mb-2" role="status"></div>
+                    <p class="mb-0">Cargando historial detallado...</p>
+                </div>
+                <div id="historialModalContenido" style="display: none;">
+                    <!-- Metadata Header -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 rounded-3 mb-3" style="background: #faf8f5; border: 1px solid var(--color-acento);">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark" id="historialEstudianteNombre">-</h6>
+                            <small class="text-muted" id="historialEstudianteMeta">-</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold" id="historialPorcentajeBadge" style="font-size: 0.88rem;">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Formula and Explanation Alert -->
+                    <div class="alert alert-info py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2" id="historialFormulaExplicacion">
+                        <i class="bi bi-info-circle-fill fs-6 flex-shrink-0"></i>
+                        <span id="historialFormulaTexto"></span>
+                    </div>
+
+                    <!-- Early warning alerts container -->
+                    <div class="mb-3" id="historialAlertasContainer"></div>
+
+                    <!-- 4 Metric summary pills -->
+                    <div class="row g-2 mb-3 text-center">
+                        <div class="col-3">
+                            <div class="p-2 rounded-3 border bg-light">
+                                <span class="d-block small text-muted">Presentes</span>
+                                <strong class="text-success fs-5" id="historialPresentesCount">0</strong>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="p-2 rounded-3 border bg-light">
+                                <span class="d-block small text-muted">Tardanzas</span>
+                                <strong class="text-warning fs-5" id="historialTardanzasCount">0</strong>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="p-2 rounded-3 border bg-light">
+                                <span class="d-block small text-muted">Ausencias</span>
+                                <strong class="text-danger fs-5" id="historialAusenciasCount">0</strong>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="p-2 rounded-3 border bg-light">
+                                <span class="d-block small text-muted">Excusas</span>
+                                <strong class="text-primary fs-5" id="historialExcusasCount">0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date-by-date list -->
+                    <h6 class="fw-bold text-dark mb-2" style="font-size: 0.9rem;"><i class="bi bi-calendar-event me-1"></i> Detalle Sesión por Sesión:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle table-hover mb-0" style="font-size: 0.82rem;">
+                            <thead style="background: #F5F2EB;">
+                                <tr>
+                                    <th class="py-2">Fecha</th>
+                                    <th class="py-2 text-center">Estado</th>
+                                    <th class="py-2">Observaciones / Novedad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historialTablaCuerpo"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer p-3 bg-light">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     JAVASCRIPT: INTERACTIVIDAD, KPIS Y LLAMADOS API
      ========================================================================= -->
 <script>
 function cambiarPestanaAsistencia(pestana) {
@@ -588,11 +727,13 @@ function cambiarPestanaAsistencia(pestana) {
     const btnResumen = document.getElementById('tab-btn-resumen');
 
     const resetBtn = (btn) => {
+        if (!btn) return;
         btn.style.background = 'transparent';
         btn.style.border = 'none';
         btn.style.color = '#64748b';
     };
     const activeBtn = (btn) => {
+        if (!btn) return;
         btn.style.background = 'var(--color-principal)';
         btn.style.border = '1px solid var(--color-principal)';
         btn.style.color = '#ffffff';
@@ -603,19 +744,19 @@ function cambiarPestanaAsistencia(pestana) {
     resetBtn(btnResumen);
 
     if (pestana === 'tomar') {
-        secTomar.style.display = 'block';
-        secHistorial.style.display = 'none';
-        secResumen.style.display = 'none';
+        if (secTomar) secTomar.style.display = 'block';
+        if (secHistorial) secHistorial.style.display = 'none';
+        if (secResumen) secResumen.style.display = 'none';
         activeBtn(btnTomar);
     } else if (pestana === 'historial') {
-        secTomar.style.display = 'none';
-        secHistorial.style.display = 'block';
-        secResumen.style.display = 'none';
+        if (secTomar) secTomar.style.display = 'none';
+        if (secHistorial) secHistorial.style.display = 'block';
+        if (secResumen) secResumen.style.display = 'none';
         activeBtn(btnHistorial);
     } else if (pestana === 'resumen') {
-        secTomar.style.display = 'none';
-        secHistorial.style.display = 'none';
-        secResumen.style.display = 'block';
+        if (secTomar) secTomar.style.display = 'none';
+        if (secHistorial) secHistorial.style.display = 'none';
+        if (secResumen) secResumen.style.display = 'block';
         activeBtn(btnResumen);
     }
 }
@@ -630,27 +771,186 @@ function marcarTodosPresentes() {
 
 function actualizarKpisEnVivo() {
     let p = 0, a = 0, t = 0, j = 0;
-    const radios = document.querySelectorAll('input[type="radio"].asist-radio:checked');
-    radios.forEach(r => {
-        if (r.value === 'P') p++;
-        else if (r.value === 'A') a++;
-        else if (r.value === 'T') t++;
-        else if (r.value === 'J' || r.value === 'E') j++;
+    const rows = document.querySelectorAll('#tabla-asistencia-docente tbody tr[data-matricula-id]');
+    const totalEstudiantes = rows.length;
+    
+    rows.forEach(tr => {
+        const checked = tr.querySelector('input[type="radio"].asist-radio:checked');
+        if (checked) {
+            if (checked.value === 'P') p++;
+            else if (checked.value === 'A') a++;
+            else if (checked.value === 'T') t++;
+            else if (checked.value === 'J' || checked.value === 'E') j++;
+        }
     });
+
+    const pendientes = Math.max(0, totalEstudiantes - (p + a + t + j));
 
     const kpiP = document.getElementById('kpi-presentes');
     const kpiA = document.getElementById('kpi-ausentes');
     const kpiT = document.getElementById('kpi-tardanzas');
     const kpiJ = document.getElementById('kpi-excusas');
+    const kpiPend = document.getElementById('kpi-pendientes');
 
     if (kpiP) kpiP.innerText = p;
     if (kpiA) kpiA.innerText = a;
     if (kpiT) kpiT.innerText = t;
     if (kpiJ) kpiJ.innerText = j;
+    if (kpiPend) kpiPend.innerText = pendientes;
+}
+
+function guardarAsistenciaIndividual(matriculaId) {
+    const radioChecked = document.querySelector(`input[name="asistencia_${matriculaId}"]:checked`);
+    if (!radioChecked) {
+        alert('Por favor selecciona un estado de asistencia para este estudiante antes de guardar.');
+        return;
+    }
+    const estado = radioChecked.value;
+    const obsInput = document.getElementById(`obs_${matriculaId}`);
+    const observaciones = obsInput ? obsInput.value : '';
+    const fecha = "{{ fecha_asistencia_str }}";
+    const cargaId = "{{ carga_seleccionada.id }}";
+    const btn = document.getElementById(`btn-guardar-ind-${matriculaId}`);
+
+    const originalHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+    }
+
+    const formData = new FormData();
+    formData.append('matricula_id', matriculaId);
+    formData.append('fecha', fecha);
+    formData.append('estado', estado);
+    formData.append('observaciones', observaciones);
+    formData.append('carga_id', cargaId);
+
+    // CSRF Token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+    fetch('/asistencia/api/guardar-individual/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check2"></i>';
+            setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+        }
+        if (data.status === 'ok') {
+            // Update live KPIs
+            if (data.kpis) {
+                const kpiP = document.getElementById('kpi-presentes');
+                const kpiA = document.getElementById('kpi-ausentes');
+                const kpiT = document.getElementById('kpi-tardanzas');
+                const kpiJ = document.getElementById('kpi-excusas');
+                const kpiPend = document.getElementById('kpi-pendientes');
+                if (kpiP) kpiP.innerText = data.kpis.presentes;
+                if (kpiA) kpiA.innerText = data.kpis.ausentes;
+                if (kpiT) kpiT.innerText = data.kpis.tardanzas;
+                if (kpiJ) kpiJ.innerText = data.kpis.excusas;
+                if (kpiPend) kpiPend.innerText = data.kpis.pendientes;
+            }
+        } else {
+            alert('Error al guardar asistencia: ' + (data.error || 'Desconocido'));
+        }
+    })
+    .catch(err => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+        alert('Error de conexión al guardar.');
+    });
+}
+
+function abrirModalHistorialEstudiante(matriculaId, nombreEstudiante) {
+    const modalEl = document.getElementById('modalHistorialEstudiante');
+    if (!modalEl) return;
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    const loading = document.getElementById('historialModalLoading');
+    const contenido = document.getElementById('historialModalContenido');
+    if (loading) loading.style.display = 'block';
+    if (contenido) contenido.style.display = 'none';
+
+    fetch(`/asistencia/api/historial/${matriculaId}/`)
+    .then(r => r.json())
+    .then(data => {
+        if (loading) loading.style.display = 'none';
+        if (contenido) contenido.style.display = 'block';
+
+        if (data.status === 'ok') {
+            document.getElementById('historialEstudianteNombre').innerText = data.estudiante;
+            document.getElementById('historialEstudianteMeta').innerText = `Documento: ${data.documento} · ${data.grado_grupo} · ${data.rango_fechas || 'Sin sesiones'}`;
+            
+            const badgePct = document.getElementById('historialPorcentajeBadge');
+            if (badgePct) {
+                if (data.porcentaje !== null) {
+                    badgePct.innerText = `${data.porcentaje}% Asistencia`;
+                    badgePct.className = `badge rounded-pill px-3 py-1.5 fw-bold ${data.porcentaje >= 80 ? 'bg-success text-white' : data.porcentaje >= 65 ? 'bg-warning text-dark' : 'bg-danger text-white'}`;
+                } else {
+                    badgePct.innerText = 'Sin registros previos';
+                    badgePct.className = 'badge rounded-pill px-3 py-1.5 bg-secondary text-white';
+                }
+            }
+
+            document.getElementById('historialFormulaTexto').innerText = data.formula_explicacion;
+            document.getElementById('historialPresentesCount').innerText = data.presentes;
+            document.getElementById('historialTardanzasCount').innerText = data.tardanzas;
+            document.getElementById('historialAusenciasCount').innerText = data.ausentes;
+            document.getElementById('historialExcusasCount').innerText = data.excusas;
+
+            // Render Alerts
+            const alertasBox = document.getElementById('historialAlertasContainer');
+            if (alertasBox) {
+                if (data.alertas && data.alertas.length > 0) {
+                    alertasBox.innerHTML = data.alertas.map(a => `
+                        <div class="alert alert-${a.tipo} py-2 px-3 small rounded-3 mb-2 d-flex align-items-center gap-2">
+                            <i class="bi bi-${a.icono} fs-6 flex-shrink-0"></i>
+                            <div><strong>${a.titulo}:</strong> ${a.descripcion}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    alertasBox.innerHTML = '';
+                }
+            }
+
+            // Render Table
+            const tbody = document.getElementById('historialTablaCuerpo');
+            if (tbody) {
+                if (data.historial && data.historial.length > 0) {
+                    tbody.innerHTML = data.historial.map(h => `
+                        <tr>
+                            <td class="fw-bold">${h.fecha}</td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-2.5 py-1 ${h.badge_class}">${h.estado_label}</span>
+                            </td>
+                            <td class="text-muted">${h.observaciones || 'Sin novedad'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-muted">Aún no hay registros de asistencia para este estudiante.</td></tr>`;
+                }
+            }
+        } else {
+            alert('Error al cargar historial: ' + (data.error || 'Desconocido'));
+        }
+    })
+    .catch(err => {
+        if (loading) loading.style.display = 'none';
+        alert('Error al consultar historial.');
+    });
 }
 
 function filtrarTablaHistorialAsist() {
-    const query = (document.getElementById('buscar-historial-asist').value || '').toLowerCase().trim();
+    const query = (document.getElementById('buscar-historial-asist')?.value || '').toLowerCase().trim();
     const rows = document.querySelectorAll('#tabla-historial-asistencias tbody tr');
     rows.forEach(tr => {
         const text = tr.innerText.toLowerCase();
@@ -659,7 +959,7 @@ function filtrarTablaHistorialAsist() {
 }
 
 function imprimirDocumentoAsistencia() {
-    const contenido = document.getElementById('area-impresion-asistencia').innerHTML;
+    const contenido = document.getElementById('area-impresion-asistencia')?.innerHTML || '';
     const ventana = window.open('', '_blank', 'width=950,height=750');
     ventana.document.write(`
         <!DOCTYPE html>
@@ -682,11 +982,6 @@ function imprimirDocumentoAsistencia() {
             <\/script>
         </body>
         </html>
-    `);
-    ventana.document.close();
-}
-</script>
- </html>
     `);
     ventana.document.close();
 }

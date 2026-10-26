@@ -159,16 +159,19 @@
                         <!-- Resumen en Vivo de la Asistencia -->
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <span class="badge rounded-pill px-3 py-2 border" style="background-color: #ECFDF5; color: #047857; border-color: #A7F3D0 !important;" id="badge-presentes">
-                                <i class="bi bi-check-circle-fill me-1"></i> <span id="num-presentes">{{ total_presentes|default:matriculas|length }}</span> Presentes
-                            </span>
-                            <span class="badge rounded-pill px-3 py-2 border" style="background-color: #FEF2F2; color: #B91C1C; border-color: #FECACA !important;" id="badge-ausentes">
-                                <i class="bi bi-x-circle-fill me-1"></i> <span id="num-ausentes">{{ total_ausentes|default:0 }}</span> Inasistencias
+                                <i class="bi bi-check-circle-fill me-1"></i> <span id="num-presentes">{{ total_presentes }}</span> Presentes
                             </span>
                             <span class="badge rounded-pill px-3 py-2 border" style="background-color: #FFFBEB; color: #B45309; border-color: #FDE68A !important;" id="badge-tardanzas">
-                                <i class="bi bi-clock-history me-1"></i> <span id="num-tardanzas">{{ total_tardanzas|default:0 }}</span> Tardanzas
+                                <i class="bi bi-clock-history me-1"></i> <span id="num-tardanzas">{{ total_tardanzas }}</span> Tardanzas
+                            </span>
+                            <span class="badge rounded-pill px-3 py-2 border" style="background-color: #FEF2F2; color: #B91C1C; border-color: #FECACA !important;" id="badge-ausentes">
+                                <i class="bi bi-x-circle-fill me-1"></i> <span id="num-ausentes">{{ total_ausentes }}</span> Inasistencias
                             </span>
                             <span class="badge rounded-pill px-3 py-2 border" style="background-color: #F5F3FF; color: #6D28D9; border-color: #DDD6FE !important;" id="badge-excusas">
-                                <i class="bi bi-file-earmark-medical me-1"></i> <span id="num-excusas">{{ total_excusas|default:0 }}</span> Excusas
+                                <i class="bi bi-file-earmark-medical me-1"></i> <span id="num-excusas">{{ total_excusas }}</span> Excusas
+                            </span>
+                            <span class="badge rounded-pill px-3 py-2 border" style="background-color: #F8FAFC; color: #475569; border-color: #E2E8F0 !important;" id="badge-pendientes">
+                                <i class="bi bi-hourglass-split me-1"></i> <span id="num-pendientes">{{ total_pendientes }}</span> Pendientes
                             </span>
                         </div>
                     </div>
@@ -211,7 +214,7 @@
                                         <td>
                                             <div class="btn-group w-100 shadow-sm" role="group" aria-label="Opciones de asistencia">
                                                 <!-- Presente -->
-                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="p_{{ matricula.pk }}" value="P" {% if estado == 'P' or not estado %}checked{% endif %} {% if not puede_llamar_asistencia %}disabled{% endif %} onchange="actualizarContadores();">
+                                                <input type="radio" class="btn-check asist-radio" name="asistencia_{{ matricula.pk }}" id="p_{{ matricula.pk }}" value="P" {% if estado == 'P' %}checked{% endif %} {% if not puede_llamar_asistencia %}disabled{% endif %} onchange="actualizarContadores();">
                                                 <label class="btn btn-outline-success btn-sm fw-semibold py-1.5" for="p_{{ matricula.pk }}" title="Marcar Presente">
                                                     <i class="bi bi-check-lg me-1"></i>Presente
                                                 </label>

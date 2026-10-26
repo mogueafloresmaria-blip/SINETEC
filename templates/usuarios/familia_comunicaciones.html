@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Comunicaciones Escolares · Portal de Familias{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0 py-2">
+
+    <!-- Header Hero Escolar EDUNOVA -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(90, 56, 37, 0.3);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-chat-dots-fill me-1"></i> Mensajería y Tutoría Escolar
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Comunicaciones con Docentes</h1>
+                <p class="mb-0 text-white-50 small">
+                    Canal directo de contacto pedagógico y acompañamiento académico para padres y acudientes.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-light fw-bold rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRedactarDocente" style="color: var(--color-principal);">
+                    <i class="bi bi-pencil-square me-1"></i> Redactar Mensaje
+                </button>
+                <a href="{% url 'familia_circulares' %}" class="btn btn-outline-light fw-semibold rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-megaphone-fill me-1"></i> Ver Circulares
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de Estudiante (Si la familia tiene más de 1 estudiante a cargo) -->
+    {% if hijos_qs and hijos_qs.count > 1 %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <span class="fw-bold text-dark small"><i class="bi bi-person-fill text-primary me-1"></i> Estudiante consultado:</span>
+            <div class="d-flex flex-wrap gap-2">
+                {% for h in hijos_qs %}
+                    <a href="{% url 'familia_portal' %}?documento={{ h.perfil.numero_documento|default:h.username }}" 
+                       class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold {% if estudiante_sel.id == h.id %}btn-primary text-white{% else %}btn-outline-secondary bg-white text-dark{% endif %} shadow-xs">
+                        {{ h.get_full_name|default:h.username }}
+                        <span class="badge {% if estudiante_sel.id == h.id %}bg-white text-primary{% else %}bg-light text-secondary border{% endif %} ms-1 small">
+                            {{ h.perfil.numero_documento|default:h.username }}
+                        </span>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Ficha Resumen de Estudiante Consultado -->
+    {% if estudiante_sel %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white p-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                {% if estudiante_sel.perfil.foto_perfil %}
+                <div class="rounded-circle shadow-sm overflow-hidden position-relative" style="width: 48px; height: 48px; border: 2px solid var(--color-acento); background: #f8fafc;">
+                    <img src="{{ estudiante_sel.perfil.foto_perfil.url }}" alt="{{ estudiante_sel.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; document.getElementById('com_foto_fb').style.display='flex';">
+                    <div id="com_foto_fb" class="align-items-center justify-content-center text-white fw-bold fs-4 w-100 h-100" style="display: none; background: linear-gradient(135deg, var(--color-principal), var(--color-secundario));">
+                        {{ estudiante_sel.first_name|default:estudiante_sel.username|slice:":1"|upper }}
+                    </div>
+                </div>
+                {% else %}
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-4 shadow-sm" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--color-principal), var(--color-secundario));">
+                    {{ estudiante_sel.first_name|default:estudiante_sel.username|slice:":1"|upper }}
+                </div>
+                {% endif %}
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">{{ estudiante_sel.get_full_name|default:estudiante_sel.username }}</h5>
+                    <small class="text-muted">Documento: <strong>{{ estudiante_sel.perfil.numero_documento|default:"N/A" }}</strong> · Grado: <strong>{% if matricula_sel %}{{ matricula_sel.get_grado_escolar_display }}-{{ matricula_sel.seccion }}{% else %}Regular{% endif %}</strong></small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold">
+                    <i class="bi bi-people-fill me-1"></i> {{ docentes_lista|length }} Docentes Asignados
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 3 Tarjetas Resumen -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Total Intercambios</span>
+                    <div class="rounded-3 p-2" style="background-color: var(--color-acento); color: var(--color-principal);">
+                        <i class="bi bi-chat-left-text-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_comunicaciones }}</div>
+                <div class="small text-muted mt-1">Comunicaciones registradas</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Recibidos / Citaciones</span>
+                    <div class="rounded-3 p-2" style="background-color: #EAF4FB; color: #0284C7;">
+                        <i class="bi bi-inbox-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_recibidos }}</div>
+                <div class="small text-muted mt-1">Mensajes directos del colegio</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Enviados por la Familia</span>
+                    <div class="rounded-3 p-2" style="background-color: #ECFDF5; color: #047857;">
+                        <i class="bi bi-send-check-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_enviados }}</div>
+                <div class="small text-muted mt-1">Consultas y solicitudes enviadas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listado de Comunicaciones -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-envelope-paper-fill me-2 text-primary"></i> Bandeja de Comunicaciones</h6>
+            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-xs" data-bs-toggle="modal" data-bs-target="#modalRedactarDocente">
+                <i class="bi bi-plus-circle me-1"></i> Nuevo Mensaje
+            </button>
+        </div>
+        <div class="card-body p-0">
+            {% if comunicaciones %}
+                <div class="list-group list-group-flush">
+                    {% for com in comunicaciones %}
+                    <div class="list-group-item p-3.5 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs flex-shrink-0" style="width: 42px; height: 42px; background: linear-gradient(135deg, var(--color-secundario), var(--color-principal));">
+                                {{ com.remitente.first_name|default:com.remitente.username|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                    <h6 class="fw-bold text-dark mb-0">{{ com.asunto }}</h6>
+                                    <span class="badge rounded-pill small px-2 py-0.5" style="background: var(--color-acento); color: var(--color-principal);">
+                                        {{ com.get_estamento_destinatario_display|default:com.estamento_destinatario }}
+                                    </span>
+                                </div>
+                                <p class="text-secondary small mb-1" style="white-space: pre-line;">{{ com.mensaje|truncatechars:140 }}</p>
+                                <small class="text-muted">
+                                    <i class="bi bi-person me-1"></i> Remitente: <strong>{{ com.remitente.get_full_name|default:com.remitente.username }}</strong> · 
+                                    <i class="bi bi-clock me-1"></i> {{ com.fecha_creacion|date:"d M Y, H:i" }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="align-self-end align-self-md-center flex-shrink-0">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalDetalleCom{{ com.id }}">
+                                <i class="bi bi-eye me-1"></i> Ver Detalle
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal Detalle del Mensaje -->
+                    <div class="modal fade" id="modalDetalleCom{{ com.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+                                <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--color-secundario), var(--color-principal));">
+                                    <h6 class="modal-title fw-bold"><i class="bi bi-chat-quote-fill me-2"></i>{{ com.asunto }}</h6>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body p-4 bg-white">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                        <small class="text-muted">Remitente: <strong>{{ com.remitente.get_full_name|default:com.remitente.username }}</strong></small>
+                                        <small class="text-muted">{{ com.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                                    </div>
+                                    <div class="p-3 bg-light rounded-3 text-dark border">
+                                        {{ com.mensaje|linebreaks }}
+                                    </div>
+                                </div>
+                                <div class="modal-footer bg-light py-2">
+                                    <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="p-5 text-center">
+                    <i class="bi bi-chat-heart fs-1 d-block mb-2" style="color: var(--color-principal);"></i>
+                    <h5 class="fw-bold text-dark mb-1">No hay mensajes registrados aún</h5>
+                    <p class="small text-muted mb-3">Puedes escribirle directamente a los docentes o directores de grupo de tu estudiante.</p>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRedactarDocente">
+                        <i class="bi bi-pencil-square me-1"></i> Redactar Primer Mensaje
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal para Redactar Mensaje a Docente -->
+<div class="modal fade" id="modalRedactarDocente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--color-secundario), var(--color-principal));">
+                <h6 class="modal-title fw-bold">
+                    <i class="bi bi-pencil-square me-2"></i> Redactar Mensaje a Docente
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'familia_comunicaciones' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="enviar_mensaje_docente">
+                <div class="modal-body p-4 bg-white">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Docente Destinatario</label>
+                        <select name="docente_id" class="form-select rounded-3" required>
+                            {% for doc in docentes_lista %}
+                                <option value="{{ doc.id }}">
+                                    {{ doc.get_full_name|default:doc.username }} (Docente)
+                                </option>
+                            {% empty %}
+                                <option value="">No hay docentes asignados disponibles</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Docentes a cargo del curso y asignaturas del estudiante.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Asunto del Mensaje</label>
+                        <input type="text" name="asunto" class="form-control rounded-3" placeholder="Ej. Consulta sobre rendimiento o actividades" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Mensaje / Consulta</label>
+                        <textarea name="mensaje" rows="4" class="form-control rounded-3" placeholder="Escriba aquí su mensaje para el docente..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2.5 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">
+                        <i class="bi bi-send-fill me-1"></i> Enviar Mensaje
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -147,6 +147,8 @@ a:hover {
     box-shadow: 2px 0 16px rgba(90, 56, 37, 0.05);
     border-right: 1px solid var(--sinetec-border) !important;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .sinetec-brand {
@@ -470,7 +472,9 @@ a:hover {
     border-radius: 14px;
     padding: 18px 20px;
     box-shadow: var(--sinetec-shadow-sm);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+    will-change: transform;
+    transform: translateZ(0);
     position: relative;
     overflow: hidden;
 }
@@ -692,6 +696,7 @@ a:hover {
     background: rgba(45, 35, 30, 0.55);
     z-index: 1040;
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .sinetec-backdrop.is-visible {
@@ -713,6 +718,7 @@ a:hover {
 
     .sinetec-sidebar.is-open {
         transform: translateX(0);
+        z-index: 1060 !important;
         visibility: visible;
     }
 
@@ -739,10 +745,10 @@ a:hover {
 button.btn-primary,
 a.btn-primary,
 .sinetec-btn-primary {
-    background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%) !important;
-    background-color: var(--color-principal) !important;
-    border-color: var(--color-secundario) !important;
-    color: #ffffff !important;
+    background: linear-gradient(135deg, var(--color-boton, var(--color-principal)) 0%, var(--color-button-hover, var(--color-secundario)) 100%) !important;
+    background-color: var(--color-boton, var(--color-principal)) !important;
+    border-color: var(--color-boton, var(--color-principal)) !important;
+    color: var(--color-texto-botones, #ffffff) !important;
     box-shadow: 0 4px 12px rgba(90, 56, 37, 0.22) !important;
 }
 
@@ -751,10 +757,10 @@ a.btn-primary,
 .btn-primary:active,
 .btn-primary.active,
 .sinetec-btn-primary:hover {
-    background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 100%) !important;
-    background-color: var(--color-secundario) !important;
-    border-color: var(--color-secundario) !important;
-    color: #ffffff !important;
+    background: linear-gradient(135deg, var(--color-button-hover, var(--color-secundario)) 0%, var(--color-button-hover, var(--color-secundario)) 100%) !important;
+    background-color: var(--color-button-hover, var(--color-secundario)) !important;
+    border-color: var(--color-button-hover, var(--color-secundario)) !important;
+    color: var(--color-texto-botones, #ffffff) !important;
     box-shadow: 0 6px 16px rgba(90, 56, 37, 0.3) !important;
 }
 
@@ -807,4 +813,35 @@ i.text-primary {
 .bg-blue-100 {
     background-color: var(--color-acento) !important;
     color: var(--color-secundario) !important;
+}
+
+/* ==============================================================================
+   OPTIMIZACIONES RESPONSIVE Y RENDIMIENTO TÁCTIL EDUNOVA
+   ============================================================================== */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #B8977E #F8F6F0;
+}
+
+.table-responsive::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #F8F6F0;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #B8977E;
+    border-radius: 4px;
+}
+
+/* Scroll táctil suave sin bloqueos */
+@media (max-width: 767.98px) {
+    .table td, .table th {
+        white-space: nowrap;
+    }
 }

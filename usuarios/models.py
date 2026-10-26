@@ -304,12 +304,29 @@ class ConfiguracionColegio(models.Model):
         import re
         return bool(re.fullmatch(r'#[0-9A-Fa-f]{6}', str(valor or '').strip()))
 
+    def save(self, *args, **kwargs):
+        from django.core.cache import cache
+        cache.delete('edunova_colegio_identidad')
+        super().save(*args, **kwargs)
+
     def paleta(self):
         """Paleta vigente validada; cualquier valor inválido cae al color por defecto."""
         paleta = {}
         for campo, defecto in self.COLORES_POR_DEFECTO.items():
             valor = str(getattr(self, campo, '') or '').strip()
             paleta[campo] = valor.upper() if self.es_color_hex_valido(valor) else defecto
+        # Aliases para compatibilidad con variables CSS globales
+        paleta['color_primary'] = paleta['color_primario']
+        paleta['color_secondary'] = paleta['color_secundario']
+        paleta['color_accent'] = paleta['color_acento']
+        paleta['color_background'] = paleta['color_fondo']
+        paleta['color_surface'] = paleta['color_tarjetas']
+        paleta['color_text'] = paleta['color_texto']
+        paleta['color_button'] = paleta['color_botones']
+        paleta['color_button_hover'] = paleta['color_secundario']
+        paleta['color_border'] = paleta['color_acento']
+        paleta['color_sidebar'] = paleta['color_navbar']
+        paleta['color_header'] = paleta['color_navbar']
         return paleta
 
 

@@ -142,16 +142,18 @@ def revision_entrega(request, entrega_id):
             
             # Registrar en CalificacionEscolar si es requerido
             try:
-                CalificacionEscolar.objects.update_or_create(
-                    matricula__aprendiz=entrega.estudiante,
-                    carga_academica=entrega.tarea.carga_academica,
-                    periodo=entrega.tarea.periodo,
-                    defaults={
-                        'nota': calificacion,
-                        'profesor': request.user,
-                        'observaciones': retroalimentacion
-                    }
-                )
+                mat_obj = Matricula.objects.filter(aprendiz=entrega.estudiante).first()
+                if mat_obj:
+                    CalificacionEscolar.objects.update_or_create(
+                        matricula=mat_obj,
+                        carga_academica=entrega.tarea.carga_academica,
+                        periodo=entrega.tarea.periodo or 'Periodo 1',
+                        defaults={
+                            'nota': float(str(calificacion).replace(',', '.')),
+                            'profesor': request.user,
+                            'observaciones': retroalimentacion
+                        }
+                    )
             except Exception as e:
                 pass
 

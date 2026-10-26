@@ -121,7 +121,7 @@
             <!-- 3. Identidad Institucional y Parámetros del Colegio -->
             <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mt-4">
                 <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                    <div class="p-2 rounded-3 text-white" style="background-color: #0F2942;">
+                    <div class="p-2 rounded-3 text-white" style="background-color: var(--color-principal, #8B5E3C);">
                         <i class="bi bi-building-gear fs-4"></i>
                     </div>
                     <div>
@@ -176,7 +176,7 @@
                         </div>
                     </div>
                     <div class="mt-4 pt-2 d-flex justify-content-end">
-                        <button type="submit" class="btn text-white fw-semibold px-4 rounded-3" style="background-color: #0F2942;">
+                        <button type="submit" class="btn btn-primary fw-semibold px-4 rounded-3">
                             <i class="bi bi-save me-1"></i> Guardar Parámetros del Colegio
                         </button>
                     </div>
@@ -186,14 +186,18 @@
 
             <!-- 4. Configuración de Colores Institucionales -->
             <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mt-4">
-                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                    <div class="p-2 rounded-3 text-white" style="background-color: var(--color-principal);">
-                        <i class="bi bi-palette fs-4"></i>
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="p-2 rounded-3 text-white" style="background-color: var(--color-principal);">
+                            <i class="bi bi-palette fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Colores Institucionales</h5>
+                            <small class="text-muted">Personalice los colores de la plataforma para ajustarse a su identidad visual (Guardado automático en base de datos)</small>
+                        </div>
                     </div>
-                    <div>
-                        <h5 class="fw-bold text-dark mb-0">Colores Institucionales</h5>
-                        <small class="text-muted">Personalice los colores de la plataforma para ajustarse a su identidad visual</small>
-                    </div>
+                    <!-- Indicador discreto de autoguardado en tiempo real -->
+                    <div id="indicadorAutoguardado" class="badge rounded-pill px-3 py-2 fw-semibold d-none align-items-center gap-2 shadow-sm" style="font-size: 0.82rem; transition: all 0.25s ease;"></div>
                 </div>
 
                 <form method="post">
@@ -312,7 +316,50 @@
                         <span class="text-muted">Estado del Sistema:</span>
                         <span class="badge bg-success text-white"><i class="bi bi-check-circle me-1"></i> Operativo</span>
                     </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Motor Base de Datos:</span>
+                        <span class="badge bg-success text-white font-monospace fw-bold px-2 py-1">
+                            <i class="bi bi-database-check me-1"></i>{{ db_info.motor }}
+                        </span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Base de Datos Activa:</span>
+                        <strong class="text-dark font-monospace">{{ db_info.name }}</strong>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Servidor / Conexión:</span>
+                        <span class="text-secondary font-monospace small">{{ db_info.host }}:{{ db_info.port }}</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Estado Persistencia:</span>
+                        {% if db_info.conectada %}
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small">
+                                <i class="bi bi-hdd-network-fill me-1"></i>Conectado ({{ db_info.total_tablas }} tablas)
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger small">Desconectado</span>
+                        {% endif %}
+                    </li>
                 </ul>
+            </div>
+
+            <!-- Panel de Información Técnica de Base de Datos -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <div class="p-2 rounded-3 bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-database-gear fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Base de Datos Institucional</h6>
+                        <small class="text-muted">Conexión activa verificada</small>
+                    </div>
+                </div>
+                <div class="p-3 bg-light rounded-3 border small">
+                    <div class="mb-1"><strong>Motor Oficial:</strong> <span class="badge bg-dark font-monospace">{{ db_info.motor }} Server</span></div>
+                    <div class="mb-1"><strong>Driver ORM:</strong> <code class="text-primary small">{{ db_info.engine }}</code></div>
+                    <div class="mb-1"><strong>Esquema:</strong> <span class="font-monospace text-dark fw-bold">{{ db_info.name }}</span></div>
+                    <div class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Conexión relacional 100% activa</div>
+                </div>
             </div>
 
             <!-- Accesos Rápidos de Administración -->
@@ -343,7 +390,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Elementos del preview
+            // Elementos de la vista previa
             const vpContenedor = document.getElementById('vista_previa_contenedor');
             const vpTitulo = document.getElementById('vp_titulo');
             const vpNavbar = document.getElementById('vp_navbar');
@@ -353,32 +400,144 @@
             const vpTexto = document.getElementById('vp_texto');
             const vpEnlace = document.getElementById('vp_enlace');
             const vpBoton = document.getElementById('vp_boton');
+            const indicador = document.getElementById('indicadorAutoguardado');
             
-            // Inputs de color
-            const inputs = {
-                fondo: document.getElementById('color_fondo'),
-                titulos: document.getElementById('color_titulos'),
-                navbar: document.getElementById('color_navbar'),
-                texto_nav: document.getElementById('color_texto_nav'),
-                tarjetas: document.getElementById('color_tarjetas'),
-                texto: document.getElementById('color_texto'),
-                enlaces: document.getElementById('color_enlaces'),
-                botones: document.getElementById('color_botones'),
-                texto_botones: document.getElementById('color_texto_botones'),
-                acento: document.getElementById('color_acento')
-            };
+            // Catálogo completo de campos de color institucionales
+            const camposColores = [
+                'color_primario', 'color_secundario', 'color_acento', 'color_fondo',
+                'color_texto', 'color_titulos', 'color_botones', 'color_texto_botones',
+                'color_enlaces', 'color_tarjetas', 'color_navbar', 'color_texto_nav'
+            ];
 
-            // Event Listeners
-            inputs.fondo.addEventListener('input', (e) => { vpContenedor.style.backgroundColor = e.target.value; });
-            inputs.titulos.addEventListener('input', (e) => { vpTitulo.style.color = e.target.value; vpCardTitulo.style.color = e.target.value; });
-            inputs.navbar.addEventListener('input', (e) => { vpNavbar.style.backgroundColor = e.target.value; });
-            inputs.texto_nav.addEventListener('input', (e) => { vpTextoNav.style.color = e.target.value; });
-            inputs.tarjetas.addEventListener('input', (e) => { vpTarjeta.style.backgroundColor = e.target.value; });
-            inputs.texto.addEventListener('input', (e) => { vpTexto.style.color = e.target.value; });
-            inputs.enlaces.addEventListener('input', (e) => { vpEnlace.style.color = e.target.value; });
-            inputs.botones.addEventListener('input', (e) => { vpBoton.style.backgroundColor = e.target.value; vpBoton.style.borderColor = e.target.value; });
-            inputs.texto_botones.addEventListener('input', (e) => { vpBoton.style.color = e.target.value; });
-            inputs.acento.addEventListener('input', (e) => { vpNavbar.style.borderBottomColor = e.target.value; });
+            let temporizadoresGuardado = {};
+            let timeoutOcultar = null;
+
+            function obtenerCsrfToken() {
+                const tokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                if (tokenInput && tokenInput.value) return tokenInput.value;
+                const match = document.cookie.match(/csrftoken=([^;]+)/);
+                return match ? match[1] : '';
+            }
+
+            function actualizarVistaPrevia(campo, valor) {
+                if (campo === 'color_fondo' && vpContenedor) vpContenedor.style.backgroundColor = valor;
+                if (campo === 'color_titulos') {
+                    if (vpTitulo) vpTitulo.style.color = valor;
+                    if (vpCardTitulo) vpCardTitulo.style.color = valor;
+                }
+                if (campo === 'color_navbar' && vpNavbar) vpNavbar.style.backgroundColor = valor;
+                if (campo === 'color_texto_nav' && vpTextoNav) vpTextoNav.style.color = valor;
+                if (campo === 'color_tarjetas' && vpTarjeta) vpTarjeta.style.backgroundColor = valor;
+                if (campo === 'color_texto' && vpTexto) vpTexto.style.color = valor;
+                if (campo === 'color_enlaces' && vpEnlace) vpEnlace.style.color = valor;
+                if (campo === 'color_botones' && vpBoton) {
+                    vpBoton.style.backgroundColor = valor;
+                    vpBoton.style.borderColor = valor;
+                }
+                if (campo === 'color_texto_botones' && vpBoton) vpBoton.style.color = valor;
+                if (campo === 'color_acento' && vpNavbar) vpNavbar.style.borderBottomColor = valor;
+            }
+
+            function actualizarVariablesCSSGlobales(paleta) {
+                if (!paleta) return;
+                const root = document.documentElement;
+                // Variables en español
+                if (paleta.color_primario) root.style.setProperty('--color-principal', paleta.color_primario);
+                if (paleta.color_secundario) root.style.setProperty('--color-secundario', paleta.color_secundario);
+                if (paleta.color_acento) root.style.setProperty('--color-acento', paleta.color_acento);
+                if (paleta.color_fondo) root.style.setProperty('--color-fondo', paleta.color_fondo);
+                if (paleta.color_titulos) root.style.setProperty('--color-titulo', paleta.color_titulos);
+                if (paleta.color_texto) root.style.setProperty('--color-texto', paleta.color_texto);
+                if (paleta.color_botones) root.style.setProperty('--color-boton', paleta.color_botones);
+                if (paleta.color_texto_botones) root.style.setProperty('--color-texto-boton', paleta.color_texto_botones);
+                if (paleta.color_enlaces) root.style.setProperty('--color-enlace', paleta.color_enlaces);
+                if (paleta.color_tarjetas) root.style.setProperty('--color-tarjeta', paleta.color_tarjetas);
+                if (paleta.color_navbar) root.style.setProperty('--color-navbar', paleta.color_navbar);
+                if (paleta.color_texto_nav) root.style.setProperty('--color-texto-nav', paleta.color_texto_nav);
+
+                // Variables en inglés (estándar solicitado)
+                if (paleta.color_primary) root.style.setProperty('--color-primary', paleta.color_primary);
+                if (paleta.color_secondary) root.style.setProperty('--color-secondary', paleta.color_secondary);
+                if (paleta.color_background) root.style.setProperty('--color-background', paleta.color_background);
+                if (paleta.color_surface) root.style.setProperty('--color-surface', paleta.color_surface);
+                if (paleta.color_text) root.style.setProperty('--color-text', paleta.color_text);
+                if (paleta.color_button) root.style.setProperty('--color-button', paleta.color_button);
+                if (paleta.color_button_hover) root.style.setProperty('--color-button-hover', paleta.color_button_hover);
+                if (paleta.color_border) root.style.setProperty('--color-border', paleta.color_border);
+                if (paleta.color_sidebar) root.style.setProperty('--color-sidebar', paleta.color_sidebar);
+                if (paleta.color_header) root.style.setProperty('--color-header', paleta.color_header);
+            }
+
+            function autoguardarColor(campo, valor) {
+                if (timeoutOcultar) clearTimeout(timeoutOcultar);
+                if (indicador) {
+                    indicador.className = 'badge rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 bg-primary text-white shadow-sm';
+                    indicador.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" style="width: 0.9rem; height: 0.9rem;"></span> Guardando en base de datos...';
+                }
+
+                fetch('{% url "api_guardar_color" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': obtenerCsrfToken(),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ campo: campo, valor: valor })
+                })
+                .then(function(res) {
+                    if (!res.ok) {
+                        return res.json().then(function(errData) {
+                            throw new Error(errData.error || 'Error HTTP ' + res.status);
+                        });
+                    }
+                    return res.json();
+                })
+                .then(function(data) {
+                    if (data && data.ok) {
+                        if (indicador) {
+                            indicador.className = 'badge rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 bg-success text-white shadow-sm';
+                            indicador.innerHTML = '<i class="bi bi-check-circle-fill"></i> Guardado en base de datos';
+                        }
+                        if (data.paleta) {
+                            actualizarVariablesCSSGlobales(data.paleta);
+                        }
+                        timeoutOcultar = setTimeout(function() {
+                            if (indicador) indicador.className = 'badge rounded-pill px-3 py-2 fw-semibold d-none';
+                        }, 2800);
+                    } else {
+                        throw new Error((data && data.error) ? data.error : 'Fallo en la persistencia');
+                    }
+                })
+                .catch(function(err) {
+                    console.error('Error al guardar color en backend:', err);
+                    if (indicador) {
+                        indicador.className = 'badge rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 bg-danger text-white shadow-sm';
+                        indicador.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error al guardar';
+                    }
+                });
+            }
+
+            // Registrar escuchadores de eventos para todos los campos
+            camposColores.forEach(function(campo) {
+                const el = document.getElementById(campo);
+                if (!el) return;
+
+                // input event: respuesta visual instantánea y autoguardado debounced
+                el.addEventListener('input', function(e) {
+                    actualizarVistaPrevia(campo, e.target.value);
+                    if (temporizadoresGuardado[campo]) clearTimeout(temporizadoresGuardado[campo]);
+                    temporizadoresGuardado[campo] = setTimeout(function() {
+                        autoguardarColor(campo, e.target.value);
+                    }, 400);
+                });
+
+                // change event: guardado definitivo al cerrar/confirmar el selector nativo
+                el.addEventListener('change', function(e) {
+                    actualizarVistaPrevia(campo, e.target.value);
+                    if (temporizadoresGuardado[campo]) clearTimeout(temporizadoresGuardado[campo]);
+                    autoguardarColor(campo, e.target.value);
+                });
+            });
         });
     </script>
 </div>

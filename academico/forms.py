@@ -34,6 +34,15 @@ class MatriculaRapidaForm(forms.Form):
         ('PPT', 'Permiso por Protección Temporal'),
     ]
     GRADOS_ESCOLARES = [
+        ('1', 'Grado 1° (Primero)'),
+        ('2', 'Grado 2° (Segundo)'),
+        ('3', 'Grado 3° (Tercero)'),
+        ('4', 'Grado 4° (Cuarto)'),
+        ('5', 'Grado 5° (Quinto)'),
+        ('6', 'Grado 6° (Sexto)'),
+        ('7', 'Grado 7° (Séptimo)'),
+        ('8', 'Grado 8° (Octavo)'),
+        ('9', 'Grado 9° (Noveno)'),
         ('10', 'Grado 10° (Décimo)'),
         ('11', 'Grado 11° (Undécimo)'),
     ]

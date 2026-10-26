@@ -29,6 +29,18 @@
             --color-tarjeta: {{ tema_colores.color_tarjetas|default:'#FFFFFF' }};
             --color-navbar: {{ tema_colores.color_navbar|default:'#FFFFFF' }};
             --color-texto-nav: {{ tema_colores.color_texto_nav|default:'#2D231E' }};
+
+            /* Variables CSS Centralizadas Estandarizadas */
+            --color-primary: {{ tema_colores.color_primary|default:tema_colores.color_primario|default:'#8B5E3C' }};
+            --color-secondary: {{ tema_colores.color_secondary|default:tema_colores.color_secundario|default:'#5A3825' }};
+            --color-background: {{ tema_colores.color_background|default:tema_colores.color_fondo|default:'#F8F6F0' }};
+            --color-surface: {{ tema_colores.color_surface|default:tema_colores.color_tarjetas|default:'#FFFFFF' }};
+            --color-text: {{ tema_colores.color_text|default:tema_colores.color_texto|default:'#3E322A' }};
+            --color-button: {{ tema_colores.color_button|default:tema_colores.color_botones|default:'#8B5E3C' }};
+            --color-button-hover: {{ tema_colores.color_button_hover|default:tema_colores.color_secundario|default:'#5A3825' }};
+            --color-border: {{ tema_colores.color_border|default:tema_colores.color_acento|default:'#EFEBE4' }};
+            --color-sidebar: {{ tema_colores.color_sidebar|default:tema_colores.color_navbar|default:'#FFFFFF' }};
+            --color-header: {{ tema_colores.color_header|default:tema_colores.color_navbar|default:'#FFFFFF' }};
         }
     </style>
     <script>

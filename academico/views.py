@@ -147,26 +147,33 @@ def validar_importacion_aprendices(registros):
 
 
 def crear_matricula_desde_datos(ficha, datos, rol_estudiante):
-    numero_documento = datos['numero_documento'].strip()
-    user = User.objects.create_user(
-        username=f"ap_{numero_documento}",
-        email=datos['correo'],
-        first_name=datos['nombres'],
-        last_name=datos['apellidos'],
-        password=f"Sena{numero_documento[:4]}*",
-    )
-    perfil = user.perfil
-    perfil.rol = rol_estudiante
-    perfil.tipo_documento = datos['tipo_documento']
-    perfil.numero_documento = numero_documento
-    perfil.telefono = datos['telefono']
-    perfil.save()
+    numero_documento = str(datos['numero_documento']).strip()
+    user = User.objects.filter(Q(username=numero_documento) | Q(perfil__numero_documento=numero_documento)).first()
+    if not user:
+        user = User.objects.create_user(
+            username=numero_documento,
+            email=datos.get('correo') or f"{numero_documento}@colegio.edu.co",
+            first_name=datos['nombres'],
+            last_name=datos['apellidos'],
+            password=numero_documento,
+        )
+    perfil = getattr(user, 'perfil', None)
+    if not perfil:
+        perfil = PerfilUsuario.objects.create(usuario=user, rol=rol_estudiante, numero_documento=numero_documento)
+    else:
+        perfil.rol = rol_estudiante
+        perfil.tipo_documento = datos.get('tipo_documento', 'TI')
+        perfil.numero_documento = numero_documento
+        if datos.get('telefono'):
+            perfil.telefono = datos['telefono']
+        perfil.save()
+
     return Matricula.objects.create(
         ficha=ficha,
         aprendiz=user,
         grado_escolar=datos['grado_escolar'],
-        acudiente_nombre=datos['acudiente_nombre'],
-        acudiente_telefono=datos['acudiente_telefono'],
+        acudiente_nombre=datos.get('acudiente_nombre', ''),
+        acudiente_telefono=datos.get('acudiente_telefono', ''),
     )
 
 

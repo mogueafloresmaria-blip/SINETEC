@@ -1060,5 +1060,46 @@ class ComunicadoEscolar(models.Model):
         verbose_name_plural = "Comunicados Escolares"
         ordering = ['-fecha_creacion']
 
+    @property
+    def titulo(self):
+        return self.asunto
+
+    @property
+    def contenido(self):
+        return self.mensaje
+
     def __str__(self):
         return f"{self.asunto} [{self.get_estamento_destinatario_display()}]"
+
+
+class AcuseLecturaCircular(models.Model):
+    """
+    Registro y trazabilidad de apertura y acuse de lectura de circulares escolares
+    por docentes, estudiantes y familias destinatarias.
+    """
+    comunicado = models.ForeignKey(
+        ComunicadoEscolar,
+        on_delete=models.CASCADE,
+        related_name='acuses_lectura',
+        verbose_name="Circular Oficial"
+    )
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='acuses_circulares',
+        verbose_name="Usuario Lector"
+    )
+    fecha_lectura = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha y Hora de Apertura"
+    )
+
+    class Meta:
+        verbose_name = "Acuse de Lectura de Circular"
+        verbose_name_plural = "Acuses de Lectura de Circulares"
+        unique_together = ('comunicado', 'usuario')
+        ordering = ['-fecha_lectura']
+
+    def __str__(self):
+        nombre = self.usuario.get_full_name() or self.usuario.username
+        return f"{nombre} leyó '{self.comunicado.asunto}' ({self.fecha_lectura.strftime('%d/%m/%Y %H:%M')})"

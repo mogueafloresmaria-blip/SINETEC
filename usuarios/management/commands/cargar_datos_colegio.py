@@ -41,6 +41,9 @@ class Command(BaseCommand):
         self._pagos(alumnos)
         self._rutas()
 
+        from django.core.management import call_command
+        call_command('poblar_demostracion_edunova')
+
         self.stdout.write(self.style.SUCCESS(
             f'Datos escolares listos: {len(instituciones)} colegios, {len(programas)} cursos, '
             f'{len(docentes)} profesores y {len(alumnos)} alumnos.'

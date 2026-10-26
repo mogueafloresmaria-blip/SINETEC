@@ -239,7 +239,7 @@ def validar_propietario_o_coordinador(request, estudiante_user):
         raise PermissionDenied("Violación de Seguridad: Como docente, este estudiante no pertenece a ninguno de tus cursos asignados.")
 
     # 3. Familias y Acudientes (verificar asociación con el estudiante)
-    if any(r in rol_nombre for r in ['famili', 'acudiente']):
+    if any(r in rol_nombre for r in ['famili', 'acudiente']) or (hasattr(request, 'session') and (request.session.get('estudiante_fam_doc') or request.session.get('familia_id'))):
         from usuarios.models import FamiliaAcudiente
         doc_acudiente = perfil.numero_documento if perfil else ''
         identificadores = Q()
@@ -247,15 +247,24 @@ def validar_propietario_o_coordinador(request, estudiante_user):
         if doc_acudiente:
             identificadores |= Q(documento=doc_acudiente)
             tiene_identificador = True
-        if request.user.email:
+        if hasattr(request, 'user') and getattr(request.user, 'email', None):
             identificadores |= Q(email__iexact=request.user.email)
             tiene_identificador = True
-        es_hijo = tiene_identificador and FamiliaAcudiente.objects.filter(
-            identificadores,
-            estudiantes=estudiante_user,
-        ).exists()
-        if es_hijo:
+        if hasattr(request, 'session') and request.session.get('familia_id'):
+            identificadores |= Q(id=request.session.get('familia_id'))
+            tiene_identificador = True
+
+        # Validación por registro de FamiliaAcudiente
+        if tiene_identificador and FamiliaAcudiente.objects.filter(identificadores, estudiantes=estudiante_user).exists():
             return True
+
+        # Validación por sesión activa del estudiante consultado
+        if hasattr(request, 'session') and request.session.get('estudiante_fam_doc'):
+            doc_sesion = str(request.session.get('estudiante_fam_doc')).strip()
+            est_doc = str(getattr(getattr(estudiante_user, 'perfil', None), 'numero_documento', '')).strip()
+            if doc_sesion and (doc_sesion == est_doc or doc_sesion == estudiante_user.username):
+                return True
+
         raise PermissionDenied("Violación de Seguridad: No tienes autorización para consultar la información privada de este estudiante.")
 
     # 4. Estudiantes (únicamente su propio expediente)

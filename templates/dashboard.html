@@ -268,8 +268,14 @@
 
     <!-- ACCIONES EJECUTIVAS RESUMIDAS (SIN DUPLICAR EL MENÚ) -->
     <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-3 border-top" style="border-color: rgba(229, 223, 213, 0.7) !important;">
-      <a href="{% url 'matriculas_lista' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white shadow-2xs" style="background:var(--color-principal);border:none;">
-        <i class="bi bi-person-plus-fill me-1"></i> Nueva Matrícula
+      <a href="{% url 'crear_usuario' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white shadow-2xs" style="background:var(--color-principal);border:none;">
+        <i class="bi bi-person-fill-add me-1"></i> + Crear Usuario
+      </a>
+      <a href="{% url 'gestion_usuarios' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold bg-white text-dark border shadow-2xs" style="border-color:#E5DFD5;">
+        <i class="bi bi-people-fill me-1" style="color:var(--color-principal);"></i> Gestión de Usuarios
+      </a>
+      <a href="{% url 'matriculas_lista' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold bg-white text-dark border shadow-2xs" style="border-color:#E5DFD5;">
+        <i class="bi bi-person-plus-fill me-1" style="color:var(--color-principal);"></i> Nueva Matrícula
       </a>
       <a href="{% url 'redactar_circular' %}" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold bg-white text-dark border shadow-2xs" style="border-color:#E5DFD5;">
         <i class="bi bi-megaphone-fill me-1" style="color:var(--color-principal);"></i> Publicar Comunicado

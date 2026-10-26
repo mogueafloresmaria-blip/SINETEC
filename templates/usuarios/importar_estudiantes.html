@@ -32,13 +32,28 @@ body { background: #f3f5f9 !important; }
     </div>
     <div class="d-flex gap-2">
       <a href="{% url 'descargar_plantilla_estudiantes' %}" class="btn btn-warning fw-bold text-dark rounded-pill px-3 shadow-sm">
-        <i class="bi bi-download me-1"></i> Descargar Plantilla Oficial Excel
+        <i class="bi bi-download me-1"></i> Plantilla Excel (.xlsx)
       </a>
-      <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-light rounded-pill px-3">
-        <i class="bi bi-arrow-left me-1"></i> Volver a Estudiantes
+      <a href="{% url 'descargar_plantilla_estudiantes' %}?formato=csv" class="btn btn-outline-light rounded-pill px-3">
+        <i class="bi bi-filetype-csv me-1"></i> Plantilla CSV
+      </a>
+      <a href="{% url 'matriculas_lista' %}" class="btn btn-outline-light rounded-pill px-3">
+        <i class="bi bi-arrow-left me-1"></i> Volver a Matrículas
       </a>
     </div>
   </div>
+
+  {% if grado_sel %}
+  <div class="alert alert-info border-0 rounded-4 shadow-sm mb-4 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-mortarboard-fill fs-4 text-primary"></i>
+      <div>
+        <strong class="text-dark">Modo Grado Específico:</strong> Todos los estudiantes del archivo se asignarán automáticamente a <strong>Grado {{ grado_sel }}°</strong> si su fila no especifica otro grado.
+      </div>
+    </div>
+    <a href="{% url 'importar_estudiantes_masivo' %}" class="btn btn-sm btn-outline-secondary rounded-pill">Quitar filtro de grado</a>
+  </div>
+  {% endif %}
 
   {% if procesado %}
   <!-- RESULTADOS DEL PROCESAMIENTO -->
@@ -72,6 +87,33 @@ body { background: #f3f5f9 !important; }
         </div>
       </div>
 
+      {% if cuentas_creadas %}
+      <div class="alert alert-success border-0 rounded-3 mb-4">
+        <h6 class="fw-bold mb-2"><i class="bi bi-person-check-fill me-1"></i> Cuentas institucionales creadas y activadas ({{ cuentas_creadas|length }}):</h6>
+        <div class="table-responsive bg-white rounded-3 p-2 shadow-2xs border">
+          <table class="table table-sm table-hover mb-0" style="font-size: 0.84rem;">
+            <thead>
+              <tr class="text-muted">
+                <th>Estudiante</th>
+                <th>Usuario / Cédula</th>
+                <th>Estado de Acceso</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in cuentas_creadas %}
+              <tr>
+                <td class="fw-semibold">{{ c.nombre }}</td>
+                <td><code>{{ c.username }}</code></td>
+                <td><span class="badge bg-success-subtle text-success">Cuenta Activa</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <small class="text-muted mt-2 d-block">Cada estudiante accede a su propio panel ingresando con su número de identificación como usuario y contraseña inicial.</small>
+      </div>
+      {% endif %}
+
       {% if errores %}
       <div class="alert alert-warning border-0 rounded-3 mb-4">
         <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-1"></i> Detalle de incidencias encontradas:</h6>
@@ -84,11 +126,11 @@ body { background: #f3f5f9 !important; }
       {% endif %}
 
       <div class="d-flex justify-content-end gap-2">
-        <a href="{% url 'importar_estudiantes_masivo' %}" class="btn btn-outline-secondary rounded-pill px-3">
+        <a href="{% url 'importar_estudiantes_masivo' %}{% if grado_sel %}?grado={{ grado_sel }}{% endif %}" class="btn btn-outline-secondary rounded-pill px-3">
           Cargar otro archivo
         </a>
-        <a href="{% url 'estudiantes_lista' %}" class="btn btn-primary rounded-pill px-4 fw-bold">
-          Ver lista de estudiantes actualizada <i class="bi bi-arrow-right ms-1"></i>
+        <a href="{% url 'matriculas_lista' %}{% if grado_sel %}?grado={{ grado_sel }}{% endif %}" class="btn btn-primary rounded-pill px-4 fw-bold">
+          Ver matrículas actualizadas <i class="bi bi-arrow-right ms-1"></i>
         </a>
       </div>
     </div>
@@ -99,6 +141,30 @@ body { background: #f3f5f9 !important; }
   <div class="import-card p-4">
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
+      {% if grado_sel %}
+      <input type="hidden" name="grado" value="{{ grado_sel }}">
+      {% endif %}
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+          <label class="form-label fw-bold text-dark small mb-1">Grado escolar para esta carga:</label>
+          <select name="grado_form" class="form-select" style="font-size: 0.88rem;" onchange="if(this.value){ window.location.href='{% url 'importar_estudiantes_masivo' %}?grado=' + this.value; } else { window.location.href='{% url 'importar_estudiantes_masivo' %}'; }">
+            <option value="">-- Todos los grados (definido en archivo) --</option>
+            {% for g in grados_catalogo %}
+              <option value="{{ g.0 }}" {% if grado_sel == g.0 %}selected{% endif %}>{{ g.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+          <span class="text-muted small">Descargar formato compatible:</span><br>
+          <a href="{% url 'descargar_plantilla_estudiantes' %}{% if grado_sel %}?grado={{ grado_sel }}{% endif %}" class="btn btn-sm btn-outline-primary rounded-pill me-1">
+            <i class="bi bi-file-earmark-excel"></i> Excel (.xlsx)
+          </a>
+          <a href="{% url 'descargar_plantilla_estudiantes' %}?formato=csv{% if grado_sel %}&grado={{ grado_sel }}{% endif %}" class="btn btn-sm btn-outline-secondary rounded-pill">
+            <i class="bi bi-filetype-csv"></i> CSV
+          </a>
+        </div>
+      </div>
+
       <div class="mb-4">
         <label class="form-label fw-bold text-dark fs-6 mb-2">Selecciona el archivo Excel (.xlsx) o CSV con la información de los estudiantes:</label>
         <div class="dropzone-box" onclick="document.getElementById('inputArchivo').click();">
@@ -123,16 +189,16 @@ body { background: #f3f5f9 !important; }
           <div class="col-md-6">
             • <code>telefono</code>: Número de contacto<br>
             • <code>genero</code>: M / F<br>
-            • <code>grado</code>: 10, 11, 8, 9, etc.<br>
-            • <code>seccion</code>: A, B, etc.<br>
+            • <code>grado</code>: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 (o asignado automáticamente)<br>
+            • <code>seccion</code>: A, B, etc. (Default: A)<br>
             • <code>acudiente_nombre</code> y <code>acudiente_telefono</code>
           </div>
         </div>
       </div>
 
       <div class="d-flex justify-content-between align-items-center pt-2">
-        <a href="{% url 'descargar_plantilla_estudiantes' %}" class="btn btn-outline-primary rounded-pill px-3">
-          <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar formato modelo (.xlsx)
+        <a href="{% url 'descargar_plantilla_estudiantes' %}{% if grado_sel %}?grado={{ grado_sel }}{% endif %}" class="btn btn-outline-primary rounded-pill px-3">
+          <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar plantilla modelo
         </a>
         <button type="submit" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">
           <i class="bi bi-upload me-1"></i> Procesar y Guardar Estudiantes

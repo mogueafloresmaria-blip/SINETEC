@@ -39,9 +39,14 @@
                         <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">{{ tarea.estado }}</span>
                     </td>
                     <td class="px-6 py-4">
-                        <a href="{% url 'detalle_clase' tarea.carga_academica.id %}?tab=tareas" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1.5 rounded text-xs font-bold transition">
-                            Ver clase
-                        </a>
+                        <div class="d-flex align-items-center gap-1">
+                            <a href="{% url 'revisar_entregas_tarea' tarea.id %}" class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 text-xs fw-bold text-white shadow-xs" style="background-color: var(--color-principal); border: none;">
+                                <i class="bi bi-pencil-square me-1"></i> Revisar Entregas
+                            </a>
+                            <a href="{% url 'detalle_clase' tarea.carga_academica.id %}?tab=tareas" class="btn btn-sm btn-light border rounded-pill px-2 py-1 text-xs font-medium text-secondary">
+                                Ver clase
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}

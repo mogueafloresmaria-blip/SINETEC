@@ -99,6 +99,21 @@
                 <a href="?tipo=Horario{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Horario' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">
                     <i class="bi bi-clock-history me-1"></i> Horarios ({{ total_horarios }})
                 </a>
+                {% if total_cargas %}
+                <a href="?tipo=CargaAcademica{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'CargaAcademica' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    <i class="bi bi-book me-1"></i> Asignaciones ({{ total_cargas }})
+                </a>
+                {% endif %}
+                {% if total_fichas %}
+                <a href="?tipo=Ficha{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Ficha' %}btn-dark{% else %}btn-outline-dark{% endif %}">
+                    <i class="bi bi-folder me-1"></i> Fichas ({{ total_fichas }})
+                </a>
+                {% endif %}
+                {% if total_bitacoras %}
+                <a href="?tipo=Bitacora{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Bitacora' %}btn-info text-dark{% else %}btn-outline-info text-dark{% endif %}">
+                    <i class="bi bi-journal-check me-1"></i> Bitácoras ({{ total_bitacoras }})
+                </a>
+                {% endif %}
                 {% if total_comunicados %}
                 <a href="?tipo=Comunicado{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Comunicado' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
                     <i class="bi bi-envelope me-1"></i> Comunicados ({{ total_comunicados }})
@@ -180,6 +195,18 @@
                                     <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
                                         <i class="bi bi-envelope me-1"></i> Comunicado
                                     </span>
+                                {% elif item.tipo_objeto == 'CargaAcademica' %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                        <i class="bi bi-book me-1"></i> Asignación Docente
+                                    </span>
+                                {% elif item.tipo_objeto == 'Ficha' %}
+                                    <span class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                        <i class="bi bi-folder me-1"></i> Ficha Escolar
+                                    </span>
+                                {% elif item.tipo_objeto == 'Bitacora' %}
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                        <i class="bi bi-journal-check me-1"></i> Bitácora
+                                    </span>
                                 {% else %}
                                     <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1">
                                         {{ item.tipo_objeto }}
@@ -196,7 +223,14 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="text-dark fw-semibold"><i class="bi bi-person-circle me-1 text-muted"></i>{{ item.eliminado_por.get_full_name|default:item.eliminado_por.username|default:"Sistema" }}</span>
+                                <span class="text-dark fw-semibold">
+                                    <i class="bi bi-person-circle me-1 text-muted"></i>
+                                    {% if item.eliminado_por %}
+                                        {{ item.eliminado_por.get_full_name|default:item.eliminado_por.username }}
+                                    {% else %}
+                                        Sistema
+                                    {% endif %}
+                                </span>
                             </td>
                             <td>
                                 <span class="text-dark d-block">{{ item.fecha_eliminacion|date:"d/m/Y" }}</span>

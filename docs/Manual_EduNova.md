@@ -20,7 +20,7 @@
 - [7. OBTENCIÓN DEL CÓDIGO FUENTE Y ENTORNO VIRTUAL](#7-obtencion-del-codigo-fuente-y-entorno-virtual)
 - [8. GESTIÓN DE DEPENDENCIAS Y PAQUETES PYTHON](#8-gestion-de-dependencias-y-paquetes-python)
 - [9. CONFIGURACIÓN DE VARIABLES DE ENTORNO (.env)](#9-configuracion-de-variables-de-entorno-(.env))
-- [10. BASE DE DATOS MYSQL: INSTALACIÓN, CONFIGURACIÓN Y MIGRACIONES](#10-base-de-datos-mysql:-instalacion,-configuracion-y-migraciones)
+- [10. BASE DE DATOS MYSQL: CONFIGURACIÓN Y VERIFICACIÓN](#10-base-de-datos-mysql:-configuracion-y-verificacion)
 - [11. SERVIDOR DE APLICACIONES WSGI: GUNICORN Y SYSTEMD](#11-servidor-de-aplicaciones-wsgi:-gunicorn-y-systemd)
 - [12. SERVIDOR WEB INVERSO: NGINX Y DISTRIBUCIÓN DE TRÁFICO](#12-servidor-web-inverso:-nginx-y-distribucion-de-trafico)
 - [13. SEGURIDAD, CIFRADO SSL/HTTPS Y LET'S ENCRYPT](#13-seguridad,-cifrado-ssl/https-y-let's-encrypt)
@@ -91,7 +91,7 @@ Requisitos de Servidor Recomendados para Producción:
 • Memoria RAM: 2 GB RAM mínimo + 2 GB Swap (4 a 8 GB RAM recomendada).
 • Almacenamiento: 25 GB SSD NVMe con copias de seguridad periódicas.
 • Sistema Operativo: Ubuntu Server 22.04 LTS o 24.04 LTS (x86_64).
-• Motor de Base de Datos: MySQL Server 8.0.x / MariaDB 10.6+ con motor InnoDB.
+• Motor de Base de Datos: MySQL Server 8.0.x existente.
 • Intérprete de Lenguaje: Python 3.12+ o 3.13 con entorno virtual aislado (venv).
 • Servidor Web y Proxy Inverso: Nginx 1.18+.
 • Servidor de Aplicaciones WSGI: Gunicorn 21.x+ administrado por Systemd.
@@ -111,8 +111,8 @@ Gestiona un grupo de procesos worker concurrentes vinculados al socket Unix /run
 3. Capa de Lógica y Negocio (Django 5.x / Python 3.13):
 Ejecuta middleware de seguridad, validación de sesiones, protección anti-CSRF, reglas de negocio RBAC y renderizado de plantillas.
 
-4. Capa de Persistencia Transaccional (MySQL 8.0):
-Base de datos relacional con motor InnoDB, integridad referencial con claves foráneas y codificación utf8mb4_unicode_ci.
+4. Capa de Persistencia (MySQL 8.0):
+Base de datos relacional MySQL existente con motor InnoDB e integridad referencial.
 
 ---
 
@@ -121,10 +121,10 @@ Base de datos relacional con motor InnoDB, integridad referencial con claves for
 Paso 1: Actualización del sistema operativo:
 sudo apt update && sudo apt upgrade -y
 
-Paso 2: Instalación de herramientas de compilación, librerías de MySQL y servidor web:
+Paso 2: Instalación de herramientas, librerías de MySQL y servidor web:
 sudo apt install -y python3-pip python3-dev python3-venv build-essential \
     libssl-dev libffi-dev pkg-config default-libmysqlclient-dev \
-    nginx git curl supervisor ufw mysql-server
+    nginx git curl supervisor ufw
 
 Paso 3: Creación de usuario de sistema sin privilegios de inicio de sesión interactivo:
 sudo adduser --system --group --no-create-home edunova
@@ -156,10 +156,10 @@ pip install --upgrade pip setuptools wheel
 
 Instalación de dependencias básicas y de producción:
 pip install -r requirements.txt
-pip install gunicorn mysqlclient whitenoise python-decouple
+pip install gunicorn whitenoise python-decouple
 
 Verificación de instalación limpia:
-python -c 'import django, MySQLdb, gunicorn; print("Módulos OK")'
+python -c 'import django, pymysql, gunicorn; print("Módulos OK")'
 
 ---
 
@@ -177,36 +177,33 @@ DEBUG=False
 ALLOWED_HOSTS=edunova.institucion.edu.co,www.edunova.institucion.edu.co,127.0.0.1
 CSRF_TRUSTED_ORIGINS=https://edunova.institucion.edu.co,https://www.edunova.institucion.edu.co
 
-# Conexión a Base de Datos MySQL:
-DB_NAME=sinetec
-DB_USER=edunova_user
-DB_PASSWORD=ContraseñaUltraSegura_MySQL_2026*
-DB_HOST=127.0.0.1
+# Conexión a la instancia MySQL existente; conservar sus valores actuales:
+DB_NAME=<nombre_existente>
+DB_USER=<usuario_existente>
+DB_PASSWORD=<contraseña_existente>
+DB_HOST=localhost
 DB_PORT=3306
 
 # Aseguramiento de permisos:
 chmod 600 /var/www/edunova/.env
 chown edunova:www-data /var/www/edunova/.env
 
+### Cómo encontrar la configuración en Visual Studio Code
+
+La conexión de la aplicación no aparece en **Archivo > Preferencias > Configuración** de Visual Studio Code: esa pantalla contiene preferencias del editor. Para localizar la configuración efectiva de Django, abra `sinetec_project/settings.py` con **Ctrl+P** y revise `DATABASES`; el motor MySQL se configura con `DATABASE_URL` o con `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST` y `DB_PORT` en `.env`. No se deben copiar credenciales de ejemplo: conserve las de la instancia existente.
+
 ---
 
-## 10. BASE DE DATOS MYSQL: INSTALACIÓN, CONFIGURACIÓN Y MIGRACIONES
+## 10. BASE DE DATOS MYSQL: CONFIGURACIÓN Y VERIFICACIÓN
 
-Paso 1: Configuración de la base de datos en MySQL:
-sudo mysql -u root -p
+El proyecto se conecta a la instancia MySQL existente mediante `DATABASE_URL` o las variables `DB_*` de `.env`. No cree otra base de datos ni reemplace las credenciales configuradas.
 
--- En la consola MySQL:
-CREATE DATABASE sinetec CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'edunova_user'@'localhost' IDENTIFIED BY 'ContraseñaUltraSegura_MySQL_2026*';
-GRANT ALL PRIVILEGES ON sinetec.* TO 'edunova_user'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-
-Paso 2: Ejecución de migraciones y creación del superusuario:
+Verifique el motor activo y la conexión, sin modificar el esquema ni los datos:
 source /var/www/edunova/venv/bin/activate
 cd /var/www/edunova
-python manage.py migrate --noinput
-python manage.py createsuperuser
+python manage.py shell -c "from django.db import connection; connection.ensure_connection(); print(connection.vendor, connection.introspection.table_names())"
+
+El resultado debe indicar `mysql` y mostrar las tablas existentes. Este comando solo abre la conexión y consulta los nombres de tablas.
 
 ---
 
@@ -351,8 +348,9 @@ BACKUP_DIR="/var/backups/edunova"
 DATE=$(date +"%Y%m%d_%H%M%S")
 mkdir -p $BACKUP_DIR
 
-# Respaldo de MySQL
-mysqldump -u edunova_user -p'ContraseñaUltraSegura_MySQL_2026*' sinetec \
+# Respaldo de la instancia MySQL existente. DB_NAME debe ser el valor ya
+# configurado para la aplicación; no incluya credenciales en este script.
+mysqldump --defaults-extra-file=/etc/edunova/mysql-backup.cnf --databases "$DB_NAME" \
     | gzip > "$BACKUP_DIR/db_$DATE.sql.gz"
 
 # Respaldo de multimedia
@@ -361,8 +359,7 @@ tar -czf "$BACKUP_DIR/media_$DATE.tar.gz" /var/www/edunova/media
 # Rotación a 30 días
 find $BACKUP_DIR -type f -mtime +30 -delete
 
-Restauración en caso de desastre:
-gunzip < /var/backups/edunova/db_FECHA.sql.gz | mysql -u edunova_user -p sinetec
+Restauración en caso de desastre: detener la aplicación y seguir el procedimiento de recuperación de MySQL del administrador de la base. No importe un respaldo sobre la instancia activa sin autorización y verificación previas.
 tar -xzf /var/backups/edunova/media_FECHA.tar.gz -C /
 
 ---
@@ -381,9 +378,9 @@ Solución: Agregar 'https://midominio.com' a CSRF_TRUSTED_ORIGINS en .env y rein
 Causa: No se ejecutó collectstatic o la ruta de alias en Nginx es incorrecta.
 Solución: Ejecutar 'python manage.py collectstatic --noinput' y verificar directiva alias en Nginx.
 
-4. Error de conexión a base de datos (Can't connect to MySQL server):
-Causa: Servicio MySQL caído o credenciales en .env inválidas.
-Solución: 'sudo systemctl status mysql' y validar conexión con 'mysql -u edunova_user -p sinetec'.
+4. Error de conexión a MySQL:
+Causa: Servicio MySQL caído, credenciales inválidas o parámetros `DB_*`/`DATABASE_URL` incorrectos.
+Solución: verificar el servicio y los parámetros existentes sin imprimir contraseñas, y ejecutar `python manage.py shell -c "from django.db import connection; connection.ensure_connection(); print(connection.vendor)"`.
 
 ---
 

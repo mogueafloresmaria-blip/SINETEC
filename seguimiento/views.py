@@ -234,8 +234,11 @@ def control_asistencia(request):
         estados_validos = {'P', 'A', 'J', 'T'}
         materia_nombre = asignatura_sel.denominacion if asignatura_sel else 'Matemáticas'
         with transaction.atomic():
+            guardados = 0
             for matricula in matriculas:
-                estado = request.POST.get(f'asistencia_{matricula.pk}', 'P')
+                estado = request.POST.get(f'asistencia_{matricula.pk}')
+                if not estado:
+                    continue
                 obs_indiv = request.POST.get(f'obs_{matricula.pk}', '').strip()
                 obs_final = f"[{materia_nombre}] {obs_indiv}" if obs_indiv else f"[{materia_nombre}]"
                 if estado in estados_validos:
@@ -244,7 +247,8 @@ def control_asistencia(request):
                         fecha=fecha,
                         defaults={'estado': estado, 'observaciones': obs_final, 'registrado_por': request.user},
                     )
-        messages.success(request, f'¡Asistencia escolar del {fecha:%d/%m/%Y} guardada correctamente para {len(matriculas)} estudiantes en {materia_nombre} (Grado {ficha.codigo_ficha})!')
+                    guardados += 1
+        messages.success(request, f'¡Asistencia escolar del {fecha:%d/%m/%Y} procesada ({guardados} registros actualizados) en {materia_nombre} (Grado {ficha.codigo_ficha})!')
         asig_param = f"&asignatura={asignatura_sel.pk}" if asignatura_sel else ""
         return redirect(f'/seguimiento/asistencia/?ficha={ficha.pk}&fecha={fecha.isoformat()}{asig_param}')
 
@@ -280,14 +284,16 @@ def control_asistencia(request):
         fecha__month=m_act
     )
     resumen_mensual_estudiantes = []
+    from seguimiento.services import calcular_alertas_asistencia
     for mat in matriculas:
         asists_est = asists_mes_global.filter(matricula=mat)
         tot_dias = asists_est.count()
         p_est = asists_est.filter(estado='P').count()
         a_est = asists_est.filter(estado='A').count()
         t_est = asists_est.filter(estado='T').count()
-        j_est = asists_est.filter(estado='J').count()
-        pct = round((p_est / tot_dias * 100), 1) if tot_dias > 0 else 100.0
+        j_est = asists_est.filter(estado__in=['J', 'E']).count()
+        pct = round(((p_est + t_est * 0.5 + j_est) / tot_dias * 100), 1) if tot_dias > 0 else None
+        alertas_est = calcular_alertas_asistencia(mat, fecha_referencia=fecha)
         resumen_mensual_estudiantes.append({
             'matricula': mat,
             'total_sesiones': tot_dias,
@@ -295,7 +301,9 @@ def control_asistencia(request):
             'ausentes': a_est,
             'tardanzas': t_est,
             'excusas': j_est,
-            'porcentaje': pct
+            'porcentaje': pct,
+            'alertas': alertas_est['alertas'],
+            'estado_resumen': alertas_est['estado_resumen'],
         })
 
     # Historial reciente de sesiones grupales
@@ -310,9 +318,9 @@ def control_asistencia(request):
             p = asists_dia.filter(estado='P').count()
             a = asists_dia.filter(estado='A').count()
             t = asists_dia.filter(estado='T').count()
-            j = asists_dia.filter(estado='J').count()
+            j = asists_dia.filter(estado__in=['J', 'E']).count()
             primera_asist = asists_dia.first()
-            docente_nom = primera_asist.registrado_por.get_full_name() if primera_asist and primera_asist.registrado_por else "Prof. Javier Mendoza"
+            docente_nom = primera_asist.registrado_por.get_full_name() if primera_asist and primera_asist.registrado_por else "Docente Titular"
             materia_hist = "Matemáticas"
             if primera_asist and primera_asist.observaciones and '[' in primera_asist.observaciones and ']' in primera_asist.observaciones:
                 materia_hist = primera_asist.observaciones.split('[')[1].split(']')[0]
@@ -328,13 +336,14 @@ def control_asistencia(request):
                 'ausentes': a,
                 'tardanzas': t,
                 'excusas': j,
-                'porcentaje': round((p / tot * 100), 1) if tot > 0 else 0
+                'porcentaje': round(((p + t * 0.5 + j) / tot * 100), 1) if tot > 0 else 0
             })
 
     total_p = sum(1 for e in asistencias.values() if e == 'P')
     total_a = sum(1 for e in asistencias.values() if e == 'A')
     total_t = sum(1 for e in asistencias.values() if e == 'T')
-    total_j = sum(1 for e in asistencias.values() if e == 'J')
+    total_j = sum(1 for e in asistencias.values() if e in ['J', 'E'])
+    total_pend = max(0, len(matriculas) - (total_p + total_a + total_t + total_j))
 
     return render(request, 'seguimiento/asistencia.html', {
         'fichas': fichas,
@@ -348,6 +357,7 @@ def control_asistencia(request):
         'total_ausentes': total_a,
         'total_tardanzas': total_t,
         'total_excusas': total_j,
+        'total_pendientes': total_pend,
         'historial_reciente': historial_reciente,
         'historial_asistencias_qs': historial_asistencias_qs[:100],
         'resumen_mensual_estudiantes': resumen_mensual_estudiantes,
@@ -355,7 +365,7 @@ def control_asistencia(request):
         'estudiante_filtro': estudiante_filtro,
         'estado_filtro': estado_filtro,
         'filas_asistencia': [
-            {'matricula': matricula, 'estado': asistencias.get(matricula.pk, 'P')}
+            {'matricula': matricula, 'estado': asistencias.get(matricula.pk, '')}
             for matricula in matriculas
         ],
         'puede_llamar_asistencia': puede_llamar_asistencia,

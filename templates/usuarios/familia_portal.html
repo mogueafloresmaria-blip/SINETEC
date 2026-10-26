@@ -117,25 +117,75 @@
         <div class="family-welcome-card">
             <h1 class="family-welcome-title">Bienvenido al Panel de<br>Familia</h1>
             <p class="family-welcome-text">Introduce el número de documento de tu hijo o hija</p>
-            {% if not acudiente %}
+            {% if not acudiente and not hijos_qs %}
             <div class="alert alert-warning py-2 px-3 small rounded-3 mb-3 text-center">
                 <i class="bi bi-info-circle me-1"></i> Sin estudiantes asociados directamente
             </div>
             {% endif %}
-            <form method="GET" action="{% url 'familia_portal' %}">
-                <input type="text" class="family-input" name="documento" placeholder="Número de documento" required autofocus>
-                <button type="submit" class="family-btn">Consultar estudiante</button>
+
+            <form method="GET" action="{% url 'familia_portal' %}" id="formConsultaFamilia">
+                <input type="text" class="family-input" id="inputDocumentoFamilia" name="documento" placeholder="Número de documento del estudiante" required autofocus>
+                <button type="submit" class="family-btn">
+                    <i class="bi bi-search me-1"></i> Consultar estudiante
+                </button>
             </form>
+
+            {% if hijos_qs %}
+            <div class="mt-4 pt-3 border-top text-start">
+                <div class="small fw-bold text-muted text-uppercase mb-2 text-center" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                    <i class="bi bi-people-fill me-1 text-primary"></i> Estudiantes Vinculados a su Familia
+                </div>
+                <div class="d-flex flex-wrap justify-content-center gap-2">
+                    {% for hijo in hijos_qs %}
+                    <a href="{% url 'familia_portal' %}?documento={{ hijo.perfil.numero_documento|default:hijo.username }}" 
+                       class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 shadow-xs d-inline-flex align-items-center gap-2 bg-white"
+                       title="Consultar expediente de {{ hijo.get_full_name|default:hijo.username }}">
+                        <i class="bi bi-person-fill text-primary"></i>
+                        <span class="fw-semibold text-dark">{{ hijo.get_full_name|default:hijo.username }}</span>
+                        <span class="badge bg-light text-secondary border small">{{ hijo.perfil.numero_documento|default:hijo.username }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
     {% else %}
     <!-- Encabezado Edunova Pro (Simplificado) -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h3 fw-bold text-dark mb-0">EDUNOVA PRO - PANEL FAMILIA</h2>
-        <a href="{% url 'familia_portal' %}?clear=1" class="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm bg-white">
-            <i class="bi bi-search me-1"></i> Consultar otro estudiante
-        </a>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-0">EDUNOVA · PORTAL FAMILIA</h2>
+            <small class="text-muted">Consulta académica individualizada por estudiante</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{% url 'familia_portal' %}?clear=1" class="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm bg-white">
+                <i class="bi bi-arrow-left me-1"></i> Consultar otro estudiante
+            </a>
+        </div>
     </div>
+
+    {% if hijos_qs and hijos_qs.count > 1 %}
+    <!-- Selector rápido entre hermanos vinculados sin mezclar información -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-person-lines-fill text-primary fs-5"></i>
+                <span class="small fw-bold text-muted text-uppercase">Estudiantes de la familia:</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                {% for hijo in hijos_qs %}
+                <a href="{% url 'familia_portal' %}?documento={{ hijo.perfil.numero_documento|default:hijo.username }}" 
+                   class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold {% if estudiante_sel.id == hijo.id %}btn-primary text-white{% else %}btn-outline-secondary bg-white text-dark{% endif %} shadow-xs">
+                    {{ hijo.get_full_name|default:hijo.username }}
+                    <span class="badge {% if estudiante_sel.id == hijo.id %}bg-white text-primary{% else %}bg-light text-secondary border{% endif %} ms-1 small">
+                        {{ hijo.perfil.numero_documento|default:hijo.username }}
+                    </span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Listado de Hijos a Cargo -->
     {% if hijos_data %}
@@ -148,8 +198,11 @@
                             <h5 class="fw-bold text-muted text-uppercase small mb-3">Perfil del estudiante</h5>
                             <div class="d-flex flex-wrap align-items-start gap-4">
                                 {% if item.estudiante.perfil.foto_perfil %}
-                                <div class="rounded-3 shadow-sm" style="width: 100px; height: 100px; overflow: hidden;">
-                                    <img src="{{ item.estudiante.perfil.foto_perfil.url }}" alt="Foto" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div class="rounded-3 shadow-sm position-relative" style="width: 100px; height: 100px; overflow: hidden; background: #f8fafc; border: 2px solid var(--color-acento);">
+                                    <img src="{{ item.estudiante.perfil.foto_perfil.url }}" alt="Fotografía de {{ item.estudiante.get_full_name|default:item.estudiante.username }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; document.getElementById('foto_fb_{{ item.estudiante.id }}').style.display='flex';">
+                                    <div id="foto_fb_{{ item.estudiante.id }}" class="align-items-center justify-content-center text-white fw-bold fs-1 w-100 h-100" style="display: none; background: linear-gradient(135deg, var(--color-principal), var(--color-secundario));">
+                                        {{ item.estudiante.first_name|default:item.estudiante.username|slice:":1"|upper }}
+                                    </div>
                                 </div>
                                 {% else %}
                                 <div class="rounded-3 d-flex align-items-center justify-content-center text-white fw-bold fs-1 shadow-sm" style="width: 100px; height: 100px; background: linear-gradient(135deg, var(--color-principal), var(--color-secundario));">
@@ -160,17 +213,7 @@
                                     <h3 class="fw-bold mb-2 text-dark">Nombre: {{ item.estudiante.get_full_name|default:item.estudiante.username }}</h3>
                                     <div class="fs-5 text-muted mb-1">Documento: <span class="fw-bold text-dark">{{ item.estudiante.perfil.numero_documento|default:"N/A" }}</span></div>
                                     <div class="fs-5 text-muted mb-1">Grado: <span class="fw-bold text-dark">{% if item.matricula %}{{ item.matricula.get_grado_escolar_display }}{% else %}N/A{% endif %}</span></div>
-                                    <div class="fs-5 text-muted mb-3">Grupo: <span class="fw-bold text-dark">{% if item.matricula %}{{ item.matricula.get_grado_escolar_display }}-{{ item.matricula.seccion }}{% else %}N/A{% endif %}</span></div>
-                                    
-                                    <div class="d-flex flex-wrap gap-2 mt-3">
-                                        <a href="{% url 'familia_matricula' %}" class="btn btn-outline-secondary fw-bold rounded-pill px-3 shadow-sm">Matrícula</a>
-                                        <a href="{% url 'familia_boletines' %}" class="btn btn-outline-primary fw-bold rounded-pill px-3 shadow-sm">Boletín / calificaciones</a>
-                                        <a href="{% url 'familia_asistencia' %}" class="btn btn-outline-success fw-bold rounded-pill px-3 shadow-sm">Asistencia</a>
-                                        <a href="{% url 'mensajeria' %}" class="btn btn-outline-info fw-bold rounded-pill px-3 shadow-sm">Comunicaciones</a>
-                                        {% if item.estudiante.perfil %}
-                                            <a href="{% url 'estudiantes_boletin_pdf' item.estudiante.perfil.pk %}" class="btn btn-primary fw-bold rounded-pill px-3 shadow-sm" target="_blank">PDF Oficial</a>
-                                        {% endif %}
-                                    </div>
+                                    <div class="fs-5 text-muted mb-1">Grupo: <span class="fw-bold text-dark">{% if item.matricula %}{{ item.matricula.get_grado_escolar_display }}-{{ item.matricula.seccion }}{% else %}N/A{% endif %}</span></div>
                                 </div>
                             </div>
                         </div>

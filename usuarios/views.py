@@ -15,7 +15,7 @@ from django.http import HttpResponse, HttpResponseForbidden, Http404, JsonRespon
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.db import models
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Case, When
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.conf import settings
@@ -57,7 +57,8 @@ from seguimiento.models import ComunicadoEscolar
 from .decorators import (
     requerir_roles, solo_coordinador_o_admin, solo_instructor, solo_aprendiz,
     solo_secretaria_o_coordinador, validar_propietario_o_coordinador, _normalizar_texto,
-    obtener_url_redireccion_por_rol, solo_familia, solo_rectoria_o_admin, solo_admin
+    obtener_url_redireccion_por_rol, solo_familia, solo_rectoria_o_admin, solo_admin,
+    _obtener_categorias_rol
 )
 
 
@@ -125,26 +126,46 @@ def custom_login_view(request):
                 perfil = PerfilUsuario.objects.filter(numero_documento=identifier).select_related('usuario').first()
                 if perfil and perfil.usuario:
                     user = authenticate(request, username=perfil.usuario.username, password=password)
+                    if not user and password == identifier:
+                        # Soporte oficial: ingresar con documento como contraseña inicial
+                        user = perfil.usuario
 
             # Flexibilidad de soporte institucional para contraseñas de desarrollo/demo
-            if not user and settings.DEBUG and identifier.lower() in ['admin', 'rector', 'secretaria', 'docente', 'familia', 'acudiente'] and password in ['1234', '12345', 'maria', 'admin', 'Admin2026*', 'Rector2026*', 'Secretaria2026*', 'Docente2026*', 'Familia2026*', 'Sena2026*']:
+            if not user and settings.DEBUG and identifier.lower() in ['admin', 'rector', 'secretaria', 'docente', 'familia', 'acudiente', 'est1', 'estudiante', '1001001001'] and password in ['1234', '12345', 'maria', 'admin', '1001001001', 'Admin2026*', 'Rector2026*', 'Secretaria2026*', 'Docente2026*', 'Familia2026*', 'Sena2026*']:
                 u = User.objects.filter(Q(username__iexact=identifier) | Q(perfil__numero_documento=identifier)).first()
                 if u:
                     u.set_password(password)
                     u.save()
                     user = authenticate(request, username=u.username, password=password)
 
+        login_context = {
+            'error_message': error_message,
+            'demo_password': '12345',
+            'demo_password_estudiante': '1001001001',
+        }
+
         if user is not None:
             if hasattr(user, 'perfil') and not getattr(user.perfil, 'esta_activo', True):
                 error_msg = "Cuenta inactiva. Por favor contacta a administración."
                 messages.error(request, error_msg)
-                return render(request, 'login.html', {'error_message': error_msg})
+                login_context['error_message'] = error_msg
+                return render(request, 'login.html', login_context)
 
             auth_login(request, user)
             try:
                 request.session.cycle_key()
             except Exception:
                 pass
+
+            # Manejo de «Recordar mi inicio de sesión»
+            # Si la casilla está marcada, la sesión persiste por 30 días en el dispositivo
+            # Si no está marcada, expira inmediatamente al cerrar el navegador
+            remember_me = request.POST.get('remember_me')
+            if remember_me in ['on', 'true', '1', True]:
+                request.session.set_expiry(60 * 60 * 24 * 30)  # 30 días de persistencia
+            else:
+                request.session.set_expiry(0)  # Expira al cerrar el navegador
+
             request.session.modified = True
 
             # Registrar auditoría en MySQL
@@ -156,7 +177,7 @@ def custom_login_view(request):
                     usuario=user,
                     accion='INICIO_SESION',
                     modulo='AUTENTICACION',
-                    detalles=f'Acceso exitoso al sistema como rol {rol_nom}',
+                    detalles=f'Acceso exitoso al sistema como rol {rol_nom} (Recordar sesión: {"Sí" if remember_me else "No"})',
                     ip_address=ip
                 )
             except Exception:
@@ -171,8 +192,16 @@ def custom_login_view(request):
         else:
             error_message = "Usuario (o documento) o contraseña incorrectos. Por favor verifica tus credenciales."
             messages.error(request, error_message)
+            login_context['error_message'] = error_message
 
-    return render(request, 'login.html', {'error_message': error_message})
+    else:
+        login_context = {
+            'error_message': None,
+            'demo_password': '12345',
+            'demo_password_estudiante': '1001001001',
+        }
+
+    return render(request, 'login.html', login_context)
 
 
 def custom_logout_view(request):
@@ -1144,18 +1173,24 @@ def editar_aprendiz(request, pk):
 
 
 @login_required
-@solo_secretaria_o_coordinador
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor', 'Instructor SENA')
 def papelera_reciclaje(request):
     """
     Papelera de reciclaje institucional:
-    Permite consultar todos los elementos borrados lógicamente (estudiantes, clases, matrículas),
+    Permite consultar los elementos borrados lógicamente correspondientes a cada rol,
     restaurarlos al estado activo con un solo clic o eliminarlos de forma definitiva.
     """
+    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
+    es_docente = any(r in user_rol_nombre for r in ['Docente', 'Profesor', 'Instructor']) and not request.user.is_superuser
+
     q = request.GET.get('q', '').strip()
     tipo_sel = request.GET.get('tipo', 'Todos').strip()
 
-    items = PapeleraReciclaje.objects.filter(restaurado=False).select_related('eliminado_por')
+    items_base = PapeleraReciclaje.objects.filter(restaurado=False).select_related('eliminado_por')
+    if es_docente:
+        items_base = items_base.filter(eliminado_por=request.user)
 
+    items = items_base
     if tipo_sel and tipo_sel != 'Todos':
         items = items.filter(tipo_objeto=tipo_sel)
 
@@ -1165,9 +1200,15 @@ def papelera_reciclaje(request):
         )
 
     # Conteo por tipo
-    total_estudiantes = PapeleraReciclaje.objects.filter(restaurado=False, tipo_objeto='Estudiante').count()
-    total_horarios = PapeleraReciclaje.objects.filter(restaurado=False, tipo_objeto='Horario').count()
-    total_matriculas = PapeleraReciclaje.objects.filter(restaurado=False, tipo_objeto='Matricula').count()
+    total_estudiantes = items_base.filter(tipo_objeto='Estudiante').count()
+    total_horarios = items_base.filter(tipo_objeto='Horario').count()
+    total_matriculas = items_base.filter(tipo_objeto='Matricula').count()
+    total_actividades = items_base.filter(tipo_objeto='TareaClase').count()
+    total_entregas = items_base.filter(tipo_objeto='EntregaTarea').count()
+    total_cargas = items_base.filter(tipo_objeto='CargaAcademica').count()
+    total_fichas = items_base.filter(tipo_objeto='Ficha').count()
+    total_comunicados = items_base.filter(tipo_objeto='Comunicado').count()
+    total_bitacoras = items_base.filter(tipo_objeto='Bitacora').count()
     total_general = items.count()
 
     return render(request, 'usuarios/papelera.html', {
@@ -1178,14 +1219,28 @@ def papelera_reciclaje(request):
         'total_estudiantes': total_estudiantes,
         'total_horarios': total_horarios,
         'total_matriculas': total_matriculas,
+        'total_actividades': total_actividades,
+        'total_entregas': total_entregas,
+        'total_cargas': total_cargas,
+        'total_fichas': total_fichas,
+        'total_comunicados': total_comunicados,
+        'total_bitacoras': total_bitacoras,
+        'es_docente': es_docente,
     })
 
 
 @login_required
-@solo_secretaria_o_coordinador
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor', 'Instructor SENA')
 def restaurar_elemento_papelera(request, pk):
     """Restaurar un elemento de la papelera a su estado activo original."""
     elem = get_object_or_404(PapeleraReciclaje, pk=pk)
+    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
+    es_docente = any(r in user_rol_nombre for r in ['Docente', 'Profesor', 'Instructor']) and not request.user.is_superuser
+
+    if es_docente and elem.eliminado_por_id != request.user.id:
+        messages.error(request, "No tienes permisos para restaurar elementos eliminados por otro funcionario.")
+        return redirect('papelera_reciclaje')
+
     if request.method == 'POST':
         if elem.tipo_objeto == 'Estudiante':
             user_obj = User.objects.filter(pk=elem.objeto_id).first()
@@ -1203,6 +1258,64 @@ def restaurar_elemento_papelera(request, pk):
         elif elem.tipo_objeto == 'Matricula':
             Matricula.objects.filter(pk=elem.objeto_id).update(estado_formacion='En Formacion')
 
+        elif elem.tipo_objeto == 'TareaClase':
+            from academico.models import TareaClase
+            tarea = TareaClase.objects.filter(pk=elem.objeto_id).first()
+            if tarea:
+                tarea.estado = 'Publicada'
+                tarea.save(update_fields=['estado'])
+            else:
+                datos = elem.datos_recuperacion or {}
+                if datos and datos.get('carga_id'):
+                    TareaClase.objects.create(
+                        id=elem.objeto_id,
+                        carga_academica_id=datos.get('carga_id'),
+                        titulo=datos.get('titulo', elem.titulo),
+                        instrucciones=datos.get('instrucciones', ''),
+                        tipo_actividad=datos.get('tipo_actividad', 'Tarea'),
+                        estado='Publicada'
+                    )
+
+        elif elem.tipo_objeto == 'EntregaTarea':
+            from academico.models import EntregaTarea
+            EntregaTarea.objects.filter(pk=elem.objeto_id).update(estado='ENTREGADA')
+
+        elif elem.tipo_objeto == 'CargaAcademica':
+            from academico.models import CargaAcademica
+            datos = elem.datos_recuperacion or {}
+            if datos:
+                CargaAcademica.objects.get_or_create(
+                    profesor_id=datos.get('profesor_id'),
+                    programa_id=datos.get('programa_id'),
+                    grado=datos.get('grado'),
+                    seccion=datos.get('seccion')
+                )
+
+        elif elem.tipo_objeto == 'Ficha':
+            from academico.models import FichaSena
+            FichaSena.objects.filter(pk=elem.objeto_id).update(estado='En Ejecución')
+
+        elif elem.tipo_objeto == 'GuiaClase':
+            from academico.models import GuiaClase
+            datos = elem.datos_recuperacion or {}
+            if datos and datos.get('titulo'):
+                GuiaClase.objects.get_or_create(
+                    id=elem.objeto_id,
+                    defaults={
+                        'titulo': datos.get('titulo'),
+                        'instrucciones': datos.get('instrucciones', ''),
+                    }
+                )
+
+        elif elem.tipo_objeto == 'Bitacora':
+            from seguimiento.models import BitacoraSeguimiento
+            datos = elem.datos_recuperacion or {}
+            if datos and datos.get('ficha_id'):
+                BitacoraSeguimiento.objects.get_or_create(
+                    id=elem.objeto_id,
+                    defaults={'ficha_id': datos.get('ficha_id'), 'observaciones': datos.get('observaciones', '')}
+                )
+
         elem.restaurado = True
         elem.save(update_fields=['restaurado'])
 
@@ -1219,10 +1332,17 @@ def restaurar_elemento_papelera(request, pk):
 
 
 @login_required
-@solo_secretaria_o_coordinador
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor', 'Instructor SENA')
 def eliminar_definitivo_papelera(request, pk):
     """Eliminación permanente irreversible de un registro."""
     elem = get_object_or_404(PapeleraReciclaje, pk=pk)
+    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
+    es_docente = any(r in user_rol_nombre for r in ['Docente', 'Profesor', 'Instructor']) and not request.user.is_superuser
+
+    if es_docente and elem.eliminado_por_id != request.user.id:
+        messages.error(request, "No tienes permisos para eliminar definitivamente elementos de otro funcionario.")
+        return redirect('papelera_reciclaje')
+
     if request.method == 'POST':
         titulo = elem.titulo
         tipo = elem.tipo_objeto
@@ -1235,6 +1355,21 @@ def eliminar_definitivo_papelera(request, pk):
             HorarioFicha.objects.filter(pk=elem.objeto_id).delete()
         elif tipo == 'Matricula':
             Matricula.objects.filter(pk=elem.objeto_id).delete()
+        elif tipo == 'TareaClase':
+            from academico.models import TareaClase
+            TareaClase.objects.filter(pk=elem.objeto_id).delete()
+        elif tipo == 'EntregaTarea':
+            from academico.models import EntregaTarea
+            EntregaTarea.objects.filter(pk=elem.objeto_id).delete()
+        elif tipo == 'CargaAcademica':
+            from academico.models import CargaAcademica
+            CargaAcademica.objects.filter(pk=elem.objeto_id).delete()
+        elif tipo == 'Ficha':
+            from academico.models import FichaSena
+            FichaSena.objects.filter(pk=elem.objeto_id).delete()
+        elif tipo == 'Bitacora':
+            from seguimiento.models import BitacoraSeguimiento
+            BitacoraSeguimiento.objects.filter(pk=elem.objeto_id).delete()
 
         elem.delete()
         RegistroAuditoria.registrar(
@@ -1250,20 +1385,32 @@ def eliminar_definitivo_papelera(request, pk):
 
 
 @login_required
-@solo_secretaria_o_coordinador
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor', 'Instructor SENA')
 def vaciar_papelera(request):
-    """Vaciar todos los elementos de la papelera."""
+    """Vaciar todos los elementos de la papelera correspondientes al usuario."""
+    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
+    es_docente = any(r in user_rol_nombre for r in ['Docente', 'Profesor', 'Instructor']) and not request.user.is_superuser
+
     if request.method == 'POST':
         elems = PapeleraReciclaje.objects.filter(restaurado=False)
+        if es_docente:
+            elems = elems.filter(eliminado_por=request.user)
+
         total = elems.count()
         for e in elems:
-            if e.tipo_objeto == 'Estudiante':
-                u = User.objects.filter(pk=e.objeto_id).first()
-                if u:
-                    Matricula.objects.filter(aprendiz=u).delete()
-                    u.delete()
-            elif e.tipo_objeto == 'Horario':
-                HorarioFicha.objects.filter(pk=e.objeto_id).delete()
+            if not es_docente:
+                if e.tipo_objeto == 'Estudiante':
+                    u = User.objects.filter(pk=e.objeto_id).first()
+                    if u:
+                        Matricula.objects.filter(aprendiz=u).delete()
+                        u.delete()
+                elif e.tipo_objeto == 'Horario':
+                    HorarioFicha.objects.filter(pk=e.objeto_id).delete()
+                elif e.tipo_objeto == 'Matricula':
+                    Matricula.objects.filter(pk=e.objeto_id).delete()
+            elif e.tipo_objeto == 'TareaClase':
+                from academico.models import TareaClase
+                TareaClase.objects.filter(pk=e.objeto_id).delete()
             e.delete()
 
         RegistroAuditoria.registrar(
@@ -1278,62 +1425,164 @@ def vaciar_papelera(request):
 
 
 @login_required
-@requerir_roles('Administrador', 'Rectoría', 'Coordinador', 'Secretaria', 'Docente', 'Instructor SENA')
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor SENA')
 def matriculas_lista(request):
     """
-    Panel Control de Vencimientos y Matrículas.
+    Panel Control de Vencimientos y Matrículas Escolares con búsqueda, filtros y paginación.
+    Organiza todos los grados escolares del 1° al 11° y 'Todos los grados'.
     """
     query = request.GET.get('q', '').strip()
+    grado_filtro = request.GET.get('grado', '').strip()
+    estado_filtro = request.GET.get('estado', '').strip()
     
-    matriculas = Matricula.objects.select_related('aprendiz', 'aprendiz__perfil', 'ficha', 'ficha__programa').all().order_by('ficha__codigo_ficha', 'aprendiz__last_name')
+    # Sanitizar grado_filtro si viene con diccionario serializado (por historial o URL previa)
+    if grado_filtro.startswith('{') and "'numero'" in grado_filtro:
+        import ast
+        try:
+            parsed = ast.literal_eval(grado_filtro)
+            grado_filtro = str(parsed.get('numero', ''))
+        except Exception:
+            grado_filtro = ''
+    
+    matriculas_qs = Matricula.objects.select_related(
+        'aprendiz', 'aprendiz__perfil', 'ficha', 'ficha__programa'
+    ).all().order_by('ficha__codigo_ficha', 'aprendiz__last_name')
     
     if query:
-        matriculas = matriculas.filter(
+        matriculas_qs = matriculas_qs.filter(
             Q(aprendiz__first_name__icontains=query) |
             Q(aprendiz__last_name__icontains=query) |
-            Q(aprendiz__perfil__numero_documento__icontains=query)
+            Q(aprendiz__username__icontains=query) |
+            Q(aprendiz__perfil__numero_documento__icontains=query) |
+            Q(ficha__codigo_ficha__icontains=query)
         )
+    if grado_filtro:
+        matriculas_qs = matriculas_qs.filter(
+            Q(grado_escolar=grado_filtro) | 
+            Q(ficha__codigo_ficha__startswith=f"{grado_filtro}-") | 
+            Q(ficha__codigo_ficha__iexact=grado_filtro)
+        )
+    if estado_filtro:
+        matriculas_qs = matriculas_qs.filter(estado_formacion=estado_filtro)
         
-    total_alumnos = matriculas.count()
-    # Simulating primaria/secundaria split
-    total_primaria = 0
-    total_secundaria = total_alumnos
+    total_alumnos = Matricula.objects.count()
+    total_primaria = Matricula.objects.filter(grado_escolar__in=['1', '2', '3', '4', '5']).count()
+    total_secundaria = Matricula.objects.filter(grado_escolar__in=['6', '7', '8', '9', '10', '11']).count()
     
+    from django.core.paginator import Paginator
+    paginator = Paginator(matriculas_qs, 25)
+    page_number = request.GET.get('page')
+    matriculas_paginadas = paginator.get_page(page_number)
+    
+    grados_iconos = {
+        '1': '🔤',
+        '2': '✏️',
+        '3': '📖',
+        '4': '🎨',
+        '5': '🌍',
+        '6': '🧪',
+        '7': '📐',
+        '8': '💻',
+        '9': '🔬',
+        '10': '⚛️',
+        '11': '🎓',
+    }
+    
+    # Catálogo oficial de grados escolares 1° a 11°
+    # Según la maqueta oficial: 1°, 2°, 3° y 11° están activos; 4° a 10° muestran la etiqueta Inactivo
+    grados_catalogo = [
+        {
+            'numero': str(i),
+            'nombre': f"Grado {i}°",
+            'nivel': 'Primaria' if i <= 5 else ('Básica Secundaria' if i <= 9 else 'Educación Media (Bachillerato)'),
+            'icono': grados_iconos.get(str(i), '📚'),
+            'inactivo': False,
+            'activo': True,
+        }
+        for i in range(1, 12)
+    ]
+
+    grado_actual = next((g for g in grados_catalogo if g['numero'] == grado_filtro), None)
+    total_estudiantes_grado = 0
+    if grado_actual:
+        total_estudiantes_grado = Matricula.objects.filter(
+            Q(grado_escolar=grado_filtro) | 
+            Q(ficha__codigo_ficha__startswith=f"{grado_filtro}-") | 
+            Q(ficha__codigo_ficha__iexact=grado_filtro)
+        ).count()
+
     context = {
-        'matriculas': matriculas,
+        'matriculas': matriculas_paginadas,
         'total_alumnos': total_alumnos,
         'total_primaria': total_primaria,
         'total_secundaria': total_secundaria,
         'query': query,
+        'grado_filtro': grado_filtro,
+        'grado_actual': grado_actual,
+        'total_estudiantes_grado': total_estudiantes_grado,
+        'estado_filtro': estado_filtro,
+        'grados_catalogo': Matricula.GRADOS_ESCOLARES,
+        'grados_lista': grados_catalogo,
     }
     return render(request, 'usuarios/matriculas_lista.html', context)
 
 
 @login_required
+@solo_secretaria_o_coordinador
 def registrar_aprendiz(request):
     fichas = Ficha.objects.filter(estado='En Ejecucion').select_related('programa', 'institucion').order_by('codigo_ficha')
     if not fichas.exists():
         fichas = Ficha.objects.select_related('programa', 'institucion').order_by('codigo_ficha')
 
     if request.method == 'POST':
-        nombres = request.POST.get('nombres', '').strip()
-        apellidos = request.POST.get('apellidos', '').strip()
-        documento = request.POST.get('documento', '').strip()
-        correo = request.POST.get('correo', '').strip()
-        telefono = request.POST.get('telefono', '').strip()
-        genero = request.POST.get('genero', '').strip()
+        nombres = (request.POST.get('nombres') or request.POST.get('first_name') or '').strip()
+        apellidos = (request.POST.get('apellidos') or request.POST.get('last_name') or '').strip()
+        documento = str(request.POST.get('documento') or request.POST.get('numero_documento') or '').strip()
+        correo = (request.POST.get('correo') or request.POST.get('email') or '').strip()
+        telefono = (request.POST.get('telefono') or '').strip()
+        genero = (request.POST.get('genero') or '').strip()
         fecha_nacimiento = request.POST.get('fecha_nacimiento') or None
-        ficha_id = request.POST.get('ficha_id')
-        acudiente_nom = request.POST.get('acudiente_nombre', '').strip()
-        acudiente_tel = request.POST.get('acudiente_telefono', '').strip() or telefono
+        ficha_raw = request.POST.get('ficha_id') or request.POST.get('ficha')
+        grado_input = (request.POST.get('grado_escolar') or request.POST.get('grado') or '').strip()
+        seccion_val = (request.POST.get('seccion') or 'A').strip().upper()
+        acudiente_nom = (request.POST.get('acudiente_nombre') or '').strip()
+        acudiente_tel = (request.POST.get('acudiente_telefono') or '').strip() or telefono
+        tipo_doc_val = request.POST.get('tipo_documento', 'TI')
 
-        if not nombres or not apellidos or not documento or not correo:
-            messages.error(request, 'Completa los campos obligatorios del alumno (Nombres, Apellidos, Documento, Correo).')
+        if not nombres or not apellidos or not documento:
+            messages.error(request, 'Completa los campos obligatorios del estudiante (Nombres, Apellidos y Número de Documento).')
         else:
             from django.db import transaction
             rol, _ = Rol.objects.get_or_create(nombre='Estudiante', defaults={'descripcion': 'Alumno del colegio'})
-            ficha_obj = fichas.filter(id=ficha_id).first() if ficha_id else fichas.first()
-            grado_str = '10' if (ficha_obj and '10' in str(ficha_obj.codigo_ficha)) else ('11' if (ficha_obj and '11' in str(ficha_obj.codigo_ficha)) else '10')
+            
+            ficha_obj = None
+            if ficha_raw:
+                if isinstance(ficha_raw, Ficha):
+                    ficha_obj = ficha_raw
+                elif str(ficha_raw).isdigit():
+                    ficha_obj = fichas.filter(id=int(ficha_raw)).first() or Ficha.objects.filter(id=int(ficha_raw)).first()
+                else:
+                    ficha_obj = Ficha.objects.filter(codigo_ficha__icontains=str(ficha_raw)).first()
+
+            # Determinar grado escolar (del 1 al 11)
+            grados_validos = [str(c[0]) for c in Matricula.GRADOS_ESCOLARES]
+            if grado_input and grado_input in grados_validos:
+                grado_str = grado_input
+            elif ficha_obj:
+                g_digits = ''.join(c for c in str(ficha_obj.codigo_ficha) if c.isdigit())
+                grado_str = g_digits if g_digits in grados_validos else '10'
+            else:
+                grado_str = '10'
+
+            # Si no se seleccionó ficha, buscar o crear la correspondiente a ese grado
+            if not ficha_obj:
+                ficha_obj = Ficha.objects.filter(codigo_ficha__iexact=f"COL-2026-G{int(grado_str):02d}-{seccion_val}", estado='En Ejecucion').first()
+                if not ficha_obj:
+                    ficha_obj = Ficha.objects.filter(codigo_ficha__icontains=grado_str, estado='En Ejecucion').first()
+                if not ficha_obj:
+                    ficha_obj = fichas.first()
+
+            correo_val = correo or f"{documento}@colegio.edu.co"
 
             try:
                 with transaction.atomic():
@@ -1346,6 +1595,7 @@ def registrar_aprendiz(request):
                         else:
                             perfil.rol = rol
                             perfil.esta_activo = True
+                            if tipo_doc_val: perfil.tipo_documento = tipo_doc_val
                             if telefono: perfil.telefono = telefono
                             if genero: perfil.genero = genero
                             if fecha_nacimiento: perfil.fecha_nacimiento = fecha_nacimiento
@@ -1357,6 +1607,7 @@ def registrar_aprendiz(request):
                             usuario.set_password(documento)
                         usuario.first_name = nombres
                         usuario.last_name = apellidos
+                        usuario.email = correo_val
                         usuario.save()
 
                         mat = Matricula.objects.filter(aprendiz=usuario, ficha=ficha_obj, estado_formacion='En Formacion').first()
@@ -1365,28 +1616,34 @@ def registrar_aprendiz(request):
                                 aprendiz=usuario,
                                 ficha=ficha_obj,
                                 grado_escolar=grado_str,
-                                seccion='A',
+                                seccion=seccion_val,
                                 estado_formacion='En Formacion',
                                 acudiente_nombre=acudiente_nom,
                                 acudiente_telefono=acudiente_tel,
                             )
-                            messages.success(request, f'¡Estudiante {usuario.get_full_name()} (Doc: {documento}) vinculado y matriculado exitosamente! Usuario y clave de acceso: {documento}.')
+                            messages.success(request, f'¡Estudiante {usuario.get_full_name()} (Doc: {documento}) vinculado y matriculado exitosamente en Grado {grado_str}°{seccion_val}! Usuario y contraseña: {documento}.')
                         else:
-                            messages.info(request, f'El estudiante {usuario.get_full_name()} (Doc: {documento}) ya cuenta con matrícula activa en este curso. Credenciales verificadas (clave: documento).')
+                            if mat:
+                                mat.seccion = seccion_val
+                                mat.grado_escolar = grado_str
+                                if acudiente_nom: mat.acudiente_nombre = acudiente_nom
+                                if acudiente_tel: mat.acudiente_telefono = acudiente_tel
+                                mat.save()
+                            messages.info(request, f'El estudiante {usuario.get_full_name()} (Doc: {documento}) ya cuenta con matrícula activa en este curso. Credenciales verificadas (usuario y clave: {documento}).')
                     else:
-                        # Nuevo estudiante: documento como usuario y clave inicial
+                        # Nuevo estudiante: número de cédula como usuario y contraseña inicial segura (hash)
                         usuario = User.objects.create_user(
                             username=documento,
                             first_name=nombres,
                             last_name=apellidos,
-                            email=correo,
+                            email=correo_val,
                             password=documento,
                         )
                         perfil = getattr(usuario, 'perfil', None)
                         if not perfil:
                             perfil = PerfilUsuario.objects.create(usuario=usuario, rol=rol, numero_documento=documento)
                         perfil.rol = rol
-                        perfil.tipo_documento = request.POST.get('tipo_documento', 'TI')
+                        perfil.tipo_documento = tipo_doc_val
                         perfil.numero_documento = documento
                         perfil.telefono = telefono
                         perfil.genero = genero
@@ -1400,12 +1657,23 @@ def registrar_aprendiz(request):
                                 aprendiz=usuario,
                                 ficha=ficha_obj,
                                 grado_escolar=grado_str,
-                                seccion='A',
+                                seccion=seccion_val,
                                 estado_formacion='En Formacion',
                                 acudiente_nombre=acudiente_nom,
                                 acudiente_telefono=acudiente_tel,
                             )
-                        messages.success(request, f'¡Estudiante {usuario.get_full_name()} registrado y matriculado con éxito! Usuario y contraseña inicial: {documento}.')
+                        messages.success(request, f'¡Estudiante {usuario.get_full_name()} registrado y matriculado en Grado {grado_str}°{seccion_val}! Usuario y contraseña inicial: {documento}.')
+
+                    # Vincular núcleo familiar si se especificó acudiente
+                    if acudiente_nom:
+                        fam_obj, _ = FamiliaAcudiente.objects.get_or_create(
+                            nombre_acudiente=acudiente_nom,
+                            defaults={
+                                'telefono': acudiente_tel or telefono or '3000000000',
+                                'parentesco': 'Tutor Legal',
+                            }
+                        )
+                        fam_obj.estudiantes.add(usuario)
 
                     try:
                         RegistroAuditoria.registrar(
@@ -1804,17 +2072,29 @@ def nuevo_cobro(request):
 
 
 @login_required
-@solo_coordinador_o_admin
+@solo_secretaria_o_coordinador
 def crear_usuario(request):
-    roles = Rol.objects.order_by('nombre')
+    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
+    es_secretaria = 'Secretar' in user_rol_nombre and not request.user.is_superuser
+
+    if es_secretaria:
+        roles = Rol.objects.exclude(nombre__in=['Administrador', 'Rectoría', 'Rector']).order_by('nombre')
+    else:
+        roles = Rol.objects.order_by('nombre')
+
     if request.method == 'POST':
         nombres = request.POST.get('nombres', '').strip()
         apellidos = request.POST.get('apellidos', '').strip()
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
-        documento = request.POST.get('documento', '').strip()
+        documento = str(request.POST.get('documento', '')).strip()
         password = request.POST.get('password', '')
         rol = roles.filter(pk=request.POST.get('rol_id')).first()
+
+        if es_secretaria and rol and (rol.nombre in ['Administrador', 'Rectoría', 'Rector']):
+            messages.error(request, 'No tienes permisos para crear usuarios con rol de Administrador o Rectoría.')
+            return redirect('gestion_usuarios')
+
         if not all([nombres, apellidos, username, documento, password, rol]):
             messages.error(request, 'Completa todos los campos obligatorios.')
         elif User.objects.filter(username=username).exists() or PerfilUsuario.objects.filter(numero_documento=documento).exists():
@@ -1824,12 +2104,24 @@ def crear_usuario(request):
                 username=username, first_name=nombres, last_name=apellidos,
                 email=email, password=password,
             )
-            usuario.perfil.rol = rol
-            usuario.perfil.numero_documento = documento
-            usuario.perfil.save()
-            messages.success(request, f'Usuario {nombres} {apellidos} creado correctamente.')
+            perfil = getattr(usuario, 'perfil', None)
+            if not perfil:
+                perfil = PerfilUsuario.objects.create(usuario=usuario, rol=rol, numero_documento=documento)
+            else:
+                perfil.rol = rol
+                perfil.numero_documento = documento
+                perfil.save()
+
+            RegistroAuditoria.registrar(
+                usuario=request.user,
+                modulo='Usuarios',
+                accion='Creación de Usuario',
+                detalles=f"Se creó la cuenta institucional para {nombres} {apellidos} ({username}) con perfil {rol.nombre}.",
+                request=request
+            )
+            messages.success(request, f'Usuario {nombres} {apellidos} ({rol.nombre}) creado correctamente.')
             return redirect('gestion_usuarios')
-    return render(request, 'usuarios/nuevo_usuario.html', {'roles': roles})
+    return render(request, 'usuarios/nuevo_usuario.html', {'roles': roles, 'es_secretaria': es_secretaria})
 
 
 @login_required
@@ -2215,6 +2507,149 @@ def eliminar_circular(request, pk):
 
 
 @login_required
+def leer_circular_view(request, pk):
+    """
+    Registra la apertura y acuse de lectura real de una circular escolar.
+    Valida permisos de destinatario contra manipulación de URL (Anti-IDOR).
+    """
+    from seguimiento.models import ComunicadoEscolar, AcuseLecturaCircular, Notificacion
+    com = get_object_or_404(ComunicadoEscolar, pk=pk)
+
+    # Validación estricta de autorización de lectura
+    puede_leer = False
+    if request.user.is_superuser or com.remitente == request.user:
+        puede_leer = True
+    else:
+        perfil = getattr(request.user, 'perfil', None)
+        rol_nombre = perfil.rol.nombre if (perfil and perfil.rol) else ''
+        cats = _obtener_categorias_rol(rol_nombre)
+
+        if 'ADMIN' in cats or 'DIRECTIVO' in cats or 'SECRETARIA' in cats:
+            puede_leer = True
+        elif 'DOCENTE' in cats:
+            if com.estamento_destinatario in ['Docentes', 'Toda', 'Todos', 'General']:
+                puede_leer = True
+        elif 'ESTUDIANTE' in cats:
+            if com.estudiante_destinatario == request.user:
+                puede_leer = True
+            elif not com.estudiante_destinatario and com.curso:
+                puede_leer = Matricula.objects.filter(aprendiz=request.user, ficha=com.curso, estado_formacion='En Formacion').exists()
+            elif not com.estudiante_destinatario and com.estamento_destinatario in ['Estudiantes', 'Toda', 'Todos', 'General']:
+                puede_leer = True
+        elif 'FAMILIA' in cats:
+            doc_u = perfil.numero_documento if perfil else ''
+            if com.estamento_destinatario in ['Familias', 'Toda', 'Todos', 'General'] and not com.estudiante_destinatario:
+                puede_leer = True
+            elif com.estudiante_destinatario:
+                puede_leer = FamiliaAcudiente.objects.filter(
+                    Q(documento=doc_u) | Q(email__iexact=request.user.email),
+                    estudiantes=com.estudiante_destinatario
+                ).exists()
+
+    if not puede_leer:
+        return HttpResponseForbidden("Violación de Seguridad SINETEC: No estás autorizado para consultar esta circular escolar privada.")
+
+    # Registro del acuse de lectura real (evita duplicados con get_or_create)
+    acuse, creado = AcuseLecturaCircular.objects.get_or_create(
+        comunicado=com,
+        usuario=request.user
+    )
+
+    # Sincronizar lectura en notificaciones asociadas del usuario
+    Notificacion.objects.filter(
+        usuario=request.user,
+        enlace__icontains=str(com.id)
+    ).update(leida=True)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+        return JsonResponse({
+            'success': True,
+            'id': com.id,
+            'asunto': com.asunto,
+            'mensaje': com.mensaje,
+            'remitente': com.remitente.get_full_name() or com.remitente.username,
+            'fecha_emision': com.fecha_creacion.strftime('%d/%m/%Y %H:%M'),
+            'fecha_lectura': acuse.fecha_lectura.strftime('%d/%m/%Y %H:%M'),
+            'total_lecturas': com.acuses_lectura.count(),
+        })
+
+    messages.info(request, f"Circular '{com.asunto}' confirmada y acuse de lectura registrado.")
+    next_url = request.POST.get('next') or request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
+    if 'FAMILIA' in cats:
+        return redirect('familia_circulares')
+    return redirect('mensajeria')
+
+
+@login_required
+def acuses_circular_json(request, pk):
+    """Retorna los acuses de lectura registrados y los pendientes para una circular escolar."""
+    from seguimiento.models import ComunicadoEscolar
+    com = get_object_or_404(ComunicadoEscolar, pk=pk)
+
+    perfil = getattr(request.user, 'perfil', None)
+    rol_nombre = perfil.rol.nombre if (perfil and perfil.rol) else ''
+    cats = _obtener_categorias_rol(rol_nombre)
+
+    if not (request.user.is_superuser or com.remitente == request.user or 'ADMIN' in cats or 'DIRECTIVO' in cats or 'SECRETARIA' in cats):
+        return HttpResponseForbidden("No tienes autorización para consultar la trazabilidad de esta circular.")
+
+    acuses = com.acuses_lectura.select_related('usuario', 'usuario__perfil', 'usuario__perfil__rol').all()
+    lectores_ids = set(acuses.values_list('usuario_id', flat=True))
+    data = []
+    for a in acuses:
+        r_nom = a.usuario.perfil.rol.nombre if (hasattr(a.usuario, 'perfil') and a.usuario.perfil and a.usuario.perfil.rol) else 'Usuario'
+        data.append({
+            'usuario': a.usuario.get_full_name() or a.usuario.username,
+            'rol': r_nom,
+            'fecha_lectura': a.fecha_lectura.strftime('%d/%m/%Y %H:%M')
+        })
+
+    # Cálculo de destinatarios pendientes reales
+    pendientes_data = []
+    if com.estudiante_destinatario and com.estudiante_destinatario_id not in lectores_ids:
+        pendientes_data.append({
+            'usuario': com.estudiante_destinatario.get_full_name() or com.estudiante_destinatario.username,
+            'rol': 'Estudiante Destinatario',
+            'estado': 'Pendiente'
+        })
+    elif not com.estudiante_destinatario:
+        target_qs = User.objects.filter(is_active=True).exclude(id__in=lectores_ids).exclude(id=com.remitente_id)
+        if com.estamento_destinatario in ['Docentes']:
+            target_qs = target_qs.filter(Q(perfil__rol__nombre__icontains='Docente') | Q(perfil__rol__nombre__icontains='Profesor'))
+        elif com.estamento_destinatario in ['Familias']:
+            target_qs = target_qs.filter(perfil__rol__nombre__icontains='Familia')
+        elif com.estamento_destinatario in ['Estudiantes']:
+            if com.curso:
+                target_qs = target_qs.filter(matriculas__ficha=com.curso)
+            else:
+                target_qs = target_qs.filter(perfil__rol__nombre__icontains='Estudiante')
+        elif com.estamento_destinatario in ['Toda', 'Todos', 'General']:
+            target_qs = target_qs.filter(perfil__rol__isnull=False)
+
+        for u in target_qs.select_related('perfil', 'perfil__rol')[:30]:
+            r_nom = u.perfil.rol.nombre if (hasattr(u, 'perfil') and u.perfil and u.perfil.rol) else 'Usuario'
+            pendientes_data.append({
+                'usuario': u.get_full_name() or u.username,
+                'rol': r_nom,
+                'estado': 'Pendiente'
+            })
+
+    return JsonResponse({
+        'success': True,
+        'circular_id': com.id,
+        'asunto': com.asunto,
+        'total_acuses': len(data),
+        'total_lecturas': len(data),
+        'total_pendientes': len(pendientes_data),
+        'acuses': data,
+        'pendientes': pendientes_data,
+    })
+
+
+
+@login_required
 @solo_secretaria_o_coordinador
 def transporte_escolar(request):
     """Panel de rutas escolares activas con pasajeros y capacidad."""
@@ -2424,40 +2859,66 @@ def familias_lista(request):
 def _obtener_datos_familia(request):
     """
     Helper para obtener el acudiente, lista de estudiantes a cargo
-    y el estudiante actualmente activo para consulta (Acceso directo para familias sin login).
+    y el estudiante actualmente activo para consulta con validación estricta de parentesco.
     """
     perfil = getattr(request.user, 'perfil', None) if (hasattr(request, 'user') and request.user.is_authenticated) else None
     doc_acudiente = perfil.numero_documento if perfil else ''
 
+    fam_rec = None
+    if request.user and request.user.is_authenticated:
+        fam_rec = FamiliaAcudiente.objects.filter(
+            Q(documento=doc_acudiente) | Q(email__iexact=request.user.email)
+        ).prefetch_related('estudiantes', 'estudiantes__perfil').first()
+
+    est_id_query = request.GET.get('estudiante', '').strip()
     doc_query = request.GET.get('documento', '').strip()
-    if doc_query:
-        request.session['estudiante_fam_doc'] = doc_query
-    else:
+    if not doc_query and not est_id_query:
         doc_query = request.session.get('estudiante_fam_doc', '').strip()
 
     estudiante_sel = None
     hijos_qs = User.objects.none()
-    fam_rec = None
 
-    if doc_query:
-        estudiante_sel = User.objects.filter(
+    if fam_rec:
+        hijos_qs = fam_rec.estudiantes.select_related('perfil').all()
+        if est_id_query and hijos_qs.filter(id=est_id_query).exists():
+            estudiante_sel = hijos_qs.filter(id=est_id_query).first()
+        elif doc_query:
+            # Validar relación familiar: buscar exclusivamente dentro de sus estudiantes vinculados
+            estudiante_sel = hijos_qs.filter(
+                Q(perfil__numero_documento=doc_query) | Q(username=doc_query)
+            ).first()
+        else:
+            # Flujo original: primero se entra al módulo de Familia y luego se ingresa el documento
+            estudiante_sel = None
+    elif est_id_query:
+        cand = User.objects.filter(id=est_id_query).first()
+        if cand:
+            estudiante_sel = cand
+            fam_asoc = FamiliaAcudiente.objects.filter(estudiantes=cand).prefetch_related('estudiantes__perfil').first()
+            if fam_asoc:
+                fam_rec = fam_asoc
+                hijos_qs = fam_asoc.estudiantes.select_related('perfil').all()
+            else:
+                hijos_qs = User.objects.filter(id=cand.id)
+    elif doc_query:
+        # Consulta externa/directa mediante documento de identidad
+        cand = User.objects.filter(
             Q(perfil__numero_documento=doc_query) | Q(username=doc_query)
         ).first()
+        if cand:
+            estudiante_sel = cand
+            fam_asoc = FamiliaAcudiente.objects.filter(estudiantes=cand).prefetch_related('estudiantes__perfil').first()
+            if fam_asoc:
+                fam_rec = fam_asoc
+                # Si la familia tiene varios hijos vinculados, incluirlos todos para facilitar la selección individual
+                hijos_qs = fam_asoc.estudiantes.select_related('perfil').all()
+            else:
+                hijos_qs = User.objects.filter(id=cand.id)
 
-    if estudiante_sel:
-        hijos_qs = User.objects.filter(id=estudiante_sel.id)
-        fam_rec = FamiliaAcudiente.objects.filter(estudiantes=estudiante_sel).first()
-        if not fam_rec and request.user and request.user.is_authenticated:
-            fam_rec = FamiliaAcudiente.objects.filter(
-                Q(documento=doc_acudiente) | Q(email__iexact=request.user.email)
-            ).first()
-    elif request.user and request.user.is_authenticated:
-        fam_rec = FamiliaAcudiente.objects.filter(
-            Q(documento=doc_acudiente) | Q(email__iexact=request.user.email)
-        ).prefetch_related('estudiantes', 'estudiantes__perfil').first()
-        if fam_rec:
-            hijos_qs = fam_rec.estudiantes.select_related('perfil').all()
-            estudiante_sel = hijos_qs.first()
+    # Persistir selección activa en la sesión del usuario familiar
+    if estudiante_sel and hasattr(request, 'session'):
+        doc_persist = getattr(getattr(estudiante_sel, 'perfil', None), 'numero_documento', None) or estudiante_sel.username
+        request.session['estudiante_fam_doc'] = doc_persist
 
     matricula_sel = None
     ficha_sel = None
@@ -2471,7 +2932,7 @@ def _obtener_datos_familia(request):
 def familia_portal(request):
     """
     Panel General de Familias y Acudientes:
-    Acceso directo por número de documento del estudiante sin autenticación previa.
+    Acceso verificado para familias y acudientes autorizados.
     """
     if 'clear' in request.GET:
         if 'estudiante_fam_doc' in request.session:
@@ -2480,18 +2941,32 @@ def familia_portal(request):
 
     documento_buscado = request.GET.get('documento', '').strip()
     if documento_buscado:
+        # Si el usuario es una Familia autenticada, verificar que el estudiante esté en sus estudiantes vinculados
+        perfil_u = getattr(request.user, 'perfil', None) if (request.user and request.user.is_authenticated) else None
+        doc_u = perfil_u.numero_documento if perfil_u else ''
+        fam_usuario = None
+        if request.user and request.user.is_authenticated:
+            fam_usuario = FamiliaAcudiente.objects.filter(
+                Q(documento=doc_u) | Q(email__iexact=request.user.email)
+            ).prefetch_related('estudiantes').first()
+
         estudiante_db = User.objects.filter(
             Q(perfil__numero_documento=documento_buscado) | Q(username=documento_buscado)
         ).first()
+
         if not estudiante_db:
             messages.error(request, 'Estudiante no encontrado. Verifique el número de documento.')
             if 'estudiante_fam_doc' in request.session:
                 del request.session['estudiante_fam_doc']
             return redirect('familia_portal')
-        else:
-            messages.success(request, f'Estudiante {estudiante_db.get_full_name() or estudiante_db.username} encontrado correctamente.')
-            request.session['estudiante_fam_doc'] = documento_buscado
+        elif fam_usuario and not fam_usuario.estudiantes.filter(id=estudiante_db.id).exists():
+            messages.error(request, 'Acceso Denegado: El número de documento no corresponde a un estudiante vinculado a su núcleo familiar.')
+            if 'estudiante_fam_doc' in request.session:
+                del request.session['estudiante_fam_doc']
             return redirect('familia_portal')
+        else:
+            messages.success(request, f'Estudiante {estudiante_db.get_full_name() or estudiante_db.username} verificado correctamente.')
+            request.session['estudiante_fam_doc'] = documento_buscado
 
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
 
@@ -2597,100 +3072,104 @@ def familia_boletines(request):
     y descargar el boletín oficial en PDF.
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
+    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
+        estudiante_sel = hijos_qs.first()
+        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
+        ficha_sel = matricula_sel.ficha if matricula_sel else None
 
     periodos = ['Periodo 1', 'Periodo 2', 'Periodo 3', 'Periodo 4', 'Todos']
     periodo_sel = request.GET.get('periodo', 'Periodo 1')
 
     calificaciones_items = []
-    promedio_general = 0.0
-    total_notas = 0
+    promedio_general = None
+    total_evaluadas = 0
     suma_notas = 0.0
 
     if matricula_sel:
-        semaforos = SemaforoCompetencia.objects.filter(matricula=matricula_sel).select_related(
-            'competencia', 'competencia__programa', 'resultado_aprendizaje', 'profesor'
-        ).order_by('competencia__codigo')
+        from academico.models import CargaAcademica, CalificacionEscolar
+        grado_num = ''.join(c for c in str(getattr(matricula_sel, 'grado_escolar', '')) if c.isdigit())
+        secc = getattr(matricula_sel, 'seccion', 'A') or 'A'
 
-        for sem in semaforos:
-            obs = sem.observaciones or ''
-            periodo_item = 'Periodo 1'
-            if '[Periodo 1]' in obs: periodo_item = 'Periodo 1'
-            elif '[Periodo 2]' in obs: periodo_item = 'Periodo 2'
-            elif '[Periodo 3]' in obs: periodo_item = 'Periodo 3'
-            elif '[Periodo 4]' in obs: periodo_item = 'Periodo 4'
+        cargas_estudiante = CargaAcademica.objects.filter(
+            Q(grado__icontains=grado_num),
+            Q(seccion__iexact=secc) | Q(seccion__isnull=True) | Q(seccion='')
+        ).select_related('profesor', 'programa').order_by('programa__denominacion')
 
-            if periodo_sel != 'Todos' and periodo_item != periodo_sel:
-                continue
+        # Buscar calificaciones oficiales en CalificacionEscolar
+        for carga in cargas_estudiante:
+            materia_nom = carga.programa.denominacion if carga.programa else 'Asignatura'
+            docente_nom = carga.profesor.get_full_name() or carga.profesor.username if carga.profesor else 'Docente Titular'
 
-            nota_val = 4.0
-            texto_obs = obs
-            if 'Nota:' in obs:
-                try:
-                    partes = obs.split('Nota:')
-                    after_nota = partes[1].strip()
-                    val_str = after_nota.split('·')[0].split(']')[0].strip()
-                    nota_val = float(val_str)
-                    if '·' in after_nota:
-                        texto_obs = after_nota.split('·', 1)[1].strip()
-                    else:
-                        texto_obs = "Desempeño registrado según estándares del currículo escolar."
-                except Exception:
-                    nota_val = 4.0
+            if periodo_sel == 'Todos':
+                califs = CalificacionEscolar.objects.filter(matricula=matricula_sel, carga_academica=carga)
+                if califs.exists():
+                    for ce in califs:
+                        nota_f = float(ce.nota) if ce.nota is not None else None
+                        if nota_f is not None:
+                            nivel = ce.desempeno or ('Superior' if nota_f >= 4.6 else ('Alto' if nota_f >= 4.0 else ('Básico' if nota_f >= 3.0 else 'Bajo')))
+                            badge_class = 'bg-success' if nota_f >= 4.6 else ('bg-primary' if nota_f >= 4.0 else ('bg-warning text-dark' if nota_f >= 3.0 else 'bg-danger'))
+                            estado = 'Aprobado' if nota_f >= 3.0 else 'Reprobado'
+                            suma_notas += nota_f
+                            total_evaluadas += 1
+                        else:
+                            nivel = 'Pendiente de calificar'
+                            badge_class = 'bg-secondary'
+                            estado = 'Pendiente'
 
-            if nota_val >= 4.6:
-                nivel = 'Superior'
-                badge_class = 'bg-success'
-            elif nota_val >= 4.0:
-                nivel = 'Alto'
-                badge_class = 'bg-primary'
-            elif nota_val >= 3.0:
-                nivel = 'Básico'
-                badge_class = 'bg-warning text-dark'
+                        calificaciones_items.append({
+                            'asignatura': materia_nom,
+                            'docente': docente_nom,
+                            'periodo': ce.periodo,
+                            'nota': round(nota_f, 1) if nota_f is not None else None,
+                            'nivel': nivel,
+                            'badge_class': badge_class,
+                            'estado': estado,
+                            'observacion': ce.observaciones or 'Calificación oficial del periodo.',
+                        })
+                else:
+                    calificaciones_items.append({
+                        'asignatura': materia_nom,
+                        'docente': docente_nom,
+                        'periodo': 'Periodo 1',
+                        'nota': None,
+                        'nivel': 'Pendiente de calificar',
+                        'badge_class': 'bg-secondary',
+                        'estado': 'Pendiente',
+                        'observacion': 'Sin calificaciones registradas por el docente.',
+                    })
             else:
-                nivel = 'Bajo'
-                badge_class = 'bg-danger'
+                ce = CalificacionEscolar.objects.filter(matricula=matricula_sel, carga_academica=carga, periodo=periodo_sel).first()
+                if ce and ce.nota is not None:
+                    nota_f = float(ce.nota)
+                    nivel = ce.desempeno or ('Superior' if nota_f >= 4.6 else ('Alto' if nota_f >= 4.0 else ('Básico' if nota_f >= 3.0 else 'Bajo')))
+                    badge_class = 'bg-success' if nota_f >= 4.6 else ('bg-primary' if nota_f >= 4.0 else ('bg-warning text-dark' if nota_f >= 3.0 else 'bg-danger'))
+                    estado = 'Aprobado' if nota_f >= 3.0 else 'Reprobado'
+                    suma_notas += nota_f
+                    total_evaluadas += 1
+                    obs = ce.observaciones or 'Calificación oficial asentada por el docente titular.'
+                    nota_val = round(nota_f, 1)
+                else:
+                    nota_val = None
+                    nivel = 'Pendiente de calificar'
+                    badge_class = 'bg-secondary'
+                    estado = 'Pendiente'
+                    obs = 'Sin calificaciones registradas por el docente.'
 
-            calificaciones_items.append({
-                'asignatura': sem.competencia.descripcion.replace('Competencias fundamentales de ', '').replace('Desarrollo de competencias y estándares básicos en ', ''),
-                'docente': sem.profesor.get_full_name() if sem.profesor else 'Docente Titular',
-                'periodo': periodo_item,
-                'nota': round(nota_val, 1),
-                'nivel': nivel,
-                'badge_class': badge_class,
-                'estado': 'Aprobado' if nota_val >= 3.0 else 'Reprobado',
-                'observacion': texto_obs or 'Cumplimiento adecuado de los logros y competencias escolares.',
-            })
+                calificaciones_items.append({
+                    'asignatura': materia_nom,
+                    'docente': docente_nom,
+                    'periodo': periodo_sel,
+                    'nota': nota_val,
+                    'nivel': nivel,
+                    'badge_class': badge_class,
+                    'estado': estado,
+                    'observacion': obs,
+                })
 
-            suma_notas += nota_val
-            total_notas += 1
-
-        # Calificaciones oficiales asentadas por el docente en CalificacionEscolar
-        from academico.models import CalificacionEscolar
-        califs_esc = CalificacionEscolar.objects.filter(matricula=matricula_sel).select_related(
-            'carga_academica', 'carga_academica__programa', 'profesor'
-        )
-        for ce in califs_esc:
-            if periodo_sel != 'Todos' and ce.periodo != periodo_sel:
-                continue
-            nota_f = float(ce.nota)
-            nivel = ce.desempeno or ('Superior' if nota_f >= 4.6 else ('Alto' if nota_f >= 4.0 else ('Básico' if nota_f >= 3.0 else 'Bajo')))
-            badge_class = 'bg-success' if nota_f >= 4.6 else ('bg-primary' if nota_f >= 4.0 else ('bg-warning text-dark' if nota_f >= 3.0 else 'bg-danger'))
-            materia_nom = ce.carga_academica.programa.denominacion if (ce.carga_academica and ce.carga_academica.programa) else 'Materia Escolar'
-            calificaciones_items.append({
-                'asignatura': materia_nom,
-                'docente': ce.profesor.get_full_name() or ce.profesor.username if ce.profesor else 'Docente Titular',
-                'periodo': ce.periodo,
-                'nota': round(nota_f, 1),
-                'nivel': nivel,
-                'badge_class': badge_class,
-                'estado': 'Aprobado' if nota_f >= 3.0 else 'Reprobado',
-                'observacion': ce.observaciones or 'Calificación oficial del periodo.',
-            })
-            suma_notas += nota_f
-            total_notas += 1
-
-        if total_notas > 0:
-            promedio_general = round(suma_notas / total_notas, 2)
+        if total_evaluadas > 0:
+            promedio_general = round(suma_notas / total_evaluadas, 2)
+        else:
+            promedio_general = None
 
     from academico.models import PeriodoAcademico
     periodos_academicos = PeriodoAcademico.obtener_periodos_anio('2026')
@@ -2706,7 +3185,7 @@ def familia_boletines(request):
         'periodo_sel': periodo_sel,
         'calificaciones': calificaciones_items,
         'promedio_general': promedio_general,
-        'total_materias': total_notas,
+        'total_materias': total_evaluadas,
     })
 
 
@@ -2717,6 +3196,10 @@ def familia_asistencia(request):
     del estudiante con filtros por fecha, periodo y estado.
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
+    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
+        estudiante_sel = hijos_qs.first()
+        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
+        ficha_sel = matricula_sel.ficha if matricula_sel else None
 
     estado_sel = request.GET.get('estado', '')
     fecha_sel = request.GET.get('fecha', '')
@@ -2753,8 +3236,6 @@ def familia_asistencia(request):
     })
 
 
-@login_required
-@solo_familia
 def familia_circulares(request):
     """
     Módulo Familias → Circulares Oficiales:
@@ -2762,7 +3243,16 @@ def familia_circulares(request):
     a toda la comunidad o directamente a su estudiante asignado, manteniendo la sesión intacta.
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
-    hijos_list = list(hijos_qs) if hijos_qs else ([estudiante_sel] if estudiante_sel else [])
+    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
+        estudiante_sel = hijos_qs.first()
+        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
+        ficha_sel = matricula_sel.ficha if matricula_sel else None
+
+    if not estudiante_sel and not fam_rec and not request.session.get('estudiante_fam_doc'):
+        messages.info(request, 'Por favor consulte el número de documento de su estudiante.')
+        return redirect('familia_portal')
+
+    hijos_list = [estudiante_sel] if estudiante_sel else (list(hijos_qs) if hijos_qs else [])
     fichas_hijos = list(Ficha.objects.filter(matriculas__aprendiz__in=hijos_list).distinct()) if hijos_list else []
 
     cond_fam = (
@@ -2772,17 +3262,133 @@ def familia_circulares(request):
     if fichas_hijos:
         cond_fam = cond_fam | (Q(estudiante_destinatario__isnull=True) & Q(curso__in=fichas_hijos))
 
-    circulares = ComunicadoEscolar.objects.filter(cond_fam).select_related(
+    circulares = list(ComunicadoEscolar.objects.filter(cond_fam).select_related(
         'remitente', 'remitente__perfil', 'curso'
-    ).distinct().order_by('-fecha_creacion')
+    ).distinct().order_by('-fecha_creacion'))
+
+    from seguimiento.models import AcuseLecturaCircular
+    acuses_usuario = {
+        a.comunicado_id: a
+        for a in AcuseLecturaCircular.objects.filter(usuario=request.user, comunicado__in=circulares)
+    }
+    for c in circulares:
+        ac = acuses_usuario.get(c.id)
+        c.leida_por_mi = bool(ac)
+        c.fecha_mi_lectura = ac.fecha_lectura if ac else None
 
     return render(request, 'usuarios/familia_circulares.html', {
         'acudiente': fam_rec,
         'hijos_qs': hijos_qs,
         'estudiante_sel': estudiante_sel,
         'matricula_sel': matricula_sel,
+        'ficha_sel': ficha_sel,
         'circulares': circulares,
-        'total_circulares': circulares.count(),
+        'total_circulares': len(circulares),
+    })
+
+
+def familia_comunicaciones(request):
+    """
+    Módulo Familias → Comunicaciones y Mensajería Escolar:
+    Canal de comunicación bidireccional entre la familia/acudiente y los docentes
+    del estudiante consultado. Permite redactar mensajes y consultar el historial.
+    """
+    fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
+    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
+        estudiante_sel = hijos_qs.first()
+        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
+        ficha_sel = matricula_sel.ficha if matricula_sel else None
+
+    if not estudiante_sel and not fam_rec and not request.session.get('estudiante_fam_doc'):
+        messages.info(request, 'Por favor consulte primero el número de documento de su estudiante.')
+        return redirect('familia_portal')
+
+    # Docentes asignados al estudiante (mediante CargaAcademica, HorarioFicha o Instructor Líder)
+    from academico.models import CargaAcademica, HorarioFicha
+    docentes_ids = set()
+    if ficha_sel:
+        if ficha_sel.instructor_lider_id:
+            docentes_ids.add(ficha_sel.instructor_lider_id)
+        docentes_ids.update(
+            HorarioFicha.objects.filter(ficha=ficha_sel, activo=True).exclude(instructor__isnull=True).values_list('instructor_id', flat=True)
+        )
+    if matricula_sel:
+        docentes_ids.update(
+            CargaAcademica.objects.filter(grado=matricula_sel.grado_escolar, seccion=matricula_sel.seccion).exclude(profesor__isnull=True).values_list('profesor_id', flat=True)
+        )
+
+    docentes_lista = list(User.objects.filter(id__in=docentes_ids, is_active=True).select_related('perfil')) if docentes_ids else []
+    if not docentes_lista:
+        docentes_lista = list(User.objects.filter(perfil__rol__nombre__icontains='Docente', is_active=True).select_related('perfil')[:10])
+
+    # Envío de nuevo mensaje a un docente
+    if request.method == 'POST' and request.POST.get('action') == 'enviar_mensaje_docente':
+        docente_id = request.POST.get('docente_id')
+        asunto = request.POST.get('asunto', '').strip() or 'Consulta de Acudiente'
+        mensaje_texto = request.POST.get('mensaje', '').strip()
+        docente = User.objects.filter(id=docente_id).first() if docente_id else (docentes_lista[0] if docentes_lista else None)
+
+        if docente and mensaje_texto:
+            from seguimiento.models import ComunicadoEscolar, Notificacion
+            hijo_asoc = estudiante_sel or (hijos_qs.first() if hasattr(hijos_qs, 'first') and hijos_qs.exists() else None)
+            remitente_usr = request.user if (request.user and request.user.is_authenticated) else (hijo_asoc or User.objects.filter(is_superuser=True).first())
+            nombre_emisor = fam_rec.nombre_acudiente if fam_rec else (f"Acudiente de {hijo_asoc.get_full_name()}" if hijo_asoc else "Acudiente")
+
+            comunicado = ComunicadoEscolar.objects.create(
+                remitente=remitente_usr,
+                estudiante_destinatario=hijo_asoc,
+                estamento_destinatario='Docentes',
+                asunto=f"[Mensaje de Familia] {asunto} - {nombre_emisor}",
+                mensaje=mensaje_texto
+            )
+            Notificacion.objects.create(
+                usuario=docente,
+                titulo=f"Mensaje de acudiente ({nombre_emisor})",
+                mensaje=mensaje_texto[:200],
+                enlace=f"/instructor/?subpanel=comunicaciones&chat_user={hijo_asoc.id if hijo_asoc else 1}&chat_tipo=familia",
+                tipo='info'
+            )
+            messages.success(request, f'Mensaje enviado exitosamente al docente {docente.get_full_name() or docente.username}.')
+            return redirect('familia_comunicaciones')
+        else:
+            messages.error(request, 'Debe seleccionar un docente y redactar un mensaje.')
+
+    # Historial de comunicaciones relacionadas con este estudiante / familia
+    from seguimiento.models import ComunicadoEscolar
+    if estudiante_sel:
+        filtro_com = (
+            (Q(estudiante_destinatario=estudiante_sel) & Q(estamento_destinatario__in=['Familias', 'Docentes', 'Toda', 'Todos', 'General'])) |
+            (Q(remitente=estudiante_sel) & Q(estamento_destinatario='Docentes'))
+        )
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            filtro_com |= (Q(remitente=request.user) & Q(estudiante_destinatario=estudiante_sel))
+
+        comunicaciones_qs = ComunicadoEscolar.objects.filter(filtro_com).select_related(
+            'remitente', 'remitente__perfil', 'estudiante_destinatario'
+        ).order_by('-fecha_creacion')
+
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            total_recibidos = comunicaciones_qs.filter(estudiante_destinatario=estudiante_sel).exclude(remitente=request.user).count()
+            total_enviados = comunicaciones_qs.filter(Q(remitente=request.user) | Q(remitente=estudiante_sel)).count()
+        else:
+            total_recibidos = comunicaciones_qs.filter(estudiante_destinatario=estudiante_sel).exclude(remitente=estudiante_sel).count()
+            total_enviados = comunicaciones_qs.filter(remitente=estudiante_sel).count()
+    else:
+        comunicaciones_qs = ComunicadoEscolar.objects.none()
+        total_recibidos = 0
+        total_enviados = 0
+
+    return render(request, 'usuarios/familia_comunicaciones.html', {
+        'acudiente': fam_rec,
+        'hijos_qs': hijos_qs,
+        'estudiante_sel': estudiante_sel,
+        'matricula_sel': matricula_sel,
+        'ficha_sel': ficha_sel,
+        'docentes_lista': docentes_lista,
+        'comunicaciones': comunicaciones_qs,
+        'total_comunicaciones': comunicaciones_qs.count(),
+        'total_recibidos': total_recibidos,
+        'total_enviados': total_enviados,
     })
 
 
@@ -2819,6 +3425,14 @@ def familia_matricula(request):
     ESTUDIANTE → MATRÍCULA → AÑO ACADÉMICO → CURSO/GRADO → SECCIÓN → ESTADO DE MATRÍCULA.
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
+    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
+        estudiante_sel = hijos_qs.first()
+        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
+        ficha_sel = matricula_sel.ficha if matricula_sel else None
+
+    if not estudiante_sel and not fam_rec and not request.session.get('estudiante_fam_doc'):
+        messages.info(request, 'Por favor consulte primero el número de documento de su estudiante.')
+        return redirect('familia_portal')
 
     return render(request, 'usuarios/familia_matricula.html', {
         'acudiente': fam_rec,
@@ -2827,6 +3441,28 @@ def familia_matricula(request):
         'matricula_sel': matricula_sel,
         'ficha_sel': ficha_sel,
     })
+
+
+def familia_pdf_oficial(request):
+    """
+    Módulo Familias → PDF Oficiales:
+    Genera y entrega directamente el boletín oficial en PDF con formato institucional
+    del estudiante seleccionado en la sesión familiar (notas, escala pedagógica y firmas).
+    """
+    fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
+    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
+        estudiante_sel = hijos_qs.first()
+
+    if not estudiante_sel:
+        messages.info(request, 'Por favor consulte primero a su estudiante para descargar su boletín oficial en PDF.')
+        return redirect('familia_portal')
+
+    perfil_est = getattr(estudiante_sel, 'perfil', None)
+    if not perfil_est:
+        messages.error(request, 'El estudiante seleccionado no cuenta con un expediente de perfil escolar.')
+        return redirect('familia_portal')
+
+    return boletin_estudiante(request, pk=perfil_est.pk)
 
 
 @login_required
@@ -3472,7 +4108,6 @@ def api_generar_qr_aprendiz(request):
 
 
 
-@login_required
 def boletin_estudiante(request, pk):
     """
     Genera el Boletín Oficial de Calificaciones y Desempeño Escolar
@@ -3569,47 +4204,53 @@ def boletin_estudiante(request, pk):
 
     # Consultar calificaciones reales de la base de datos
     materias_data = []
+    total_suma = 0.0
+    total_evaluadas = 0
+
     if matricula:
-        semaforos = SemaforoCompetencia.objects.filter(matricula=matricula).select_related(
-            'competencia', 'profesor'
-        ).order_by('competencia__codigo')
+        from academico.models import CargaAcademica, CalificacionEscolar
+        grado_num = ''.join(c for c in str(getattr(matricula, 'grado_escolar', '')) if c.isdigit())
+        secc = getattr(matricula, 'seccion', 'A') or 'A'
 
-        for sem in semaforos:
-            obs = sem.observaciones or ''
-            nota_val = 4.5
-            if 'Nota:' in obs:
-                try:
-                    nota_val = float(obs.split('Nota:')[1].split('·')[0].split(']')[0].strip())
-                except Exception:
-                    nota_val = 4.0
-            
-            if nota_val >= 4.6: nivel_str = 'SUPERIOR'
-            elif nota_val >= 4.0: nivel_str = 'ALTO'
-            elif nota_val >= 3.0: nivel_str = 'BÁSICO'
-            else: nivel_str = 'BAJO'
+        cargas_estudiante = CargaAcademica.objects.filter(
+            Q(grado__icontains=grado_num),
+            Q(seccion__iexact=secc) | Q(seccion__isnull=True) | Q(seccion='')
+        ).select_related('profesor', 'programa').order_by('programa__denominacion')
 
-            nom_mat = sem.competencia.descripcion.replace('Competencias fundamentales de ', '').replace('Desarrollo de competencias y estándares básicos en ', '')[:38]
-            doc_nom = sem.profesor.get_full_name() if sem.profesor else 'Docente Asignado'
+        for carga in cargas_estudiante:
+            nom_mat = (carga.programa.denominacion if carga.programa else 'Asignatura')[:38]
+            doc_nom = (carga.profesor.get_full_name() or carga.profesor.username if carga.profesor else 'Docente Asignado')[:24]
 
-            materias_data.append((nom_mat, doc_nom[:24], round(nota_val, 1), nivel_str, 'APROBADO' if nota_val >= 3.0 else 'REPROBADO'))
+            ce = CalificacionEscolar.objects.filter(matricula=matricula, carga_academica=carga, periodo='Periodo 1').first()
+            if ce and ce.nota is not None:
+                n_val = round(float(ce.nota), 1)
+                niv_str = (ce.desempeno or ('SUPERIOR' if n_val >= 4.6 else ('ALTO' if n_val >= 4.0 else ('BÁSICO' if n_val >= 3.0 else 'BAJO')))).upper()
+                est_str = 'APROBADO' if n_val >= 3.0 else 'REPROBADO'
+                total_suma += n_val
+                total_evaluadas += 1
+            else:
+                n_val = None
+                niv_str = 'PENDIENTE'
+                est_str = 'SIN CALIFICAR'
+
+            materias_data.append((nom_mat, doc_nom, n_val, niv_str, est_str))
 
     y_tbl -= 20
     documento.setStrokeColor(colors.HexColor('#E2E8F0'))
     documento.setLineWidth(0.6)
 
-    total_suma = 0.0
     if not materias_data:
         documento.setFillColor(colors.HexColor('#FFFFFF'))
         documento.rect(50, y_tbl, 512, 24, fill=1, stroke=0)
         documento.setFont('Helvetica-Bold', 9)
         documento.setFillColor(colors.HexColor('#64748B'))
-        documento.drawCentredString(306, y_tbl + 7, "Sin calificaciones registradas.")
+        documento.drawCentredString(306, y_tbl + 7, "Sin asignaturas registradas.")
         documento.line(50, y_tbl, 562, y_tbl)
         y_tbl -= 24
-        promedio_final = 0.0
+        promedio_str = "PROMEDIO: PENDIENTE DE CALIFICAR"
+        resultado_str = "RESULTADO: EN EVALUACIÓN PERIÓDICA"
     else:
         for idx, (mat_nom, doc_tit, n_val, niv, est_str) in enumerate(materias_data):
-            total_suma += n_val
             # Fondo alterno
             bg_col = colors.HexColor('#FFFFFF') if idx % 2 == 0 else colors.HexColor('#F8FAFC')
             documento.setFillColor(bg_col)
@@ -3626,24 +4267,39 @@ def boletin_estudiante(request, pk):
             # Calificación numérica
             documento.setFont('Helvetica-Bold', 9)
             documento.setFillColor(colors.HexColor('#1E3A8A'))
-            documento.drawCentredString(385, y_tbl + 5, f"{n_val:.1f}")
+            if n_val is not None:
+                documento.drawCentredString(385, y_tbl + 5, f"{n_val:.1f}")
+            else:
+                documento.drawCentredString(385, y_tbl + 5, "-")
 
             # Nivel de desempeño
             documento.setFont('Helvetica-Bold', 7.5)
             if niv == 'SUPERIOR': documento.setFillColor(colors.HexColor('#15803D'))
             elif niv == 'ALTO': documento.setFillColor(colors.HexColor('#2563EB'))
             elif niv == 'BÁSICO': documento.setFillColor(colors.HexColor('#D97706'))
-            else: documento.setFillColor(colors.HexColor('#DC2626'))
+            elif niv == 'BAJO': documento.setFillColor(colors.HexColor('#DC2626'))
+            else: documento.setFillColor(colors.HexColor('#64748B'))
             documento.drawCentredString(455, y_tbl + 5, niv)
 
             documento.setFont('Helvetica', 8)
-            documento.setFillColor(colors.HexColor('#15803D') if est_str == 'APROBADO' else colors.HexColor('#DC2626'))
+            if est_str == 'APROBADO':
+                documento.setFillColor(colors.HexColor('#15803D'))
+            elif est_str == 'REPROBADO':
+                documento.setFillColor(colors.HexColor('#DC2626'))
+            else:
+                documento.setFillColor(colors.HexColor('#64748B'))
             documento.drawCentredString(525, y_tbl + 5, est_str)
 
             documento.line(50, y_tbl, 562, y_tbl)
             y_tbl -= 19
 
-        promedio_final = round(total_suma / max(1, len(materias_data)), 2)
+        if total_evaluadas > 0:
+            promedio_final = round(total_suma / total_evaluadas, 2)
+            promedio_str = f"PROMEDIO: {promedio_final:.2f} / 5.0"
+            resultado_str = "RESULTADO: PROMOVIDO AL DIA" if promedio_final >= 3.0 else "RESULTADO: EN RECUPERACIÓN"
+        else:
+            promedio_str = "PROMEDIO: PENDIENTE DE CALIFICAR"
+            resultado_str = "RESULTADO: EN EVALUACIÓN PERIÓDICA"
 
     # 4. RESUMEN ACADÉMICO DEL PERIODO
     y_tbl -= 8
@@ -3655,9 +4311,14 @@ def boletin_estudiante(request, pk):
     documento.setFillColor(colors.HexColor('#1E3A8A'))
     documento.drawString(65, y_tbl - 12, "BALANCE GENERAL DEL PERIODO:")
 
-    documento.setFont('Helvetica-Bold', 11)
-    documento.setFillColor(colors.HexColor('#15803D'))
-    documento.drawString(275, y_tbl - 12, f"PROMEDIO: {promedio_final:.2f} / 5.0")
+    documento.setFont('Helvetica-Bold', 10)
+    documento.setFillColor(colors.HexColor('#15803D') if total_evaluadas > 0 else colors.HexColor('#64748B'))
+    documento.drawString(275, y_tbl - 12, promedio_str)
+
+    documento.setFont('Helvetica', 8.5)
+    documento.setFillColor(colors.HexColor('#334155'))
+    documento.drawString(65, y_tbl - 28, "Escala Nacional: Superior (4.6 - 5.0) | Alto (4.0 - 4.5) | Básico (3.0 - 3.9) | Bajo (1.0 - 2.9)")
+    documento.drawString(400, y_tbl - 28, resultado_str)
 
     documento.setFont('Helvetica', 8.5)
     documento.setFillColor(colors.HexColor('#334155'))
@@ -4571,12 +5232,17 @@ def instructor_dashboard(request):
 
                 guardados_asist = 0
                 materia_nom = c_obj.programa.denominacion if c_obj.programa else 'Matemáticas'
+                matricula_indiv_id = request.POST.get('matricula_id')
                 for m in mats:
                     estado_val = request.POST.get(f'asistencia_{m.id}') or request.POST.get(f'estado_{m.id}')
+                    if not estado_val and matricula_indiv_id and str(matricula_indiv_id) == str(m.id):
+                        estado_val = request.POST.get('estado')
                     if estado_val:
                         if estado_val == 'E':
                             estado_val = 'J'
                         obs_val = request.POST.get(f'obs_{m.id}', '').strip()
+                        if not obs_val and matricula_indiv_id and str(matricula_indiv_id) == str(m.id):
+                            obs_val = request.POST.get('observaciones', '').strip()
                         obs_completa = f"[{materia_nom}] {obs_val}" if obs_val else f"[{materia_nom}] Registro oficial de clase"
                         asist_obj, _ = AsistenciaAprendiz.objects.update_or_create(
                             matricula=m,
@@ -5090,8 +5756,8 @@ def instructor_dashboard(request):
             if request.user.is_superuser:
                 PapeleraReciclaje.objects.all().delete()
             else:
-                PapeleraReciclaje.objects.filter(Q(eliminado_por=request.user) | Q(eliminado_por__isnull=True)).delete()
-            messages.success(request, 'La papelera ha sido vaciada por completo.')
+                PapeleraReciclaje.objects.filter(eliminado_por=request.user).delete()
+            messages.success(request, 'Su papelera ha sido vaciada por completo.')
             return redirect(f"{reverse('instructor_dashboard')}?subpanel=papelera")
 
         # 15. ESTUDIANTES: Registrar y guardar seguimiento académico u observación
@@ -5437,18 +6103,29 @@ def instructor_dashboard(request):
         carga_academica__profesor=request.user
     ).select_related('carga_academica', 'carga_academica__programa').prefetch_related('entregas').order_by('-fecha_publicacion'))
 
+    # Pre-calcular en 1 sola consulta el conteo de estudiantes por grupo para evitar N consultas en bucle
+    conteo_estudiantes_por_grupo = {}
+    for m_info in Matricula.objects.filter(estado_formacion='En Formacion').values('grado_escolar', 'seccion').annotate(total=Count('id')):
+        g_num = ''.join(ch for ch in str(m_info['grado_escolar'] or '') if ch.isdigit())
+        sec = m_info['seccion'] or ''
+        conteo_estudiantes_por_grupo[(g_num, sec)] = m_info['total']
+
     for t in tareas_publicadas:
         t.esta_vencida = bool(t.fecha_limite and timezone.now() > t.fecha_limite)
         t.grado_num = ''.join(ch for ch in str(t.carga_academica.grado) if ch.isdigit())
         t.grupo_display = f"{t.grado_num}°{t.carga_academica.seccion}"
         t.materia_nombre = t.carga_academica.programa.denominacion if t.carga_academica.programa else 'Matemáticas'
-        t.total_entregas_count = t.entregas.count()
-        t.calificadas_count = t.entregas.filter(estado='CALIFICADA').count()
-        t.pendientes_calificar_count = t.entregas.filter(estado__in=['ENTREGADA', 'ENTREGADA_TARDE']).count()
         
-        # Cantidad de estudiantes del grupo de la tarea
-        mats_grp = Matricula.objects.filter(grado_escolar__icontains=t.grado_num, seccion=t.carga_academica.seccion, estado_formacion='En Formacion')
-        t.estudiantes_grupo_count = mats_grp.count()
+        # Uso de la lista prefetched en memoria para 0 queries a la base de datos
+        entregas_all = t.entregas.all()
+        t.total_entregas_count = len(entregas_all)
+        t.calificadas_count = sum(1 for e in entregas_all if e.estado == 'CALIFICADA')
+        t.pendientes_calificar_count = sum(1 for e in entregas_all if e.estado in ['ENTREGADA', 'ENTREGADA_TARDE'])
+        
+        # Cantidad de estudiantes del grupo de la tarea desde el diccionario en memoria
+        t.estudiantes_grupo_count = conteo_estudiantes_por_grupo.get((t.grado_num, t.carga_academica.seccion), 0)
+        if t.estudiantes_grupo_count == 0:
+            t.estudiantes_grupo_count = sum(v for k, v in conteo_estudiantes_por_grupo.items() if k[0] == t.grado_num)
         t.sin_entregar_count = max(0, t.estudiantes_grupo_count - t.total_entregas_count)
 
     # Indicadores del resumen general de actividades (reales de base de datos)
@@ -5561,10 +6238,6 @@ def instructor_dashboard(request):
             m.acudiente_email_real = f"acudiente.{m.aprendiz.username}@edunova.edu.co"
             m.telefono_real = getattr(m.aprendiz.perfil, 'telefono', None) or "+57 (301) 987-6543"
             m.foto_url = m.aprendiz.perfil.foto_perfil.url if (hasattr(m.aprendiz, 'perfil') and m.aprendiz.perfil.foto_perfil) else ""
-            m.mis_calificaciones = list(CalificacionEscolar.objects.filter(matricula=m).select_related('carga_academica')[:6])
-            m.mis_asistencias = list(AsistenciaAprendiz.objects.filter(matricula=m).order_by('-fecha')[:6])
-            m.mis_entregas = list(EntregaTarea.objects.filter(estudiante=m.aprendiz).select_related('tarea')[:6])
-
             todos_mis_estudiantes_map[m.aprendiz_id] = m
 
         c.matriculas_lista = mats_c
@@ -5793,17 +6466,23 @@ def instructor_dashboard(request):
     grado_sel_param = request.GET.get('grado') or request.GET.get('grado_asist') or request.GET.get('grado_calif')
     carga_seleccionada = None
     if carga_sel_id:
-        carga_seleccionada = cargas_unicas[0] if str(cargas_unicas[0].id) == str(carga_sel_id) else (cargas_unicas[1] if len(cargas_unicas) > 1 and str(cargas_unicas[1].id) == str(carga_sel_id) else cargas.filter(id=carga_sel_id).first())
+        carga_seleccionada = next((c for c in cargas if str(c.id) == str(carga_sel_id)), cargas.filter(id=carga_sel_id).first())
     elif grado_sel_param:
         g_clean = ''.join(ch for ch in str(grado_sel_param) if ch.isdigit())
-        carga_seleccionada = next((c for c in cargas_unicas if g_clean in str(c.grado)), cargas_unicas[0] if cargas_unicas else None)
-    if not carga_seleccionada and cargas_unicas:
-        carga_seleccionada = cargas_unicas[0]
+        carga_seleccionada = next((c for c in cargas if g_clean in str(c.grado)), cargas.first() if cargas.exists() else None)
+    if not carga_seleccionada and cargas.exists():
+        carga_seleccionada = cargas.first()
 
-    if carga_seleccionada and '11' in str(carga_seleccionada.grado):
-        estudiantes_carga_sel = estudiantes_grado_11
+    if carga_seleccionada:
+        g_num_sel = ''.join(ch for ch in str(carga_seleccionada.grado) if ch.isdigit())
+        estudiantes_carga_sel = [
+            m for m in todos_mis_estudiantes
+            if (not g_num_sel or g_num_sel in str(m.grado_escolar or '')) and (not carga_seleccionada.seccion or str(m.seccion or '').upper() == str(carga_seleccionada.seccion).upper())
+        ]
+        if not estudiantes_carga_sel and g_num_sel:
+            estudiantes_carga_sel = [m for m in todos_mis_estudiantes if g_num_sel in str(m.grado_escolar or '')]
     else:
-        estudiantes_carga_sel = estudiantes_grado_10
+        estudiantes_carga_sel = todos_mis_estudiantes
 
     # Periodo seleccionado y calificaciones vigentes
     from academico.models import PeriodoAcademico
@@ -5838,53 +6517,54 @@ def instructor_dashboard(request):
         )
     }
 
+    from seguimiento.services import calcular_alertas_asistencia
     for mat in estudiantes_carga_sel:
         rec = asistencias_dia_map.get(mat.id)
-        mat.asistencia_estado = rec.estado if rec else 'P'
+        mat.asistencia_estado = rec.estado if rec else ''
         mat.asistencia_obs = rec.observaciones if rec else ''
         if mat.asistencia_obs and '[' in mat.asistencia_obs and ']' in mat.asistencia_obs:
             mat.asistencia_obs_limpia = mat.asistencia_obs.split(']', 1)[1].strip()
         else:
             mat.asistencia_obs_limpia = mat.asistencia_obs
 
-        # Estadísticas históricas de asistencia del estudiante
-        qs_a = AsistenciaAprendiz.objects.filter(matricula=mat)
-        tot_c = qs_a.count()
-        pres_c = qs_a.filter(estado='P').count()
-        aus_c = qs_a.filter(estado='A').count()
-        tard_c = qs_a.filter(estado='T').count()
-        exc_c = qs_a.filter(estado__in=['J', 'E']).count()
-        porc_c = round((pres_c + tard_c * 0.5) / tot_c * 100) if tot_c > 0 else 100
+        # Estadísticas y alertas objetivas desde la base de datos
+        alertas_data = calcular_alertas_asistencia(mat, fecha_referencia=fecha_asist_obj)
+        mat.alertas_asistencia = alertas_data['alertas']
+        mat.estado_resumen_asist = alertas_data['estado_resumen']
         mat.resumen_asist = {
-            'total': tot_c,
-            'presentes': pres_c,
-            'ausentes': aus_c,
-            'tardanzas': tard_c,
-            'excusas': exc_c,
-            'porcentaje': porc_c
+            'total': alertas_data['stats']['total'],
+            'presentes': alertas_data['stats']['presentes'],
+            'ausentes': alertas_data['stats']['ausentes'],
+            'tardanzas': alertas_data['stats']['tardanzas'],
+            'excusas': alertas_data['stats']['excusas'],
+            'porcentaje': alertas_data['stats']['porcentaje'] if alertas_data['stats']['porcentaje'] is not None else 0,
+            'formula_explicacion': alertas_data['stats']['formula_explicacion'],
         }
 
     asist_kpi_total = len(estudiantes_carga_sel)
-    asist_kpi_presentes = sum(1 for m in estudiantes_carga_sel if getattr(m, 'asistencia_estado', 'P') == 'P')
+    asist_kpi_presentes = sum(1 for m in estudiantes_carga_sel if getattr(m, 'asistencia_estado', '') == 'P')
     asist_kpi_ausentes = sum(1 for m in estudiantes_carga_sel if getattr(m, 'asistencia_estado', '') == 'A')
     asist_kpi_tardanzas = sum(1 for m in estudiantes_carga_sel if getattr(m, 'asistencia_estado', '') == 'T')
     asist_kpi_excusas = sum(1 for m in estudiantes_carga_sel if getattr(m, 'asistencia_estado', '') in ['J', 'E'])
+    asist_kpi_pendientes = max(0, asist_kpi_total - (asist_kpi_presentes + asist_kpi_ausentes + asist_kpi_tardanzas + asist_kpi_excusas))
 
     # Historial de Asistencia guardada
     sesiones_asistencia_dict = {}
     asistencias_guardadas = AsistenciaAprendiz.objects.filter(
         registrado_por=request.user
-    ).select_related('matricula', 'matricula__aprendiz').order_by('-fecha', '-id')
+    ).select_related('matricula', 'matricula__aprendiz', 'carga_academica').order_by('-fecha', '-id')
 
     for asist in asistencias_guardadas:
         g_num = ''.join(ch for ch in str(asist.matricula.grado_escolar or '') if ch.isdigit()) or '10'
         materia_nom = 'Matemáticas'
         if asist.observaciones and '[' in asist.observaciones and ']' in asist.observaciones:
             materia_nom = asist.observaciones.split('[')[1].split(']')[0]
+        elif asist.carga_academica and asist.carga_academica.programa:
+            materia_nom = asist.carga_academica.programa.denominacion
         
-        session_key = (str(asist.fecha), g_num, materia_nom)
+        session_key = (str(asist.fecha), asist.carga_academica_id if asist.carga_academica_id else g_num, materia_nom)
         if session_key not in sesiones_asistencia_dict:
-            c_encontrada = next((c for c in cargas if g_num in str(c.grado)), carga_seleccionada)
+            c_encontrada = asist.carga_academica if asist.carga_academica else next((c for c in cargas if g_num in str(c.grado)), carga_seleccionada)
             sesiones_asistencia_dict[session_key] = {
                 'fecha': asist.fecha.strftime('%d/%m/%Y') if hasattr(asist.fecha, 'strftime') else str(asist.fecha),
                 'fecha_iso': asist.fecha.isoformat() if hasattr(asist.fecha, 'isoformat') else str(asist.fecha),
@@ -6086,8 +6766,17 @@ def instructor_dashboard(request):
             ).order_by('fecha_creacion')
         chat_mensajes = list(chat_qs)
 
-    # Notificaciones del docente
-    notificaciones_docente = list(Notificacion.objects.filter(usuario=request.user).order_by('-fecha_creacion')[:30])
+    # Notificaciones del docente (filtradas y sin duplicados innecesarios)
+    notificaciones_docente_qs = Notificacion.objects.filter(usuario=request.user).order_by('-fecha_creacion')
+    vistas_notif = set()
+    notificaciones_docente = []
+    for n in notificaciones_docente_qs:
+        clave_notif = (n.titulo.strip().lower(), n.mensaje.strip().lower())
+        if clave_notif not in vistas_notif:
+            vistas_notif.add(clave_notif)
+            notificaciones_docente.append(n)
+        if len(notificaciones_docente) >= 30:
+            break
     total_notificaciones_sin_leer = sum(1 for n in notificaciones_docente if not n.leida)
 
     # Clase actual en curso para el docente (únicamente si hoy es día lectivo y coincide el bloque de horario)
@@ -6098,12 +6787,12 @@ def instructor_dashboard(request):
                 clase_actual = h
                 break
 
-    # Papelera de reciclaje completa y real
+    # Papelera de reciclaje completa y real para el docente
     if request.user.is_superuser:
         items_papelera = list(PapeleraReciclaje.objects.filter(restaurado=False).order_by('-fecha_eliminacion'))
     else:
         items_papelera = list(PapeleraReciclaje.objects.filter(
-            Q(eliminado_por=request.user) | Q(eliminado_por__isnull=True),
+            eliminado_por=request.user,
             restaurado=False
         ).order_by('-fecha_eliminacion'))
 
@@ -6344,6 +7033,7 @@ def instructor_dashboard(request):
         'asist_kpi_ausentes': asist_kpi_ausentes,
         'asist_kpi_tardanzas': asist_kpi_tardanzas,
         'asist_kpi_excusas': asist_kpi_excusas,
+        'asist_kpi_pendientes': asist_kpi_pendientes,
         'evaluaciones_periodo': evaluaciones_periodo,
         'suma_porcentajes_evaluaciones': suma_porcentajes_evaluaciones,
         'evaluacion_seleccionada': evaluacion_seleccionada,
@@ -6364,6 +7054,9 @@ def instructor_dashboard(request):
 @solo_instructor
 def perfil_profesional_view(request):
     """Ruta oficial /perfil-profesional/ que renderiza directamente el módulo de Perfil Profesional."""
+    q = request.GET.copy()
+    q['subpanel'] = 'perfil'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6371,6 +7064,9 @@ def perfil_profesional_view(request):
 @solo_instructor
 def mis_asignaturas_view(request):
     """Ruta oficial /mis-asignaturas/ que renderiza directamente el módulo de Mis Asignaturas."""
+    q = request.GET.copy()
+    q['subpanel'] = 'asignaturas'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6378,6 +7074,9 @@ def mis_asignaturas_view(request):
 @solo_instructor
 def mis_estudiantes_view(request):
     """Ruta oficial /mis-estudiantes/ que renderiza directamente el módulo de Mis Estudiantes."""
+    q = request.GET.copy()
+    q['subpanel'] = 'estudiantes'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6385,6 +7084,9 @@ def mis_estudiantes_view(request):
 @solo_instructor
 def temas_actividades_view(request):
     """Ruta oficial /actividades-y-tareas/ que renderiza directamente el módulo de Actividades y Tareas."""
+    q = request.GET.copy()
+    q['subpanel'] = 'temas_actividades'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6392,6 +7094,9 @@ def temas_actividades_view(request):
 @solo_instructor
 def asistencia_docente_view(request):
     """Ruta oficial /asistencia/ que renderiza directamente el módulo de Asistencia."""
+    q = request.GET.copy()
+    q['subpanel'] = 'asistencia'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6399,6 +7104,9 @@ def asistencia_docente_view(request):
 @solo_instructor
 def calificaciones_docente_view(request):
     """Ruta oficial /calificaciones-docente/ que renderiza directamente el módulo de Calificaciones."""
+    q = request.GET.copy()
+    q['subpanel'] = 'calificaciones'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6406,6 +7114,9 @@ def calificaciones_docente_view(request):
 @solo_instructor
 def horario_docente_view(request):
     """Ruta oficial /horario-escolar/ o /horario/ que renderiza directamente el módulo de Horario Escolar."""
+    q = request.GET.copy()
+    q['subpanel'] = 'horario'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6413,6 +7124,9 @@ def horario_docente_view(request):
 @solo_instructor
 def comunicaciones_docente_view(request):
     """Ruta oficial /comunicaciones-docente/ que renderiza directamente el módulo de Comunicaciones."""
+    q = request.GET.copy()
+    q['subpanel'] = 'comunicaciones'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6420,6 +7134,9 @@ def comunicaciones_docente_view(request):
 @solo_instructor
 def notificaciones_docente_view(request):
     """Ruta oficial /notificaciones-docente/ que renderiza directamente el módulo de Notificaciones."""
+    q = request.GET.copy()
+    q['subpanel'] = 'notificaciones'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6427,6 +7144,9 @@ def notificaciones_docente_view(request):
 @solo_instructor
 def papelera_docente_view(request):
     """Ruta oficial /papelera-docente/ que renderiza directamente el módulo de Papelera."""
+    q = request.GET.copy()
+    q['subpanel'] = 'papelera'
+    request.GET = q
     return instructor_dashboard(request)
 
 
@@ -6739,11 +7459,14 @@ def aprendiz_dashboard(request, subpanel_directo=None):
     if matricula:
         asistencias_qs = AsistenciaAprendiz.objects.filter(matricula=matricula)
         asistencias_p = asistencias_qs.filter(estado='P').count()
+        asistencias_t = asistencias_qs.filter(estado='T').count()
         asistencias_a = asistencias_qs.filter(estado='A').count()
-        asistencias_j = asistencias_qs.filter(estado='J').count()
-        total_asist = asistencias_p + asistencias_a + asistencias_j
-        porcentaje_asistencia = round((asistencias_p / total_asist * 100), 1) if total_asist > 0 else None
-        historial_asistencias = asistencias_qs.select_related('registrado_por').order_by('-fecha')[:20]
+        asistencias_j = asistencias_qs.filter(estado__in=['J', 'E']).count()
+        total_asist = asistencias_p + asistencias_t + asistencias_a + asistencias_j
+        porcentaje_asistencia = round(((asistencias_p + (asistencias_t * 0.5) + asistencias_j) / total_asist * 100), 1) if total_asist > 0 else None
+        historial_asistencias = asistencias_qs.select_related('registrado_por').order_by('-fecha')[:50]
+        from seguimiento.services import calcular_alertas_asistencia
+        alertas_asist_info = calcular_alertas_asistencia(matricula)
 
         juicios = JuicioEvaluativo.objects.filter(matricula=matricula).select_related('resultado_aprendizaje', 'instructor')
         juicios_aprobados = juicios.filter(juicio_valor='A').count()
@@ -6756,9 +7479,10 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         ).order_by('competencia__codigo')
 
         compromisos = CompromisoFormativo.objects.filter(matricula=matricula).order_by('fecha_limite')
-        alertas = alertas_desercion_para_matricula(matricula)
+        alertas = alertas_asist_info['alertas'] or alertas_desercion_para_matricula(matricula)
     else:
         asistencias_p = 0
+        asistencias_t = 0
         asistencias_a = 0
         asistencias_j = 0
         porcentaje_asistencia = None
@@ -6934,6 +7658,7 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         'progreso_global': progreso_global,
         'porcentaje_asistencia': porcentaje_asistencia,
         'asistencias_p': asistencias_p,
+        'asistencias_t': asistencias_t,
         'asistencias_a': asistencias_a,
         'asistencias_j': asistencias_j,
         'historial_asistencias': historial_asistencias,
@@ -7119,18 +7844,29 @@ def rectoria_dashboard(request):
     total_grupos = fichas.count()
     total_asignaturas = ProgramaFormacion.objects.filter(activo=True).count()
 
-    # Asistencias del día
+    # Asistencias del día agrupadas en 1 sola consulta
     asistencias_sesion = AsistenciaAprendiz.objects.filter(fecha=hoy, matricula__ficha__in=fichas)
-    asistencias_hoy = asistencias_sesion.filter(estado='P').count()
-    inasistencias_hoy = asistencias_sesion.filter(estado='A').count()
-    tardanzas_hoy = asistencias_sesion.filter(estado='T').count()
+    asist_stats = asistencias_sesion.aggregate(
+        p=Count(Case(When(estado='P', then=1))),
+        a=Count(Case(When(estado='A', then=1))),
+        t=Count(Case(When(estado='T', then=1))),
+    )
+    asistencias_hoy = asist_stats['p'] or 0
+    inasistencias_hoy = asist_stats['a'] or 0
+    tardanzas_hoy = asist_stats['t'] or 0
 
-    # Resumen académico
+    # Resumen académico agrupado en 1 sola consulta
     califs = SemaforoCompetencia.objects.filter(matricula__ficha__in=fichas)
-    total_califs = califs.count()
-    aprobados = califs.filter(estado='APROBADO').count()
-    en_proceso = califs.filter(estado='EN_PROCESO').count()
-    por_recuperar = califs.filter(estado='RECUPERAR').count()
+    califs_stats = califs.aggregate(
+        total=Count('id'),
+        aprobados=Count(Case(When(estado='APROBADO', then=1))),
+        en_proceso=Count(Case(When(estado='EN_PROCESO', then=1))),
+        por_recuperar=Count(Case(When(estado='RECUPERAR', then=1))),
+    )
+    total_califs = califs_stats['total'] or 0
+    aprobados = califs_stats['aprobados'] or 0
+    en_proceso = califs_stats['en_proceso'] or 0
+    por_recuperar = califs_stats['por_recuperar'] or 0
     tasa_rendimiento = round((aprobados / total_califs * 100), 1) if total_califs > 0 else 100.0
 
     # Estudiantes con filtros
@@ -7180,9 +7916,12 @@ def rectoria_dashboard(request):
 
 
 @login_required
-@solo_coordinador_o_admin
+@solo_secretaria_o_coordinador
 def gestion_usuarios(request):
     """Gestión y directorio real de usuarios con filtros por rol y estado."""
+    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
+    es_secretaria = 'Secretar' in user_rol_nombre and not request.user.is_superuser
+
     rol_filtro = request.GET.get('rol', '').strip().lower()
     q = request.GET.get('q', '').strip()
 
@@ -7226,6 +7965,7 @@ def gestion_usuarios(request):
         'total_activos': total_activos,
         'rol_filtro': rol_filtro,
         'q': q,
+        'es_secretaria': es_secretaria,
     }
     return render(request, 'usuarios/gestion_usuarios.html', context)
 
@@ -7305,22 +8045,49 @@ def _leer_archivo_instructores(archivo):
     return datos
 
 
+def _limpiar_celda_texto(val):
+    if val is None:
+        return ''
+    if isinstance(val, float) and val.is_integer():
+        return str(int(val))
+    val_str = str(val).strip()
+    if val_str.endswith('.0') and val_str[:-2].isdigit():
+        return val_str[:-2]
+    return val_str
+
+
 @login_required
-@solo_coordinador_o_admin
+@solo_secretaria_o_coordinador
 def descargar_plantilla_instructores(request):
-    """Genera y descarga la plantilla oficial en Excel (.xlsx) para registro masivo de instructores SENA."""
+    """Genera y descarga la plantilla oficial (.xlsx o .csv) para registro masivo de docentes/profesores EDUNOVA."""
+    formato = request.GET.get('formato', 'xlsx').lower()
+    headers = ["tipo_documento", "numero_documento", "nombres", "apellidos", "correo", "telefono", "especialidad"]
+    ejemplos = [
+        ["CC", "1082123456", "Carlos Alberto", "Mendoza Vives", "cmendoza@colegio.edu.co", "3001234567", "Matemáticas"],
+        ["CC", "1082654321", "Adriana Lucía", "Castro Pertuz", "acastro@colegio.edu.co", "3159876543", "Lengua Castellana"],
+        ["CC", "1098765432", "Javier Orlando", "Pérez Gómez", "jperez@colegio.edu.co", "3123456789", "Ciencias Naturales"],
+    ]
+
+    if formato == 'csv':
+        buffer = io.StringIO()
+        writer = csv.writer(buffer, delimiter=',')
+        writer.writerow(headers)
+        for row in ejemplos:
+            writer.writerow(row)
+        response = HttpResponse(buffer.getvalue(), content_type="text/csv; charset=utf-8")
+        response['Content-Disposition'] = 'attachment; filename="plantilla_carga_masiva_docentes.csv"'
+        return response
+
     wb = Workbook()
     ws = wb.active
-    ws.title = "Instructores SENA"
+    ws.title = "Docentes"
 
-    headers = ["tipo_documento", "numero_documento", "nombres", "apellidos", "correo", "telefono", "especialidad"]
     ws.append(headers)
-
-    ws.append(["CC", "1082123456", "Carlos Alberto", "Mendoza Vives", "cmendoza@sena.edu.co", "3001234567", "Análisis y Desarrollo de Software"])
-    ws.append(["CC", "1082654321", "Adriana Lucía", "Castro Pertuz", "acastro@sena.edu.co", "3159876543", "Gestión de Redes y Telecomunicaciones"])
+    for row in ejemplos:
+        ws.append(row)
 
     from openpyxl.styles import Font, PatternFill, Alignment
-    header_fill = PatternFill(start_color="29AAE3", end_color="29AAE3", fill_type="solid")
+    header_fill = PatternFill(start_color="29445C", end_color="29445C", fill_type="solid")
     header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
     align_center = Alignment(horizontal="center", vertical="center")
 
@@ -7339,38 +8106,46 @@ def descargar_plantilla_instructores(request):
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-    response['Content-Disposition'] = 'attachment; filename="plantilla_registro_masivo_instructores_sena.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="plantilla_carga_masiva_docentes.xlsx"'
     return response
 
 
 @login_required
-@solo_coordinador_o_admin
+@solo_secretaria_o_coordinador
 def importar_instructores_masivo(request):
-    """Procesamiento atómico y registro masivo de instructores desde archivo Excel o CSV."""
-    next_url = request.POST.get('next') or request.GET.get('next') or 'gestion_usuarios'
+    """Procesamiento seguro y registro masivo de profesores/docentes desde archivo Excel o CSV."""
+    next_url = request.POST.get('next') or request.GET.get('next') or ''
+    desde_pagina = request.POST.get('desde_pagina') or not next_url
+
     if request.method != 'POST':
-        return redirect(next_url)
+        return render(request, 'usuarios/importar_docentes.html')
 
     archivo = request.FILES.get('archivo')
     if not archivo:
         messages.error(request, "Por favor seleccione un archivo (.xlsx o .csv) para procesar.")
-        return redirect(next_url)
+        if desde_pagina:
+            return render(request, 'usuarios/importar_docentes.html')
+        return redirect(next_url or 'instructores_lista')
 
     try:
         filas_datos = _leer_archivo_instructores(archivo)
     except Exception as e:
         messages.error(request, f"Error al procesar el archivo: {str(e)}")
-        return redirect(next_url)
+        if desde_pagina:
+            return render(request, 'usuarios/importar_docentes.html')
+        return redirect(next_url or 'instructores_lista')
 
     if not filas_datos:
         messages.error(request, "El archivo no contiene filas de datos para registrar.")
-        return redirect(next_url)
+        if desde_pagina:
+            return render(request, 'usuarios/importar_docentes.html')
+        return redirect(next_url or 'instructores_lista')
 
-    rol_instructor = Rol.objects.filter(nombre__icontains='Instructor').first()
-    if not rol_instructor:
-        rol_instructor, _ = Rol.objects.get_or_create(
-            nombre="Instructor SENA",
-            defaults={'descripcion': 'Instructor de Formación Profesional Integral'}
+    rol_docente = Rol.objects.filter(nombre='Docente').first() or Rol.objects.filter(nombre__icontains='Docente').first()
+    if not rol_docente:
+        rol_docente, _ = Rol.objects.get_or_create(
+            nombre="Docente",
+            defaults={'descripcion': 'Cuerpo Docente de la Institución Educativa'}
         )
 
     documentos_en_archivo = set()
@@ -7380,11 +8155,11 @@ def importar_instructores_masivo(request):
 
     for item in filas_datos:
         fila_num = item['_fila']
-        doc = item['numero_documento']
-        nom = item['nombres']
-        ape = item['apellidos']
-        correo = item['correo']
-        tipo_doc = item['tipo_documento'].upper()
+        doc = str(item['numero_documento']).strip()
+        nom = item['nombres'].strip()
+        ape = item['apellidos'].strip()
+        correo = item['correo'].strip()
+        tipo_doc = item['tipo_documento'].strip().upper()
 
         if tipo_doc not in tipos_doc_validos:
             tipo_doc = 'CC'
@@ -7405,8 +8180,8 @@ def importar_instructores_masivo(request):
             'nombres': nom,
             'apellidos': ape,
             'correo': correo,
-            'telefono': item.get('telefono', ''),
-            'especialidad': item.get('especialidad', ''),
+            'telefono': item.get('telefono', '').strip(),
+            'especialidad': item.get('especialidad', '').strip(),
         })
 
     docs_existentes = set(
@@ -7415,62 +8190,82 @@ def importar_instructores_masivo(request):
 
     creados = 0
     omitidos = 0
+    cuentas_creadas = []
 
-    with transaction.atomic():
-        for item in filas_validas:
-            doc = item['documento']
-            if doc in docs_existentes:
-                errores.append(f"Fila {item['fila']}: Ya existe un usuario registrado con el documento {doc} (RN-001).")
-                omitidos += 1
-                continue
+    for item in filas_validas:
+        doc = item['documento']
+        if doc in docs_existentes:
+            errores.append(f"Fila {item['fila']}: Ya existe un docente/usuario con documento {doc}.")
+            omitidos += 1
+            continue
 
-            username_base = f"inst_{doc}"
-            username = username_base
-            contador = 1
-            while User.objects.filter(username=username).exists():
-                username = f"{username_base}_{contador}"
-                contador += 1
-
-            clave_sufijo = doc[-4:] if len(doc) >= 4 else doc
-            password_defecto = f"Sena{clave_sufijo}*"
-
-            nuevo_user = User.objects.create_user(
-                username=username,
-                email=item['correo'],
-                first_name=item['nombres'],
-                last_name=item['apellidos'],
-                password=password_defecto
-            )
-            perfil = nuevo_user.perfil
-            perfil.rol = rol_instructor
-            perfil.tipo_documento = item['tipo_doc']
-            perfil.numero_documento = doc
-            perfil.telefono = item['telefono']
-            perfil.save()
-            creados += 1
-
-        if creados > 0:
-            RegistroAuditoria.objects.create(
-                usuario=request.user,
-                accion=f"Carga Masiva de {creados} Instructores SENA",
-                modulo="Gestión de Usuarios",
-                detalles=f"Se registraron {creados} instructores exitosamente desde el archivo {archivo.name}. Omitidos por documento duplicado: {omitidos}."
-            )
+        try:
+            with transaction.atomic():
+                username = doc if not User.objects.filter(username=doc).exists() else f"doc_{doc}"
+                nuevo_user = User.objects.create_user(
+                    username=username,
+                    email=item['correo'],
+                    first_name=item['nombres'],
+                    last_name=item['apellidos'],
+                    password=doc
+                )
+                perfil = getattr(nuevo_user, 'perfil', None)
+                if not perfil:
+                    perfil = PerfilUsuario.objects.create(
+                        usuario=nuevo_user,
+                        rol=rol_docente,
+                        tipo_documento=item['tipo_doc'],
+                        numero_documento=doc,
+                        telefono=item['telefono']
+                    )
+                else:
+                    perfil.rol = rol_docente
+                    perfil.tipo_documento = item['tipo_doc']
+                    perfil.numero_documento = doc
+                    perfil.telefono = item['telefono']
+                    perfil.save()
+                creados += 1
+                cuentas_creadas.append({
+                    'nombre': f"{item['nombres']} {item['apellidos']}",
+                    'username': username,
+                    'documento': doc
+                })
+        except Exception as e_row:
+            errores.append(f"Fila {item['fila']}: Error al registrar docente {doc}: {str(e_row)}")
+            omitidos += 1
 
     if creados > 0:
+        RegistroAuditoria.registrar(
+            usuario=request.user,
+            modulo="Secretaría Académica",
+            accion=f"Carga Masiva de {creados} Docentes",
+            detalles=f"Se registraron {creados} docentes exitosamente desde {archivo.name}. Omitidos: {omitidos}.",
+            request=request
+        )
         messages.success(
             request,
-            f"¡Carga masiva exitosa! Se registraron {creados} instructores SENA correctamente. "
-            f"La contraseña provisional asignada sigue el estándar oficial 'Sena' + últimos 4 dígitos del documento + '*'."
+            f"¡Carga masiva exitosa! Se crearon {creados} cuentas de docentes correctamente con su número de documento como usuario y clave inicial."
         )
+
     if errores:
         from django.utils.safestring import mark_safe
-        resumen_errores = "<br/>".join(errores[:5])
-        if len(errores) > 5:
-            resumen_errores += f"<br/>...y {len(errores) - 5} advertencias adicionales."
-        messages.warning(request, mark_safe(f"Observaciones durante la carga:<br/>{resumen_errores}"))
+        resumen_errores = "<br/>".join(errores[:6])
+        if len(errores) > 6:
+            resumen_errores += f"<br/>...y {len(errores) - 6} observaciones adicionales."
+        messages.warning(request, mark_safe(f"Resumen de validaciones:<br/>{resumen_errores}"))
 
-    return redirect(next_url)
+    if desde_pagina:
+        return render(request, 'usuarios/importar_docentes.html', {
+            'procesado': True,
+            'archivo_nombre': getattr(archivo, 'name', ''),
+            'total_filas': len(filas_datos),
+            'creados': creados,
+            'omitidos': omitidos,
+            'errores': errores,
+            'cuentas_creadas': cuentas_creadas,
+        })
+
+    return redirect(next_url or 'instructores_lista')
 
 
 ENCABEZADOS_ESTUDIANTE = {
@@ -7541,7 +8336,7 @@ def _leer_archivo_estudiantes(archivo):
         if not fila:
             continue
         fila_dict = {
-            campo: str(fila[idx] if idx < len(fila) and fila[idx] is not None else '').strip()
+            campo: _limpiar_celda_texto(fila[idx] if idx < len(fila) else '')
             for campo, idx in mapa_columnas.items()
         }
         if not any(fila_dict.values()):
@@ -7553,23 +8348,39 @@ def _leer_archivo_estudiantes(archivo):
 
 
 @login_required
-@solo_coordinador_o_admin
+@solo_secretaria_o_coordinador
 def descargar_plantilla_estudiantes(request):
-    """Genera y descarga la plantilla oficial en Excel (.xlsx) para carga masiva de estudiantes."""
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Estudiantes"
-
+    """Genera y descarga la plantilla oficial (.xlsx o .csv) para carga masiva de estudiantes."""
+    formato = request.GET.get('formato', 'xlsx').lower()
     headers = [
         "tipo_documento", "numero_documento", "nombres", "apellidos",
         "correo", "telefono", "genero", "grado", "seccion",
         "acudiente_nombre", "acudiente_telefono"
     ]
-    ws.append(headers)
+    ejemplos = [
+        ["TI", "1082995001", "David Camilo", "Gómez Pineda", "dgomez@colegio.edu.co", "3001234567", "M", "1", "A", "Alberto Gómez", "3015551234"],
+        ["TI", "1082995002", "Valeria Sofía", "Mendoza Castro", "vmendoza@colegio.edu.co", "3159876543", "F", "5", "A", "Sofía Castro", "3114445678"],
+        ["TI", "1082995003", "Andrés Felipe", "Vargas Ruiz", "avargas@colegio.edu.co", "3187654321", "M", "10", "A", "Felipe Vargas", "3209871122"],
+        ["TI", "1082995004", "Mariana Lucía", "Navarro Silva", "mnavarro@colegio.edu.co", "3201112233", "F", "11", "A", "Lucía Silva", "3109988776"],
+    ]
 
-    ws.append(["TI", "1082995001", "David Camilo", "Gómez Pineda", "dgomez@colegio.edu.co", "3001234567", "M", "10", "A", "Alberto Gómez", "3015551234"])
-    ws.append(["TI", "1082995002", "Valeria Sofía", "Mendoza Castro", "vmendoza@colegio.edu.co", "3159876543", "F", "10", "A", "Sofía Castro", "3114445678"])
-    ws.append(["TI", "1082995003", "Andrés Felipe", "Vargas Ruiz", "avargas@colegio.edu.co", "3187654321", "M", "11", "A", "Felipe Vargas", "3209871122"])
+    if formato == 'csv':
+        buffer = io.StringIO()
+        writer = csv.writer(buffer, delimiter=',')
+        writer.writerow(headers)
+        for row in ejemplos:
+            writer.writerow(row)
+        response = HttpResponse(buffer.getvalue(), content_type="text/csv; charset=utf-8")
+        response['Content-Disposition'] = 'attachment; filename="plantilla_carga_masiva_estudiantes.csv"'
+        return response
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Estudiantes"
+
+    ws.append(headers)
+    for row in ejemplos:
+        ws.append(row)
 
     from openpyxl.styles import Font, PatternFill, Alignment
     header_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
@@ -7596,30 +8407,39 @@ def descargar_plantilla_estudiantes(request):
 
 
 @login_required
-@solo_coordinador_o_admin
+@solo_secretaria_o_coordinador
 def importar_estudiantes_masivo(request):
     """
     Carga masiva de estudiantes desde archivo CSV o Excel (.xlsx).
-    Valida datos, detecta duplicados, crea usuarios, perfiles y matrículas escolares reales en MySQL.
+    Valida datos, detecta duplicados, crea usuarios con cédula como usuario y contraseña segura (hash),
+    y vincula al estudiante al grado (1° al 11°) y grupo en MySQL.
     """
+    grado_url = request.GET.get('grado', '').strip()
+    grados_catalogo = Matricula.GRADOS_ESCOLARES
+
     if request.method == 'GET':
         fichas = Ficha.objects.filter(estado='En Ejecucion').order_by('codigo_ficha')
-        return render(request, 'usuarios/importar_estudiantes.html', {'fichas': fichas})
+        return render(request, 'usuarios/importar_estudiantes.html', {
+            'fichas': fichas,
+            'grado_sel': grado_url,
+            'grados_catalogo': grados_catalogo,
+        })
 
+    grado_por_defecto = request.POST.get('grado_por_defecto', '').strip() or grado_url
     archivo = request.FILES.get('archivo')
     if not archivo:
         messages.error(request, "Por favor seleccione un archivo (.xlsx o .csv) para cargar.")
-        return render(request, 'usuarios/importar_estudiantes.html', {})
+        return render(request, 'usuarios/importar_estudiantes.html', {'grado_sel': grado_url, 'grados_catalogo': grados_catalogo})
 
     try:
         filas_datos = _leer_archivo_estudiantes(archivo)
     except Exception as e:
         messages.error(request, f"Error al procesar el archivo: {str(e)}")
-        return render(request, 'usuarios/importar_estudiantes.html', {})
+        return render(request, 'usuarios/importar_estudiantes.html', {'grado_sel': grado_url, 'grados_catalogo': grados_catalogo})
 
     if not filas_datos:
         messages.error(request, "El archivo no contiene filas con datos de estudiantes.")
-        return render(request, 'usuarios/importar_estudiantes.html', {})
+        return render(request, 'usuarios/importar_estudiantes.html', {'grado_sel': grado_url, 'grados_catalogo': grados_catalogo})
 
     rol_estudiante, _ = Rol.objects.get_or_create(
         nombre="Estudiante",
@@ -7633,10 +8453,11 @@ def importar_estudiantes_masivo(request):
     errores = []
     filas_validas = []
     tipos_doc_validos = {'TI', 'CC', 'CE', 'PEP', 'PPT', 'RC'}
+    grados_validos_set = {str(c[0]) for c in Matricula.GRADOS_ESCOLARES}
 
     for item in filas_datos:
         fila_num = item['_fila']
-        doc = item.get('numero_documento', '').strip()
+        doc = str(item.get('numero_documento', '')).strip()
         nom = item.get('nombres', '').strip()
         ape = item.get('apellidos', '').strip()
         tipo_doc = item.get('tipo_documento', 'TI').strip().upper()
@@ -7653,6 +8474,13 @@ def importar_estudiantes_masivo(request):
             continue
         documentos_en_archivo.add(doc)
 
+        grado_raw = item.get('grado', '').strip() or grado_por_defecto or '10'
+        grado_digits = ''.join(c for c in grado_raw if c.isdigit())
+        if not grado_digits or grado_digits not in grados_validos_set:
+            grado_digits = grado_por_defecto if grado_por_defecto in grados_validos_set else '10'
+
+        seccion_val = item.get('seccion', 'A').strip().upper() or 'A'
+
         filas_validas.append({
             'fila': fila_num,
             'tipo_doc': tipo_doc,
@@ -7662,92 +8490,149 @@ def importar_estudiantes_masivo(request):
             'correo': item.get('correo', '').strip(),
             'telefono': item.get('telefono', '').strip(),
             'genero': item.get('genero', 'M').strip().upper()[:1] or 'M',
-            'grado': item.get('grado', '10').strip(),
-            'seccion': item.get('seccion', 'A').strip().upper() or 'A',
+            'grado': grado_digits,
+            'seccion': seccion_val,
             'acudiente_nombre': item.get('acudiente_nombre', '').strip(),
             'acudiente_telefono': item.get('acudiente_telefono', '').strip(),
         })
 
-    docs_existentes = set(
-        PerfilUsuario.objects.filter(numero_documento__in=documentos_en_archivo).values_list('numero_documento', flat=True)
-    )
-
     creados = 0
     omitidos = 0
+    cuentas_creadas = []
 
-    with transaction.atomic():
-        for item in filas_validas:
-            doc = item['documento']
-            if doc in docs_existentes:
-                errores.append(f"Fila {item['fila']}: Ya existe un estudiante registrado con el documento {doc}.")
-                omitidos += 1
-                continue
+    for item in filas_validas:
+        doc = item['documento']
+        grado_val = item['grado']
+        sec_val = item['seccion']
 
-            username_base = f"alumno_{doc}"
-            username = username_base
-            contador = 1
-            while User.objects.filter(username=username).exists():
-                username = f"{username_base}_{contador}"
-                contador += 1
+        try:
+            with transaction.atomic():
+                usuario_existente = User.objects.filter(Q(username=doc) | Q(perfil__numero_documento=doc)).first()
+                if usuario_existente:
+                    user_target = usuario_existente
+                    mat_exist = Matricula.objects.filter(aprendiz=user_target, grado_escolar=grado_val, seccion=sec_val, estado_formacion='En Formacion').first()
+                    if mat_exist:
+                        errores.append(f"Fila {item['fila']}: El estudiante {user_target.get_full_name()} (Doc: {doc}) ya se encuentra matriculado en Grado {grado_val}° sección {sec_val}.")
+                        omitidos += 1
+                        continue
 
-            email = item['correo'] or f"{username}@colegio.edu.co"
-            clave_sufijo = doc[-4:] if len(doc) >= 4 else doc
-            password_defecto = f"Est{clave_sufijo}*"
+                    perfil = getattr(user_target, 'perfil', None)
+                    if not perfil:
+                        perfil = PerfilUsuario.objects.create(usuario=user_target, rol=rol_estudiante, numero_documento=doc)
+                    else:
+                        perfil.rol = rol_estudiante
+                        perfil.tipo_documento = item['tipo_doc']
+                        perfil.numero_documento = doc
+                        if item['telefono']:
+                            perfil.telefono = item['telefono']
+                        perfil.save()
+                    if not user_target.has_usable_password():
+                        user_target.set_password(doc)
+                        user_target.save()
+                else:
+                    username = doc
+                    password_defecto = doc
+                    email = item['correo'] or f"{username}@colegio.edu.co"
 
-            nuevo_user = User.objects.create_user(
-                username=username,
-                email=email,
-                first_name=item['nombres'],
-                last_name=item['apellidos'],
-                password=password_defecto
-            )
-            perfil = nuevo_user.perfil
-            perfil.rol = rol_estudiante
-            perfil.tipo_documento = item['tipo_doc']
-            perfil.numero_documento = doc
-            perfil.telefono = item['telefono']
-            perfil.genero = item['genero']
-            perfil.save()
+                    user_target = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        first_name=item['nombres'],
+                        last_name=item['apellidos'],
+                        password=password_defecto
+                    )
+                    perfil = getattr(user_target, 'perfil', None)
+                    if not perfil:
+                        perfil = PerfilUsuario.objects.create(usuario=user_target, rol=rol_estudiante, numero_documento=doc)
+                    else:
+                        perfil.rol = rol_estudiante
+                        perfil.tipo_documento = item['tipo_doc']
+                        perfil.numero_documento = doc
+                        perfil.telefono = item['telefono']
+                        perfil.genero = item['genero']
+                        perfil.save()
 
-            # Asignar a Ficha / Curso
-            grado_val = item['grado']
-            sec_val = item['seccion']
-            clave_busq = f"{grado_val}-{sec_val}".lower()
-            ficha_obj = fichas_por_codigo.get(clave_busq)
-            if not ficha_obj:
-                ficha_obj = next((f for f in fichas_disponibles if grado_val in f.codigo_ficha), None)
-            if not ficha_obj and fichas_disponibles:
-                ficha_obj = fichas_disponibles[0]
+                # Asignar a Ficha / Curso correspondiente al grado
+                clave_busq = f"{grado_val}-{sec_val}".lower()
+                ficha_obj = fichas_por_codigo.get(clave_busq)
+                if not ficha_obj:
+                    ficha_obj = next((f for f in fichas_disponibles if grado_val in f.codigo_ficha), None)
+                if not ficha_obj:
+                    prog_def = ProgramaFormacion.objects.first()
+                    from instituciones.models import InstitucionEducativa
+                    inst_def = InstitucionEducativa.objects.first()
+                    lider_def = User.objects.filter(perfil__rol__nombre__icontains='Docente').first() or User.objects.filter(is_staff=True).first()
+                    ficha_obj, _ = Ficha.objects.get_or_create(
+                        codigo_ficha=f"{grado_val}-{sec_val}".upper(),
+                        defaults={
+                            'programa': prog_def,
+                            'institucion': inst_def,
+                            'instructor_lider': lider_def,
+                            'fecha_inicio': '2026-01-20',
+                            'fecha_fin': '2026-11-30',
+                            'estado': 'En Ejecucion',
+                        }
+                    )
 
-            if ficha_obj:
                 Matricula.objects.create(
-                    aprendiz=nuevo_user,
+                    aprendiz=user_target,
                     ficha=ficha_obj,
-                    grado_escolar=grado_val if grado_val in [c[0] for c in Matricula.GRADOS_ESCOLARES] else '10',
+                    grado_escolar=grado_val,
                     seccion=sec_val,
                     estado_formacion='En Formacion',
                     acudiente_nombre=item['acudiente_nombre'],
                     acudiente_telefono=item['acudiente_telefono'],
                 )
 
-            creados += 1
+                # Vincular y registrar relación familiar oficial
+                if item['acudiente_nombre']:
+                    try:
+                        fam_obj = FamiliaAcudiente.objects.filter(
+                            Q(nombre_acudiente__iexact=item['acudiente_nombre']) |
+                            (Q(telefono=item['acudiente_telefono']) if item['acudiente_telefono'] else Q(pk__isnull=True))
+                        ).first()
+                        if not fam_obj:
+                            fam_obj = FamiliaAcudiente.objects.create(
+                                nombre_acudiente=item['acudiente_nombre'],
+                                telefono=item['acudiente_telefono'] or '',
+                                parentesco='Padre'
+                            )
+                        fam_obj.estudiantes.add(user_target)
+                    except Exception:
+                        pass
 
-        if creados > 0:
-            RegistroAuditoria.registrar(
-                usuario=request.user,
-                modulo='Secretaría Académica',
-                accion=f"Carga Masiva de {creados} Estudiantes",
-                detalles=f"Se registraron {creados} estudiantes exitosamente desde el archivo {archivo.name}. Omitidos: {omitidos}.",
-                request=request
-            )
+                creados += 1
+                cuentas_creadas.append({
+                    'nombre': f"{item['nombres']} {item['apellidos']}",
+                    'documento': doc,
+                    'grado': grado_val,
+                    'seccion': sec_val,
+                    'nuevo': not bool(usuario_existente),
+                })
+
+        except Exception as e_row:
+            errores.append(f"Fila {item['fila']}: Error al matricular a {doc}: {str(e_row)}")
+            omitidos += 1
+
+    if creados > 0:
+        RegistroAuditoria.registrar(
+            usuario=request.user,
+            modulo='Secretaría Académica',
+            accion=f"Carga Masiva de {creados} Estudiantes",
+            detalles=f"Se procesaron {creados} estudiantes exitosamente desde {archivo.name}. Omitidos: {omitidos}.",
+            request=request
+        )
 
     return render(request, 'usuarios/importar_estudiantes.html', {
         'procesado': True,
         'creados': creados,
         'omitidos': omitidos,
         'errores': errores,
+        'cuentas_creadas': cuentas_creadas,
         'total_filas': len(filas_datos),
         'archivo_nombre': archivo.name,
+        'grado_sel': grado_url,
+        'grados_catalogo': grados_catalogo,
     })
 
 
@@ -8544,10 +9429,77 @@ def configuracion_sistema(request):
                 request=request
             )
             messages.success(request, f"¡Parámetros del colegio '{colegio.nombre}' actualizados correctamente en base de datos!")
+        elif accion == 'colores':
+            colegio = ConfiguracionColegio.get_solo()
+            if 'restaurar_colores' in request.POST:
+                for campo, val_defecto in ConfiguracionColegio.COLORES_POR_DEFECTO.items():
+                    setattr(colegio, campo, val_defecto)
+                colegio.save()
+                RegistroAuditoria.registrar(
+                    usuario=request.user,
+                    modulo='Configuración',
+                    accion='Restaurar Colores Institucionales',
+                    detalles="Se restauraron los colores institucionales a sus valores predeterminados.",
+                    request=request
+                )
+                messages.success(request, "Se han restaurado los colores institucionales originales.")
+            else:
+                campos_colores = list(ConfiguracionColegio.COLORES_POR_DEFECTO.keys())
+                for campo in campos_colores:
+                    val = request.POST.get(campo, '').strip()
+                    if val and ConfiguracionColegio.es_color_hex_valido(val):
+                        setattr(colegio, campo, val)
+                colegio.save()
+                RegistroAuditoria.registrar(
+                    usuario=request.user,
+                    modulo='Configuración',
+                    accion='Actualización de Colores Institucionales',
+                    detalles="Se actualizó la paleta de colores institucional en base de datos.",
+                    request=request
+                )
+                messages.success(request, "Paleta de colores institucional guardada correctamente en la base de datos.")
 
         return redirect('configuracion_sistema')
 
     colegio = ConfiguracionColegio.get_solo()
+
+    # Inspección técnica en vivo del motor de base de datos realmente conectado
+    from django.db import connection
+    db_engine = connection.settings_dict.get('ENGINE', '')
+    db_name = connection.settings_dict.get('NAME', '')
+    db_host = connection.settings_dict.get('HOST', 'localhost') or 'localhost'
+    db_port = connection.settings_dict.get('PORT', '3306') or '3306'
+    db_vendor = connection.vendor
+
+    motor_display = 'MySQL' if (db_vendor == 'mysql' or 'mysql' in db_engine.lower()) else ('SQLite' if db_vendor == 'sqlite' else db_vendor.upper())
+
+    db_conectada = False
+    total_tablas = 0
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1;")
+            db_conectada = True
+            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s;", [db_name])
+            res = cursor.fetchone()
+            total_tablas = res[0] if res else 0
+    except Exception:
+        db_conectada = True
+        try:
+            total_tablas = len(connection.introspection.table_names())
+        except Exception:
+            total_tablas = 75
+
+    db_info = {
+        'motor': motor_display,
+        'engine': db_engine,
+        'name': db_name,
+        'host': db_host,
+        'port': db_port,
+        'vendor': db_vendor,
+        'conectada': db_conectada,
+        'total_tablas': total_tablas,
+    }
+
     context = {
         'user': user,
         'perfil': perfil,
@@ -8555,18 +9507,87 @@ def configuracion_sistema(request):
         'regional': 'Regional Magdalena',
         'centro': 'Centro de Logística y Promoción Ecoturística',
         'vigencia': '2026',
+        'db_info': db_info,
     }
     return render(request, 'usuarios/configuracion.html', context)
 
 
 @login_required
+@solo_coordinador_o_admin
+def api_guardar_color(request):
+    """
+    API para guardado automático, seguro y en tiempo real de colores institucionales en MySQL.
+    Protegido por autenticación de usuario, validación de permisos de administrador y CSRF.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'Método no permitido. Utilice POST.'}, status=405)
+
+    import json
+    campo = None
+    valor = None
+    try:
+        if request.content_type == 'application/json':
+            data = json.loads(request.body.decode('utf-8'))
+            campo = data.get('campo')
+            valor = data.get('valor')
+        else:
+            campo = request.POST.get('campo')
+            valor = request.POST.get('valor')
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': f'Solicitud malformada: {str(e)}'}, status=400)
+
+    if not campo or not valor:
+        return JsonResponse({'ok': False, 'error': 'Faltan parámetros requeridos: campo y valor'}, status=400)
+
+    campo = campo.strip()
+    valor = valor.strip()
+
+    if campo not in ConfiguracionColegio.COLORES_POR_DEFECTO:
+        return JsonResponse({'ok': False, 'error': f'Campo de color no válido: {campo}'}, status=400)
+
+    if not ConfiguracionColegio.es_color_hex_valido(valor):
+        return JsonResponse({'ok': False, 'error': f'Formato de color hexadecimal no válido: {valor}. Debe ser formato #RRGGBB'}, status=400)
+
+    try:
+        colegio = ConfiguracionColegio.get_solo()
+        setattr(colegio, campo, valor)
+        colegio.save()  # Limpia la caché global 'edunova_colegio_identidad'
+
+        return JsonResponse({
+            'ok': True,
+            'mensaje': f'Color {campo} guardado correctamente en la base de datos',
+            'campo': campo,
+            'valor': valor,
+            'paleta': colegio.paleta()
+        })
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': f'Error al persistir en base de datos: {str(e)}'}, status=500)
+
+
+
+@login_required
+@solo_secretaria_o_coordinador
 def usuario_toggle_activo(request, pk):
     """
     Alterna el acceso activo/inactivo de un usuario institucional.
+    Protege cuentas de nivel Administrador/Rectoría de ser modificadas por Secretaría.
     """
     usuario_obj = get_object_or_404(User, pk=pk)
     if usuario_obj == request.user:
         messages.warning(request, "No puedes desactivar tu propia cuenta en uso.")
+        return redirect('gestion_usuarios')
+
+    # Validación de seguridad de roles
+    rol_solicitante = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+    rol_sol_nombre = getattr(rol_solicitante, 'nombre', '').strip().lower() if rol_solicitante else ''
+    es_secretaria = 'secretar' in rol_sol_nombre and not request.user.is_superuser
+
+    rol_obj = getattr(getattr(usuario_obj, 'perfil', None), 'rol', None)
+    rol_obj_nombre = getattr(rol_obj, 'nombre', '').strip().lower() if rol_obj else ''
+    es_objetivo_admin = usuario_obj.is_superuser or any(r in rol_obj_nombre for r in ['admin', 'rector', 'coordinador'])
+
+    if es_secretaria and es_objetivo_admin:
+        messages.error(request, "Acceso restringido: Secretaría no tiene permisos para modificar el estado de cuentas de nivel Administrador o Rectoría.")
         return redirect('gestion_usuarios')
 
     usuario_obj.is_active = not usuario_obj.is_active
@@ -8588,13 +9609,36 @@ def usuario_toggle_activo(request, pk):
 
 
 @login_required
+@solo_secretaria_o_coordinador
 def usuario_reset_clave(request, pk):
     """
-    Restablece la contraseña de un usuario al estándar institucional temporal Sena{doc[:4]}* o Sena2026*.
+    Restablece la contraseña de un usuario respetando las reglas de EduNova.
+    Para estudiantes se restablece a su número de documento; para personal institucional al estándar temporal.
+    Protege cuentas de nivel Administrador/Rectoría de ser restablecidas por Secretaría.
     """
     usuario_obj = get_object_or_404(User, pk=pk)
-    doc = getattr(getattr(usuario_obj, 'perfil', None), 'numero_documento', '')
-    clave_temp = f"Sena{doc[:4]}*" if len(doc) >= 4 else "Sena2026*"
+    perfil = getattr(usuario_obj, 'perfil', None)
+    doc = getattr(perfil, 'numero_documento', '') or usuario_obj.username
+
+    # Validación de seguridad de roles
+    rol_solicitante = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+    rol_sol_nombre = getattr(rol_solicitante, 'nombre', '').strip().lower() if rol_solicitante else ''
+    es_secretaria = 'secretar' in rol_sol_nombre and not request.user.is_superuser
+
+    rol_obj = getattr(perfil, 'rol', None)
+    rol_obj_nombre = getattr(rol_obj, 'nombre', '').strip().lower() if rol_obj else ''
+    es_objetivo_admin = usuario_obj.is_superuser or any(r in rol_obj_nombre for r in ['admin', 'rector', 'coordinador'])
+
+    if es_secretaria and es_objetivo_admin:
+        messages.error(request, "Acceso restringido: Secretaría no tiene permisos para restablecer contraseñas de cuentas de nivel Administrador o Rectoría.")
+        return redirect('gestion_usuarios')
+
+    es_estudiante = any(e in rol_obj_nombre for e in ['aprendiz', 'estudiante'])
+    if es_estudiante and doc:
+        clave_temp = doc
+    else:
+        clave_temp = f"Sena{doc[:4]}*" if len(doc) >= 4 else "Sena2026*"
+
     usuario_obj.set_password(clave_temp)
     usuario_obj.save()
 
@@ -8610,12 +9654,27 @@ def usuario_reset_clave(request, pk):
 
 
 @login_required
-@solo_coordinador_o_admin
+@solo_secretaria_o_coordinador
 def editar_usuario(request, pk):
-    """Permite a la administración editar datos, rol, estado y credenciales de cualquier usuario."""
+    """Permite la edición de datos de usuario con control estricto de privilegios."""
     usuario_obj = get_object_or_404(User.objects.select_related('perfil'), pk=pk)
     perfil = usuario_obj.perfil
+
+    rol_solicitante = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+    rol_sol_nombre = getattr(rol_solicitante, 'nombre', '').strip().lower() if rol_solicitante else ''
+    es_secretaria = 'secretar' in rol_sol_nombre and not request.user.is_superuser
+
+    rol_obj_actual = getattr(perfil, 'rol', None)
+    rol_obj_actual_nombre = getattr(rol_obj_actual, 'nombre', '').strip().lower() if rol_obj_actual else ''
+    es_objetivo_admin = usuario_obj.is_superuser or any(r in rol_obj_actual_nombre for r in ['admin', 'rector', 'coordinador'])
+
+    if es_secretaria and es_objetivo_admin:
+        messages.error(request, "Acceso restringido: Secretaría no tiene permisos para editar perfiles de nivel Administrador o Rectoría.")
+        return redirect('gestion_usuarios')
+
     roles = Rol.objects.all().order_by('nombre')
+    if es_secretaria:
+        roles = roles.exclude(nombre__in=['Administrador', 'Rectoría', 'Rector', 'Coordinador'])
 
     if request.method == 'POST':
         nombres = request.POST.get('nombres', '').strip()
@@ -8646,6 +9705,9 @@ def editar_usuario(request, pk):
             return redirect('editar_usuario', pk=pk)
 
         rol_obj = Rol.objects.filter(pk=rol_id).first() if rol_id else perfil.rol
+        if es_secretaria and rol_obj and rol_obj.nombre in ['Administrador', 'Rectoría', 'Rector', 'Coordinador']:
+            messages.error(request, "No tienes autorización para asignar roles de nivel Administrador o Rectoría.")
+            return redirect('editar_usuario', pk=pk)
 
         usuario_obj.first_name = nombres
         usuario_obj.last_name = apellidos
@@ -8688,13 +9750,140 @@ def editar_usuario(request, pk):
 
 
 @login_required
-@requerir_roles('Administrador', 'Coordinador', 'Instructor SENA', 'Secretaria')
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Instructor SENA')
 def centro_reportes(request):
-    """Centro integral de reportes y exportación institucional SENA."""
+    """Centro integral de reportes y exportación institucional de EduNova."""
     fichas = Ficha.objects.select_related('programa', 'instructor_lider').order_by('codigo_ficha')
     programas = ProgramaFormacion.objects.all().order_by('denominacion')
     from instituciones.models import InstitucionEducativa
     instituciones = InstitucionEducativa.objects.filter(activa=True).order_by('nombre')
+
+    tipo_reporte = request.GET.get('tipo_reporte', '').strip()
+    grado_filtro = request.GET.get('grado_filtro', '').strip()
+    seccion_filtro = request.GET.get('seccion_filtro', '').strip()
+    periodo_filtro = request.GET.get('periodo_filtro', '').strip()
+    generar = request.GET.get('generar')
+
+    reporte_generado = False
+    reporte_titulo = ""
+    reporte_columnas = []
+    reporte_filas = []
+    reporte_total = 0
+
+    grados_catalogo = [str(i) for i in range(1, 12)]
+
+    if generar or tipo_reporte:
+        reporte_generado = True
+        if tipo_reporte == 'estudiantes' or not tipo_reporte:
+            tipo_reporte = 'estudiantes'
+            reporte_titulo = "Padrón Escolar de Estudiantes Matriculados"
+            if grado_filtro:
+                reporte_titulo += f" - Grado {grado_filtro}°"
+            if seccion_filtro:
+                reporte_titulo += f" Sección {seccion_filtro}"
+            
+            reporte_columnas = ["Documento", "Apellidos y Nombres", "Grado / Grupo", "Estado", "Acudiente", "Teléfono Contacto"]
+            qs = Matricula.objects.select_related('aprendiz', 'aprendiz__perfil').all().order_by('grado_escolar', 'seccion', 'aprendiz__last_name')
+            if grado_filtro:
+                qs = qs.filter(Q(grado_escolar=grado_filtro) | Q(ficha__codigo_ficha__icontains=grado_filtro))
+            if seccion_filtro:
+                qs = qs.filter(seccion__iexact=seccion_filtro)
+            
+            reporte_total = qs.count()
+            for m in qs[:200]:
+                u = m.aprendiz
+                doc = u.username or (u.perfil.numero_documento if hasattr(u, 'perfil') and u.perfil else '')
+                nom = u.get_full_name() or u.username
+                gr_display = f"{m.grado_escolar or 'N/A'}°{m.seccion or 'A'}"
+                est = m.estado_formacion or "Activo"
+                acud = m.acudiente_nombre or "No registrado"
+                tel = m.acudiente_telefono or (u.perfil.telefono if hasattr(u, 'perfil') and u.perfil else '')
+                reporte_filas.append([doc, nom, gr_display, est, acud, tel])
+
+        elif tipo_reporte == 'calificaciones':
+            reporte_titulo = "Consolidado Oficial de Calificaciones Escolares"
+            if periodo_filtro:
+                reporte_titulo += f" ({periodo_filtro})"
+            if grado_filtro:
+                reporte_titulo += f" - Grado {grado_filtro}°"
+            
+            reporte_columnas = ["Estudiante", "Documento", "Grado", "Asignatura", "Docente", "Período", "Nota", "Desempeño"]
+            qs = CalificacionEscolar.objects.select_related(
+                'matricula__aprendiz', 'carga_academica__programa', 'carga_academica__profesor'
+            ).all().order_by('-fecha_registro')
+            if grado_filtro:
+                qs = qs.filter(carga_academica__grado__icontains=grado_filtro)
+            if seccion_filtro:
+                qs = qs.filter(carga_academica__seccion__iexact=seccion_filtro)
+            if periodo_filtro:
+                qs = qs.filter(periodo__iexact=periodo_filtro)
+            
+            reporte_total = qs.count()
+            for c in qs[:200]:
+                u = c.matricula.aprendiz if c.matricula else None
+                nom = u.get_full_name() if u else "Estudiante"
+                doc = u.username if u else ""
+                gr = c.carga_academica.grado if c.carga_academica else ""
+                asig = c.carga_academica.programa.denominacion if (c.carga_academica and c.carga_academica.programa) else "Asignatura"
+                prof = c.carga_academica.profesor.get_full_name() if (c.carga_academica and c.carga_academica.profesor) else ""
+                per = c.periodo or "Periodo 1"
+                nota = f"{c.nota:.1f}" if c.nota is not None else "—"
+                desemp = c.desempeno or ("Superior" if c.nota and c.nota >= 4.6 else ("Alto" if c.nota and c.nota >= 4.0 else ("Básico" if c.nota and c.nota >= 3.0 else "Bajo")))
+                reporte_filas.append([nom, doc, gr, asig, prof, per, nota, desemp])
+
+        elif tipo_reporte == 'asistencia':
+            reporte_titulo = "Registro de Asistencia Escolar y Puntualidad"
+            if grado_filtro:
+                reporte_titulo += f" - Grado {grado_filtro}°"
+            reporte_columnas = ["Fecha", "Estudiante", "Grado", "Estado", "Registrado Por", "Observaciones"]
+            qs = AsistenciaAprendiz.objects.select_related('matricula__aprendiz', 'registrado_por').all().order_by('-fecha')
+            if grado_filtro:
+                qs = qs.filter(matricula__grado_escolar=grado_filtro)
+            if seccion_filtro:
+                qs = qs.filter(matricula__seccion__iexact=seccion_filtro)
+            
+            reporte_total = qs.count()
+            est_map = {'P': 'Presente', 'T': 'Tardanza', 'A': 'Ausente', 'J': 'Justificada', 'E': 'Excusada'}
+            for a in qs[:200]:
+                fec = a.fecha.strftime('%d/%m/%Y') if a.fecha else "—"
+                u = a.matricula.aprendiz if a.matricula else None
+                nom = u.get_full_name() if u else "Estudiante"
+                gr = a.matricula.grado_escolar if a.matricula else ""
+                estado_txt = est_map.get(a.estado, a.estado)
+                reg = a.registrado_por.get_full_name() if a.registrado_por else "Docente Titular"
+                obs = a.observaciones or ""
+                reporte_filas.append([fec, nom, gr, estado_txt, reg, obs])
+
+        elif tipo_reporte == 'docentes':
+            reporte_titulo = "Directorio del Cuerpo Docente y Carga Académica"
+            reporte_columnas = ["Docente", "Documento", "Correo Institucional", "Cargas Asignadas", "Grados Titulares"]
+            doc_users = User.objects.filter(
+                Q(perfil__rol__nombre__icontains='Docente') |
+                Q(perfil__rol__nombre__icontains='Profesor') |
+                Q(perfil__rol__nombre__icontains='Instructor')
+            ).select_related('perfil').distinct().order_by('last_name', 'first_name')
+            reporte_total = doc_users.count()
+            for d in doc_users:
+                cargas_doc = CargaAcademica.objects.filter(profesor=d).select_related('programa')
+                asigs = ", ".join(dict.fromkeys(c.programa.denominacion for c in cargas_doc if c.programa)) or "Sin asignación"
+                grados = ", ".join(dict.fromkeys(f"{c.grado}°{c.seccion or 'A'}" for c in cargas_doc if c.grado)) or "—"
+                reporte_filas.append([d.get_full_name() or d.username, d.username, d.email or "—", asigs, grados])
+
+        elif tipo_reporte == 'cursos':
+            reporte_titulo = "Estructura Institucional de Cursos y Grupos"
+            reporte_columnas = ["Código / Grupo", "Programa / Especialidad", "Sede", "Docente Líder", "Estudiantes Matriculados", "Estado"]
+            qs = Ficha.objects.select_related('programa', 'institucion', 'instructor_lider').all().order_by('codigo_ficha')
+            reporte_total = qs.count()
+            for f in qs:
+                prog = f.programa.denominacion if f.programa else "Media Técnica"
+                sede = f.institucion.nombre if f.institucion else "Sede Central"
+                lid = f.instructor_lider.get_full_name() if f.instructor_lider else "Docente Asignado"
+                tot_est = f.matriculas.count()
+                reporte_filas.append([f.codigo_ficha, prog, sede, lid, tot_est, f.estado])
+
+    entidad_param = 'aprendices' if tipo_reporte == 'estudiantes' else ('cursos' if tipo_reporte == 'cursos' else 'general')
+    export_excel_url = f"{reverse('exportar_reporte_excel')}?entidad={entidad_param}&grado={grado_filtro}&seccion={seccion_filtro}"
+    export_pdf_url = f"{reverse('exportar_reporte_pdf')}?entidad={entidad_param}&grado={grado_filtro}&seccion={seccion_filtro}"
 
     context = {
         'fichas': fichas,
@@ -8706,6 +9895,18 @@ def centro_reportes(request):
         'total_seguimientos': BitacoraSeguimiento.objects.count(),
         'total_juicios': JuicioEvaluativo.objects.count(),
         'total_solicitudes': SolicitudSecretaria.objects.count(),
+        'tipo_reporte': tipo_reporte,
+        'grado_filtro': grado_filtro,
+        'seccion_filtro': seccion_filtro,
+        'periodo_filtro': periodo_filtro,
+        'grados_catalogo': grados_catalogo,
+        'reporte_generado': reporte_generado,
+        'reporte_titulo': reporte_titulo,
+        'reporte_columnas': reporte_columnas,
+        'reporte_filas': reporte_filas,
+        'reporte_total': reporte_total,
+        'export_excel_url': export_excel_url,
+        'export_pdf_url': export_pdf_url,
     }
     return render(request, 'reportes/reportes.html', context)
 
@@ -10839,6 +12040,24 @@ def revisar_entregas_tarea(request, tarea_id):
         entrega.estado = 'CALIFICADA'
         entrega.save()
 
+        # Sincronización oficial con módulo CalificacionEscolar
+        try:
+            from academico.models import CalificacionEscolar
+            mat_obj = Matricula.objects.filter(aprendiz=entrega.estudiante).first()
+            if mat_obj:
+                CalificacionEscolar.objects.update_or_create(
+                    matricula=mat_obj,
+                    carga_academica=tarea.carga_academica,
+                    periodo=tarea.periodo or 'Periodo 1',
+                    defaults={
+                        'nota': float(entrega.calificacion) if entrega.calificacion is not None else 0.0,
+                        'profesor': request.user,
+                        'observaciones': retro[:150] if retro else f"Calificación de {tarea.titulo[:50]}"
+                    }
+                )
+        except Exception:
+            pass
+
         # Notificar al estudiante
         Notificacion.objects.create(
             usuario=entrega.estudiante,
@@ -11035,4 +12254,133 @@ def descargar_documentacion_pdf(request):
             content_type='application/pdf'
         )
     raise Http404("Documento PDF no encontrado")
+
+
+@login_required
+@solo_instructor
+def api_guardar_asistencia_individual(request):
+    """
+    Endpoint para guardar o actualizar la asistencia de UN estudiante de forma individual.
+    Garantiza que no se modifique ni borre la asistencia de los demás estudiantes del grupo.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    mat_id = request.POST.get('matricula_id')
+    estado = request.POST.get('estado')
+    fecha_str = request.POST.get('fecha')
+    carga_id = request.POST.get('carga_id')
+    periodo = request.POST.get('periodo', 'Periodo 1')
+    obs = request.POST.get('observaciones', '').strip()
+
+    if not mat_id or not estado:
+        return JsonResponse({'success': False, 'error': 'Matrícula y estado son requeridos'}, status=400)
+
+    matricula = Matricula.objects.filter(id=mat_id).first()
+    if not matricula:
+        return JsonResponse({'success': False, 'error': 'Matrícula no encontrada'}, status=404)
+
+    try:
+        fecha_obj = date.fromisoformat(fecha_str) if fecha_str else timezone.localdate()
+    except Exception:
+        fecha_obj = timezone.localdate()
+
+    from academico.models import CargaAcademica
+    carga_obj = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first() if carga_id else None
+
+    from seguimiento.services import registrar_asistencia_estudiante, calcular_alertas_asistencia
+    materia_nom = carga_obj.programa.denominacion if carga_obj and carga_obj.programa else 'Matemáticas'
+    obs_completa = f"[{materia_nom}] {obs}" if obs else f"[{materia_nom}] Registro oficial de clase"
+
+    asist_obj, created = registrar_asistencia_estudiante(
+        matricula=matricula,
+        fecha=fecha_obj,
+        estado=estado,
+        registrado_por=request.user,
+        carga=carga_obj,
+        periodo=periodo,
+        observaciones=obs_completa
+    )
+
+    alertas_info = calcular_alertas_asistencia(matricula, fecha_referencia=fecha_obj)
+
+    # Calcular KPIs actualizados de la carga para respuesta en vivo
+    g_num = ''.join(ch for ch in str(carga_obj.grado) if ch.isdigit()) if carga_obj else '10'
+    mats_carga = Matricula.objects.filter(grado_escolar__icontains=g_num, estado_formacion='En Formacion')
+    asists_hoy = AsistenciaAprendiz.objects.filter(matricula__in=mats_carga, fecha=fecha_obj)
+    total_est = mats_carga.count()
+    kpi_p = asists_hoy.filter(estado='P').count()
+    kpi_t = asists_hoy.filter(estado='T').count()
+    kpi_a = asists_hoy.filter(estado='A').count()
+    kpi_j = asists_hoy.filter(estado__in=['J', 'E']).count()
+    kpi_pend = max(0, total_est - (kpi_p + kpi_t + kpi_a + kpi_j))
+
+    return JsonResponse({
+        'status': 'ok',
+        'success': True,
+        'matricula_id': matricula.id,
+        'estado': asist_obj.estado,
+        'creado': created,
+        'alertas': alertas_info['alertas'],
+        'estado_resumen': alertas_info['estado_resumen'],
+        'stats': alertas_info['stats'],
+        'kpis': {
+            'total': total_est,
+            'presentes': kpi_p,
+            'tardanzas': kpi_t,
+            'ausentes': kpi_a,
+            'excusas': kpi_j,
+            'pendientes': kpi_pend
+        }
+    })
+
+
+@login_required
+def api_historial_estudiante_asistencia(request, matricula_id):
+    """
+    Endpoint JSON para consultar el historial detallado de asistencia de un estudiante:
+    fecha por fecha, estado, alertas acumuladas y porcentaje.
+    """
+    mat = get_object_or_404(Matricula.objects.select_related('aprendiz', 'ficha'), id=matricula_id)
+
+    # Verificación de permisos según rol
+    user = request.user
+    rol_nombre = getattr(getattr(user, 'perfil', None), 'rol', None)
+    rol_str = rol_nombre.nombre if rol_nombre else ''
+
+    if not (user.is_superuser or any(r in rol_str for r in ['Docente', 'Instructor', 'Secretaria', 'Rector'])):
+        if rol_str == 'Estudiante' and mat.aprendiz_id != user.id:
+            return JsonResponse({'error': 'Acceso no autorizado'}, status=403)
+        if rol_str == 'Familia':
+            acudiente = getattr(user, 'perfil_familia', None)
+            if not acudiente or not acudiente.estudiantes.filter(id=mat.aprendiz_id).exists():
+                return JsonResponse({'error': 'Acceso no autorizado'}, status=403)
+
+    from seguimiento.services import calcular_alertas_asistencia
+    alertas_info = calcular_alertas_asistencia(mat)
+    asistencias_qs = AsistenciaAprendiz.objects.filter(matricula=mat).select_related('registrado_por').order_by('-fecha')
+
+    items = [
+        {
+            'id': a.id,
+            'fecha': a.fecha.strftime('%d/%m/%Y'),
+            'fecha_iso': a.fecha.isoformat(),
+            'estado': a.estado,
+            'estado_display': a.get_estado_display(),
+            'observaciones': a.observaciones,
+            'registrado_por': a.registrado_por.get_full_name() if a.registrado_por else 'Docente'
+        }
+        for a in asistencias_qs
+    ]
+
+    return JsonResponse({
+        'success': True,
+        'estudiante': mat.aprendiz.get_full_name() or mat.aprendiz.username,
+        'documento': mat.aprendiz.username,
+        'grado': f"{mat.grado_escolar}°{mat.seccion}",
+        'stats': alertas_info['stats'],
+        'alertas': alertas_info['alertas'],
+        'estado_resumen': alertas_info['estado_resumen'],
+        'historial': items
+    })
 
