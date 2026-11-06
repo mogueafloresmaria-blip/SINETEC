@@ -50,6 +50,14 @@ class EstudianteForm(forms.Form):
 
     def clean_numero_documento(self):
         numero_documento = self.cleaned_data['numero_documento'].strip()
+        est_existente = PerfilUsuario.buscar_estudiante_por_documento(
+            numero_documento,
+            exclude_user_id=self.estudiante.usuario_id if self.estudiante else None
+        )
+        if est_existente:
+            raise forms.ValidationError(
+                f'No se permite crear otra cuenta: el documento {numero_documento} ya pertenece al estudiante {est_existente.get_full_name()}.'
+            )
         consulta = PerfilUsuario.objects.filter(numero_documento=numero_documento)
         if self.estudiante is not None:
             consulta = consulta.exclude(pk=self.estudiante.pk)

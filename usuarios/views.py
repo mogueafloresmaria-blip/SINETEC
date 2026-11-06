@@ -1494,7 +1494,7 @@ def matriculas_lista(request):
         {
             'numero': str(i),
             'nombre': f"Grado {i}°",
-            'nivel': 'Primaria' if i <= 5 else ('Básica Secundaria' if i <= 9 else 'Educación Media (Bachillerato)'),
+            'nivel': 'Básica Primaria' if i <= 5 else ('Básica Secundaria' if i <= 9 else 'Educación Media'),
             'icono': grados_iconos.get(str(i), '📚'),
             'inactivo': False,
             'activo': True,
@@ -1534,6 +1534,8 @@ def registrar_aprendiz(request):
     if not fichas.exists():
         fichas = Ficha.objects.select_related('programa', 'institucion').order_by('codigo_ficha')
 
+    hoy = timezone.localdate()
+
     if request.method == 'POST':
         nombres = (request.POST.get('nombres') or request.POST.get('first_name') or '').strip()
         apellidos = (request.POST.get('apellidos') or request.POST.get('last_name') or '').strip()
@@ -1541,16 +1543,45 @@ def registrar_aprendiz(request):
         correo = (request.POST.get('correo') or request.POST.get('email') or '').strip()
         telefono = (request.POST.get('telefono') or '').strip()
         genero = (request.POST.get('genero') or '').strip()
+        direccion = (request.POST.get('direccion') or '').strip()
+        lugar_nacimiento = (request.POST.get('lugar_nacimiento') or '').strip()
         fecha_nacimiento = request.POST.get('fecha_nacimiento') or None
         ficha_raw = request.POST.get('ficha_id') or request.POST.get('ficha')
         grado_input = (request.POST.get('grado_escolar') or request.POST.get('grado') or '').strip()
         seccion_val = (request.POST.get('seccion') or 'A').strip().upper()
+        jornada_val = (request.POST.get('jornada') or 'Mañana').strip()
+        anio_input = (request.POST.get('anio_lectivo') or '2026').strip()
+        try:
+            anio_val = int(anio_input)
+        except (ValueError, TypeError):
+            anio_val = 2026
+        estado_formacion_input = (request.POST.get('estado_formacion') or 'En Formacion').strip()
         acudiente_nom = (request.POST.get('acudiente_nombre') or '').strip()
+        acudiente_doc = (request.POST.get('acudiente_documento') or '').strip()
+        acudiente_parentesco = (request.POST.get('acudiente_parentesco') or 'Madre').strip()
         acudiente_tel = (request.POST.get('acudiente_telefono') or '').strip() or telefono
+        acudiente_email = (request.POST.get('acudiente_correo') or '').strip()
+        acudiente_dir = (request.POST.get('acudiente_direccion') or direccion or '').strip()
         tipo_doc_val = request.POST.get('tipo_documento', 'TI')
 
         if not nombres or not apellidos or not documento:
             messages.error(request, 'Completa los campos obligatorios del estudiante (Nombres, Apellidos y Número de Documento).')
+        elif not documento.isdigit():
+            messages.error(request, 'El documento debe contener únicamente números (sin letras, puntos, guiones ni símbolos).')
+        elif len(documento) < 6 or len(documento) > 12:
+            messages.error(request, f'El documento debe tener una longitud válida entre 6 y 12 dígitos (ingresó {len(documento)} dígitos).')
+        elif nombres.isdigit() or not re.search(r'[a-zA-ZáéíóúÁÉÍÓÚñÑ]', nombres):
+            messages.error(request, 'Los nombres deben contener letras y no ser únicamente números ni símbolos.')
+        elif apellidos.isdigit() or not re.search(r'[a-zA-ZáéíóúÁÉÍÓÚñÑ]', apellidos):
+            messages.error(request, 'Los apellidos deben contener letras y no ser únicamente números ni símbolos.')
+        elif correo and (not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$', correo) or '..' in correo or correo.count('@') != 1):
+            messages.error(request, 'El correo electrónico no tiene un formato válido (ejemplo: usuario@edunova.edu). No use formatos como aminta@gmail, aminta.com o aminta@@gmail.com.')
+        elif grado_input and grado_input not in [str(c[0]) for c in Matricula.GRADOS_ESCOLARES]:
+            messages.error(request, 'Debe seleccionar un grado escolar válido (1.° a 11.°).')
+        elif seccion_val and seccion_val not in ['A', 'B', 'C', 'D']:
+            messages.error(request, 'Debe seleccionar un grupo válido (A, B, C o D).')
+        elif jornada_val and jornada_val not in ['Mañana', 'Tarde']:
+            messages.error(request, 'Debe seleccionar una jornada válida (Mañana o Tarde).')
         else:
             from django.db import transaction
             rol, _ = Rol.objects.get_or_create(nombre='Estudiante', defaults={'descripcion': 'Alumno del colegio'})
@@ -1574,13 +1605,25 @@ def registrar_aprendiz(request):
             else:
                 grado_str = '10'
 
-            # Si no se seleccionó ficha, buscar o crear la correspondiente a ese grado
+            # Búsqueda exacta de ficha correspondiente a ese año lectivo, grado y sección (sin aproximaciones ni fichas.first)
             if not ficha_obj:
-                ficha_obj = Ficha.objects.filter(codigo_ficha__iexact=f"COL-2026-G{int(grado_str):02d}-{seccion_val}", estado='En Ejecucion').first()
+                try:
+                    g_num = int(grado_str)
+                    codigo_exacto = f"COL-{anio_val}-G{g_num:02d}-{seccion_val}"
+                except (ValueError, TypeError):
+                    codigo_exacto = f"COL-{anio_val}-G{grado_str}-{seccion_val}"
+
+                ficha_obj = Ficha.objects.filter(
+                    codigo_ficha__iexact=codigo_exacto,
+                    estado='En Ejecucion'
+                ).first()
+
                 if not ficha_obj:
-                    ficha_obj = Ficha.objects.filter(codigo_ficha__icontains=grado_str, estado='En Ejecucion').first()
-                if not ficha_obj:
-                    ficha_obj = fichas.first()
+                    ficha_obj = Ficha.objects.filter(
+                        codigo_ficha__icontains=f"G{int(grado_str):02d}-{seccion_val}",
+                        fecha_inicio__year=anio_val,
+                        estado='En Ejecucion'
+                    ).first()
 
             correo_val = correo or f"{documento}@colegio.edu.co"
 
@@ -1588,7 +1631,7 @@ def registrar_aprendiz(request):
                 with transaction.atomic():
                     usuario = User.objects.filter(Q(username=documento) | Q(perfil__numero_documento=documento)).first()
                     if usuario:
-                        # Estudiante ya registrado: actualizar perfil y vincular sin duplicar
+                        # Estudiante ya registrado: actualizar datos de perfil sin crear usuario duplicado
                         perfil = getattr(usuario, 'perfil', None)
                         if not perfil:
                             perfil = PerfilUsuario.objects.create(usuario=usuario, rol=rol, numero_documento=documento)
@@ -1610,26 +1653,23 @@ def registrar_aprendiz(request):
                         usuario.email = correo_val
                         usuario.save()
 
-                        mat = Matricula.objects.filter(aprendiz=usuario, ficha=ficha_obj, estado_formacion='En Formacion').first()
-                        if not mat and ficha_obj:
-                            Matricula.objects.create(
-                                aprendiz=usuario,
-                                ficha=ficha_obj,
-                                grado_escolar=grado_str,
-                                seccion=seccion_val,
-                                estado_formacion='En Formacion',
-                                acudiente_nombre=acudiente_nom,
-                                acudiente_telefono=acudiente_tel,
-                            )
-                            messages.success(request, f'¡Estudiante {usuario.get_full_name()} (Doc: {documento}) vinculado y matriculado exitosamente en Grado {grado_str}°{seccion_val}! Usuario y contraseña: {documento}.')
+                        if ficha_obj:
+                            mat = Matricula.objects.filter(aprendiz=usuario, ficha=ficha_obj, estado_formacion='En Formacion').first()
+                            if not mat:
+                                Matricula.objects.create(
+                                    aprendiz=usuario,
+                                    ficha=ficha_obj,
+                                    grado_escolar=grado_str,
+                                    seccion=seccion_val,
+                                    estado_formacion=estado_formacion_input,
+                                    acudiente_nombre=acudiente_nom,
+                                    acudiente_telefono=acudiente_tel,
+                                )
+                                messages.success(request, f'¡Estudiante {usuario.get_full_name()} (Doc: {documento}) vinculado y matriculado exitosamente en Grado {grado_str}°{seccion_val}! Usuario y clave: {documento}.')
+                            else:
+                                messages.info(request, f'El estudiante {usuario.get_full_name()} (Doc: {documento}) ya cuenta con matrícula activa en este curso. Credenciales verificadas (usuario y clave: {documento}).')
                         else:
-                            if mat:
-                                mat.seccion = seccion_val
-                                mat.grado_escolar = grado_str
-                                if acudiente_nom: mat.acudiente_nombre = acudiente_nom
-                                if acudiente_tel: mat.acudiente_telefono = acudiente_tel
-                                mat.save()
-                            messages.info(request, f'El estudiante {usuario.get_full_name()} (Doc: {documento}) ya cuenta con matrícula activa en este curso. Credenciales verificadas (usuario y clave: {documento}).')
+                            messages.warning(request, f'El estudiante {usuario.get_full_name()} (Doc: {documento}) fue actualizado exitosamente, pero no existe un curso/ficha activo para el Año {anio_val}, Grado {grado_str}° sección {seccion_val}. No se asignó ningún curso por aproximación.')
                     else:
                         # Nuevo estudiante: número de cédula como usuario y contraseña inicial segura (hash)
                         usuario = User.objects.create_user(
@@ -1650,6 +1690,7 @@ def registrar_aprendiz(request):
                         perfil.fecha_nacimiento = fecha_nacimiento
                         if request.FILES.get('foto_perfil'):
                             perfil.foto_perfil = request.FILES['foto_perfil']
+                        perfil.esta_activo = True
                         perfil.save()
 
                         if ficha_obj:
@@ -1658,11 +1699,13 @@ def registrar_aprendiz(request):
                                 ficha=ficha_obj,
                                 grado_escolar=grado_str,
                                 seccion=seccion_val,
-                                estado_formacion='En Formacion',
+                                estado_formacion=estado_formacion_input,
                                 acudiente_nombre=acudiente_nom,
                                 acudiente_telefono=acudiente_tel,
                             )
-                        messages.success(request, f'¡Estudiante {usuario.get_full_name()} registrado y matriculado en Grado {grado_str}°{seccion_val}! Usuario y contraseña inicial: {documento}.')
+                            messages.success(request, f'¡Estudiante {usuario.get_full_name()} registrado y matriculado en Grado {grado_str}°{seccion_val}! Usuario y contraseña inicial: {documento}.')
+                        else:
+                            messages.warning(request, f'El estudiante {usuario.get_full_name()} (Doc: {documento}) fue registrado exitosamente, pero no existe un curso/ficha activo para el Año {anio_val}, Grado {grado_str}° sección {seccion_val}. No se asignó ningún curso por aproximación.')
 
                     # Vincular núcleo familiar si se especificó acudiente
                     if acudiente_nom:
@@ -1670,21 +1713,34 @@ def registrar_aprendiz(request):
                             nombre_acudiente=acudiente_nom,
                             defaults={
                                 'telefono': acudiente_tel or telefono or '3000000000',
-                                'parentesco': 'Tutor Legal',
+                                'parentesco': acudiente_parentesco or 'Madre',
+                                'documento': acudiente_doc,
+                                'email': acudiente_email,
+                                'direccion': acudiente_dir or direccion,
                             }
                         )
+                        if acudiente_doc and not fam_obj.documento:
+                            fam_obj.documento = acudiente_doc
+                        if acudiente_email and not fam_obj.email:
+                            fam_obj.email = acudiente_email
+                        if acudiente_dir and not fam_obj.direccion:
+                            fam_obj.direccion = acudiente_dir
+                        fam_obj.save()
                         fam_obj.estudiantes.add(usuario)
 
                     try:
+                        det_aud = f"Se formalizó al estudiante {usuario.get_full_name()} (Doc: {documento}) en Grado {ficha_obj.codigo_ficha}." if ficha_obj else f"Se registró al estudiante {usuario.get_full_name()} (Doc: {documento}) sin ficha asignada (Año {anio_val}, Grado {grado_str}°{seccion_val})."
                         RegistroAuditoria.registrar(
                             usuario=request.user,
                             modulo='Secretaría',
                             accion='Registro de Estudiante',
-                            detalles=f"Se formalizó al estudiante {usuario.get_full_name()} (Doc: {documento}) en Grado {ficha_obj.codigo_ficha if ficha_obj else 'Asignado'}.",
+                            detalles=det_aud,
                             request=request
                         )
                     except Exception:
                         pass
+
+                    return redirect('estudiantes_lista')
 
             except Exception as e:
                 messages.error(request, f'Ocurrió un error al registrar el estudiante: {str(e)}')
@@ -1692,9 +1748,7 @@ def registrar_aprendiz(request):
 
             return redirect('estudiantes_lista')
 
-    return render(request, 'usuarios/registrar_aprendiz.html', {'fichas': fichas})
-
-
+    return render(request, 'usuarios/registrar_aprendiz.html', {'fichas': fichas, 'hoy': hoy})
 @login_required
 @solo_secretaria_o_coordinador
 def caja_pensiones(request):
@@ -2097,6 +2151,10 @@ def crear_usuario(request):
 
         if not all([nombres, apellidos, username, documento, password, rol]):
             messages.error(request, 'Completa todos los campos obligatorios.')
+        elif (est_con_doc := PerfilUsuario.buscar_estudiante_por_documento(documento)):
+            messages.warning(request, f"No se puede crear otra cuenta: el documento {documento} ya pertenece al estudiante {est_con_doc.get_full_name()}.")
+        elif (est_con_user := PerfilUsuario.buscar_estudiante_por_documento(username)):
+            messages.warning(request, f"No se puede crear otra cuenta: el usuario {username} ya pertenece al estudiante {est_con_user.get_full_name()}.")
         elif User.objects.filter(username=username).exists() or PerfilUsuario.objects.filter(numero_documento=documento).exists():
             messages.error(request, 'El usuario o documento ya está registrado.')
         else:
@@ -8729,7 +8787,11 @@ def crear_instructor(request):
             messages.error(request, "Todos los campos principales son obligatorios.")
             return render(request, 'usuarios/instructor_formulario.html', {'titulo': 'Registrar Instructor / Docente'})
 
-        if PerfilUsuario.objects.filter(numero_documento=doc).exists():
+        est_con_doc = PerfilUsuario.buscar_estudiante_por_documento(doc)
+        if est_con_doc:
+            messages.warning(request, f"No se puede crear otra cuenta: el documento {doc} ya pertenece al estudiante {est_con_doc.get_full_name()}.")
+            return render(request, 'usuarios/instructor_formulario.html', {'titulo': 'Registrar Instructor / Docente'})
+        elif PerfilUsuario.objects.filter(numero_documento=doc).exists():
             messages.error(request, f"Ya existe un usuario registrado con el documento {doc}.")
             return render(request, 'usuarios/instructor_formulario.html', {'titulo': 'Registrar Instructor / Docente'})
 
