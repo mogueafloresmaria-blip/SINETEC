@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Registrar y Matricular Estudiante · EDUNOVA{% endblock %}
+{% block title %}Registrar Estudiante y Matrícula · EDUNOVA{% endblock %}
 {% block content %}
 <style>
 .alumno-wrap {
-    max-width: 840px;
+    max-width: 860px;
     margin: 1.5rem auto 3rem;
     padding: 0 1rem;
 }
@@ -11,13 +11,13 @@
     background: #ffffff;
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(47, 157, 221, 0.12);
-    border: 1px solid #d8ecf8;
+    box-shadow: 0 10px 30px rgba(90, 56, 37, 0.08);
+    border: 1.5px solid var(--color-acento, #E5DFD5);
 }
 .alumno-head {
-    background: linear-gradient(135deg, #1d72b8 0%, #2f9ddd 50%, #7FC4F2 100%);
+    background: linear-gradient(135deg, var(--color-secundario, #5A3825) 0%, var(--color-principal, #8B5E3C) 100%);
     color: #ffffff;
-    padding: 1.5rem 2rem;
+    padding: 1.6rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -29,14 +29,14 @@
     display: flex;
     align-items: center;
     gap: .5rem;
-    color: #1a5c88;
+    color: var(--color-secundario, #5A3825);
     font-size: .88rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .05em;
-    border-bottom: 2px solid #e1f1fa;
+    border-bottom: 2px solid var(--color-acento, #ECE7DE);
     padding-bottom: .6rem;
-    margin: 1.5rem 0 1.2rem;
+    margin: 1.8rem 0 1.2rem;
 }
 .alumno-section:first-of-type {
     margin-top: 0;
@@ -49,69 +49,92 @@
     display: block;
 }
 .alumno-help {
-    background: #eef8fe;
-    color: #206286;
-    border-left: 3px solid #2f9ddd;
-    border-radius: 6px;
-    padding: .65rem .9rem;
-    font-size: .8rem;
+    background: #FAF8F5;
+    color: var(--color-secundario, #5A3825);
+    border-left: 3.5px solid var(--color-principal, #8B5E3C);
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    font-size: .82rem;
+    border-top: 1px solid var(--color-acento, #ECE7DE);
+    border-right: 1px solid var(--color-acento, #ECE7DE);
+    border-bottom: 1px solid var(--color-acento, #ECE7DE);
 }
 .form-control, .form-select {
     border-radius: 10px;
-    border: 1px solid #cbd5e1;
+    border: 1.5px solid #d8d1c7;
     padding: .65rem .85rem;
     font-size: .9rem;
 }
 .form-control:focus, .form-select:focus {
-    border-color: #2f9ddd;
-    box-shadow: 0 0 0 3px rgba(47, 157, 221, 0.2);
+    border-color: var(--color-principal, #8B5E3C);
+    box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.2);
 }
 .alumno-submit {
-    background: linear-gradient(135deg, #1d72b8, #2f9ddd);
+    background: linear-gradient(135deg, var(--color-secundario, #5A3825), var(--color-principal, #8B5E3C));
     color: #ffffff;
     border: none;
     border-radius: 10px;
     width: 100%;
-    padding: .9rem;
+    padding: .95rem;
     font-size: 1rem;
     font-weight: 800;
     letter-spacing: .02em;
     transition: all .2s ease;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(47, 157, 221, 0.35);
+    box-shadow: 0 4px 14px rgba(90, 56, 37, 0.25);
 }
 .alumno-submit:hover {
-    background: linear-gradient(135deg, #185a91, #258ac5);
-    box-shadow: 0 6px 18px rgba(47, 157, 221, 0.45);
+    filter: brightness(1.08);
+    box-shadow: 0 6px 18px rgba(90, 56, 37, 0.35);
     transform: translateY(-1px);
 }
 </style>
 
 <div class="alumno-wrap">
-    <div class="mb-3 d-flex justify-content-between align-items-center">
-        <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold">
-            <i class="bi bi-arrow-left me-1"></i> Volver a la Lista de Estudiantes
+    <div class="mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <a href="{% url 'matriculas_lista' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold">
+            <i class="bi bi-arrow-left me-1"></i> Volver a Matrículas
         </a>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold">
-            <i class="bi bi-mortarboard me-1"></i> Matrículas Escolares
-        </span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge px-3 py-2 rounded-pill fw-semibold" style="background: var(--color-acento); color: var(--color-secundario); border: 1px solid #E0D8CE;">
+                <i class="bi bi-mortarboard-fill me-1"></i> Período Oficial 2026
+            </span>
+        </div>
+    </div>
+
+    <!-- AVISO DE CLARIFICACIÓN FUNCIONAL: ESTUDIANTE EXISTENTE VS NUEVO -->
+    <div class="alert border-0 rounded-4 p-3 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-3 shadow-2xs"
+         style="background: #ffffff; border: 1.5px solid var(--color-acento) !important;">
+        <div class="d-flex align-items-center gap-2.5">
+            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: #FAF8F5; color: var(--color-principal); width: 40px; height: 40px;">
+                <i class="bi bi-search fs-5"></i>
+            </div>
+            <div class="small">
+                <strong class="text-dark">¿El estudiante ya está registrado en el colegio?</strong><br>
+                <span class="text-muted">No vuelva a digitar sus datos personales. Puede asignarle o renovar su matrícula directamente con un solo clic.</span>
+            </div>
+        </div>
+        <a href="{% url 'matricula_nueva' %}" class="btn btn-sm fw-bold rounded-pill px-3 py-1.5 text-nowrap"
+           style="background: #FAF8F5; color: var(--color-principal); border: 1.5px solid var(--color-acento);">
+            <i class="bi bi-person-check-fill me-1"></i> Asignar Matrícula (Existente)
+        </a>
     </div>
 
     <div class="alumno-card">
         <div class="alumno-head">
             <div>
-                <h1 class="h4 fw-bold mb-1 text-white"><i class="bi bi-person-plus-fill me-2"></i>Registrar y Matricular Estudiante</h1>
-                <p class="small mb-0 text-white-50">Crea el expediente del estudiante y asígnalo formalmente a su grado escolar.</p>
+                <h1 class="h4 fw-bold mb-1 text-white"><i class="bi bi-person-plus-fill me-2"></i>Registrar y Matricular Estudiante Nuevo</h1>
+                <p class="small mb-0 text-white-50">Crea el expediente integral del alumno y formaliza su matrícula en un solo proceso.</p>
             </div>
-            <i class="bi bi-building-check fs-2 text-white-50"></i>
+            <span class="badge bg-white text-dark fw-bold px-3 py-2 rounded-pill shadow-sm">Vigencia 2026</span>
         </div>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="alumno-body">
                 
-                <!-- DATOS PERSONALES -->
-                <h2 class="alumno-section"><i class="bi bi-person"></i> Datos Personales del Estudiante</h2>
+                <!-- 1. DATOS PERSONALES -->
+                <h2 class="alumno-section"><i class="bi bi-person-badge"></i> 1. Datos Personales del Estudiante</h2>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <label class="alumno-label">Nombres Completos *</label>
@@ -123,12 +146,13 @@
                     </div>
                     <div class="col-md-4">
                         <label class="alumno-label">Tipo de Documento *</label>
-                        <select name="tipo_documento" class="form-select">
+                        <select name="tipo_documento" class="form-select" required>
                             <option value="TI" selected>Tarjeta de Identidad (TI)</option>
                             <option value="RC">Registro Civil (RC)</option>
                             <option value="CC">Cédula de Ciudadanía (CC)</option>
                             <option value="CE">Cédula de Extranjería (CE)</option>
                             <option value="PEP">Permiso Especial (PEP)</option>
+                            <option value="PPT">Permiso Protección Temporal (PPT)</option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -144,58 +168,139 @@
                             <option value="Otro">Otro</option>
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="alumno-label">Fecha de Nacimiento</label>
                         <input name="fecha_nacimiento" type="date" class="form-control">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <label class="alumno-label">Lugar de Nacimiento</label>
+                        <input name="lugar_nacimiento" type="text" class="form-control" placeholder="Ej: Bucaramanga, Santander">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="alumno-label">Teléfono del Estudiante (Opcional)</label>
+                        <input name="telefono" type="tel" class="form-control" placeholder="Ej: 300 123 4567">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="alumno-label">Dirección de Residencia *</label>
+                        <input name="direccion" type="text" class="form-control" placeholder="Ej: Carrera 15 # 45-23, Barrio El Prado" required>
+                    </div>
+                    <div class="col-md-4">
                         <label class="alumno-label">Foto de Perfil (Opcional)</label>
                         <input name="foto_perfil" type="file" class="form-control" accept="image/*">
                     </div>
                 </div>
 
-                <!-- ASIGNACIÓN ESCOLAR / MATRÍCULA -->
-                <h2 class="alumno-section"><i class="bi bi-mortarboard"></i> Grado Escolar y Matrícula</h2>
+                <!-- 2. INFORMACIÓN ACADÉMICA Y MATRÍCULA -->
+                <h2 class="alumno-section"><i class="bi bi-mortarboard-fill"></i> 2. Información Académica y Matrícula</h2>
                 <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <label class="alumno-label">Grado / Grupo Asignado *</label>
-                        <select name="ficha_id" class="form-select" required>
-                            <option value="">-- Selecciona el Grado Escolar --</option>
-                            {% for f in fichas %}
-                                <option value="{{ f.id }}">Grado {{ f.codigo_ficha }} - {{ f.nombre_grado|default:f.codigo_ficha }}</option>
-                            {% endfor %}
+                    <div class="col-md-4">
+                        <label class="alumno-label">Año Lectivo *</label>
+                        <select name="anio_lectivo" class="form-select bg-light fw-bold" required>
+                            <option value="2026" selected>Año Lectivo 2026</option>
+                            <option value="2027">Año Lectivo 2027</option>
+                            <option value="2028">Año Lectivo 2028</option>
+                            <option value="2029">Año Lectivo 2029</option>
+                            <option value="2030">Año Lectivo 2030</option>
                         </select>
-                        {% if not fichas %}
-                        <div class="text-danger small mt-1">
-                            <i class="bi bi-exclamation-circle me-1"></i> No hay grados o fichas activas registradas en el sistema.
-                        </div>
-                        {% endif %}
                     </div>
-                    <div class="col-md-6">
-                        <label class="alumno-label">Correo Electrónico Institucional / Personal *</label>
+                    <div class="col-md-4">
+                        <label class="alumno-label">Grado Escolar (1.° a 11.°) *</label>
+                        <select name="grado_escolar" id="grado_escolar" class="form-select" required>
+                            <option value="">-- Selecciona el Grado --</option>
+                            <optgroup label="Primaria">
+                                <option value="1" {% if request.GET.grado == '1' %}selected{% endif %}>1.° Grado (Primaria)</option>
+                                <option value="2" {% if request.GET.grado == '2' %}selected{% endif %}>2.° Grado (Primaria)</option>
+                                <option value="3" {% if request.GET.grado == '3' %}selected{% endif %}>3.° Grado (Primaria)</option>
+                                <option value="4" {% if request.GET.grado == '4' %}selected{% endif %}>4.° Grado (Primaria)</option>
+                                <option value="5" {% if request.GET.grado == '5' %}selected{% endif %}>5.° Grado (Primaria)</option>
+                            </optgroup>
+                            <optgroup label="Secundaria">
+                                <option value="6" {% if request.GET.grado == '6' %}selected{% endif %}>6.° Grado (Secundaria)</option>
+                                <option value="7" {% if request.GET.grado == '7' %}selected{% endif %}>7.° Grado (Secundaria)</option>
+                                <option value="8" {% if request.GET.grado == '8' %}selected{% endif %}>8.° Grado (Secundaria)</option>
+                                <option value="9" {% if request.GET.grado == '9' %}selected{% endif %}>9.° Grado (Secundaria)</option>
+                            </optgroup>
+                            <optgroup label="Media Técnica / Bachillerato">
+                                <option value="10" {% if not request.GET.grado or request.GET.grado == '10' %}selected{% endif %}>10.° Grado (Media Técnica)</option>
+                                <option value="11" {% if request.GET.grado == '11' %}selected{% endif %}>11.° Grado (Media Técnica)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="alumno-label">Grupo / Sección *</label>
+                        <select name="seccion" id="seccion" class="form-select" required>
+                            <option value="A" selected>Grupo A</option>
+                            <option value="B">Grupo B</option>
+                            <option value="C">Grupo C</option>
+                            <option value="D">Grupo D</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="alumno-label">Jornada Escolar *</label>
+                        <select name="jornada" class="form-select" required>
+                            <option value="Mañana" selected>Jornada Mañana</option>
+                            <option value="Tarde">Jornada Tarde</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="alumno-label">Fecha de Matrícula *</label>
+                        <input name="fecha_matricula" type="date" class="form-control" value="{{ hoy|date:'Y-m-d' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="alumno-label">Estado de Matrícula *</label>
+                        <select name="estado_formacion" class="form-select" required>
+                            <option value="En Formacion" selected>En Formación (Activo)</option>
+                            <option value="Desertado">Desertado</option>
+                            <option value="Trasladado">Trasladado</option>
+                            <option value="Retirado">Retiro Voluntario</option>
+                            <option value="Certificado">Certificado</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="alumno-label">Correo Institucional / Personal *</label>
                         <input name="correo" type="email" class="form-control" placeholder="estudiante@colegio.edu.co" required>
                     </div>
                     <div class="col-12">
                         <div class="alumno-help">
-                            <i class="bi bi-info-circle-fill me-1"></i> El estudiante podrá iniciar sesión con su número de documento como usuario y contraseña inicial.
+                            <i class="bi bi-shield-check me-1"></i> <strong>Creación Automática de Cuenta:</strong> El estudiante podrá ingresar al sistema inmediatamente usando su <strong>número de documento</strong> como usuario y contraseña inicial segura. Al completar el registro, queda matriculado formalmente en el año lectivo 2026.
                         </div>
                     </div>
                 </div>
 
-                <!-- INFORMACIÓN DE FAMILIA / ACUDIENTE -->
-                <h2 class="alumno-section"><i class="bi bi-people"></i> Información de Familia / Acudiente</h2>
+                <!-- 3. INFORMACIÓN DE FAMILIA Y ACUDIENTE -->
+                <h2 class="alumno-section"><i class="bi bi-people-fill"></i> 3. Información de Familia y Acudiente Responsable</h2>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <label class="alumno-label">Nombre del Acudiente / Representante</label>
-                        <input name="acudiente_nombre" type="text" class="form-control" placeholder="Ej: María Restrepo">
+                        <label class="alumno-label">Nombre del Acudiente / Representante *</label>
+                        <input name="acudiente_nombre" type="text" class="form-control" placeholder="Ej: María Restrepo" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="alumno-label">Parentesco *</label>
+                        <select name="acudiente_parentesco" class="form-select" required>
+                            <option value="Madre" selected>Madre</option>
+                            <option value="Padre">Padre</option>
+                            <option value="Tutor Legal">Tutor Legal</option>
+                            <option value="Abuelo/a">Abuelo/a</option>
+                            <option value="Tío/a">Tío/a</option>
+                            <option value="Hermano/a">Hermano/a</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="alumno-label">Documento del Acudiente</label>
+                        <input name="acudiente_documento" type="text" class="form-control" placeholder="Ej: 45678912">
                     </div>
                     <div class="col-md-6">
-                        <label class="alumno-label">Teléfono de Contacto / Emergencia</label>
-                        <input name="acudiente_telefono" type="tel" class="form-control" placeholder="Ej: +57 310 456 7890">
+                        <label class="alumno-label">Teléfono de Contacto del Acudiente *</label>
+                        <input name="acudiente_telefono" type="tel" class="form-control" placeholder="Ej: 310 456 7890" required>
                     </div>
-                    <div class="col-md-12">
-                        <label class="alumno-label">Teléfono del Estudiante (Opcional)</label>
-                        <input name="telefono" type="tel" class="form-control" placeholder="Ej: +57 300 123 4567">
+                    <div class="col-md-6">
+                        <label class="alumno-label">Correo Electrónico del Acudiente</label>
+                        <input name="acudiente_correo" type="email" class="form-control" placeholder="acudiente@correo.com">
+                    </div>
+                    <div class="col-12">
+                        <label class="alumno-label">Dirección de Residencia del Acudiente (si difiere)</label>
+                        <input name="acudiente_direccion" type="text" class="form-control" placeholder="Dejar en blanco si es la misma del estudiante">
                     </div>
                 </div>
 

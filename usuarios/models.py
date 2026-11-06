@@ -126,6 +126,50 @@ class PerfilUsuario(models.Model):
         rol_nombre = self.rol.nombre if self.rol else "Sin Rol"
         return f"{nombre_completo} ({rol_nombre} - {self.numero_documento})"
 
+    @classmethod
+    def buscar_estudiante_por_documento(cls, documento, exclude_user_id=None):
+        """
+        Verifica si un número de documento ya pertenece a un estudiante registrado en EduNova.
+        Busca por número de documento en PerfilUsuario o username en User.
+        Retorna la instancia del User del estudiante si existe, o None.
+        """
+        if not documento:
+            return None
+        doc_str = str(documento).strip()
+        if not doc_str:
+            return None
+
+        from django.db.models import Q
+        qs = User.objects.filter(
+            Q(username=doc_str) | Q(perfil__numero_documento=doc_str)
+        ).select_related('perfil', 'perfil__rol').distinct()
+
+        if exclude_user_id:
+            qs = qs.exclude(pk=exclude_user_id)
+
+        for u in qs:
+            perfil = getattr(u, 'perfil', None)
+            rol_nombre = perfil.rol.nombre.lower() if (perfil and perfil.rol) else ''
+            if 'estudiante' in rol_nombre or 'aprendiz' in rol_nombre:
+                return u
+            if hasattr(u, 'matriculas_academicas') and u.matriculas_academicas.exists():
+                return u
+        return None
+
+    def clean(self):
+        super().clean()
+        if self.numero_documento:
+            doc_str = str(self.numero_documento).strip()
+            est = PerfilUsuario.buscar_estudiante_por_documento(
+                doc_str,
+                exclude_user_id=self.usuario_id if self.usuario_id else None
+            )
+            if est and est.pk != self.usuario_id:
+                from django.core.exceptions import ValidationError
+                raise ValidationError(
+                    f"No se permite crear otra cuenta: el documento {doc_str} ya pertenece al estudiante {est.get_full_name()}."
+                )
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         from django.utils import timezone

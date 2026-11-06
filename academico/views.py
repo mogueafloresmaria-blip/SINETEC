@@ -1438,113 +1438,358 @@ def editar_horario(request, pk):
 
 
 @login_required
+
 @solo_secretaria_o_coordinador
 def nueva_matricula(request):
-    alumnos = User.objects.filter(
-        perfil__rol__nombre__in=['Estudiante', 'Aprendiz'],
-        perfil__esta_activo=True,
-    ).select_related('perfil').order_by('last_name', 'first_name')
-    
+    """
+    Formulario Oficial de Matrícula Escolar (Secretaría EduNova).
+    Permite buscar al estudiante existente, seleccionarlo con su ID interno y formalizar su matrícula
+    asignando año lectivo 2026, grado escolar (1° a 11°), sección y jornada con consulta de datos reales.
+    """
+    import json
+    alumnos_qs = User.objects.filter(
+        Q(perfil__rol__nombre__in=['Estudiante', 'Aprendiz']) |
+        Q(perfil__rol__nombre__icontains='estudiante') |
+        Q(perfil__rol__nombre__icontains='aprendiz') |
+        Q(matriculas_academicas__isnull=False)
+    ).filter(is_active=True).distinct().select_related('perfil').prefetch_related('matriculas_academicas__ficha').order_by('first_name', 'last_name')
+
+    alumnos = []
+    estudiantes_data_map = {}
+
+    for alumno in alumnos_qs:
+        try:
+            perfil = alumno.perfil
+            doc = (perfil.numero_documento if perfil else '') or alumno.username
+        except Exception:
+            doc = alumno.username
+        nombre_completo = alumno.get_full_name() or alumno.username
+        email = alumno.email or 'Sin correo registrado'
+
+        # Consultar la matrícula activa más reciente del estudiante
+        mat_activa = alumno.matriculas_academicas.filter(estado_formacion='En Formacion').order_by('-id').first()
+        if not mat_activa:
+            mat_activa = alumno.matriculas_academicas.order_by('-id').first()
+
+        tiene_mat = bool(mat_activa)
+        es_activa = bool(mat_activa and mat_activa.estado_formacion == 'En Formacion')
+
+        anio_mat = 2026
+        if mat_activa and mat_activa.ficha:
+            if mat_activa.ficha.fecha_inicio:
+                anio_mat = mat_activa.ficha.fecha_inicio.year
+            elif 'COL-' in mat_activa.ficha.codigo_ficha:
+                try:
+                    parts = mat_activa.ficha.codigo_ficha.split('-')
+                    if len(parts) >= 2 and parts[1].isdigit():
+                        anio_mat = int(parts[1])
+                except Exception:
+                    pass
+
+        info = {
+            'id': alumno.pk,
+            'nombre': nombre_completo,
+            'documento': doc,
+            'email': email,
+            'tiene_matricula': tiene_mat,
+            'es_activa': es_activa,
+            'grado_num': mat_activa.grado_escolar if mat_activa else '',
+            'grado_display': mat_activa.get_grado_escolar_display() if mat_activa else '',
+            'seccion': mat_activa.seccion if mat_activa else '',
+            'estado': mat_activa.get_estado_formacion_display() if mat_activa else '',
+            'estado_raw': mat_activa.estado_formacion if mat_activa else '',
+            'anio': anio_mat,
+            'jornada': 'Mañana'
+        }
+        alumno.info_mat = info
+        alumnos.append(alumno)
+        estudiantes_data_map[str(alumno.pk)] = info
+
     fichas = Ficha.objects.filter(estado='En Ejecucion').order_by('codigo_ficha')
     if not fichas.exists():
         fichas = Ficha.objects.all().order_by('codigo_ficha')
     grados = Matricula._meta.get_field('grado_escolar').choices
-    secciones = ('A', 'B', 'C')
+    secciones = ('A', 'B', 'C', 'D')
+    jornadas = ('Mañana', 'Tarde')
+    anios_lectivos = [2026, 2027, 2028, 2029, 2030]
 
     alumno_preseleccionado = request.GET.get('alumno') or request.GET.get('estudiante')
 
     if request.method == 'POST':
-        alumno_id = request.POST.get('alumno_id')
-        alumno = alumnos.filter(pk=alumno_id).first()
-        grado = request.POST.get('grado_escolar') or '10'
-        seccion = request.POST.get('seccion') or 'A'
-        
+        import re
+        from django.db import transaction
+        from usuarios.models import Rol, PerfilUsuario
+
+        errors = {}
+        form_data = {
+            'alumno_id': (request.POST.get('alumno_id') or '').strip(),
+            'documento': (request.POST.get('documento') or request.POST.get('numero_documento') or '').strip(),
+            'nombre': (request.POST.get('nombre') or request.POST.get('nombres') or '').strip(),
+            'apellido': (request.POST.get('apellido') or request.POST.get('apellidos') or '').strip(),
+            'email': (request.POST.get('email') or request.POST.get('correo') or '').strip(),
+            'grado_escolar': (request.POST.get('grado_escolar') or '').strip(),
+            'seccion': (request.POST.get('seccion') or '').strip().upper(),
+            'jornada': (request.POST.get('jornada') or '').strip(),
+            'anio_lectivo': ('2026' if request.POST.get('anio_lectivo') is None else request.POST.get('anio_lectivo', '').strip()),
+            'modo_registro': (request.POST.get('modo_registro') or '').strip(),
+        }
+
+        modo = form_data['modo_registro']
+        if not modo:
+            if form_data['documento'] or form_data['nombre'] or form_data['apellido'] or not form_data['alumno_id']:
+                modo = 'nuevo'
+            else:
+                modo = 'existente'
+        form_data['modo_registro'] = modo
+
+        # 1. Validación de Grado Escolar
+        grado = form_data['grado_escolar']
+        grados_validos = [str(g[0]) for g in grados]
+        if not grado:
+            errors['grado_escolar'] = 'Debe seleccionar un grado escolar obligatorio (1.° a 11.°).'
+        elif grado not in grados_validos:
+            errors['grado_escolar'] = 'El grado escolar seleccionado no es válido (debe ser entre 1.° y 11.°).'
+
+        # 2. Validación de Sección / Grupo
+        seccion = form_data['seccion']
+        if not seccion:
+            errors['seccion'] = 'Debe seleccionar un grupo o sección obligatorio (A, B, C o D).'
+        elif seccion not in secciones:
+            errors['seccion'] = f'El grupo no es válido. Opciones permitidas: {", ".join(secciones)}.'
+
+        # 3. Validación de Jornada
+        jornada = form_data['jornada']
+        if not jornada:
+            errors['jornada'] = 'Debe seleccionar una jornada escolar obligatoria (Mañana o Tarde).'
+        elif jornada not in jornadas:
+            errors['jornada'] = f'La jornada no es válida. Opciones permitidas: {", ".join(jornadas)}.'
+
+        # 4. Validación de Año Lectivo
+        anio_str = form_data['anio_lectivo']
+        anio_lectivo = 2026
+        if not anio_str:
+            errors['anio_lectivo'] = 'Debe seleccionar un año lectivo obligatorio.'
+        else:
+            try:
+                anio_lectivo = int(anio_str)
+                if anio_lectivo not in anios_lectivos:
+                    errors['anio_lectivo'] = f'El año lectivo {anio_lectivo} no es válido.'
+            except (ValueError, TypeError):
+                errors['anio_lectivo'] = 'El año lectivo debe ser un número entero válido.'
+
+        alumno = None
+
+        if modo == 'nuevo':
+            doc = form_data['documento']
+            nombres = form_data['nombre']
+            apellidos = form_data['apellido']
+            email = form_data['email']
+
+            # Documento obligatorio, solo dígitos y longitud 6..12
+            if not doc:
+                errors['documento'] = 'El número de documento es obligatorio.'
+            elif not doc.isdigit():
+                errors['documento'] = 'El documento debe contener únicamente números (sin letras, puntos, guiones ni espacios).'
+            elif len(doc) < 6 or len(doc) > 12:
+                errors['documento'] = f'El documento debe tener una longitud válida entre 6 y 12 dígitos (ingresó {len(doc)} dígitos).'
+            else:
+                # Evitar documentos duplicados y cuentas repetidas
+                est_con_doc = PerfilUsuario.buscar_estudiante_por_documento(doc)
+                if est_con_doc:
+                    errors['documento'] = f'No se permite crear otra cuenta: el documento {doc} ya pertenece al estudiante {est_con_doc.get_full_name()}. Utilice la opción "Estudiante Existente" para matricularlo.'
+                else:
+                    usuario_existente = User.objects.filter(Q(username=doc) | Q(perfil__numero_documento=doc)).first()
+                    if usuario_existente:
+                        errors['documento'] = f'Ya existe una cuenta registrada con el documento {doc} ({usuario_existente.get_full_name()}). No se permiten cuentas duplicadas.'
+
+            # Correo electrónico con formato estricto
+            if email:
+                EMAIL_REGEX = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$'
+                if not re.match(EMAIL_REGEX, email) or '..' in email or email.count('@') != 1:
+                    errors['email'] = 'El correo electrónico no tiene un formato válido (ejemplo: usuario@edunova.edu). No use formatos como aminta@gmail, aminta.com o aminta@@gmail.com.'
+
+            # Nombres obligatorios, no vacíos ni solo números
+            if not nombres:
+                errors['nombre'] = 'Los nombres del estudiante son obligatorios.'
+            elif nombres.isdigit() or not re.search(r'[a-zA-ZáéíóúÁÉÍÓÚñÑ]', nombres):
+                errors['nombre'] = 'Los nombres deben contener letras y no pueden ser únicamente números ni símbolos.'
+            elif len(nombres) < 2:
+                errors['nombre'] = 'Los nombres deben tener al menos 2 caracteres.'
+
+            # Apellidos obligatorios, no vacíos ni solo números
+            if not apellidos:
+                errors['apellido'] = 'Los apellidos del estudiante son obligatorios.'
+            elif apellidos.isdigit() or not re.search(r'[a-zA-ZáéíóúÁÉÍÓÚñÑ]', apellidos):
+                errors['apellido'] = 'Los apellidos deben contener letras y no pueden ser únicamente números ni símbolos.'
+            elif len(apellidos) < 2:
+                errors['apellido'] = 'Los apellidos deben tener al menos 2 caracteres.'
+
+        else: # modo == 'existente'
+            alumno_id = form_data['alumno_id']
+            if not alumno_id:
+                errors['alumno_id'] = 'Debe seleccionar un estudiante de la lista haciendo clic sobre él.'
+            else:
+                alumno = User.objects.filter(pk=alumno_id).first()
+                if not alumno:
+                    errors['alumno_id'] = f'No se encontró ningún estudiante con el identificador #{alumno_id}.'
+
+        # Si hay errores en las validaciones, rechazar sin tocar la BD
+        if errors:
+            messages.error(request, 'Por favor revise y corrija los campos indicados en el formulario.')
+            return render(request, 'academico/nueva_matricula.html', {
+                'alumnos': alumnos,
+                'estudiantes_json': json.dumps(estudiantes_data_map),
+                'fichas': fichas,
+                'grados': grados,
+                'secciones': secciones,
+                'jornadas': jornadas,
+                'anios_lectivos': anios_lectivos,
+                'alumno_preseleccionado': form_data['alumno_id'] or alumno_preseleccionado,
+                'errors': errors,
+                'form_data': form_data,
+            })
+
+        # Si el modo es nuevo y no hubo errores, crear el estudiante de forma atómica y segura
+        if modo == 'nuevo':
+            with transaction.atomic():
+                rol_est, _ = Rol.objects.get_or_create(nombre='Estudiante', defaults={'descripcion': 'Alumno del colegio'})
+                alumno = User.objects.create_user(
+                    username=doc,
+                    first_name=nombres,
+                    last_name=apellidos,
+                    email=email or f"{doc}@edunova.edu",
+                    password=doc
+                )
+                perfil, _ = PerfilUsuario.objects.get_or_create(usuario=alumno)
+                perfil.rol = rol_est
+                perfil.numero_documento = doc
+                perfil.esta_activo = True
+                perfil.save()
+
+        # Validación de duplicados de matrícula para el mismo estudiante, grado, sección y año lectivo
+        mat_existente = Matricula.objects.filter(aprendiz=alumno, estado_formacion='En Formacion').select_related('ficha').order_by('-id').first()
+        mat_anio = None
+        if mat_existente:
+            mat_anio = mat_existente.ficha.fecha_inicio.year if (mat_existente.ficha and mat_existente.ficha.fecha_inicio) else 2026
+            if mat_anio == anio_lectivo and str(mat_existente.grado_escolar) == str(grado) and mat_existente.seccion == seccion:
+                errors['general'] = f'El estudiante {alumno.get_full_name()} ya cuenta con una matrícula activa en {mat_existente.get_grado_escolar_display()} Sección "{seccion}" para la vigencia {anio_lectivo}. No se permiten matrículas duplicadas.'
+                errors['grado_escolar'] = 'El estudiante ya se encuentra matriculado en este mismo grado.'
+                errors['seccion'] = 'El estudiante ya se encuentra matriculado en esta misma sección.'
+                messages.error(request, errors['general'])
+                return render(request, 'academico/nueva_matricula.html', {
+                    'alumnos': alumnos,
+                    'estudiantes_json': json.dumps(estudiantes_data_map),
+                    'fichas': fichas,
+                    'grados': grados,
+                    'secciones': secciones,
+                    'jornadas': jornadas,
+                    'anios_lectivos': anios_lectivos,
+                    'alumno_preseleccionado': str(alumno.pk),
+                    'errors': errors,
+                    'form_data': form_data,
+                })
+
+        # Buscar o vincular la Ficha correspondiente
         ficha_id = request.POST.get('ficha_id')
         ficha = None
         if ficha_id:
             ficha = Ficha.objects.filter(pk=ficha_id).first()
         if not ficha:
-            ficha = Ficha.objects.filter(codigo_ficha__icontains=f"{grado}-{seccion}").first() or fichas.first()
+            try:
+                grado_int = int(grado)
+            except ValueError:
+                grado_int = 10
+            ficha = Ficha.objects.filter(codigo_ficha__iexact=f"COL-{anio_lectivo}-G{grado_int:02d}-{seccion}").first()
+            if not ficha:
+                ficha = Ficha.objects.filter(codigo_ficha__icontains=f"{grado}-{seccion}", fecha_inicio__year=anio_lectivo, estado='En Ejecucion').first()
+            if not ficha:
+                ficha = Ficha.objects.filter(fecha_inicio__year=anio_lectivo, codigo_ficha__icontains=grado, estado='En Ejecucion').first()
+            if not ficha:
+                from instituciones.models import InstitucionEducativa
+                from datetime import date
+                prog_def = ProgramaFormacion.objects.filter(activo=True).first() or ProgramaFormacion.objects.first()
+                inst_def = InstitucionEducativa.objects.filter(activa=True).first() or InstitucionEducativa.objects.first()
+                lider_def = User.objects.filter(Q(perfil__rol__nombre__icontains='Docente') | Q(is_superuser=True)).first() or request.user
+                hoy_d = date(anio_lectivo, 1, 15)
+                ficha, _ = Ficha.objects.get_or_create(
+                    codigo_ficha=f"COL-{anio_lectivo}-G{grado_int:02d}-{seccion}",
+                    defaults={
+                        'programa': prog_def,
+                        'institucion': inst_def,
+                        'instructor_lider': lider_def,
+                        'fecha_inicio': hoy_d,
+                        'fecha_fin': hoy_d.replace(month=12, day=15),
+                        'estado': 'En Ejecucion'
+                    }
+                )
 
-        if not alumno:
-            documento = request.POST.get('documento', '').strip() or request.POST.get('numero_documento', '').strip()
-            nombres = request.POST.get('nombre', '').strip() or request.POST.get('nombres', '').strip()
-            apellidos = request.POST.get('apellido', '').strip() or request.POST.get('apellidos', '').strip()
-            email = request.POST.get('email', '').strip() or request.POST.get('correo', '').strip()
-            if documento:
-                from usuarios.models import Rol, PerfilUsuario
-                alumno = User.objects.filter(Q(username=documento) | Q(perfil__numero_documento=documento)).first()
-                if not alumno:
-                    rol_est, _ = Rol.objects.get_or_create(nombre='Estudiante', defaults={'descripcion': 'Alumno del colegio'})
-                    alumno = User.objects.create_user(
-                        username=documento,
-                        first_name=nombres or 'Estudiante',
-                        last_name=apellidos or 'Nuevo',
-                        email=email or f'{documento}@edunova.edu',
-                        password=documento
-                    )
-                    perfil = getattr(alumno, 'perfil', None)
-                    if not perfil:
-                        PerfilUsuario.objects.create(usuario=alumno, rol=rol_est, numero_documento=documento)
-                    else:
-                        perfil.rol = rol_est
-                        perfil.numero_documento = documento
-                        perfil.save()
+        # Si ya tenía matrícula activa en ese año pero con diferente grado o sección: traslado controlado
+        if mat_existente and mat_anio == anio_lectivo:
+            with transaction.atomic():
+                mat_existente.grado_escolar = grado
+                mat_existente.seccion = seccion
+                mat_existente.ficha = ficha
+                mat_existente.save()
+            messages.success(
+                request,
+                f'¡Asignación actualizada con éxito! {alumno.get_full_name()} fue trasladado/asignado a {mat_existente.get_grado_escolar_display()} - Sección "{seccion}" para el año lectivo {anio_lectivo}.'
+            )
+            return redirect('matriculas_lista')
 
-        if not alumno:
-            messages.error(request, 'Por favor seleccione un estudiante o ingrese un número de documento válido.')
-        elif Matricula.objects.filter(aprendiz=alumno, grado_escolar=grado, seccion=seccion, estado_formacion='En Formacion').exists():
-            messages.warning(request, f'El estudiante {alumno.get_full_name()} ya se encuentra matriculado en {grado}° Sección "{seccion}".')
-        else:
+        # Si no tenía matrícula activa en ese año, crear nueva vinculación oficial
+        with transaction.atomic():
             mat = Matricula.objects.create(
                 aprendiz=alumno,
                 ficha=ficha,
                 grado_escolar=grado,
                 seccion=seccion,
-                estado_formacion='En Formacion',
+                estado_formacion='En Formacion'
             )
-            if not Matricula.objects.filter(id=mat.id, aprendiz=alumno, ficha=ficha).exists():
-                messages.warning(request, "El aprendiz fue registrado, pero la matrícula no pudo registrarse. Verifica la información e inténtalo nuevamente.")
-                return redirect('matriculas_lista')
-            # Notificación y Auditoría
-            try:
-                from seguimiento.models import Notificacion, RegistroAuditoria
-                Notificacion.objects.create(
-                    usuario=alumno,
-                    titulo="Matrícula Escolar Formalizada",
-                    mensaje=f"Has sido matriculado formalmente en {mat.get_grado_escolar_display()} - Sección {seccion} para el año lectivo 2026.",
-                    enlace="/matriculas/",
-                    tipo="success"
-                )
-                for fam in alumno.nucleo_familiar.all():
-                    u_fam = User.objects.filter(Q(username=fam.documento) | Q(email=fam.email)).first()
-                    if u_fam:
-                        Notificacion.objects.create(
-                            usuario=u_fam,
-                            titulo=f"Matrícula Confirmada · {alumno.first_name}",
-                            mensaje=f"Se confirmó la matrícula oficial de {alumno.get_full_name()} en {mat.get_grado_escolar_display()} Sección {seccion}.",
-                            enlace="/familia/matricula/",
-                            tipo="success"
-                        )
-                RegistroAuditoria.registrar(
-                    usuario=request.user,
-                    modulo="Matrículas",
-                    accion="Formalización de Matrícula",
-                    detalles=f"Matriculó al estudiante {alumno.get_full_name()} (DNI: {getattr(alumno.perfil, 'numero_documento', 'S/D')}) en {mat.get_grado_escolar_display()} {seccion}.",
-                    request=request
-                )
-            except Exception:
-                pass
 
-            messages.success(request, f'¡{alumno.get_full_name()} ha sido matriculado exitosamente en {mat.get_grado_escolar_display()} - Sección "{seccion}"!')
-            return redirect('matriculas_lista')
+        # Notificación y Auditoría
+        try:
+            from seguimiento.models import Notificacion, RegistroAuditoria
+            Notificacion.objects.create(
+                usuario=alumno,
+                titulo="Matrícula Escolar Formalizada",
+                mensaje=f"Has sido matriculado formalmente en {mat.get_grado_escolar_display()} - Sección {seccion} para el año lectivo {anio_lectivo}.",
+                enlace="/matriculas/",
+                tipo="success"
+            )
+            for fam in alumno.nucleo_familiar.all():
+                u_fam = User.objects.filter(Q(username=fam.documento) | Q(email=fam.email)).first()
+                if u_fam:
+                    Notificacion.objects.create(
+                        usuario=u_fam,
+                        titulo=f"Matrícula Confirmada – {alumno.first_name}",
+                        mensaje=f"Se confirmó la matrícula oficial de {alumno.get_full_name()} en {mat.get_grado_escolar_display()} Sección {seccion}.",
+                        enlace="/familia/matricula/",
+                        tipo="success"
+                    )
+            RegistroAuditoria.registrar(
+                usuario=request.user,
+                modulo="Matrículas",
+                accion="Formalización de Matrícula",
+                detalles=f"Matriculó al estudiante {alumno.get_full_name()} (DNI: {getattr(alumno.perfil, 'numero_documento', alumno.username)}) en {mat.get_grado_escolar_display()} {seccion} para el año lectivo {anio_lectivo}.",
+                request=request
+            )
+        except Exception:
+            pass
+
+        messages.success(request, f'¡{alumno.get_full_name()} ha sido matriculado exitosamente en {mat.get_grado_escolar_display()} - Sección "{seccion}" para el año lectivo {anio_lectivo}!')
+        return redirect('matriculas_lista')
 
     return render(request, 'academico/nueva_matricula.html', {
         'alumnos': alumnos,
+        'estudiantes_json': json.dumps(estudiantes_data_map),
         'fichas': fichas,
         'grados': grados,
         'secciones': secciones,
+        'jornadas': jornadas,
+        'anios_lectivos': anios_lectivos,
         'alumno_preseleccionado': alumno_preseleccionado,
+        'errors': {},
+        'form_data': {},
     })
 
 
@@ -1650,7 +1895,16 @@ def matricular_aprendiz(request, ficha_id):
                 with transaction.atomic():
                     # Verificar si ya existe usuario con ese correo o documento
                     num_doc = cd['numero_documento'].strip()
-                    if PerfilUsuario.objects.filter(numero_documento=num_doc).exists():
+                    est_con_doc = PerfilUsuario.buscar_estudiante_por_documento(num_doc)
+                    if est_con_doc:
+                        messages.error(request, f"No se permite crear otra cuenta: el documento {num_doc} ya pertenece al estudiante {est_con_doc.get_full_name()}. Búsquelo en la opción de vincular existente.")
+                        return render(request, 'academico/matricular.html', {
+                            'form': form,
+                            'import_form': import_form,
+                            'import_errors': import_errors,
+                            'ficha': ficha,
+                        })
+                    elif PerfilUsuario.objects.filter(numero_documento=num_doc).exists() or User.objects.filter(username=num_doc).exists():
                         messages.error(request, f"Error (RN-001): Ya existe un usuario registrado con el documento {num_doc}.")
                         return render(request, 'academico/matricular.html', {
                             'form': form,
