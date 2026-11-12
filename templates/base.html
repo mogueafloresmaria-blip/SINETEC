@@ -737,9 +737,6 @@
                     <a class="nav-link {% if request.resolver_match.url_name == 'programas_lista' or request.resolver_match.url_name == 'gestion_academica' %}active{% endif %}" href="{% url 'programas_lista' %}" id="nav-sec-carga">
                         <i class="bi bi-mortarboard-fill"></i> Asignación Académica
                     </a>
-                    <a class="nav-link {% if 'horario' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'horarios_tablero' %}" id="nav-sec-horarios">
-                        <i class="bi bi-calendar3-week-fill"></i> Horarios Escolares
-                    </a>
                     <a class="nav-link {% if 'familia' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familias_lista' %}" id="nav-sec-familias">
                         <i class="bi bi-person-vcard-fill"></i> Familias y Acudientes
                     </a>
