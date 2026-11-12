@@ -606,8 +606,8 @@ def dashboard(request):
     proximos_eventos = EventoCalendario.objects.filter(fecha__gte=hoy).order_by('fecha', 'hora')[:5]
 
     # Datos para gráficas del panel de inicio (estilo escolar)
-    grado_10 = Matricula.objects.filter(estado_formacion='En Formacion', aprendiz__is_active=True, grado_escolar__icontains='10').count()
-    grado_11 = Matricula.objects.filter(estado_formacion='En Formacion', aprendiz__is_active=True, grado_escolar__icontains='11').count()
+    grado_10 = Matricula.objects.filter(estado_formacion='En Formacion', aprendiz__is_active=True, grado_escolar='10').count()
+    grado_11 = Matricula.objects.filter(estado_formacion='En Formacion', aprendiz__is_active=True, grado_escolar='11').count()
     chart_alumnado_nivel = {
         'labels': ['Grado 10\u00b0', 'Grado 11\u00b0'],
         'data': [grado_10, grado_11]
@@ -2412,6 +2412,7 @@ def redactar_circular(request):
         asunto = request.POST.get('asunto', '').strip()
         mensaje = (request.POST.get('mensaje') or request.POST.get('contenido') or '').strip()
         destinatario_tipo = request.POST.get('destinatario_tipo', 'Toda').strip()
+        grado_especifico = request.POST.get('grado_especifico', '').strip()
         curso_id = request.POST.get('curso_id', '').strip()
         estudiante_id = request.POST.get('estudiante_id', '').strip()
         accion_guardar = request.POST.get('accion_guardar', 'publicar').strip()
@@ -2443,6 +2444,7 @@ def redactar_circular(request):
                 'asunto': asunto,
                 'mensaje': mensaje,
                 'destinatario_tipo': destinatario_tipo,
+                'grado_especifico': grado_especifico,
                 'curso_id': curso_id,
                 'estudiante_id': estudiante_id,
             })
@@ -2458,23 +2460,64 @@ def redactar_circular(request):
             urgente=urgente,
             adjunto_pdf=adjunto_pdf
         )
-        # Notificar a los destinatarios escolares pertinentes
+        # Notificar a los destinatarios escolares pertinentes con aislamiento riguroso
         try:
             dest_users = []
             if estudiante_obj:
                 dest_users.append(estudiante_obj)
-            else:
-                if destinatario_tipo in ['Familias', 'Toda', 'Todos']:
-                    dest_users.extend(list(User.objects.filter(perfil__rol__nombre='Familia')))
-                if destinatario_tipo in ['Estudiantes', 'Toda', 'Todos']:
-                    if curso_obj:
-                        dest_users.extend(list(User.objects.filter(matriculas__ficha=curso_obj)))
-                    else:
-                        dest_users.extend(list(User.objects.filter(perfil__rol__nombre='Estudiante')))
-                if destinatario_tipo in ['Docentes', 'Toda', 'Todos']:
-                    dest_users.extend(list(docentes_qs))
-                if destinatario_tipo in ['Directivos', 'Toda', 'Todos']:
-                    dest_users.extend(list(directivos_qs))
+            elif destinatario_tipo == 'Grado' or (grado_especifico and destinatario_tipo in ['Grado', 'Estudiantes', 'Familias']):
+                # Estudiantes estrictamente matriculados en ese grado
+                mats = Matricula.objects.filter(grado_escolar=grado_especifico, estado_formacion='En Formacion').select_related('aprendiz')
+                est_de_grado = [m.aprendiz for m in mats if m.aprendiz]
+
+                fam_de_grado = []
+                for e_u in est_de_grado:
+                    doc_e = getattr(getattr(e_u, 'perfil', None), 'numero_documento', None) or e_u.username
+                    fa_list = FamiliaAcudiente.objects.filter(
+                        Q(estudiantes=e_u) | Q(documento=doc_e) | Q(email__iexact=e_u.email)
+                    ).distinct()
+                    for fam in fa_list:
+                        u_fam = User.objects.filter(Q(username=fam.documento) | Q(email__iexact=fam.email)).first()
+                        if u_fam:
+                            fam_de_grado.append(u_fam)
+
+                if destinatario_tipo == 'Estudiantes':
+                    dest_users.extend(est_de_grado)
+                elif destinatario_tipo == 'Familias':
+                    dest_users.extend(fam_de_grado)
+                else:  # 'Grado': Ambos
+                    dest_users.extend(est_de_grado)
+                    dest_users.extend(fam_de_grado)
+
+            elif destinatario_tipo == 'Grupo' or curso_obj:
+                # Estudiantes pertenecientes a esa ficha/grupo específico
+                mats = Matricula.objects.filter(ficha=curso_obj, estado_formacion='En Formacion').select_related('aprendiz')
+                est_de_grupo = [m.aprendiz for m in mats if m.aprendiz]
+
+                fam_de_grupo = []
+                for e_u in est_de_grupo:
+                    doc_e = getattr(getattr(e_u, 'perfil', None), 'numero_documento', None) or e_u.username
+                    fa_list = FamiliaAcudiente.objects.filter(
+                        Q(estudiantes=e_u) | Q(documento=doc_e) | Q(email__iexact=e_u.email)
+                    ).distinct()
+                    for fam in fa_list:
+                        u_fam = User.objects.filter(Q(username=fam.documento) | Q(email__iexact=fam.email)).first()
+                        if u_fam:
+                            fam_de_grupo.append(u_fam)
+
+                dest_users.extend(est_de_grupo)
+                dest_users.extend(fam_de_grupo)
+
+            elif destinatario_tipo == 'Familias':
+                dest_users.extend(list(User.objects.filter(perfil__rol__nombre__in=['Familia', 'Acudiente'])))
+            elif destinatario_tipo == 'Estudiantes':
+                dest_users.extend(list(User.objects.filter(perfil__rol__nombre__in=['Estudiante', 'Aprendiz', 'Alumno'])))
+            elif destinatario_tipo == 'Docentes':
+                dest_users.extend(list(docentes_qs))
+            elif destinatario_tipo == 'Directivos':
+                dest_users.extend(list(directivos_qs))
+            else:  # 'Toda'
+                dest_users.extend(list(User.objects.filter(is_active=True)))
 
             tipo_n = 'warning' if urgente else 'info'
             for u in set(dest_users):
@@ -2485,9 +2528,19 @@ def redactar_circular(request):
                     enlace="/comunicaciones/",
                     tipo=tipo_n
                 )
+                from django.core.cache import cache
+                cache.delete(f'edunova_notif_u_{u.pk}')
         except Exception:
             pass
-        dest_info = f"estudiante {estudiante_obj.get_full_name()}" if estudiante_obj else (f"curso {curso_obj.codigo_ficha}" if curso_obj else destinatario_tipo)
+
+        if estudiante_obj:
+            dest_info = f"estudiante individual {estudiante_obj.get_full_name() or estudiante_obj.username}"
+        elif grado_especifico:
+            dest_info = f"Grado {grado_especifico}° ({destinatario_tipo})"
+        elif curso_obj:
+            dest_info = f"Grupo {curso_obj.codigo_ficha}"
+        else:
+            dest_info = destinatario_tipo
         RegistroAuditoria.registrar(
             usuario=request.user,
             modulo='Comunicaciones',
@@ -5262,16 +5315,23 @@ def instructor_dashboard(request):
                                 )
                         else:
                             g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
-                            mats = Matricula.objects.filter(grado_escolar__icontains=g_num, seccion__iexact=c_obj.seccion, estado_formacion='En Formacion').select_related('aprendiz')
+                            sec_val = str(c_obj.seccion or '').strip()
+                            if sec_val:
+                                mats = Matricula.objects.filter(grado_escolar=g_num, seccion__iexact=sec_val, estado_formacion='En Formacion').select_related('aprendiz')
+                            else:
+                                mats = Matricula.objects.filter(grado_escolar=g_num, estado_formacion='En Formacion').select_related('aprendiz')
                             for m in mats:
-                                EntregaTarea.objects.get_or_create(tarea=tarea, estudiante=m.aprendiz, defaults={'estado': 'PENDIENTE'})
-                                Notificacion.objects.create(
-                                    usuario=m.aprendiz,
-                                    titulo=f"Nueva Actividad: {titulo[:120]}",
-                                    mensaje=f"El docente {request.user.get_full_name() or request.user.username} publicó una actividad para {nom_mat} ({c_obj.grado}°{c_obj.seccion}).",
-                                    enlace=link_notif,
-                                    tipo='info'
-                                )
+                                if m.aprendiz:
+                                    EntregaTarea.objects.get_or_create(tarea=tarea, estudiante=m.aprendiz, defaults={'estado': 'PENDIENTE'})
+                                    Notificacion.objects.create(
+                                        usuario=m.aprendiz,
+                                        titulo=f"Nueva Actividad: {titulo[:120]}",
+                                        mensaje=f"El docente {request.user.get_full_name() or request.user.username} publicó una actividad para {nom_mat} ({c_obj.grado}°{c_obj.seccion}).",
+                                        enlace=link_notif,
+                                        tipo='info'
+                                    )
+                                    from django.core.cache import cache
+                                    cache.delete(f'edunova_notif_u_{m.aprendiz.pk}')
                     creadas_count += 1
 
             if creadas_count > 0:
@@ -5356,7 +5416,11 @@ def instructor_dashboard(request):
             if tarea_obj.estado == 'Publicada' and tarea_obj.carga_academica:
                 c_obj = tarea_obj.carga_academica
                 g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
-                mats = Matricula.objects.filter(grado_escolar__icontains=g_num, seccion__iexact=c_obj.seccion, estado_formacion='En Formacion').select_related('aprendiz')
+                sec_val = str(c_obj.seccion or '').strip()
+                if sec_val:
+                    mats = Matricula.objects.filter(grado_escolar=g_num, seccion__iexact=sec_val, estado_formacion='En Formacion').select_related('aprendiz')
+                else:
+                    mats = Matricula.objects.filter(grado_escolar=g_num, estado_formacion='En Formacion').select_related('aprendiz')
                 link_notif = reverse('entregar_tarea_clase', kwargs={'pk': tarea_obj.id})
                 nom_mat = c_obj.programa.denominacion if c_obj.programa else 'Matemáticas'
                 for m in mats:
@@ -5369,6 +5433,8 @@ def instructor_dashboard(request):
                             enlace=link_notif,
                             tipo='info'
                         )
+                        from django.core.cache import cache
+                        cache.delete(f'edunova_notif_u_{m.aprendiz.pk}')
 
             estado_lbl = "retirada de la vista de estudiantes (Borrador)" if tarea_obj.estado == 'Borrador' else f"marcada como {tarea_obj.estado}"
             messages.success(request, f'Actividad "{tarea_obj.titulo}" {estado_lbl}.')
@@ -5620,9 +5686,9 @@ def instructor_dashboard(request):
 
             if c_obj:
                 g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
-                mats = Matricula.objects.filter(grado_escolar__icontains=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
+                mats = Matricula.objects.filter(grado_escolar=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
                 if not mats.exists():
-                    mats = Matricula.objects.filter(grado_escolar__icontains=g_num, estado_formacion='En Formacion')
+                    mats = Matricula.objects.filter(grado_escolar=g_num, estado_formacion='En Formacion')
 
                 guardados_asist = 0
                 materia_nom = c_obj.programa.denominacion if c_obj.programa else 'Matemáticas'
@@ -5705,7 +5771,7 @@ def instructor_dashboard(request):
 
                 # Notificar a los estudiantes del grupo
                 g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
-                mats = Matricula.objects.filter(grado_escolar__icontains=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
+                mats = Matricula.objects.filter(grado_escolar=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
                 materia_nom = c_obj.programa.denominacion if c_obj.programa else 'Matemáticas'
                 for m in mats:
                     Notificacion.objects.create(
@@ -5730,9 +5796,9 @@ def instructor_dashboard(request):
             c_obj = tarea_obj.carga_academica
 
             g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
-            mats = Matricula.objects.filter(grado_escolar__icontains=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
+            mats = Matricula.objects.filter(grado_escolar=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
             if not mats.exists():
-                mats = Matricula.objects.filter(grado_escolar__icontains=g_num, estado_formacion='En Formacion')
+                mats = Matricula.objects.filter(grado_escolar=g_num, estado_formacion='En Formacion')
 
             calificadas_count = 0
             for m in mats:
@@ -5810,9 +5876,9 @@ def instructor_dashboard(request):
 
             if c_obj:
                 g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
-                mats = Matricula.objects.filter(grado_escolar__icontains=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
+                mats = Matricula.objects.filter(grado_escolar=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
                 if not mats.exists():
-                    mats = Matricula.objects.filter(grado_escolar__icontains=g_num, estado_formacion='En Formacion')
+                    mats = Matricula.objects.filter(grado_escolar=g_num, estado_formacion='En Formacion')
 
                 comp = Competencia.objects.filter(programa=c_obj.programa).first()
                 rap_obj = ResultadoAprendizaje.objects.filter(competencia=comp).first() if comp else None
@@ -6069,7 +6135,7 @@ def instructor_dashboard(request):
                     c_obj = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first() or cargas.first()
                     if c_obj:
                         g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
-                        mats = Matricula.objects.filter(grado_escolar__icontains=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
+                        mats = Matricula.objects.filter(grado_escolar=g_num, seccion=c_obj.seccion, estado_formacion='En Formacion')
                         nom_materia = c_obj.programa.denominacion if c_obj.programa else 'Asignatura'
                         prefijo = "[Correo al Grupo]" if es_correo else "[Comunicado Docente]"
                         ComunicadoEscolar.objects.create(
@@ -6589,7 +6655,7 @@ def instructor_dashboard(request):
         if tarea_seleccionada:
             g_num = ''.join(ch for ch in str(tarea_seleccionada.carga_academica.grado) if ch.isdigit())
             estudiantes_grupo_tarea = list(Matricula.objects.filter(
-                grado_escolar__icontains=g_num, seccion=tarea_seleccionada.carga_academica.seccion
+                grado_escolar=g_num, seccion=tarea_seleccionada.carga_academica.seccion
             ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name'))
 
             entregas_map = {e.estudiante_id: e for e in EntregaTarea.objects.filter(tarea=tarea_seleccionada).select_related('estudiante')}
@@ -6654,14 +6720,14 @@ def instructor_dashboard(request):
     for c in cargas_unicas:
         g_num_c = ''.join(ch for ch in str(c.grado) if ch.isdigit())
         mats_c = list(Matricula.objects.filter(
-            grado_escolar__icontains=g_num_c,
+            grado_escolar=g_num_c,
             seccion=c.seccion,
             estado_formacion__in=['En Formacion', 'Activo'],
             aprendiz__is_active=True
         ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name'))
         if not mats_c:
             mats_c = list(Matricula.objects.filter(
-                grado_escolar__icontains=g_num_c,
+                grado_escolar=g_num_c,
                 estado_formacion__in=['En Formacion', 'Activo'],
                 aprendiz__is_active=True
             ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name'))
@@ -12357,7 +12423,7 @@ def detalle_clase_hoy(request, clase_id):
 
     # Estudiantes de este grupo
     estudiantes = Matricula.objects.filter(
-        grado_escolar__icontains=grado_num,
+        grado_escolar=grado_num,
         seccion=clase.seccion,
         estado_formacion='En Formacion'
     ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name')
@@ -12429,7 +12495,7 @@ def detalle_clase_hoy(request, clase_id):
             from django.urls import reverse
             grado_num = ''.join(ch for ch in str(clase.grado) if ch.isdigit())
             estudiantes_m = Matricula.objects.filter(
-                grado_escolar__icontains=grado_num,
+                grado_escolar=grado_num,
                 seccion__iexact=clase.seccion,
                 estado_formacion='En Formacion'
             ).select_related('aprendiz')
@@ -12489,7 +12555,7 @@ def detalle_clase_hoy(request, clase_id):
             from django.urls import reverse
             grado_num = ''.join(ch for ch in str(clase.grado) if ch.isdigit())
             estudiantes_m = Matricula.objects.filter(
-                grado_escolar__icontains=grado_num,
+                grado_escolar=grado_num,
                 seccion__iexact=clase.seccion,
                 estado_formacion='En Formacion'
             ).select_related('aprendiz')
@@ -12660,7 +12726,7 @@ def revisar_entregas_tarea(request, tarea_id):
     
     grado_num = ''.join(c for c in str(tarea.carga_academica.grado) if c.isdigit())
     matriculados = Matricula.objects.filter(
-        grado_escolar__icontains=grado_num,
+        grado_escolar=grado_num,
         seccion=tarea.carga_academica.seccion,
         estado_formacion='En Formacion'
     ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name')
@@ -12868,38 +12934,201 @@ def marcar_todas_notificaciones_leidas_view(request):
     from seguimiento.models import Notificacion
     from django.http import JsonResponse
     from django.core.cache import cache
-    Notificacion.objects.filter(usuario=request.user).update(leida=True)
-    cache.delete(f'edunova_notif_u_{request.user.pk}')
+    from usuarios.models import FamiliaAcudiente
+    from django.db.models import Q
+
+    user = request.user
+    rol_nombre = getattr(getattr(user, 'perfil', None), 'rol', None)
+    rol_str = rol_nombre.nombre if rol_nombre else ''
+
+    Notificacion.objects.filter(usuario=user).update(leida=True)
+    if any(r in rol_str for r in ['Familia', 'Acudiente']):
+        doc_u = getattr(getattr(user, 'perfil', None), 'numero_documento', None) or user.username
+        hijos_ids = list(FamiliaAcudiente.objects.filter(
+            Q(documento=doc_u) | Q(email__iexact=user.email) | Q(estudiantes__username=user.username)
+        ).values_list('estudiantes__id', flat=True))
+        if hijos_ids:
+            Notificacion.objects.filter(usuario_id__in=hijos_ids).update(leida=True)
+
+    cache.delete(f'edunova_notif_u_{user.pk}')
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
-        return JsonResponse({'status': 'ok', 'message': 'Todas las notificaciones marcadas como leídas.'})
+        return JsonResponse({'status': 'ok', 'num_no_leidas': 0, 'message': 'Todas las notificaciones marcadas como leídas.'})
     messages.success(request, 'Todas las notificaciones han sido marcadas como leídas.')
     next_url = request.POST.get('next') or request.META.get('HTTP_REFERER')
     if next_url and '/login' not in next_url:
         return redirect(next_url)
     return redirect('notificaciones_lista')
 
-from django.http import JsonResponse, FileResponse, Http404
+
+@login_required
+def marcar_notificacion_no_leida(request, pk):
+    """Marca una notificación específica como NO leída."""
+    from seguimiento.models import Notificacion
+    from django.core.cache import cache
+    from usuarios.models import FamiliaAcudiente
+    from django.db.models import Q
+
+    user = request.user
+    notif = Notificacion.objects.filter(pk=pk, usuario=user).first()
+    if not notif:
+        doc_u = getattr(getattr(user, 'perfil', None), 'numero_documento', None) or user.username
+        hijos_ids = list(FamiliaAcudiente.objects.filter(
+            Q(documento=doc_u) | Q(email__iexact=user.email) | Q(estudiantes__username=user.username)
+        ).values_list('estudiantes__id', flat=True))
+        notif = Notificacion.objects.filter(pk=pk, usuario_id__in=hijos_ids).first()
+
+    if notif:
+        notif.leida = False
+        notif.save(update_fields=['leida'])
+
+    cache.delete(f'edunova_notif_u_{user.pk}')
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'ok', 'leida': False})
+    messages.info(request, 'Notificación marcada como no leída.')
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER')
+    if next_url and '/login' not in next_url:
+        return redirect(next_url)
+    return redirect('notificaciones_lista')
+
+
+@login_required
+def toggle_notificacion_leida_ajax(request, pk):
+    """Alterna el estado leído/no leído de una notificación vía AJAX."""
+    from seguimiento.models import Notificacion
+    from django.core.cache import cache
+    from usuarios.models import FamiliaAcudiente
+    from django.db.models import Q
+
+    user = request.user
+    notif = Notificacion.objects.filter(pk=pk, usuario=user).first()
+    if not notif:
+        doc_u = getattr(getattr(user, 'perfil', None), 'numero_documento', None) or user.username
+        hijos_ids = list(FamiliaAcudiente.objects.filter(
+            Q(documento=doc_u) | Q(email__iexact=user.email) | Q(estudiantes__username=user.username)
+        ).values_list('estudiantes__id', flat=True))
+        notif = Notificacion.objects.filter(pk=pk, usuario_id__in=hijos_ids).first()
+
+    nueva_leida = False
+    if notif:
+        notif.leida = not notif.leida
+        notif.save(update_fields=['leida'])
+        nueva_leida = notif.leida
+
+    cache.delete(f'edunova_notif_u_{user.pk}')
+
+    rol_nombre = getattr(getattr(user, 'perfil', None), 'rol', None)
+    rol_str = rol_nombre.nombre if rol_nombre else ''
+    if any(r in rol_str for r in ['Familia', 'Acudiente']):
+        doc_u = getattr(getattr(user, 'perfil', None), 'numero_documento', None) or user.username
+        hijos_ids = list(FamiliaAcudiente.objects.filter(
+            Q(documento=doc_u) | Q(email__iexact=user.email) | Q(estudiantes__username=user.username)
+        ).values_list('estudiantes__id', flat=True))
+        no_leidas = Notificacion.objects.filter(Q(usuario=user) | Q(usuario_id__in=hijos_ids), leida=False).count()
+    else:
+        no_leidas = Notificacion.objects.filter(usuario=user, leida=False).count()
+
+    return JsonResponse({
+        'status': 'ok',
+        'id': pk,
+        'leida': nueva_leida,
+        'num_no_leidas': no_leidas
+    })
+
+
 @login_required
 def marcar_notificacion_leida_ajax(request, pk):
     from seguimiento.models import Notificacion
     from django.core.cache import cache
-    notif = Notificacion.objects.filter(pk=pk, usuario=request.user).first() or Notificacion.objects.filter(pk=pk).first()
+    from usuarios.models import FamiliaAcudiente
+    from django.db.models import Q
+
+    user = request.user
+    notif = Notificacion.objects.filter(pk=pk, usuario=user).first()
+    if not notif:
+        doc_u = getattr(getattr(user, 'perfil', None), 'numero_documento', None) or user.username
+        hijos_ids = list(FamiliaAcudiente.objects.filter(
+            Q(documento=doc_u) | Q(email__iexact=user.email) | Q(estudiantes__username=user.username)
+        ).values_list('estudiantes__id', flat=True))
+        notif = Notificacion.objects.filter(pk=pk, usuario_id__in=hijos_ids).first()
+
     if notif:
         notif.leida = True
         notif.save(update_fields=['leida'])
-    cache.delete(f'edunova_notif_u_{request.user.pk}')
-    return JsonResponse({'status': 'ok', 'leida': True})
+
+    cache.delete(f'edunova_notif_u_{user.pk}')
+
+    rol_nombre = getattr(getattr(user, 'perfil', None), 'rol', None)
+    rol_str = rol_nombre.nombre if rol_nombre else ''
+    if any(r in rol_str for r in ['Familia', 'Acudiente']):
+        doc_u = getattr(getattr(user, 'perfil', None), 'numero_documento', None) or user.username
+        hijos_ids = list(FamiliaAcudiente.objects.filter(
+            Q(documento=doc_u) | Q(email__iexact=user.email) | Q(estudiantes__username=user.username)
+        ).values_list('estudiantes__id', flat=True))
+        no_leidas = Notificacion.objects.filter(Q(usuario=user) | Q(usuario_id__in=hijos_ids), leida=False).count()
+    else:
+        no_leidas = Notificacion.objects.filter(usuario=user, leida=False).count()
+
+    return JsonResponse({'status': 'ok', 'leida': True, 'num_no_leidas': no_leidas})
+
 
 @login_required
 def api_notificaciones_campana(request):
     """Endpoint AJAX para la campanita de notificaciones unificada de EduNova."""
     from seguimiento.models import Notificacion
+    from academico.models import Matricula
+    from usuarios.models import FamiliaAcudiente
     from django.utils.timesince import timesince
     from django.utils import timezone
     from django.urls import reverse
+    from django.db.models import Q
 
     user = request.user
-    qs = Notificacion.objects.filter(usuario=user).order_by('-fecha_creacion')
+    rol_nombre = getattr(getattr(user, 'perfil', None), 'rol', None)
+    rol_str = rol_nombre.nombre if rol_nombre else ''
+
+    if any(r in rol_str for r in ['Familia', 'Acudiente']):
+        doc_u = getattr(getattr(user, 'perfil', None), 'numero_documento', None) or user.username
+        fa_qs = FamiliaAcudiente.objects.filter(
+            Q(documento=doc_u) | Q(email__iexact=user.email) | Q(estudiantes__username=user.username)
+        ).distinct()
+        hijos_ids = set()
+        for fa in fa_qs:
+            hijos_ids.update(fa.estudiantes.values_list('id', flat=True))
+
+        qs = Notificacion.objects.filter(
+            Q(usuario=user) | Q(usuario_id__in=hijos_ids)
+        ).distinct().order_by('-fecha_creacion')
+
+        grados_hijos = set()
+        if hijos_ids:
+            mats = Matricula.objects.filter(aprendiz_id__in=hijos_ids, estado_formacion='En Formacion')
+            for m in mats:
+                g_dig = ''.join(ch for ch in str(m.grado_escolar) if ch.isdigit())
+                if g_dig:
+                    grados_hijos.add(g_dig)
+
+        if grados_hijos:
+            todos_grados = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'}
+            otros_grados = todos_grados - grados_hijos
+            for og in otros_grados:
+                qs = qs.exclude(
+                    Q(titulo__iregex=rf'\bgrado\s*{og}\b') | Q(titulo__icontains=f'Grado {og}°')
+                )
+    elif any(r in rol_str for r in ['Estudiante', 'Aprendiz', 'Alumno']):
+        qs = Notificacion.objects.filter(usuario=user).order_by('-fecha_creacion')
+        mat = Matricula.objects.filter(aprendiz=user, estado_formacion='En Formacion').first()
+        if mat and mat.grado_escolar:
+            g_est = ''.join(ch for ch in str(mat.grado_escolar) if ch.isdigit())
+            if g_est:
+                todos_grados = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'}
+                otros_grados = todos_grados - {g_est}
+                for og in otros_grados:
+                    qs = qs.exclude(
+                        Q(titulo__iregex=rf'\bgrado\s*{og}\b') | Q(titulo__icontains=f'Grado {og}°')
+                    )
+    else:
+        qs = Notificacion.objects.filter(usuario=user).order_by('-fecha_creacion')
+
     no_leidas = qs.filter(leida=False).count()
 
     items = []
@@ -12921,6 +13150,7 @@ def api_notificaciones_campana(request):
             'timesince': timesince(n.fecha_creacion),
             'abrir_url': reverse('abrir_notificacion', args=[n.id]),
             'marcar_url': reverse('marcar_notificacion_leida_ajax', args=[n.id]),
+            'toggle_url': reverse('toggle_notificacion_leida_ajax', args=[n.id]),
         })
 
     return JsonResponse({
@@ -13004,7 +13234,7 @@ def api_guardar_asistencia_individual(request):
 
     # Calcular KPIs actualizados de la carga para respuesta en vivo
     g_num = ''.join(ch for ch in str(carga_obj.grado) if ch.isdigit()) if carga_obj else '10'
-    mats_carga = Matricula.objects.filter(grado_escolar__icontains=g_num, estado_formacion='En Formacion')
+    mats_carga = Matricula.objects.filter(grado_escolar=g_num, estado_formacion='En Formacion')
     asists_hoy = AsistenciaAprendiz.objects.filter(matricula__in=mats_carga, fecha=fecha_obj)
     total_est = mats_carga.count()
     kpi_p = asists_hoy.filter(estado='P').count()

@@ -323,16 +323,25 @@ def crear_actividad_digital(request):
                 estado='Publicada'
             )
 
-            # Notificar y crear entregas pendientes para los estudiantes
+            # Notificar y crear entregas pendientes para los estudiantes del grado y curso correspondiente
             from seguimiento.models import Notificacion
             from django.urls import reverse
+            from usuarios.models import FamiliaAcudiente
             
-            g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit()) or '10'
+            g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit()) or str(c_obj.grado).strip()
+            sec_val = str(c_obj.seccion or '').strip()
+
             if destinatario_tipo == 'individual' and estudiante_id:
-                target_users = User.objects.filter(id=estudiante_id)
+                target_users = list(User.objects.filter(id=estudiante_id))
             else:
-                mats = [m for m in matriculas_qs if g_num in str(m.grado_escolar)]
-                target_users = [m.aprendiz for m in mats] if mats else [m.aprendiz for m in matriculas_qs[:2]]
+                mats = [
+                    m for m in matriculas_qs 
+                    if str(m.grado_escolar).strip() == g_num 
+                    and (not sec_val or not m.seccion or str(m.seccion).strip().upper() == sec_val.upper())
+                ]
+                if not mats:
+                    mats = [m for m in matriculas_qs if str(m.grado_escolar).strip() == g_num]
+                target_users = [m.aprendiz for m in mats if m.aprendiz]
 
             for u in target_users:
                 EntregaTarea.objects.get_or_create(
@@ -347,6 +356,26 @@ def crear_actividad_digital(request):
                     enlace=reverse('entregar_tarea_clase', kwargs={'pk': tarea.id}),
                     tipo='info'
                 )
+
+            # Notificar también a los acudientes de los estudiantes vinculados
+            try:
+                for u in target_users:
+                    doc_u = getattr(getattr(u, 'perfil', None), 'numero_documento', None) or u.username
+                    familias = FamiliaAcudiente.objects.filter(
+                        Q(estudiantes=u) | Q(documento=doc_u) | Q(email__iexact=u.email)
+                    ).distinct()
+                    for fam in familias:
+                        fam_user = User.objects.filter(Q(username=fam.documento) | Q(email__iexact=fam.email)).first()
+                        if fam_user:
+                            Notificacion.objects.create(
+                                usuario=fam_user,
+                                titulo=f"Nueva Actividad Asignada: {tarea.titulo}",
+                                mensaje=f"Se ha asignado la actividad '{tarea.titulo}' a tu acudido(a) {u.get_full_name() or u.username} en {c_obj.programa.denominacion if c_obj.programa else 'Clase'}.",
+                                enlace=reverse('entregar_tarea_clase', kwargs={'pk': tarea.id}),
+                                tipo='info'
+                            )
+            except Exception:
+                pass
 
             messages.success(request, f'¡Actividad "{tarea.titulo}" publicada y enviada a los estudiantes con éxito!')
             return redirect(f"{reverse('actividades_tareas')}?tarea_id={tarea.id}")

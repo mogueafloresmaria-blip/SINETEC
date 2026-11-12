@@ -1050,10 +1050,13 @@ class ComunicadoEscolar(models.Model):
     """
     ESTAMENTOS = [
         ('Toda', 'Toda la Comunidad Educativa'),
+        ('Grado', 'Un Grado Específico'),
+        ('Grupo', 'Un Grupo Específico'),
         ('Docentes', 'Cuerpo Docente'),
         ('Estudiantes', 'Estudiantes'),
         ('Familias', 'Acudientes y Familias'),
         ('Directivos', 'Directivos y Administrativos'),
+        ('Individual', 'Destinatario Específico'),
     ]
 
     remitente = models.ForeignKey(

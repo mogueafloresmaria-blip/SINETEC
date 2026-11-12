@@ -160,8 +160,8 @@
 
     /* Tabla ancha garantizada para permitir el rodar horizontal en cualquier pantalla */
     .tabla-actividades {
-        min-width: 1560px;
-        width: 1560px;
+        min-width: 1850px;
+        width: 1850px;
         border-collapse: separate;
         border-spacing: 0;
         text-align: left;
@@ -439,11 +439,11 @@
                 <table class="tabla-actividades">
                     <thead>
                         <tr>
-                            <th style="width: 520px; min-width: 520px;">NOMBRE DE LA ACTIVIDAD</th>
-                            <th style="width: 280px; min-width: 280px; text-align: center;">GRADO / ASIGNATURA</th>
-                            <th style="width: 250px; min-width: 250px; text-align: center;">TIPO / FECHA LÍMITE</th>
-                            <th style="width: 220px; min-width: 220px; text-align: center;">ESTADO DE ENTREGAS</th>
-                            <th style="width: 290px; min-width: 290px; text-align: right;">ACCIONES</th>
+                            <th style="width: 580px; min-width: 580px;">NOMBRE DE LA ACTIVIDAD</th>
+                            <th style="width: 320px; min-width: 320px; text-align: center;">GRADO / ASIGNATURA</th>
+                            <th style="width: 290px; min-width: 290px; text-align: center;">TIPO / FECHA LÍMITE</th>
+                            <th style="width: 310px; min-width: 310px; text-align: center;">ESTADO DE ENTREGAS</th>
+                            <th style="width: 350px; min-width: 350px; text-align: right;">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -658,12 +658,18 @@
         // Desplazamiento dinámico con las flechas < y > tanto superiores como laterales
         function scrollHorizontally(delta) {
             if (!container) return;
+            const prev = container.scrollLeft;
             try {
                 container.scrollBy({ left: delta, behavior: 'smooth' });
             } catch(e) {
                 container.scrollLeft += delta;
             }
-            setTimeout(updateScrollIndicator, 120);
+            setTimeout(function() {
+                if (container.scrollLeft === prev && delta !== 0) {
+                    container.scrollLeft += delta;
+                }
+                updateScrollIndicator();
+            }, 120);
         }
 
         const btnSideLeft = document.getElementById('btnSideScrollLeft');

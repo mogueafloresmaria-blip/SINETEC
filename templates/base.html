@@ -901,20 +901,20 @@
 
                     <!-- Centro Unificado de Notificaciones EduNova (Campanita oficial para todos los paneles) -->
                     {% with rol=request.user.perfil.rol.nombre|default:'' %}
-                    <div class="dropdown me-1" id="wrap-campana-notificaciones" {% if 'Familia' in rol or 'Acudiente' in rol %}{% if not request.session.estudiante_fam_doc and not estudiante_sel %}style="display:none;"{% endif %}{% endif %}>
+                    <div class="dropdown me-1" id="wrap-campana-notificaciones">
                         <button class="sinetec-icon-btn position-relative" type="button" id="btn-campana-notificaciones" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Centro de Notificaciones EduNova">
                             <i class="bi bi-bell text-secondary fs-5"></i>
-                            <span id="badge-campana" class="badge-campana position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background: #EF4444; color: #FFFFFF; font-size: 0.65rem; padding: 2px 6px; font-weight: 700; {% if num_notificaciones_no_leidas == 0 %}display:none;{% endif %}">
+                            <span id="badge-campana" class="badge-campana position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background: #C46820; color: #FFFFFF; font-size: 0.65rem; padding: 2px 6px; font-weight: 700; {% if num_notificaciones_no_leidas == 0 %}display:none;{% endif %}">
                                 {{ num_notificaciones_no_leidas }}
                             </span>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0 mt-2 notif-panel-dropdown" aria-labelledby="btn-campana-notificaciones" style="width: 390px; max-width: 95vw; z-index: 1060; border: 1.5px solid #E5DFD5 !important; background: #FFFFFF; box-shadow: 0 12px 36px rgba(0,0,0,0.12) !important;">
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0 mt-2 notif-panel-dropdown" aria-labelledby="btn-campana-notificaciones" style="width: 400px; max-width: 95vw; z-index: 1060; border: 1.5px solid #E5DFD5 !important; background: #FFFFFF; box-shadow: 0 12px 36px rgba(0,0,0,0.12) !important;">
                             <!-- Cabecera del Panel -->
                             <div class="p-3 border-bottom d-flex align-items-center justify-content-between rounded-top-4" style="background: #FAF8F5; border-color: #EAE4DC !important;">
                                 <div class="d-flex align-items-center gap-2">
                                     <i class="bi bi-bell-fill" style="color: var(--color-principal, #5A3825); font-size: 1.05rem;"></i>
                                     <span class="fw-bold text-dark" style="font-size: 0.92rem;">Notificaciones</span>
-                                    <span id="notif-header-badge" class="badge rounded-pill" style="font-size: 0.7rem; font-weight: 600; {% if num_notificaciones_no_leidas > 0 %}background: #FEE2E2; color: #DC2626; border: 1px solid #FECACA;{% else %}background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0;{% endif %}">
+                                    <span id="notif-header-badge" class="badge rounded-pill" style="font-size: 0.7rem; font-weight: 600; {% if num_notificaciones_no_leidas > 0 %}background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;{% else %}background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0;{% endif %}">
                                         {% if num_notificaciones_no_leidas > 0 %}{{ num_notificaciones_no_leidas }} nuevas{% else %}Al día{% endif %}
                                     </span>
                                 </div>
@@ -927,40 +927,47 @@
                             <div id="notif-campana-lista" class="p-2" style="max-height: 380px; overflow-y: auto;">
                                 {% if notificaciones_campana %}
                                     {% for n in notificaciones_campana %}
-                                        <div class="notif-card-item p-2.5 mb-1.5 rounded-3 border transition-all position-relative {% if not n.leida %}notif-no-leida{% else %}notif-leida{% endif %}" id="notif-item-{{ n.id }}" data-id="{{ n.id }}" data-leida="{% if n.leida %}1{% else %}0{% endif %}" style="{% if not n.leida %}background: #F5F9FF; border-color: #BFDBFE !important; border-left: 4px solid #2563EB !important;{% else %}background: #FFFFFF; border-color: #F1ECE5 !important; opacity: 0.88;{% endif %}">
+                                        <div class="notif-card-item p-2.5 mb-1.5 rounded-3 border transition-all position-relative {% if not n.leida %}notif-no-leida{% else %}notif-leida{% endif %}" id="notif-item-{{ n.id }}" data-id="{{ n.id }}" data-leida="{% if n.leida %}1{% else %}0{% endif %}" style="{% if not n.leida %}background: #FDFBF7; border-color: #E2D3BE !important; border-left: 4px solid #9C7A5B !important;{% else %}background: #FFFFFF; border-color: #ECE5DC !important; border-left: 4px solid #EAE4DC !important; opacity: 0.88;{% endif %} cursor: pointer;">
                                             <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
                                                 <div class="d-flex align-items-center gap-1.5 flex-grow-1 min-w-0">
                                                     {% if not n.leida %}
-                                                        <span class="notif-dot rounded-circle flex-shrink-0" style="width: 7px; height: 7px; background: #2563EB;" title="No leída"></span>
+                                                        <span class="notif-dot rounded-circle flex-shrink-0" style="width: 7px; height: 7px; background: #9C7A5B;" title="No leída"></span>
                                                     {% else %}
                                                         <i class="bi bi-check2 text-muted flex-shrink-0" style="font-size: 0.85rem;" title="Leída"></i>
                                                     {% endif %}
-                                                    <strong class="text-dark small text-truncate notif-item-titulo {% if not n.leida %}fw-bold text-primary{% else %}fw-semibold text-secondary{% endif %}" style="font-size: 0.82rem;">{{ n.titulo }}</strong>
+                                                    <strong class="text-dark small text-truncate notif-item-titulo {% if not n.leida %}fw-bold text-dark{% else %}fw-semibold text-secondary{% endif %}" style="font-size: 0.82rem;">{{ n.titulo }}</strong>
                                                 </div>
-                                                <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                <div class="d-flex align-items-center gap-1.5 flex-shrink-0">
                                                     <small class="text-muted notif-item-time" style="font-size: 0.68rem;" title="{{ n.fecha_creacion|date:'d/m/Y h:i A' }}">
                                                         {{ n.fecha_creacion|date:"d M, h:i A" }}
                                                     </small>
-                                                    {% if not n.leida %}
-                                                    <button type="button" class="btn btn-sm btn-link p-0 text-muted btn-marcar-individual-leida" data-id="{{ n.id }}" title="Marcar como leída" style="line-height: 1;">
-                                                        <i class="bi bi-check2-circle text-primary" style="font-size: 0.95rem;"></i>
+                                                    <button type="button" class="btn btn-sm btn-link p-0 text-muted btn-toggle-individual" data-id="{{ n.id }}" title="{% if not n.leida %}Marcar como leída{% else %}Marcar como no leída{% endif %}" style="line-height: 1;">
+                                                        {% if not n.leida %}
+                                                            <i class="bi bi-check2-circle text-primary" style="font-size: 0.95rem;"></i>
+                                                        {% else %}
+                                                            <i class="bi bi-envelope text-secondary" style="font-size: 0.88rem;"></i>
+                                                        {% endif %}
                                                     </button>
-                                                    {% endif %}
                                                 </div>
                                             </div>
                                             <p class="small text-secondary mb-1.5 text-break notif-item-msg" style="font-size: 0.77rem; line-height: 1.35; margin-left: 14px;">
                                                 {{ n.mensaje }}
                                             </p>
-                                            {% if n.enlace %}
                                             <div class="d-flex justify-content-between align-items-center pt-1 mt-1 border-top" style="border-color: rgba(0,0,0,0.05) !important; margin-left: 14px;">
-                                                <a href="{% url 'abrir_notificacion' n.id %}" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 notif-item-enlace" style="background: var(--color-acento, #EAE4DC); color: var(--color-secundario, #3A2417); font-size: 0.72rem;">
-                                                    <span>Ir a la acción</span> <i class="bi bi-arrow-right"></i>
-                                                </a>
-                                                <span class="badge rounded-pill text-uppercase px-2 py-0.5" style="font-size: 0.62rem; background: #EEF2F6; color: #475569;">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <button type="button" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold border d-inline-flex align-items-center gap-1 btn-ver-detalle-inline" data-id="{{ n.id }}" style="background: #FAF8F5; color: #5A3825; font-size: 0.72rem; border-color: #E2D3BE !important;">
+                                                        <i class="bi bi-eye"></i> <span>Ver detalle</span>
+                                                    </button>
+                                                    {% if n.enlace %}
+                                                    <a href="{% url 'abrir_notificacion' n.id %}" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 notif-item-enlace" style="background: var(--color-principal, #5A3825); color: #FFFFFF; font-size: 0.72rem;">
+                                                        <span>Ir a la acción</span> <i class="bi bi-arrow-right"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                                <span class="badge rounded-pill text-uppercase px-2 py-0.5" style="font-size: 0.62rem; background: #F5ECE3; color: #5A3825;">
                                                     {{ n.tipo|default:'aviso' }}
                                                 </span>
                                             </div>
-                                            {% endif %}
                                         </div>
                                     {% endfor %}
                                 {% else %}
@@ -1250,14 +1257,64 @@
             if (headerBadge) {
                 if (num > 0) {
                     headerBadge.textContent = num + ' nuevas';
-                    headerBadge.style.background = '#FEE2E2';
-                    headerBadge.style.color = '#DC2626';
-                    headerBadge.style.border = '1px solid #FECACA';
+                    headerBadge.style.background = '#FEF3C7';
+                    headerBadge.style.color = '#92400E';
+                    headerBadge.style.border = '1px solid #FDE68A';
                 } else {
                     headerBadge.textContent = 'Al día';
                     headerBadge.style.background = '#DCFCE7';
                     headerBadge.style.color = '#166534';
                     headerBadge.style.border = '1px solid #BBF7D0';
+                }
+            }
+        }
+
+        function actualizarEstiloItem(itemEl, esLeida) {
+            if (!itemEl) return;
+            itemEl.dataset.leida = esLeida ? '1' : '0';
+            if (esLeida) {
+                itemEl.classList.remove('notif-no-leida');
+                itemEl.classList.add('notif-leida');
+                itemEl.style.background = '#FFFFFF';
+                itemEl.style.borderColor = '#ECE5DC';
+                itemEl.style.borderLeft = '4px solid #EAE4DC';
+                itemEl.style.opacity = '0.88';
+
+                const dot = itemEl.querySelector('.notif-dot, .notif-status-icon');
+                if (dot) {
+                    dot.outerHTML = '<i class="bi bi-check2 text-muted flex-shrink-0 notif-status-icon" style="font-size: 0.85rem;" title="Leída"></i>';
+                }
+                const titulo = itemEl.querySelector('.notif-item-titulo');
+                if (titulo) {
+                    titulo.classList.remove('fw-bold', 'text-dark');
+                    titulo.classList.add('fw-semibold', 'text-secondary');
+                }
+                const btnToggle = itemEl.querySelector('.btn-toggle-individual');
+                if (btnToggle) {
+                    btnToggle.title = 'Marcar como no leída';
+                    btnToggle.innerHTML = '<i class="bi bi-envelope text-secondary" style="font-size: 0.88rem;"></i>';
+                }
+            } else {
+                itemEl.classList.remove('notif-leida');
+                itemEl.classList.add('notif-no-leida');
+                itemEl.style.background = '#FDFBF7';
+                itemEl.style.borderColor = '#E2D3BE';
+                itemEl.style.borderLeft = '4px solid #9C7A5B';
+                itemEl.style.opacity = '1';
+
+                const icon = itemEl.querySelector('.notif-status-icon');
+                if (icon) {
+                    icon.outerHTML = '<span class="notif-dot rounded-circle flex-shrink-0 notif-status-icon" style="width: 7px; height: 7px; background: #9C7A5B;" title="No leída"></span>';
+                }
+                const titulo = itemEl.querySelector('.notif-item-titulo');
+                if (titulo) {
+                    titulo.classList.remove('fw-semibold', 'text-secondary');
+                    titulo.classList.add('fw-bold', 'text-dark');
+                }
+                const btnToggle = itemEl.querySelector('.btn-toggle-individual');
+                if (btnToggle) {
+                    btnToggle.title = 'Marcar como leída';
+                    btnToggle.innerHTML = '<i class="bi bi-check2-circle text-primary" style="font-size: 0.95rem;"></i>';
                 }
             }
         }
@@ -1276,39 +1333,48 @@
 
             let html = '';
             notificaciones.forEach(n => {
-                const bg = n.leida ? 'background: #FFFFFF; border-color: #F1ECE5 !important; opacity: 0.88;' : 'background: #F5F9FF; border-color: #BFDBFE !important; border-left: 4px solid #2563EB !important;';
-                const dot = n.leida ? '<i class="bi bi-check2 text-muted flex-shrink-0" style="font-size: 0.85rem;" title="Leída"></i>' : '<span class="notif-dot rounded-circle flex-shrink-0" style="width: 7px; height: 7px; background: #2563EB;" title="No leída"></span>';
-                const titleClass = n.leida ? 'fw-semibold text-secondary' : 'fw-bold text-primary';
-                const checkBtn = !n.leida ? `<button type="button" class="btn btn-sm btn-link p-0 text-muted btn-marcar-individual-leida" data-id="${n.id}" title="Marcar como leída" style="line-height: 1;"><i class="bi bi-check2-circle text-primary" style="font-size: 0.95rem;"></i></button>` : '';
-                const actionFooter = n.enlace ? `
-                    <div class="d-flex justify-content-between align-items-center pt-1 mt-1 border-top" style="border-color: rgba(0,0,0,0.05) !important; margin-left: 14px;">
-                        <a href="${n.abrir_url}" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 notif-item-enlace" style="background: var(--color-acento, #EAE4DC); color: var(--color-secundario, #3A2417); font-size: 0.72rem;">
-                            <span>Ir a la acción</span> <i class="bi bi-arrow-right"></i>
-                        </a>
-                        <span class="badge rounded-pill text-uppercase px-2 py-0.5" style="font-size: 0.62rem; background: #EEF2F6; color: #475569;">
-                            ${n.tipo || 'aviso'}
-                        </span>
-                    </div>
+                const bg = n.leida ? 'background: #FFFFFF; border-color: #ECE5DC !important; border-left: 4px solid #EAE4DC !important; opacity: 0.88;' : 'background: #FDFBF7; border-color: #E2D3BE !important; border-left: 4px solid #9C7A5B !important;';
+                const dot = n.leida ? '<i class="bi bi-check2 text-muted flex-shrink-0 notif-status-icon" style="font-size: 0.85rem;" title="Leída"></i>' : '<span class="notif-dot rounded-circle flex-shrink-0 notif-status-icon" style="width: 7px; height: 7px; background: #9C7A5B;" title="No leída"></span>';
+                const titleClass = n.leida ? 'fw-semibold text-secondary' : 'fw-bold text-dark';
+                const toggleBtn = `
+                    <button type="button" class="btn btn-sm btn-link p-0 text-muted btn-toggle-individual" data-id="${n.id}" title="${n.leida ? 'Marcar como no leída' : 'Marcar como leída'}" style="line-height: 1;">
+                        ${n.leida ? '<i class="bi bi-envelope text-secondary" style="font-size: 0.88rem;"></i>' : '<i class="bi bi-check2-circle text-primary" style="font-size: 0.95rem;"></i>'}
+                    </button>
+                `;
+                const actionBtn = n.enlace ? `
+                    <a href="${n.abrir_url}" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 notif-item-enlace" style="background: var(--color-principal, #5A3825); color: #FFFFFF; font-size: 0.72rem;">
+                        <span>Ir a la acción</span> <i class="bi bi-arrow-right"></i>
+                    </a>
                 ` : '';
 
                 html += `
-                    <div class="notif-card-item p-2.5 mb-1.5 rounded-3 border transition-all position-relative ${n.leida ? 'notif-leida' : 'notif-no-leida'}" id="notif-item-${n.id}" data-id="${n.id}" data-leida="${n.leida ? '1' : '0'}" style="${bg}">
+                    <div class="notif-card-item p-2.5 mb-1.5 rounded-3 border transition-all position-relative ${n.leida ? 'notif-leida' : 'notif-no-leida'}" id="notif-item-${n.id}" data-id="${n.id}" data-leida="${n.leida ? '1' : '0'}" style="${bg} cursor: pointer;">
                         <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
                             <div class="d-flex align-items-center gap-1.5 flex-grow-1 min-w-0">
                                 ${dot}
                                 <strong class="text-dark small text-truncate notif-item-titulo ${titleClass}" style="font-size: 0.82rem;">${n.titulo}</strong>
                             </div>
-                            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                            <div class="d-flex align-items-center gap-1.5 flex-shrink-0">
                                 <small class="text-muted notif-item-time" style="font-size: 0.68rem;">
                                     ${n.fecha_str}
                                 </small>
-                                ${checkBtn}
+                                ${toggleBtn}
                             </div>
                         </div>
                         <p class="small text-secondary mb-1.5 text-break notif-item-msg" style="font-size: 0.77rem; line-height: 1.35; margin-left: 14px;">
                             ${n.mensaje}
                         </p>
-                        ${actionFooter}
+                        <div class="d-flex justify-content-between align-items-center pt-1 mt-1 border-top" style="border-color: rgba(0,0,0,0.05) !important; margin-left: 14px;">
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold border d-inline-flex align-items-center gap-1 btn-ver-detalle-inline" data-id="${n.id}" style="background: #FAF8F5; color: #5A3825; font-size: 0.72rem; border-color: #E2D3BE !important;">
+                                    <i class="bi bi-eye"></i> <span>Ver detalle</span>
+                                </button>
+                                ${actionBtn}
+                            </div>
+                            <span class="badge rounded-pill text-uppercase px-2 py-0.5" style="font-size: 0.62rem; background: #F5ECE3; color: #5A3825;">
+                                ${n.tipo || 'aviso'}
+                            </span>
+                        </div>
                     </div>
                 `;
             });
@@ -1332,8 +1398,8 @@
             .catch(err => console.debug('Polling notificaciones:', err));
         }
 
-        function marcarIndividual(id, itemEl) {
-            fetch(`/notificaciones/${id}/marcar-leida-ajax/`, {
+        function toggleIndividual(id, itemEl) {
+            fetch(`/notificaciones/${id}/toggle-leida-ajax/`, {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -1344,30 +1410,10 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'ok') {
-                    if (itemEl) {
-                        itemEl.classList.remove('notif-no-leida');
-                        itemEl.classList.add('notif-leida');
-                        itemEl.dataset.leida = '1';
-                        itemEl.style.background = '#FFFFFF';
-                        itemEl.style.borderColor = '#F1ECE5';
-                        itemEl.style.borderLeft = '1px solid #F1ECE5';
-                        itemEl.style.opacity = '0.88';
-
-                        const dot = itemEl.querySelector('.notif-dot');
-                        if (dot) {
-                            dot.outerHTML = '<i class="bi bi-check2 text-muted flex-shrink-0" style="font-size: 0.85rem;" title="Leída"></i>';
-                        }
-                        const titulo = itemEl.querySelector('.notif-item-titulo');
-                        if (titulo) {
-                            titulo.classList.remove('fw-bold', 'text-primary');
-                            titulo.classList.add('fw-semibold', 'text-secondary');
-                        }
-                        const btnCheck = itemEl.querySelector('.btn-marcar-individual-leida');
-                        if (btnCheck) btnCheck.remove();
+                    actualizarEstiloItem(itemEl, data.leida);
+                    if (data.num_no_leidas !== undefined) {
+                        actualizarContador(data.num_no_leidas);
                     }
-                    let actual = parseInt(badgeCampana ? badgeCampana.textContent : '0') || 0;
-                    actual = Math.max(0, actual - 1);
-                    actualizarContador(actual);
                 }
             })
             .catch(err => console.error(err));
@@ -1389,25 +1435,7 @@
                     if (data.status === 'ok') {
                         actualizarContador(0);
                         document.querySelectorAll('.notif-card-item').forEach(itemEl => {
-                            itemEl.classList.remove('notif-no-leida');
-                            itemEl.classList.add('notif-leida');
-                            itemEl.dataset.leida = '1';
-                            itemEl.style.background = '#FFFFFF';
-                            itemEl.style.borderColor = '#F1ECE5';
-                            itemEl.style.borderLeft = '1px solid #F1ECE5';
-                            itemEl.style.opacity = '0.88';
-
-                            const dot = itemEl.querySelector('.notif-dot');
-                            if (dot) {
-                                dot.outerHTML = '<i class="bi bi-check2 text-muted flex-shrink-0" style="font-size: 0.85rem;" title="Leída"></i>';
-                            }
-                            const titulo = itemEl.querySelector('.notif-item-titulo');
-                            if (titulo) {
-                                titulo.classList.remove('fw-bold', 'text-primary');
-                                titulo.classList.add('fw-semibold', 'text-secondary');
-                            }
-                            const btnCheck = itemEl.querySelector('.btn-marcar-individual-leida');
-                            if (btnCheck) btnCheck.remove();
+                            actualizarEstiloItem(itemEl, true);
                         });
                     }
                 })
@@ -1439,17 +1467,17 @@
                 elBtnMarcar.style.display = 'inline-block';
                 elBtnMarcar.onclick = function() {
                     const itemEl = document.getElementById(`notif-item-${id}`);
-                    marcarIndividual(id, itemEl);
+                    toggleIndividual(id, itemEl);
                     elBtnMarcar.style.display = 'none';
                 };
             } else if (elBtnMarcar) {
                 elBtnMarcar.style.display = 'none';
             }
 
-            // Si no estaba leída, marcarla automáticamente como leída al abrir detalle
+            // Si no estaba leída, marcarla como leída automáticamente al abrir detalle
             if (!esLeida) {
                 const itemEl = document.getElementById(`notif-item-${id}`);
-                marcarIndividual(id, itemEl);
+                toggleIndividual(id, itemEl);
             }
 
             const modalEl = document.getElementById('modalDetalleNotificacion');
@@ -1460,13 +1488,30 @@
         };
 
         function enlazarEventosItems() {
-            document.querySelectorAll('.btn-marcar-individual-leida').forEach(btn => {
+            document.querySelectorAll('.btn-toggle-individual').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
                     const id = this.dataset.id;
                     const itemEl = document.getElementById(`notif-item-${id}`);
-                    marcarIndividual(id, itemEl);
+                    toggleIndividual(id, itemEl);
+                });
+            });
+
+            document.querySelectorAll('.btn-ver-detalle-inline').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const id = this.dataset.id;
+                    const card = document.getElementById(`notif-item-${id}`);
+                    if (!card) return;
+                    const tit = card.querySelector('.notif-item-titulo') ? card.querySelector('.notif-item-titulo').textContent : 'Notificación';
+                    const time = card.querySelector('.notif-item-time') ? card.querySelector('.notif-item-time').getAttribute('title') || card.querySelector('.notif-item-time').textContent : '';
+                    const msg = card.querySelector('.notif-item-msg') ? card.querySelector('.notif-item-msg').textContent.trim() : '';
+                    const enlaceEl = card.querySelector('.notif-item-enlace');
+                    const enlace = enlaceEl ? enlaceEl.getAttribute('href') : '';
+                    const esLeida = card.dataset.leida === '1';
+                    window.abrirDetalleNotificacion(id, tit, time, msg, enlace, esLeida);
                 });
             });
 

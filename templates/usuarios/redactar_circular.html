@@ -49,25 +49,40 @@
                             </div>
 
                             <!-- Destinatario, Grado y Estudiante Específico -->
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="destinatario_tipo" class="form-label small fw-bold text-dark mb-1">
                                     <i class="bi bi-people-fill text-primary me-1"></i> Destinatarios Principales *
                                 </label>
-                                <select name="destinatario_tipo" id="destinatario_tipo" class="form-select border-primary-subtle rounded-3 py-2" required>
-                                    <option value="Toda" {% if destinatario_tipo == 'Toda' or not destinatario_tipo %}selected{% endif %}>📢 Toda la Comunidad Educativa</option>
-                                    <option value="Familias" {% if destinatario_tipo == 'Familias' %}selected{% endif %}>👨‍👩‍👧‍👦 Familias y Acudientes</option>
-                                    <option value="Estudiantes" {% if destinatario_tipo == 'Estudiantes' %}selected{% endif %}>🎒 Estudiantes</option>
-                                    <option value="Docentes" {% if destinatario_tipo == 'Docentes' %}selected{% endif %}>👨‍🏫 Docentes / Profesores</option>
-                                    <option value="Directivos" {% if destinatario_tipo == 'Directivos' %}selected{% endif %}>🏛️ Directivos y Administrativos (Rectoría, Coordinación, Administración)</option>
+                                <select name="destinatario_tipo" id="destinatario_tipo" class="form-select border-primary-subtle rounded-3 py-2" required onchange="actualizarCamposDestinatarios();">
+                                    <option value="Toda" {% if destinatario_tipo == 'Toda' or not destinatario_tipo %}selected{% endif %}>📢 Toda la Institución</option>
+                                    <option value="Grado" {% if destinatario_tipo == 'Grado' %}selected{% endif %}>🎓 Un Grado Específico</option>
+                                    <option value="Grupo" {% if destinatario_tipo == 'Grupo' %}selected{% endif %}>🏫 Un Grupo / Curso Específico</option>
+                                    <option value="Docentes" {% if destinatario_tipo == 'Docentes' %}selected{% endif %}>👨‍🏫 Todos los Docentes</option>
+                                    <option value="Estudiantes" {% if destinatario_tipo == 'Estudiantes' %}selected{% endif %}>🎒 Todos los Estudiantes</option>
+                                    <option value="Familias" {% if destinatario_tipo == 'Familias' %}selected{% endif %}>👨‍👩‍👧‍👦 Todas las Familias</option>
+                                    <option value="Directivos" {% if destinatario_tipo == 'Directivos' %}selected{% endif %}>🏛️ Directivos y Administrativos</option>
+                                    <option value="Individual" {% if destinatario_tipo == 'Individual' %}selected{% endif %}>👤 Un Destinatario Específico</option>
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3" id="wrap_grado_especifico">
+                                <label for="grado_especifico" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-award-fill text-primary me-1"></i> Grado Escolar Específico
+                                </label>
+                                <select name="grado_especifico" id="grado_especifico" class="form-select border-primary-subtle rounded-3 py-2">
+                                    <option value="">-- Seleccionar Grado --</option>
+                                    {% for g in "6,7,8,9,10,11"|make_list %}
+                                        <option value="{{ g }}" {% if grado_especifico == g %}selected{% endif %}>Grado {{ g }}°</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3" id="wrap_curso_id">
                                 <label for="curso_id" class="form-label small fw-bold text-dark mb-1">
                                     <i class="bi bi-mortarboard-fill text-primary me-1"></i> Curso / Grupo Específico
                                 </label>
                                 <select name="curso_id" id="curso_id" class="form-select border-primary-subtle rounded-3 py-2">
-                                    <option value="">-- Todos los Cursos / Grupos --</option>
+                                    <option value="">-- Todos los Grupos --</option>
                                     {% for f in fichas %}
                                         <option value="{{ f.id }}" {% if curso_id == f.id|stringformat:"s" %}selected{% endif %}>
                                             Grupo {{ f.codigo_ficha }}
@@ -76,14 +91,14 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3" id="wrap_estudiante_id">
                                 <label for="estudiante_id" class="form-label small fw-bold text-dark mb-1">
-                                    <i class="bi bi-person-fill text-primary me-1"></i> Destinatario Individual Específico (Opcional)
+                                    <i class="bi bi-person-fill text-primary me-1"></i> Destinatario Específico
                                 </label>
                                 <select name="estudiante_id" id="estudiante_id" class="form-select border-primary-subtle rounded-3 py-2">
-                                    <option value="">-- Ninguno (Aplica a todo el grupo/estamento) --</option>
+                                    <option value="">-- Seleccionar Persona --</option>
                                     {% if directivos %}
-                                    <optgroup label="Directivos y Personal Administrativo">
+                                    <optgroup label="Directivos y Administrativos">
                                         {% for d in directivos %}
                                             <option value="{{ d.id }}" {% if estudiante_id == d.id|stringformat:"s" %}selected{% endif %}>
                                                 {{ d.get_full_name|default:d.username }} ({{ d.perfil.rol.nombre|default:'Directivo' }})
