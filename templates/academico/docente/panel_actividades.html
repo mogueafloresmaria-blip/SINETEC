@@ -646,9 +646,6 @@
                     <option value="todos">Todos los Grados</option>
                     {% for c in cargas_unicas %}
                     <option value="{{ c.grado }}">Grado {{ c.grado }}°</option>
-                    {% empty %}
-                    <option value="10">Grado 10°</option>
-                    <option value="11">Grado 11°</option>
                     {% endfor %}
                 </select>
             </div>
@@ -659,9 +656,6 @@
                     <option value="todos">Todos los Grupos</option>
                     {% for c in cargas_unicas %}
                     <option value="{{ c.grado }}°{{ c.seccion }}">Grupo {{ c.grado }}°{{ c.seccion }}</option>
-                    {% empty %}
-                    <option value="10°A">Grupo 10°A</option>
-                    <option value="11°A">Grupo 11°A</option>
                     {% endfor %}
                 </select>
             </div>
@@ -957,9 +951,7 @@
                                         {{ c.programa.denominacion|default:'Matemáticas' }} — Grado {{ c.grado }}°{{ c.seccion }}
                                     </option>
                                     {% empty %}
-                                    <option value="1">Matemáticas — Grado 10°A</option>
-                                    <option value="2">Informática — Grado 10°A</option>
-                                    <option value="3">Matemáticas — Grado 11°A</option>
+                                    <option value="" disabled selected>Sin asignaturas asignadas por Secretaría</option>
                                     {% endfor %}
                                 </select>
                             </div>

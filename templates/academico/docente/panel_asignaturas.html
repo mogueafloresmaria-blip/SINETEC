@@ -347,8 +347,9 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 py-1">
                     <li><a class="dropdown-item small" href="javascript:void(0);" onclick="seleccionarFiltroGrado('todos', 'Todos los grados');">Todos los grados</a></li>
-                    <li><a class="dropdown-item small" href="javascript:void(0);" onclick="seleccionarFiltroGrado('10', 'Grado 10°');">Grado 10°</a></li>
-                    <li><a class="dropdown-item small" href="javascript:void(0);" onclick="seleccionarFiltroGrado('11', 'Grado 11°');">Grado 11°</a></li>
+                    {% for g in grados_estructura_colegio %}
+                    <li><a class="dropdown-item small" href="javascript:void(0);" onclick="seleccionarFiltroGrado('{{ g.numero }}', 'Grado {{ g.numero }}°');">Grado {{ g.numero }}°</a></li>
+                    {% endfor %}
                 </ul>
             </div>
         </div>

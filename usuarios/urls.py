@@ -37,6 +37,7 @@ urlpatterns = [
     path('familia/pdf-oficial/', views.familia_pdf_oficial, name='familia_pdf_oficial'),
     path('familias/portal/', views.familia_portal, name='familia_portal_alt'),
     path('familias/nueva/', views.crear_familia, name='crear_familia'),
+    path('familias/<int:familia_id>/vincular/', views.vincular_estudiante_acudiente, name='vincular_estudiante_acudiente'),
     path('rectoria/', views.rectoria_dashboard, name='rectoria_dashboard'),
     path('biblioteca/', views.biblioteca_formacion, name='biblioteca_formacion'),
     path('asistencia/escanear/', views.escanear_asistencia_camara, name='escanear_asistencia_camara'),

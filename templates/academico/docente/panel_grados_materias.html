@@ -151,7 +151,9 @@
                     <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.6rem; color: #5a3825 !important;">
                         {{ total_grados_asignados }} <span class="fs-6 fw-normal text-muted">grados</span>
                     </h3>
-                    <small class="text-muted d-block mt-0.5" style="font-size: 0.7rem;">Grado 10° y Grado 11°</small>
+                    <small class="text-muted d-block mt-0.5 text-truncate" style="font-size: 0.7rem; max-width: 140px;">
+                        {% if grados_asignados_nombres %}{{ grados_asignados_nombres|join:", " }}{% else %}Sin grados asignados{% endif %}
+                    </small>
                 </div>
                 <div class="rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: #5a3825; width: 44px; height: 44px;">
                     <i class="bi bi-building fs-5"></i>
@@ -166,7 +168,9 @@
                     <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.6rem; color: #5a3825 !important;">
                         {{ total_grupos_asignados }} <span class="fs-6 fw-normal text-muted">grupos</span>
                     </h3>
-                    <small class="text-muted d-block mt-0.5" style="font-size: 0.7rem;">Sección 10°A y Sección 11°A</small>
+                    <small class="text-muted d-block mt-0.5" style="font-size: 0.7rem;">
+                        {% if total_grupos_asignados %}{{ total_grupos_asignados }} grupos activos{% else %}Sin grupos asignados{% endif %}
+                    </small>
                 </div>
                 <div class="rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: #5a3825; width: 44px; height: 44px;">
                     <i class="bi bi-people-fill fs-5"></i>
@@ -181,7 +185,9 @@
                     <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.6rem; color: #5a3825 !important;">
                         {{ total_materias_asignadas }} <span class="fs-6 fw-normal text-muted">materias</span>
                     </h3>
-                    <small class="text-muted d-block mt-0.5 text-truncate" style="font-size: 0.7rem; max-width: 140px;">Matemáticas, Informática...</small>
+                    <small class="text-muted d-block mt-0.5 text-truncate" style="font-size: 0.7rem; max-width: 140px;">
+                        {% if nombres_materias_str %}{{ nombres_materias_str }}{% else %}Sin materias asignadas{% endif %}
+                    </small>
                 </div>
                 <div class="rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: #5a3825; width: 44px; height: 44px;">
                     <i class="bi bi-journal-bookmark-fill fs-5"></i>
@@ -197,7 +203,7 @@
                         {{ total_estudiantes_activos_docente }} <span class="fs-6 fw-normal text-muted">activos</span>
                     </h3>
                     <small class="text-muted d-block mt-0.5" style="font-size: 0.7rem;">
-                        {{ total_estudiantes_activos_docente }} activos · {{ total_estudiantes_retirados_docente|default:1 }} retirado
+                        {{ total_estudiantes_activos_docente }} activos · {{ total_estudiantes_retirados_docente|default:0 }} retirados
                     </small>
                 </div>
                 <div class="rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: #5a3825; width: 44px; height: 44px;">
@@ -221,7 +227,7 @@
         <div class="row g-3" id="grid-selector-grados">
             {% for g in grados_estructura_colegio %}
             <div class="col-12 col-md-6 item-grado-selector" data-search="{{ g.nombre|lower }} {{ g.grupos_display|lower }}">
-                <div class="grado-pill-card {% if g.es_asignado %}is-assigned{% endif %} {% if g.numero == '10' %}is-active{% endif %}" 
+                <div class="grado-pill-card {% if g.es_asignado %}is-assigned{% endif %} {% if forloop.first %}is-active{% endif %}" 
                      id="btn-grado-card-{{ g.numero }}"
                      onclick="seleccionarGradoDocente('{{ g.numero }}', '{{ g.nombre|escapejs }}', '{{ g.nivel|escapejs }}', {{ g.es_asignado|yesno:'true,false' }}, '{{ g.grupos_display|escapejs }}', {{ g.total_materias }}, {{ g.total_estudiantes }}, '{{ g.director_grupo|escapejs }}', '{{ g.jornada|escapejs }}', '{{ g.periodo|escapejs }}');">
                     <div class="d-flex align-items-center justify-content-between mb-1">
@@ -233,12 +239,18 @@
                     </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="col-12 text-center py-5 text-muted bg-white rounded-4 border p-4 shadow-2xs" style="border-color: #E0D8CE !important;">
+                <i class="bi bi-mortarboard fs-2 d-block mb-2" style="color: #5a3825;"></i>
+                <h6 class="fw-bold text-dark mb-1">Sin Grados Asignados</h6>
+                <p class="small text-muted mb-0">No tienes grados escolares asignados actualmente por Secretaría Académica.</p>
+            </div>
             {% endfor %}
         </div>
     </div>
 
     <!-- 4. GRUPOS DEL GRADO SELECCIONADO Y DETALLE DEL NIVEL -->
-    <div class="card border rounded-4 bg-white shadow-2xs p-4 mb-4" id="contenedor-detalle-grado" style="border-color: #E0D8CE !important;">
+    <div class="card border rounded-4 bg-white shadow-2xs p-4 mb-4" id="contenedor-detalle-grado" style="border-color: #E0D8CE !important; {% if not grados_estructura_colegio %}display: none;{% endif %}">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-3 border-bottom">
             <div class="d-flex align-items-center gap-3">
                 <div class="rounded-circle p-2.5 d-flex align-items-center justify-content-center shadow-2xs"
@@ -689,8 +701,12 @@ function mostrarFichaDetalleMateria(cargaId, nombreMateria, grupoDisplay, intens
     document.getElementById('panel-ficha-materia-detalle').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Inicializar selección del grado 10 al cargar
+// Inicializar selección del primer grado asignado al cargar
 document.addEventListener('DOMContentLoaded', function() {
-    seleccionarGradoDocente('10', '10° Décimo', 'Media Vocacional', true, '10°A', 3, 2, '{{ user.get_full_name|default:user.username|escapejs }}', 'Mañana', 'Periodo 1 - 2026');
+    {% if grados_estructura_colegio %}
+    {% with pg=grados_estructura_colegio.0 %}
+    seleccionarGradoDocente('{{ pg.numero }}', '{{ pg.nombre|escapejs }}', '{{ pg.nivel|escapejs }}', true, '{{ pg.grupos_display|escapejs }}', {{ pg.total_materias }}, {{ pg.total_estudiantes }}, '{{ pg.director_grupo|escapejs }}', '{{ pg.jornada|escapejs }}', '{{ pg.periodo|escapejs }}');
+    {% endwith %}
+    {% endif %}
 });
 </script>

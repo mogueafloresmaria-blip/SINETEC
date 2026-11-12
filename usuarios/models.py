@@ -412,6 +412,21 @@ class FamiliaAcudiente(models.Model):
         verbose_name_plural = "Familias y Acudientes"
         ordering = ['nombre_acudiente']
 
+    @property
+    def estado(self):
+        """
+        Estado dinámico del acudiente:
+        - 'Asignado' si tiene al menos un estudiante vinculado.
+        - 'Pendiente de asignación' si no tiene ningún estudiante vinculado.
+        """
+        if self.estudiantes.exists():
+            return "Asignado"
+        return "Pendiente de asignación"
+
+    @property
+    def esta_asignado(self):
+        return self.estudiantes.exists()
+
     def __str__(self):
         return f"{self.nombre_acudiente} ({self.parentesco})"
 

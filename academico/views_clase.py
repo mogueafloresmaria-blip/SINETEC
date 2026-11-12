@@ -240,12 +240,12 @@ def mis_actividades_docente(request):
 @login_required
 @solo_instructor
 def crear_actividad_digital(request):
-    guias = GuiaClase.objects.filter(Q(carga_academica__profesor=request.user) | Q(carga_academica__isnull=True)).distinct()
-    if not guias.exists():
+    guias = GuiaClase.objects.filter(Q(carga_academica__profesor=request.user) | Q(profesor=request.user)).distinct()
+    if not guias.exists() and request.user.is_superuser:
         guias = GuiaClase.objects.all().distinct()
         
     cargas = CargaAcademica.objects.filter(profesor=request.user).select_related('programa').order_by('grado', 'programa__denominacion')
-    if not cargas.exists():
+    if not cargas.exists() and request.user.is_superuser:
         cargas = CargaAcademica.objects.all().select_related('programa').order_by('grado', 'programa__denominacion')
 
     resultados = ResultadoAprendizaje.objects.all().order_by('codigo')

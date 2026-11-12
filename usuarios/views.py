@@ -2926,10 +2926,13 @@ def familias_lista(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    todos_estudiantes = User.objects.filter(perfil__rol__nombre__in=['Estudiante', 'Aprendiz']).select_related('perfil').order_by('last_name', 'first_name')
+
     return render(request, 'usuarios/familias.html', {
         'familias': page_obj,
         'page_obj': page_obj,
         'total_familias': total_familias,
+        'todos_estudiantes': todos_estudiantes,
         'q': q,
     })
 
@@ -3531,6 +3534,7 @@ def familia_pdf_oficial(request):
 def crear_familia(request):
     """
     Registro o vinculación de nuevo acudiente con un estudiante escolar.
+    Valida obligatoriamente que se vincule al menos un estudiante para completar la asignación.
     """
     if request.method == 'POST':
         nombre = request.POST.get('nombre_acudiente', '').strip()
@@ -3542,8 +3546,10 @@ def crear_familia(request):
 
         if not nombre or not doc:
             messages.error(request, 'Nombre y documento del acudiente son requeridos.')
+        elif not estudiante_id:
+            messages.error(request, 'No se puede guardar la asignación: debe seleccionar obligatoriamente al menos un estudiante para vincular al acudiente.')
         else:
-            fam, _ = FamiliaAcudiente.objects.get_or_create(
+            fam, creada = FamiliaAcudiente.objects.get_or_create(
                 documento=doc,
                 defaults={
                     'nombre_acudiente': nombre,
@@ -3552,16 +3558,37 @@ def crear_familia(request):
                     'email': email,
                 }
             )
-            if estudiante_id:
-                est = User.objects.filter(pk=estudiante_id).first()
-                if est:
-                    fam.estudiantes.add(est)
-
-            messages.success(request, f'Familia/Acudiente {nombre} registrada exitosamente.')
+            est = User.objects.filter(pk=estudiante_id).first()
+            if est:
+                fam.estudiantes.add(est)
+                messages.success(request, f'Familia/Acudiente {nombre} asignada exitosamente con el estudiante {est.get_full_name() or est.username}. Estado: «Asignado».')
+            else:
+                messages.warning(request, f'Acudiente {nombre} guardado, pero el estudiante seleccionado no fue encontrado. Estado: «Pendiente de asignación».')
             return redirect('familias_lista')
 
     estudiantes = User.objects.filter(perfil__rol__nombre__in=['Estudiante', 'Aprendiz']).order_by('last_name')
     return render(request, 'usuarios/crear_familia.html', {'estudiantes': estudiantes})
+
+
+@login_required
+def vincular_estudiante_acudiente(request, familia_id):
+    """
+    Permite vincular estudiantes adicionales o iniciales a un acudiente existente.
+    Actualiza el estado dinámico a «Asignado» y admite múltiples estudiantes vinculados.
+    """
+    fam = get_object_or_404(FamiliaAcudiente, pk=familia_id)
+    if request.method == 'POST':
+        estudiante_id = request.POST.get('estudiante_id')
+        if not estudiante_id:
+            messages.error(request, 'No se puede guardar la vinculación: debe seleccionar un estudiante.')
+        else:
+            est = User.objects.filter(pk=estudiante_id).first()
+            if est:
+                fam.estudiantes.add(est)
+                messages.success(request, f'Estudiante {est.get_full_name() or est.username} vinculado exitosamente a {fam.nombre_acudiente}. Estado actual: «Asignado».')
+            else:
+                messages.error(request, 'El estudiante seleccionado no es válido.')
+    return redirect('familias_lista')
 
 
 @login_required
@@ -7208,32 +7235,34 @@ def instructor_dashboard(request):
     perfil_docente = getattr(request.user, 'perfil', None)
     foto_perfil_url = perfil_docente.foto_perfil.url if (perfil_docente and perfil_docente.foto_perfil) else None
 
-    # Grupos asignados oficialmente
-    grupos_lista = [
-        {
-            'grado': '10',
-            'grado_display': 'Grado 10°A',
-            'seccion': 'A',
-            'estudiantes': estudiantes_grado_10,
-            'total_estudiantes': len(estudiantes_grado_10),
-            'materias': [c.programa.denominacion for c in cargas if '10' in str(c.grado) and c.programa],
-            'carga_id': next((c.id for c in cargas if '10' in str(c.grado)), 1),
-        },
-        {
-            'grado': '11',
-            'grado_display': 'Grado 11°A',
-            'seccion': 'A',
-            'estudiantes': estudiantes_grado_11,
-            'total_estudiantes': len(estudiantes_grado_11),
-            'materias': [c.programa.denominacion for c in cargas if '11' in str(c.grado) and c.programa],
-            'carga_id': next((c.id for c in cargas if '11' in str(c.grado)), 2),
-        }
-    ]
+    # Grupos asignados oficialmente (100% dinámicos según CargaAcademica real)
+    grupos_dict = {}
+    for c in cargas_unicas:
+        g_num = ''.join(ch for ch in str(c.grado) if ch.isdigit())
+        sec = (c.seccion or 'A').upper()
+        g_key = f"{g_num}_{sec}"
+        if g_key not in grupos_dict:
+            mats_g = [
+                m for m in todos_mis_estudiantes
+                if (''.join(ch for ch in str(m.grado_escolar or '') if ch.isdigit()) == g_num)
+                and ((m.seccion or 'A').upper() == sec)
+            ]
+            mat_nombres = [c2.programa.denominacion for c2 in cargas if ''.join(ch for ch in str(c2.grado) if ch.isdigit()) == g_num and c2.programa]
+            grupos_dict[g_key] = {
+                'grado': g_num,
+                'grado_display': f"Grado {g_num}°{sec}",
+                'seccion': sec,
+                'estudiantes': mats_g,
+                'total_estudiantes': len(mats_g),
+                'materias': list(dict.fromkeys(mat_nombres)),
+                'carga_id': c.id,
+            }
+    grupos_lista = list(grupos_dict.values())
 
     guias_biblioteca = list(GuiaClase.objects.filter(
         Q(carga_academica__profesor=request.user) | Q(profesor=request.user)
     ).exclude(estado='PAPELERA').distinct().select_related('carga_academica', 'carga_academica__programa').order_by('-fecha_publicacion', '-id'))
-    if not guias_biblioteca and (request.user.is_superuser or not CargaAcademica.objects.filter(profesor=request.user).exists()):
+    if not guias_biblioteca and request.user.is_superuser:
         guias_biblioteca = list(GuiaClase.objects.all().exclude(estado='PAPELERA').select_related('carga_academica', 'carga_academica__programa').order_by('-fecha_publicacion', '-id'))
 
     for guia in guias_biblioteca:
@@ -7409,6 +7438,8 @@ def instructor_dashboard(request):
     contexto = {
         'subpanel_activo': subpanel_activo,
         'grados_estructura_colegio': grados_estructura_colegio,
+        'grados_asignados_nombres': [f"Grado {g}°" for g in sorted(grados_asignados_nums, key=lambda x: int(x) if x.isdigit() else 99)],
+        'nombres_materias_str': ", ".join(list(dict.fromkeys(c.programa.denominacion for c in cargas if c.programa))),
         'total_grados_asignados': len(grados_asignados_nums),
         'total_grupos_asignados': len(cargas_unicas),
         'total_materias_asignadas': total_materias_asignadas,
@@ -8464,8 +8495,19 @@ def gestion_usuarios(request):
     ).distinct().count()
     total_activos = User.objects.filter(is_active=True).count()
 
+    usuarios_lista = list(usuarios_qs)
+    for u in usuarios_lista:
+        u_rol = getattr(getattr(u, 'perfil', None), 'rol', None)
+        u_rol_nom = (u_rol.nombre if u_rol else '').lower()
+        u.es_directivo_protegido = bool(
+            u.is_superuser or
+            u.is_staff or
+            any(k in u_rol_nom for k in ['admin', 'rector', 'coordinad']) or
+            ('admin' in u.username.lower())
+        )
+
     context = {
-        'usuarios': usuarios_qs,
+        'usuarios': usuarios_lista,
         'total_usuarios': total_usuarios,
         'total_aprendices': total_aprendices,
         'total_instructores': total_instructores,
@@ -10105,14 +10147,19 @@ def usuario_toggle_activo(request, pk):
     # Validación de seguridad de roles
     rol_solicitante = getattr(getattr(request.user, 'perfil', None), 'rol', None)
     rol_sol_nombre = getattr(rol_solicitante, 'nombre', '').strip().lower() if rol_solicitante else ''
-    es_secretaria = 'secretar' in rol_sol_nombre and not request.user.is_superuser
+    es_secretaria = ('secretar' in rol_sol_nombre or not (request.user.is_superuser or 'admin' in rol_sol_nombre or 'rector' in rol_sol_nombre)) and not request.user.is_superuser
 
     rol_obj = getattr(getattr(usuario_obj, 'perfil', None), 'rol', None)
     rol_obj_nombre = getattr(rol_obj, 'nombre', '').strip().lower() if rol_obj else ''
-    es_objetivo_admin = usuario_obj.is_superuser or any(r in rol_obj_nombre for r in ['admin', 'rector', 'coordinador'])
+    es_objetivo_admin = (
+        usuario_obj.is_superuser or
+        usuario_obj.is_staff or
+        any(r in rol_obj_nombre for r in ['admin', 'rector', 'coordinador']) or
+        ('admin' in usuario_obj.username.lower())
+    )
 
     if es_secretaria and es_objetivo_admin:
-        messages.error(request, "Acceso restringido: Secretaría no tiene permisos para modificar el estado de cuentas de nivel Administrador o Rectoría.")
+        messages.error(request, "Acceso denegado: Secretaría no tiene permisos para desactivar o modificar cuentas con rol de Administrador o Directivo.")
         return redirect('gestion_usuarios')
 
     usuario_obj.is_active = not usuario_obj.is_active
