@@ -190,11 +190,12 @@
                             <i class="bi bi-person-fill text-primary me-1" style="color: var(--color-principal);"></i> Seleccionar Estudiante Destino *
                         </label>
                         
-                        <!-- Filtro de grado rápido -->
-                        <div class="d-flex gap-1.5 mb-2">
-                            <button type="button" class="btn btn-sm rounded-pill px-2.5 py-0.5 fw-bold btn-filtro-est active" onclick="filtrarEstudiantesPorGrado('todos', this)" style="background: var(--color-acento); color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.72rem;">Todos (4)</button>
-                            <button type="button" class="btn btn-sm rounded-pill px-2.5 py-0.5 fw-bold btn-filtro-est" onclick="filtrarEstudiantesPorGrado('10', this)" style="background: #fff; color: #64748b; border: 1px solid #e2e8f0; font-size: 0.72rem;">Grado 10° (2)</button>
-                            <button type="button" class="btn btn-sm rounded-pill px-2.5 py-0.5 fw-bold btn-filtro-est" onclick="filtrarEstudiantesPorGrado('11', this)" style="background: #fff; color: #64748b; border: 1px solid #e2e8f0; font-size: 0.72rem;">Grado 11° (2)</button>
+                        <!-- Filtro de grado dinámico según cursos asignados -->
+                        <div class="d-flex gap-1.5 mb-2 flex-wrap" id="contenedor_botones_grados">
+                            <button type="button" class="btn btn-sm rounded-pill px-2.5 py-0.5 fw-bold btn-filtro-est active" id="btn-filtro-todos" onclick="filtrarEstudiantesPorGrado('todos', this)" style="background: var(--color-acento); color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.72rem;">Todos</button>
+                            {% for g in grados_cargas %}
+                            <button type="button" class="btn btn-sm rounded-pill px-2.5 py-0.5 fw-bold btn-filtro-est" id="btn-filtro-g{{ g }}" onclick="filtrarEstudiantesPorGrado('{{ g }}', this)" style="background: #fff; color: #64748b; border: 1px solid #e2e8f0; font-size: 0.72rem;">Grado {{ g }}°</button>
+                            {% endfor %}
                         </div>
 
                         <!-- Buscador de estudiante -->
@@ -314,8 +315,16 @@ function actualizarGrupoEstudiantes() {
     const selectCarga = document.getElementById('selector_carga');
     const opt = selectCarga.options[selectCarga.selectedIndex];
     if (opt && opt.value) {
-        const grado = opt.getAttribute('data-grado') || '10';
-        document.getElementById('input_grado_hidden').value = grado;
+        const grado = opt.getAttribute('data-grado') || '';
+        const gNum = grado.replace(/\D/g, '') || '10';
+        document.getElementById('input_grado_hidden').value = gNum;
+
+        // Auto-filtrar los estudiantes asignados a este grado
+        const btnTarget = document.getElementById('btn-filtro-g' + gNum);
+        filtrarEstudiantesPorGrado(gNum, btnTarget);
+    } else {
+        const btnTodos = document.getElementById('btn-filtro-todos');
+        filtrarEstudiantesPorGrado('todos', btnTodos);
     }
 }
 
@@ -325,6 +334,7 @@ function toggleSelectorEstudiante(mostrar) {
     if (mostrar) {
         box.style.display = 'block';
         select.required = true;
+        actualizarGrupoEstudiantes();
     } else {
         box.style.display = 'none';
         select.required = false;
@@ -332,21 +342,24 @@ function toggleSelectorEstudiante(mostrar) {
     }
 }
 
-function filtrarEstudiantesPorGrado(grado, btn) {
+function filtrarEstudiantesPorGrado(grado, btn = null) {
     document.querySelectorAll('.btn-filtro-est').forEach(b => {
         b.style.background = '#fff';
         b.style.color = '#64748b';
         b.style.borderColor = '#e2e8f0';
     });
-    btn.style.background = 'var(--color-acento)';
-    btn.style.color = 'var(--color-principal)';
-    btn.style.borderColor = 'var(--color-acento)';
+    if (btn) {
+        btn.style.background = 'var(--color-acento)';
+        btn.style.color = 'var(--color-principal)';
+        btn.style.borderColor = 'var(--color-acento)';
+    }
 
     const select = document.getElementById('selector_estudiante_individual');
+    if (!select) return;
     for (let i = 1; i < select.options.length; i++) {
         const opt = select.options[i];
-        const g = opt.getAttribute('data-grado') || '';
-        if (grado === 'todos' || g.includes(grado)) {
+        const g = (opt.getAttribute('data-grado') || '').replace(/\D/g, '');
+        if (grado === 'todos' || g === String(grado) || g.includes(String(grado))) {
             opt.style.display = '';
         } else {
             opt.style.display = 'none';

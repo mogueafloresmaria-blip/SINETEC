@@ -865,7 +865,7 @@ function cambiarPestanaGrado(grado, mantenerFiltroGrupo = false) {
 
 function onCambiarFiltroGrupo() {
     const selectGrupo = document.getElementById('filtro-grupo');
-    const grupoFiltro = selectGrupo ? selectGrupo.value : 'todos';
+    const grupoFiltro = selectGrupo ? selectGrupo.value.trim() : 'todos';
 
     if (grupoFiltro === 'todos') {
         cambiarPestanaGrado('todos', true);
@@ -879,24 +879,32 @@ function onCambiarFiltroGrupo() {
     }
 }
 
+function normalizarGrupo(str) {
+    if (!str) return '';
+    return str.replace(/[\s°\-_]/g, '').toLowerCase();
+}
+
 function aplicarFiltrosEstudiantes() {
     const inputBuscar = document.getElementById('buscar-estudiante-input');
     const term = inputBuscar ? inputBuscar.value.toLowerCase().trim() : '';
-    const grupoFiltro = document.getElementById('filtro-grupo') ? document.getElementById('filtro-grupo').value.trim().toLowerCase() : 'todos';
+    const grupoFiltroRaw = document.getElementById('filtro-grupo') ? document.getElementById('filtro-grupo').value.trim() : 'todos';
     const estadoFiltro = document.getElementById('filtro-estado') ? document.getElementById('filtro-estado').value.trim().toLowerCase() : 'todos';
     const materiaFiltro = document.getElementById('filtro-materia') ? document.getElementById('filtro-materia').value.trim().toLowerCase() : 'todas';
+
+    const grupoFiltroNorm = normalizarGrupo(grupoFiltroRaw);
 
     document.querySelectorAll('.fila-estudiante-item').forEach(card => {
         const nombre = (card.getAttribute('data-nombre') || '').toLowerCase();
         const doc = (card.getAttribute('data-doc') || '').toLowerCase();
         const grado = (card.getAttribute('data-grado') || '').trim();
-        const grupo = (card.getAttribute('data-grupo') || '').trim().toLowerCase();
+        const grupoCardRaw = card.getAttribute('data-grupo') || '';
+        const grupoCardNorm = normalizarGrupo(grupoCardRaw);
         const estado = (card.getAttribute('data-estado') || '').trim().toLowerCase();
         const materia = (card.getAttribute('data-materia') || '').toLowerCase();
 
         let matchGradoTab = (gradoActivo === 'todos') || (grado === gradoActivo);
         const matchTerm = !term || nombre.includes(term) || doc.includes(term);
-        const matchGrupo = (grupoFiltro === 'todos') || (grupo === grupoFiltro);
+        const matchGrupo = (grupoFiltroRaw === 'todos') || (grupoCardNorm === grupoFiltroNorm) || grupoCardNorm.includes(grupoFiltroNorm) || grupoFiltroNorm.includes(grupoCardNorm);
         const matchEstado = (estadoFiltro === 'todos') || (estado === estadoFiltro);
         const matchMateria = (materiaFiltro === 'todas') || materia.includes(materiaFiltro);
 
@@ -943,12 +951,25 @@ function abrirModalRetiro(matriculaId, estudianteId, nombre, grado, nuevoEstado)
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const gradoUrl = urlParams.get('grado');
-    if (gradoUrl === '11') {
-        cambiarPestanaGrado('11');
-    } else if (gradoUrl === 'todos') {
-        cambiarPestanaGrado('todos');
+    const grupoUrl = urlParams.get('grupo');
+
+    if (grupoUrl) {
+        const selectGrupo = document.getElementById('filtro-grupo');
+        if (selectGrupo) {
+            selectGrupo.value = grupoUrl;
+            onCambiarFiltroGrupo();
+            return;
+        }
+    }
+
+    if (gradoUrl) {
+        cambiarPestanaGrado(gradoUrl);
     } else {
-        cambiarPestanaGrado('10');
+        {% if grupos_lista|length == 1 %}
+            cambiarPestanaGrado('{{ grupos_lista.0.grado }}');
+        {% else %}
+            cambiarPestanaGrado('todos');
+        {% endif %}
     }
 });
 </script>

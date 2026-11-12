@@ -248,6 +248,8 @@ def crear_actividad_digital(request):
     if not cargas.exists() and request.user.is_superuser:
         cargas = CargaAcademica.objects.all().select_related('programa').order_by('grado', 'programa__denominacion')
 
+    grados_cargas = sorted(list(set(''.join(ch for ch in str(c.grado) if ch.isdigit()) for c in cargas if c.grado)), key=lambda x: int(x) if x.isdigit() else 0)
+
     resultados = ResultadoAprendizaje.objects.all().order_by('codigo')
 
     matriculas_qs = list(Matricula.objects.filter(
@@ -354,6 +356,7 @@ def crear_actividad_digital(request):
     return render(request, 'academico/crear_actividad_digital.html', {
         'guias': guias,
         'cargas': cargas,
+        'grados_cargas': grados_cargas,
         'resultados': resultados,
         'estudiantes': matriculas_qs,
     })

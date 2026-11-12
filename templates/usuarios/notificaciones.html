@@ -10,8 +10,8 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
-                <span class="text-muted small">Centro de Notificaciones Institucionales</span>
+                <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #F5F2EB; color: #5a3825; border: 1px solid #E0D8CE;">EDUNOVA · Gestión Institucional</span>
+                <span class="text-muted small">Centro de Notificaciones y Avisos Escolares</span>
             </div>
             <h1 class="h3 fw-bold text-dark mb-1">
                 <i class="bi bi-bell-fill text-success me-2"></i>Bandeja de Notificaciones y Avisos
@@ -59,13 +59,18 @@
                         </div>
                     </div>
                     <div class="d-flex flex-column align-items-end gap-2 flex-shrink-0">
-                        {% if n.url_destino %}
-                            <a href="{{ n.url_destino }}" class="btn btn-sm text-white fw-semibold" style="background-color: #29AAE3;">
+                        {% if n.enlace or n.url_destino %}
+                            <a href="{% url 'abrir_notificacion' n.pk %}" class="btn btn-sm text-white fw-semibold rounded-pill px-3" style="background-color: var(--color-principal, #5A3825);">
                                 Ver Detalle <i class="bi bi-arrow-right ms-1"></i>
                             </a>
+                        {% else %}
+                            <button type="button" class="btn btn-sm text-white fw-semibold rounded-pill px-3" style="background-color: var(--color-principal, #5A3825);"
+                                    onclick="window.abrirDetalleNotificacion('{{ n.pk }}', '{{ n.titulo|escapejs }}', '{{ n.fecha_creacion|date:'d/m/Y h:i A' }}', '{{ n.mensaje|escapejs }}', '', {% if n.leida %}true{% else %}false{% endif %});">
+                                Ver Detalle <i class="bi bi-eye ms-1"></i>
+                            </button>
                         {% endif %}
                         {% if not n.leida %}
-                            <a href="{% url 'marcar_notificacion_leida' n.pk %}" class="btn btn-sm btn-outline-secondary" title="Marcar como leída">
+                            <a href="{% url 'marcar_notificacion_leida' n.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3" title="Marcar como leída">
                                 <i class="bi bi-check2"></i> Marcar leída
                             </a>
                         {% endif %}
@@ -75,7 +80,7 @@
                 <div class="p-5 text-center text-muted">
                     <i class="bi bi-bell-slash fs-1 d-block mb-2 opacity-50"></i>
                     <h5 class="fw-bold text-dark">No tienes notificaciones pendientes</h5>
-                    <p class="text-muted small mb-0">Cuando se registren novedades en tus fichas, evidencias o trámites aparecerán aquí.</p>
+                    <p class="text-muted small mb-0">Cuando se registren novedades en tus clases, calificaciones, comunicaciones o trámites escolares aparecerán aquí.</p>
                 </div>
             {% endfor %}
         </div>

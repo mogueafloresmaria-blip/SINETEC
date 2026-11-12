@@ -1415,6 +1415,50 @@
             });
         }
 
+        // Función global para mostrar el detalle completo de una notificación
+        window.abrirDetalleNotificacion = function(id, titulo, fecha, mensaje, enlace, esLeida) {
+            const elTit = document.getElementById('modalNotifTitulo');
+            const elFec = document.getElementById('modalNotifFecha');
+            const elMsg = document.getElementById('modalNotifMensaje');
+            const elBox = document.getElementById('modalNotifAccionBox');
+            const elBtnAcc = document.getElementById('modalNotifAccionBtn');
+            const elBtnMarcar = document.getElementById('modalNotifMarcarLeidaBtn');
+
+            if (elTit) elTit.textContent = titulo;
+            if (elFec) elFec.textContent = fecha;
+            if (elMsg) elMsg.textContent = mensaje;
+
+            if (enlace && enlace !== '#' && enlace !== '') {
+                if (elBox) elBox.style.display = 'block';
+                if (elBtnAcc) elBtnAcc.href = enlace;
+            } else {
+                if (elBox) elBox.style.display = 'none';
+            }
+
+            if (!esLeida && elBtnMarcar) {
+                elBtnMarcar.style.display = 'inline-block';
+                elBtnMarcar.onclick = function() {
+                    const itemEl = document.getElementById(`notif-item-${id}`);
+                    marcarIndividual(id, itemEl);
+                    elBtnMarcar.style.display = 'none';
+                };
+            } else if (elBtnMarcar) {
+                elBtnMarcar.style.display = 'none';
+            }
+
+            // Si no estaba leída, marcarla automáticamente como leída al abrir detalle
+            if (!esLeida) {
+                const itemEl = document.getElementById(`notif-item-${id}`);
+                marcarIndividual(id, itemEl);
+            }
+
+            const modalEl = document.getElementById('modalDetalleNotificacion');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        };
+
         function enlazarEventosItems() {
             document.querySelectorAll('.btn-marcar-individual-leida').forEach(btn => {
                 btn.addEventListener('click', function(e) {
@@ -1423,6 +1467,20 @@
                     const id = this.dataset.id;
                     const itemEl = document.getElementById(`notif-item-${id}`);
                     marcarIndividual(id, itemEl);
+                });
+            });
+
+            document.querySelectorAll('.notif-card-item').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (e.target.closest('a, button')) return;
+                    const id = this.dataset.id;
+                    const tit = this.querySelector('.notif-item-titulo') ? this.querySelector('.notif-item-titulo').textContent : 'Notificación';
+                    const time = this.querySelector('.notif-item-time') ? this.querySelector('.notif-item-time').getAttribute('title') || this.querySelector('.notif-item-time').textContent : '';
+                    const msg = this.querySelector('.notif-item-msg') ? this.querySelector('.notif-item-msg').textContent.trim() : '';
+                    const enlaceEl = this.querySelector('.notif-item-enlace');
+                    const enlace = enlaceEl ? enlaceEl.getAttribute('href') : '';
+                    const esLeida = this.dataset.leida === '1';
+                    window.abrirDetalleNotificacion(id, tit, time, msg, enlace, esLeida);
                 });
             });
         }
@@ -1440,6 +1498,42 @@
         setInterval(consultarNotificacionesAPI, 25000);
     })();
     </script>
+
+    <!-- Modal Oficial de Detalle Completo de Notificación -->
+    <div class="modal fade" id="modalDetalleNotificacion" tabindex="-1" aria-labelledby="modalDetalleNotifLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border shadow-lg" style="border-color: #E2DCD5;">
+                <div class="modal-header border-bottom py-3 px-4" style="background: #FAF8F5;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: #F5ECE3; color: #5A3825;">
+                            <i class="bi bi-bell-fill fs-6"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark mb-0" id="modalDetalleNotifLabel">Detalle de la Notificación</h6>
+                            <small class="text-muted" id="modalNotifFecha" style="font-size: 0.74rem;">--</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4 bg-white">
+                    <h5 class="fw-bold text-dark mb-2" id="modalNotifTitulo">--</h5>
+                    <p class="text-secondary small mb-3 text-break" id="modalNotifMensaje" style="line-height: 1.6; white-space: pre-wrap;">--</p>
+                    <div id="modalNotifAccionBox" style="display: none;" class="p-3 rounded-3 bg-light border">
+                        <span class="d-block small text-muted mb-2"><i class="bi bi-box-arrow-up-right me-1"></i> Esta notificación tiene una acción o enlace asociado:</span>
+                        <a href="#" id="modalNotifAccionBtn" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white d-inline-flex align-items-center gap-1.5" style="background: #5A3825;">
+                            <span>Ir al apartado correspondiente</span> <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-2.5 px-4 bg-light d-flex justify-content-between">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-sm rounded-pill px-3.5 text-white fw-bold" id="modalNotifMarcarLeidaBtn" style="background: #047857; display: none;">
+                        <i class="bi bi-check2-circle me-1"></i> Marcar como leída
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

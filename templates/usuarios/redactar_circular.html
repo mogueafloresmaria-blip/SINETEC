@@ -58,6 +58,7 @@
                                     <option value="Familias" {% if destinatario_tipo == 'Familias' %}selected{% endif %}>👨‍👩‍👧‍👦 Familias y Acudientes</option>
                                     <option value="Estudiantes" {% if destinatario_tipo == 'Estudiantes' %}selected{% endif %}>🎒 Estudiantes</option>
                                     <option value="Docentes" {% if destinatario_tipo == 'Docentes' %}selected{% endif %}>👨‍🏫 Docentes / Profesores</option>
+                                    <option value="Directivos" {% if destinatario_tipo == 'Directivos' %}selected{% endif %}>🏛️ Directivos y Administrativos (Rectoría, Coordinación, Administración)</option>
                                 </select>
                             </div>
 
@@ -77,15 +78,37 @@
 
                             <div class="col-md-4">
                                 <label for="estudiante_id" class="form-label small fw-bold text-dark mb-1">
-                                    <i class="bi bi-person-fill text-primary me-1"></i> Estudiante Específico (Opcional)
+                                    <i class="bi bi-person-fill text-primary me-1"></i> Destinatario Individual Específico (Opcional)
                                 </label>
                                 <select name="estudiante_id" id="estudiante_id" class="form-select border-primary-subtle rounded-3 py-2">
                                     <option value="">-- Ninguno (Aplica a todo el grupo/estamento) --</option>
-                                    {% for est in estudiantes %}
-                                        <option value="{{ est.id }}" {% if estudiante_id == est.id|stringformat:"s" %}selected{% endif %}>
-                                            {{ est.get_full_name|default:est.username }} (Doc: {{ est.perfil.numero_documento|default:"--" }})
-                                        </option>
-                                    {% endfor %}
+                                    {% if directivos %}
+                                    <optgroup label="Directivos y Personal Administrativo">
+                                        {% for d in directivos %}
+                                            <option value="{{ d.id }}" {% if estudiante_id == d.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ d.get_full_name|default:d.username }} ({{ d.perfil.rol.nombre|default:'Directivo' }})
+                                            </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    {% endif %}
+                                    {% if docentes %}
+                                    <optgroup label="Docentes y Profesores">
+                                        {% for doc in docentes %}
+                                            <option value="{{ doc.id }}" {% if estudiante_id == doc.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ doc.get_full_name|default:doc.username }} (Docente)
+                                            </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    {% endif %}
+                                    {% if estudiantes %}
+                                    <optgroup label="Estudiantes">
+                                        {% for est in estudiantes %}
+                                            <option value="{{ est.id }}" {% if estudiante_id == est.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ est.get_full_name|default:est.username }} (Doc: {{ est.perfil.numero_documento|default:est.username }})
+                                            </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    {% endif %}
                                 </select>
                             </div>
 

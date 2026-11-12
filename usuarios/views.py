@@ -2401,6 +2401,12 @@ def redactar_circular(request):
     if not fichas.exists():
         fichas = Ficha.objects.select_related('programa', 'institucion').order_by('codigo_ficha')
     estudiantes_qs = User.objects.filter(matriculas_academicas__estado_formacion='En Formacion').distinct().order_by('last_name', 'first_name')
+    docentes_qs = User.objects.filter(
+        Q(perfil__rol__nombre__in=['Docente', 'Profesor', 'Instructor'])
+    ).distinct().select_related('perfil').order_by('last_name', 'first_name')
+    directivos_qs = User.objects.filter(
+        Q(perfil__rol__nombre__in=['Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria']) | Q(is_superuser=True)
+    ).distinct().select_related('perfil').order_by('last_name', 'first_name')
 
     if request.method == 'POST':
         asunto = request.POST.get('asunto', '').strip()
@@ -2431,6 +2437,8 @@ def redactar_circular(request):
             return render(request, 'usuarios/redactar_circular.html', {
                 'fichas': fichas,
                 'estudiantes': estudiantes_qs,
+                'docentes': docentes_qs,
+                'directivos': directivos_qs,
                 'hoy': hoy,
                 'asunto': asunto,
                 'mensaje': mensaje,
@@ -2464,9 +2472,9 @@ def redactar_circular(request):
                     else:
                         dest_users.extend(list(User.objects.filter(perfil__rol__nombre='Estudiante')))
                 if destinatario_tipo in ['Docentes', 'Toda', 'Todos']:
-                    dest_users.extend(list(User.objects.filter(
-                        Q(perfil__rol__nombre__icontains='Docente') | Q(perfil__rol__nombre__icontains='Profesor')
-                    )))
+                    dest_users.extend(list(docentes_qs))
+                if destinatario_tipo in ['Directivos', 'Toda', 'Todos']:
+                    dest_users.extend(list(directivos_qs))
 
             tipo_n = 'warning' if urgente else 'info'
             for u in set(dest_users):
@@ -2493,6 +2501,8 @@ def redactar_circular(request):
     return render(request, 'usuarios/redactar_circular.html', {
         'fichas': fichas,
         'estudiantes': estudiantes_qs,
+        'docentes': docentes_qs,
+        'directivos': directivos_qs,
         'hoy': hoy,
     })
 
@@ -9554,12 +9564,12 @@ def exportar_reporte_excel(request):
     ws = wb.active
 
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    header_fill = PatternFill(start_color="29AAE3", end_color="29AAE3", fill_type="solid")
+    header_fill = PatternFill(start_color="5A3825", end_color="5A3825", fill_type="solid")
     header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
 
     if entidad == 'instituciones':
-        ws.title = "Instituciones Articuladas"
-        headers = ["Código DANE", "Institución Educativa", "Municipio", "Rector", "Teléfono", "Correo", "Estado", "Fichas"]
+        ws.title = "Instituciones Educativas"
+        headers = ["Código DANE", "Institución Educativa", "Municipio", "Rector", "Teléfono", "Correo", "Estado", "Grupos"]
         ws.append(headers)
         from instituciones.models import InstitucionEducativa
         for col in InstitucionEducativa.objects.annotate(num_fichas=Count('fichas')).order_by('nombre'):
@@ -9573,30 +9583,30 @@ def exportar_reporte_excel(request):
                 'Activo' if col.activa else 'Inactivo',
                 col.num_fichas
             ])
-        filename = "reporte_instituciones_sinetec.xlsx"
+        filename = "reporte_instituciones_edunova.xlsx"
 
-    elif entidad == 'aprendices':
-        ws.title = "Aprendices Media Técnica"
-        headers = ["Tipo Doc", "Número Documento", "Nombres", "Apellidos", "Correo", "Ficha", "Programa", "Colegio", "Grado", "Estado"]
+    elif entidad in ['aprendices', 'estudiantes']:
+        ws.title = "Estudiantes Matriculados"
+        headers = ["Tipo Doc", "Número Documento", "Nombres", "Apellidos", "Correo", "Curso / Grupo", "Énfasis / Programa", "Colegio", "Grado", "Estado"]
         ws.append(headers)
         for mat in Matricula.objects.select_related('aprendiz', 'aprendiz__perfil', 'ficha', 'ficha__programa', 'ficha__institucion').order_by('aprendiz__last_name'):
             ws.append([
-                mat.aprendiz.perfil.tipo_documento,
-                mat.aprendiz.perfil.numero_documento,
+                getattr(getattr(mat.aprendiz, 'perfil', None), 'tipo_documento', 'CC'),
+                getattr(getattr(mat.aprendiz, 'perfil', None), 'numero_documento', mat.aprendiz.username),
                 mat.aprendiz.first_name,
                 mat.aprendiz.last_name,
                 mat.aprendiz.email,
-                mat.ficha.codigo_ficha,
-                mat.ficha.programa.denominacion,
-                mat.ficha.institucion.nombre if mat.ficha.institucion else '',
+                f"Grado {mat.grado_escolar or '10'}°{mat.seccion or 'A'}",
+                mat.ficha.programa.denominacion if mat.ficha and mat.ficha.programa else 'General',
+                mat.ficha.institucion.nombre if mat.ficha and mat.ficha.institucion else 'EDUNOVA',
                 mat.grado_escolar or '10',
                 mat.get_estado_formacion_display()
             ])
-        filename = "reporte_aprendices_sinetec.xlsx"
+        filename = "reporte_estudiantes_edunova.xlsx"
 
-    elif entidad == 'instructores':
-        ws.title = "Instructores y Docentes"
-        headers = ["Nombres", "Apellidos", "Documento", "Correo", "Teléfono", "Rol", "Fichas a Cargo", "Estado Cuenta"]
+    elif entidad in ['instructores', 'docentes']:
+        ws.title = "Docentes y Profesores"
+        headers = ["Nombres", "Apellidos", "Documento", "Correo", "Teléfono", "Rol", "Grupos Asignados", "Estado Cuenta"]
         ws.append(headers)
         for u in User.objects.filter(Q(perfil__rol__nombre__icontains='Instructor') | Q(perfil__rol__nombre__icontains='Docente')).select_related('perfil', 'perfil__rol'):
             fichas_cnt = Ficha.objects.filter(instructor_lider=u).count()
@@ -9606,28 +9616,29 @@ def exportar_reporte_excel(request):
                 getattr(u.perfil, 'numero_documento', ''),
                 u.email,
                 getattr(u.perfil, 'telefono', ''),
-                getattr(u.perfil.rol, 'nombre', 'Instructor') if getattr(u, 'perfil', None) else '',
+                getattr(u.perfil.rol, 'nombre', 'Docente') if getattr(u, 'perfil', None) else '',
                 fichas_cnt,
                 'Activo' if u.is_active else 'Inactivo'
             ])
-        filename = "reporte_instructores_sinetec.xlsx"
+        filename = "reporte_docentes_edunova.xlsx"
 
     elif entidad == 'seguimientos':
-        ws.title = "Bitácoras de Seguimiento"
-        headers = ["ID", "Fecha Visita", "Ficha", "Programa", "Institución", "Instructor", "Tipo", "Estado", "Compromisos"]
+        ws.title = "Bitácoras de Seguimiento Escolar"
+        headers = ["ID", "Fecha Visita", "Grupo", "Programa / Asignatura", "Institución", "Docente", "Tipo", "Estado", "Compromisos"]
         ws.append(headers)
         for s in BitacoraSeguimiento.objects.select_related('ficha', 'ficha__programa', 'ficha__institucion', 'instructor').order_by('-fecha_visita'):
             ws.append([
                 s.id,
                 s.fecha_visita.strftime('%d/%m/%Y'),
-                s.ficha.codigo_ficha,
-                s.ficha.programa.denominacion,
-                s.ficha.institucion.nombre if s.ficha.institucion else '',
+                s.ficha.codigo_ficha if s.ficha else 'General',
+                s.ficha.programa.denominacion if s.ficha and s.ficha.programa else 'Académico',
+                s.ficha.institucion.nombre if s.ficha and s.ficha.institucion else 'EDUNOVA',
                 s.instructor.get_full_name() if s.instructor else '',
                 s.tipo_seguimiento,
                 s.estado,
                 s.compromisos or 'Sin compromisos'
             ])
+        filename = "reporte_seguimientos_edunova.xlsx"
     elif entidad == 'pensiones':
         ws.title = "Recaudos y Pensiones"
         headers = ["N° Recibo", "Fecha", "Estudiante", "Documento", "Concepto", "Método", "Monto", "Estado"]
@@ -9764,19 +9775,19 @@ def exportar_reporte_pdf(request):
     p = canvas.Canvas(buffer, pagesize=letter)
     ancho, alto = letter
 
-    # Banner superior SENA
-    p.setFillColor(colors.HexColor('#29AAE3'))
+    # Banner superior institucional EduNova
+    p.setFillColor(colors.HexColor('#5A3825'))
     p.rect(0, alto - 55, ancho, 55, fill=True, stroke=False)
     p.setFillColor(colors.white)
     p.setFont("Helvetica-Bold", 13)
-    p.drawString(40, alto - 26, "SERVICIO NACIONAL DE APRENDIZAJE - SENA")
+    p.drawString(40, alto - 26, "EDUNOVA - GESTIÓN ACADÉMICA Y ESCOLAR")
     p.setFont("Helvetica", 9)
-    p.drawString(40, alto - 42, "Regional Magdalena · SINETEC Gestión Administrativa de Media Técnica")
+    p.drawString(40, alto - 42, "Institución Educativa · Reporte Oficial del Sistema Escolar")
 
     # Título
-    p.setFillColor(colors.HexColor('#0F172A'))
+    p.setFillColor(colors.HexColor('#3D2417'))
     p.setFont("Helvetica-Bold", 12)
-    p.drawString(40, alto - 80, f"INFORME OFICIAL DE CONSOLIDADO: {entidad.upper()}")
+    p.drawString(40, alto - 80, f"INFORME OFICIAL ESCOLAR: {entidad.upper()}")
     p.setFont("Helvetica", 8)
     p.drawString(40, alto - 94, f"Generado por: {request.user.get_full_name() or request.user.username} | Fecha: {timezone.now().strftime('%d/%m/%Y %H:%M')}")
 
@@ -9803,11 +9814,11 @@ def exportar_reporte_pdf(request):
             p.drawString(450, y, 'Activo' if col.activa else 'Inactivo')
             y -= 14
 
-    elif entidad == 'aprendices':
+    elif entidad in ['aprendices', 'estudiantes']:
         p.drawString(40, y, "DOCUMENTO")
-        p.drawString(120, y, "APRENDIZ")
-        p.drawString(280, y, "FICHA")
-        p.drawString(350, y, "PROGRAMA")
+        p.drawString(120, y, "ESTUDIANTE")
+        p.drawString(280, y, "CURSO / GRADO")
+        p.drawString(370, y, "ÉNFASIS / ASIGNATURA")
         p.drawString(490, y, "ESTADO")
         p.line(40, y - 4, ancho - 40, y - 4)
         y -= 16
@@ -9816,11 +9827,13 @@ def exportar_reporte_pdf(request):
             if y < 60:
                 p.showPage()
                 y = alto - 60
-            p.drawString(40, y, str(m.aprendiz.perfil.numero_documento)[:14])
+            doc_val = getattr(getattr(m.aprendiz, 'perfil', None), 'numero_documento', m.aprendiz.username)
+            p.drawString(40, y, str(doc_val)[:14])
             p.drawString(120, y, m.aprendiz.get_full_name()[:26])
-            p.drawString(280, y, str(m.ficha.codigo_ficha))
-            p.drawString(350, y, m.ficha.programa.denominacion[:22])
+            p.drawString(280, y, f"Grado {m.grado_escolar or '10'}°{m.seccion or 'A'}")
+            p.drawString(370, y, (m.ficha.programa.denominacion if m.ficha and m.ficha.programa else 'General')[:20])
             p.drawString(490, y, str(m.estado_formacion)[:12])
+            y -= 14
     elif entidad == 'convenios':
         p.drawString(40, y, "N° CONVENIO")
         p.drawString(130, y, "INSTITUCIÓN EDUCATIVA")

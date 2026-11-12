@@ -1053,6 +1053,7 @@ class ComunicadoEscolar(models.Model):
         ('Docentes', 'Cuerpo Docente'),
         ('Estudiantes', 'Estudiantes'),
         ('Familias', 'Acudientes y Familias'),
+        ('Directivos', 'Directivos y Administrativos'),
     ]
 
     remitente = models.ForeignKey(
