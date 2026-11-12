@@ -126,6 +126,17 @@ class PerfilUsuario(models.Model):
         rol_nombre = self.rol.nombre if self.rol else "Sin Rol"
         return f"{nombre_completo} ({rol_nombre} - {self.numero_documento})"
 
+    @property
+    def direccion(self):
+        """Retorna la dirección asociada al perfil o docente si existe."""
+        doc = getattr(self.usuario, 'docente', None)
+        if doc and getattr(doc, 'direccion', None):
+            return doc.direccion
+        doc_perfil = getattr(self.usuario, 'docente_perfil', None)
+        if doc_perfil and getattr(doc_perfil, 'direccion', None):
+            return doc_perfil.direccion
+        return ''
+
     @classmethod
     def buscar_estudiante_por_documento(cls, documento, exclude_user_id=None):
         """

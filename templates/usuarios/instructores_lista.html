@@ -121,9 +121,13 @@ body { background: #f3f5f9 !important; }
           <tr>
             <td class="ps-4">
               <div class="d-flex align-items-center gap-3">
-                <div class="doc-avatar">
-                  {{ d.user.first_name|first|upper }}{{ d.user.last_name|first|upper }}
-                </div>
+                {% if d.user.perfil.foto_perfil %}
+                  <img src="{{ d.user.perfil.foto_perfil.url }}" alt="{{ d.user.get_full_name }}" class="doc-avatar object-fit-cover shadow-2xs border border-2 border-white">
+                {% else %}
+                  <div class="doc-avatar">
+                    {{ d.user.first_name|first|upper }}{{ d.user.last_name|first|upper }}
+                  </div>
+                {% endif %}
                 <div>
                   <a href="{% url 'instructor_detalle' d.user.pk %}" class="fw-bold text-dark text-decoration-none">
                     Prof. {{ d.user.get_full_name|default:d.user.username }}

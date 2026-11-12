@@ -179,7 +179,7 @@
 <div class="modal fade" id="nuevoMensajeModal" tabindex="-1" aria-labelledby="nuevoMensajeModalLabel" aria-hidden="true" style="z-index: 1070;">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
-            <form method="POST" action="{% url 'mensajeria' %}" id="formRedactarComunicado">
+            <form method="POST" enctype="multipart/form-data" action="{% url 'mensajeria' %}" id="formRedactarComunicado">
                 {% csrf_token %}
                 <div class="modal-header text-white" style="background: linear-gradient(135deg, #5CA8D8 0%, #2F79A8 100%);">
                     <h5 class="modal-title fw-bold" id="nuevoMensajeModalLabel">
@@ -213,7 +213,14 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label small fw-bold text-dark" for="mensaje_textarea">Contenido de la Comunicación Oficial *</label>
-                            <textarea id="mensaje_textarea" name="mensaje" class="form-control border-primary-subtle rounded-3" rows="6" placeholder="Escribe aquí los detalles, fechas e indicaciones de la circular escolar..." required></textarea>
+                            <textarea id="mensaje_textarea" name="mensaje" class="form-control border-primary-subtle rounded-3" rows="5" placeholder="Escribe aquí los detalles, fechas e indicaciones de la circular escolar..." required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark" for="adjunto_pdf_input">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Adjuntar Circular Oficial (PDF)
+                            </label>
+                            <input type="file" name="adjunto_pdf" id="adjunto_pdf_input" accept=".pdf" class="form-control border-primary-subtle rounded-3">
+                            <small class="text-muted">Opcional. Adjunta el documento oficial en formato PDF para los destinatarios.</small>
                         </div>
                         <div class="col-12">
                             <div class="form-check p-3 bg-light rounded-3 border">
@@ -272,6 +279,20 @@
                 <div class="p-3 bg-light rounded-3 text-dark border">
                     {{ com.mensaje|linebreaks }}
                 </div>
+                {% if com.adjunto_pdf %}
+                <div class="mt-3 p-3 bg-white rounded-3 border border-danger-subtle d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-pdf-fill fs-3 text-danger"></i>
+                        <div>
+                            <strong class="d-block text-dark small">Documento Oficial Adjunto</strong>
+                            <small class="text-muted">Circular o resolución oficial en PDF</small>
+                        </div>
+                    </div>
+                    <a href="{{ com.adjunto_pdf.url }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
+                        <i class="bi bi-file-earmark-arrow-down-fill me-1"></i> Abrir / Descargar PDF
+                    </a>
+                </div>
+                {% endif %}
                 {% if user.is_superuser or 'Admin' in user.perfil.rol.nombre or 'Rector' in user.perfil.rol.nombre or 'Secretar' in user.perfil.rol.nombre or com.remitente == user %}
                 <div class="mt-3 pt-3 border-top">
                     <div class="d-flex justify-content-between align-items-center mb-2">

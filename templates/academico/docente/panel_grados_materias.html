@@ -207,33 +207,29 @@
         </div>
     </div>
 
-    <!-- 3. SELECTOR DE GRADOS (1.° A 11.° EN ORDEN ASCENDENTE) -->
+    <!-- 3. SELECTOR DE GRADOS ASIGNADOS -->
     <div class="mb-4">
         <div class="d-flex align-items-center justify-content-between mb-2.5">
             <span class="text-uppercase fw-bold text-muted" style="font-size: 0.76rem; letter-spacing: 0.5px;">
-                Selector de Grados (1.° al 11.°)
+                Grados Asignados al Docente
             </span>
             <span class="small text-muted" style="font-size: 0.76rem;">
-                Haz clic en un grado para consultar su información detallada
+                Haz clic en un grado para consultar sus asignaturas y nómina
             </span>
         </div>
 
-        <div class="row g-2" id="grid-selector-grados">
+        <div class="row g-3" id="grid-selector-grados">
             {% for g in grados_estructura_colegio %}
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2 item-grado-selector" data-search="{{ g.nombre|lower }} {{ g.grupos_display|lower }}">
+            <div class="col-12 col-md-6 item-grado-selector" data-search="{{ g.nombre|lower }} {{ g.grupos_display|lower }}">
                 <div class="grado-pill-card {% if g.es_asignado %}is-assigned{% endif %} {% if g.numero == '10' %}is-active{% endif %}" 
                      id="btn-grado-card-{{ g.numero }}"
                      onclick="seleccionarGradoDocente('{{ g.numero }}', '{{ g.nombre|escapejs }}', '{{ g.nivel|escapejs }}', {{ g.es_asignado|yesno:'true,false' }}, '{{ g.grupos_display|escapejs }}', {{ g.total_materias }}, {{ g.total_estudiantes }}, '{{ g.director_grupo|escapejs }}', '{{ g.jornada|escapejs }}', '{{ g.periodo|escapejs }}');">
                     <div class="d-flex align-items-center justify-content-between mb-1">
-                        <strong style="font-size: 0.9rem;">{{ g.numero }}° Grado</strong>
-                        {% if g.es_asignado %}
-                        <span class="badge rounded-pill badge-grado-status" style="background: #5a3825; color: #ffffff; font-size: 0.62rem;">Asignado</span>
-                        {% else %}
-                        <span class="badge rounded-pill badge-soft-gray badge-grado-status" style="font-size: 0.62rem;">Sin asignación</span>
-                        {% endif %}
+                        <strong style="font-size: 0.95rem;">{{ g.numero }}° Grado ({{ g.nombre }})</strong>
+                        <span class="badge rounded-pill badge-grado-status" style="background: #5a3825; color: #ffffff; font-size: 0.65rem;">Asignado Oficialmente</span>
                     </div>
-                    <div class="small text-muted-pill text-truncate" style="font-size: 0.74rem;">
-                        {% if g.es_asignado %}{{ g.total_materias }} materia(s) · {{ g.grupos_display }}{% else %}{{ g.nivel }}{% endif %}
+                    <div class="small text-muted-pill text-truncate" style="font-size: 0.78rem;">
+                        {{ g.total_materias }} asignatura(s) asignadas · {{ g.grupos_display }} · {{ g.total_estudiantes }} estudiante(s)
                     </div>
                 </div>
             </div>

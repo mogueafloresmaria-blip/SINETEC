@@ -93,7 +93,7 @@
                     </div>
                     <h1 class="h2 fw-bold text-white mb-2">Panel del Coordinador Académico</h1>
                     <p class="text-white-50 mb-0" style="font-size: 0.95rem; max-width: 760px;">
-                        Control y supervisión estratégica de cohortes, resultados de aprendizaje (RAP), novedades de secretaría,
+                        Control y supervisión estratégica de cohortes, desempeño académico, novedades de secretaría,
                         asignación docente y alertas tempranas del proceso de integración con la educación media.
                     </p>
                 </div>
@@ -137,7 +137,7 @@
         </div>
         <div class="col-6 col-md-4 col-xl-2">
             <div class="kpi-card kpi-success">
-                <div class="text-muted small fw-semibold text-uppercase">Aprobación RAP</div>
+                <div class="text-muted small fw-semibold text-uppercase">Aprobación General</div>
                 <div class="kpi-value mt-1">{{ tasa_aprobacion|default:0 }}%</div>
                 <small class="text-success fw-medium">{{ juicios_aprobados|default:0 }} Aprobados ('A')</small>
             </div>
@@ -298,7 +298,7 @@
         <!-- Columna Derecha: Evaluaciones y Aprendizaje, Trámites y Métricas Operativas -->
         <div class="col-12 col-lg-5 col-xl-4 d-flex flex-column gap-3">
             
-            <!-- 1. MÓDULO: EVALUACIONES Y APRENDIZAJE (RAP) -->
+            <!-- 1. MÓDULO: EVALUACIONES Y APRENDIZAJE -->
             <section class="sinetec-card p-4 shadow-sm bg-white">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
@@ -308,14 +308,14 @@
                             </span>
                         </div>
                         <h2 class="h6 fw-bold mb-0 text-dark">Evaluaciones y Aprendizaje</h2>
-                        <small class="text-muted">Juicios evaluativos RAP (Aprobados / Por Mejorar)</small>
+                        <small class="text-muted">Evaluaciones formativas y periódicas</small>
                     </div>
                     <a href="{% url 'evaluaciones_calificar' %}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">
-                        <i class="bi bi-table me-1"></i> Sábana RAP
+                        <i class="bi bi-table me-1"></i> Calificaciones
                     </a>
                 </div>
 
-                <!-- Métricas Visuales de Desempeño RAP -->
+                <!-- Métricas Visuales de Desempeño Académico -->
                 <div class="row g-2 mb-3">
                     <div class="col-6">
                         <div class="p-3 rounded-3 border bg-success bg-opacity-10 text-center">
@@ -336,7 +336,7 @@
                 <!-- Barras de Progreso Visuales -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between small mb-1">
-                        <span class="fw-semibold text-dark"><i class="bi bi-graph-up-arrow text-success me-1"></i> Cumplimiento Global de RAPs</span>
+                        <span class="fw-semibold text-dark"><i class="bi bi-graph-up-arrow text-success me-1"></i> Cumplimiento Académico Global</span>
                         <strong class="text-success">{{ tasa_aprobacion }}%</strong>
                     </div>
                     <div class="progress" style="height: 10px; border-radius: 8px;">

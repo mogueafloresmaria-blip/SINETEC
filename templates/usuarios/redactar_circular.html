@@ -36,7 +36,7 @@
                     <span class="badge bg-light text-secondary border">Periodo Lectivo 2026</span>
                 </div>
                 <div class="card-body p-4 p-md-5">
-                    <form method="post" action="{% if es_edicion %}{% url 'editar_circular' comunicado.pk %}{% else %}{% url 'redactar_circular' %}{% endif %}">
+                    <form method="post" enctype="multipart/form-data" action="{% if es_edicion %}{% url 'editar_circular' comunicado.pk %}{% else %}{% url 'redactar_circular' %}{% endif %}">
                         {% csrf_token %}
                         <div class="row g-4">
                             <!-- Asunto / Título -->
@@ -112,7 +112,21 @@
                                 <label for="mensaje" class="form-label small fw-bold text-dark mb-1">
                                     Contenido y Directrices de la Circular Oficial *
                                 </label>
-                                <textarea name="mensaje" id="mensaje" rows="8" class="form-control border-primary-subtle rounded-3 p-3" placeholder="Estimada comunidad educativa:&#10;&#10;Por medio de la presente nos permitimos informar que...&#10;&#10;Atentamente,&#10;Dirección Institucional" required>{{ mensaje|default:'' }}</textarea>
+                                <textarea name="mensaje" id="mensaje" rows="7" class="form-control border-primary-subtle rounded-3 p-3" placeholder="Estimada comunidad educativa:&#10;&#10;Por medio de la presente nos permitimos informar que...&#10;&#10;Atentamente,&#10;Dirección Institucional" required>{{ mensaje|default:'' }}</textarea>
+                            </div>
+
+                            <!-- Documento Oficial Adjunto en PDF -->
+                            <div class="col-12">
+                                <label for="adjunto_pdf" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Documento Oficial Adjunto (PDF)
+                                </label>
+                                <input type="file" name="adjunto_pdf" id="adjunto_pdf" accept=".pdf" class="form-control border-primary-subtle rounded-3 py-2">
+                                <small class="text-muted">Opcional. Sube el documento oficial firmado o resolución en formato PDF para que las familias y estudiantes puedan descargarlo y visualizarlo.</small>
+                                {% if comunicado.adjunto_pdf %}
+                                    <div class="mt-2 text-success small">
+                                        <i class="bi bi-file-check-fill me-1"></i> Archivo actual: <a href="{{ comunicado.adjunto_pdf.url }}" target="_blank" class="fw-bold text-decoration-underline">{{ comunicado.adjunto_pdf.name }}</a>
+                                    </div>
+                                {% endif %}
                             </div>
 
                             <!-- Notificación Prioritaria / Urgente -->

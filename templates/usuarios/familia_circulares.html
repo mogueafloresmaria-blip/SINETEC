@@ -84,9 +84,23 @@
                                 <small class="text-muted">Emite: <strong>{{ circ.remitente.get_full_name|default:circ.remitente.username }}</strong></small>
                                 <small class="text-muted">{{ circ.fecha_creacion|date:"d/m/Y H:i" }}</small>
                             </div>
-                            <div class="p-3 bg-light rounded-3 text-dark border">
+                            <div class="p-3 bg-light rounded-3 text-dark border mb-3">
                                 {{ circ.mensaje|linebreaks }}
                             </div>
+                            {% if circ.adjunto_pdf %}
+                            <div class="p-3 rounded-3 border d-flex justify-content-between align-items-center mb-3" style="background: #faf8f5; border-color: var(--color-acento) !important;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-file-earmark-pdf-fill fs-3 text-danger"></i>
+                                    <div>
+                                        <strong class="text-dark small d-block">Documento Oficial Adjunto</strong>
+                                        <span class="text-muted" style="font-size: 0.72rem;">Circular oficial en formato PDF</span>
+                                    </div>
+                                </div>
+                                <a href="{{ circ.adjunto_pdf.url }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-bold">
+                                    <i class="bi bi-download me-1"></i> Descargar PDF
+                                </a>
+                            </div>
+                            {% endif %}
                             {% if circ.leida_por_mi %}
                             <div class="mt-3 p-2.5 bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 text-success small d-flex align-items-center justify-content-between">
                                 <span><i class="bi bi-check2-all me-1"></i> Acuse de lectura confirmado por el acudiente</span>

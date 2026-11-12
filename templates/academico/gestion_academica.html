@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión Académica · Grados 1° a 11° · EDUNOVA{% endblock %}
+
+{% block extra_head %}
+<style>
+.ga-card-stat {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.25rem 1.4rem;
+    border: 1.5px solid var(--color-acento, #E5DFD5);
+    box-shadow: 0 4px 14px rgba(90, 56, 37, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.ga-card-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(90, 56, 37, 0.08);
+}
+.ga-grado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    background: #ffffff;
+    border: 1.5px solid var(--color-acento, #E5DFD5);
+    border-radius: 14px;
+    text-decoration: none;
+    color: #1e293b;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+.ga-grado-badge:hover, .ga-grado-badge.active {
+    background: linear-gradient(135deg, var(--color-secundario, #5A3825) 0%, var(--color-principal, #8B5E3C) 100%);
+    color: #ffffff !important;
+    border-color: var(--color-secundario, #5A3825);
+    box-shadow: 0 4px 12px rgba(90, 56, 37, 0.25);
+    transform: translateY(-1px);
+}
+.ga-table th {
+    background: #F5F2EB !important;
+    color: var(--color-secundario, #5A3825) !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border-bottom: 1.5px solid var(--color-acento, #E5DFD5) !important;
+    padding: 0.85rem 1rem !important;
+}
+.ga-table td {
+    padding: 0.85rem 1rem !important;
+    vertical-align: middle !important;
+    border-color: #F1ECE4 !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- 1. Header Hero Institucional -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-principal) 100%) !important; color: #ffffff; padding: 2.2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -4px rgba(90, 56, 37, 0.25);">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 rounded-pill fw-semibold">
+                        <i class="bi bi-mortarboard-fill me-1"></i> Despacho de Rectoría y Coordinación Académica
+                    </span>
+                    <span class="text-white-50 small">{{ colegio.nombre|default:"Institución Educativa EDUNOVA" }}</span>
+                </div>
+                <h1 class="h2 fw-bold text-white mb-1">
+                    Gestión Académica Institucional 🏛️
+                </h1>
+                <p class="text-white-50 mb-0 small">
+                    Supervisión integral de grados escolares (1.° a 11.°), grupos, asignaturas, docentes asignados y nómina de estudiantes matriculados.
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'programas_lista' %}" class="btn btn-warning fw-bold text-dark shadow-sm rounded-pill px-3.5 py-2">
+                    <i class="bi bi-layers-fill me-1"></i> Malla y Carga Docente
+                </a>
+                <a href="{% url 'horarios_tablero' %}" class="btn btn-light fw-bold text-dark shadow-sm rounded-pill px-3.5 py-2">
+                    <i class="bi bi-calendar3-week-fill me-1"></i> Horarios Escolares
+                </a>
+                <a href="{% url 'matriculas_lista' %}" class="btn btn-outline-light fw-semibold rounded-pill px-3.5 py-2">
+                    <i class="bi bi-person-check-fill me-1"></i> Matrículas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. KPIs de Supervisión Académica Real -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="ga-card-stat">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Grados Oficiales</span>
+                    <div class="rounded-3 p-2" style="background: var(--color-acento); color: var(--color-principal);">
+                        <i class="bi bi-mortarboard-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">11 Grados</div>
+                <div class="small text-muted mt-1">Desde 1.° Primaria hasta 11.° Media</div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="ga-card-stat">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Estudiantes Activos</span>
+                    <div class="rounded-3 p-2 text-primary" style="background: #EAF4FB;">
+                        <i class="bi bi-people-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_estudiantes_colegio }} Alumnos</div>
+                <div class="small text-muted mt-1">Matrícula formal activa en el colegio</div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="ga-card-stat">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Planta Docente</span>
+                    <div class="rounded-3 p-2 text-success" style="background: #ECFDF5;">
+                        <i class="bi bi-person-badge-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_docentes_colegio }} Profesores</div>
+                <div class="small text-muted mt-1">Directorio docente registrado</div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="ga-card-stat">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Asignaciones Académicas</span>
+                    <div class="rounded-3 p-2 text-warning" style="background: #FFFBEB;">
+                        <i class="bi bi-clipboard2-check-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_cargas_colegio }} Cargas</div>
+                <div class="small text-muted mt-1">Materias con docente vinculado</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Selector de Grados Escolares (1° a 11°) -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <h5 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-layers-fill text-primary me-2"></i>Niveles y Grados Escolares (1.° a 11.°)
+                </h5>
+                <p class="text-muted small mb-0">Seleccione un grado para consultar sus asignaturas curriculares, docentes asignados y nómina de estudiantes matriculados.</p>
+            </div>
+            {% if grado_filtro %}
+            <a href="{% url 'gestion_academica' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                <i class="bi bi-grid me-1"></i> Ver Todos los Grados
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="row g-2">
+            {% for g in grados_info %}
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="?grado={{ g.numero }}" class="ga-grado-badge w-100 justify-content-between {% if grado_filtro == g.numero %}active{% endif %}" title="{{ g.nombre }} - {{ g.nivel }}">
+                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                        <span class="fs-5">{{ g.icono }}</span>
+                        <div class="text-truncate">
+                            <span class="d-block leading-tight text-truncate">{{ g.nombre }}</span>
+                            <small class="opacity-75" style="font-size: 0.68rem;">{{ g.nivel }}</small>
+                        </div>
+                    </div>
+                    <span class="badge rounded-pill bg-light text-dark fw-bold" style="font-size: 0.72rem;">
+                        {{ g.total_estudiantes }}
+                    </span>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 4. Detalle del Grado Seleccionado o Resumen General -->
+    {% if grado_seleccionado %}
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="fs-1">{{ grado_seleccionado.icono }}</span>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="fw-bold text-dark mb-0">{{ grado_seleccionado.nombre }}</h4>
+                        <span class="badge px-3 py-1 rounded-pill" style="background: var(--color-acento); color: var(--color-secundario);">
+                            {{ grado_seleccionado.nivel }}
+                        </span>
+                    </div>
+                    <small class="text-muted">
+                        {{ grado_seleccionado.total_estudiantes }} Estudiantes matriculados · {{ grado_seleccionado.total_materias }} Asignaturas asignadas · {{ grado_seleccionado.total_docentes }} Docentes a cargo
+                    </small>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'registrar_aprendiz' %}?grado_escolar={{ grado_seleccionado.numero }}" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold shadow-sm" style="background: var(--color-principal); border: none;">
+                    <i class="bi bi-person-plus-fill me-1"></i> Matricular en este Grado
+                </a>
+                <a href="{% url 'programas_lista' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1.5 fw-semibold">
+                    <i class="bi bi-plus-circle me-1"></i> Asignar Materia y Docente
+                </a>
+                <a href="{% url 'horarios_tablero' %}?grado={{ grado_seleccionado.numero }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5">
+                    <i class="bi bi-clock-history me-1"></i> Ver Horario
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <!-- Columna Izquierda: Asignaturas y Carga Docente -->
+                <div class="col-lg-6">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-book-half text-primary me-2"></i>Asignaturas y Carga Docente
+                        </h6>
+                        <span class="badge bg-light text-secondary border">{{ cargas_seleccionadas|length }} Materias</span>
+                    </div>
+
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table ga-table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Asignatura</th>
+                                    <th>Docente Asignado</th>
+                                    <th>Grupo</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for carga in cargas_seleccionadas %}
+                                <tr>
+                                    <td>
+                                        <strong class="text-dark d-block">{{ carga.programa.denominacion }}</strong>
+                                        <small class="text-muted">Cod: {{ carga.programa.codigo_programa|default:"CUR-OFICIAL" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-person-badge text-success"></i>
+                                            <div>
+                                                <span class="fw-bold text-dark d-block">{{ carga.profesor.get_full_name|default:carga.profesor.username }}</span>
+                                                <small class="text-muted">{{ carga.profesor.email|default:"Docente Titular" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">Sección {{ carga.seccion }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'programas_lista' %}" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5" title="Gestionar Carga">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        <i class="bi bi-journal-x fs-3 d-block mb-1 text-secondary opacity-50"></i>
+                                        No hay asignaturas vinculadas a este grado aún.
+                                        <div class="mt-2">
+                                            <a href="{% url 'programas_lista' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                <i class="bi bi-plus-lg me-1"></i> Asignar Materia y Docente
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Nómina de Estudiantes Matriculados -->
+                <div class="col-lg-6">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-people-fill text-primary me-2"></i>Estudiantes Matriculados
+                        </h6>
+                        <span class="badge bg-light text-secondary border">{{ estudiantes_grado|length }} Alumnos</span>
+                    </div>
+
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table ga-table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Documento</th>
+                                    <th>Grupo</th>
+                                    <th class="text-end">Expediente</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mat in estudiantes_grado %}
+                                <tr>
+                                    <td>
+                                        <strong class="text-dark d-block">{{ mat.aprendiz.get_full_name|default:mat.aprendiz.username }}</strong>
+                                        <small class="text-muted">{{ mat.aprendiz.email|default:"Sin correo registrado" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            {{ mat.aprendiz.perfil.tipo_documento|default:"TI" }} {{ mat.aprendiz.perfil.numero_documento|default:mat.aprendiz.username }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge px-2.5 py-1 rounded-pill" style="background: var(--color-acento); color: var(--color-secundario);">
+                                            {{ mat.seccion|default:"A" }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'estudiante_detalle' mat.aprendiz.id %}" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-0.5" title="Ver Expediente Escolar">
+                                            <i class="bi bi-eye-fill"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        <i class="bi bi-person-x fs-3 d-block mb-1 text-secondary opacity-50"></i>
+                                        No hay estudiantes matriculados en este grado.
+                                        <div class="mt-2">
+                                            <a href="{% url 'registrar_aprendiz' %}?grado_escolar={{ grado_seleccionado.numero }}" class="btn btn-sm btn-primary rounded-pill px-3" style="background: var(--color-principal); border: none;">
+                                                <i class="bi bi-person-plus me-1"></i> Matricular Estudiante
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Resumen Consolidado de los 11 Grados Escolares -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0 fs-6">
+                <i class="bi bi-table text-primary me-2"></i>Consolidado Institucional de Grados y Cobertura Escolar
+            </h5>
+            <span class="badge bg-light text-secondary border">Año Lectivo 2026</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table ga-table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Grado Escolar</th>
+                        <th>Nivel Educativo</th>
+                        <th>Grupos / Secciones</th>
+                        <th>Alumnos Matriculados</th>
+                        <th>Asignaturas Vinculadas</th>
+                        <th>Docentes Asignados</th>
+                        <th class="text-end">Supervisión</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in grados_info %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fs-4">{{ g.icono }}</span>
+                                <div>
+                                    <strong class="text-dark d-block">{{ g.nombre }}</strong>
+                                    <small class="text-muted">{{ g.nivel }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-secondary border">{{ g.nivel }}</span>
+                        </td>
+                        <td>
+                            {% for sec in g.secciones %}
+                            <span class="badge px-2.5 py-1 rounded-pill me-1" style="background: var(--color-acento); color: var(--color-secundario);">
+                                {{ g.numero }}°{{ sec }}
+                            </span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <strong class="text-dark">{{ g.total_estudiantes }}</strong> <span class="text-muted small">alumnos</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ g.total_materias }} materias</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">{{ g.total_docentes }} docentes</span>
+                        </td>
+                        <td class="text-end">
+                            <a href="?grado={{ g.numero }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold">
+                                <i class="bi bi-eye me-1"></i> Consultar Grado
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

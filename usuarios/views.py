@@ -79,7 +79,7 @@ def csrf_failure(request, reason=""):
 
 def custom_login_view(request):
     """
-    Inicio de sesión seguro y robusto para la plataforma SINETEC.
+    Inicio de sesión seguro y robusto para la plataforma SINETEC / EDUNOVA.
     Inmune a fallos por CSRF en iPhone/Safari móvil y soporta autenticación tanto por
     nombre de usuario como por número de documento de identidad.
     Redirige automáticamente según el rol institucional.
@@ -88,38 +88,38 @@ def custom_login_view(request):
         return redirect(obtener_url_redireccion_por_rol(request.user))
 
     error_message = None
+    rol_param = (request.GET.get('rol') or request.POST.get('rol') or '').lower().strip()
+    rol_nombres = {
+        'admin': 'Administrador del Sistema',
+        'administrador': 'Administrador del Sistema',
+        'rector': 'Rectoría Institucional',
+        'rectoria': 'Rectoría Institucional',
+        'rectoría': 'Rectoría Institucional',
+        'secretaria': 'Secretaría Académica',
+        'secretaría': 'Secretaría Académica',
+        'docente': 'Cuerpo Docente',
+        'profesor': 'Cuerpo Docente',
+        'estudiante': 'Portal del Estudiante',
+        'aprendiz': 'Portal del Estudiante',
+        'familia': 'Portal Familia y Acudientes',
+        'acudiente': 'Portal Familia y Acudientes',
+    }
+    rol_display = rol_nombres.get(rol_param)
+
+    login_context = {
+        'error_message': None,
+        'rol_seleccionado': rol_param,
+        'rol_display': rol_display,
+        'demo_password': '12345',
+        'demo_password_estudiante': '12345',
+    }
+
     if request.method == 'POST':
-        demo_access = request.POST.get('demo_access')
+        identifier = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
         user = None
 
-        if demo_access == 'student':
-            if not settings.DEBUG:
-                return HttpResponseForbidden("La cuenta de demostración solo está disponible en modo desarrollo.")
-            
-            from usuarios.models import Rol
-            student_role = Rol.objects.filter(nombre__in=['Estudiante', 'Aprendiz', 'Alumno']).first()
-            demo_user = User.objects.filter(username='demo_estudiante').first()
-            
-            if demo_user:
-                if (hasattr(demo_user, 'perfil') and demo_user.perfil.rol != student_role) or demo_user.has_usable_password():
-                    error_msg = 'La cuenta estudiantil de demostración no está disponible.'
-                    messages.error(request, error_msg)
-                    return render(request, 'login.html', {'error_message': error_msg})
-                user = demo_user
-            else:
-                demo_user = User.objects.create_user(username='demo_estudiante')
-                demo_user.set_unusable_password()
-                demo_user.save()
-                if hasattr(demo_user, 'perfil') and student_role:
-                    demo_user.perfil.rol = student_role
-                    demo_user.perfil.esta_activo = True
-                    demo_user.perfil.save()
-                user = demo_user
-
-        if not user:
-            identifier = request.POST.get('username', '').strip()
-            password = request.POST.get('password', '')
-
+        if identifier and password:
             user = authenticate(request, username=identifier, password=password)
             if not user:
                 # Buscar si el usuario ingresó su documento de identidad en lugar del nombre de usuario
@@ -138,12 +138,6 @@ def custom_login_view(request):
                     u.save()
                     user = authenticate(request, username=u.username, password=password)
 
-        login_context = {
-            'error_message': error_message,
-            'demo_password': '12345',
-            'demo_password_estudiante': '1001001001',
-        }
-
         if user is not None:
             if hasattr(user, 'perfil') and not getattr(user.perfil, 'esta_activo', True):
                 error_msg = "Cuenta inactiva. Por favor contacta a administración."
@@ -152,6 +146,8 @@ def custom_login_view(request):
                 return render(request, 'login.html', login_context)
 
             auth_login(request, user)
+            if 'estudiante_fam_doc' in request.session:
+                del request.session['estudiante_fam_doc']
             try:
                 request.session.cycle_key()
             except Exception:
@@ -194,20 +190,13 @@ def custom_login_view(request):
             messages.error(request, error_message)
             login_context['error_message'] = error_message
 
-    else:
-        login_context = {
-            'error_message': None,
-            'demo_password': '12345',
-            'demo_password_estudiante': '1001001001',
-        }
-
     return render(request, 'login.html', login_context)
 
 
 def custom_logout_view(request):
     """Cierre de sesión seguro compatible tanto con peticiones GET como POST."""
     auth_logout(request)
-    return redirect('home')
+    return redirect('login_short')
 
 
 @csrf_exempt
@@ -358,8 +347,30 @@ def alertas_desercion_para_matricula(matricula):
 
 @csrf_exempt
 def home(request):
-    """Página de inicio institucional de SINETEC."""
+    """Página de inicio institucional de SINETEC / EDUNOVA."""
     if request.method == 'POST':
+        # Formulario de contacto público
+        if request.POST.get('action') == 'contacto' or ('nombre' in request.POST and 'email' in request.POST and 'mensaje' in request.POST):
+            nombre = request.POST.get('nombre', '').strip()
+            email = request.POST.get('email', '').strip()
+            mensaje = request.POST.get('mensaje', '').strip()
+            if nombre and email and mensaje:
+                try:
+                    ip = request.META.get('REMOTE_ADDR', '127.0.0.1')
+                    RegistroAuditoria.objects.create(
+                        usuario=request.user if request.user.is_authenticated else None,
+                        accion='CONTACTO_PUBLICO',
+                        modulo='INSTITUCIONAL',
+                        detalles=f'Mensaje de soporte de {nombre} ({email}): {mensaje[:200]}',
+                        ip_address=ip
+                    )
+                except Exception:
+                    pass
+                messages.success(request, f"¡Gracias {nombre}! Tu mensaje ha sido enviado correctamente al equipo de soporte institucional. Nos pondremos en contacto al correo {email}.")
+            else:
+                messages.error(request, "Por favor completa todos los campos del formulario de contacto.")
+            return redirect('home')
+
         # Si se envió formulario de autenticación desde el portal de inicio
         if 'username' in request.POST or 'password' in request.POST:
             return custom_login_view(request)
@@ -539,11 +550,13 @@ def home(request):
     total_fichas = Ficha.objects.count()
     total_aprendices = Matricula.objects.count()
 
+    colegio = ConfiguracionColegio.objects.first()
     return render(request, 'home.html', {
         'usuario_resumen': contexto_usuario,
         'convocatorias': convocatorias,
         'total_fichas': total_fichas,
         'total_aprendices': total_aprendices,
+        'colegio': colegio,
     })
 
 
@@ -2265,6 +2278,8 @@ def mensajeria(request):
             except (ValueError, TypeError):
                 pass
 
+        adjunto_pdf = request.FILES.get('adjunto_pdf') or request.FILES.get('archivo')
+
         if contenido and (destinatario_tipo or destinatario_email or asunto):
             ComunicadoEscolar.objects.create(
                 remitente=request.user,
@@ -2272,7 +2287,8 @@ def mensajeria(request):
                 curso=curso_obj,
                 asunto=asunto,
                 mensaje=contenido,
-                urgente=urgente
+                urgente=urgente,
+                adjunto_pdf=adjunto_pdf
             )
             # Notificación y auditoría
             RegistroAuditoria.objects.create(
@@ -2423,6 +2439,7 @@ def redactar_circular(request):
                 'estudiante_id': estudiante_id,
             })
 
+        adjunto_pdf = request.FILES.get('adjunto_pdf') or request.FILES.get('archivo')
         com = ComunicadoEscolar.objects.create(
             remitente=request.user,
             estamento_destinatario=destinatario_tipo or 'Toda',
@@ -2430,7 +2447,8 @@ def redactar_circular(request):
             estudiante_destinatario=estudiante_obj,
             asunto=asunto,
             mensaje=mensaje,
-            urgente=urgente
+            urgente=urgente,
+            adjunto_pdf=adjunto_pdf
         )
         # Notificar a los destinatarios escolares pertinentes
         try:
@@ -2519,6 +2537,8 @@ def editar_circular(request, pk):
             com.curso = curso_obj
             com.estudiante_destinatario = estudiante_obj
             com.urgente = urgente
+            if request.FILES.get('adjunto_pdf'):
+                com.adjunto_pdf = request.FILES['adjunto_pdf']
             com.save()
 
             RegistroAuditoria.registrar(
@@ -2991,7 +3011,11 @@ def familia_portal(request):
     """
     Panel General de Familias y Acudientes:
     Acceso verificado para familias y acudientes autorizados.
+    Requiere autenticación obligatoria con credenciales oficiales.
     """
+    if not request.user.is_authenticated:
+        return redirect(f"{reverse('login_short')}?rol=familia&next={request.path}")
+
     if 'clear' in request.GET:
         if 'estudiante_fam_doc' in request.session:
             del request.session['estudiante_fam_doc']
@@ -3120,6 +3144,7 @@ def familia_portal(request):
         'hijos_data': hijos_data,
         'circulares': circulares,
         'docentes_lista': docentes_lista,
+        'modo_consulta_inicial': (estudiante_sel is None),
     })
 
 
@@ -3127,13 +3152,12 @@ def familia_boletines(request):
     """
     Módulo Familias → Boletines y Calificaciones:
     Permite consultar asignaturas, notas (1.0 - 5.0), desempeños, observaciones
-    y descargar el boletín oficial en PDF.
+    y descargar el boletín oficial en PDF. Requiere haber consultado un estudiante.
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
-    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
-        estudiante_sel = hijos_qs.first()
-        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
-        ficha_sel = matricula_sel.ficha if matricula_sel else None
+    if not estudiante_sel:
+        messages.warning(request, 'Debe consultar primero el número de documento de su hijo o hija para ver el boletín.')
+        return redirect('familia_portal')
 
     periodos = ['Periodo 1', 'Periodo 2', 'Periodo 3', 'Periodo 4', 'Todos']
     periodo_sel = request.GET.get('periodo', 'Periodo 1')
@@ -3144,14 +3168,12 @@ def familia_boletines(request):
     suma_notas = 0.0
 
     if matricula_sel:
-        from academico.models import CargaAcademica, CalificacionEscolar
-        grado_num = ''.join(c for c in str(getattr(matricula_sel, 'grado_escolar', '')) if c.isdigit())
-        secc = getattr(matricula_sel, 'seccion', 'A') or 'A'
-
-        cargas_estudiante = CargaAcademica.objects.filter(
-            Q(grado__icontains=grado_num),
-            Q(seccion__iexact=secc) | Q(seccion__isnull=True) | Q(seccion='')
-        ).select_related('profesor', 'programa').order_by('programa__denominacion')
+        from academico.models import CargaAcademica, CalificacionEscolar, obtener_cargas_activas_grupo
+        cargas_estudiante, _ = obtener_cargas_activas_grupo(
+            getattr(matricula_sel, 'grado_escolar', '10'),
+            getattr(matricula_sel, 'seccion', 'A'),
+            2026
+        )
 
         # Buscar calificaciones oficiales en CalificacionEscolar
         for carga in cargas_estudiante:
@@ -3251,13 +3273,12 @@ def familia_asistencia(request):
     """
     Módulo Familias → Asistencia Escolar:
     Permite consultar el historial de asistencias, tardanzas y justificaciones
-    del estudiante con filtros por fecha, periodo y estado.
+    del estudiante con filtros por fecha, periodo y estado. Requiere haber consultado un estudiante.
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
-    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
-        estudiante_sel = hijos_qs.first()
-        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
-        ficha_sel = matricula_sel.ficha if matricula_sel else None
+    if not estudiante_sel:
+        messages.warning(request, 'Debe consultar primero el número de documento de su hijo o hija para ver la asistencia.')
+        return redirect('familia_portal')
 
     estado_sel = request.GET.get('estado', '')
     fecha_sel = request.GET.get('fecha', '')
@@ -3301,13 +3322,8 @@ def familia_circulares(request):
     a toda la comunidad o directamente a su estudiante asignado, manteniendo la sesión intacta.
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
-    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
-        estudiante_sel = hijos_qs.first()
-        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
-        ficha_sel = matricula_sel.ficha if matricula_sel else None
-
-    if not estudiante_sel and not fam_rec and not request.session.get('estudiante_fam_doc'):
-        messages.info(request, 'Por favor consulte el número de documento de su estudiante.')
+    if not estudiante_sel:
+        messages.warning(request, 'Debe consultar primero el número de documento de su hijo o hija para ver las circulares.')
         return redirect('familia_portal')
 
     hijos_list = [estudiante_sel] if estudiante_sel else (list(hijos_qs) if hijos_qs else [])
@@ -3352,13 +3368,8 @@ def familia_comunicaciones(request):
     del estudiante consultado. Permite redactar mensajes y consultar el historial.
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
-    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
-        estudiante_sel = hijos_qs.first()
-        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
-        ficha_sel = matricula_sel.ficha if matricula_sel else None
-
-    if not estudiante_sel and not fam_rec and not request.session.get('estudiante_fam_doc'):
-        messages.info(request, 'Por favor consulte primero el número de documento de su estudiante.')
+    if not estudiante_sel:
+        messages.warning(request, 'Debe consultar primero el número de documento de su hijo o hija para ver las comunicaciones.')
         return redirect('familia_portal')
 
     # Docentes asignados al estudiante (mediante CargaAcademica, HorarioFicha o Instructor Líder)
@@ -3483,13 +3494,8 @@ def familia_matricula(request):
     ESTUDIANTE → MATRÍCULA → AÑO ACADÉMICO → CURSO/GRADO → SECCIÓN → ESTADO DE MATRÍCULA.
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
-    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
-        estudiante_sel = hijos_qs.first()
-        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
-        ficha_sel = matricula_sel.ficha if matricula_sel else None
-
-    if not estudiante_sel and not fam_rec and not request.session.get('estudiante_fam_doc'):
-        messages.info(request, 'Por favor consulte primero el número de documento de su estudiante.')
+    if not estudiante_sel:
+        messages.warning(request, 'Debe consultar primero el número de documento de su hijo o hija para ver la ficha de matrícula.')
         return redirect('familia_portal')
 
     return render(request, 'usuarios/familia_matricula.html', {
@@ -3508,11 +3514,9 @@ def familia_pdf_oficial(request):
     del estudiante seleccionado en la sesión familiar (notas, escala pedagógica y firmas).
     """
     fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
-    if not estudiante_sel and hasattr(hijos_qs, 'exists') and hijos_qs.exists():
-        estudiante_sel = hijos_qs.first()
-
     if not estudiante_sel:
-        messages.info(request, 'Por favor consulte primero a su estudiante para descargar su boletín oficial en PDF.')
+        messages.warning(request, 'Debe consultar primero el número de documento de su hijo o hija para descargar el boletín oficial en PDF.')
+        return redirect('familia_portal')
         return redirect('familia_portal')
 
     perfil_est = getattr(estudiante_sel, 'perfil', None)
@@ -3749,6 +3753,57 @@ def detalle_estudiante(request, pk):
     matricula_principal = matriculas.first()
     ficha = matricula_principal.ficha if matricula_principal else None
 
+    # Gestión de asignación académica directa al grupo del estudiante (Secretaría / Rectoría / Admin)
+    if request.method == 'POST' and request.POST.get('action') == 'asignar_materia_grupo':
+        perfil_req = getattr(request.user, 'perfil', None)
+        rol_req = _normalizar_texto(perfil_req.rol.nombre) if (perfil_req and perfil_req.rol) else ''
+        puede_asignar = request.user.is_superuser or any(r in rol_req for r in ['admin', 'rector', 'secretar', 'coordinad'])
+        if not puede_asignar:
+            messages.error(request, 'No tienes autorización para asignar o modificar materias de este grado.')
+        else:
+            programa_id = request.POST.get('programa_id')
+            profesor_id = request.POST.get('profesor_id')
+            grado_val = (matricula_principal.grado_escolar if matricula_principal else request.POST.get('grado') or '10').strip()
+            seccion_val = (matricula_principal.seccion if matricula_principal else request.POST.get('seccion') or 'A').strip().upper()
+            from academico.models import determinar_nivel_educativo, normalizar_grado, extraer_numero_grado
+            grado_norm = normalizar_grado(grado_val)
+            grado_dig = extraer_numero_grado(grado_val)
+            nivel_val = determinar_nivel_educativo(grado_norm or grado_val)
+
+            if not programa_id or not profesor_id:
+                messages.error(request, 'Debes seleccionar la asignatura y el docente a asignar.')
+            else:
+                from academico.models import CargaAcademica, ProgramaFormacion
+                prog = ProgramaFormacion.objects.filter(id=programa_id).first()
+                prof = User.objects.filter(id=profesor_id).first()
+                if not prog or not prof:
+                    messages.error(request, 'Asignatura o docente seleccionados no válidos.')
+                else:
+                    carga_existente = CargaAcademica.objects.filter(
+                        programa_id=programa_id,
+                        seccion=seccion_val,
+                        anio_lectivo=2026
+                    ).filter(
+                        Q(grado=grado_norm) | Q(grado=grado_dig) | Q(grado__icontains=grado_dig)
+                    ).first()
+                    if carga_existente:
+                        carga_existente.profesor = prof
+                        carga_existente.nivel = nivel_val
+                        carga_existente.grado = grado_norm or grado_val
+                        carga_existente.save()
+                        messages.success(request, f'¡Asignación actualizada! La materia "{prog.denominacion}" para Grado {grado_norm or grado_val}°{seccion_val} ahora está a cargo de {prof.get_full_name()}.')
+                    else:
+                        CargaAcademica.objects.create(
+                            profesor=prof,
+                            programa=prog,
+                            nivel=nivel_val,
+                            grado=grado_norm or grado_val,
+                            seccion=seccion_val,
+                            anio_lectivo=2026
+                        )
+                        messages.success(request, f'¡Materia "{prog.denominacion}" asignada exitosamente al Grado {grado_norm or grado_val}°{seccion_val} a cargo del docente {prof.get_full_name()}!')
+        return redirect('estudiante_detalle', pk=pk)
+
     # 1. Calificaciones y Juicios RAP
     juicios = JuicioEvaluativo.objects.filter(matricula__in=matriculas).select_related(
         'resultado_aprendizaje', 'matricula__ficha'
@@ -3830,6 +3885,29 @@ def detalle_estudiante(request, pk):
     semaforo_en_proceso = semaforos_qs.filter(estado='EN_PROCESO').count()
     semaforo_recuperar = semaforos_qs.filter(estado='RECUPERAR').count()
 
+    # 12. Asignaturas y Carga Académica asignadas al Grado y Grupo del Estudiante
+    cargas_estudiante = []
+    cargas_historicas = []
+    if matricula_principal:
+        from academico.models import CargaAcademica, ProgramaFormacion, obtener_cargas_activas_grupo
+        cargas_estudiante, cargas_historicas = obtener_cargas_activas_grupo(
+            matricula_principal.grado_escolar,
+            matricula_principal.seccion,
+            2026
+        )
+
+    from academico.models import ProgramaFormacion
+    programas_disponibles = ProgramaFormacion.objects.filter(activo=True).order_by('denominacion')
+    if not programas_disponibles.exists():
+        programas_disponibles = ProgramaFormacion.objects.all().order_by('denominacion')
+
+    docentes_disponibles = User.objects.filter(
+        Q(perfil__rol__nombre__icontains='Docente') |
+        Q(perfil__rol__nombre__icontains='Profesor') |
+        Q(perfil__rol__nombre__icontains='Instructor'),
+        is_active=True
+    ).order_by('last_name', 'first_name')
+
     context = {
         'estudiante': perfil,
         'usuario': usuario,
@@ -3856,6 +3934,10 @@ def detalle_estudiante(request, pk):
         'semaforo_aprobados': semaforo_aprobados,
         'semaforo_en_proceso': semaforo_en_proceso,
         'semaforo_recuperar': semaforo_recuperar,
+        'cargas_estudiante': cargas_estudiante,
+        'cargas_historicas': cargas_historicas,
+        'programas_disponibles': programas_disponibles,
+        'docentes_disponibles': docentes_disponibles,
     }
     return render(request, 'usuarios/estudiante_detalle.html', context)
 
@@ -4266,14 +4348,12 @@ def boletin_estudiante(request, pk):
     total_evaluadas = 0
 
     if matricula:
-        from academico.models import CargaAcademica, CalificacionEscolar
-        grado_num = ''.join(c for c in str(getattr(matricula, 'grado_escolar', '')) if c.isdigit())
-        secc = getattr(matricula, 'seccion', 'A') or 'A'
-
-        cargas_estudiante = CargaAcademica.objects.filter(
-            Q(grado__icontains=grado_num),
-            Q(seccion__iexact=secc) | Q(seccion__isnull=True) | Q(seccion='')
-        ).select_related('profesor', 'programa').order_by('programa__denominacion')
+        from academico.models import CargaAcademica, CalificacionEscolar, obtener_cargas_activas_grupo
+        cargas_estudiante, _ = obtener_cargas_activas_grupo(
+            getattr(matricula, 'grado_escolar', '10'),
+            getattr(matricula, 'seccion', 'A'),
+            2026
+        )
 
         for carga in cargas_estudiante:
             nom_mat = (carga.programa.denominacion if carga.programa else 'Asignatura')[:38]
@@ -4812,7 +4892,9 @@ def instructor_dashboard(request):
     cargas_unicas = []
     seen_gs = set()
     for c in cargas:
-        g_key = (str(c.grado).strip(), str(c.seccion).strip())
+        g_dig = ''.join(ch for ch in str(c.grado) if ch.isdigit())
+        g_canon = f"{g_dig}°" if g_dig else str(c.grado).strip()
+        g_key = (g_canon, str(c.seccion or 'A').strip().upper())
         if g_key not in seen_gs:
             seen_gs.add(g_key)
             cargas_unicas.append(c)
@@ -4861,20 +4943,193 @@ def instructor_dashboard(request):
 
         # 1. PERFIL PROFESIONAL: Guardar cambios de perfil
         if action == 'guardar_perfil':
+            first_name = request.POST.get('first_name', '').strip()
+            last_name = request.POST.get('last_name', '').strip()
             telefono = request.POST.get('telefono', '').strip()
             email = request.POST.get('email', '').strip()
+            fecha_nac = request.POST.get('fecha_nacimiento', '').strip()
+            direccion = request.POST.get('direccion', '').strip()
+            profesion = request.POST.get('profesion', '').strip()
+            area = request.POST.get('area', '').strip()
+            escalafon = request.POST.get('escalafon', '').strip()
+
+            user_update_fields = []
+            if first_name:
+                request.user.first_name = first_name
+                user_update_fields.append('first_name')
+            if last_name:
+                request.user.last_name = last_name
+                user_update_fields.append('last_name')
             if email:
                 request.user.email = email
-                request.user.save(update_fields=['email'])
+                user_update_fields.append('email')
+            if user_update_fields:
+                request.user.save(update_fields=user_update_fields)
+
             perfil = getattr(request.user, 'perfil', None)
             if perfil:
                 if telefono:
                     perfil.telefono = telefono
-                if 'foto_perfil' in request.FILES:
-                    perfil.foto_perfil = request.FILES['foto_perfil']
+                if fecha_nac:
+                    try:
+                        perfil.fecha_nacimiento = date.fromisoformat(fecha_nac)
+                    except Exception:
+                        pass
+                foto = request.FILES.get('foto_perfil') or request.FILES.get('foto')
+                if foto:
+                    perfil.foto_perfil = foto
                 perfil.save()
-            messages.success(request, 'Perfil profesional actualizado exitosamente.')
+
+            # Guardar información profesional oficial en modelo Docente
+            from usuarios.models import Docente, ExperienciaAcademica, EstudioRealizado
+            docente_reg, _ = Docente.objects.get_or_create(usuario=request.user)
+            if direccion:
+                docente_reg.direccion = direccion
+            if profesion:
+                docente_reg.profesion = profesion
+            if area:
+                docente_reg.area = area
+            if escalafon:
+                docente_reg.escalafon = escalafon
+            docente_reg.save()
+
+            # Registro de nuevo estudio o titulación
+            nuevo_est_tit = request.POST.get('nuevo_estudio_titulo', '').strip()
+            nuevo_est_inst = request.POST.get('nuevo_estudio_institucion', '').strip()
+            nuevo_est_ano = request.POST.get('nuevo_estudio_ano', '').strip()
+            if nuevo_est_tit and nuevo_est_inst:
+                try:
+                    ano_int = int(nuevo_est_ano) if nuevo_est_ano else 2024
+                except ValueError:
+                    ano_int = 2024
+                EstudioRealizado.objects.create(
+                    docente=docente_reg,
+                    titulo=nuevo_est_tit,
+                    institucion=nuevo_est_inst,
+                    ano=ano_int
+                )
+
+            # Registro de nueva experiencia laboral
+            nueva_exp_inst = request.POST.get('nueva_experiencia_institucion', '').strip()
+            nueva_exp_anos = request.POST.get('nueva_experiencia_anos', '').strip()
+            if nueva_exp_inst:
+                try:
+                    anos_int = int(nueva_exp_anos) if nueva_exp_anos else 1
+                except ValueError:
+                    anos_int = 1
+                ExperienciaAcademica.objects.create(
+                    docente=docente_reg,
+                    institucion=nueva_exp_inst,
+                    anos=anos_int
+                )
+
+            messages.success(request, 'Perfil profesional y hoja de vida académica actualizados exitosamente.')
             return redirect(f"{reverse('instructor_dashboard')}?subpanel=perfil")
+
+        # 1b. GESTIÓN DOCUMENTAL: Publicar Guía Oficial
+        elif action == 'publicar_guia':
+            titulo_g = request.POST.get('titulo', '').strip()
+            carga_id = request.POST.get('carga_id')
+            instrucciones_g = request.POST.get('instrucciones', '').strip()
+            archivo_g = request.FILES.get('archivo')
+            c_obj = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first() or cargas.first()
+            if titulo_g and c_obj:
+                GuiaClase.objects.create(
+                    carga_academica=c_obj,
+                    profesor=request.user,
+                    tipo_documento='GUIA',
+                    titulo=titulo_g,
+                    instrucciones=instrucciones_g or 'Guía oficial orientadora de la asignatura.',
+                    archivo=archivo_g,
+                    estado='ACTIVO'
+                )
+                messages.success(request, f'Guía "{titulo_g}" publicada exitosamente para Grado {c_obj.grado}°{c_obj.seccion}.')
+            else:
+                messages.error(request, 'El título y la asignatura son obligatorios para publicar una guía.')
+            return redirect(f"{reverse('instructor_dashboard')}?subpanel=documentos&tab=guias")
+
+        # 1c. GESTIÓN DOCUMENTAL: Publicar Material Pedagógico
+        elif action == 'publicar_material_pedagogico':
+            titulo_m = request.POST.get('titulo', '').strip()
+            carga_id = request.POST.get('carga_id')
+            instrucciones_m = request.POST.get('instrucciones', '').strip()
+            archivo_m = request.FILES.get('archivo')
+            c_obj = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first() or cargas.first()
+            if titulo_m and c_obj:
+                GuiaClase.objects.create(
+                    carga_academica=c_obj,
+                    profesor=request.user,
+                    tipo_documento='MATERIAL_PEDAGOGICO',
+                    titulo=titulo_m,
+                    instrucciones=instrucciones_m or 'Material pedagógico estructurado para la asignatura.',
+                    archivo=archivo_m,
+                    estado='ACTIVO'
+                )
+                if archivo_m:
+                    MaterialClase.objects.create(
+                        carga_academica=c_obj,
+                        titulo=titulo_m,
+                        descripcion=instrucciones_m,
+                        archivo=archivo_m
+                    )
+                messages.success(request, f'Material pedagógico "{titulo_m}" publicado exitosamente para Grado {c_obj.grado}°{c_obj.seccion}.')
+            else:
+                messages.error(request, 'El título y la asignatura son obligatorios para publicar material pedagógico.')
+            return redirect(f"{reverse('instructor_dashboard')}?subpanel=documentos&tab=pedagogico")
+
+        # 1d. GESTIÓN DOCUMENTAL: Publicar Material de Apoyo
+        elif action == 'publicar_material_apoyo':
+            titulo_a = request.POST.get('titulo', '').strip()
+            carga_id = request.POST.get('carga_id')
+            instrucciones_a = request.POST.get('instrucciones', '').strip()
+            archivo_a = request.FILES.get('archivo')
+            c_obj = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first() or cargas.first()
+            if titulo_a and c_obj:
+                GuiaClase.objects.create(
+                    carga_academica=c_obj,
+                    profesor=request.user,
+                    tipo_documento='MATERIAL_APOYO',
+                    titulo=titulo_a,
+                    instrucciones=instrucciones_a or 'Material de apoyo y consulta complementaria.',
+                    archivo=archivo_a,
+                    estado='ACTIVO'
+                )
+                if archivo_a:
+                    MaterialClase.objects.create(
+                        carga_academica=c_obj,
+                        titulo=titulo_a,
+                        descripcion=instrucciones_a,
+                        archivo=archivo_a
+                    )
+                messages.success(request, f'Material de apoyo "{titulo_a}" publicado exitosamente para Grado {c_obj.grado}°{c_obj.seccion}.')
+            else:
+                messages.error(request, 'El título y la asignatura son obligatorios para publicar material de apoyo.')
+            return redirect(f"{reverse('instructor_dashboard')}?subpanel=documentos&tab=apoyo")
+
+        # 1e. GESTIÓN DOCUMENTAL: Eliminar documento a Papelera
+        elif action == 'eliminar_documento':
+            doc_id = request.POST.get('documento_id')
+            guia_obj = GuiaClase.objects.filter(id=doc_id, profesor=request.user).first()
+            if guia_obj:
+                tipo_nom = guia_obj.get_tipo_documento_display() if hasattr(guia_obj, 'get_tipo_documento_display') else 'Documento'
+                PapeleraReciclaje.objects.create(
+                    tipo_objeto='GuiaClase',
+                    objeto_id=guia_obj.id,
+                    titulo=guia_obj.titulo,
+                    subtitulo=f"Documento · {tipo_nom} · Grado {guia_obj.carga_academica.grado if guia_obj.carga_academica else ''}",
+                    datos_recuperacion={
+                        'titulo': guia_obj.titulo,
+                        'carga_id': guia_obj.carga_academica_id,
+                        'tipo_documento': guia_obj.tipo_documento,
+                        'instrucciones': guia_obj.instrucciones
+                    },
+                    eliminado_por=request.user,
+                    motivo='Eliminado desde Gestión Documental del docente'
+                )
+                guia_obj.estado = 'PAPELERA'
+                guia_obj.save(update_fields=['estado'])
+                messages.success(request, f'{tipo_nom} "{guia_obj.titulo}" movido(a) a la Papelera de Reciclaje.')
+            return redirect(f"{reverse('instructor_dashboard')}?subpanel=documentos")
 
         # 2. ACTIVIDADES Y TAREAS: Crear actividad / tarea
         elif action in ['crear_actividad', 'crear_tarea']:
@@ -5060,6 +5315,24 @@ def instructor_dashboard(request):
             else:
                 tarea_obj.estado = 'Borrador' if tarea_obj.estado == 'Publicada' else 'Publicada'
             tarea_obj.save()
+
+            if tarea_obj.estado == 'Publicada' and tarea_obj.carga_academica:
+                c_obj = tarea_obj.carga_academica
+                g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
+                mats = Matricula.objects.filter(grado_escolar__icontains=g_num, seccion__iexact=c_obj.seccion, estado_formacion='En Formacion').select_related('aprendiz')
+                link_notif = reverse('entregar_tarea_clase', kwargs={'pk': tarea_obj.id})
+                nom_mat = c_obj.programa.denominacion if c_obj.programa else 'Matemáticas'
+                for m in mats:
+                    if m.aprendiz:
+                        EntregaTarea.objects.get_or_create(tarea=tarea_obj, estudiante=m.aprendiz, defaults={'estado': 'PENDIENTE'})
+                        Notificacion.objects.create(
+                            usuario=m.aprendiz,
+                            titulo=f"Nueva Actividad Publicada: {tarea_obj.titulo[:120]}",
+                            mensaje=f"El docente publicó la actividad '{tarea_obj.titulo}' para {nom_mat} ({c_obj.grado}°{c_obj.seccion}).",
+                            enlace=link_notif,
+                            tipo='info'
+                        )
+
             estado_lbl = "retirada de la vista de estudiantes (Borrador)" if tarea_obj.estado == 'Borrador' else f"marcada como {tarea_obj.estado}"
             messages.success(request, f'Actividad "{tarea_obj.titulo}" {estado_lbl}.')
             return redirect(reverse('temas_actividades'))
@@ -5268,15 +5541,41 @@ def instructor_dashboard(request):
                 messages.success(request, f'Actividad "{titulo_t}" eliminada y enviada a la Papelera de Reciclaje.')
             return redirect(reverse('temas_actividades'))
 
-        # 5. ASISTENCIA: Guardar lista diaria con prevención de duplicados
-        elif action == 'guardar_asistencia':
+        # 5. ASISTENCIA: Guardar lista diaria o corrección individual con prevención de duplicados
+        elif action in ['guardar_asistencia', 'corregir_asistencia_individual']:
             carga_id = request.POST.get('carga_id')
-            fecha_str = request.POST.get('fecha_asistencia')
+            fecha_str = request.POST.get('fecha_asistencia') or request.POST.get('fecha')
             periodo_n = request.POST.get('periodo', 'Periodo 1')
+            motivo_correccion = request.POST.get('motivo_correccion') or request.POST.get('motivo') or 'Actualización de asistencia'
             try:
                 fecha_asist = date.fromisoformat(fecha_str) if fecha_str else timezone.localdate()
             except Exception:
                 fecha_asist = timezone.localdate()
+
+            matricula_indiv_id = request.POST.get('matricula_id')
+            if matricula_indiv_id:
+                m_indiv = Matricula.objects.filter(id=matricula_indiv_id).first()
+                if m_indiv:
+                    c_obj = CargaAcademica.objects.filter(id=carga_id).first() if carga_id else (cargas.filter(grado=m_indiv.grado_escolar).first() or cargas.first())
+                    estado_val = request.POST.get('estado') or request.POST.get(f'asistencia_{m_indiv.id}') or 'P'
+                    if estado_val == 'E':
+                        estado_val = 'J'
+                    obs_val = request.POST.get('observaciones') or request.POST.get(f'obs_{m_indiv.id}', '').strip()
+                    materia_nom = c_obj.programa.denominacion if (c_obj and c_obj.programa) else 'Matemáticas'
+                    obs_completa = f"[{materia_nom}] {obs_val}" if obs_val else f"[{materia_nom}] Registro oficial de clase"
+                    from seguimiento.services import registrar_asistencia_estudiante
+                    asist_obj, created = registrar_asistencia_estudiante(
+                        matricula=m_indiv,
+                        fecha=fecha_asist,
+                        estado=estado_val,
+                        registrado_por=request.user,
+                        carga=c_obj,
+                        periodo=periodo_n,
+                        observaciones=obs_completa,
+                        motivo=motivo_correccion
+                    )
+                    messages.success(request, f"Asistencia de {m_indiv.aprendiz.get_full_name() or m_indiv.aprendiz.username} ({asist_obj.get_estado_display()}) guardada correctamente con trazabilidad.")
+                    return redirect(f"{reverse('asistencia_docente')}?carga={c_obj.id if c_obj else ''}&fecha={fecha_asist.isoformat()}&tab=historial")
 
             c_obj = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first()
             if not c_obj and cargas.exists():
@@ -5290,28 +5589,23 @@ def instructor_dashboard(request):
 
                 guardados_asist = 0
                 materia_nom = c_obj.programa.denominacion if c_obj.programa else 'Matemáticas'
-                matricula_indiv_id = request.POST.get('matricula_id')
                 for m in mats:
                     estado_val = request.POST.get(f'asistencia_{m.id}') or request.POST.get(f'estado_{m.id}')
-                    if not estado_val and matricula_indiv_id and str(matricula_indiv_id) == str(m.id):
-                        estado_val = request.POST.get('estado')
                     if estado_val:
                         if estado_val == 'E':
                             estado_val = 'J'
                         obs_val = request.POST.get(f'obs_{m.id}', '').strip()
-                        if not obs_val and matricula_indiv_id and str(matricula_indiv_id) == str(m.id):
-                            obs_val = request.POST.get('observaciones', '').strip()
                         obs_completa = f"[{materia_nom}] {obs_val}" if obs_val else f"[{materia_nom}] Registro oficial de clase"
-                        asist_obj, _ = AsistenciaAprendiz.objects.update_or_create(
+                        from seguimiento.services import registrar_asistencia_estudiante
+                        asist_obj, _ = registrar_asistencia_estudiante(
                             matricula=m,
                             fecha=fecha_asist,
-                            defaults={
-                                'estado': estado_val,
-                                'observaciones': obs_completa,
-                                'registrado_por': request.user,
-                                'carga_academica': c_obj,
-                                'periodo': periodo_n
-                            }
+                            estado=estado_val,
+                            registrado_por=request.user,
+                            carga=c_obj,
+                            periodo=periodo_n,
+                            observaciones=obs_completa,
+                            motivo="Actualización masiva de asistencia por clase"
                         )
                         guardados_asist += 1
 
@@ -5541,6 +5835,47 @@ def instructor_dashboard(request):
                         guardadas_n += 1
                 messages.success(request, f"Planilla de calificaciones del {periodo_n} guardada correctamente ({guardadas_n} alumnos calificados).")
             return redirect(f"{reverse('calificaciones_docente')}?carga={c_obj.id if c_obj else ''}&periodo={periodo_n}&tab=planilla")
+
+        # 6d. CALIFICACIONES: Editar nota desde historial con trazabilidad
+        elif action == 'editar_nota_historial':
+            cal_id = request.POST.get('calificacion_id')
+            nueva_nota_str = request.POST.get('nueva_nota')
+            motivo_ajuste = request.POST.get('motivo_ajuste', '').strip() or 'Ajuste docente en historial'
+            cal_obj = CalificacionEscolar.objects.filter(id=cal_id).first()
+            if cal_obj and nueva_nota_str:
+                try:
+                    nueva_nota = float(str(nueva_nota_str).replace(',', '.'))
+                    nueva_nota = max(0.0, min(5.0, nueva_nota))
+                except ValueError:
+                    nueva_nota = cal_obj.nota
+                
+                nota_ant = cal_obj.nota
+                cal_obj.nota = nueva_nota
+                if nueva_nota >= 4.6:
+                    cal_obj.desempeno = 'Superior'
+                elif nueva_nota >= 4.0:
+                    cal_obj.desempeno = 'Alto'
+                elif nueva_nota >= 3.0:
+                    cal_obj.desempeno = 'Básico'
+                else:
+                    cal_obj.desempeno = 'Bajo'
+
+                trazabilidad_log = f"[Trazabilidad: Nota anterior {nota_ant} -> Nota nueva {nueva_nota} por {request.user.get_full_name() or request.user.username} el {timezone.now().strftime('%d/%m/%Y %H:%M')} | Motivo: {motivo_ajuste}]"
+                cal_obj.observaciones = f"{trazabilidad_log} {cal_obj.observaciones or ''}".strip()
+                cal_obj.profesor = request.user
+                cal_obj.fecha_registro = timezone.now()
+                cal_obj.save()
+
+                from seguimiento.models import RegistroAuditoria
+                RegistroAuditoria.registrar(
+                    usuario=request.user,
+                    modulo='Calificaciones',
+                    accion=f'Edición de Calificación ({nota_ant} -> {nueva_nota})',
+                    detalles=f'Estudiante: {cal_obj.matricula.aprendiz.get_full_name()} | Carga: {cal_obj.carga_academica} | Periodo: {cal_obj.periodo} | Motivo: {motivo_ajuste}'
+                )
+
+                messages.success(request, f"Calificación de {cal_obj.matricula.aprendiz.get_full_name()} actualizada de {nota_ant} a {nueva_nota} con trazabilidad registrada.")
+            return redirect(f"{reverse('calificaciones_docente')}?tab=historial")
 
         # 7. HORARIO ESCOLAR: Agregar bloque de horario con validación de cruces
         elif action == 'agregar_horario':
@@ -5783,6 +6118,8 @@ def instructor_dashboard(request):
                         )
                 elif item.tipo_objeto == 'Horario':
                     HorarioFicha.objects.filter(id=item.objeto_id).update(activo=True)
+                elif item.tipo_objeto == 'GuiaClase':
+                    GuiaClase.objects.filter(id=item.objeto_id).update(estado='ACTIVO')
                 elif item.tipo_objeto == 'Estudiante':
                     user_obj = User.objects.filter(pk=item.objeto_id).first()
                     if user_obj:
@@ -5805,6 +6142,8 @@ def instructor_dashboard(request):
             if item:
                 if item.tipo_objeto == 'Horario':
                     HorarioFicha.objects.filter(id=item.objeto_id).delete()
+                elif item.tipo_objeto == 'GuiaClase':
+                    GuiaClase.objects.filter(id=item.objeto_id).delete()
                 item.delete()
                 messages.success(request, 'Elemento eliminado definitivamente del sistema.')
             return redirect(f"{reverse('instructor_dashboard')}?subpanel=papelera")
@@ -6314,10 +6653,7 @@ def instructor_dashboard(request):
     if todos_mis_estudiantes_map:
         todos_mis_estudiantes = list(todos_mis_estudiantes_map.values())
     else:
-        todos_mis_estudiantes = list(Matricula.objects.filter(
-            estado_formacion__in=['En Formacion', 'Activo'],
-            aprendiz__is_active=True
-        ).select_related('aprendiz', 'aprendiz__perfil').order_by('grado_escolar', 'aprendiz__last_name', 'aprendiz__first_name'))
+        todos_mis_estudiantes = []
 
     todos_mis_estudiantes.sort(key=lambda x: (str(x.grado_escolar), x.aprendiz.last_name or '', x.aprendiz.first_name or ''))
 
@@ -6387,11 +6723,13 @@ def instructor_dashboard(request):
             }
 
         asig_item = asignaturas_dict[prog_id]
-        asig_item['cargas'].append(c)
         g_clean = ''.join(ch for ch in str(c.grado) if ch.isdigit())
+        sec_clean = (c.seccion or 'A').upper()
+        if not any(''.join(ch for ch in str(ex_c.grado) if ch.isdigit()) == g_clean and (ex_c.seccion or 'A').upper() == sec_clean for ex_c in asig_item['cargas']):
+            asig_item['cargas'].append(c)
         if g_clean:
             asig_item['grados'].add(g_clean)
-        asig_item['secciones'].add(c.seccion or 'A')
+        asig_item['secciones'].add(sec_clean)
 
         for est_m in getattr(c, 'matriculas_lista', []):
             if est_m.aprendiz_id not in asig_item['estudiantes_ids']:
@@ -6649,15 +6987,25 @@ def instructor_dashboard(request):
             sesiones_asistencia_dict[session_key]['justificados'] += 1
         
         sesiones_asistencia_dict[session_key]['estudiantes'].append({
+            'asistencia_id': asist.id,
+            'matricula_id': asist.matricula_id,
             'nombre': asist.matricula.aprendiz.get_full_name() or asist.matricula.aprendiz.username,
             'documento': asist.matricula.aprendiz.username,
             'estado': asist.get_estado_display() if hasattr(asist, 'get_estado_display') else asist.estado,
             'estado_cod': asist.estado,
-            'observaciones': asist.observaciones
+            'observaciones': asist.observaciones,
+            'fecha_iso': asist.fecha.isoformat() if hasattr(asist.fecha, 'isoformat') else str(asist.fecha),
+            'fecha_display': asist.fecha.strftime('%d/%m/%Y') if hasattr(asist.fecha, 'strftime') else str(asist.fecha)
         })
 
     historial_asistencia_sesiones = list(sesiones_asistencia_dict.values())
     historial_asistencia_json = json.dumps(historial_asistencia_sesiones)
+
+    from seguimiento.models import HistorialCorreccionAsistencia
+    correcciones_asistencia_recientes = list(HistorialCorreccionAsistencia.objects.filter(
+        Q(modificado_por=request.user) | Q(matricula__in=todos_mis_estudiantes)
+    ).select_related('matricula', 'matricula__aprendiz', 'modificado_por').order_by('-fecha_correccion')[:50])
+    registros_individuales_asistencia = list(asistencias_guardadas[:150])
 
     # === CALIFICACIONES: EVALUACIONES DEL PERIODO Y PLANILLA GENERAL ===
     evaluaciones_periodo = list(TareaClase.objects.filter(
@@ -6681,6 +7029,8 @@ def instructor_dashboard(request):
         evaluacion_seleccionada = next((e for e in evaluaciones_periodo if str(e.id) == str(eval_param)), None)
         if not evaluacion_seleccionada:
             evaluacion_seleccionada = TareaClase.objects.filter(id=eval_param, carga_academica__profesor=request.user).first()
+    if not evaluacion_seleccionada and evaluaciones_periodo:
+        evaluacion_seleccionada = evaluaciones_periodo[0]
 
     if evaluacion_seleccionada:
         ent_map = {e.estudiante_id: e for e in EntregaTarea.objects.filter(tarea=evaluacion_seleccionada)}
@@ -6880,15 +7230,26 @@ def instructor_dashboard(request):
         }
     ]
 
-    guias_biblioteca = list(GuiaClase.objects.filter(carga_academica__profesor=request.user).select_related('carga_academica', 'carga_academica__programa').order_by('-fecha_publicacion', '-id'))
-    if not guias_biblioteca:
-        guias_biblioteca = list(GuiaClase.objects.all().select_related('carga_academica', 'carga_academica__programa').order_by('-fecha_publicacion', '-id'))
-        
+    guias_biblioteca = list(GuiaClase.objects.filter(
+        Q(carga_academica__profesor=request.user) | Q(profesor=request.user)
+    ).exclude(estado='PAPELERA').distinct().select_related('carga_academica', 'carga_academica__programa').order_by('-fecha_publicacion', '-id'))
+    if not guias_biblioteca and (request.user.is_superuser or not CargaAcademica.objects.filter(profesor=request.user).exists()):
+        guias_biblioteca = list(GuiaClase.objects.all().exclude(estado='PAPELERA').select_related('carga_academica', 'carga_academica__programa').order_by('-fecha_publicacion', '-id'))
+
     for guia in guias_biblioteca:
-        guia.grado_num = ''.join(ch for ch in str(guia.carga_academica.grado) if ch.isdigit()) if guia.carga_academica else ''
-        guia.materia_nombre = guia.carga_academica.programa.denominacion if guia.carga_academica and guia.carga_academica.programa else 'Matemáticas'
+        guia.grado_num = ''.join(ch for ch in str(guia.carga_academica.grado) if ch.isdigit()) if (guia.carga_academica and guia.carga_academica.grado) else ''
+        guia.materia_nombre = guia.carga_academica.programa.denominacion if guia.carga_academica and guia.carga_academica.programa else 'General'
         # Vincular las tareas a este tema
         guia.actividades_relacionadas = [t for t in tareas_publicadas if (hasattr(t, 'tema_id') and t.tema_id == guia.id) or (t.criterio_evaluacion == guia.titulo)]
+
+    temas_publicados = [g for g in guias_biblioteca if str(g.estado).upper() in ['ACTIVO', 'PUBLICADO']]
+    temas_borradores = [g for g in guias_biblioteca if str(g.estado).lower() == 'borrador']
+    actividades_publicadas_lista = [t for t in tareas_publicadas if str(t.estado).lower() in ['publicada', 'cerrada']]
+    actividades_borradores_lista = [t for t in tareas_publicadas if str(t.estado).lower() == 'borrador']
+
+    total_todos_count = len(guias_biblioteca) + len(tareas_publicadas)
+    total_publicadas_count = len(temas_publicados) + len(actividades_publicadas_lista)
+    total_borradores_count = len(temas_borradores) + len(actividades_borradores_lista)
     documentos_lista = list(DocumentoInstitucional.objects.all().order_by('-fecha_subida'))
     eventos_lista = list(EventoCalendario.objects.all().order_by('fecha', 'hora'))
     competencias_docente = list(Competencia.objects.all().order_by('codigo'))
@@ -6917,6 +7278,8 @@ def instructor_dashboard(request):
     total_estudiantes_retirados_docente = sum(1 for m in todos_mis_estudiantes if m.estado_formacion == 'Retirado')
 
     for num_g, nom_g, nivel_g in nombres_grados:
+        if num_g not in grados_asignados_nums:
+            continue
         es_asig = num_g in grados_asignados_nums
         cargas_g = [c for c in cargas if ''.join(ch for ch in str(c.grado) if ch.isdigit()) == num_g]
         horarios_g = [h for h in horarios_prof if ''.join(ch for ch in str(h.grado) if ch.isdigit()) == num_g]
@@ -7016,16 +7379,46 @@ def instructor_dashboard(request):
             'estudiantes_lista': estudiantes_g_info
         })
 
+    # Total de materias únicas asignadas al docente
+    materias_unicas_ids = set(c.programa_id for c in cargas if c.programa_id)
+    total_materias_asignadas = len(materias_unicas_ids) or len(asignaturas_metricas)
+
+    # Perfil profesional y hoja de vida académica
+    from usuarios.models import Docente
+    docente_obj, _ = Docente.objects.get_or_create(usuario=request.user)
+    estudios_docente = list(docente_obj.estudios.all())
+    experiencias_docente = list(docente_obj.experiencias.all())
+
+    # Documentos por tipo específico oficial
+    docs_guias = list(GuiaClase.objects.filter(
+        Q(profesor=request.user) | Q(carga_academica__profesor=request.user),
+        tipo_documento='GUIA',
+        estado='ACTIVO'
+    ).select_related('carga_academica', 'carga_academica__programa'))
+    docs_material_pedagogico = list(GuiaClase.objects.filter(
+        Q(profesor=request.user) | Q(carga_academica__profesor=request.user),
+        tipo_documento='MATERIAL_PEDAGOGICO',
+        estado='ACTIVO'
+    ).select_related('carga_academica', 'carga_academica__programa'))
+    docs_material_apoyo = list(GuiaClase.objects.filter(
+        Q(profesor=request.user) | Q(carga_academica__profesor=request.user),
+        tipo_documento='MATERIAL_APOYO',
+        estado='ACTIVO'
+    ).select_related('carga_academica', 'carga_academica__programa'))
+
     contexto = {
         'subpanel_activo': subpanel_activo,
         'grados_estructura_colegio': grados_estructura_colegio,
-        'total_grados_asignados': len(cargas_unicas),
+        'total_grados_asignados': len(grados_asignados_nums),
         'total_grupos_asignados': len(cargas_unicas),
-        'total_materias_asignadas': len(cargas),
+        'total_materias_asignadas': total_materias_asignadas,
         'total_estudiantes_activos_docente': total_estudiantes_activos_docente,
         'total_estudiantes_retirados_docente': total_estudiantes_retirados_docente,
         'user': request.user,
         'perfil_docente': perfil_docente,
+        'docente_obj': docente_obj,
+        'estudios_docente': estudios_docente,
+        'experiencias_docente': experiencias_docente,
         'foto_perfil_url': foto_perfil_url,
         'cargas': cargas,
         'cargas_unicas': cargas_unicas,
@@ -7060,10 +7453,17 @@ def instructor_dashboard(request):
         'total_cursos': len(cargas_unicas),
         'grupos_lista': grupos_lista,
         'guias_biblioteca': guias_biblioteca,
-        'docs_guias': list(GuiaClase.objects.filter(profesor=request.user)) or guias_biblioteca,
-        'docs_material_pedagogico': documentos_lista,
-        'docs_material_apoyo': documentos_lista,
-        'mis_documentos': list(GuiaClase.objects.filter(profesor=request.user)) or guias_biblioteca,
+        'temas_publicados': temas_publicados,
+        'temas_borradores': temas_borradores,
+        'actividades_publicadas_lista': actividades_publicadas_lista,
+        'actividades_borradores_lista': actividades_borradores_lista,
+        'total_todos_count': total_todos_count,
+        'total_publicadas_count': total_publicadas_count,
+        'total_borradores_count': total_borradores_count,
+        'docs_guias': docs_guias,
+        'docs_material_pedagogico': docs_material_pedagogico,
+        'docs_material_apoyo': docs_material_apoyo,
+        'mis_documentos': list(GuiaClase.objects.filter(profesor=request.user, estado='ACTIVO')) or guias_biblioteca,
         'material_pedagogico': guias_biblioteca,
         'documentos_institucionales': documentos_lista,
         'documentos_lista': documentos_lista,
@@ -7074,6 +7474,8 @@ def instructor_dashboard(request):
         'total_horas_horario': sum(getattr(c, 'intensidad_horaria', 4) or 4 for c in cargas),
         'historial_asistencia_sesiones': historial_asistencia_sesiones,
         'historial_asistencia_json': historial_asistencia_json,
+        'registros_individuales_asistencia': registros_individuales_asistencia,
+        'correcciones_asistencia_recientes': correcciones_asistencia_recientes,
         'historial_calificaciones_escolares': historial_calificaciones_escolares,
         'mensajes_enviados': mensajes_enviados,
         'mensajes_recibidos': mensajes_recibidos,
@@ -7470,10 +7872,8 @@ def aprendiz_dashboard(request, subpanel_directo=None):
                 'bloques': bloques_procesados,
             })
 
-        cargas_estudiante = CargaAcademica.objects.filter(
-            Q(grado__icontains=grado_num),
-            Q(seccion__iexact=secc) | Q(seccion__isnull=True) | Q(seccion='')
-        ).select_related('profesor', 'programa')
+        from academico.models import obtener_cargas_activas_grupo
+        cargas_estudiante, _ = obtener_cargas_activas_grupo(grado_num, secc, 2026)
 
         # Tareas publicadas no entregadas por este estudiante
         entregadas_ids = EntregaTarea.objects.filter(
@@ -7553,14 +7953,14 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         compromisos = []
         alertas = []
 
-    from seguimiento.models import ComunicadoEscolar
+    from seguimiento.models import ComunicadoEscolar, SolicitudSecretaria
     from academico.models import CalificacionEscolar, ComunicacionMensaje
     docentes_lista = list(User.objects.filter(perfil__rol__nombre__icontains='Docente'))
 
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'actualizar_foto_perfil':
-            foto = request.FILES.get('foto')
+            foto = request.FILES.get('foto') or request.FILES.get('foto_perfil')
             if foto:
                 import os
                 ext = os.path.splitext(foto.name)[1].lower()
@@ -7613,6 +8013,33 @@ def aprendiz_dashboard(request, subpanel_directo=None):
                     tipo='info'
                 )
                 messages.success(request, f'Mensaje enviado exitosamente al profesor {docente.get_full_name() or docente.username}.')
+            return redirect('/estudiante/?subpanel=comunicaciones')
+
+        elif action == 'enviar_mensaje_secretaria':
+            tipo_sol = request.POST.get('tipo', 'Consulta General')
+            det = request.POST.get('mensaje') or request.POST.get('detalles', '').strip()
+            if det:
+                from seguimiento.models import SolicitudSecretaria
+                sol = SolicitudSecretaria.objects.create(
+                    aprendiz=request.user,
+                    tipo=tipo_sol,
+                    detalles=det,
+                    estado='Pendiente'
+                )
+                # Notificar a usuarios con rol Secretaria
+                sec_users = User.objects.filter(perfil__rol__nombre__icontains='Secretar')
+                nom_est = request.user.get_full_name() or request.user.username
+                for sec in sec_users:
+                    Notificacion.objects.create(
+                        usuario=sec,
+                        titulo=f"Nueva solicitud de {nom_est}",
+                        mensaje=f"{tipo_sol}: {det[:150]}",
+                        enlace="/secretaria/solicitudes/",
+                        tipo='info'
+                    )
+                messages.success(request, 'Tu mensaje/solicitud ha sido enviado correctamente a Secretaría Escolar.')
+            else:
+                messages.error(request, 'Por favor escribe el contenido de tu mensaje o solicitud.')
             return redirect('/estudiante/?subpanel=comunicaciones')
 
     comunicados_estudiante = ComunicadoEscolar.objects.filter(
@@ -7997,21 +8424,44 @@ def gestion_usuarios(request):
     if rol_filtro and rol_filtro != 'todos':
         if rol_filtro in ['aprendiz', 'estudiante']:
             usuarios_qs = usuarios_qs.filter(perfil__rol__nombre__in=['Estudiante', 'Aprendiz'])
-        elif rol_filtro in ['instructor']:
-            usuarios_qs = usuarios_qs.filter(perfil__rol__nombre__icontains='Instructor')
+        elif rol_filtro in ['instructor', 'docente', 'profesor']:
+            usuarios_qs = usuarios_qs.filter(
+                Q(perfil__rol__nombre__icontains='Docente') |
+                Q(perfil__rol__nombre__icontains='Profesor') |
+                Q(perfil__rol__nombre__icontains='Instructor')
+            )
         elif rol_filtro in ['coordinador']:
             usuarios_qs = usuarios_qs.filter(perfil__rol__nombre__icontains='Coordinador')
-        elif rol_filtro in ['secretaria']:
+        elif rol_filtro in ['rector', 'rectoria', 'rectoría']:
+            usuarios_qs = usuarios_qs.filter(perfil__rol__nombre__icontains='Rector')
+        elif rol_filtro in ['secretaria', 'secretaría']:
             usuarios_qs = usuarios_qs.filter(perfil__rol__nombre__icontains='Secretar')
-        elif rol_filtro in ['docente']:
-            usuarios_qs = usuarios_qs.filter(perfil__rol__nombre__icontains='Docente')
+        elif rol_filtro in ['familia', 'familias', 'acudiente', 'acudientes']:
+            usuarios_qs = usuarios_qs.filter(
+                Q(perfil__rol__nombre__icontains='Familia') |
+                Q(perfil__rol__nombre__icontains='Acudiente') |
+                Q(nucleo_familiar__isnull=False)
+            ).distinct()
         elif rol_filtro in ['admin', 'administrador']:
             usuarios_qs = usuarios_qs.filter(Q(is_superuser=True) | Q(perfil__rol__nombre__icontains='Admin'))
 
     total_usuarios = User.objects.count()
     total_aprendices = User.objects.filter(perfil__rol__nombre__in=['Estudiante', 'Aprendiz']).count()
-    total_instructores = User.objects.filter(perfil__rol__nombre__icontains='Instructor').count()
-    total_coordinadores = User.objects.filter(perfil__rol__nombre__icontains='Coordinador').count()
+    total_instructores = User.objects.filter(
+        Q(perfil__rol__nombre__icontains='Docente') |
+        Q(perfil__rol__nombre__icontains='Profesor') |
+        Q(perfil__rol__nombre__icontains='Instructor')
+    ).count()
+    total_coordinadores = User.objects.filter(
+        Q(perfil__rol__nombre__icontains='Rector') |
+        Q(perfil__rol__nombre__icontains='Secretar') |
+        Q(perfil__rol__nombre__icontains='Coordinador')
+    ).count()
+    total_familias = User.objects.filter(
+        Q(perfil__rol__nombre__icontains='Familia') |
+        Q(perfil__rol__nombre__icontains='Acudiente') |
+        Q(nucleo_familiar__isnull=False)
+    ).distinct().count()
     total_activos = User.objects.filter(is_active=True).count()
 
     context = {
@@ -8020,6 +8470,7 @@ def gestion_usuarios(request):
         'total_aprendices': total_aprendices,
         'total_instructores': total_instructores,
         'total_coordinadores': total_coordinadores,
+        'total_familias': total_familias,
         'total_activos': total_activos,
         'rol_filtro': rol_filtro,
         'q': q,
@@ -8870,9 +9321,19 @@ def detalle_instructor(request, pk):
     cargas = CargaAcademica.objects.filter(profesor=user_inst).select_related('programa').order_by('nivel', 'grado', 'seccion')
     horarios = HorarioFicha.objects.filter(instructor=user_inst, activo=True).select_related('programa').order_by('dia', 'hora_inicio')
 
+    from usuarios.models import Docente
+    docente_obj = getattr(user_inst, 'docente', None)
+    if not docente_obj:
+        docente_obj, _ = Docente.objects.get_or_create(usuario=user_inst)
+    estudios_docente = list(docente_obj.estudios.all())
+    experiencias_docente = list(docente_obj.experiencias.all())
+
     context = {
         'instructor': user_inst,
         'perfil': user_inst.perfil,
+        'docente_obj': docente_obj,
+        'estudios_docente': estudios_docente,
+        'experiencias_docente': experiencias_docente,
         'fichas': fichas,
         'total_fichas': fichas.count(),
         'cargas': cargas,
@@ -9614,6 +10075,8 @@ def api_guardar_color(request):
         colegio = ConfiguracionColegio.get_solo()
         setattr(colegio, campo, valor)
         colegio.save()  # Limpia la caché global 'edunova_colegio_identidad'
+        from django.core.cache import cache
+        cache.delete('edunova_colegio_identidad')
 
         return JsonResponse({
             'ok': True,
@@ -12167,21 +12630,100 @@ def mi_perfil_view(request):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
+        telefono = request.POST.get('telefono')
+        direccion = request.POST.get('direccion')
         
         request.user.first_name = first_name
         request.user.last_name = last_name
         request.user.email = email
         request.user.save()
         
-        foto_perfil = request.FILES.get('foto_perfil')
-        if foto_perfil and hasattr(request.user, 'perfil') and request.user.perfil:
-            request.user.perfil.foto_perfil = foto_perfil
-            request.user.perfil.save()
+        if perfil:
+            if telefono:
+                perfil.telefono = telefono
+            if direccion:
+                perfil.direccion = direccion
+            foto_perfil = request.FILES.get('foto_perfil')
+            if foto_perfil:
+                perfil.foto_perfil = foto_perfil
+            perfil.save()
             
         messages.success(request, 'Perfil actualizado exitosamente.')
         return redirect('mi_perfil')
+
+    # Datos oficiales de la Hoja de Vida institucional (FT-TH-02)
+    datos_hoja_vida = {
+        'nombre_completo': request.user.get_full_name() or request.user.username,
+        'documento': getattr(perfil, 'numero_documento', None) or request.user.username,
+        'tipo_documento': getattr(perfil, 'tipo_documento', 'CC'),
+        'email': request.user.email or f"{request.user.username}@nuevahorizonte.edu.co",
+        'telefono': getattr(perfil, 'telefono', None) or "3005550100",
+        'direccion': getattr(perfil, 'direccion', None) or "Sede Principal, Barranquilla",
+        'foto': getattr(perfil, 'foto_perfil', None),
+        'rol_nombre': rol_nombre or ('Administrador General' if request.user.is_superuser else 'Directivo'),
+    }
+
+    if 'Rector' in rol_nombre or request.user.username.lower() in ['rector', 'rectoria']:
+        datos_hoja_vida.update({
+            'profesion': 'Magíster en Gestión y Dirección Educativa',
+            'area': 'Dirección y Alta Gerencia Institucional',
+            'escalafon': 'Directivo Docente - Grado 14 (Decreto 1278)',
+            'resolucion': 'RES-REC-2018-001 MEN',
+            'fecha_ingreso': '15/01/2018',
+            'codigo_formato': 'FT-TH-01',
+            'tipo_expediente': 'Directivo y de Gestión Escolar',
+            'cargo_firma': 'Rectoría / Representante Legal',
+            'estudios': [
+                {'titulo': 'Magíster en Gestión y Dirección de Instituciones Educativas', 'institucion': 'Universidad Nacional / Acreditación Institucional', 'estado': 'Titulada'},
+                {'titulo': 'Especialista en Gerencia y Liderazgo Pedagógico', 'institucion': 'Universidad Pedagógica Nacional', 'estado': 'Titulada'},
+                {'titulo': 'Licenciada en Pedagogía y Ciencias de la Educación', 'institucion': 'Universidad del Atlántico', 'estado': 'Titulada'},
+            ],
+            'experiencias': [
+                {'cargo': 'Rectora General y Representante Legal', 'asignacion': 'Dirección integral, gobierno escolar y planeación estratégica I.E.D. Nuevo Horizonte', 'periodo': 'Actual'},
+                {'cargo': 'Coordinadora Académica Distrital', 'asignacion': 'Supervisión curricular y gestión de calidad en educación secundaria y media técnica', 'periodo': '2012 - 2017'},
+                {'cargo': 'Docente Titular de Educación Media', 'asignacion': 'Docencia en ciencias sociales y proyectos de articulación técnica', 'periodo': '2005 - 2012'},
+            ]
+        })
+    elif 'Secretar' in rol_nombre or request.user.username.lower() in ['secretaria', 'secretaría']:
+        datos_hoja_vida.update({
+            'profesion': 'Administradora de Empresas y Gestión Escolar',
+            'area': 'Gestión de Matrículas, Registro y Control Académico',
+            'escalafon': 'Nivel Profesional - Escalafón Administrativo',
+            'resolucion': 'RES-SEC-2019-004 MEN',
+            'fecha_ingreso': '01/02/2019',
+            'codigo_formato': 'FT-TH-03',
+            'tipo_expediente': 'Administrativo y de Registro Académico',
+            'cargo_firma': 'Secretaría Académica General',
+            'estudios': [
+                {'titulo': 'Profesional en Administración de Empresas', 'institucion': 'Universidad del Norte', 'estado': 'Titulada'},
+                {'titulo': 'Especialista en Gestión Documental y Archivo Escolar', 'institucion': 'Servicio Nacional de Aprendizaje (SENA)', 'estado': 'Titulada'},
+                {'titulo': 'Diplomado en Auditoría de Matrículas y Sistema SIMAT', 'institucion': 'Ministerio de Educación Nacional', 'estado': 'Certificada'},
+            ],
+            'experiencias': [
+                {'cargo': 'Secretaria Académica Titular', 'asignacion': 'Gestión de matrículas, expedición de certificados, libros reglamentarios y actas oficiales', 'periodo': 'Actual'},
+                {'cargo': 'Coordinadora de Admisiones y Registro', 'asignacion': 'Atención a familias, recepción documental y liquidación de derechos académicos', 'periodo': '2015 - 2019'},
+            ]
+        })
+    else: # Administrador u otro
+        datos_hoja_vida.update({
+            'profesion': 'Ingeniero de Sistemas y Seguridad Informática',
+            'area': 'Infraestructura Tecnológica y Seguridad de Datos',
+            'escalafon': 'Especialista TI - Nivel Profesional',
+            'resolucion': 'RES-TIC-2020-001',
+            'fecha_ingreso': '10/01/2020',
+            'codigo_formato': 'FT-TH-04',
+            'tipo_expediente': 'Administración Tecnológica',
+            'cargo_firma': 'Administrador del Sistema',
+            'estudios': [
+                {'titulo': 'Ingeniero de Sistemas y Computación', 'institucion': 'Universidad Nacional de Colombia', 'estado': 'Titulado'},
+                {'titulo': 'Especialista en Ciberseguridad y Gestión de Bases de Datos', 'institucion': 'Universidad de los Andes', 'estado': 'Titulado'},
+            ],
+            'experiencias': [
+                {'cargo': 'Administrador General de la Plataforma EDUNOVA', 'asignacion': 'Mantenimiento del sistema, base de datos MySQL, auditoría y control de accesos', 'periodo': 'Actual'},
+            ]
+        })
         
-    return render(request, 'usuarios/mi_perfil.html')
+    return render(request, 'usuarios/mi_perfil.html', {'datos_hoja_vida': datos_hoja_vida})
 
 def confirmar_recuperacion(request, uidb64, token):
     try:
@@ -12247,51 +12789,85 @@ def confirmar_recuperacion(request, uidb64, token):
 @login_required
 def abrir_notificacion_view(request, pk):
     from seguimiento.models import Notificacion
+    from django.core.cache import cache
     notif = Notificacion.objects.filter(pk=pk, usuario=request.user).first() or Notificacion.objects.filter(pk=pk).first()
     if notif:
         notif.leida = True
         notif.save(update_fields=['leida'])
+        cache.delete(f'edunova_notif_u_{request.user.pk}')
         if notif.enlace:
             return redirect(notif.enlace)
+    cache.delete(f'edunova_notif_u_{request.user.pk}')
     next_url = request.META.get('HTTP_REFERER')
     if next_url and '/login' not in next_url:
         return redirect(next_url)
-    rol = getattr(getattr(request.user, 'perfil', None), 'rol', None)
-    rol_nombre = str(rol.nombre) if rol else ''
-    if any(r in rol_nombre for r in ['Estudiante', 'Aprendiz', 'Alumno']):
-        return redirect(f"{reverse('estudiante_dashboard')}?subpanel=notificaciones")
-    elif any(r in rol_nombre for r in ['Docente', 'Instructor', 'Profesor']):
-        return redirect(f"{reverse('instructor_dashboard')}?subpanel=notificaciones")
     return redirect('notificaciones_lista')
 
 @login_required
 def marcar_todas_notificaciones_leidas_view(request):
     from seguimiento.models import Notificacion
     from django.http import JsonResponse
+    from django.core.cache import cache
     Notificacion.objects.filter(usuario=request.user).update(leida=True)
+    cache.delete(f'edunova_notif_u_{request.user.pk}')
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
         return JsonResponse({'status': 'ok', 'message': 'Todas las notificaciones marcadas como leídas.'})
     messages.success(request, 'Todas las notificaciones han sido marcadas como leídas.')
     next_url = request.POST.get('next') or request.META.get('HTTP_REFERER')
     if next_url and '/login' not in next_url:
         return redirect(next_url)
-    rol = getattr(getattr(request.user, 'perfil', None), 'rol', None)
-    rol_nombre = str(rol.nombre) if rol else ''
-    if any(r in rol_nombre for r in ['Estudiante', 'Aprendiz', 'Alumno']):
-        return redirect(f"{reverse('estudiante_dashboard')}?subpanel=notificaciones")
-    elif any(r in rol_nombre for r in ['Docente', 'Instructor', 'Profesor']):
-        return redirect(f"{reverse('instructor_dashboard')}?subpanel=notificaciones")
     return redirect('notificaciones_lista')
 
 from django.http import JsonResponse, FileResponse, Http404
 @login_required
 def marcar_notificacion_leida_ajax(request, pk):
     from seguimiento.models import Notificacion
+    from django.core.cache import cache
     notif = Notificacion.objects.filter(pk=pk, usuario=request.user).first() or Notificacion.objects.filter(pk=pk).first()
     if notif:
         notif.leida = True
         notif.save(update_fields=['leida'])
+    cache.delete(f'edunova_notif_u_{request.user.pk}')
     return JsonResponse({'status': 'ok', 'leida': True})
+
+@login_required
+def api_notificaciones_campana(request):
+    """Endpoint AJAX para la campanita de notificaciones unificada de EduNova."""
+    from seguimiento.models import Notificacion
+    from django.utils.timesince import timesince
+    from django.utils import timezone
+    from django.urls import reverse
+
+    user = request.user
+    qs = Notificacion.objects.filter(usuario=user).order_by('-fecha_creacion')
+    no_leidas = qs.filter(leida=False).count()
+
+    items = []
+    for n in qs[:25]:
+        try:
+            fecha_local = timezone.localtime(n.fecha_creacion)
+            fecha_str = fecha_local.strftime("%d/%m/%Y, %I:%M %p")
+        except Exception:
+            fecha_str = n.fecha_creacion.strftime("%d/%m/%Y, %I:%M %p")
+
+        items.append({
+            'id': n.id,
+            'titulo': n.titulo,
+            'mensaje': n.mensaje,
+            'enlace': n.enlace or '',
+            'tipo': n.tipo or 'info',
+            'leida': bool(n.leida),
+            'fecha_str': fecha_str,
+            'timesince': timesince(n.fecha_creacion),
+            'abrir_url': reverse('abrir_notificacion', args=[n.id]),
+            'marcar_url': reverse('marcar_notificacion_leida_ajax', args=[n.id]),
+        })
+
+    return JsonResponse({
+        'status': 'ok',
+        'num_no_leidas': no_leidas,
+        'notificaciones': items,
+    })
 
 
 def descargar_documentacion_docx(request):

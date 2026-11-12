@@ -53,10 +53,25 @@
                             </span>
                         </div>
                         <p class="text-secondary mb-1.5 small fw-medium">
-                            <i class="bi bi-briefcase-fill me-1" style="color: var(--color-principal);"></i> Licenciado en Matemáticas y Educación Media Técnica
+                            <i class="bi bi-briefcase-fill me-1" style="color: var(--color-principal);"></i> 
+                            {% if docente_obj.profesion %}
+                                {{ docente_obj.profesion }}
+                            {% elif request.user.perfil.rol %}
+                                {{ request.user.perfil.rol.nombre }}
+                            {% else %}
+                                <span class="badge bg-light text-muted border">Pendiente de registrar</span>
+                            {% endif %}
                         </p>
                         <div class="d-flex align-items-center gap-3 text-muted small flex-wrap">
-                            <span><i class="bi bi-geo-alt-fill me-1" style="color: var(--color-principal);"></i> Sede Principal, Bogotá</span>
+                            <span><i class="bi bi-geo-alt-fill me-1" style="color: var(--color-principal);"></i> 
+                                {% if docente_obj.direccion %}
+                                    {{ docente_obj.direccion }}
+                                {% elif request.user.perfil.direccion %}
+                                    {{ request.user.perfil.direccion }}
+                                {% else %}
+                                    <span class="text-muted">Pendiente de registrar</span>
+                                {% endif %}
+                            </span>
                             <span><i class="bi bi-envelope-fill me-1" style="color: var(--color-principal);"></i> {{ request.user.email|default:"docente@edunova.edu.co" }}</span>
                         </div>
                     </div>
@@ -92,8 +107,8 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small text-dark bg-white border" id="tab-btn-preferencias" onclick="switchPerfilTab('preferencias', this)" style="border-color: var(--color-acento) !important;">
-                        <i class="bi bi-sliders me-1.5" style="color: var(--color-principal);"></i> Preferencias
+                    <button type="button" class="nav-link rounded-pill px-3.5 py-1.5 fw-bold small text-dark bg-white border" id="tab-btn-hoja-vida" onclick="switchPerfilTab('hoja-vida', this)" style="border-color: var(--color-acento) !important;">
+                        <i class="bi bi-file-earmark-person-fill me-1.5" style="color: var(--color-principal);"></i> Hoja de Vida
                     </button>
                 </li>
             </ul>
@@ -119,12 +134,18 @@
 
                         <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
                             <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Documento de Identidad</small>
-                            <span class="fw-bold text-dark fs-6">{{ request.user.perfil.tipo_documento|default:"C.C." }} {{ request.user.perfil.numero_documento|default:"1.098.765.432" }}</span>
+                            <span class="fw-bold text-dark fs-6">{{ request.user.perfil.tipo_documento|default:"C.C." }} {{ request.user.perfil.documento|default:request.user.username }}</span>
                         </div>
 
                         <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
                             <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Fecha de Nacimiento</small>
-                            <span class="fw-bold text-dark fs-6">{% if request.user.perfil.fecha_nacimiento %}{{ request.user.perfil.fecha_nacimiento|date:"d F Y" }}{% else %}15 de Mayo de 1985{% endif %}</span>
+                            <span class="fw-bold text-dark fs-6">
+                                {% if request.user.perfil.fecha_nacimiento %}
+                                    {{ request.user.perfil.fecha_nacimiento|date:"d \d\e F \d\e Y" }}
+                                {% else %}
+                                    <span class="text-muted fw-normal">Pendiente de registrar</span>
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -144,12 +165,26 @@
 
                         <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
                             <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Teléfono de Contacto</small>
-                            <span class="fw-bold text-dark fs-6">{{ request.user.perfil.telefono|default:"+57 301 555 1234" }}</span>
+                            <span class="fw-bold text-dark fs-6">
+                                {% if request.user.perfil.telefono %}
+                                    {{ request.user.perfil.telefono }}
+                                {% else %}
+                                    <span class="text-muted fw-normal">Pendiente de registrar</span>
+                                {% endif %}
+                            </span>
                         </div>
 
                         <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
                             <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Dirección de Residencia</small>
-                            <span class="fw-bold text-dark fs-6">{{ request.user.perfil.direccion|default:"Calle 45 # 10-20, Apto 301, Bogotá D.C." }}</span>
+                            <span class="fw-bold text-dark fs-6">
+                                {% if docente_obj.direccion %}
+                                    {{ docente_obj.direccion }}
+                                {% elif request.user.perfil.direccion %}
+                                    {{ request.user.perfil.direccion }}
+                                {% else %}
+                                    <span class="text-muted fw-normal">Pendiente de registrar</span>
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -169,12 +204,29 @@
                     <div class="space-y-3">
                         <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
                             <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem;">Cargo Institucional</small>
-                            <span class="fw-bold text-dark fs-6">Docente Titular de Educación Secundaria y Media</span>
+                            <span class="fw-bold text-dark fs-6">{{ request.user.perfil.rol.nombre|default:"Docente de Educación Media y Secundaria" }}</span>
                         </div>
 
                         <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
                             <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem;">Área de Especialidad</small>
-                            <span class="fw-bold text-dark fs-6">Matemáticas, Física y Educación Media Técnica</span>
+                            <span class="fw-bold text-dark fs-6">
+                                {% if docente_obj.area %}
+                                    {{ docente_obj.area }}
+                                {% else %}
+                                    <span class="text-muted fw-normal">Pendiente de registrar</span>
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
+                            <small class="text-muted d-block text-uppercase fw-semibold mb-1" style="font-size: 0.7rem;">Escalafón Docente</small>
+                            <span class="fw-bold text-dark fs-6">
+                                {% if docente_obj.escalafon %}
+                                    {{ docente_obj.escalafon }}
+                                {% else %}
+                                    <span class="text-muted fw-normal">Pendiente de registrar</span>
+                                {% endif %}
+                            </span>
                         </div>
 
                         <div class="p-3 rounded-3 mb-2" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
@@ -193,46 +245,65 @@
                     
                     <p class="text-muted small mb-3">Resumen de asignaturas y grupos vigentes registrados en la plataforma:</p>
 
-                    <div class="row g-2">
+                    <div class="row g-2 mb-3">
+                        {% for asig in asignaturas_metricas %}
                         <div class="col-sm-6">
                             <div class="p-3 rounded-3 bg-white text-dark shadow-2xs border" style="border-color: var(--color-acento) !important;">
                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                    <i class="bi bi-calculator-fill fs-5" style="color: var(--color-principal);"></i>
-                                    <strong class="small">Matemáticas</strong>
+                                    <i class="bi {{ asig.icono|default:'bi-journal-bookmark-fill' }} fs-5" style="color: var(--color-principal);"></i>
+                                    <strong class="small">{{ asig.nombre }}</strong>
                                 </div>
-                                <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" style="background: #F5F2EB; color: var(--color-secundario);">Grados 10 y 11</span>
+                                <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" style="background: #F5F2EB; color: var(--color-secundario);">
+                                    Grados: {{ asig.grados_display }}
+                                </span>
                             </div>
                         </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-muted small">No hay asignaturas asignadas.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
 
-                        <div class="col-sm-6">
-                            <div class="p-3 rounded-3 bg-white text-dark shadow-2xs border" style="border-color: var(--color-acento) !important;">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <i class="bi bi-laptop-fill fs-5" style="color: var(--color-principal);"></i>
-                                    <strong class="small">Informática</strong>
+                    <!-- ESTUDIOS Y TITULACIONES -->
+                    <div class="pt-3 border-top" style="border-color: var(--color-acento) !important;">
+                        <h6 class="fw-bold text-dark mb-2.5 d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                            <i class="bi bi-mortarboard-fill" style="color: var(--color-principal);"></i> Estudios y Titulaciones
+                        </h6>
+                        {% if estudios_docente %}
+                            <div class="space-y-2">
+                            {% for est in estudios_docente %}
+                                <div class="p-2.5 rounded-3 mb-2 bg-light border d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="small text-dark d-block">{{ est.titulo }}</strong>
+                                        <span class="text-muted" style="font-size: 0.75rem;">{{ est.institucion }}</span>
+                                    </div>
+                                    <span class="badge bg-white text-dark border">{{ est.ano }}</span>
                                 </div>
-                                <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" style="background: #F5F2EB; color: var(--color-secundario);">Grados 10 y 11</span>
+                            {% endfor %}
                             </div>
-                        </div>
+                        {% else %}
+                            <p class="text-muted small mb-0"><span class="badge bg-light text-muted border">Pendiente de registrar</span> Sin títulos adicionales registrados.</p>
+                        {% endif %}
+                    </div>
 
-                        <div class="col-sm-6">
-                            <div class="p-3 rounded-3 bg-white text-dark shadow-2xs border" style="border-color: var(--color-acento) !important;">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <i class="bi bi-rulers fs-5" style="color: var(--color-principal);"></i>
-                                    <strong class="small">Física</strong>
+                    <!-- EXPERIENCIA LABORAL -->
+                    <div class="mt-3 pt-3 border-top" style="border-color: var(--color-acento) !important;">
+                        <h6 class="fw-bold text-dark mb-2.5 d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                            <i class="bi bi-briefcase-fill" style="color: var(--color-principal);"></i> Experiencia Laboral
+                        </h6>
+                        {% if experiencias_docente %}
+                            <div class="space-y-2">
+                            {% for exp in experiencias_docente %}
+                                <div class="p-2.5 rounded-3 mb-2 bg-light border d-flex justify-content-between align-items-center">
+                                    <strong class="small text-dark">{{ exp.institucion }}</strong>
+                                    <span class="badge bg-white text-dark border">{{ exp.anos }} año(s)</span>
                                 </div>
-                                <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" style="background: #F5F2EB; color: var(--color-secundario);">Grado 10-A</span>
+                            {% endfor %}
                             </div>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <div class="p-3 rounded-3 bg-white text-dark shadow-2xs border" style="border-color: var(--color-acento) !important;">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <i class="bi bi-lightning-charge-fill fs-5" style="color: var(--color-principal);"></i>
-                                    <strong class="small">Electrónica</strong>
-                                </div>
-                                <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" style="background: #F5F2EB; color: var(--color-secundario);">Grado 11-B</span>
-                            </div>
-                        </div>
+                        {% else %}
+                            <p class="text-muted small mb-0"><span class="badge bg-light text-muted border">Pendiente de registrar</span> Sin experiencia laboral previa registrada.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -280,45 +351,277 @@
         </div>
     </div>
 
-    <!-- SECCIÓN F: PREFERENCIAS -->
-    <div class="perfil-tab-pane d-none" id="pane-preferencias">
-        <div class="card border rounded-4 bg-white p-4 shadow-2xs max-w-2xl mx-auto" style="border-color: var(--color-acento) !important; max-width: 650px;">
-            <h5 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2" style="font-size: 1.1rem;">
-                <i class="bi bi-sliders" style="color: var(--color-principal);"></i> Preferencias de Notificación y Sistema
-            </h5>
-            <p class="text-muted small mb-4">Configure las alertas y opciones visuales para su cuenta docente.</p>
+    <!-- SECCIÓN F: HOJA DE VIDA OFICIAL (FORMATO EXACTO FT-TH-02) -->
+    <div class="perfil-tab-pane d-none" id="pane-hoja-vida">
+        <div class="card border rounded-3 bg-white p-4 p-md-5 shadow-sm max-w-4xl mx-auto print-area" style="border-color: #cbd5e1 !important; max-width: 900px;">
+            
+            <!-- Botones de Acción Superiores -->
+            <div class="d-flex justify-content-end align-items-center gap-2 mb-4 d-print-none">
+                <button type="button" onclick="window.print()" class="btn btn-sm text-white rounded-pill px-3.5 py-1.5 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5" style="background: #0f2b48;">
+                    <i class="bi bi-printer-fill"></i> Imprimir / PDF
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3.5 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
+                    <i class="bi bi-pencil-square"></i> Actualizar
+                </button>
+            </div>
 
-            <div class="space-y-3">
-                <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
-                    <div>
-                        <strong class="d-block text-dark small">Alertas de entregas de tareas</strong>
-                        <small class="text-muted">Notificar cuando los estudiantes envíen actividades.</small>
+            <!-- ENCABEZADO INSTITUCIONAL -->
+            <div class="border rounded-2 mb-4 p-3 bg-white" style="border-color: #94a3b8 !important;">
+                <div class="row align-items-center g-0">
+                    <div class="col-8 d-flex align-items-center gap-3 pe-3">
+                        <div class="rounded-2 d-flex align-items-center justify-content-center text-white" style="width: 52px; height: 52px; background: #0f2b48; flex-shrink: 0;">
+                            <i class="bi bi-journal-bookmark-fill fs-3 text-warning"></i>
+                        </div>
+                        <div>
+                            <div class="fw-extrabold text-uppercase text-dark tracking-wide" style="font-size: 0.95rem; font-family: 'Arial', sans-serif;">
+                                INSTITUCIÓN EDUCATIVA DISTRITAL NUEVO HORIZONTE
+                            </div>
+                            <div class="text-secondary fw-semibold" style="font-size: 0.78rem;">
+                                EDUNOVA · Formato Único de Hoja de Vida y Expediente Pedagógico
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" checked style="cursor: pointer;">
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
-                    <div>
-                        <strong class="d-block text-dark small">Mensajes de acudientes y familias</strong>
-                        <small class="text-muted">Recibir aviso inmediato al llegar un comunicado familiar.</small>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" checked style="cursor: pointer;">
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: #FAF8F5; border: 1px solid var(--color-acento);">
-                    <div>
-                        <strong class="d-block text-dark small">Recordatorios de clase en agenda</strong>
-                        <small class="text-muted">Mostrar aviso 15 minutos antes de iniciar un bloque.</small>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" checked style="cursor: pointer;">
+                    <div class="col-4 border-start ps-3" style="border-color: #cbd5e1 !important; font-size: 0.75rem;">
+                        <div class="d-flex justify-content-between mb-0.5">
+                            <strong class="text-dark">CÓDIGO:</strong>
+                            <span class="text-secondary fw-semibold">FT-TH-02</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-0.5">
+                            <strong class="text-dark">VERSIÓN:</strong>
+                            <span class="text-secondary fw-semibold">03</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <strong class="text-dark">VIGENCIA:</strong>
+                            <span class="text-success fw-bold">Activa</span>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- TARJETA DEL TITULAR CON FOTO EN LA ESQUINA -->
+            <div class="border rounded-2 p-3.5 mb-4 bg-white" style="border-color: #cbd5e1 !important;">
+                <div class="d-flex flex-column flex-sm-row align-items-start gap-4">
+                    <!-- FOTO OFICIAL 3X4 CM EN LA ESQUINA -->
+                    <div class="flex-shrink-0 mx-auto mx-sm-0">
+                        {% if request.user.perfil.foto_perfil %}
+                            <div class="border rounded-2 shadow-2xs overflow-hidden" style="width: 110px; height: 140px; border-color: #94a3b8 !important;">
+                                <img src="{{ request.user.perfil.foto_perfil.url }}" alt="Fotografía Oficial de {{ request.user.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                        {% elif user.perfil.foto_perfil %}
+                            <div class="border rounded-2 shadow-2xs overflow-hidden" style="width: 110px; height: 140px; border-color: #94a3b8 !important;">
+                                <img src="{{ user.perfil.foto_perfil.url }}" alt="Fotografía Oficial de {{ user.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                        {% else %}
+                            <div class="border rounded-2 d-flex flex-column align-items-center justify-content-center text-center p-2" style="width: 110px; height: 140px; border: 1.5px dashed #94a3b8 !important; background: #f8fafc;">
+                                <i class="bi bi-camera text-secondary mb-1" style="font-size: 2rem;"></i>
+                                <span class="text-muted fw-bold text-uppercase" style="font-size: 0.62rem; line-height: 1.15;">
+                                    FOTO OFICIAL<br>3X4 CM
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- INFORMACIÓN PRINCIPAL AL LADO DE LA FOTO -->
+                    <div class="flex-grow-1 text-center text-sm-start">
+                        <h2 class="fw-bold text-dark mb-1 font-display" style="font-size: 1.65rem; color: #0f172a;">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </h2>
+                        <div class="fw-semibold mb-2" style="font-size: 1.05rem; color: #0284c7;">
+                            {{ docente_obj.profesion|default:"Licenciado en Educación" }}
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-start gap-2 mb-3">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-2.5 py-1" style="font-size: 0.72rem; font-weight: 700;">
+                                ● Activo
+                            </span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill px-2.5 py-1" style="font-size: 0.72rem; font-weight: 600;">
+                                Escalafón: {{ docente_obj.escalafon|default:"Grado 14 - Decreto 1278" }}
+                            </span>
+                            <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1" style="font-size: 0.72rem; font-weight: 600;">
+                                {{ docente_obj.area|default:"Humanidades y Lengua" }}
+                            </span>
+                        </div>
+                        <div class="text-secondary small d-flex flex-wrap align-items-center justify-content-center justify-content-sm-start gap-3" style="font-size: 0.82rem;">
+                            <span><strong>Identificación:</strong> CC {{ request.user.perfil.numero_documento|default:request.user.username }}</span>
+                            <span>|</span>
+                            <span><strong>Contacto:</strong> {{ request.user.perfil.telefono|default:"3005550100" }}</span>
+                            <span>|</span>
+                            <span><strong>Correo:</strong> {{ request.user.email|default:"cmendoza@nuevahorizonte.edu.co" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1. INFORMACIÓN PERSONAL Y DE IDENTIFICACIÓN -->
+            <div class="mb-3.5">
+                <div class="text-white fw-bold px-3 py-1.5 text-uppercase tracking-wide rounded-top" style="background: #0f2b48; font-size: 0.8rem; letter-spacing: 0.5px;">
+                    1. INFORMACIÓN PERSONAL Y DE IDENTIFICACIÓN
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0" style="border-color: #cbd5e1; font-size: 0.82rem;">
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold bg-light" style="width: 25%;">Nombres y Apellidos:</td>
+                                <td colspan="3" class="fw-semibold text-dark">{{ request.user.get_full_name|default:request.user.username }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold bg-light" style="width: 25%;">Documento de Identidad:</td>
+                                <td style="width: 25%;">CC: {{ request.user.perfil.numero_documento|default:request.user.username }}</td>
+                                <td class="fw-bold bg-light" style="width: 25%;">Teléfono de Contacto:</td>
+                                <td style="width: 25%;">{{ request.user.perfil.telefono|default:"3005550100" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold bg-light">Correo Electrónico Oficial:</td>
+                                <td>{{ request.user.email|default:"cmendoza@nuevahorizonte.edu.co" }}</td>
+                                <td class="fw-bold bg-light">Dirección de Residencia:</td>
+                                <td>{{ docente_obj.direccion|default:request.user.perfil.direccion|default:"No registrada" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. CARGO Y ASIGNACIÓN INSTITUCIONAL -->
+            <div class="mb-3.5">
+                <div class="text-white fw-bold px-3 py-1.5 text-uppercase tracking-wide rounded-top" style="background: #0f2b48; font-size: 0.8rem; letter-spacing: 0.5px;">
+                    2. CARGO Y ASIGNACIÓN INSTITUCIONAL
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0" style="border-color: #cbd5e1; font-size: 0.82rem;">
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold bg-light" style="width: 25%;">Profesión / Titulación Base:</td>
+                                <td style="width: 25%;">{{ docente_obj.profesion|default:"Licenciado en Educación" }}</td>
+                                <td class="fw-bold bg-light" style="width: 25%;">Área de Especialidad:</td>
+                                <td style="width: 25%;">{{ docente_obj.area|default:"Humanidades y Lengua" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold bg-light">Escalafón Docente:</td>
+                                <td>{{ docente_obj.escalafon|default:"Grado 14 - Decreto 1278" }}</td>
+                                <td class="fw-bold bg-light">Resolución de Nombramiento:</td>
+                                <td>{{ docente_obj.nro_resolucion|default:"RES-2020-0002" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold bg-light">Fecha de Vinculación:</td>
+                                <td>{{ docente_obj.fecha_ingreso|date:"d/m/Y"|default:"15/01/2020" }}</td>
+                                <td class="fw-bold bg-light">Estado Administrativo:</td>
+                                <td><span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">Activo</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. FORMACIÓN ACADÉMICA Y TITULACIONES -->
+            <div class="mb-3.5">
+                <div class="text-white fw-bold px-3 py-1.5 text-uppercase tracking-wide rounded-top" style="background: #0f2b48; font-size: 0.8rem; letter-spacing: 0.5px;">
+                    3. FORMACIÓN ACADÉMICA Y TITULACIONES
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0" style="border-color: #cbd5e1; font-size: 0.82rem;">
+                        <thead class="bg-light text-dark">
+                            <tr>
+                                <th style="width: 38%;">Título Obtenido</th>
+                                <th style="width: 44%;">Institución / Universidad</th>
+                                <th style="width: 18%;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for est in estudios_docente %}
+                            <tr>
+                                <td class="fw-bold text-dark">{{ est.titulo }}</td>
+                                <td class="text-secondary">{{ est.institucion }}</td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle">Titulado</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td class="fw-bold text-dark">{{ docente_obj.profesion|default:"Licenciado en Educación" }}</td>
+                                <td class="text-secondary">Universidad / Institución de Formación Superior Acreditada</td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle">Titulado</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. EXPERIENCIA LABORAL Y DESEMPEÑO -->
+            <div class="mb-3.5">
+                <div class="text-white fw-bold px-3 py-1.5 text-uppercase tracking-wide rounded-top" style="background: #0f2b48; font-size: 0.8rem; letter-spacing: 0.5px;">
+                    4. EXPERIENCIA LABORAL Y DESEMPEÑO
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0" style="border-color: #cbd5e1; font-size: 0.82rem;">
+                        <thead class="bg-light text-dark">
+                            <tr>
+                                <th style="width: 38%;">Cargo y Dependencia</th>
+                                <th style="width: 44%;">Asignación y Funciones</th>
+                                <th style="width: 18%;">Periodo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold text-dark">Docente de Planta<br><small class="text-muted fw-normal">Institución Educativa Distrital Nuevo Horizonte</small></td>
+                                <td class="text-secondary">Asignación académica en Media Técnica y Secundaria · Vigencia Activa</td>
+                                <td><span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">Actual</span></td>
+                            </tr>
+                            {% for exp in experiencias_docente %}
+                            <tr>
+                                <td class="fw-bold text-dark">{{ exp.cargo|default:"Docente" }}<br><small class="text-muted fw-normal">{{ exp.institucion }}</small></td>
+                                <td class="text-secondary">Desempeño docente en asignaturas de la especialidad</td>
+                                <td><span class="badge bg-light text-secondary border">{{ exp.anos|default:"1" }} año(s)</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SOPORTES DIGITALES Y CERTIFICACIONES -->
+            <div class="border rounded-1 p-2.5 px-3 mb-4 bg-white" style="border-color: #cbd5e1 !important; font-size: 0.8rem;">
+                <div class="fw-bold mb-1" style="color: #0f2b48;">SOPORTES DIGITALES Y CERTIFICACIONES:</div>
+                <div class="text-secondary">Títulos escaneados, actas de grado y antecedentes en Mis Documentos (repositorio digital del sistema EDUNOVA).</div>
+            </div>
+
+            <!-- SECCIÓN DE FIRMAS Y SELLO OFICIAL -->
+            <div class="row align-items-end mt-4 pt-3 pb-2 position-relative">
+                <!-- Firma Docente Titular -->
+                <div class="col-6 text-center">
+                    <div style="height: 42px; display: flex; align-items: flex-end; justify-content: center;">
+                        <svg width="170" height="35" viewBox="0 0 170 35">
+                            <path d="M 10 24 Q 35 6 65 22 T 115 16 T 155 12" fill="none" stroke="#1e293b" stroke-width="1.8" />
+                        </svg>
+                    </div>
+                    <div style="border-top: 1.5px solid #334155; width: 80%; margin: 4px auto 6px;"></div>
+                    <strong class="d-block text-dark" style="font-size: 0.85rem;">{{ request.user.get_full_name|default:request.user.username }}</strong>
+                    <small class="text-muted" style="font-size: 0.72rem;">Docente Titular · C.C. {{ request.user.perfil.numero_documento|default:request.user.username }}</small>
+                </div>
+
+                <!-- Firma Rectoría con Sello Rojo -->
+                <div class="col-6 text-center position-relative">
+                    <div style="height: 42px; display: flex; align-items: flex-end; justify-content: center;">
+                        <svg width="170" height="35" viewBox="0 0 170 35">
+                            <path d="M 12 26 Q 42 8 80 20 T 135 14 T 165 18" fill="none" stroke="#0f2b48" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div style="border-top: 1.5px solid #334155; width: 80%; margin: 4px auto 6px;"></div>
+                    <strong class="d-block text-dark" style="font-size: 0.85rem;">Dr. Roberto Carlos Mendoza</strong>
+                    <small class="text-muted" style="font-size: 0.72rem;">Rectoría / Gestión de Talento Humano · EDUNOVA</small>
+
+                    <!-- Sello Institucional Rojo -->
+                    <div style="position: absolute; right: 10px; top: -15px; transform: rotate(-12deg); width: 85px; height: 85px; border: 2.5px solid #b91c1c; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #b91c1c; font-weight: 800; font-size: 0.62rem; line-height: 1.1; text-align: center; pointer-events: none; opacity: 0.92; box-shadow: 0 0 0 2px #fff inset, 0 0 0 3.5px #b91c1c inset;">
+                        <span>EDUNOVA</span>
+                        <span style="font-size: 0.7rem; border-top: 1px solid #b91c1c; border-bottom: 1px solid #b91c1c; margin: 1px 0; padding: 1px 0;">REVISADO</span>
+                        <span>TALENTO<br>HUMANO</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PIE DE PÁGINA DEL FORMATO -->
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top text-muted mt-3" style="font-size: 0.72rem; border-color: #cbd5e1 !important;">
+                <span>EDUNOVA · Sistema Integrado de Talento Humano Docente (I.E.D. Nuevo Horizonte)</span>
+                <span>FT-TH-02 | Página 1 de 1</span>
+            </div>
+
         </div>
     </div>
 
@@ -330,6 +633,7 @@
         <div class="modal-content rounded-4 border-0 shadow">
             <form method="POST" action="{% url 'perfil_profesional' %}" enctype="multipart/form-data">
                 {% csrf_token %}
+                <input type="hidden" name="action" value="guardar_perfil">
                 <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #F5F2EB 0%, var(--color-acento) 100%); border-bottom: 1px solid var(--color-acento);">
                     <div>
                         <h5 class="modal-title fw-bold text-dark mb-0">Editar Perfil Docente</h5>
@@ -373,10 +677,59 @@
                             <input type="email" class="form-control" name="email" value="{{ request.user.email }}" required style="border-color: var(--color-acento);">
                         </div>
 
-                        <!-- Fecha Nacimiento -->
+                        <!-- Fecha Nacimiento y Dirección -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold small text-dark">Fecha de Nacimiento:</label>
                             <input type="date" class="form-control" name="fecha_nacimiento" value="{{ request.user.perfil.fecha_nacimiento|date:'Y-m-d' }}" style="border-color: var(--color-acento);">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-dark">Dirección de Residencia:</label>
+                            <input type="text" class="form-control" name="direccion" value="{{ docente_obj.direccion|default:request.user.perfil.direccion|default:'' }}" placeholder="Ej: Carrera 15 # 20-30" style="border-color: var(--color-acento);">
+                        </div>
+
+                        <!-- Perfil Profesional Docente -->
+                        <div class="col-12 pt-2 border-top mt-2">
+                            <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-briefcase-fill" style="color: var(--color-principal);"></i> Información Profesional</h6>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small text-dark">Profesión / Título Principal:</label>
+                            <input type="text" class="form-control" name="profesion" value="{{ docente_obj.profesion|default:'' }}" placeholder="Ej: Licenciado en Matemáticas" style="border-color: var(--color-acento);">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small text-dark">Área de Especialidad:</label>
+                            <input type="text" class="form-control" name="area" value="{{ docente_obj.area|default:'' }}" placeholder="Ej: Matemáticas e Informática" style="border-color: var(--color-acento);">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small text-dark">Escalafón Docente:</label>
+                            <input type="text" class="form-control" name="escalafon" value="{{ docente_obj.escalafon|default:'' }}" placeholder="Ej: Grado 2A - 1278" style="border-color: var(--color-acento);">
+                        </div>
+
+                        <!-- Registrar Nuevo Estudio -->
+                        <div class="col-12 pt-2 border-top mt-2">
+                            <h6 class="fw-bold text-dark small mb-1"><i class="bi bi-mortarboard-fill" style="color: var(--color-principal);"></i> Agregar Nuevo Estudio (Opcional)</h6>
+                            <small class="text-muted d-block mb-2">Permite agregar una titulación a su hoja de vida oficial.</small>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control form-control-sm" name="nuevo_estudio_titulo" placeholder="Título (ej: Magíster en Educación)" style="border-color: var(--color-acento);">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control form-control-sm" name="nuevo_estudio_institucion" placeholder="Institución Universitaria" style="border-color: var(--color-acento);">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" class="form-control form-control-sm" name="nuevo_estudio_ano" placeholder="Año (ej: 2024)" style="border-color: var(--color-acento);">
+                        </div>
+
+                        <!-- Registrar Nueva Experiencia -->
+                        <div class="col-12 pt-2 border-top mt-2">
+                            <h6 class="fw-bold text-dark small mb-1"><i class="bi bi-building" style="color: var(--color-principal);"></i> Agregar Experiencia Laboral (Opcional)</h6>
+                            <small class="text-muted d-block mb-2">Permite registrar experiencia previa como docente.</small>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" name="nueva_experiencia_institucion" placeholder="Institución / Colegio / Empresa" style="border-color: var(--color-acento);">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" class="form-control form-control-sm" name="nueva_experiencia_anos" placeholder="Años de experiencia (ej: 5)" style="border-color: var(--color-acento);">
                         </div>
                     </div>
                 </div>

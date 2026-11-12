@@ -42,7 +42,7 @@ def notificaciones_context(request):
     if user_notif_data is None:
         notificaciones_qs = Notificacion.objects.filter(usuario=user)
         no_leidas = notificaciones_qs.filter(leida=False).count()
-        recientes = list(notificaciones_qs.order_by('-fecha_creacion')[:5])
+        recientes = list(notificaciones_qs.order_by('-fecha_creacion')[:25])
 
         # Si es administrador o coordinador, revisar alertas operativas
         alertas_admin_count = 0

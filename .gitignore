@@ -23,5 +23,6 @@ staticfiles/
 # Respaldos SQL pesados y temporales
 *.sql
 backup_pre_limpieza*.json
+backup_*.json
 scratch/
 SINETEC/

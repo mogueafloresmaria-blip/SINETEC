@@ -17,7 +17,7 @@
     }
 
     .estudiante-hero-banner {
-        background: linear-gradient(135deg, #5a3825 0%, #3d2417 60%, #2a180e 100%);
+        background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%);
         color: #ffffff;
         border-radius: 24px;
         padding: clamp(24px, 3.8vw, 36px);
@@ -124,7 +124,7 @@
         <!-- BANNER DE BIENVENIDA -->
         <div class="estudiante-hero-banner mb-4">
             <div class="row align-items-center position-relative" style="z-index: 2;">
-                <div class="col-lg-8 mb-3 mb-lg-0">
+                <div class="col-lg-7 mb-3 mb-lg-0">
                     <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                         <span class="badge rounded-pill px-3 py-1.5 small fw-bold" style="background: rgba(255,255,255,0.18); color: #ffffff; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.25);">
                             <i class="bi bi-mortarboard-fill me-1.5" style="color: #f59e0b;"></i> Portal Institucional del Estudiante
@@ -1252,9 +1252,14 @@
                     <i class="bi bi-chat-dots-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
                     <h6 class="fw-bold text-dark mb-0">Bandeja de Comunicaciones Institucionales</h6>
                 </div>
-                <button type="button" class="btn text-white rounded-pill px-3.5 py-1.5 fw-bold shadow-2xs" data-bs-toggle="modal" data-bs-target="#modalMensajeDocente" style="background: var(--stu-coffee-primary); border: none; font-size: 0.84rem;">
-                    <i class="bi bi-send-fill me-1"></i> Escribir a un Docente
-                </button>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn text-white rounded-pill px-3 py-1.5 fw-bold shadow-2xs" data-bs-toggle="modal" data-bs-target="#modalMensajeSecretaria" style="background: var(--stu-coffee-dark, #5A3825); border: none; font-size: 0.82rem;">
+                        <i class="bi bi-envelope-paper-fill me-1"></i> Escribir a Secretaría
+                    </button>
+                    <button type="button" class="btn text-white rounded-pill px-3.5 py-1.5 fw-bold shadow-2xs" data-bs-toggle="modal" data-bs-target="#modalMensajeDocente" style="background: var(--stu-coffee-primary); border: none; font-size: 0.82rem;">
+                        <i class="bi bi-send-fill me-1"></i> Escribir a un Docente
+                    </button>
+                </div>
             </div>
 
             <!-- Conversaciones / Mensajes -->
@@ -1509,6 +1514,49 @@
     </div>
 </div>
 
+<!-- MODAL ENVIAR MENSAJE O SOLICITUD A SECRETARÍA -->
+<div class="modal fade" id="modalMensajeSecretaria" tabindex="-1" aria-labelledby="modalMensajeSecretariaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <form method="post" action="{% url 'estudiante_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="enviar_mensaje_secretaria">
+                <div class="modal-header border-bottom py-3 text-white" style="background: linear-gradient(135deg, var(--color-secundario, #5A3825) 0%, var(--color-principal, #8B5E3C) 100%);">
+                    <h6 class="modal-title fw-bold text-white d-flex align-items-center gap-2" id="modalMensajeSecretariaLabel">
+                        <i class="bi bi-envelope-paper-fill"></i> Mensaje a Secretaría Escolar
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Tipo de Comunicación / Trámite</label>
+                        <select class="form-select rounded-pill px-3 py-2" name="tipo" style="border-color: var(--stu-coffee-border);" required>
+                            <option value="Consulta General">Consulta General</option>
+                            <option value="Constancia de Estudio">Solicitud de Constancia de Estudio</option>
+                            <option value="Certificado de Notas">Solicitud de Certificado de Calificaciones</option>
+                            <option value="Actualización de Datos">Actualización de Datos Personales / Documentos</option>
+                            <option value="Excusa Médica">Radicación de Excusa Médica o Justificación</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Mensaje o Detalle de la Solicitud</label>
+                        <textarea class="form-control rounded-4 px-3 py-2" name="mensaje" rows="4" style="border-color: var(--stu-coffee-border);" placeholder="Describe con claridad tu consulta, trámite o solicitud a la Secretaría de EduNova..." required></textarea>
+                    </div>
+                    <div class="form-text small text-muted">
+                        <i class="bi bi-info-circle me-1 text-primary"></i> Tu comunicación quedará registrada formalmente y Secretaría dará respuesta a través del panel de notificaciones y solicitudes.
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-2.5 bg-light">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-sm text-white rounded-pill px-4 fw-bold" style="background: var(--color-principal, #8B5E3C);">
+                        <i class="bi bi-send-check me-1.5"></i> Radicar a Secretaría
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function previsualizarFotoEstudiante(input) {
         if (input.files && input.files[0]) {
@@ -1548,12 +1596,18 @@
 
     function cambiarPeriodoCalificaciones(num) {
         if (!num) num = '1';
+
+        // Asegurar que el subpanel de calificaciones esté activo y visible
+        activarSubpanel('calificaciones');
+
         document.querySelectorAll('.periodo-calif-pane').forEach(function(pane) {
             pane.classList.add('d-none');
         });
         const target = document.getElementById('contenedor-periodo-' + num);
         if (target) {
             target.classList.remove('d-none');
+            // Scroll suave hacia la tabla de calificaciones del periodo
+            target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         document.querySelectorAll('.card-periodo-tab').forEach(function(card) {

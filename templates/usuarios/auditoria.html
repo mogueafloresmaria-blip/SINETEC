@@ -152,6 +152,7 @@
                             </td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
+                                    {% if l.usuario %}
                                     <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-2xs flex-shrink-0" style="width: 32px; height: 32px; background: #059669; font-size: 0.78rem;">
                                         {{ l.usuario.first_name|default:l.usuario.username|slice:":1"|upper }}
                                     </div>
@@ -159,6 +160,15 @@
                                         <strong class="text-dark d-block leading-tight">{{ l.usuario.get_full_name|default:l.usuario.username }}</strong>
                                         <small class="text-muted">{{ l.usuario.perfil.rol.nombre|default:"Usuario" }}</small>
                                     </div>
+                                    {% else %}
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-2xs flex-shrink-0" style="width: 32px; height: 32px; background: #64748B; font-size: 0.78rem;">
+                                        S
+                                    </div>
+                                    <div>
+                                        <strong class="text-dark d-block leading-tight">Sistema / Anónimo</strong>
+                                        <small class="text-muted">Proceso Automático</small>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </td>
                             <td>

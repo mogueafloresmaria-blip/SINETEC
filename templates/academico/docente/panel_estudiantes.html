@@ -28,7 +28,7 @@
 
         <!-- HERO FICHA INDIVIDUAL DEL ESTUDIANTE -->
         <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-             style="background: linear-gradient(135deg, #5a3825 0%, #3d2417 70%, #29170e 100%); color: #ffffff; border: 1px solid var(--color-secundario);">
+             style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); color: #ffffff; border: 1px solid var(--color-secundario);">
             <div class="row align-items-center position-relative z-1">
                 <div class="col-lg-8 d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-4">
                     <!-- Avatar con Iniciales Prominentes -->
@@ -450,7 +450,7 @@
 
     <!-- HERO DE BIENVENIDA MÓDULO MIS ESTUDIANTES -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #5a3825 0%, #3d2417 75%, #23140b 100%); color: #ffffff; border: 1px solid var(--color-secundario);">
+         style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); color: #ffffff; border: 1px solid var(--color-secundario);">
         <div class="row align-items-center position-relative z-1">
             <div class="col-lg-8 d-flex align-items-center gap-3.5">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-lg flex-shrink-0"
@@ -542,7 +542,7 @@
 
             <!-- Filtro Grupo -->
             <div class="col-6 col-md-2">
-                <select id="filtro-grupo" onchange="aplicarFiltrosEstudiantes();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.85rem;">
+                <select id="filtro-grupo" onchange="onCambiarFiltroGrupo();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.85rem;">
                     <option value="todos">Todos los Grupos</option>
                     <option value="10°A">Grupo 10°A</option>
                     <option value="11°A">Grupo 11°A</option>
@@ -562,8 +562,13 @@
             <div class="col-12 col-md-3 text-md-end">
                 <select id="filtro-materia" onchange="aplicarFiltrosEstudiantes();" class="form-select form-select-sm rounded-pill px-3 py-2 d-inline-block w-auto" style="border-color: var(--color-acento); font-size: 0.85rem;">
                     <option value="todas">Todas las Asignaturas</option>
+                    {% for asig in asignaturas_docente %}
+                    <option value="{{ asig.nombre }}">{{ asig.nombre }}</option>
+                    {% empty %}
                     <option value="Matemáticas">Matemáticas</option>
                     <option value="Informática">Informática</option>
+                    <option value="Lengua Castellana">Lengua Castellana</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
@@ -908,13 +913,25 @@
 <script>
 let gradoActivo = '{{ grado_activo|default:"10" }}';
 
-function cambiarPestanaGrado(grado) {
+function cambiarPestanaGrado(grado, mantenerFiltroGrupo = false) {
     gradoActivo = grado;
     const btn10 = document.getElementById('tab-btn-grado10');
     const btn11 = document.getElementById('tab-btn-grado11');
     const btnTodos = document.getElementById('tab-btn-todos');
     const sec10 = document.getElementById('seccion-grado-10');
     const sec11 = document.getElementById('seccion-grado-11');
+    const selectGrupo = document.getElementById('filtro-grupo');
+
+    if (!mantenerFiltroGrupo && selectGrupo) {
+        const val = selectGrupo.value;
+        if (grado === '10' && val !== 'todos' && !val.startsWith('10')) {
+            selectGrupo.value = 'todos';
+        } else if (grado === '11' && val !== 'todos' && !val.startsWith('11')) {
+            selectGrupo.value = 'todos';
+        } else if (grado === 'todos') {
+            selectGrupo.value = 'todos';
+        }
+    }
 
     if (btn10) { btn10.classList.remove('active'); btn10.style.background = 'transparent'; btn10.style.color = '#64748b'; }
     if (btn11) { btn11.classList.remove('active'); btn11.style.background = 'transparent'; btn11.style.color = '#64748b'; }
@@ -937,20 +954,33 @@ function cambiarPestanaGrado(grado) {
     aplicarFiltrosEstudiantes();
 }
 
+function onCambiarFiltroGrupo() {
+    const selectGrupo = document.getElementById('filtro-grupo');
+    const grupoFiltro = selectGrupo ? selectGrupo.value : 'todos';
+
+    if (grupoFiltro.startsWith('10')) {
+        cambiarPestanaGrado('10', true);
+    } else if (grupoFiltro.startsWith('11')) {
+        cambiarPestanaGrado('11', true);
+    } else {
+        aplicarFiltrosEstudiantes();
+    }
+}
+
 function aplicarFiltrosEstudiantes() {
     const inputBuscar = document.getElementById('buscar-estudiante-input');
     const term = inputBuscar ? inputBuscar.value.toLowerCase().trim() : '';
-    const grupoFiltro = document.getElementById('filtro-grupo') ? document.getElementById('filtro-grupo').value : 'todos';
-    const estadoFiltro = document.getElementById('filtro-estado') ? document.getElementById('filtro-estado').value : 'todos';
-    const materiaFiltro = document.getElementById('filtro-materia') ? document.getElementById('filtro-materia').value : 'todas';
+    const grupoFiltro = document.getElementById('filtro-grupo') ? document.getElementById('filtro-grupo').value.trim().toLowerCase() : 'todos';
+    const estadoFiltro = document.getElementById('filtro-estado') ? document.getElementById('filtro-estado').value.trim().toLowerCase() : 'todos';
+    const materiaFiltro = document.getElementById('filtro-materia') ? document.getElementById('filtro-materia').value.trim().toLowerCase() : 'todas';
 
     document.querySelectorAll('.fila-estudiante-item').forEach(card => {
         const nombre = (card.getAttribute('data-nombre') || '').toLowerCase();
         const doc = (card.getAttribute('data-doc') || '').toLowerCase();
-        const grado = card.getAttribute('data-grado') || '';
-        const grupo = card.getAttribute('data-grupo') || '';
-        const estado = card.getAttribute('data-estado') || '';
-        const materia = card.getAttribute('data-materia') || '';
+        const grado = (card.getAttribute('data-grado') || '').trim();
+        const grupo = (card.getAttribute('data-grupo') || '').trim().toLowerCase();
+        const estado = (card.getAttribute('data-estado') || '').trim().toLowerCase();
+        const materia = (card.getAttribute('data-materia') || '').toLowerCase();
 
         let matchGradoTab = (gradoActivo === 'todos') || (grado === gradoActivo);
         const matchTerm = !term || nombre.includes(term) || doc.includes(term);

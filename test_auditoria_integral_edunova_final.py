@@ -107,8 +107,13 @@ def ejecutar_auditoria_completa():
     rol_fam, _ = Rol.objects.get_or_create(nombre='Familia/Acudiente')
     perfil_fam, _ = PerfilUsuario.objects.get_or_create(usuario=familia_user)
     perfil_fam.rol = rol_fam
-    perfil_fam.numero_documento = '1098765432'
-    perfil_fam.save()
+    if not perfil_fam.numero_documento:
+        perfil_fam.numero_documento = '1098765432_test'
+    try:
+        perfil_fam.save()
+    except Exception:
+        perfil_fam.numero_documento = f'fam_{familia_user.id}'
+        perfil_fam.save()
 
     # 6. Estudiante
     estudiante_user, _ = User.objects.get_or_create(username='estudiante_test', defaults={'first_name': 'Valeria', 'last_name': 'Gómez'})
