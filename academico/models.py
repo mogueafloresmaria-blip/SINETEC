@@ -12,17 +12,105 @@ from instituciones.models import InstitucionEducativa
 
 NIVELES_ESCOLARES = [
     ('Inicial', 'Inicial'),
-    ('Primaria', 'Primaria'),
-    ('Secundaria', 'Secundaria'),
+    ('Educación Primaria', 'Educación Primaria'),
+    ('Básica Primaria', 'Educación Primaria'),
+    ('Educación Secundaria', 'Educación Secundaria'),
+    ('Básica Secundaria', 'Educación Secundaria'),
     ('Educación Media', 'Educación Media'),
+    ('Primaria', 'Educación Primaria'),
+    ('Secundaria', 'Educación Secundaria'),
 ]
 
 GRADOS_POR_NIVEL = {
     'Inicial': ['3 años', '4 años', '5 años'],
-    'Primaria': ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado'],
-    'Secundaria': ['6to Grado', '7mo Grado', '8vo Grado', '9no Grado', '10mo Grado', '11mo Grado'],
+    'Educación Primaria': ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado'],
+    'Básica Primaria': ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado'],
+    'Educación Secundaria': ['6to Grado', '7mo Grado', '8vo Grado', '9no Grado'],
+    'Básica Secundaria': ['6to Grado', '7mo Grado', '8vo Grado', '9no Grado'],
     'Educación Media': ['10mo Grado', '11mo Grado', '10', '11'],
+    'Primaria': ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado'],
+    'Secundaria': ['6to Grado', '7mo Grado', '8vo Grado', '9no Grado'],
 }
+
+
+def normalizar_grado(grado):
+    """
+    Normaliza el grado escolar para unificar formatos como '10', '10°', '10mo', 'Grado 10'
+    al formato canónico '10°'.
+    """
+    if not grado:
+        return ''
+    g_str = str(grado).strip()
+    digits = ''.join(c for c in g_str if c.isdigit())
+    if digits:
+        return f"{digits}°"
+    return g_str
+
+
+def extraer_numero_grado(grado):
+    """Extrae el número de grado como string ('10', '11', '6')."""
+    if not grado:
+        return ''
+    return ''.join(c for c in str(grado) if c.isdigit())
+
+
+def determinar_nivel_educativo(grado):
+    """
+    Clasificación pedagógica oficial de EduNova según el grado escolar:
+    - Grados 1° a 5°: 'Educación Primaria' (o 'Básica Primaria')
+    - Grados 6° a 9°: 'Educación Secundaria' (o 'Básica Secundaria')
+    - Grados 10° y 11°: 'Educación Media'
+    """
+    if not grado:
+        return ''
+    g_str = str(grado).strip()
+    digits = ''.join(c for c in g_str if c.isdigit())
+    if digits:
+        g_num = int(digits)
+        if 1 <= g_num <= 5:
+            return 'Educación Primaria'
+        elif 6 <= g_num <= 9:
+            return 'Educación Secundaria'
+        elif g_num in [10, 11]:
+            return 'Educación Media'
+        else:
+            return 'Educación Media' if g_num > 11 else 'Educación Secundaria'
+
+    g_lower = g_str.lower()
+    if any(k in g_lower for k in ['10', '11', 'media', 'decimo', 'décimo', 'once', 'undecimo', 'undécimo']):
+        return 'Educación Media'
+    if any(k in g_lower for k in ['primaria', 'primero', 'segundo', 'tercero', 'cuarto', 'quinto']):
+        return 'Educación Primaria'
+    if any(k in g_lower for k in ['secundaria', 'sexto', 'septimo', 'séptimo', 'octavo', 'noveno']):
+        return 'Educación Secundaria'
+    return 'Educación Secundaria'
+
+
+def obtener_cargas_activas_grupo(grado, seccion='A', anio_lectivo=2026):
+    """
+    Obtiene las cargas académicas oficiales y activas de un grado y sección,
+    eliminando filas duplicadas por asignatura y preservando las cargas históricas en segundo plano.
+    Prioriza las cargas oficiales más recientes (mayor ID / formato canónico).
+    """
+    from django.db.models import Q
+    g_digits = extraer_numero_grado(grado)
+    sec_clean = str(seccion or '').strip().upper()
+    qs = CargaAcademica.objects.filter(
+        Q(grado__icontains=g_digits) | Q(grado=g_digits),
+        Q(seccion__iexact=sec_clean) | Q(seccion='') | Q(seccion__isnull=True),
+        anio_lectivo=anio_lectivo
+    ).select_related('profesor', 'profesor__perfil', 'programa').order_by('programa__denominacion', '-id')
+
+    cargas_activas = []
+    cargas_historicas = []
+    vistos_prog = set()
+    for c in qs:
+        if c.programa_id not in vistos_prog:
+            vistos_prog.add(c.programa_id)
+            cargas_activas.append(c)
+        else:
+            cargas_historicas.append(c)
+    return cargas_activas, cargas_historicas
 
 SECCIONES_ESCOLARES = ['A', 'B', 'C']
 
@@ -442,6 +530,20 @@ class CargaAcademica(models.Model):
         verbose_name_plural = "Cargas Académicas"
         ordering = ['nivel', 'grado', 'programa__denominacion']
         unique_together = ('profesor', 'programa', 'nivel', 'grado', 'seccion', 'anio_lectivo')
+
+    @property
+    def nivel_educativo(self):
+        """Clasificación pedagógica oficial según el grado escolar asignado."""
+        return determinar_nivel_educativo(self.grado) or self.nivel or ''
+
+    def save(self, *args, **kwargs):
+        if self.grado:
+            self.nivel = determinar_nivel_educativo(self.grado)
+            if not self.pk:
+                g_norm = normalizar_grado(self.grado)
+                if g_norm:
+                    self.grado = g_norm
+        super().save(*args, **kwargs)
 
     def __str__(self):
         nombre = self.profesor.get_full_name() or self.profesor.username

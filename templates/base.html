@@ -486,8 +486,8 @@
 </head>
 <body class="{% if 'Docente' in request.user.perfil.rol.nombre or 'Instructor' in request.user.perfil.rol.nombre or 'Profesor' in request.user.perfil.rol.nombre or '/instructor/' in request.path or '/perfil-profesional/' in request.path or '/mis-asignaturas/' in request.path or '/mis-estudiantes/' in request.path or '/actividades-y-tareas/' in request.path or '/asistencia/' in request.path %}role-docente bg-edunova-shell{% endif %}">
 
-    <div class="sinetec-shell {% if request.resolver_match.url_name == 'home' or request.path == '/' %}is-home-landing{% endif %}" id="sinetecShell">
-        {% if request.resolver_match.url_name != 'home' and request.path != '/' %}
+    <div class="sinetec-shell {% if request.resolver_match.url_name == 'home' or request.path == '/' or modo_consulta_inicial %}is-home-landing is-familia-consulta{% endif %}" id="sinetecShell">
+        {% if request.resolver_match.url_name != 'home' and request.path != '/' and not modo_consulta_inicial %}
         <!-- SIDEBAR INSTITUCIONAL ESCOLAR -->
         <aside class="sinetec-sidebar notranslate {% if 'Docente' in request.user.perfil.rol.nombre and not request.user.is_superuser and not 'Admin' in request.user.perfil.rol.nombre or 'Instructor' in request.user.perfil.rol.nombre and not request.user.is_superuser and not 'Admin' in request.user.perfil.rol.nombre or 'Profesor' in request.user.perfil.rol.nombre and not request.user.is_superuser and not 'Admin' in request.user.perfil.rol.nombre %}is-docente-sidebar{% endif %}" id="sinetecSidebar" translate="no">
             <!-- Barra superior móvil con botón de cierre -->
@@ -520,10 +520,10 @@
             <nav class="sinetec-nav">
                 {% if 'Familia' in rol or 'Acudiente' in rol or 'Padre' in rol or 'Madre' in rol or '/familia/' in request.path or 'familia_' in request.resolver_match.url_name %}
                     <!-- 3. FAMILIA / ACUDIENTE: MÓDULOS OFICIALES Y NAVEGACIÓN -->
-                    {% if request.session.estudiante_fam_doc or estudiante_sel or 'Familia' in rol or 'Acudiente' in rol %}
-                        <a class="nav-link {% if request.resolver_match.url_name == 'familia_portal' or request.resolver_match.url_name == 'familia_portal_alt' %}active{% endif %}" href="{% url 'familia_portal' %}">
-                            <i class="bi bi-house-heart-fill"></i> Inicio
-                        </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'familia_portal' or request.resolver_match.url_name == 'familia_portal_alt' %}active{% endif %}" href="{% url 'familia_portal' %}">
+                        <i class="bi bi-house-heart-fill"></i> Inicio
+                    </a>
+                    {% if request.session.estudiante_fam_doc or estudiante_sel %}
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_matricula' %}active{% endif %}" href="{% url 'familia_matricula' %}">
                             <i class="bi bi-person-vcard-fill"></i> Ficha de matrícula
                         </a>
@@ -542,10 +542,6 @@
                         </a>
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_pdf_oficial' %}active{% endif %}" href="{% url 'familia_pdf_oficial' %}" target="_blank">
                             <i class="bi bi-file-earmark-pdf-fill"></i> PDF oficiales
-                        </a>
-                    {% else %}
-                        <a class="nav-link active" href="{% url 'familia_portal' %}">
-                            <i class="bi bi-house-heart-fill"></i> Inicio
                         </a>
                     {% endif %}
 
@@ -632,9 +628,7 @@
                     <a class="nav-link {% if subpanel_activo == 'comunicaciones' %}active{% endif %}" id="student-nav-comunicaciones" data-subpanel="comunicaciones" href="{% url 'estudiante_dashboard' %}?subpanel=comunicaciones">
                         <i class="bi bi-chat-dots-fill"></i> Comunicaciones
                     </a>
-                    <a class="nav-link {% if subpanel_activo == 'notificaciones' %}active{% endif %}" id="student-nav-notificaciones" data-subpanel="notificaciones" href="{% url 'estudiante_dashboard' %}?subpanel=notificaciones">
-                        <i class="bi bi-bell-fill"></i> Notificaciones
-                    </a>
+
                     <a class="nav-link {% if subpanel_activo == 'documentos' %}active{% endif %}" id="student-nav-documentos" data-subpanel="documentos" href="{% url 'estudiante_dashboard' %}?subpanel=documentos">
                         <i class="bi bi-file-earmark-text-fill"></i> Documentos
                     </a>
@@ -674,10 +668,10 @@
                             <span class="teacher-label-text">Temas y Actividades</span>
                         </a>
 
-                        <!-- 5b. Revisar entregas y retroalimentación -->
-                        <a href="{% url 'mis_actividades_docente' %}" class="teacher-nav-item {% if request.resolver_match.url_name == 'mis_actividades_docente' or 'revisar_entregas' in request.resolver_match.url_name %}is-active{% endif %}" id="nav-item-revisar-entregas">
+                        <!-- 5b. Mis Actividades / Revisar entregas -->
+                        <a href="{% url 'mis_actividades_docente' %}" class="teacher-nav-item {% if request.resolver_match.url_name == 'mis_actividades_docente' or 'revisar_entregas' in request.resolver_match.url_name or subpanel_activo == 'mis_actividades' %}is-active{% endif %}" id="nav-item-revisar-entregas">
                             <i class="bi bi-clipboard-check-fill teacher-icon-nav"></i>
-                            <span class="teacher-label-text">Revisar entregas</span>
+                            <span class="teacher-label-text">Mis Actividades</span>
                         </a>
 
                         <!-- 6. Calificaciones -->
@@ -716,115 +710,74 @@
                             <span class="teacher-label-text">Documentos</span>
                         </a>
 
-                        <!-- 12. Notificaciones -->
-                        <a href="{% url 'notificaciones_docente' %}" class="teacher-nav-item {% if subpanel_activo == 'notificaciones' %}is-active{% endif %}" id="nav-item-notificaciones">
-                            <i class="bi bi-bell-fill teacher-icon-nav"></i>
-                            <span class="teacher-label-text">Notificaciones</span>
-                            <span id="badge-sidebar-notificaciones" class="badge rounded-pill ms-auto" style="background: #EF4444; font-size: 0.65rem; {% if total_notificaciones_sin_leer == 0 and num_notificaciones_no_leidas == 0 %}display:none;{% endif %}">{{ total_notificaciones_sin_leer|default:num_notificaciones_no_leidas }}</span>
-                        </a>
+
 
                         <!-- 13. Papelera -->
                         <a href="{% url 'papelera_docente' %}" class="teacher-nav-item {% if subpanel_activo == 'papelera' %}is-active{% endif %}" id="nav-item-papelera">
                             <i class="bi bi-trash3-fill teacher-icon-nav"></i>
                             <span class="teacher-label-text">Papelera</span>
                         </a>
-
-                        <!-- 14. Cerrar sesión oficial Docente -->
-                        <div class="mt-3 pt-2 border-top" style="border-color: var(--color-acento) !important;">
-                            <form method="post" action="{% url 'logout' %}" class="m-0" id="form-logout-docente-menu">
-                                {% csrf_token %}
-                                <button type="submit" class="teacher-nav-item w-100 text-start border-0 bg-transparent text-danger p-2" id="nav-item-logout-docente" style="cursor: pointer;" title="Cerrar sesión de forma segura">
-                                    <i class="bi bi-box-arrow-left text-danger teacher-icon-nav" style="font-size: 1.15rem;"></i>
-                                    <span class="teacher-label-text fw-bold text-danger">🚪 Cerrar sesión</span>
-                                </button>
-                            </form>
-                        </div>
                     </div>
 
                 {% elif 'Secretar' in rol %}
                     <!-- 5. SECRETARÍA -->
                     <div class="sinetec-nav-label">Secretaría</div>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'secretaria_dashboard' %}active{% endif %}" href="{% url 'secretaria_dashboard' %}">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'secretaria_dashboard' %}active{% endif %}" href="{% url 'secretaria_dashboard' %}" id="nav-sec-dashboard">
                         <i class="bi bi-briefcase-fill"></i> Panel Secretaría
                     </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'mi_perfil' %}active{% endif %}" href="{% url 'mi_perfil' %}">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'mi_perfil' %}active{% endif %}" href="{% url 'mi_perfil' %}" id="nav-sec-perfil">
                         <i class="bi bi-person-circle"></i> Mi Perfil
                     </a>
-                    <a class="nav-link {% if 'matricular' in request.resolver_match.url_name or 'matriculas_lista' in request.resolver_match.url_name or 'registrar_aprendiz' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}">
-                        <i class="bi bi-person-plus-fill"></i> Matrículas y Cupos
-                    </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'estudiantes_lista' %}active{% endif %}" href="{% url 'estudiantes_lista' %}">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'estudiantes_lista' or 'estudiante_' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'estudiantes_lista' %}" id="nav-sec-estudiantes">
                         <i class="bi bi-people-fill"></i> Estudiantes
                     </a>
-                    <a class="nav-link {% if 'familia' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familias_lista' %}">
+                    <a class="nav-link {% if 'matricular' in request.resolver_match.url_name or 'matriculas_lista' in request.resolver_match.url_name or 'registrar_aprendiz' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}" id="nav-sec-matriculas">
+                        <i class="bi bi-person-plus-fill"></i> Matrículas y Cupos
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'programas_lista' or request.resolver_match.url_name == 'gestion_academica' %}active{% endif %}" href="{% url 'programas_lista' %}" id="nav-sec-carga">
+                        <i class="bi bi-mortarboard-fill"></i> Asignación Académica
+                    </a>
+                    <a class="nav-link {% if 'familia' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familias_lista' %}" id="nav-sec-familias">
                         <i class="bi bi-person-vcard-fill"></i> Familias y Acudientes
                     </a>
-                    <a class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'instructores_lista' %}">
+                    <a class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'instructores_lista' %}" id="nav-sec-docentes">
                         <i class="bi bi-person-badge-fill"></i> Directorio Docente
                     </a>
                     <div class="sinetec-nav-label">Administración</div>
-
-                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
-                        <i class="bi bi-megaphone-fill"></i> Comunicados
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}" id="nav-sec-comunicados">
+                        <i class="bi bi-chat-dots-fill"></i> Mensajería y Comunicados
                     </a>
-                    <a class="nav-link {% if 'reporte' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'centro_reportes' %}">
+                    <a class="nav-link {% if 'reporte' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'centro_reportes' %}" id="nav-sec-reportes">
                         <i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes
-                    </a>
-                    <a class="nav-link {% if 'papelera' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'papelera_reciclaje' %}">
-                        <i class="bi bi-trash3-fill"></i> Papelera
-                    </a>
-                    <a class="nav-link {% if 'auditoria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'auditoria_lista' %}">
-                        <i class="bi bi-shield-check"></i> Auditoría
                     </a>
 
                 {% elif 'Rector' in rol %}
-                    <!-- 6. RECTORÍA -->
+                    <!-- 6. RECTORÍA OFICIAL EDUNOVA (8 MÓDULOS RECTORALES) -->
                     <div class="sinetec-nav-label">Rectoría</div>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'rectoria_dashboard' %}active{% endif %}" href="{% url 'rectoria_dashboard' %}">
-                        <i class="bi bi-building-fill-check"></i> Resumen Institucional
+                    <a class="nav-link {% if request.resolver_match.url_name == 'rectoria_dashboard' %}active{% endif %}" href="{% url 'rectoria_dashboard' %}" id="nav-rec-inicio">
+                        <i class="bi bi-house-door-fill"></i> Inicio
                     </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'mi_perfil' %}active{% endif %}" href="{% url 'mi_perfil' %}">
-                        <i class="bi bi-person-circle"></i> Mi Perfil
+                    <a class="nav-link {% if request.resolver_match.url_name == 'gestion_usuarios' %}active{% endif %}" href="{% url 'gestion_usuarios' %}" id="nav-rec-usuarios">
+                        <i class="bi bi-people-fill"></i> Usuarios
                     </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'estudiantes_lista' %}active{% endif %}" href="{% url 'estudiantes_lista' %}">
-                        <i class="bi bi-people-fill"></i> Estudiantes
+                    <a class="nav-link {% if request.resolver_match.url_name == 'gestion_academica' or request.resolver_match.url_name == 'programas_lista' or request.resolver_match.url_name == 'cursos_lista' or request.resolver_match.url_name == 'mockup_grados' %}active{% endif %}" href="{% url 'gestion_academica' %}" id="nav-rec-gestion-academica">
+                        <i class="bi bi-mortarboard-fill"></i> Gestión académica
                     </a>
-                    <a class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'instructores_lista' %}">
-                        <i class="bi bi-person-badge-fill"></i> Cuerpo Docente
+                    <a class="nav-link {% if 'horario' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'horarios_tablero' %}" id="nav-rec-horarios">
+                        <i class="bi bi-calendar3-week-fill"></i> Horarios
                     </a>
-                    <a class="nav-link {% if 'matriculas_lista' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}">
-                        <i class="bi bi-person-plus-fill"></i> Matrículas
+                    <a class="nav-link {% if 'matricula' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}" id="nav-rec-matriculas">
+                        <i class="bi bi-person-check-fill"></i> Matrículas y seguimiento
                     </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'mockup_grados' %}active{% endif %}" href="{% url 'mockup_grados' %}">
-                        <i class="bi bi-layers-fill"></i> Grados
-                    </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'mockup_materias' %}active{% endif %}" href="{% url 'mockup_materias' %}">
-                        <i class="bi bi-book-half"></i> Materias
-                    </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'mockup_temas' %}active{% endif %}" href="{% url 'mockup_temas' %}">
-                        <i class="bi bi-journal-bookmark-fill"></i> Temas
-                    </a>
-                    <a class="nav-link {% if 'calificacion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'calificaciones' %}">
-                        <i class="bi bi-clipboard2-data-fill"></i> Rendimiento
-                    </a>
-                    <a class="nav-link {% if 'alerta' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'alertas_tempranas' %}">
-                        <i class="bi bi-exclamation-triangle-fill"></i> Alertas
+                    <a class="nav-link {% if 'calificacion' in request.resolver_match.url_name or request.resolver_match.url_name == 'centro_reportes' %}active{% endif %}" href="{% url 'calificaciones' %}" id="nav-rec-informes">
+                        <i class="bi bi-clipboard2-data-fill"></i> Informes académicos
                     </a>
                     <div class="sinetec-nav-label">Institucional</div>
-                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
-                        <i class="bi bi-megaphone-fill"></i> Circulares
+                    <a class="nav-link {% if request.resolver_match.url_name == 'comunicaciones' %}active{% endif %}" href="{% url 'comunicaciones' %}" id="nav-rec-comunicaciones">
+                        <i class="bi bi-chat-dots-fill"></i> Comunicaciones
                     </a>
-                    <a class="nav-link {% if 'reporte' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'centro_reportes' %}">
-                        <i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes
-                    </a>
-                    <a class="nav-link {% if 'papelera' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'papelera_reciclaje' %}">
-                        <i class="bi bi-trash3-fill"></i> Papelera
-                    </a>
-                    <a class="nav-link {% if 'auditoria' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'auditoria_lista' %}">
-                        <i class="bi bi-shield-check"></i> Auditoría
-                    </a>
-                    <a class="nav-link {% if 'configuracion' in request.resolver_match.url_name or request.path == '/configuracion/' %}active{% endif %}" href="{% url 'configuracion_sistema' %}">
-                        <i class="bi bi-sliders"></i> Configuración
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}" id="nav-rec-circulares">
+                        <i class="bi bi-megaphone-fill"></i> Circulares oficiales
                     </a>
 
                 {% else %}
@@ -877,18 +830,14 @@
                     </a>
                 {% endif %}
 
-                <!-- CERRAR SESIÓN Y AJUSTES -->
-                <div class="mt-auto pt-3 border-top d-flex align-items-center justify-content-between gap-2 sidebar-bottom-actions" style="border-color: rgba(226, 232, 240, 0.8) !important;">
-                    <form method="post" action="{% url 'logout' %}" class="flex-grow-1 m-0">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-danger w-100 text-start rounded-pill px-3 py-1.5 d-flex align-items-center gap-2 border-0" style="cursor:pointer; background: rgba(239, 68, 68, 0.08); color: #dc2626;">
-                            <i class="bi bi-box-arrow-left text-danger"></i> <span class="small fw-semibold">Cerrar Sesión</span>
-                        </button>
-                    </form>
+                <!-- AJUSTES (Sin botón de cerrar sesión en la izquierda) -->
+                {% if not 'Estudiante' in rol and not 'Aprendiz' in rol and not 'Alumno' in rol and not 'Familia' in rol and not 'Acudiente' in rol %}
+                <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-end sidebar-bottom-actions" style="border-color: rgba(226, 232, 240, 0.8) !important;">
                     <a href="{% url 'configuracion_sistema' %}" class="btn btn-sm btn-light rounded-circle p-2 text-secondary border" title="Configuración">
                         <i class="bi bi-gear-fill"></i>
                     </a>
                 </div>
+                {% endif %}
             </nav>
             {% endwith %}
 
@@ -908,8 +857,8 @@
         {% endif %}
 
         <!-- CONTENEDOR PRINCIPAL -->
-        <div class="sinetec-main {% if request.resolver_match.url_name == 'home' or request.path == '/' %}w-100 p-0 m-0{% endif %}">
-            {% if request.resolver_match.url_name != 'home' and request.path != '/' %}
+        <div class="sinetec-main {% if request.resolver_match.url_name == 'home' or request.path == '/' or modo_consulta_inicial %}w-100 p-0 m-0{% endif %}" {% if modo_consulta_inicial %}style="margin-left: 0 !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; min-height: 100vh;"{% endif %}>
+            {% if request.resolver_match.url_name != 'home' and request.path != '/' and not modo_consulta_inicial %}
             <!-- BARRA SUPERIOR (TOPBAR) -->
             <header class="sinetec-topbar notranslate" translate="no">
                 <div class="d-flex align-items-center gap-3">
@@ -945,21 +894,100 @@
                         </span>
                     </div>
 
-                    {% with rol=request.user.perfil.rol.nombre|default:'' %}
-                    {% if 'Docente' in rol and not request.user.is_superuser and not 'Admin' in rol or 'Instructor' in rol and not request.user.is_superuser and not 'Admin' in rol or 'Profesor' in rol and not request.user.is_superuser and not 'Admin' in rol %}
-                    <!-- Botón de Ayuda Institucional Docente -->
+                    <!-- Botón de Ayuda Institucional -->
                     <button type="button" class="sinetec-icon-btn d-none d-sm-grid" title="Mesa de Ayuda y Soporte" onclick="alert('Centro de Ayuda EDUNOVA: Soporte académico disponible de 7:00 AM a 5:00 PM.');">
                         <i class="bi bi-question-circle"></i>
                     </button>
 
-                    <!-- Notificaciones con campana -->
-                    <a href="{% url 'instructor_dashboard' %}?subpanel=notificaciones" class="sinetec-icon-btn position-relative me-1" title="Notificaciones">
-                        <i class="bi bi-bell text-secondary fs-5"></i>
-                        <span id="badge-campana" class="badge-campana position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background: #EF4444; color: #fff; font-size: 0.62rem; padding: 2px 5px; {% if num_notificaciones_no_leidas == 0 %}display:none;{% endif %}">
-                            {{ num_notificaciones_no_leidas }}
-                        </span>
-                    </a>
+                    <!-- Centro Unificado de Notificaciones EduNova (Campanita oficial para todos los paneles) -->
+                    {% with rol=request.user.perfil.rol.nombre|default:'' %}
+                    <div class="dropdown me-1" id="wrap-campana-notificaciones">
+                        <button class="sinetec-icon-btn position-relative" type="button" id="btn-campana-notificaciones" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Centro de Notificaciones EduNova">
+                            <i class="bi bi-bell text-secondary fs-5"></i>
+                            <span id="badge-campana" class="badge-campana position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background: #C46820; color: #FFFFFF; font-size: 0.65rem; padding: 2px 6px; font-weight: 700; {% if num_notificaciones_no_leidas == 0 %}display:none;{% endif %}">
+                                {{ num_notificaciones_no_leidas }}
+                            </span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0 mt-2 notif-panel-dropdown" aria-labelledby="btn-campana-notificaciones" style="width: 400px; max-width: 95vw; z-index: 1060; border: 1.5px solid #E5DFD5 !important; background: #FFFFFF; box-shadow: 0 12px 36px rgba(0,0,0,0.12) !important;">
+                            <!-- Cabecera del Panel -->
+                            <div class="p-3 border-bottom d-flex align-items-center justify-content-between rounded-top-4" style="background: #FAF8F5; border-color: #EAE4DC !important;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-bell-fill" style="color: var(--color-principal, #5A3825); font-size: 1.05rem;"></i>
+                                    <span class="fw-bold text-dark" style="font-size: 0.92rem;">Notificaciones</span>
+                                    <span id="notif-header-badge" class="badge rounded-pill" style="font-size: 0.7rem; font-weight: 600; {% if num_notificaciones_no_leidas > 0 %}background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;{% else %}background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0;{% endif %}">
+                                        {% if num_notificaciones_no_leidas > 0 %}{{ num_notificaciones_no_leidas }} nuevas{% else %}Al día{% endif %}
+                                    </span>
+                                </div>
+                                <button type="button" id="btn-marcar-todas-leidas" class="btn btn-sm btn-link text-decoration-none p-0 fw-semibold d-flex align-items-center gap-1" style="color: var(--color-principal, #5A3825); font-size: 0.76rem;" title="Marcar todas las notificaciones como leídas">
+                                    <i class="bi bi-check2-all"></i> Marcar todas leídas
+                                </button>
+                            </div>
 
+                            <!-- Contenedor scrollable de Notificaciones -->
+                            <div id="notif-campana-lista" class="p-2" style="max-height: 380px; overflow-y: auto;">
+                                {% if notificaciones_campana %}
+                                    {% for n in notificaciones_campana %}
+                                        <div class="notif-card-item p-2.5 mb-1.5 rounded-3 border transition-all position-relative {% if not n.leida %}notif-no-leida{% else %}notif-leida{% endif %}" id="notif-item-{{ n.id }}" data-id="{{ n.id }}" data-leida="{% if n.leida %}1{% else %}0{% endif %}" style="{% if not n.leida %}background: #FDFBF7; border-color: #E2D3BE !important; border-left: 4px solid #9C7A5B !important;{% else %}background: #FFFFFF; border-color: #ECE5DC !important; border-left: 4px solid #EAE4DC !important; opacity: 0.88;{% endif %} cursor: pointer;">
+                                            <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+                                                <div class="d-flex align-items-center gap-1.5 flex-grow-1 min-w-0">
+                                                    {% if not n.leida %}
+                                                        <span class="notif-dot rounded-circle flex-shrink-0" style="width: 7px; height: 7px; background: #9C7A5B;" title="No leída"></span>
+                                                    {% else %}
+                                                        <i class="bi bi-check2 text-muted flex-shrink-0" style="font-size: 0.85rem;" title="Leída"></i>
+                                                    {% endif %}
+                                                    <strong class="text-dark small text-truncate notif-item-titulo {% if not n.leida %}fw-bold text-dark{% else %}fw-semibold text-secondary{% endif %}" style="font-size: 0.82rem;">{{ n.titulo }}</strong>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-1.5 flex-shrink-0">
+                                                    <small class="text-muted notif-item-time" style="font-size: 0.68rem;" title="{{ n.fecha_creacion|date:'d/m/Y h:i A' }}">
+                                                        {{ n.fecha_creacion|date:"d M, h:i A" }}
+                                                    </small>
+                                                    <button type="button" class="btn btn-sm btn-link p-0 text-muted btn-toggle-individual" data-id="{{ n.id }}" title="{% if not n.leida %}Marcar como leída{% else %}Marcar como no leída{% endif %}" style="line-height: 1;">
+                                                        {% if not n.leida %}
+                                                            <i class="bi bi-check2-circle text-primary" style="font-size: 0.95rem;"></i>
+                                                        {% else %}
+                                                            <i class="bi bi-envelope text-secondary" style="font-size: 0.88rem;"></i>
+                                                        {% endif %}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p class="small text-secondary mb-1.5 text-break notif-item-msg" style="font-size: 0.77rem; line-height: 1.35; margin-left: 14px;">
+                                                {{ n.mensaje }}
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center pt-1 mt-1 border-top" style="border-color: rgba(0,0,0,0.05) !important; margin-left: 14px;">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <button type="button" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold border d-inline-flex align-items-center gap-1 btn-ver-detalle-inline" data-id="{{ n.id }}" style="background: #FAF8F5; color: #5A3825; font-size: 0.72rem; border-color: #E2D3BE !important;">
+                                                        <i class="bi bi-eye"></i> <span>Ver detalle</span>
+                                                    </button>
+                                                    {% if n.enlace %}
+                                                    <a href="{% url 'abrir_notificacion' n.id %}" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 notif-item-enlace" style="background: var(--color-principal, #5A3825); color: #FFFFFF; font-size: 0.72rem;">
+                                                        <span>Ir a la acción</span> <i class="bi bi-arrow-right"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                                <span class="badge rounded-pill text-uppercase px-2 py-0.5" style="font-size: 0.62rem; background: #F5ECE3; color: #5A3825;">
+                                                    {{ n.tipo|default:'aviso' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-4 px-3 text-muted" id="notif-empty-state">
+                                        <i class="bi bi-bell-slash fs-2 d-block mb-2 text-secondary opacity-50"></i>
+                                        <div class="small fw-semibold text-secondary">No tienes notificaciones por el momento</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Pie del panel -->
+                            <div class="p-2.5 border-top text-center rounded-bottom-4" style="background: #FAF8F5; border-color: #EAE4DC !important;">
+                                <a href="{% url 'notificaciones_lista' %}" class="small text-decoration-none fw-bold d-inline-flex align-items-center gap-1" style="color: var(--color-principal, #5A3825); font-size: 0.79rem;">
+                                    Ver historial completo de notificaciones <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if 'Docente' in rol and not request.user.is_superuser and not 'Admin' in rol or 'Instructor' in rol and not request.user.is_superuser and not 'Admin' in rol or 'Profesor' in rol and not request.user.is_superuser and not 'Admin' in rol %}
                     <!-- Usuario Docente: Avatar institucional y datos limpios -->
                     <div class="dropdown">
                         <button class="sinetec-user-pill border-0 text-start d-flex align-items-center gap-2 p-1 pe-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: transparent;">
@@ -977,66 +1005,6 @@
                             <i class="bi bi-chevron-down text-muted small ms-1"></i>
                         </button>
                     {% else %}
-                    <!-- Botón de Ayuda Institucional -->
-                    <button type="button" class="sinetec-icon-btn d-none d-sm-grid" title="Mesa de Ayuda y Soporte" onclick="alert('Centro de Ayuda EDUNOVA: Soporte académico disponible de 7:00 AM a 5:00 PM.');">
-                        <i class="bi bi-question-circle"></i>
-                    </button>
-
-                    <!-- Centro de Notificaciones General -->
-                    <div class="dropdown" {% if 'Familia' in rol or 'Acudiente' in rol %}{% if not request.session.estudiante_fam_doc %}style="display:none;"{% endif %}{% endif %}>
-                        <button class="sinetec-icon-btn position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notificaciones">
-                            <i class="bi bi-bell"></i>
-                            {% if num_notificaciones_no_leidas > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
-                                    {{ num_notificaciones_no_leidas }}
-                                </span>
-                            {% endif %}
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-0 mt-2" style="width: 320px; max-width: 90vw;">
-                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-4">
-                                <span class="fw-bold text-dark small"><i class="bi bi-bell-fill text-primary me-1"></i> Notificaciones</span>
-                                {% if num_notificaciones_no_leidas > 0 %}
-                                    <span class="badge bg-danger rounded-pill">{{ num_notificaciones_no_leidas }} nuevas</span>
-                                {% else %}
-                                    <span class="badge bg-success rounded-pill">Al día</span>
-                                {% endif %}
-                            </div>
-                            <div class="p-2" style="max-height: 280px; overflow-y: auto;">
-                                {% if notificaciones_campana %}
-                                    {% for n in notificaciones_campana %}
-                                        {% if n.enlace %}
-                                        <a href="{% url 'abrir_notificacion' n.id %}" class="text-decoration-none d-block p-2 border-bottom rounded-2 mb-1 notif-item-link" style="background: rgba(37,99,235,0.03);">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <strong class="small text-dark text-truncate" style="max-width: 200px;">{{ n.titulo }}</strong>
-                                                <small class="text-muted" style="font-size: 0.7rem;">{{ n.fecha_creacion|timesince }}</small>
-                                            </div>
-                                            <p class="small text-secondary mb-0 text-truncate" style="font-size: 0.78rem;">{{ n.mensaje }}</p>
-                                        </a>
-                                        {% else %}
-                                        <div class="p-2 border-bottom rounded-2 mb-1">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <strong class="small text-dark text-truncate" style="max-width: 200px;">{{ n.titulo }}</strong>
-                                                <small class="text-muted" style="font-size: 0.7rem;">{{ n.fecha_creacion|timesince }}</small>
-                                            </div>
-                                            <p class="small text-secondary mb-0" style="font-size: 0.78rem;">{{ n.mensaje|truncatechars:65 }}</p>
-                                        </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="text-center py-4 text-muted small">
-                                        <i class="bi bi-check2-circle fs-3 d-block text-success mb-1"></i>
-                                        Sin notificaciones pendientes.
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="p-2 border-top text-center bg-light rounded-bottom-4">
-                                <a href="{% if 'Estudiante' in request.user.perfil.rol.nombre or 'Aprendiz' in request.user.perfil.rol.nombre %}{% url 'estudiante_dashboard' %}?subpanel=notificaciones{% else %}{% url 'notificaciones_lista' %}{% endif %}" class="small text-decoration-none fw-semibold text-primary">
-                                    Ver todas las notificaciones <i class="bi bi-arrow-right"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Usuario y Perfil General -->
                     <div class="dropdown">
                         <button class="sinetec-user-pill border-0 text-start d-flex align-items-center gap-2 p-1 pe-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: transparent;">
@@ -1057,32 +1025,34 @@
                         </button>
                     {% endif %}
                     {% endwith %}
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mt-2" style="min-width: 220px;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mt-2" style="min-width: 240px;">
                             <li class="px-3 py-2 border-bottom mb-1">
-                                <div class="fw-bold text-dark small">{{ user.get_full_name|default:user.username }}</div>
-                                <div class="text-muted" style="font-size: 0.75rem;">{{ user.email|default:'contacto@colegio.edu.co' }}</div>
-                                <span class="badge badge-lavender-soft mt-1">
+                                <div class="fw-bold text-dark small text-truncate">{{ user.get_full_name|default:user.username }}</div>
+                                <div class="text-muted text-truncate" style="font-size: 0.75rem;">{{ user.email|default:'contacto@colegio.edu.co' }}</div>
+                                <span class="badge mt-1" style="background: var(--color-acento); color: var(--color-secundario); font-weight: 700; font-size: 0.7rem; border: 1px solid rgba(90, 56, 37, 0.15);">
                                     {{ user.perfil.rol.nombre|default:'Usuario Institucional' }}
                                 </span>
                             </li>
-                            <li>
-                                <a class="dropdown-item py-2 rounded-2" href="{% if 'Estudiante' in user.perfil.rol.nombre or 'Aprendiz' in user.perfil.rol.nombre or 'Alumno' in user.perfil.rol.nombre %}{% url 'aprendiz_dashboard' %}{% elif 'Familia' in user.perfil.rol.nombre or 'Acudiente' in user.perfil.rol.nombre or 'Padre' in user.perfil.rol.nombre or 'Madre' in user.perfil.rol.nombre %}{% url 'familia_portal' %}{% elif 'Docente' in user.perfil.rol.nombre or 'Instructor' in user.perfil.rol.nombre %}{% url 'instructor_dashboard' %}{% elif 'Secretar' in user.perfil.rol.nombre %}{% url 'secretaria_dashboard' %}{% elif 'Rector' in user.perfil.rol.nombre %}{% url 'rectoria_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}">
-                                    <i class="bi bi-speedometer2 text-primary me-2"></i> Mi Panel de Control
-                                </a>
-                            </li>
+
                             {% if 'Administrador' in user.perfil.rol.nombre or 'Secretar' in user.perfil.rol.nombre or user.is_superuser %}
                             <li>
-                                <a class="dropdown-item py-2 rounded-2" href="{% url 'configuracion_sistema' %}">
+                                <a class="dropdown-item py-2 rounded-2 small" href="{% url 'configuracion_sistema' %}">
                                     <i class="bi bi-sliders text-secondary me-2"></i> Configuración del Sistema
                                 </a>
                             </li>
                             {% endif %}
-                            <li><hr class="dropdown-divider my-1"></li>
+
                             <li>
-                                <form method="post" action="{% url 'logout' %}" class="m-0 p-0">
+                                <hr class="dropdown-divider my-1">
+                            </li>
+
+                            <!-- Cerrar Sesión en Barra Superior Derecha para Todos los Paneles -->
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" class="m-0 p-1" id="form-logout-topbar-derecho">
                                     {% csrf_token %}
-                                    <button type="submit" class="dropdown-item py-2 rounded-2 text-danger">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                                    <button type="submit" class="btn w-100 py-2 px-3 rounded-3 text-white fw-bold d-flex align-items-center justify-content-center gap-2 border-0 shadow-xs" style="background-color: #387768; cursor: pointer; font-size: 0.88rem;" title="Cerrar sesión de forma segura">
+                                        <i class="bi bi-box-arrow-right fs-6"></i>
+                                        <span>Cerrar Sesión</span>
                                     </button>
                                 </form>
                             </li>
@@ -1093,7 +1063,7 @@
             {% endif %}
 
             <!-- CONTENIDO DE LA PÁGINA -->
-            <main class="sinetec-content {% if request.resolver_match.url_name == 'home' or request.path == '/' %}p-0 m-0 w-100 border-0 bg-transparent{% endif %}">
+            <main class="sinetec-content {% if request.resolver_match.url_name == 'home' or request.path == '/' or modo_consulta_inicial %}p-0 m-0 w-100 border-0 bg-transparent{% endif %}">
                 {% if messages %}
                     <div class="container-fluid mt-3">
                         {% for message in messages %}
@@ -1246,5 +1216,369 @@
             {% block extra_js %}{% endblock %}
         </div>
     </div>
+
+    <!-- EduNova Sistema Unificado de Notificaciones (Script Dinámico y Polling) -->
+    <script>
+    (function() {
+        const badgeCampana = document.getElementById('badge-campana');
+        const headerBadge = document.getElementById('notif-header-badge');
+        const notifLista = document.getElementById('notif-campana-lista');
+        const btnMarcarTodas = document.getElementById('btn-marcar-todas-leidas');
+        const btnCampana = document.getElementById('btn-campana-notificaciones');
+
+        if (!btnCampana || !notifLista) return;
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        function actualizarContador(num) {
+            if (badgeCampana) {
+                if (num > 0) {
+                    badgeCampana.textContent = num;
+                    badgeCampana.style.display = 'inline-block';
+                } else {
+                    badgeCampana.textContent = '0';
+                    badgeCampana.style.display = 'none';
+                }
+            }
+            if (headerBadge) {
+                if (num > 0) {
+                    headerBadge.textContent = num + ' nuevas';
+                    headerBadge.style.background = '#FEF3C7';
+                    headerBadge.style.color = '#92400E';
+                    headerBadge.style.border = '1px solid #FDE68A';
+                } else {
+                    headerBadge.textContent = 'Al día';
+                    headerBadge.style.background = '#DCFCE7';
+                    headerBadge.style.color = '#166534';
+                    headerBadge.style.border = '1px solid #BBF7D0';
+                }
+            }
+        }
+
+        function actualizarEstiloItem(itemEl, esLeida) {
+            if (!itemEl) return;
+            itemEl.dataset.leida = esLeida ? '1' : '0';
+            if (esLeida) {
+                itemEl.classList.remove('notif-no-leida');
+                itemEl.classList.add('notif-leida');
+                itemEl.style.background = '#FFFFFF';
+                itemEl.style.borderColor = '#ECE5DC';
+                itemEl.style.borderLeft = '4px solid #EAE4DC';
+                itemEl.style.opacity = '0.88';
+
+                const dot = itemEl.querySelector('.notif-dot, .notif-status-icon');
+                if (dot) {
+                    dot.outerHTML = '<i class="bi bi-check2 text-muted flex-shrink-0 notif-status-icon" style="font-size: 0.85rem;" title="Leída"></i>';
+                }
+                const titulo = itemEl.querySelector('.notif-item-titulo');
+                if (titulo) {
+                    titulo.classList.remove('fw-bold', 'text-dark');
+                    titulo.classList.add('fw-semibold', 'text-secondary');
+                }
+                const btnToggle = itemEl.querySelector('.btn-toggle-individual');
+                if (btnToggle) {
+                    btnToggle.title = 'Marcar como no leída';
+                    btnToggle.innerHTML = '<i class="bi bi-envelope text-secondary" style="font-size: 0.88rem;"></i>';
+                }
+            } else {
+                itemEl.classList.remove('notif-leida');
+                itemEl.classList.add('notif-no-leida');
+                itemEl.style.background = '#FDFBF7';
+                itemEl.style.borderColor = '#E2D3BE';
+                itemEl.style.borderLeft = '4px solid #9C7A5B';
+                itemEl.style.opacity = '1';
+
+                const icon = itemEl.querySelector('.notif-status-icon');
+                if (icon) {
+                    icon.outerHTML = '<span class="notif-dot rounded-circle flex-shrink-0 notif-status-icon" style="width: 7px; height: 7px; background: #9C7A5B;" title="No leída"></span>';
+                }
+                const titulo = itemEl.querySelector('.notif-item-titulo');
+                if (titulo) {
+                    titulo.classList.remove('fw-semibold', 'text-secondary');
+                    titulo.classList.add('fw-bold', 'text-dark');
+                }
+                const btnToggle = itemEl.querySelector('.btn-toggle-individual');
+                if (btnToggle) {
+                    btnToggle.title = 'Marcar como leída';
+                    btnToggle.innerHTML = '<i class="bi bi-check2-circle text-primary" style="font-size: 0.95rem;"></i>';
+                }
+            }
+        }
+
+        function renderNotificaciones(notificaciones, numNoLeidas) {
+            actualizarContador(numNoLeidas);
+            if (!notificaciones || notificaciones.length === 0) {
+                notifLista.innerHTML = `
+                    <div class="text-center py-4 px-3 text-muted" id="notif-empty-state">
+                        <i class="bi bi-bell-slash fs-2 d-block mb-2 text-secondary opacity-50"></i>
+                        <div class="small fw-semibold text-secondary">No tienes notificaciones por el momento</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            notificaciones.forEach(n => {
+                const bg = n.leida ? 'background: #FFFFFF; border-color: #ECE5DC !important; border-left: 4px solid #EAE4DC !important; opacity: 0.88;' : 'background: #FDFBF7; border-color: #E2D3BE !important; border-left: 4px solid #9C7A5B !important;';
+                const dot = n.leida ? '<i class="bi bi-check2 text-muted flex-shrink-0 notif-status-icon" style="font-size: 0.85rem;" title="Leída"></i>' : '<span class="notif-dot rounded-circle flex-shrink-0 notif-status-icon" style="width: 7px; height: 7px; background: #9C7A5B;" title="No leída"></span>';
+                const titleClass = n.leida ? 'fw-semibold text-secondary' : 'fw-bold text-dark';
+                const toggleBtn = `
+                    <button type="button" class="btn btn-sm btn-link p-0 text-muted btn-toggle-individual" data-id="${n.id}" title="${n.leida ? 'Marcar como no leída' : 'Marcar como leída'}" style="line-height: 1;">
+                        ${n.leida ? '<i class="bi bi-envelope text-secondary" style="font-size: 0.88rem;"></i>' : '<i class="bi bi-check2-circle text-primary" style="font-size: 0.95rem;"></i>'}
+                    </button>
+                `;
+                const actionBtn = n.enlace ? `
+                    <a href="${n.abrir_url}" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 notif-item-enlace" style="background: var(--color-principal, #5A3825); color: #FFFFFF; font-size: 0.72rem;">
+                        <span>Ir a la acción</span> <i class="bi bi-arrow-right"></i>
+                    </a>
+                ` : '';
+
+                html += `
+                    <div class="notif-card-item p-2.5 mb-1.5 rounded-3 border transition-all position-relative ${n.leida ? 'notif-leida' : 'notif-no-leida'}" id="notif-item-${n.id}" data-id="${n.id}" data-leida="${n.leida ? '1' : '0'}" style="${bg} cursor: pointer;">
+                        <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+                            <div class="d-flex align-items-center gap-1.5 flex-grow-1 min-w-0">
+                                ${dot}
+                                <strong class="text-dark small text-truncate notif-item-titulo ${titleClass}" style="font-size: 0.82rem;">${n.titulo}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-1.5 flex-shrink-0">
+                                <small class="text-muted notif-item-time" style="font-size: 0.68rem;">
+                                    ${n.fecha_str}
+                                </small>
+                                ${toggleBtn}
+                            </div>
+                        </div>
+                        <p class="small text-secondary mb-1.5 text-break notif-item-msg" style="font-size: 0.77rem; line-height: 1.35; margin-left: 14px;">
+                            ${n.mensaje}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center pt-1 mt-1 border-top" style="border-color: rgba(0,0,0,0.05) !important; margin-left: 14px;">
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-sm py-0.5 px-2 rounded-pill fw-semibold border d-inline-flex align-items-center gap-1 btn-ver-detalle-inline" data-id="${n.id}" style="background: #FAF8F5; color: #5A3825; font-size: 0.72rem; border-color: #E2D3BE !important;">
+                                    <i class="bi bi-eye"></i> <span>Ver detalle</span>
+                                </button>
+                                ${actionBtn}
+                            </div>
+                            <span class="badge rounded-pill text-uppercase px-2 py-0.5" style="font-size: 0.62rem; background: #F5ECE3; color: #5A3825;">
+                                ${n.tipo || 'aviso'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            notifLista.innerHTML = html;
+            enlazarEventosItems();
+        }
+
+        function consultarNotificacionesAPI() {
+            fetch('/notificaciones/api/campana/', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    renderNotificaciones(data.notificaciones, data.num_no_leidas);
+                }
+            })
+            .catch(err => console.debug('Polling notificaciones:', err));
+        }
+
+        function toggleIndividual(id, itemEl) {
+            fetch(`/notificaciones/${id}/toggle-leida-ajax/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    actualizarEstiloItem(itemEl, data.leida);
+                    if (data.num_no_leidas !== undefined) {
+                        actualizarContador(data.num_no_leidas);
+                    }
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        if (btnMarcarTodas) {
+            btnMarcarTodas.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch('/notificaciones/marcar-todas-leidas/', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        actualizarContador(0);
+                        document.querySelectorAll('.notif-card-item').forEach(itemEl => {
+                            actualizarEstiloItem(itemEl, true);
+                        });
+                    }
+                })
+                .catch(err => console.error(err));
+            });
+        }
+
+        // Función global para mostrar el detalle completo de una notificación
+        window.abrirDetalleNotificacion = function(id, titulo, fecha, mensaje, enlace, esLeida) {
+            const elTit = document.getElementById('modalNotifTitulo');
+            const elFec = document.getElementById('modalNotifFecha');
+            const elMsg = document.getElementById('modalNotifMensaje');
+            const elBox = document.getElementById('modalNotifAccionBox');
+            const elBtnAcc = document.getElementById('modalNotifAccionBtn');
+            const elBtnMarcar = document.getElementById('modalNotifMarcarLeidaBtn');
+
+            if (elTit) elTit.textContent = titulo;
+            if (elFec) elFec.textContent = fecha;
+            if (elMsg) elMsg.textContent = mensaje;
+
+            if (enlace && enlace !== '#' && enlace !== '') {
+                if (elBox) elBox.style.display = 'block';
+                if (elBtnAcc) elBtnAcc.href = enlace;
+            } else {
+                if (elBox) elBox.style.display = 'none';
+            }
+
+            if (!esLeida && elBtnMarcar) {
+                elBtnMarcar.style.display = 'inline-block';
+                elBtnMarcar.onclick = function() {
+                    const itemEl = document.getElementById(`notif-item-${id}`);
+                    toggleIndividual(id, itemEl);
+                    elBtnMarcar.style.display = 'none';
+                };
+            } else if (elBtnMarcar) {
+                elBtnMarcar.style.display = 'none';
+            }
+
+            // Si no estaba leída, marcarla como leída automáticamente al abrir detalle
+            if (!esLeida) {
+                const itemEl = document.getElementById(`notif-item-${id}`);
+                toggleIndividual(id, itemEl);
+            }
+
+            const modalEl = document.getElementById('modalDetalleNotificacion');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        };
+
+        function enlazarEventosItems() {
+            document.querySelectorAll('.btn-toggle-individual').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const id = this.dataset.id;
+                    const itemEl = document.getElementById(`notif-item-${id}`);
+                    toggleIndividual(id, itemEl);
+                });
+            });
+
+            document.querySelectorAll('.btn-ver-detalle-inline').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const id = this.dataset.id;
+                    const card = document.getElementById(`notif-item-${id}`);
+                    if (!card) return;
+                    const tit = card.querySelector('.notif-item-titulo') ? card.querySelector('.notif-item-titulo').textContent : 'Notificación';
+                    const time = card.querySelector('.notif-item-time') ? card.querySelector('.notif-item-time').getAttribute('title') || card.querySelector('.notif-item-time').textContent : '';
+                    const msg = card.querySelector('.notif-item-msg') ? card.querySelector('.notif-item-msg').textContent.trim() : '';
+                    const enlaceEl = card.querySelector('.notif-item-enlace');
+                    const enlace = enlaceEl ? enlaceEl.getAttribute('href') : '';
+                    const esLeida = card.dataset.leida === '1';
+                    window.abrirDetalleNotificacion(id, tit, time, msg, enlace, esLeida);
+                });
+            });
+
+            document.querySelectorAll('.notif-card-item').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (e.target.closest('a, button')) return;
+                    const id = this.dataset.id;
+                    const tit = this.querySelector('.notif-item-titulo') ? this.querySelector('.notif-item-titulo').textContent : 'Notificación';
+                    const time = this.querySelector('.notif-item-time') ? this.querySelector('.notif-item-time').getAttribute('title') || this.querySelector('.notif-item-time').textContent : '';
+                    const msg = this.querySelector('.notif-item-msg') ? this.querySelector('.notif-item-msg').textContent.trim() : '';
+                    const enlaceEl = this.querySelector('.notif-item-enlace');
+                    const enlace = enlaceEl ? enlaceEl.getAttribute('href') : '';
+                    const esLeida = this.dataset.leida === '1';
+                    window.abrirDetalleNotificacion(id, tit, time, msg, enlace, esLeida);
+                });
+            });
+        }
+
+        enlazarEventosItems();
+
+        const wrapCampana = document.getElementById('wrap-campana-notificaciones');
+        if (wrapCampana) {
+            wrapCampana.addEventListener('show.bs.dropdown', function() {
+                consultarNotificacionesAPI();
+            });
+        }
+
+        // Polling en segundo plano cada 25 segundos
+        setInterval(consultarNotificacionesAPI, 25000);
+    })();
+    </script>
+
+    <!-- Modal Oficial de Detalle Completo de Notificación -->
+    <div class="modal fade" id="modalDetalleNotificacion" tabindex="-1" aria-labelledby="modalDetalleNotifLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border shadow-lg" style="border-color: #E2DCD5;">
+                <div class="modal-header border-bottom py-3 px-4" style="background: #FAF8F5;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: #F5ECE3; color: #5A3825;">
+                            <i class="bi bi-bell-fill fs-6"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark mb-0" id="modalDetalleNotifLabel">Detalle de la Notificación</h6>
+                            <small class="text-muted" id="modalNotifFecha" style="font-size: 0.74rem;">--</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4 bg-white">
+                    <h5 class="fw-bold text-dark mb-2" id="modalNotifTitulo">--</h5>
+                    <p class="text-secondary small mb-3 text-break" id="modalNotifMensaje" style="line-height: 1.6; white-space: pre-wrap;">--</p>
+                    <div id="modalNotifAccionBox" style="display: none;" class="p-3 rounded-3 bg-light border">
+                        <span class="d-block small text-muted mb-2"><i class="bi bi-box-arrow-up-right me-1"></i> Esta notificación tiene una acción o enlace asociado:</span>
+                        <a href="#" id="modalNotifAccionBtn" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-white d-inline-flex align-items-center gap-1.5" style="background: #5A3825;">
+                            <span>Ir al apartado correspondiente</span> <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-2.5 px-4 bg-light d-flex justify-content-between">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-sm rounded-pill px-3.5 text-white fw-bold" id="modalNotifMarcarLeidaBtn" style="background: #047857; display: none;">
+                        <i class="bi bi-check2-circle me-1"></i> Marcar como leída
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

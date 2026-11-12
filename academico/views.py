@@ -1,1917 +1,6321 @@
 import csv
+
+
 import io
+
+
 import unicodedata
+
+
 import uuid
+
+
 from datetime import date, datetime
+
+
 from urllib.parse import urlencode
 
+
 from django.shortcuts import render, get_object_or_404, redirect
+
+
 from django.contrib.auth.decorators import login_required
+
+
 from django.contrib.auth.models import User
+
+
 from django.contrib import messages
+
+
 import os
+
+
 from django.conf import settings
+
+
 from django.db.models import Q, Count
+
+
 from django.core.paginator import Paginator
+
+
 from django.db import transaction
+
+
 from django.http import HttpResponse
 
+
 from .models import (
+
+
     Ficha, Matricula, ProgramaFormacion, Competencia, ResultadoAprendizaje,
-    HorarioFicha, CargaAcademica, GRADOS_POR_NIVEL, SECCIONES_ESCOLARES,
+
+
+    HorarioFicha, CargaAcademica, GRADOS_POR_NIVEL, SECCIONES_ESCOLARES, determinar_nivel_educativo,
+    normalizar_grado, extraer_numero_grado, obtener_cargas_activas_grupo,
+
+
 )
+
+
 from openpyxl import load_workbook, Workbook
+
+
 from reportlab.lib.pagesizes import letter
+
+
 from reportlab.lib import colors
+
+
 from reportlab.lib.utils import ImageReader
+
+
 from reportlab.pdfgen import canvas
 
+
 from .forms import FichaForm, MatriculaRapidaForm, ImportarAprendicesForm, HorarioFichaForm
+
+
 from usuarios.models import PerfilUsuario, Rol
-from usuarios.decorators import _obtener_categorias_rol, solo_instructor, solo_secretaria_o_coordinador
+
+
+from usuarios.decorators import _obtener_categorias_rol, solo_instructor, solo_secretaria_o_coordinador, requerir_roles
+
+
 from seguimiento.models import BitacoraSeguimiento, SolicitudSecretaria, RegistroAuditoria
+
+
 from evaluaciones.models import JuicioEvaluativo
 
 
 ENCABEZADOS_IMPORTACION = {
+
+
     'tipo_documento': {'tipo_documento', 'tipo_documento_identidad', 'tipo_de_documento'},
+
+
     'numero_documento': {'numero_documento', 'numero_de_documento', 'documento'},
+
+
     'nombres': {'nombres', 'nombre', 'nombres_completos'},
+
+
     'apellidos': {'apellidos', 'apellido', 'apellidos_completos'},
+
+
     'correo': {'correo', 'correo_electronico', 'email'},
+
+
     'telefono': {'telefono', 'telefono_celular', 'celular'},
+
+
     'grado_escolar': {'grado_escolar', 'grado', 'curso'},
+
+
     'acudiente_nombre': {'acudiente_nombre', 'nombre_acudiente', 'padre_acudiente'},
+
+
     'acudiente_telefono': {'acudiente_telefono', 'telefono_acudiente'},
+
+
 }
 
 
 def normalizar_encabezado(valor):
+
+
     valor = unicodedata.normalize('NFKD', str(valor or ''))
+
+
     valor = ''.join(caracter for caracter in valor if not unicodedata.combining(caracter))
+
+
     return ''.join(caracter if caracter.isalnum() else '_' for caracter in valor.lower()).strip('_')
 
 
 def leer_archivo_aprendices(archivo):
+
+
     extension = archivo.name.lower().rsplit('.', 1)[-1]
+
+
     if extension == 'xlsx':
+
+
         libro = load_workbook(archivo, read_only=True, data_only=True)
+
+
         filas = list(libro.active.iter_rows(values_only=True))
+
+
         if not filas:
+
+
             raise ValueError('El archivo no contiene filas.')
+
+
         encabezados = filas[0]
+
+
         registros = filas[1:]
+
+
     else:
+
+
         contenido = archivo.read()
+
+
         try:
+
+
             texto = contenido.decode('utf-8-sig')
+
+
         except UnicodeDecodeError:
+
+
             texto = contenido.decode('latin-1')
+
+
         try:
+
+
             delimitador = csv.Sniffer().sniff(texto[:2048], delimiters=',;\t').delimiter
+
+
         except csv.Error:
+
+
             delimitador = ','
+
+
         lector = csv.reader(io.StringIO(texto), delimiter=delimitador, strict=False)
+
+
         filas = list(lector)
+
+
         if not filas:
+
+
             raise ValueError('El archivo no contiene filas.')
+
+
         encabezados = filas[0]
+
+
         registros = filas[1:]
+
 
     encabezados_normalizados = [normalizar_encabezado(valor) for valor in encabezados]
+
+
     mapa_columnas = {}
+
+
     for indice, encabezado in enumerate(encabezados_normalizados):
+
+
         for campo, alias in ENCABEZADOS_IMPORTACION.items():
+
+
             if encabezado in alias:
+
+
                 mapa_columnas[campo] = indice
+
+
                 break
 
+
     campos_requeridos = {'tipo_documento', 'numero_documento', 'nombres', 'apellidos', 'correo', 'grado_escolar'}
+
+
     faltantes = campos_requeridos - mapa_columnas.keys()
+
+
     if faltantes:
+
+
         raise ValueError(f'Faltan columnas obligatorias: {", ".join(sorted(faltantes))}.')
 
+
     datos = []
+
+
     for numero_fila, fila in enumerate(registros, start=2):
+
+
         valores = {
+
+
             campo: str(fila[indice] if indice < len(fila) and fila[indice] is not None else '').strip()
+
+
             for campo, indice in mapa_columnas.items()
+
+
         }
+
+
         if not any(valores.values()):
+
+
             continue
+
+
         valores['_fila'] = numero_fila
+
+
         datos.append(valores)
+
+
     return datos
 
 
 def validar_importacion_aprendices(registros):
+
+
     documentos_archivo = set()
+
+
     registros_validos = []
+
+
     errores = []
+
+
     for registro in registros:
+
+
         numero_fila = registro.pop('_fila')
+
+
         formulario = MatriculaRapidaForm(registro)
+
+
         if not formulario.is_valid():
+
+
             detalles = '; '.join(
+
+
                 f'{campo}: {", ".join(errores_campo)}'
+
+
                 for campo, errores_campo in formulario.errors.items()
+
+
             )
+
+
             errores.append(f'Fila {numero_fila}: {detalles}')
+
+
             continue
+
+
         datos = formulario.cleaned_data
+
+
         documento = datos['numero_documento'].strip()
+
+
         if documento in documentos_archivo:
+
+
             errores.append(f'Fila {numero_fila}: el documento {documento} está repetido en el archivo.')
+
+
             continue
+
+
         documentos_archivo.add(documento)
+
+
         datos['_fila'] = numero_fila
+
+
         registros_validos.append(datos)
 
+
     documentos_existentes = set(
+
+
         PerfilUsuario.objects.filter(numero_documento__in=documentos_archivo)
+
+
         .values_list('numero_documento', flat=True)
+
+
     )
+
+
     for registro in registros_validos[:]:
+
+
         if registro['numero_documento'] in documentos_existentes:
+
+
             errores.append(
+
+
                 f"Fila {registro['_fila']}: ya existe un usuario con el documento {registro['numero_documento']}."
+
+
             )
+
+
             registros_validos.remove(registro)
+
+
         elif User.objects.filter(username=f"ap_{registro['numero_documento']}").exists():
+
+
             errores.append(
+
+
                 f"Fila {registro['_fila']}: el nombre de usuario generado para el documento "
+
+
                 f"{registro['numero_documento']} ya está ocupado."
+
+
             )
+
+
             registros_validos.remove(registro)
+
+
     return registros_validos, errores
 
 
 def crear_matricula_desde_datos(ficha, datos, rol_estudiante):
+
+
     numero_documento = str(datos['numero_documento']).strip()
+
+
     user = User.objects.filter(Q(username=numero_documento) | Q(perfil__numero_documento=numero_documento)).first()
+
+
     if not user:
+
+
         user = User.objects.create_user(
+
+
             username=numero_documento,
+
+
             email=datos.get('correo') or f"{numero_documento}@colegio.edu.co",
+
+
             first_name=datos['nombres'],
+
+
             last_name=datos['apellidos'],
+
+
             password=numero_documento,
+
+
         )
+
+
     perfil = getattr(user, 'perfil', None)
+
+
     if not perfil:
+
+
         perfil = PerfilUsuario.objects.create(usuario=user, rol=rol_estudiante, numero_documento=numero_documento)
+
+
     else:
+
+
         perfil.rol = rol_estudiante
+
+
         perfil.tipo_documento = datos.get('tipo_documento', 'TI')
+
+
         perfil.numero_documento = numero_documento
+
+
         if datos.get('telefono'):
+
+
             perfil.telefono = datos['telefono']
+
+
         perfil.save()
 
+
     return Matricula.objects.create(
+
+
         ficha=ficha,
+
+
         aprendiz=user,
+
+
         grado_escolar=datos['grado_escolar'],
+
+
         acudiente_nombre=datos.get('acudiente_nombre', ''),
+
+
         acudiente_telefono=datos.get('acudiente_telefono', ''),
+
+
     )
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def lista_fichas(request):
+
+
     """
+
+
     Listado general de Fichas de Media Técnica con 4 KPIs en tiempo real,
+
+
     filtros avanzados (institución, programa, estado), ordenamiento y paginación.
+
+
     """
+
+
     query = request.GET.get('q', '').strip()
+
+
     estado_filtro = request.GET.get('estado', '').strip()
+
+
     instructor_filtro = request.GET.get('instructor', '').strip()
+
+
     institucion_filtro = request.GET.get('institucion', '').strip()
+
+
     programa_filtro = request.GET.get('programa', '').strip()
+
+
     orden = request.GET.get('orden', 'recientes').strip()
+
 
     from instituciones.models import InstitucionEducativa
 
+
     # KPIs Globales
+
+
     total_fichas = Ficha.objects.count()
+
+
     fichas_ejecucion = Ficha.objects.filter(estado='En Ejecucion').count()
+
+
     fichas_terminadas = Ficha.objects.filter(estado='Terminada').count()
+
+
     fichas_canceladas = Ficha.objects.filter(estado='Cancelada').count()
 
+
     fichas = Ficha.objects.select_related(
+
+
         'programa', 'institucion', 'instructor_lider'
+
+
     ).annotate(
+
+
         num_aprendices=Count('matriculas', distinct=True),
+
+
         num_horarios=Count('horarios', distinct=True)
+
+
     ).all()
 
+
     if query:
+
+
         fichas = fichas.filter(
+
+
             Q(codigo_ficha__icontains=query) |
+
+
             Q(programa__denominacion__icontains=query) |
+
+
             Q(institucion__nombre__icontains=query) |
+
+
             Q(institucion__municipio__icontains=query)
+
+
         )
 
+
     if estado_filtro:
+
+
         fichas = fichas.filter(estado=estado_filtro)
 
+
     if instructor_filtro:
+
+
         fichas = fichas.filter(instructor_lider_id=instructor_filtro)
 
+
     if institucion_filtro:
+
+
         fichas = fichas.filter(institucion_id=institucion_filtro)
 
+
     if programa_filtro:
+
+
         fichas = fichas.filter(programa_id=programa_filtro)
 
+
     # Ordenamiento
+
+
     if orden == 'codigo_asc':
+
+
         fichas = fichas.order_by('codigo_ficha')
+
+
     elif orden == 'codigo_desc':
+
+
         fichas = fichas.order_by('-codigo_ficha')
+
+
     elif orden == 'aprendices_desc':
+
+
         fichas = fichas.order_by('-num_aprendices', '-fecha_inicio')
+
+
     else:  # recientes
+
+
         fichas = fichas.order_by('-fecha_inicio', '-id')
 
+
     # Paginación (10 por página)
+
+
     paginator = Paginator(fichas, 10)
+
+
     page_number = request.GET.get('page')
+
+
     page_obj = paginator.get_page(page_number)
 
+
     # Rol y permisos para añadir
+
+
     perfil = getattr(request.user, 'perfil', None)
+
+
     rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+
+
     puede_crear = request.user.is_superuser or rol_nombre in ['Administrador', 'Coordinador']
 
+
     instructores = User.objects.filter(perfil__rol__nombre__icontains='Instructor')
+
+
     instituciones = InstitucionEducativa.objects.filter(activa=True).order_by('nombre')
+
+
     programas = ProgramaFormacion.objects.all().order_by('denominacion')
 
+
     context = {
+
+
         'page_obj': page_obj,
+
+
         'fichas': page_obj,
+
+
         'query': query,
+
+
         'estado_filtro': estado_filtro,
+
+
         'instructor_filtro': instructor_filtro,
+
+
         'institucion_filtro': institucion_filtro,
+
+
         'programa_filtro': programa_filtro,
+
+
         'orden': orden,
+
+
         'instructores': instructores,
+
+
         'instituciones': instituciones,
+
+
         'programas': programas,
+
+
         'total_fichas': total_fichas,
+
+
         'fichas_ejecucion': fichas_ejecucion,
+
+
         'fichas_terminadas': fichas_terminadas,
+
+
         'fichas_canceladas': fichas_canceladas,
+
+
         'puede_crear': puede_crear,
+
+
     }
+
+
     return render(request, 'academico/fichas_lista.html', context)
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def detalle_ficha(request, pk):
+
+
     """
+
+
     Expediente completo de una ficha técnica con pestañas operativas y modal rápido de matrícula.
+
+
     """
+
+
     ficha = get_object_or_404(
+
+
         Ficha.objects.select_related('programa', 'institucion', 'instructor_lider'),
+
+
         pk=pk
+
+
     )
+
+
     matriculas = ficha.matriculas.select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name')
+
+
     seguimientos = ficha.seguimientos.select_related('instructor', 'matricula__aprendiz').order_by('-fecha_visita')
+
+
     competencias = ficha.programa.competencias.prefetch_related('resultados').all()
+
+
     horarios = ficha.horarios.select_related('instructor').filter(activo=True).order_by('dia', 'hora_inicio')
 
+
     # Instructores relacionados (Líder + horarios)
+
+
     instructores = User.objects.filter(
+
+
         Q(id=ficha.instructor_lider_id) | Q(horarios_formativos__ficha=ficha)
+
+
     ).distinct()
 
+
     # Evaluaciones de la ficha
+
+
     evaluaciones = JuicioEvaluativo.objects.filter(
+
+
         matricula__ficha=ficha
+
+
     ).select_related('matricula__aprendiz', 'resultado_aprendizaje', 'instructor').order_by('-fecha_evaluacion')
 
+
     total_juicios = evaluaciones.count()
+
+
     juicios_aprobados = evaluaciones.filter(juicio_valor='A').count()
+
+
     juicios_deficientes = evaluaciones.filter(juicio_valor='D').count()
+
+
     porcentaje_aprobacion = round((juicios_aprobados / total_juicios * 100), 1) if total_juicios > 0 else 0
 
+
     # Novedades / Solicitudes vinculadas
+
+
     novedades = SolicitudSecretaria.objects.filter(ficha=ficha).select_related('aprendiz', 'responsable').order_by('-fecha_creacion')
 
+
     # Permisos
+
+
     perfil = getattr(request.user, 'perfil', None)
+
+
     rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+
+
     puede_editar = request.user.is_superuser or rol_nombre in ['Administrador', 'Coordinador', 'Instructor SENA']
 
+
     # Historial y auditoría de la ficha
+
+
     from seguimiento.models import RegistroAuditoria
+
+
     historial = RegistroAuditoria.objects.filter(
+
+
         Q(detalles__icontains=ficha.codigo_ficha) |
+
+
         Q(modulo__icontains='Ficha')
+
+
     ).select_related('usuario').order_by('-fecha')[:15]
 
+
     # Aprendices disponibles para matricular (que no estén ya en esta ficha)
+
+
     aprendices_disponibles = User.objects.filter(
+
+
         perfil__rol__nombre__icontains='Estudiante'
+
+
     ).exclude(
+
+
         matriculas_academicas__ficha=ficha
+
+
     ).select_related('perfil').order_by('last_name', 'first_name')[:80]
 
+
     context = {
+
+
         'ficha': ficha,
+
+
         'matriculas': matriculas,
+
+
         'total_aprendices': matriculas.count(),
+
+
         'competencias': competencias,
+
+
         'instructores': instructores,
+
+
         'horarios': horarios,
+
+
         'seguimientos': seguimientos,
+
+
         'total_seguimientos': seguimientos.count(),
+
+
         'historial': historial,
+
+
         'evaluaciones': evaluaciones[:30],
+
+
         'total_juicios': total_juicios,
+
+
         'juicios_aprobados': juicios_aprobados,
+
+
         'juicios_deficientes': juicios_deficientes,
+
+
         'porcentaje_aprobacion': porcentaje_aprobacion,
+
+
         'novedades': novedades,
+
+
         'puede_editar': puede_editar,
+
+
         'aprendices_disponibles': aprendices_disponibles,
+
+
     }
+
+
     return render(request, 'academico/ficha_detalle.html', context)
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def cambiar_estado_ficha(request, pk):
+
+
     """
+
+
     Alterna o actualiza el estado de una ficha técnica (En Ejecucion, Terminada, Cancelada) con auditoría.
+
+
     """
+
+
     ficha = get_object_or_404(Ficha, pk=pk)
+
+
     nuevo_estado = request.GET.get('estado') or request.POST.get('estado')
+
+
     if nuevo_estado in ['En Ejecucion', 'Terminada', 'Cancelada']:
+
+
         ficha.estado = nuevo_estado
+
+
     else:
+
+
         if ficha.estado == 'En Ejecucion':
+
+
             ficha.estado = 'Terminada'
+
+
         elif ficha.estado == 'Terminada':
+
+
             ficha.estado = 'En Ejecucion'
+
+
         else:
+
+
             ficha.estado = 'En Ejecucion'
+
+
     ficha.save()
 
+
     from seguimiento.models import RegistroAuditoria
+
+
     RegistroAuditoria.registrar(
+
+
         usuario=request.user,
+
+
         modulo='Fichas Técnicas',
+
+
         accion=f'Cambio de Estado a {ficha.estado}',
+
+
         detalles=f"Se modificó el estado de la ficha técnica {ficha.codigo_ficha} a '{ficha.estado}'.",
+
+
         request=request
+
+
     )
+
+
     messages.success(request, f"La Ficha {ficha.codigo_ficha} ahora está en estado '{ficha.estado}'.")
 
+
     next_url = request.GET.get('next') or request.POST.get('next')
+
+
     if next_url:
+
+
         return redirect(next_url)
+
+
     return redirect('fichas_detalle', pk=ficha.pk)
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def eliminar_ficha(request, pk):
+
+
     """
+
+
     Eliminación segura de una ficha técnica con protección referencial.
+
+
     Si contiene aprendices o seguimientos vinculados, rechaza el borrado.
+
+
     """
+
+
     ficha = get_object_or_404(Ficha, pk=pk)
+
+
     matriculas_count = ficha.matriculas.count()
+
+
     seguimientos_count = ficha.seguimientos.count()
 
+
     if matriculas_count > 0 or seguimientos_count > 0:
+
+
         messages.warning(
+
+
             request,
+
+
             f"No es posible eliminar la Ficha {ficha.codigo_ficha} porque contiene {matriculas_count} aprendiz(ces) "
+
+
             f"o {seguimientos_count} seguimiento(s) asociado(s). Para archivarla sin perder datos, cambie su estado a 'Cancelada'."
+
+
         )
+
+
         return redirect('fichas_detalle', pk=ficha.pk)
 
+
     if request.method == 'POST':
+
+
         codigo = ficha.codigo_ficha
+
+
         from usuarios.models import PapeleraReciclaje
+
+
         PapeleraReciclaje.objects.create(
+
+
             tipo_objeto='Ficha',
+
+
             objeto_id=ficha.id,
+
+
             titulo=f"Ficha {codigo}",
+
+
             subtitulo=f"Programa: {ficha.programa.denominacion if ficha.programa else 'N/A'} · Sede: {ficha.institucion.nombre if ficha.institucion else 'N/A'}",
+
+
             datos_recuperacion={
+
+
                 'codigo_ficha': codigo,
+
+
                 'programa_id': ficha.programa_id,
+
+
                 'institucion_id': ficha.institucion_id,
+
+
                 'estado': ficha.estado,
+
+
             },
+
+
             eliminado_por=request.user,
+
+
             motivo='Eliminada hacia la Papelera de Reciclaje'
+
+
         )
+
+
         ficha.estado = 'Cancelada'
+
+
         ficha.save(update_fields=['estado'])
 
+
         from seguimiento.models import RegistroAuditoria
+
+
         RegistroAuditoria.registrar(
+
+
             usuario=request.user,
+
+
             modulo='Fichas Técnicas',
+
+
             accion='Envío a Papelera de Ficha',
+
+
             detalles=f"Se envió a la papelera la ficha técnica {codigo}.",
+
+
             request=request
+
+
         )
+
+
         messages.success(request, f"La Ficha {codigo} ha sido enviada a la Papelera de Reciclaje. Puede restaurarla desde Administración → Papelera.")
+
+
         return redirect('fichas_lista')
+
 
     return render(request, 'academico/confirmar_eliminar_ficha.html', {'ficha': ficha})
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def agregar_aprendiz_rapido(request, pk):
+
+
     """
+
+
     Permite matricular un aprendiz existente o crear uno nuevo en un solo paso
+
+
     directamente desde el expediente de la ficha técnica.
+
+
     """
+
+
     ficha = get_object_or_404(Ficha, pk=pk)
+
+
     if request.method == 'POST':
+
+
         modo = request.POST.get('modo', 'existente')
+
+
         from seguimiento.models import RegistroAuditoria
+
+
         if modo == 'existente':
+
+
             aprendiz_id = request.POST.get('aprendiz_id')
+
+
             if not aprendiz_id:
+
+
                 messages.error(request, "Debe seleccionar un aprendiz de la lista.")
+
+
                 return redirect('fichas_detalle', pk=ficha.pk)
+
 
             if Matricula.objects.filter(ficha=ficha, aprendiz_id=aprendiz_id).exists():
+
+
                 messages.warning(request, "El aprendiz ya se encuentra matriculado en esta ficha.")
+
+
                 return redirect('fichas_detalle', pk=ficha.pk)
+
 
             aprendiz_user = get_object_or_404(User, pk=aprendiz_id)
+
+
             mat = Matricula.objects.create(
+
+
                 ficha=ficha,
+
+
                 aprendiz=aprendiz_user,
+
+
                 grado_escolar=request.POST.get('grado_escolar', '10')
+
+
             )
+
+
             if not Matricula.objects.filter(id=mat.id, ficha=ficha, aprendiz=aprendiz_user).exists():
+
+
                 messages.warning(request, "El aprendiz fue registrado, pero la matrícula no pudo registrarse. Verifica la información e inténtalo nuevamente.")
+
+
                 return redirect('fichas_detalle', pk=ficha.pk)
+
 
             RegistroAuditoria.registrar(
+
+
                 usuario=request.user,
+
+
                 modulo='Fichas Técnicas',
+
+
                 accion='Matrícula de Aprendiz',
+
+
                 detalles=f"Se vinculó a {aprendiz_user.get_full_name() or aprendiz_user.username} a la Ficha {ficha.codigo_ficha}.",
+
+
                 request=request
+
+
             )
+
+
             messages.success(request, f"Aprendiz {aprendiz_user.get_full_name() or aprendiz_user.username} matriculado exitosamente.")
+
+
         elif modo == 'nuevo':
+
+
             num_doc = request.POST.get('numero_documento', '').strip()
+
+
             nombres = request.POST.get('nombres', '').strip()
+
+
             apellidos = request.POST.get('apellidos', '').strip()
+
+
             correo = request.POST.get('correo', '').strip()
+
+
             telefono = request.POST.get('telefono', '').strip()
+
+
             tipo_doc = request.POST.get('tipo_documento', 'TI').strip()
+
+
             grado = request.POST.get('grado_escolar', '10').strip()
 
+
             if not (num_doc and nombres and apellidos):
+
+
                 messages.error(request, "Documento, nombres y apellidos son campos obligatorios.")
+
+
                 return redirect('fichas_detalle', pk=ficha.pk)
 
-            if PerfilUsuario.objects.filter(numero_documento=num_doc).exists():
+
+            est_con_doc = PerfilUsuario.buscar_estudiante_por_documento(num_doc)
+            if est_con_doc:
+                messages.warning(request, f"No se puede crear otra cuenta: el documento {num_doc} ya pertenece al estudiante {est_con_doc.get_full_name()}. Búsquelo en la opción de vincular existente.")
+                return redirect('fichas_detalle', pk=ficha.pk)
+            elif PerfilUsuario.objects.filter(numero_documento=num_doc).exists() or User.objects.filter(username=num_doc).exists():
                 messages.warning(request, f"Ya existe un aprendiz con el documento {num_doc}. Búsquelo en la opción de vincular existente.")
                 return redirect('fichas_detalle', pk=ficha.pk)
 
+
             with transaction.atomic():
+
+
                 username = f"ap_{num_doc}"
+
+
                 if User.objects.filter(username=username).exists():
+
+
                     username = f"ap_{num_doc}_{ficha.id}"
+
+
                 user = User.objects.create_user(
+
+
                     username=username,
+
+
                     email=correo,
+
+
                     first_name=nombres,
+
+
                     last_name=apellidos,
+
+
                     password=f"Sena{num_doc[:4]}*"
+
+
                 )
+
+
                 rol_estudiante, _ = Rol.objects.get_or_create(
+
+
                     nombre='Estudiante',
+
+
                     defaults={'descripcion': 'Aprendiz matriculado en Media Técnica'}
+
+
                 )
+
+
                 perfil = user.perfil
+
+
                 perfil.rol = rol_estudiante
+
+
                 perfil.tipo_documento = tipo_doc
+
+
                 perfil.numero_documento = num_doc
+
+
                 perfil.telefono = telefono
+
+
                 perfil.save()
 
+
                 mat = Matricula.objects.create(
+
+
                     ficha=ficha,
+
+
                     aprendiz=user,
+
+
                     grado_escolar=grado
+
+
                 )
+
+
                 if not Matricula.objects.filter(id=mat.id, ficha=ficha, aprendiz=user).exists():
+
+
                     raise Exception("La matrícula no pudo ser confirmada en la base de datos.")
 
+
                 RegistroAuditoria.registrar(
+
+
                     usuario=request.user,
+
+
                     modulo='Fichas Técnicas',
+
+
                     accion='Registro y Matrícula Rápida',
+
+
                     detalles=f"Se creó y matriculó al aprendiz {nombres} {apellidos} ({num_doc}) en la Ficha {ficha.codigo_ficha}.",
+
+
                     request=request
+
+
                 )
+
+
                 messages.success(request, f"Aprendiz {nombres} {apellidos} registrado y matriculado en la Ficha {ficha.codigo_ficha}.")
+
+
     return redirect('fichas_detalle', pk=ficha.pk)
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def editar_ficha(request, pk):
+
+
     """
+
+
     Edición de los metadatos de una ficha técnica: fechas, estado, instructor líder.
+
+
     """
+
+
     ficha = get_object_or_404(Ficha, pk=pk)
+
+
     perfil = getattr(request.user, 'perfil', None)
+
+
     rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+
+
     if not (request.user.is_superuser or rol_nombre in ['Administrador', 'Coordinador']):
+
+
         messages.error(request, "No tienes permisos para modificar los datos de la ficha técnica.")
+
+
         return redirect('fichas_detalle', pk=ficha.pk)
 
+
     if request.method == 'POST':
+
+
         form = FichaForm(request.POST, instance=ficha)
+
+
         if form.is_valid():
+
+
             form.save()
+
+
             RegistroAuditoria.objects.create(
+
+
                 usuario=request.user,
+
+
                 accion=f"Actualización de Ficha {ficha.codigo_ficha}",
+
+
                 modulo="Fichas Técnicas",
+
+
                 detalles=f"Estado: {ficha.estado}, Fechas: {ficha.fecha_inicio} a {ficha.fecha_fin}"
+
+
             )
+
+
             messages.success(request, f"La Ficha {ficha.codigo_ficha} ha sido actualizada exitosamente.")
+
+
             return redirect('fichas_detalle', pk=ficha.pk)
+
+
         else:
+
+
             messages.error(request, "Por favor revise los campos del formulario.")
+
+
     else:
+
+
         form = FichaForm(instance=ficha)
 
+
     return render(request, 'academico/ficha_formulario.html', {
+
+
         'form': form,
+
+
         'titulo': f'Editar Ficha Técnica {ficha.codigo_ficha}',
+
+
         'ficha': ficha,
+
+
     })
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def crear_ficha(request):
+
+
     """
+
+
     Apertura de una nueva ficha técnica de Media Técnica en el Centro.
+
+
     """
+
+
     perfil = getattr(request.user, 'perfil', None)
+
+
     rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+
+
     if not (request.user.is_superuser or rol_nombre in ['Administrador', 'Coordinador']):
+
+
         messages.error(request, "No tienes permisos para aperturar nuevas fichas técnicas.")
+
+
         return redirect('fichas_lista')
 
+
     if request.method == 'POST':
+
+
         form = FichaForm(request.POST)
+
+
         if form.is_valid():
+
+
             ficha = form.save()
+
+
             RegistroAuditoria.objects.create(
+
+
                 usuario=request.user,
+
+
                 accion=f"Apertura de nueva Ficha {ficha.codigo_ficha}",
+
+
                 modulo="Fichas Técnicas",
+
+
                 detalles=f"Programa: {ficha.programa.denominacion}, Institución: {ficha.institucion.nombre}"
+
+
             )
+
+
             messages.success(request, f"Ficha {ficha.codigo_ficha} creada exitosamente.")
+
+
             return redirect('fichas_detalle', pk=ficha.pk)
+
+
         else:
+
+
             messages.error(request, "Por favor revise los campos obligatorios.")
+
+
     else:
+
+
         form = FichaForm()
+
 
     return render(request, 'academico/ficha_formulario.html', {'form': form, 'titulo': 'Apertura de Ficha Técnica'})
 
 
 def _parse_hora(valor):
+
+
     valor = (valor or '').strip().upper().replace('.', '')
+
+
     for fmt in ('%H:%M', '%H:%M:%S', '%I:%M %p', '%I:%M%p'):
+
+
         try:
+
+
             return datetime.strptime(valor, fmt).time()
+
+
         except ValueError:
+
+
             continue
+
+
     return None
 
 
 def _docentes_activos():
+
+
     return User.objects.filter(
+
+
         Q(perfil__rol__nombre__icontains='Instructor') |
+
+
         Q(perfil__rol__nombre__icontains='Profesor') |
+
+
         Q(perfil__rol__nombre__icontains='Docente'),
+
+
         is_active=True
+
+
     ).distinct().order_by('last_name', 'first_name')
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def lista_cursos(request):
+
+
     """Malla curricular visual: materias activas y sus grupos asociados."""
+
+
     if request.method == 'POST':
+
+
         denominacion = (request.POST.get('denominacion') or '').strip()
+
+
         tipo_programa = request.POST.get('tipo_programa') or 'Técnico'
+
+
         if not denominacion:
+
+
             messages.error(request, 'El nombre del curso es obligatorio.')
+
+
         else:
+
+
             ProgramaFormacion.objects.create(
+
+
                 codigo_programa=f'CUR-{uuid.uuid4().hex[:8].upper()}',
+
+
                 denominacion=denominacion,
+
+
                 tipo_programa=tipo_programa,
+
+
                 activo=True,
+
+
             )
+
+
             messages.success(request, f'El curso "{denominacion}" fue creado correctamente.')
+
+
         return redirect('cursos_lista')
 
+
     query = (request.GET.get('q') or '').strip()
+
+
     cursos = ProgramaFormacion.objects.filter(activo=True).prefetch_related('fichas').annotate(
+
+
         total_fichas=Count('fichas', distinct=True),
+
+
         total_competencias=Count('competencias', distinct=True),
+
+
     ).order_by('denominacion')
+
+
     if query:
+
+
         cursos = cursos.filter(denominacion__icontains=query)
 
+
     return render(request, 'academico/cursos_lista.html', {
+
+
         'cursos': cursos,
+
+
         'query': query,
+
+
         'total_cursos': ProgramaFormacion.objects.filter(activo=True).count(),
+
+
         'grupos_primaria': CargaAcademica.objects.filter(nivel='Primaria').count(),
+
+
         'grupos_secundaria': CargaAcademica.objects.filter(nivel='Secundaria').count(),
+
+
     })
 
 
 @login_required
-@solo_instructor
+
+
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor SENA', 'Instructor')
+
+
 def lista_programas(request):
+
+
     """Carga académica: asignación y edición de docentes a materias, grados y secciones."""
+
+
     if request.method == 'POST':
+
+
         carga_id = request.POST.get('carga_id')
+
+
         profesor_id = request.POST.get('profesor_id')
+
+
         programa_id = request.POST.get('programa_id') or request.POST.get('curso_id')
+
+
         nivel = (request.POST.get('nivel') or '').strip()
         grado = (request.POST.get('grado') or '').strip()
-        seccion = (request.POST.get('seccion') or 'A').strip() or 'A'
+        grado_norm = normalizar_grado(grado)
+        grado_dig = extraer_numero_grado(grado)
+        seccion = (request.POST.get('seccion') or 'A').strip().upper() or 'A'
+        permitir_co_docencia = request.POST.get('permitir_co_docencia') in ['1', 'true', 'True', 'on']
+
 
         if not all([profesor_id, programa_id, nivel, grado, seccion]):
+
+
             messages.error(request, 'Todos los campos son obligatorios para guardar la asignación académica.')
+
+
         else:
+
+
             if carga_id:
+
+
                 # EDICIÓN DE CARGA EXISTENTE
+
+
                 carga_existente = CargaAcademica.objects.filter(id=carga_id).first()
+
+
                 if not carga_existente:
+
+
                     messages.error(request, 'La asignación académica que intenta editar no fue encontrada.')
+
+
                     return redirect('programas_lista')
+
 
                 duplicado = CargaAcademica.objects.filter(
                     programa_id=programa_id,
-                    grado=grado,
                     seccion=seccion,
                     anio_lectivo=2026
+                ).filter(
+                    Q(grado=grado_norm) | Q(grado=grado_dig) | Q(grado__icontains=grado_dig)
                 ).exclude(id=carga_id).select_related('profesor', 'programa').first()
 
+
                 if duplicado:
+
+
                     nom_p = duplicado.profesor.get_full_name() if duplicado.profesor else 'Otro docente'
+
+
                     messages.error(request, f'No se puede duplicar la asignación: La materia ya está asignada al Grado {grado}°{seccion} a cargo de {nom_p}.')
+
+
                     return redirect('programas_lista')
 
+
                 carga_existente.profesor_id = profesor_id
+
+
                 carga_existente.programa_id = programa_id
+
+
                 carga_existente.nivel = nivel
+
+
                 carga_existente.grado = grado
+
+
                 carga_existente.seccion = seccion
+
+
                 carga_existente.save()
 
+
                 # Sincronizar horarios asociados si el docente cambió
+
+
                 g_num = ''.join(ch for ch in str(carga_existente.grado) if ch.isdigit())
+
+
                 HorarioFicha.objects.filter(
+
+
                     Q(programa_id=carga_existente.programa_id) | Q(tema__iexact=carga_existente.programa.denominacion if carga_existente.programa else ''),
+
+
                     grado__icontains=g_num,
+
+
                     seccion__iexact=carga_existente.seccion
+
+
                 ).update(instructor_id=profesor_id)
 
+
                 messages.success(request, f'¡Asignación académica de "{carga_existente.programa.denominacion if carga_existente.programa else "Materia"}" para {grado}°{seccion} actualizada exitosamente!')
+
+
                 return redirect('programas_lista')
+
+
             else:
+
+
                 # CREACIÓN NUEVA
                 carga_exist = CargaAcademica.objects.filter(
                     programa_id=programa_id,
-                    grado=grado,
                     seccion=seccion,
                     anio_lectivo=2026
+                ).filter(
+                    Q(grado=grado_norm) | Q(grado=grado_dig) | Q(grado__icontains=grado_dig)
                 ).select_related('profesor', 'programa').first()
 
-                if carga_exist:
-                    nom_p = carga_exist.profesor.get_full_name() if carga_exist.profesor else 'Otro docente'
-                    messages.error(request, f'No se puede duplicar la asignación: La materia "{carga_exist.programa.denominacion}" ya está asignada al Grado {grado}°{seccion} a cargo de {nom_p}.')
+
+                if carga_exist and not permitir_co_docencia:
+                    # Actualización de titular existente para evitar registros duplicados residuales
+                    doc_ya_asignado = CargaAcademica.objects.filter(
+                        profesor_id=profesor_id,
+                        programa_id=programa_id,
+                        seccion=seccion,
+                        anio_lectivo=2026
+                    ).filter(Q(grado=grado_norm) | Q(grado=grado_dig) | Q(grado__icontains=grado_dig)).first()
+
+                    if doc_ya_asignado:
+                        doc_ya_asignado.nivel = nivel or determinar_nivel_educativo(grado_norm or grado)
+                        doc_ya_asignado.grado = grado_norm or grado
+                        doc_ya_asignado.save()
+                        carga_titular_act = doc_ya_asignado
+                    else:
+                        carga_exist.profesor_id = profesor_id
+                        carga_exist.nivel = nivel or determinar_nivel_educativo(grado_norm or grado)
+                        carga_exist.grado = grado_norm or grado
+                        carga_exist.save()
+                        carga_titular_act = carga_exist
+
+                    g_num = extraer_numero_grado(carga_titular_act.grado)
+                    HorarioFicha.objects.filter(
+                        Q(programa_id=carga_titular_act.programa_id) | Q(tema__iexact=carga_titular_act.programa.denominacion if carga_titular_act.programa else ''),
+                        grado__icontains=g_num,
+                        seccion__iexact=carga_titular_act.seccion
+                    ).update(instructor_id=profesor_id)
+
+                    messages.success(request, f'¡Asignación actualizada! La materia "{carga_titular_act.programa.denominacion}" para Grado {grado_norm or grado}{seccion} ahora está a cargo de {carga_titular_act.profesor.get_full_name()}.')
+                elif carga_exist and permitir_co_docencia:
+                    if int(profesor_id) == carga_exist.profesor_id or CargaAcademica.objects.filter(
+                        profesor_id=profesor_id,
+                        programa_id=programa_id,
+                        seccion=seccion,
+                        anio_lectivo=2026
+                    ).filter(Q(grado=grado_norm) | Q(grado=grado_dig) | Q(grado__icontains=grado_dig)).exists():
+                        messages.info(request, f'El docente {carga_exist.profesor.get_full_name()} ya se encuentra asignado a esta asignatura.')
+                    else:
+                        nueva_c = CargaAcademica.objects.create(
+                            profesor_id=profesor_id,
+                            programa_id=programa_id,
+                            nivel=nivel or determinar_nivel_educativo(grado_norm or grado),
+                            grado=grado_norm or grado,
+                            seccion=seccion,
+                            anio_lectivo=2026,
+                        )
+                        messages.success(request, f'¡Co-docencia autorizada! {nueva_c.profesor.get_full_name()} asignado como segundo docente para "{nueva_c.programa.denominacion}" en {grado_norm or grado}{seccion}.')
                 else:
                     nueva_c = CargaAcademica.objects.create(
                         profesor_id=profesor_id,
                         programa_id=programa_id,
-                        nivel=nivel,
-                        grado=grado,
+                        nivel=nivel or determinar_nivel_educativo(grado_norm or grado),
+                        grado=grado_norm or grado,
                         seccion=seccion,
                         anio_lectivo=2026,
                     )
-                    messages.success(request, f'¡Carga académica de "{nueva_c.programa.denominacion}" asignada exitosamente para Grado {grado}°{seccion}!')
+                    messages.success(request, f'¡Carga académica de "{nueva_c.programa.denominacion}" asignada exitosamente para Grado {grado_norm or grado}{seccion}!')
+
                 return redirect('programas_lista')
 
+
     docentes = _docentes_activos()
+
+
     if not docentes.exists():
+
+
         docentes = User.objects.filter(
+
+
             Q(perfil__rol__nombre__icontains='Docente') |
+
+
             Q(perfil__rol__nombre__icontains='Profesor') |
+
+
             Q(perfil__rol__nombre__icontains='Instructor'),
+
+
             is_active=True
+
+
         ).order_by('last_name', 'first_name')
+
+
     if not docentes.exists():
+
+
         docentes = User.objects.filter(is_active=True).exclude(perfil__rol__nombre='Estudiante').order_by('last_name', 'first_name')
 
+
     cargas_qs = CargaAcademica.objects.select_related('profesor', 'profesor__perfil', 'programa').all().order_by('grado', 'seccion', 'programa__denominacion')
+
+
     cargas_lista = []
+
+
     docentes_con_carga_ids = set()
+
+
     grados_con_carga = set()
 
+
     for c in cargas_qs:
+
+
         g_clean = ''.join(ch for ch in str(c.grado) if ch.isdigit())
+
+
         num_est = Matricula.objects.filter(
+
+
             grado_escolar__icontains=g_clean,
+
+
             seccion=c.seccion,
+
+
             estado_formacion__in=['En Formacion', 'Activo'],
+
+
             aprendiz__is_active=True
+
+
         ).count()
+
+
         c.num_estudiantes = num_est
+
+
         if c.profesor_id:
+
+
             docentes_con_carga_ids.add(c.profesor_id)
+
+
         if c.grado:
+
+
             grados_con_carga.add(f"{c.grado}°{c.seccion}")
+
+
         cargas_lista.append(c)
 
-    cargas_media = [c for c in cargas_lista if 'media' in str(c.nivel).lower() or str(c.grado) in ['10', '11']]
-    cargas_secundaria = [c for c in cargas_lista if 'secund' in str(c.nivel).lower() and str(c.grado) not in ['10', '11']]
-    cargas_primaria = [c for c in cargas_lista if 'primar' in str(c.nivel).lower()]
-    cargas_inicial = [c for c in cargas_lista if 'inic' in str(c.nivel).lower() or 'pre' in str(c.nivel).lower()]
+
+    from collections import defaultdict
+    grupos_dict = defaultdict(list)
+    for c in cargas_lista:
+        g_dig = ''.join(ch for ch in str(c.grado) if ch.isdigit())
+        g_display = f"{g_dig}°" if g_dig else str(c.grado)
+        sec = c.seccion or 'A'
+        ord_num = int(g_dig) if g_dig else 99
+        clave = (ord_num, g_display, sec)
+        grupos_dict[clave].append(c)
+
+    grupos_cargas = []
+    cargas_activas_totales = []
+    cargas_historicas_totales = []
+
+    for (ord_num, g_display, sec), items in sorted(grupos_dict.items(), key=lambda x: (x[0][0], x[0][2])):
+        # Deduplicar asignaturas por grupo para mostrar una sola fila por materia activa
+        # priorizando la carga oficial más reciente (mayor ID / formato canónico)
+        items_sorted = sorted(items, key=lambda x: x.id, reverse=True)
+        items_activos = []
+        items_historicos = []
+        vistos_prog = set()
+        for it in items_sorted:
+            if it.programa_id not in vistos_prog:
+                vistos_prog.add(it.programa_id)
+                items_activos.append(it)
+                cargas_activas_totales.append(it)
+            else:
+                items_historicos.append(it)
+                cargas_historicas_totales.append(it)
+        items_activos.sort(key=lambda x: x.programa.denominacion if x.programa else '')
+
+        docentes_unicos = {i.profesor_id for i in items_activos if i.profesor_id}
+        niveles = [i.nivel_educativo or i.nivel for i in items_activos if (i.nivel_educativo or i.nivel)]
+        niv_principal = niveles[0] if niveles else determinar_nivel_educativo(ord_num)
+        grupos_cargas.append({
+            'grado': g_display,
+            'grado_numero': str(ord_num),
+            'seccion': sec,
+            'nivel': niv_principal,
+            'clave_id': f"grupo_{ord_num}_{sec}",
+            'total_materias': len(items_activos),
+            'total_docentes': len(docentes_unicos),
+            'cargas': items_activos,
+            'cargas_historicas': items_historicos,
+        })
+
+    cargas_media = [c for c in cargas_activas_totales if 'media' in str(c.nivel_educativo or c.nivel).lower() or str(c.grado) in ['10', '11', '10°', '11°']]
+    cargas_secundaria = [c for c in cargas_activas_totales if 'secund' in str(c.nivel_educativo or c.nivel).lower() and str(c.grado) not in ['10', '11', '10°', '11°']]
+    cargas_primaria = [c for c in cargas_activas_totales if 'primar' in str(c.nivel_educativo or c.nivel).lower()]
+    cargas_inicial = [c for c in cargas_activas_totales if 'inic' in str(c.nivel_educativo or c.nivel).lower() or 'pre' in str(c.nivel_educativo or c.nivel).lower()]
 
     context = {
         'docentes': docentes,
         'programas': ProgramaFormacion.objects.filter(activo=True).order_by('denominacion'),
         'grados_por_nivel': GRADOS_POR_NIVEL,
         'secciones': SECCIONES_ESCOLARES,
-        'todas_cargas': cargas_lista,
+        'todas_cargas': cargas_activas_totales,
+        'cargas_historicas': cargas_historicas_totales,
+        'grupos_cargas': grupos_cargas,
         'cargas_media': cargas_media,
         'cargas_secundaria': cargas_secundaria,
         'cargas_primaria': cargas_primaria,
         'cargas_inicial': cargas_inicial,
-        'total_cargas': len(cargas_lista),
+        'total_cargas': len(cargas_activas_totales),
         'total_docentes_asignados': len(docentes_con_carga_ids),
         'total_grados_cubiertos': len(grados_con_carga),
     }
+
     return render(request, 'academico/malla_curricular.html', context)
 
 
 @login_required
-@solo_instructor
+
+
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria')
+
+
 def eliminar_carga_academica(request, pk):
+
+
     carga = get_object_or_404(CargaAcademica, pk=pk)
+
+
     if request.method == 'POST':
+
+
         from usuarios.models import PapeleraReciclaje
+
+
         PapeleraReciclaje.objects.create(
+
+
             tipo_objeto='CargaAcademica',
+
+
             objeto_id=carga.id,
+
+
             titulo=f"Carga: {carga.programa.denominacion if carga.programa else 'Materia'} - Grado {carga.grado}°{carga.seccion}",
+
+
             subtitulo=f"Profesor: {carga.profesor.get_full_name() if carga.profesor else 'N/A'}",
+
+
             datos_recuperacion={
+
+
                 'profesor_id': carga.profesor_id,
+
+
                 'programa_id': carga.programa_id,
+
+
                 'grado': carga.grado,
+
+
                 'seccion': carga.seccion,
+
+
             },
+
+
             eliminado_por=request.user,
+
+
             motivo='Eliminada desde asignaciones académicas hacia la Papelera de Reciclaje'
+
+
         )
+
+
         carga.delete()
+
+
         messages.success(request, 'Asignación académica enviada a la Papelera de Reciclaje. Puede restaurarla cuando lo desee.')
+
+
     return redirect('programas_lista')
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def detalle_programa(request, pk):
+
+
     """
+
+
     Expediente Curricular de un Programa de Formación: competencias,
+
+
     resultados de aprendizaje, fichas asociadas y aprendices matriculados.
+
+
     """
+
+
     programa = get_object_or_404(
+
+
         ProgramaFormacion.objects.prefetch_related(
+
+
             'competencias__resultados',
+
+
             'fichas__institucion',
+
+
             'fichas__instructor_lider'
+
+
         ),
+
+
         pk=pk
+
+
     )
+
+
     fichas = programa.fichas.annotate(num_aprendices=Count('matriculas')).order_by('-fecha_inicio')
+
+
     total_aprendices = Matricula.objects.filter(ficha__programa=programa).count()
+
+
     competencias = programa.competencias.all()
 
+
     context = {
+
+
         'programa': programa,
+
+
         'fichas': fichas,
+
+
         'competencias': competencias,
+
+
         'total_aprendices': total_aprendices,
+
+
     }
+
+
     return render(request, 'academico/programa_detalle.html', context)
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def reporte_ficha_pdf(request, pk):
+
+
     """
+
+
     Exportación oficial en PDF del expediente y lista de aprendices de la ficha técnica.
+
+
     """
+
+
     ficha = get_object_or_404(Ficha.objects.select_related('programa', 'institucion', 'instructor_lider'), pk=pk)
+
+
     matriculas = ficha.matriculas.select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name')
+
 
     buffer = io.BytesIO()
+
+
     p = canvas.Canvas(buffer, pagesize=letter)
+
+
     ancho, alto = letter
 
+
     # Encabezado institucional SINETEC
+
+
     p.setFillColor(colors.HexColor('#1E3A8A'))
+
+
     p.rect(0, alto - 60, ancho, 60, fill=True, stroke=False)
 
+
     # Logo SENA Oficial en el encabezado
+
+
     logo_sena_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'sena_logo_white.png')
+
+
     if os.path.exists(logo_sena_path):
+
+
         try:
+
+
             sena_img = ImageReader(logo_sena_path)
+
+
             p.drawImage(sena_img, ancho - 65, alto - 52, width=44, height=44, mask='auto')
+
+
         except Exception:
+
+
             pass
 
+
     p.setFillColor(colors.white)
+
+
     p.setFont("Helvetica-Bold", 14)
+
+
     p.drawString(40, alto - 28, "SERVICIO NACIONAL DE APRENDIZAJE - SENA | SINETEC")
+
+
     p.setFont("Helvetica", 10)
+
+
     p.drawString(40, alto - 45, "Regional Magdalena · Centro de Logística y Promoción Ecoturística")
 
+
     # Datos de la Ficha
+
+
     p.setFillColor(colors.HexColor('#1E293B'))
+
+
     p.setFont("Helvetica-Bold", 12)
+
+
     p.drawString(40, alto - 85, f"REPORTE OFICIAL DE FICHA TÉCNICA: {ficha.codigo_ficha}")
+
+
     p.setFont("Helvetica", 9)
+
+
     p.drawString(40, alto - 100, f"Programa: {ficha.programa.denominacion} (Cód SOFIA: {ficha.programa.codigo_programa})")
+
+
     p.drawString(40, alto - 114, f"Institución Articulada: {ficha.institucion.nombre} - {ficha.institucion.municipio}")
+
+
     p.drawString(40, alto - 128, f"Instructor Líder: {ficha.instructor_lider.get_full_name() or ficha.instructor_lider.username}")
+
+
     p.drawString(40, alto - 142, f"Vigencia: {ficha.fecha_inicio} a {ficha.fecha_fin} | Estado: {ficha.estado}")
 
+
     # Tabla de Aprendices
+
+
     y = alto - 170
+
+
     p.setFillColor(colors.HexColor('#F1F5F9'))
+
+
     p.rect(40, y - 5, ancho - 80, 18, fill=True, stroke=False)
+
+
     p.setFillColor(colors.HexColor('#0F172A'))
+
+
     p.setFont("Helvetica-Bold", 9)
+
+
     p.drawString(45, y, "No.")
+
+
     p.drawString(75, y, "Documento")
+
+
     p.drawString(170, y, "Apellidos y Nombres")
+
+
     p.drawString(380, y, "Correo Electrónico")
+
+
     p.drawString(500, y, "Estado")
 
+
     p.setFont("Helvetica", 8)
+
+
     for idx, mat in enumerate(matriculas, start=1):
+
+
         y -= 16
+
+
         if y < 50:
+
+
             p.showPage()
+
+
             y = alto - 60
+
+
         nombre = mat.aprendiz.get_full_name() or mat.aprendiz.username
+
+
         doc = f"{mat.aprendiz.perfil.tipo_documento} {mat.aprendiz.perfil.numero_documento}" if hasattr(mat.aprendiz, 'perfil') else "N/A"
+
+
         correo = mat.aprendiz.email or "Sin correo"
 
+
         p.setFillColor(colors.HexColor('#334155'))
+
+
         p.drawString(45, y, str(idx))
+
+
         p.drawString(75, y, doc)
+
+
         p.drawString(170, y, nombre[:36])
+
+
         p.drawString(380, y, correo[:28])
+
+
         p.drawString(500, y, mat.get_estado_formacion_display())
 
+
     p.showPage()
+
+
     p.save()
+
+
     buffer.seek(0)
+
+
     response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+
+
     response['Content-Disposition'] = f'attachment; filename="reporte_ficha_{ficha.codigo_ficha}.pdf"'
+
+
     return response
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def reporte_ficha_excel(request, pk):
+
+
     """
+
+
     Exportación en Excel (.xlsx) del listado de aprendices y estado de la ficha.
+
+
     """
+
+
     ficha = get_object_or_404(Ficha.objects.select_related('programa', 'institucion', 'instructor_lider'), pk=pk)
+
+
     matriculas = ficha.matriculas.select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name')
 
+
     wb = Workbook()
+
+
     ws = wb.active
+
+
     ws.title = f"Ficha {ficha.codigo_ficha}"
 
+
     ws.append(["SERVICIO NACIONAL DE APRENDIZAJE - SENA | REGIONAL MAGDALENA"])
+
+
     ws.append([f"FICHA: {ficha.codigo_ficha} - {ficha.programa.denominacion}"])
+
+
     ws.append([f"Sede: {ficha.institucion.nombre} ({ficha.institucion.municipio}) | Instructor: {ficha.instructor_lider.get_full_name()}"])
+
+
     ws.append([])
+
+
     ws.append(["No.", "Tipo Doc", "Número Documento", "Apellidos y Nombres", "Correo Electrónico", "Teléfono", "Grado", "Estado"])
 
+
     for idx, mat in enumerate(matriculas, start=1):
+
+
         tdoc = mat.aprendiz.perfil.tipo_documento if hasattr(mat.aprendiz, 'perfil') else ""
+
+
         ndoc = mat.aprendiz.perfil.numero_documento if hasattr(mat.aprendiz, 'perfil') else ""
+
+
         tel = mat.aprendiz.perfil.telefono if hasattr(mat.aprendiz, 'perfil') else ""
+
+
         ws.append([
+
+
             idx,
+
+
             tdoc,
+
+
             ndoc,
+
+
             mat.aprendiz.get_full_name() or mat.aprendiz.username,
+
+
             mat.aprendiz.email,
+
+
             tel,
+
+
             mat.get_grado_escolar_display(),
+
+
             mat.get_estado_formacion_display()
+
+
         ])
 
+
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+
     response['Content-Disposition'] = f'attachment; filename="aprendices_ficha_{ficha.codigo_ficha}.xlsx"'
+
+
     wb.save(response)
+
+
     return response
 
 
 @login_required
+
+
 def consulta_certificacion(request):
+
+
     """
+
+
     Consulta institucional del estado de cumplimiento de requisitos académicos
+
+
     para la certificación técnica de los aprendices en Media Técnica.
+
+
     """
+
+
     ficha_id = request.GET.get('ficha', '').strip()
+
+
     perfil = getattr(request.user, 'perfil', None)
+
+
     es_estudiante = bool(
+
+
         perfil and perfil.rol and
+
+
         'ESTUDIANTE' in _obtener_categorias_rol(perfil.rol.nombre)
+
+
     )
+
+
     matriculas_estudiante = Matricula.objects.filter(
+
+
         aprendiz=request.user,
+
+
         estado_formacion='En Formacion',
+
+
     )
+
+
     fichas = Ficha.objects.filter(estado='En Ejecucion').order_by('codigo_ficha')
+
+
     if es_estudiante:
+
+
         fichas = fichas.filter(
+
+
             pk__in=matriculas_estudiante.values_list('ficha_id', flat=True)
+
+
         )
+
 
     ficha_seleccionada = None
+
+
     aprendices_cert = []
 
+
     if ficha_id:
+
+
         ficha_seleccionada = fichas.filter(id=ficha_id).first()
+
+
     if not ficha_seleccionada:
+
+
         ficha_seleccionada = (
+
+
             fichas.first() if es_estudiante else
+
+
             Ficha.objects.filter(codigo_ficha='3173430').first() or fichas.first()
+
+
         )
 
+
     if ficha_seleccionada:
+
+
         raps_total = ResultadoAprendizaje.objects.filter(competencia__programa=ficha_seleccionada.programa).count()
+
+
         matriculas = ficha_seleccionada.matriculas.select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name')
+
+
         if es_estudiante:
+
+
             matriculas = matriculas.filter(aprendiz=request.user)
+
+
         for m in matriculas:
+
+
             aprobados = JuicioEvaluativo.objects.filter(matricula=m, juicio_valor='A').count()
+
+
             pendientes = max(0, raps_total - aprobados)
+
+
             porcentaje = round((aprobados / raps_total * 100), 1) if raps_total > 0 else 0
+
+
             apto = (pendientes == 0 and raps_total > 0)
+
+
             aprendices_cert.append({
+
+
                 'matricula': m,
+
+
                 'raps_total': raps_total,
+
+
                 'aprobados': aprobados,
+
+
                 'pendientes': pendientes,
+
+
                 'porcentaje': porcentaje,
+
+
                 'apto': apto,
+
+
             })
 
+
     context = {
+
+
         'fichas': fichas,
+
+
         'ficha_seleccionada': ficha_seleccionada,
+
+
         'aprendices_cert': aprendices_cert,
+
+
         'es_estudiante': es_estudiante,
+
+
     }
+
+
     return render(request, 'academico/certificacion.html', context)
 
 
 def _redirigir_horarios(request, extra=None):
+
+
     params = extra or {}
+
+
     for key in ('nivel', 'grado', 'seccion', 'dia'):
+
+
         valor = request.POST.get(key) or request.GET.get(key) or params.get(key)
+
+
         if valor:
+
+
             params[key] = valor
+
+
     qs = urlencode({k: v for k, v in params.items() if v})
+
+
     return redirect(f'/academico/horarios/?{qs}' if qs else 'horarios_tablero')
 
 
 @login_required
-@solo_instructor
+
+
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor SENA', 'Instructor')
+
+
 def tablero_horarios(request):
+
+
     nivel = (request.GET.get('nivel') or '').strip()
+
+
     grado = (request.GET.get('grado') or '').strip()
-    seccion = (request.GET.get('seccion') or 'A').strip() or 'A'
+
+
+    seccion = (request.GET.get('seccion') or '').strip()
+
+
     dia = (request.GET.get('dia') or '').strip()
+
+
     docente_id = request.GET.get('docente')
+
+
     aula_filtro = request.GET.get('aula')
+
+
     materia_id = request.GET.get('materia')
+
+
     q = request.GET.get('q', '').strip()
 
+
     # Detección de rol institucional para aislamiento estricto
+
+
     rol_obj = getattr(getattr(request.user, 'perfil', None), 'rol', None)
+
+
     rol_nombre = rol_obj.nombre if rol_obj else ''
+
+
     es_docente = not request.user.is_superuser and ('Docente' in rol_nombre or 'Instructor' in rol_nombre or 'Profesor' in rol_nombre)
 
+
     if es_docente:
+
+
         # Aislamiento estricto: el docente SOLO ve sus propias clases (y solo 10/11 como requiere la regla)
+
+
         docente_id = str(request.user.id)
+
+
         horarios_qs = HorarioFicha.objects.select_related(
+
+
             'ficha', 'ficha__programa', 'instructor', 'instructor__perfil', 'programa'
+
+
         ).filter(
+
+
             instructor=request.user, 
+
+
             activo=True,
+
+
             grado__in=['10', '11', '10mo Grado', '11mo Grado', '10°', '11°', 'Décimo', 'Undécimo']
+
+
         )
+
+
     else:
+
+
         # Administrador / Coordinador
+
+
         horarios_qs = HorarioFicha.objects.select_related(
+
+
             'ficha', 'ficha__programa', 'instructor', 'instructor__perfil', 'programa'
+
+
         ).filter(activo=True)
 
+
     # Si no hay filtros, preseleccionar un grado/curso para que siempre tenga contenido visible
+
+
     if not nivel and not grado and not docente_id and not aula_filtro and not q:
+
+
         primer_h = horarios_qs.first()
+
+
         if primer_h and primer_h.nivel and primer_h.grado:
+
+
             nivel = primer_h.nivel
+
+
             grado = primer_h.grado
+
+
             seccion = primer_h.seccion or 'A'
+
+
         else:
+
+
             nivel = 'Secundaria'
+
+
             grado = '10mo Grado'
+
+
             seccion = 'A'
 
+
     if nivel:
+
+
         horarios_qs = horarios_qs.filter(nivel=nivel)
+
+
     if grado:
+
+
         horarios_qs = horarios_qs.filter(grado=grado)
+
+
     if seccion:
+
+
         horarios_qs = horarios_qs.filter(seccion=seccion)
+
+
     if dia and dia != 'todos':
+
+
         horarios_qs = horarios_qs.filter(dia=dia)
+
+
     if docente_id and not es_docente:
+
+
         horarios_qs = horarios_qs.filter(instructor_id=docente_id)
+
+
     if aula_filtro:
+
+
         horarios_qs = horarios_qs.filter(ambiente__icontains=aula_filtro)
+
+
     if materia_id:
+
+
         horarios_qs = horarios_qs.filter(programa_id=materia_id)
+
+
     if q:
+
+
         horarios_qs = horarios_qs.filter(
+
+
             Q(tema__icontains=q) |
+
+
             Q(programa__denominacion__icontains=q) |
+
+
             Q(ambiente__icontains=q) |
+
+
             Q(instructor__first_name__icontains=q) |
+
+
             Q(instructor__last_name__icontains=q)
+
+
         )
 
+
     # Rejilla semanal completa (Lunes a Viernes)
+
+
     horarios_por_dia = {
+
+
         '1': horarios_qs.filter(dia='1').order_by('hora_inicio'),
+
+
         '2': horarios_qs.filter(dia='2').order_by('hora_inicio'),
+
+
         '3': horarios_qs.filter(dia='3').order_by('hora_inicio'),
+
+
         '4': horarios_qs.filter(dia='4').order_by('hora_inicio'),
+
+
         '5': horarios_qs.filter(dia='5').order_by('hora_inicio'),
+
+
     }
 
+
     if es_docente:
+
+
         docentes = User.objects.filter(id=request.user.id)
+
+
         programas_ids = HorarioFicha.objects.filter(instructor=request.user, activo=True).values_list('programa_id', flat=True)
+
+
         programas = ProgramaFormacion.objects.filter(id__in=programas_ids).order_by('denominacion')
+
+
         if not programas.exists():
+
+
             from academico.models import CargaAcademica
+
+
             prog_cargas = CargaAcademica.objects.filter(profesor=request.user).values_list('programa_id', flat=True)
+
+
             programas = ProgramaFormacion.objects.filter(id__in=prog_cargas).order_by('denominacion')
+
+
     else:
+
+
         docentes = _docentes_activos()
+
+
         if not docentes.exists():
+
+
             docentes = User.objects.exclude(perfil__rol__nombre='Estudiante').order_by('last_name', 'first_name')
+
+
         programas = ProgramaFormacion.objects.filter(activo=True).order_by('denominacion')
+
+
         if not programas.exists():
+
+
             programas = ProgramaFormacion.objects.all().order_by('denominacion')
 
+
     aulas_disponibles = [
+
+
         'Aula 101', 'Aula 102', 'Aula 103', 'Aula 104',
+
+
         'Aula 201', 'Aula 202', 'Aula 203', 'Aula 204',
+
+
         'Laboratorio de Ciencias', 'Sala de Informática 1', 'Sala de Informática 2',
+
+
         'Cancha Múltiple / Polideportivo', 'Biblioteca Central', 'Auditorio'
+
+
     ]
+
 
     horas_inicio_sugeridas = [
+
+
         '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
+
+
         '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+
+
         '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+
+
         '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'
+
+
     ]
 
+
     return render(request, 'academico/horarios.html', {
+
+
         'horarios': horarios_qs.order_by('dia', 'hora_inicio'),
+
+
         'horarios_por_dia': horarios_por_dia,
+
+
         'docentes': docentes,
+
+
         'programas': programas,
+
+
         'aulas': aulas_disponibles,
+
+
         'horas_sugeridas': horas_inicio_sugeridas,
+
+
         'nivel': nivel,
+
+
         'grado': grado,
+
+
         'seccion': seccion,
+
+
         'dia': dia,
+
+
         'docente_sel': docente_id,
+
+
+        'docente_obj': User.objects.filter(id=docente_id).first() if docente_id else None,
+
+
         'aula_sel': aula_filtro,
+
+
         'q': q,
+
+
         'grados_por_nivel': GRADOS_POR_NIVEL,
+
+
         'secciones': SECCIONES_ESCOLARES,
+
+
         'dias': HorarioFicha.DIAS,
+
+
     })
 
 
 @login_required
-@solo_instructor
+
+
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor SENA', 'Instructor')
+
+
 def crear_horario(request):
+
+
     if request.method != 'POST':
+
+
         return redirect('horarios_tablero')
 
+
     nivel = (request.POST.get('nivel') or '').strip()
+
+
     grado = (request.POST.get('grado') or '').strip()
+
+
     seccion = (request.POST.get('seccion') or 'A').strip() or 'A'
+
+
     dia = (request.POST.get('dia') or '1').strip() or '1'
+
+
     hora_inicio = _parse_hora(request.POST.get('hora_inicio'))
+
+
     hora_fin = _parse_hora(request.POST.get('hora_fin'))
+
+
     es_recreo = request.POST.get('es_recreo') in ('1', 'on', 'true', 'True')
+
+
     programa_id = request.POST.get('programa_id')
+
+
     docente_id = request.POST.get('docente_id')
+
+
     aula = (request.POST.get('aula') or request.POST.get('ambiente') or 'Aula 101').strip()
+
+
     materia_texto = (request.POST.get('materia') or request.POST.get('tema') or '').strip()
 
+
     if not nivel or not grado:
+
+
         messages.error(request, 'Selecciona el nivel y grado antes de guardar el bloque horario.')
+
+
         return _redirigir_horarios(request)
+
+
     if not hora_inicio or not hora_fin:
+
+
         messages.error(request, 'Indica hora de inicio y hora de fin válidas (a partir de las 06:00 AM).')
+
+
         return _redirigir_horarios(request)
+
+
     if hora_fin <= hora_inicio:
+
+
         messages.error(request, 'La hora de finalización debe ser posterior a la hora de inicio.')
+
+
         return _redirigir_horarios(request)
+
 
     programa = None
+
+
     if programa_id:
+
+
         programa = ProgramaFormacion.objects.filter(pk=programa_id).first()
+
+
         if programa and not materia_texto:
+
+
             materia_texto = programa.denominacion
 
+
     if es_recreo:
+
+
         materia_texto = 'RECREO / DESCANSO PEDAGÓGICO'
 
+
     # Identificar docente asignado o seleccionado
+
+
     instructor = None
+
+
     if docente_id:
+
+
         instructor = User.objects.filter(pk=docente_id).first()
+
+
     if not instructor and programa:
+
+
         carga = CargaAcademica.objects.filter(
+
+
             nivel=nivel, grado=grado, seccion=seccion, programa=programa
+
+
         ).select_related('profesor').first()
+
+
         if carga:
+
+
             instructor = carga.profesor
 
+
     # ==========================================
+
+
     # CONTROL DE CONFLICTOS ADMINISTRATIVOS
+
+
     # ==========================================
+
+
     dia_nombre = dict(HorarioFicha.DIAS).get(dia, 'el día seleccionado')
 
+
     # 0. Límite de materias del docente (máximo 2 materias distintas)
+
+
     if instructor and programa and not es_recreo:
+
+
         materias_doc = set(
+
+
             CargaAcademica.objects.filter(profesor=instructor)
+
+
             .exclude(programa_id__isnull=True)
+
+
             .values_list('programa_id', flat=True)
+
+
         ) | set(
+
+
             HorarioFicha.objects.filter(instructor=instructor, activo=True)
+
+
             .exclude(programa_id__isnull=True)
+
+
             .values_list('programa_id', flat=True)
+
+
         )
+
+
         if programa.id not in materias_doc and len(materias_doc) >= 2:
+
+
             messages.error(request, f'El docente {instructor.get_full_name() or instructor.username} ya está inscrito en el número máximo de materias permitidas (máximo 2 materias distintas). Ya está inscrito en otras asignaturas.')
+
+
             return _redirigir_horarios(request)
+
 
     # 1. Conflicto de Docente (el docente no puede tener dos clases al mismo tiempo)
+
+
     if instructor and not es_recreo:
+
+
         conflicto_doc = HorarioFicha.objects.filter(
+
+
             instructor=instructor,
+
+
             dia=dia,
+
+
             activo=True,
+
+
             hora_inicio__lt=hora_fin,
+
+
             hora_fin__gt=hora_inicio
+
+
         ).first()
+
+
         if conflicto_doc:
+
+
             messages.error(
+
+
                 request,
+
+
                 f"⚠️ CONFLICTO DE HORARIO: El docente {instructor.get_full_name()} ya tiene asignada la clase de '{conflicto_doc.nombre_materia}' en {conflicto_doc.grado} Sección '{conflicto_doc.seccion}' de {conflicto_doc.hora_inicio:%H:%M} a {conflicto_doc.hora_fin:%H:%M} el {dia_nombre}."
+
+
             )
+
+
             return _redirigir_horarios(request)
+
 
     # 2. Conflicto de Aula (el aula no puede ser ocupada por dos grupos al mismo tiempo)
+
+
     if aula and not es_recreo:
+
+
         conflicto_aula = HorarioFicha.objects.filter(
+
+
             ambiente__iexact=aula,
+
+
             dia=dia,
+
+
             activo=True,
+
+
             hora_inicio__lt=hora_fin,
+
+
             hora_fin__gt=hora_inicio
+
+
         ).first()
+
+
         if conflicto_aula:
+
+
             messages.error(
+
+
                 request,
+
+
                 f"⚠️ CONFLICTO DE AULA: El espacio '{aula}' ya se encuentra ocupado por el grupo {conflicto_aula.grado} '{conflicto_aula.seccion}' ({conflicto_aula.nombre_materia}) en ese mismo bloque horario el {dia_nombre}."
+
+
             )
+
+
             return _redirigir_horarios(request)
 
+
     # 3. Conflicto de Grupo (el mismo grupo no puede tener dos clases a la misma hora)
+
+
     conflicto_grupo = HorarioFicha.objects.filter(
+
+
         grado=grado,
+
+
         seccion=seccion,
+
+
         dia=dia,
+
+
         activo=True,
+
+
         hora_inicio__lt=hora_fin,
+
+
         hora_fin__gt=hora_inicio
+
+
     ).first()
+
+
     if conflicto_grupo:
+
+
         messages.error(
+
+
             request,
+
+
             f"⚠️ CONFLICTO DE GRUPO: El grupo {grado} Sección '{seccion}' ya tiene programada la clase de '{conflicto_grupo.nombre_materia}' de {conflicto_grupo.hora_inicio:%H:%M} a {conflicto_grupo.hora_fin:%H:%M} el {dia_nombre}."
+
+
         )
+
+
         return _redirigir_horarios(request)
 
+
     # Vincular cohorte / curso institucional
+
+
     grado_num = ''.join(c for c in grado if c.isdigit())
+
+
     ficha = Ficha.objects.filter(
+
+
         Q(codigo_ficha__icontains=f"{grado_num}-{seccion}") |
+
+
         Q(codigo_ficha__icontains=f"{grado_num}{seccion}") |
+
+
         Q(codigo_ficha=f"{grado_num}-{seccion}")
+
+
     ).first()
+
+
     if not ficha:
+
+
         ficha = Ficha.objects.filter(estado='En Ejecucion').first()
 
+
     nueva_clase = HorarioFicha.objects.create(
+
+
         ficha=ficha,
+
+
         instructor=instructor,
+
+
         programa=programa,
+
+
         dia=dia,
+
+
         hora_inicio=hora_inicio,
+
+
         hora_fin=hora_fin,
+
+
         ambiente=aula,
+
+
         modalidad='Presencial',
+
+
         tema=materia_texto,
+
+
         nivel=nivel,
+
+
         grado=grado,
+
+
         seccion=seccion,
+
+
         es_recreo=es_recreo,
+
+
         activo=True,
+
+
         color_hex=request.POST.get('color_hex', '#E2E8F0'),
+
+
     )
 
+
     # Notificación al docente y registro de auditoría
+
+
     try:
+
+
         from seguimiento.models import Notificacion, RegistroAuditoria
+
+
         if instructor:
+
+
             Notificacion.objects.create(
+
+
                 usuario=instructor,
+
+
                 titulo=f"Nueva Clase en Horario: {materia_texto}",
+
+
                 mensaje=f"Se agregó a su horario escolar la clase de {materia_texto} para {grado} '{seccion}' ({dia_nombre} {hora_inicio:%H:%M} - {hora_fin:%H:%M} en {aula}).",
+
+
                 enlace="/instructor/",
+
+
                 tipo="info"
+
+
             )
+
+
         RegistroAuditoria.registrar(
+
+
             usuario=request.user,
+
+
             modulo="Horarios",
+
+
             accion="Creación de Clase en Horario",
+
+
             detalles=f"Programó {materia_texto} en {grado} '{seccion}' ({dia_nombre} {hora_inicio:%H:%M} - {hora_fin:%H:%M}, {aula}).",
+
+
             request=request
+
+
         )
+
+
     except Exception:
+
+
         pass
 
+
     messages.success(request, f"¡Clase de '{materia_texto}' agregada al horario de {grado} '{seccion}' ({dia_nombre} {hora_inicio:%H:%M} - {hora_fin:%H:%M})!")
+
+
     return _redirigir_horarios(request)
 
 
 @login_required
-@solo_instructor
+
+
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor SENA', 'Instructor')
+
+
 def editar_horario(request, pk):
+
+
     """Permite editar docente, aula, día, hora o asignatura de un bloque horario."""
+
+
     horario = get_object_or_404(HorarioFicha, pk=pk)
 
+
     if request.method == 'POST':
+
+
         nivel = (request.POST.get('nivel') or horario.nivel).strip()
+
+
         grado = (request.POST.get('grado') or horario.grado).strip()
+
+
         seccion = (request.POST.get('seccion') or horario.seccion).strip()
+
+
         dia = (request.POST.get('dia') or horario.dia).strip()
+
+
         hora_inicio = _parse_hora(request.POST.get('hora_inicio')) or horario.hora_inicio
+
+
         hora_fin = _parse_hora(request.POST.get('hora_fin')) or horario.hora_fin
+
+
         es_recreo = request.POST.get('es_recreo') in ('1', 'on', 'true', 'True')
+
+
         programa_id = request.POST.get('programa_id')
+
+
         docente_id = request.POST.get('docente_id')
+
+
         aula = (request.POST.get('aula') or request.POST.get('ambiente') or horario.ambiente).strip()
+
+
         materia_texto = (request.POST.get('materia') or request.POST.get('tema') or '').strip()
 
+
         if hora_fin <= hora_inicio:
+
+
             messages.error(request, 'La hora de fin debe ser posterior a la de inicio.')
+
+
             return redirect('horario_editar', pk=pk)
 
+
         programa = horario.programa
+
+
         if programa_id:
+
+
             programa = ProgramaFormacion.objects.filter(pk=programa_id).first()
+
+
             if programa and not materia_texto:
+
+
                 materia_texto = programa.denominacion
 
+
         instructor = horario.instructor
+
+
         if docente_id:
+
+
             instructor = User.objects.filter(pk=docente_id).first()
+
 
         dia_nombre = dict(HorarioFicha.DIAS).get(dia, 'el día seleccionado')
 
+
         # Límite de materias del docente (máximo 2 materias distintas)
+
+
         if instructor and programa and not es_recreo:
+
+
             materias_doc = set(
+
+
                 CargaAcademica.objects.filter(profesor=instructor)
+
+
                 .exclude(programa_id__isnull=True)
+
+
                 .values_list('programa_id', flat=True)
+
+
             ) | set(
+
+
                 HorarioFicha.objects.filter(instructor=instructor, activo=True)
+
+
                 .exclude(pk=pk)
+
+
                 .exclude(programa_id__isnull=True)
+
+
                 .values_list('programa_id', flat=True)
+
+
             )
+
+
             if programa.id not in materias_doc and len(materias_doc) >= 2:
+
+
                 messages.error(request, f'El docente {instructor.get_full_name() or instructor.username} ya está inscrito en el número máximo de materias permitidas (máximo 2 materias distintas). Ya está inscrito en otras asignaturas.')
+
+
                 return redirect('horario_editar', pk=pk)
+
 
         # Conflictos excluyendo el horario actual
+
+
         if instructor and not es_recreo:
+
+
             c_doc = HorarioFicha.objects.filter(
+
+
                 instructor=instructor, dia=dia, activo=True,
+
+
                 hora_inicio__lt=hora_fin, hora_fin__gt=hora_inicio
+
+
             ).exclude(pk=pk).first()
+
+
             if c_doc:
+
+
                 messages.error(request, f"Conflicto de Docente: {instructor.get_full_name()} ya tiene clase en ese horario ({c_doc.nombre_materia} en {c_doc.grado}).")
+
+
                 return redirect('horario_editar', pk=pk)
+
 
         if aula and not es_recreo:
+
+
             c_aul = HorarioFicha.objects.filter(
+
+
                 ambiente__iexact=aula, dia=dia, activo=True,
+
+
                 hora_inicio__lt=hora_fin, hora_fin__gt=hora_inicio
+
+
             ).exclude(pk=pk).first()
+
+
             if c_aul:
+
+
                 messages.error(request, f"Conflicto de Aula: El espacio '{aula}' ya está reservado por {c_aul.grado} '{c_aul.seccion}'.")
+
+
                 return redirect('horario_editar', pk=pk)
 
+
         c_grp = HorarioFicha.objects.filter(
+
+
             grado=grado, seccion=seccion, dia=dia, activo=True,
+
+
             hora_inicio__lt=hora_fin, hora_fin__gt=hora_inicio
+
+
         ).exclude(pk=pk).first()
+
+
         if c_grp:
+
+
             messages.error(request, f"Conflicto de Grupo: {grado} '{seccion}' ya tiene la materia '{c_grp.nombre_materia}' a esa misma hora.")
+
+
             return redirect('horario_editar', pk=pk)
 
+
         horario.nivel = nivel
+
+
         horario.grado = grado
+
+
         horario.seccion = seccion
+
+
         horario.dia = dia
+
+
         horario.hora_inicio = hora_inicio
+
+
         horario.hora_fin = hora_fin
+
+
         horario.ambiente = aula
+
+
         horario.programa = programa
+
+
         horario.instructor = instructor
+
+
         horario.tema = materia_texto
+
+
         horario.es_recreo = es_recreo
+
+
         color_hex = request.POST.get('color_hex')
+
+
         if color_hex:
+
+
             horario.color_hex = color_hex
+
+
         horario.save()
 
+
         messages.success(request, f"¡Clase de '{horario.nombre_materia}' actualizada correctamente!")
+
+
         return redirect(f"/academico/horarios/?nivel={nivel}&grado={grado}&seccion={seccion}")
 
+
     docentes = _docentes_activos()
+
+
     programas = ProgramaFormacion.objects.filter(activo=True).order_by('denominacion')
+
+
     aulas = [
+
+
         'Aula 101', 'Aula 102', 'Aula 103', 'Aula 104',
+
+
         'Aula 201', 'Aula 202', 'Aula 203', 'Aula 204',
+
+
         'Laboratorio de Ciencias', 'Sala de Informática 1', 'Polideportivo / Cancha'
+
+
     ]
 
+
     return render(request, 'academico/editar_horario.html', {
+
+
         'horario': horario,
+
+
         'docentes': docentes,
+
+
         'programas': programas,
+
+
         'aulas': aulas,
+
+
         'grados_por_nivel': GRADOS_POR_NIVEL,
+
+
         'secciones': SECCIONES_ESCOLARES,
+
+
         'dias': HorarioFicha.DIAS,
+
+
     })
 
 
+from usuarios.models import FamiliaAcudiente
+
+
+from django.http import JsonResponse
+
+
+import json
+
+
 @login_required
+
 @solo_secretaria_o_coordinador
 def nueva_matricula(request):
-    alumnos = User.objects.filter(
-        perfil__rol__nombre__in=['Estudiante', 'Aprendiz'],
-        perfil__esta_activo=True,
-    ).select_related('perfil').order_by('last_name', 'first_name')
-    
+    """
+    Formulario Oficial de Matrícula Escolar (Secretaría EduNova).
+    Permite buscar al estudiante existente, seleccionarlo con su ID interno y formalizar su matrícula
+    asignando año lectivo 2026, grado escolar (1° a 11°), sección y jornada con consulta de datos reales.
+    """
+    import json
+    alumnos_qs = User.objects.filter(
+        Q(perfil__rol__nombre__in=['Estudiante', 'Aprendiz']) |
+        Q(perfil__rol__nombre__icontains='estudiante') |
+        Q(perfil__rol__nombre__icontains='aprendiz') |
+        Q(matriculas_academicas__isnull=False)
+    ).filter(is_active=True).distinct().select_related('perfil').prefetch_related('matriculas_academicas__ficha').order_by('first_name', 'last_name')
+
+    alumnos = []
+    estudiantes_data_map = {}
+
+    for alumno in alumnos_qs:
+        try:
+            perfil = alumno.perfil
+            doc = (perfil.numero_documento if perfil else '') or alumno.username
+        except Exception:
+            doc = alumno.username
+        nombre_completo = alumno.get_full_name() or alumno.username
+        email = alumno.email or 'Sin correo registrado'
+
+        # Consultar la matrícula activa más reciente del estudiante
+        mat_activa = alumno.matriculas_academicas.filter(estado_formacion='En Formacion').order_by('-id').first()
+        if not mat_activa:
+            mat_activa = alumno.matriculas_academicas.order_by('-id').first()
+
+        tiene_mat = bool(mat_activa)
+        es_activa = bool(mat_activa and mat_activa.estado_formacion == 'En Formacion')
+
+        anio_mat = 2026
+        if mat_activa and mat_activa.ficha:
+            if mat_activa.ficha.fecha_inicio:
+                anio_mat = mat_activa.ficha.fecha_inicio.year
+            elif 'COL-' in mat_activa.ficha.codigo_ficha:
+                try:
+                    parts = mat_activa.ficha.codigo_ficha.split('-')
+                    if len(parts) >= 2 and parts[1].isdigit():
+                        anio_mat = int(parts[1])
+                except Exception:
+                    pass
+
+        info = {
+            'id': alumno.pk,
+            'nombre': nombre_completo,
+            'documento': doc,
+            'email': email,
+            'tiene_matricula': tiene_mat,
+            'es_activa': es_activa,
+            'grado_num': mat_activa.grado_escolar if mat_activa else '',
+            'grado_display': mat_activa.get_grado_escolar_display() if mat_activa else '',
+            'seccion': mat_activa.seccion if mat_activa else '',
+            'estado': mat_activa.get_estado_formacion_display() if mat_activa else '',
+            'estado_raw': mat_activa.estado_formacion if mat_activa else '',
+            'anio': anio_mat,
+            'jornada': 'Mañana'
+        }
+        alumno.info_mat = info
+        alumnos.append(alumno)
+        estudiantes_data_map[str(alumno.pk)] = info
+
     fichas = Ficha.objects.filter(estado='En Ejecucion').order_by('codigo_ficha')
     if not fichas.exists():
         fichas = Ficha.objects.all().order_by('codigo_ficha')
     grados = Matricula._meta.get_field('grado_escolar').choices
-    secciones = ('A', 'B', 'C')
+    secciones = ('A', 'B', 'C', 'D')
+    jornadas = ('Mañana', 'Tarde')
+    anios_lectivos = [2026, 2027, 2028, 2029, 2030]
 
     alumno_preseleccionado = request.GET.get('alumno') or request.GET.get('estudiante')
 
     if request.method == 'POST':
-        alumno_id = request.POST.get('alumno_id')
-        alumno = alumnos.filter(pk=alumno_id).first()
-        grado = request.POST.get('grado_escolar') or '10'
-        seccion = request.POST.get('seccion') or 'A'
-        
+        import re
+        from django.db import transaction
+        from usuarios.models import Rol, PerfilUsuario
+
+        errors = {}
+        form_data = {
+            'alumno_id': (request.POST.get('alumno_id') or '').strip(),
+            'documento': (request.POST.get('documento') or request.POST.get('numero_documento') or '').strip(),
+            'nombre': (request.POST.get('nombre') or request.POST.get('nombres') or '').strip(),
+            'apellido': (request.POST.get('apellido') or request.POST.get('apellidos') or '').strip(),
+            'email': (request.POST.get('email') or request.POST.get('correo') or '').strip(),
+            'grado_escolar': (request.POST.get('grado_escolar') or '').strip(),
+            'seccion': (request.POST.get('seccion') or '').strip().upper(),
+            'jornada': (request.POST.get('jornada') or '').strip(),
+            'anio_lectivo': ('2026' if request.POST.get('anio_lectivo') is None else request.POST.get('anio_lectivo', '').strip()),
+            'modo_registro': (request.POST.get('modo_registro') or '').strip(),
+        }
+
+        modo = form_data['modo_registro']
+        if not modo:
+            if form_data['documento'] or form_data['nombre'] or form_data['apellido'] or not form_data['alumno_id']:
+                modo = 'nuevo'
+            else:
+                modo = 'existente'
+        form_data['modo_registro'] = modo
+
+        # 1. Validación de Grado Escolar
+        grado = form_data['grado_escolar']
+        grados_validos = [str(g[0]) for g in grados]
+        if not grado:
+            errors['grado_escolar'] = 'Debe seleccionar un grado escolar obligatorio (1.° a 11.°).'
+        elif grado not in grados_validos:
+            errors['grado_escolar'] = 'El grado escolar seleccionado no es válido (debe ser entre 1.° y 11.°).'
+
+        # 2. Validación de Sección / Grupo
+        seccion = form_data['seccion']
+        if not seccion:
+            errors['seccion'] = 'Debe seleccionar un grupo o sección obligatorio (A, B, C o D).'
+        elif seccion not in secciones:
+            errors['seccion'] = f'El grupo no es válido. Opciones permitidas: {", ".join(secciones)}.'
+
+        # 3. Validación de Jornada
+        jornada = form_data['jornada']
+        if not jornada:
+            errors['jornada'] = 'Debe seleccionar una jornada escolar obligatoria (Mañana o Tarde).'
+        elif jornada not in jornadas:
+            errors['jornada'] = f'La jornada no es válida. Opciones permitidas: {", ".join(jornadas)}.'
+
+        # 4. Validación de Año Lectivo
+        anio_str = form_data['anio_lectivo']
+        anio_lectivo = 2026
+        if not anio_str:
+            errors['anio_lectivo'] = 'Debe seleccionar un año lectivo obligatorio.'
+        else:
+            try:
+                anio_lectivo = int(anio_str)
+                if anio_lectivo not in anios_lectivos:
+                    errors['anio_lectivo'] = f'El año lectivo {anio_lectivo} no es válido.'
+            except (ValueError, TypeError):
+                errors['anio_lectivo'] = 'El año lectivo debe ser un número entero válido.'
+
+        alumno = None
+
+        if modo == 'nuevo':
+            doc = form_data['documento']
+            nombres = form_data['nombre']
+            apellidos = form_data['apellido']
+            email = form_data['email']
+
+            # Documento obligatorio, solo dígitos y longitud 6..12
+            if not doc:
+                errors['documento'] = 'El número de documento es obligatorio.'
+            elif not doc.isdigit():
+                errors['documento'] = 'El documento debe contener únicamente números (sin letras, puntos, guiones ni espacios).'
+            elif len(doc) < 6 or len(doc) > 12:
+                errors['documento'] = f'El documento debe tener una longitud válida entre 6 y 12 dígitos (ingresó {len(doc)} dígitos).'
+            else:
+                # Evitar documentos duplicados y cuentas repetidas
+                est_con_doc = PerfilUsuario.buscar_estudiante_por_documento(doc)
+                if est_con_doc:
+                    errors['documento'] = f'No se permite crear otra cuenta: el documento {doc} ya pertenece al estudiante {est_con_doc.get_full_name()}. Utilice la opción "Estudiante Existente" para matricularlo.'
+                else:
+                    usuario_existente = User.objects.filter(Q(username=doc) | Q(perfil__numero_documento=doc)).first()
+                    if usuario_existente:
+                        errors['documento'] = f'Ya existe una cuenta registrada con el documento {doc} ({usuario_existente.get_full_name()}). No se permiten cuentas duplicadas.'
+
+            # Correo electrónico con formato estricto
+            if email:
+                EMAIL_REGEX = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$'
+                if not re.match(EMAIL_REGEX, email) or '..' in email or email.count('@') != 1:
+                    errors['email'] = 'El correo electrónico no tiene un formato válido (ejemplo: usuario@edunova.edu). No use formatos como aminta@gmail, aminta.com o aminta@@gmail.com.'
+
+            # Nombres obligatorios, no vacíos ni solo números
+            if not nombres:
+                errors['nombre'] = 'Los nombres del estudiante son obligatorios.'
+            elif nombres.isdigit() or not re.search(r'[a-zA-ZáéíóúÁÉÍÓÚñÑ]', nombres):
+                errors['nombre'] = 'Los nombres deben contener letras y no pueden ser únicamente números ni símbolos.'
+            elif len(nombres) < 2:
+                errors['nombre'] = 'Los nombres deben tener al menos 2 caracteres.'
+
+            # Apellidos obligatorios, no vacíos ni solo números
+            if not apellidos:
+                errors['apellido'] = 'Los apellidos del estudiante son obligatorios.'
+            elif apellidos.isdigit() or not re.search(r'[a-zA-ZáéíóúÁÉÍÓÚñÑ]', apellidos):
+                errors['apellido'] = 'Los apellidos deben contener letras y no pueden ser únicamente números ni símbolos.'
+            elif len(apellidos) < 2:
+                errors['apellido'] = 'Los apellidos deben tener al menos 2 caracteres.'
+
+        else: # modo == 'existente'
+            alumno_id = form_data['alumno_id']
+            if not alumno_id:
+                errors['alumno_id'] = 'Debe seleccionar un estudiante de la lista haciendo clic sobre él.'
+            else:
+                alumno = User.objects.filter(pk=alumno_id).first()
+                if not alumno:
+                    errors['alumno_id'] = f'No se encontró ningún estudiante con el identificador #{alumno_id}.'
+
+        # Si hay errores en las validaciones, rechazar sin tocar la BD
+        if errors:
+            messages.error(request, 'Por favor revise y corrija los campos indicados en el formulario.')
+            return render(request, 'academico/nueva_matricula.html', {
+                'alumnos': alumnos,
+                'estudiantes_json': json.dumps(estudiantes_data_map),
+                'fichas': fichas,
+                'grados': grados,
+                'secciones': secciones,
+                'jornadas': jornadas,
+                'anios_lectivos': anios_lectivos,
+                'alumno_preseleccionado': form_data['alumno_id'] or alumno_preseleccionado,
+                'errors': errors,
+                'form_data': form_data,
+            })
+
+        # Si el modo es nuevo y no hubo errores, crear el estudiante de forma atómica y segura
+        if modo == 'nuevo':
+            with transaction.atomic():
+                rol_est, _ = Rol.objects.get_or_create(nombre='Estudiante', defaults={'descripcion': 'Alumno del colegio'})
+                alumno = User.objects.create_user(
+                    username=doc,
+                    first_name=nombres,
+                    last_name=apellidos,
+                    email=email or f"{doc}@edunova.edu",
+                    password=doc
+                )
+                perfil, _ = PerfilUsuario.objects.get_or_create(usuario=alumno)
+                perfil.rol = rol_est
+                perfil.numero_documento = doc
+                perfil.esta_activo = True
+                perfil.save()
+
+        # Validación de duplicados de matrícula para el mismo estudiante, grado, sección y año lectivo
+        mat_existente = Matricula.objects.filter(aprendiz=alumno, estado_formacion='En Formacion').select_related('ficha').order_by('-id').first()
+        mat_anio = None
+        if mat_existente:
+            mat_anio = mat_existente.ficha.fecha_inicio.year if (mat_existente.ficha and mat_existente.ficha.fecha_inicio) else 2026
+            if mat_anio == anio_lectivo and str(mat_existente.grado_escolar) == str(grado) and mat_existente.seccion == seccion:
+                errors['general'] = f'El estudiante {alumno.get_full_name()} ya cuenta con una matrícula activa en {mat_existente.get_grado_escolar_display()} Sección "{seccion}" para la vigencia {anio_lectivo}. No se permiten matrículas duplicadas.'
+                errors['grado_escolar'] = 'El estudiante ya se encuentra matriculado en este mismo grado.'
+                errors['seccion'] = 'El estudiante ya se encuentra matriculado en esta misma sección.'
+                messages.error(request, errors['general'])
+                return render(request, 'academico/nueva_matricula.html', {
+                    'alumnos': alumnos,
+                    'estudiantes_json': json.dumps(estudiantes_data_map),
+                    'fichas': fichas,
+                    'grados': grados,
+                    'secciones': secciones,
+                    'jornadas': jornadas,
+                    'anios_lectivos': anios_lectivos,
+                    'alumno_preseleccionado': str(alumno.pk),
+                    'errors': errors,
+                    'form_data': form_data,
+                })
+
+        # Buscar o vincular la Ficha correspondiente
         ficha_id = request.POST.get('ficha_id')
         ficha = None
         if ficha_id:
             ficha = Ficha.objects.filter(pk=ficha_id).first()
         if not ficha:
-            ficha = Ficha.objects.filter(codigo_ficha__icontains=f"{grado}-{seccion}").first() or fichas.first()
+            try:
+                grado_int = int(grado)
+            except ValueError:
+                grado_int = 10
+            ficha = Ficha.objects.filter(codigo_ficha__iexact=f"COL-{anio_lectivo}-G{grado_int:02d}-{seccion}").first()
+            if not ficha:
+                ficha = Ficha.objects.filter(codigo_ficha__icontains=f"{grado}-{seccion}", fecha_inicio__year=anio_lectivo, estado='En Ejecucion').first()
+            if not ficha:
+                ficha = Ficha.objects.filter(fecha_inicio__year=anio_lectivo, codigo_ficha__icontains=grado, estado='En Ejecucion').first()
+            if not ficha:
+                from instituciones.models import InstitucionEducativa
+                from datetime import date
+                prog_def = ProgramaFormacion.objects.filter(activo=True).first() or ProgramaFormacion.objects.first()
+                inst_def = InstitucionEducativa.objects.filter(activa=True).first() or InstitucionEducativa.objects.first()
+                lider_def = User.objects.filter(Q(perfil__rol__nombre__icontains='Docente') | Q(is_superuser=True)).first() or request.user
+                hoy_d = date(anio_lectivo, 1, 15)
+                ficha, _ = Ficha.objects.get_or_create(
+                    codigo_ficha=f"COL-{anio_lectivo}-G{grado_int:02d}-{seccion}",
+                    defaults={
+                        'programa': prog_def,
+                        'institucion': inst_def,
+                        'instructor_lider': lider_def,
+                        'fecha_inicio': hoy_d,
+                        'fecha_fin': hoy_d.replace(month=12, day=15),
+                        'estado': 'En Ejecucion'
+                    }
+                )
 
-        if not alumno:
-            documento = request.POST.get('documento', '').strip() or request.POST.get('numero_documento', '').strip()
-            nombres = request.POST.get('nombre', '').strip() or request.POST.get('nombres', '').strip()
-            apellidos = request.POST.get('apellido', '').strip() or request.POST.get('apellidos', '').strip()
-            email = request.POST.get('email', '').strip() or request.POST.get('correo', '').strip()
-            if documento:
-                from usuarios.models import Rol, PerfilUsuario
-                alumno = User.objects.filter(Q(username=documento) | Q(perfil__numero_documento=documento)).first()
-                if not alumno:
-                    rol_est, _ = Rol.objects.get_or_create(nombre='Estudiante', defaults={'descripcion': 'Alumno del colegio'})
-                    alumno = User.objects.create_user(
-                        username=documento,
-                        first_name=nombres or 'Estudiante',
-                        last_name=apellidos or 'Nuevo',
-                        email=email or f'{documento}@edunova.edu',
-                        password=documento
-                    )
-                    perfil = getattr(alumno, 'perfil', None)
-                    if not perfil:
-                        PerfilUsuario.objects.create(usuario=alumno, rol=rol_est, numero_documento=documento)
-                    else:
-                        perfil.rol = rol_est
-                        perfil.numero_documento = documento
-                        perfil.save()
+        # Si ya tenía matrícula activa en ese año pero con diferente grado o sección: traslado controlado
+        if mat_existente and mat_anio == anio_lectivo:
+            with transaction.atomic():
+                mat_existente.grado_escolar = grado
+                mat_existente.seccion = seccion
+                mat_existente.ficha = ficha
+                mat_existente.save()
+            messages.success(
+                request,
+                f'¡Asignación actualizada con éxito! {alumno.get_full_name()} fue trasladado/asignado a {mat_existente.get_grado_escolar_display()} - Sección "{seccion}" para el año lectivo {anio_lectivo}.'
+            )
+            return redirect('matriculas_lista')
 
-        if not alumno:
-            messages.error(request, 'Por favor seleccione un estudiante o ingrese un número de documento válido.')
-        elif Matricula.objects.filter(aprendiz=alumno, grado_escolar=grado, seccion=seccion, estado_formacion='En Formacion').exists():
-            messages.warning(request, f'El estudiante {alumno.get_full_name()} ya se encuentra matriculado en {grado}° Sección "{seccion}".')
-        else:
+        # Si no tenía matrícula activa en ese año, crear nueva vinculación oficial
+        with transaction.atomic():
             mat = Matricula.objects.create(
                 aprendiz=alumno,
                 ficha=ficha,
                 grado_escolar=grado,
                 seccion=seccion,
-                estado_formacion='En Formacion',
+                estado_formacion='En Formacion'
             )
-            if not Matricula.objects.filter(id=mat.id, aprendiz=alumno, ficha=ficha).exists():
-                messages.warning(request, "El aprendiz fue registrado, pero la matrícula no pudo registrarse. Verifica la información e inténtalo nuevamente.")
-                return redirect('matriculas_lista')
-            # Notificación y Auditoría
-            try:
-                from seguimiento.models import Notificacion, RegistroAuditoria
-                Notificacion.objects.create(
-                    usuario=alumno,
-                    titulo="Matrícula Escolar Formalizada",
-                    mensaje=f"Has sido matriculado formalmente en {mat.get_grado_escolar_display()} - Sección {seccion} para el año lectivo 2026.",
-                    enlace="/matriculas/",
-                    tipo="success"
-                )
-                for fam in alumno.nucleo_familiar.all():
-                    u_fam = User.objects.filter(Q(username=fam.documento) | Q(email=fam.email)).first()
-                    if u_fam:
-                        Notificacion.objects.create(
-                            usuario=u_fam,
-                            titulo=f"Matrícula Confirmada · {alumno.first_name}",
-                            mensaje=f"Se confirmó la matrícula oficial de {alumno.get_full_name()} en {mat.get_grado_escolar_display()} Sección {seccion}.",
-                            enlace="/familia/matricula/",
-                            tipo="success"
-                        )
-                RegistroAuditoria.registrar(
-                    usuario=request.user,
-                    modulo="Matrículas",
-                    accion="Formalización de Matrícula",
-                    detalles=f"Matriculó al estudiante {alumno.get_full_name()} (DNI: {getattr(alumno.perfil, 'numero_documento', 'S/D')}) en {mat.get_grado_escolar_display()} {seccion}.",
-                    request=request
-                )
-            except Exception:
-                pass
 
-            messages.success(request, f'¡{alumno.get_full_name()} ha sido matriculado exitosamente en {mat.get_grado_escolar_display()} - Sección "{seccion}"!')
-            return redirect('matriculas_lista')
+        # Notificación y Auditoría
+        try:
+            from seguimiento.models import Notificacion, RegistroAuditoria
+            Notificacion.objects.create(
+                usuario=alumno,
+                titulo="Matrícula Escolar Formalizada",
+                mensaje=f"Has sido matriculado formalmente en {mat.get_grado_escolar_display()} - Sección {seccion} para el año lectivo {anio_lectivo}.",
+                enlace="/matriculas/",
+                tipo="success"
+            )
+            for fam in alumno.nucleo_familiar.all():
+                u_fam = User.objects.filter(Q(username=fam.documento) | Q(email=fam.email)).first()
+                if u_fam:
+                    Notificacion.objects.create(
+                        usuario=u_fam,
+                        titulo=f"Matrícula Confirmada – {alumno.first_name}",
+                        mensaje=f"Se confirmó la matrícula oficial de {alumno.get_full_name()} en {mat.get_grado_escolar_display()} Sección {seccion}.",
+                        enlace="/familia/matricula/",
+                        tipo="success"
+                    )
+            RegistroAuditoria.registrar(
+                usuario=request.user,
+                modulo="Matrículas",
+                accion="Formalización de Matrícula",
+                detalles=f"Matriculó al estudiante {alumno.get_full_name()} (DNI: {getattr(alumno.perfil, 'numero_documento', alumno.username)}) en {mat.get_grado_escolar_display()} {seccion} para el año lectivo {anio_lectivo}.",
+                request=request
+            )
+        except Exception:
+            pass
+
+        messages.success(request, f'¡{alumno.get_full_name()} ha sido matriculado exitosamente en {mat.get_grado_escolar_display()} - Sección "{seccion}" para el año lectivo {anio_lectivo}!')
+        return redirect('matriculas_lista')
 
     return render(request, 'academico/nueva_matricula.html', {
         'alumnos': alumnos,
+        'estudiantes_json': json.dumps(estudiantes_data_map),
         'fichas': fichas,
         'grados': grados,
         'secciones': secciones,
+        'jornadas': jornadas,
+        'anios_lectivos': anios_lectivos,
         'alumno_preseleccionado': alumno_preseleccionado,
+        'errors': {},
+        'form_data': {},
     })
 
 
 @login_required
-@solo_instructor
-def eliminar_horario(request, pk):
-    horario = get_object_or_404(HorarioFicha, pk=pk)
-    params = {
-        'nivel': horario.nivel,
-        'grado': horario.grado,
-        'seccion': horario.seccion,
-        'dia': horario.dia,
-    }
+
+
+@solo_secretaria_o_coordinador
+
+
+def editar_matricula(request, pk):
+
+
+    """
+
+
+    Edición de datos de matrícula, cambio de sección o actualización del acudiente.
+
+
+    """
+
+
+    mat = get_object_or_404(Matricula.objects.select_related('aprendiz', 'ficha'), pk=pk)
+
+
+    grados = Matricula._meta.get_field('grado_escolar').choices
+
+
+    secciones = [('A', 'Sección A'), ('B', 'Sección B'), ('C', 'Sección C'), ('D', 'Sección D')]
+
+
+    estados = [
+        ('En Formacion', 'En Formación (Activa)'),
+        ('Graduado', 'Graduado'),
+        ('Retirado', 'Retirado'),
+        ('Trasladado', 'Trasladado'),
+        ('Cancelado', 'Cancelado'),
+    ]
+    anios_lectivos = [2026, 2027, 2028, 2029, 2030]
+    anio_actual = mat.ficha.fecha_inicio.year if (mat.ficha and mat.ficha.fecha_inicio) else 2026
+
+    fam = mat.aprendiz.nucleo_familiar.first()
+
+
     if request.method == 'POST':
+        nuevo_grado = request.POST.get('grado_escolar', mat.grado_escolar)
+        nueva_seccion = request.POST.get('seccion', mat.seccion)
+        nuevo_estado = request.POST.get('estado_formacion', mat.estado_formacion)
+        nuevo_anio_str = request.POST.get('anio_lectivo')
+        try:
+            nuevo_anio = int(nuevo_anio_str) if nuevo_anio_str else anio_actual
+        except (ValueError, TypeError):
+            nuevo_anio = anio_actual
+        acudiente_nom = request.POST.get('acudiente_nombre', '').strip()
+        acudiente_tel = request.POST.get('acudiente_telefono', '').strip()
+
+        with transaction.atomic():
+            mat.grado_escolar = nuevo_grado
+            mat.seccion = nueva_seccion
+            mat.estado_formacion = nuevo_estado
+            mat.acudiente_nombre = acudiente_nom
+            mat.acudiente_telefono = acudiente_tel
+
+            # Buscar o crear ficha correspondiente si cambió grupo, grado o año lectivo
+            try:
+                grado_int = int(nuevo_grado)
+            except (ValueError, TypeError):
+                grado_int = 10
+            nueva_ficha = Ficha.objects.filter(codigo_ficha__iexact=f"COL-{nuevo_anio}-G{grado_int:02d}-{nueva_seccion}").first()
+            if not nueva_ficha:
+                nueva_ficha = Ficha.objects.filter(codigo_ficha__icontains=f"{nuevo_grado}-{nueva_seccion}", fecha_inicio__year=nuevo_anio, estado='En Ejecucion').first()
+            if not nueva_ficha:
+                from instituciones.models import InstitucionEducativa
+                from datetime import date
+                prog_def = (mat.ficha.programa if mat.ficha else None) or ProgramaFormacion.objects.filter(activo=True).first() or ProgramaFormacion.objects.first()
+                inst_def = (mat.ficha.institucion if mat.ficha else None) or InstitucionEducativa.objects.filter(activa=True).first() or InstitucionEducativa.objects.first()
+                lider_def = (mat.ficha.instructor_lider if mat.ficha else None) or User.objects.filter(Q(perfil__rol__nombre__icontains='Docente') | Q(is_superuser=True)).first() or request.user
+                nueva_ficha, _ = Ficha.objects.get_or_create(
+                    codigo_ficha=f"COL-{nuevo_anio}-G{grado_int:02d}-{nueva_seccion}",
+                    defaults={
+                        'programa': prog_def,
+                        'institucion': inst_def,
+                        'instructor_lider': lider_def,
+                        'fecha_inicio': date(nuevo_anio, 1, 15),
+                        'fecha_fin': date(nuevo_anio, 12, 15),
+                        'estado': 'En Ejecucion'
+                    }
+                )
+
+            if nueva_ficha:
+                mat.ficha = nueva_ficha
+
+            mat.save()
+
+            if fam and acudiente_nom:
+                fam.nombre_acudiente = acudiente_nom
+                if acudiente_tel:
+                    fam.telefono = acudiente_tel
+                fam.save()
+
+            RegistroAuditoria.registrar(
+                usuario=request.user,
+                modulo="Matrículas",
+                accion="Edición de Matrícula",
+                detalles=f"Actualizó matrícula #{mat.id} del estudiante {mat.aprendiz.get_full_name()} (Año {nuevo_anio}, Grado {nuevo_grado}°{nueva_seccion}).",
+                request=request
+            )
+            messages.success(request, f"Matrícula #{mat.id} actualizada correctamente.")
+            return redirect('matriculas_lista')
+
+    return render(request, 'academico/editar_matricula.html', {
+        'matricula': mat,
+        'grados': grados,
+        'secciones': secciones,
+        'estados': estados,
+        'familia': fam,
+        'anios_lectivos': anios_lectivos,
+        'anio_actual': anio_actual,
+    })
+
+
+@login_required
+
+
+@solo_secretaria_o_coordinador
+
+
+def traslado_matricula(request, pk):
+
+
+    """
+
+
+    Gestión de traslados y cambio de grupo escolar.
+
+
+    Conserva intacto el historial académico, asistencias y calificaciones del estudiante.
+
+
+    """
+
+
+    mat = get_object_or_404(Matricula.objects.select_related('aprendiz', 'ficha'), pk=pk)
+
+
+    grados = Matricula._meta.get_field('grado_escolar').choices
+
+
+    secciones = [('A', 'Sección A'), ('B', 'Sección B'), ('C', 'Sección C'), ('D', 'Sección D')]
+
+
+    if request.method == 'POST':
+
+
+        nuevo_grado = request.POST.get('nuevo_grado', mat.grado_escolar)
+
+
+        nueva_seccion = request.POST.get('nueva_seccion', mat.seccion)
+
+
+        motivo = request.POST.get('motivo', 'Traslado interno institucional').strip()
+
+
+        if nuevo_grado == mat.grado_escolar and nueva_seccion == mat.seccion:
+
+
+            messages.info(request, "El estudiante ya pertenece al grado y sección seleccionados.")
+
+
+            return redirect('matriculas_lista')
+
+
+        origen = f"Grado {mat.get_grado_escolar_display()} Sección {mat.seccion}"
+
+
+        destino = f"Grado {nuevo_grado}° Sección {nueva_seccion}"
+
+
+        with transaction.atomic():
+
+
+            # Actualizar matrícula conservando su ID y relaciones
+
+
+            mat.grado_escolar = nuevo_grado
+
+
+            mat.seccion = nueva_seccion
+
+
+            nueva_ficha = Ficha.objects.filter(codigo_ficha__icontains=f"{nuevo_grado}-{nueva_seccion}").first()
+
+
+            if nueva_ficha:
+
+
+                mat.ficha = nueva_ficha
+
+
+            mat.save()
+
+
+            # Notificación y Auditoría
+
+
+            try:
+
+
+                from seguimiento.models import Notificacion
+
+
+                Notificacion.objects.create(
+
+
+                    usuario=mat.aprendiz,
+
+
+                    titulo="Traslado de Grupo Confirmado",
+
+
+                    mensaje=f"Has sido trasladado de {origen} a {destino}. Motivo: {motivo}. Tu historial y notas han sido conservados.",
+
+
+                    enlace="/estudiante/",
+
+
+                    tipo="info"
+
+
+                )
+
+
+            except Exception:
+
+
+                pass
+
+
+            RegistroAuditoria.registrar(
+
+
+                usuario=request.user,
+
+
+                modulo="Matrículas",
+
+
+                accion="Traslado de Grupo",
+
+
+                detalles=f"Trasladó a {mat.aprendiz.get_full_name()} de {origen} a {destino}. Motivo: {motivo}.",
+
+
+                request=request
+
+
+            )
+
+
+            messages.success(
+
+
+                request,
+
+
+                f"¡Traslado ejecutado exitosamente! {mat.aprendiz.get_full_name()} fue transferido a "
+
+
+                f"{destino}. Se ha conservado todo su historial de asistencias y calificaciones."
+
+
+            )
+
+
+            return redirect('matriculas_lista')
+
+
+    return render(request, 'academico/traslado_matricula.html', {
+
+
+        'matricula': mat,
+
+
+        'grados': grados,
+
+
+        'secciones': secciones,
+
+
+    })
+
+
+@login_required
+
+
+@solo_secretaria_o_coordinador
+
+
+def actualizar_acudiente_matricula(request, pk):
+
+
+    """
+
+
+    Actualización rápida de los datos del acudiente y contacto familiar.
+
+
+    """
+
+
+    mat = get_object_or_404(Matricula.objects.select_related('aprendiz'), pk=pk)
+
+
+    fam = mat.aprendiz.nucleo_familiar.first()
+
+
+    if request.method == 'POST':
+
+
+        nombre = request.POST.get('nombre_acudiente', '').strip()
+
+
+        parentesco = request.POST.get('parentesco', 'Madre').strip()
+
+
+        documento = request.POST.get('documento', '').strip()
+
+
+        telefono = request.POST.get('telefono', '').strip()
+
+
+        email = request.POST.get('email', '').strip()
+
+
+        direccion = request.POST.get('direccion', '').strip()
+
+
+        with transaction.atomic():
+
+
+            mat.acudiente_nombre = nombre
+
+
+            mat.acudiente_telefono = telefono
+
+
+            mat.save()
+
+
+            if fam:
+
+
+                fam.nombre_acudiente = nombre
+
+
+                fam.parentesco = parentesco
+
+
+                fam.documento = documento
+
+
+                fam.telefono = telefono
+
+
+                fam.email = email
+
+
+                fam.direccion = direccion
+
+
+                fam.save()
+
+
+            elif nombre:
+
+
+                fam = FamiliaAcudiente.objects.create(
+
+
+                    nombre_acudiente=nombre,
+
+
+                    parentesco=parentesco,
+
+
+                    documento=documento,
+
+
+                    telefono=telefono,
+
+
+                    email=email,
+
+
+                    direccion=direccion
+
+
+                )
+
+
+                fam.estudiantes.add(mat.aprendiz)
+
+
+            messages.success(request, f"Datos de acudiente de {mat.aprendiz.get_full_name()} actualizados.")
+
+
+            return redirect('matriculas_lista')
+
+
+    return render(request, 'academico/actualizar_acudiente_matricula.html', {
+
+
+        'matricula': mat,
+
+
+        'familia': fam,
+
+
+    })
+
+
+@login_required
+
+
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria')
+
+
+def gestionar_asignacion_grupo(request, ficha_id=None):
+
+
+    """
+
+
+    Módulo de Asignación Académica Separada por Grupo.
+
+
+    Permite:
+
+
+    1. Visualizar estudiantes matriculados en el grupo.
+
+
+    2. Asignar docentes a las materias correspondientes al grado.
+
+
+    3. Configurar el horario semanal compartido del grupo.
+
+
+    4. Detectar cruces de horarios de docentes y ambientes.
+
+
+    5. Indicar estado: Completa, Parcial, o Pendiente sin bloquear la matrícula.
+
+
+    """
+
+
+    grado_sel = request.GET.get('grado', '6')
+
+
+    seccion_sel = request.GET.get('seccion', 'A')
+
+
+    # Ficha seleccionada si existe
+
+
+    ficha = None
+
+
+    if ficha_id:
+
+
+        ficha = Ficha.objects.filter(pk=ficha_id).first()
+
+
+        if ficha:
+
+
+            # extraer grado si es posible
+
+
+            nums = ''.join(filter(str.isdigit, ficha.codigo_ficha))
+
+
+            if nums:
+
+
+                grado_sel = nums
+
+
+            if '-' in ficha.codigo_ficha:
+
+
+                partes = ficha.codigo_ficha.split('-')
+
+
+                if len(partes) > 1:
+
+
+                    seccion_sel = partes[1].strip()
+
+
+    # Estudiantes matriculados en este grupo
+
+
+    matriculas = Matricula.objects.filter(
+
+
+        Q(grado_escolar=grado_sel) | Q(grado_escolar__icontains=grado_sel),
+
+
+        seccion__iexact=seccion_sel,
+
+
+        estado_formacion='En Formacion'
+
+
+    ).select_related('aprendiz', 'aprendiz__perfil')
+
+
+    # Asignaturas / Materias para el grado
+
+
+    materias = ProgramaFormacion.objects.filter(activo=True).order_by('denominacion')
+
+
+    docentes = User.objects.filter(
+
+
+        Q(perfil__rol__nombre__icontains='Docente') |
+
+
+        Q(perfil__rol__nombre__icontains='Profesor') |
+
+
+        Q(perfil__rol__nombre__icontains='Instructor'),
+
+
+        is_active=True
+
+
+    ).select_related('perfil').order_by('last_name', 'first_name')
+
+
+    # Cargas académicas ya creadas para este grupo
+
+
+    cargas = CargaAcademica.objects.filter(
+
+
+        Q(grado=grado_sel) | Q(grado__icontains=grado_sel),
+
+
+        seccion__iexact=seccion_sel,
+
+
+        anio_lectivo=2026
+
+
+    ).select_related('profesor', 'programa')
+
+
+    # Horarios registrados para este grupo
+
+
+    horarios = HorarioFicha.objects.filter(
+
+
+        Q(grado=grado_sel) | Q(grado__icontains=grado_sel),
+
+
+        seccion__iexact=seccion_sel
+
+
+    ).select_related('instructor', 'programa').order_by('dia', 'hora_inicio')
+
+
+    # Detección de cruces de horarios
+
+
+    cruces_detectados = []
+
+
+    for h in horarios:
+
+
+        # Cruce por docente
+
+
+        cruce_doc = HorarioFicha.objects.filter(
+
+
+            instructor=h.instructor,
+
+
+            dia=h.dia,
+
+
+            hora_inicio__lt=h.hora_fin,
+
+
+            hora_fin__gt=h.hora_inicio
+
+
+        ).exclude(pk=h.pk).first()
+
+
+        if cruce_doc:
+
+
+            cruces_detectados.append(
+
+
+                f"Cruce detectado: El docente {h.instructor.get_full_name()} tiene clase simultánea en "
+
+
+                f"Grado {cruce_doc.grado}°{cruce_doc.seccion} los {h.get_dia_display()} de {cruce_doc.hora_inicio} a {cruce_doc.hora_fin}."
+
+
+            )
+
+
+    # Estado de la asignación
+
+
+    total_materias_disp = min(materias.count(), 6)
+
+
+    materias_con_docente = cargas.count()
+
+
+    if materias_con_docente == 0:
+
+
+        estado_asignacion = 'Pendiente'
+
+
+        badge_class = 'badge-danger'
+
+
+    elif materias_con_docente < total_materias_disp or horarios.count() == 0:
+
+
+        estado_asignacion = 'Parcial'
+
+
+        badge_class = 'badge-warning'
+
+
+    else:
+
+
+        estado_asignacion = 'Completa'
+
+
+        badge_class = 'badge-success'
+
+
+    # Procesar asignación rápida en POST
+
+
+    if request.method == 'POST':
+
+
+        action = request.POST.get('action')
+
+
+        if action == 'asignar_docente_materia':
+            prog_id = request.POST.get('programa_id')
+            doc_id = request.POST.get('docente_id')
+            permitir_co_docencia = request.POST.get('permitir_co_docencia') in ['1', 'true', 'True', 'on']
+
+            if prog_id and doc_id:
+                prog = get_object_or_404(ProgramaFormacion, pk=prog_id)
+                doc = get_object_or_404(User, pk=doc_id)
+                grado_normalizado = normalizar_grado(grado_sel) or grado_sel
+                grado_dig = extraer_numero_grado(grado_sel)
+                nivel_asignado = determinar_nivel_educativo(grado_normalizado)
+
+                cargas_exist = CargaAcademica.objects.filter(
+                    programa=prog,
+                    seccion=seccion_sel,
+                    anio_lectivo=2026
+                ).filter(
+                    Q(grado=grado_sel) | Q(grado=grado_normalizado) | Q(grado=grado_dig) | Q(grado__icontains=grado_dig)
+                )
+
+                if cargas_exist.exists() and not permitir_co_docencia:
+                    if cargas_exist.filter(profesor=doc).exists():
+                        c_titular = cargas_exist.filter(profesor=doc).first()
+                        c_titular.nivel = nivel_asignado
+                        c_titular.grado = grado_normalizado
+                        c_titular.save()
+                    else:
+                        c_titular = cargas_exist.first()
+                        c_titular.profesor = doc
+                        c_titular.nivel = nivel_asignado
+                        c_titular.grado = grado_normalizado
+                        c_titular.save()
+
+                    g_num = extraer_numero_grado(grado_normalizado)
+                    HorarioFicha.objects.filter(
+                        Q(programa=prog) | Q(tema__iexact=prog.denominacion),
+                        grado__icontains=g_num,
+                        seccion__iexact=seccion_sel
+                    ).update(instructor=doc)
+
+                    messages.success(request, f"Docente titular actualizado: {doc.get_full_name()} asignado a {prog.denominacion} para Grado {grado_sel}°{seccion_sel}.")
+                elif cargas_exist.exists() and permitir_co_docencia:
+                    if cargas_exist.filter(profesor=doc).exists():
+                        messages.info(request, f"El docente {doc.get_full_name()} ya está asignado a {prog.denominacion}.")
+                    else:
+                        nueva_c = CargaAcademica.objects.create(
+                            profesor=doc,
+                            programa=prog,
+                            grado=grado_normalizado,
+                            seccion=seccion_sel,
+                            nivel=nivel_asignado,
+                            anio_lectivo=2026
+                        )
+                        messages.success(request, f"¡Co-docencia autorizada! {doc.get_full_name()} asignado como segundo docente para {prog.denominacion} en Grado {grado_sel}°{seccion_sel}.")
+                else:
+                    nueva_c = CargaAcademica.objects.create(
+                        profesor=doc,
+                        programa=prog,
+                        grado=grado_normalizado,
+                        seccion=seccion_sel,
+                        nivel=nivel_asignado,
+                        anio_lectivo=2026
+                    )
+                    messages.success(request, f"Docente {doc.get_full_name()} asignado a {prog.denominacion} para Grado {grado_sel}°{seccion_sel}.")
+
+                return redirect(f"{request.path}?grado={grado_sel}&seccion={seccion_sel}")
+
+
+    grados = Matricula._meta.get_field('grado_escolar').choices
+
+
+    secciones = ['A', 'B', 'C', 'D']
+
+
+    return render(request, 'academico/gestionar_asignacion_grupo.html', {
+
+
+        'grado_sel': str(grado_sel),
+
+
+        'seccion_sel': seccion_sel,
+
+
+        'matriculas': matriculas,
+
+
+        'materias': materias,
+
+
+        'docentes': docentes,
+
+
+        'cargas': cargas,
+
+
+        'horarios': horarios,
+
+
+        'cruces_detectados': cruces_detectados,
+
+
+        'estado_asignacion': estado_asignacion,
+
+
+        'badge_class': badge_class,
+
+
+        'grados': grados,
+
+
+        'secciones': secciones,
+
+
+    })
+
+
+@login_required
+
+
+def api_validar_cruce_horario(request):
+
+
+    """
+
+
+    Endpoint JSON para validar en vivo si un docente o aula tiene conflicto de horario.
+
+
+    """
+
+
+    profesor_id = request.GET.get('profesor_id')
+
+
+    dia = request.GET.get('dia')
+
+
+    hora_inicio = request.GET.get('hora_inicio')
+
+
+    hora_fin = request.GET.get('hora_fin')
+
+
+    horario_id = request.GET.get('horario_id')
+
+
+    if not all([profesor_id, dia, hora_inicio, hora_fin]):
+
+
+        return JsonResponse({'hay_cruce': False, 'mensaje': 'Parámetros incompletos'})
+
+
+    qs = HorarioFicha.objects.filter(
+
+
+        instructor_id=profesor_id,
+
+
+        dia=dia,
+
+
+        hora_inicio__lt=hora_fin,
+
+
+        hora_fin__gt=hora_inicio
+
+
+    )
+
+
+    if horario_id:
+
+
+        qs = qs.exclude(pk=horario_id)
+
+
+    cruce = qs.first()
+
+
+    if cruce:
+
+
+        return JsonResponse({
+
+
+            'hay_cruce': True,
+
+
+            'mensaje': f'Conflicto de horario: El docente ya tiene clase en Grado {cruce.grado}°{cruce.seccion} ({cruce.hora_inicio} - {cruce.hora_fin})'
+
+
+        })
+
+
+    return JsonResponse({'hay_cruce': False, 'mensaje': 'Horario disponible sin cruces'})
+
+
+@login_required
+
+
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor SENA', 'Instructor')
+
+
+def eliminar_horario(request, pk):
+
+
+    horario = get_object_or_404(HorarioFicha, pk=pk)
+
+
+    params = {
+
+
+        'nivel': horario.nivel,
+
+
+        'grado': horario.grado,
+
+
+        'seccion': horario.seccion,
+
+
+        'dia': horario.dia,
+
+
+    }
+
+
+    if request.method == 'POST':
+
+
         from usuarios.models import PapeleraReciclaje
+
+
         PapeleraReciclaje.objects.create(
+
+
             tipo_objeto='Horario',
+
+
             objeto_id=horario.id,
+
+
             titulo=f"{horario.nombre_materia} - Grado {horario.grado}°{horario.seccion}",
+
+
             subtitulo=f"{horario.get_dia_display()} {horario.hora_inicio.strftime('%H:%M')} - {horario.hora_fin.strftime('%H:%M')} · {horario.ambiente}",
+
+
             datos_recuperacion={
+
+
                 'horario_id': horario.id,
+
+
                 'dia': horario.dia,
+
+
                 'hora_inicio': str(horario.hora_inicio),
+
+
                 'hora_fin': str(horario.hora_fin),
+
+
                 'ambiente': horario.ambiente,
+
+
                 'grado': horario.grado,
+
+
                 'seccion': horario.seccion,
+
+
                 'programa_id': horario.programa_id,
+
+
                 'instructor_id': horario.instructor_id,
+
+
             },
+
+
             eliminado_por=request.user,
+
+
             motivo='Eliminado desde la gestión de horarios'
+
+
         )
+
+
         horario.activo = False
+
+
         horario.save(update_fields=['activo'])
+
+
         messages.success(request, f'Bloque "{horario.nombre_materia}" movido a la Papelera de Reciclaje.')
+
+
     return _redirigir_horarios(request, extra=params)
 
 
 @login_required
+
+
 @solo_instructor
+
+
 def matricular_aprendiz(request, ficha_id):
+
+
     """
+
+
     Matrícula de un nuevo estudiante en una ficha técnica (RN-001, RN-002, RN-007).
+
+
     Crea el usuario, su perfil y la vinculación formal en una sola transacción segura.
+
+
     """
+
+
     ficha = get_object_or_404(Ficha, pk=ficha_id)
+
+
     perfil = getattr(request.user, 'perfil', None)
+
+
     rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+
+
     is_authorized = (
+
+
         request.user.is_superuser
+
+
         or request.user == ficha.instructor_lider
+
+
         or rol_nombre in ['Administrador', 'Coordinador', 'Instructor SENA', 'Instructor']
+
+
         or rol_nombre.startswith('Instructor')
+
+
         or 'inst' in request.user.username.lower()
+
+
     )
+
+
     if not is_authorized:
+
+
         messages.error(request, "No tienes autorización institucional para matricular aprendices.")
+
+
         return redirect('fichas_detalle', pk=ficha.pk)
 
+
     import_form = ImportarAprendicesForm()
+
+
     import_errors = []
 
+
     if request.method == 'POST':
+
+
         if request.POST.get('accion') == 'importar':
+
+
             import_form = ImportarAprendicesForm(request.POST, request.FILES)
+
+
             if import_form.is_valid():
+
+
                 try:
+
+
                     registros = leer_archivo_aprendices(import_form.cleaned_data['archivo'])
+
+
                     registros_validos, import_errors = validar_importacion_aprendices(registros)
+
+
                 except (ValueError, csv.Error) as error:
+
+
                     import_errors = [str(error)]
+
+
                 if not import_errors and registros_validos:
+
+
                     try:
+
+
                         with transaction.atomic():
+
+
                             rol_estudiante, _ = Rol.objects.get_or_create(
+
+
                                 nombre='Estudiante',
+
+
                                 defaults={'descripcion': 'Aprendiz matriculado en Media Técnica'},
+
+
                             )
+
+
                             for datos in registros_validos:
+
+
                                 crear_matricula_desde_datos(ficha, datos, rol_estudiante)
+
+
                         messages.success(
+
+
                             request,
+
+
                             f'Se importaron {len(registros_validos)} aprendices en la Ficha {ficha.codigo_ficha}.',
+
+
                         )
+
+
                         return redirect('fichas_detalle', pk=ficha.pk)
+
+
                     except Exception as error:
+
+
                         import_errors = [f'No fue posible completar la importación: {error}']
+
+
                 elif not import_errors:
+
+
                     import_errors = ['El archivo no contiene aprendices para importar.']
+
+
             return render(request, 'academico/matricular.html', {
+
+
                 'form': MatriculaRapidaForm(),
+
+
                 'import_form': import_form,
+
+
                 'import_errors': import_errors,
+
+
                 'ficha': ficha,
+
+
             })
 
+
         form = MatriculaRapidaForm(request.POST)
+
+
         if form.is_valid():
+
+
             cd = form.cleaned_data
+
+
             try:
+
+
                 with transaction.atomic():
+
+
                     # Verificar si ya existe usuario con ese correo o documento
+
+
                     num_doc = cd['numero_documento'].strip()
-                    if PerfilUsuario.objects.filter(numero_documento=num_doc).exists():
-                        messages.error(request, f"Error (RN-001): Ya existe un usuario registrado con el documento {num_doc}.")
+
+
+                    est_con_doc = PerfilUsuario.buscar_estudiante_por_documento(num_doc)
+                    if est_con_doc:
+                        messages.error(request, f"No se permite crear otra cuenta: el documento {num_doc} ya pertenece al estudiante {est_con_doc.get_full_name()}. Búsquelo en la opción de vincular existente.")
                         return render(request, 'academico/matricular.html', {
                             'form': form,
                             'import_form': import_form,
                             'import_errors': import_errors,
                             'ficha': ficha,
                         })
+                    elif PerfilUsuario.objects.filter(numero_documento=num_doc).exists() or User.objects.filter(username=num_doc).exists():
+                        messages.error(request, f"Error (RN-001): Ya existe un usuario registrado con el documento {num_doc}.")
+                        return render(request, 'academico/matricular.html', {
+
+
+                            'form': form,
+
+
+                            'import_form': import_form,
+
+
+                            'import_errors': import_errors,
+
+
+                            'ficha': ficha,
+
+
+                        })
+
 
                     # Obtener o crear rol Estudiante
+
+
                     rol_estudiante, _ = Rol.objects.get_or_create(
+
+
                         nombre="Estudiante",
+
+
                         defaults={'descripcion': 'Aprendiz matriculado en Media Técnica'}
+
+
                     )
 
+
                     matricula = crear_matricula_desde_datos(ficha, cd, rol_estudiante)
+
+
                     nombre_aprendiz = matricula.aprendiz.get_full_name() or matricula.aprendiz.username
+
+
                     messages.success(request, f"Aprendiz {nombre_aprendiz} matriculado exitosamente en la Ficha {ficha.codigo_ficha}.")
+
+
                     return redirect('fichas_detalle', pk=ficha.pk)
 
+
             except Exception as e:
+
+
                 messages.error(request, f"Ocurrió un error al procesar la matrícula: {str(e)}")
+
+
     else:
+
+
         form = MatriculaRapidaForm()
 
+
     return render(request, 'academico/matricular.html', {
+
+
         'form': form,
+
+
         'import_form': import_form,
+
+
         'import_errors': import_errors,
+
+
         'ficha': ficha,
+
+
     })
+
+
 from django.http import JsonResponse
+
+
 from django.utils import timezone
 
+
 @login_required
+
+
 def api_objetivos_por_competencia(request, competencia_id):
+
+
     from .models import Objetivo
+
+
     perfil = getattr(request.user, 'perfil', None)
+
+
     es_estudiante = bool(
+
+
         perfil and perfil.rol and
+
+
         'ESTUDIANTE' in _obtener_categorias_rol(perfil.rol.nombre)
+
+
     )
+
+
     objetivos = Objetivo.objects.filter(competencia_id=competencia_id)
+
+
     if es_estudiante:
+
+
         programas_estudiante = Matricula.objects.filter(
+
+
             aprendiz=request.user,
+
+
             estado_formacion='En Formacion',
+
+
         ).values_list('ficha__programa_id', flat=True)
+
+
         objetivos = objetivos.filter(
+
+
             competencia__programa_id__in=programas_estudiante,
+
+
         )
+
+
     data = [{'id': o.id, 'descripcion': o.descripcion} for o in objetivos]
+
+
     return JsonResponse({'objetivos': data})
 
+
 @login_required
+
+
 @solo_instructor
+
+
 def guardar_asistencia_clase(request):
+
+
     carga_id = request.POST.get('carga_id') or request.GET.get('carga_id')
+
+
     if request.method == 'POST' and carga_id:
+
+
         from .models import CargaAcademica, Matricula
+
+
         from seguimiento.models import AsistenciaAprendiz
-        
+
+
         carga = get_object_or_404(CargaAcademica, id=carga_id, profesor=request.user)
-        
+
+
         estudiantes = Matricula.objects.filter(
+
+
             grado_escolar=carga.grado,
+
+
             seccion=carga.seccion,
+
+
             estado_formacion='En Formacion'
+
+
         )
-        
+
+
         hoy = timezone.localdate()
-        
+
+
         for mat in estudiantes:
+
+
             estado = request.POST.get(f'asist_{mat.aprendiz.id}')
+
+
             if estado:
+
+
                 AsistenciaAprendiz.objects.update_or_create(
+
+
                     matricula=mat,
+
+
                     fecha=hoy,
+
+
                     defaults={'estado': estado, 'observacion': f"Asistencia en clase: {carga.programa.denominacion if carga.programa else 'Clase'}"}
+
+
                 )
+
+
         messages.success(request, f"Asistencia guardada para {carga.grado}°{carga.seccion}")
+
+
         return redirect(f"/instructor/?carga_id={carga_id}&subpanel=asistencia")
+
+
     return redirect('/instructor/?subpanel=asistencia')
 
+
 @login_required
+
+
 @solo_instructor
+
+
 def crear_actividad_clase(request):
+
+
     if request.method == 'POST':
+
+
         from .models import CargaAcademica, Competencia, Objetivo
+
+
         from usuarios.models import EvidenciaTaller
-        
+
+
         carga_id = request.POST.get('carga_id')
+
+
         carga = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first()
+
+
         if not carga:
+
+
             messages.error(request, 'No se puede asignar una tarea a una materia que no corresponde a su asignación docente.')
+
+
             return redirect('/instructor/?subpanel=actividades')
-        
+
+
         competencia_id = request.POST.get('competencia_id')
+
+
         objetivo_id = request.POST.get('objetivo_id')
+
+
         titulo = request.POST.get('titulo')
+
+
         descripcion = request.POST.get('descripcion')
+
+
         fecha_limite = request.POST.get('fecha_limite')
 
+
         if fecha_limite:
+
+
             try:
+
+
                 from datetime import datetime
+
+
                 from django.utils import timezone
+
+
                 dt_limite = timezone.make_aware(datetime.fromisoformat(fecha_limite))
+
+
                 if dt_limite < timezone.now() - timezone.timedelta(minutes=5):
+
+
                     messages.error(request, 'No se puede poner una fecha límite anterior a la fecha actual.')
+
+
                     return redirect(f"/instructor/?carga_id={carga_id}&subpanel=actividades")
+
+
             except Exception:
+
+
                 pass
-        
+
+
         EvidenciaTaller.objects.create(
+
+
             instructor=request.user,
+
+
             competencia_id=competencia_id,
+
+
             objetivo_id=objetivo_id,
+
+
             titulo=titulo,
+
+
             descripcion=descripcion,
+
+
             fecha_limite=fecha_limite
+
+
         )
+
+
         messages.success(request, f"Actividad '{titulo}' asignada exitosamente al grupo {carga.grado}°{carga.seccion}.")
+
+
         return redirect(f"/instructor/?carga_id={carga_id}&subpanel=actividades")
+
+
     return redirect('/instructor/?subpanel=actividades')
 
+
 @login_required
+
+
 @solo_instructor
+
+
 def horarios_cambiar_color(request):
+
+
     if request.method == 'POST':
+
+
         horario_id = request.POST.get('horario_id')
+
+
         color_clase = request.POST.get('color_clase')
-        
+
+
         from .models import HorarioFicha
+
+
         horario = get_object_or_404(HorarioFicha, id=horario_id)
+
+
         horario.color_hex = color_clase
+
+
         horario.save()
-        
+
+
         messages.success(request, f"Color de clase actualizado exitosamente.")
+
+
     return redirect('horarios_tablero')
 
+
+@login_required
+
+
+@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria')
+
+
+def gestion_academica(request):
+
+
+    """
+
+
+    Gestión Académica Escolar Oficial de EduNova:
+
+
+    Supervisión integral de los grados escolares de 1.º a 11.º, grupos (secciones),
+
+
+    asignaturas curriculares, estudiantes matriculados y docentes asignados en tiempo real.
+
+
+    """
+
+
+    grado_filtro = request.GET.get('grado', '').strip()
+
+
+    seccion_filtro = request.GET.get('seccion', '').strip()
+
+
+    q = request.GET.get('q', '').strip()
+
+
+    grados_iconos = {
+
+
+        '1': '🔤', '2': '✏️', '3': '📖', '4': '🎨', '5': '🌍',
+
+
+        '6': '🧪', '7': '📐', '8': '💻', '9': '🔬', '10': '⚛️', '11': '🎓'
+
+
+    }
+
+
+    # Grados 1° a 11°
+
+
+    grados_info = []
+
+
+    total_estudiantes_colegio = Matricula.objects.filter(estado_formacion='En Formacion').count()
+
+
+    total_cargas_colegio = CargaAcademica.objects.filter(anio_lectivo=2026).count()
+
+
+    total_programas_colegio = ProgramaFormacion.objects.filter(activo=True).count()
+
+
+    total_docentes_colegio = User.objects.filter(
+
+
+        Q(perfil__rol__nombre__icontains='Docente') |
+
+
+        Q(perfil__rol__nombre__icontains='Profesor') |
+
+
+        Q(perfil__rol__nombre__icontains='Instructor'),
+
+
+        is_active=True
+
+
+    ).distinct().count()
+
+
+    for i in range(1, 12):
+
+
+        g_str = str(i)
+
+
+        nivel_nombre = 'Primaria' if i <= 5 else ('Básica Secundaria' if i <= 9 else 'Educación Media')
+
+
+        # Matrículas reales
+
+
+        mats_grado = Matricula.objects.filter(
+
+
+            Q(grado_escolar=g_str) | Q(ficha__codigo_ficha__startswith=f"{g_str}-") | Q(ficha__codigo_ficha__iexact=f"COL-2026-G{i:02d}-A"),
+
+
+            estado_formacion='En Formacion'
+
+
+        )
+
+
+        total_est = mats_grado.count()
+
+
+        # Secciones presentes
+
+
+        secciones_presentes = list(mats_grado.values_list('seccion', flat=True).distinct())
+
+
+        if not secciones_presentes:
+
+
+            secciones_presentes = ['A']
+
+
+        # Cargas académicas (materias y docentes) para este grado
+
+
+        cargas_grado = CargaAcademica.objects.filter(
+
+
+            Q(grado=g_str) | Q(grado=f"{g_str}°") | Q(grado__icontains=f"{g_str}mo") | Q(grado__icontains=f"{g_str}ro") | Q(grado__icontains=f"{g_str}to") | Q(grado__icontains=f"{g_str}do") | Q(grado__icontains=f"{g_str}vo"),
+
+
+            anio_lectivo=2026
+
+
+        ).select_related('profesor', 'programa').order_by('programa__denominacion')
+
+
+        docentes_grado_ids = set(cargas_grado.values_list('profesor_id', flat=True))
+
+
+        grados_info.append({
+
+
+            'numero': g_str,
+
+
+            'nombre': f"Grado {g_str}.°",
+
+
+            'nombre_display': f"Grado {g_str}°",
+
+
+            'nivel': nivel_nombre,
+
+
+            'icono': grados_iconos.get(g_str, '📚'),
+
+
+            'total_estudiantes': total_est,
+
+
+            'secciones': sorted(list(set(secciones_presentes))),
+
+
+            'total_materias': cargas_grado.count(),
+
+
+            'total_docentes': len(docentes_grado_ids),
+
+
+            'cargas': cargas_grado,
+
+
+        })
+
+
+    # Detalle de grado seleccionado
+
+
+    grado_seleccionado = None
+
+
+    estudiantes_grado = []
+
+
+    cargas_seleccionadas = []
+
+
+    if grado_filtro:
+
+
+        grado_seleccionado = next((g for g in grados_info if g['numero'] == grado_filtro), None)
+
+
+        if grado_seleccionado:
+
+
+            qs_est = Matricula.objects.filter(
+
+
+                Q(grado_escolar=grado_filtro) | Q(ficha__codigo_ficha__startswith=f"{grado_filtro}-") | Q(ficha__codigo_ficha__iexact=f"COL-2026-G{int(grado_filtro):02d}-A"),
+
+
+                estado_formacion='En Formacion'
+
+
+            ).select_related('aprendiz', 'aprendiz__perfil', 'ficha')
+
+
+            if seccion_filtro:
+
+
+                qs_est = qs_est.filter(seccion__iexact=seccion_filtro)
+
+
+            if q:
+
+
+                qs_est = qs_est.filter(
+
+
+                    Q(aprendiz__first_name__icontains=q) |
+
+
+                    Q(aprendiz__last_name__icontains=q) |
+
+
+                    Q(aprendiz__perfil__numero_documento__icontains=q)
+
+
+                )
+
+
+            estudiantes_grado = list(qs_est.order_by('seccion', 'aprendiz__last_name'))
+
+
+            cargas_seleccionadas = list(grado_seleccionado['cargas'])
+
+
+            if seccion_filtro:
+
+
+                cargas_seleccionadas = [c for c in cargas_seleccionadas if c.seccion.upper() == seccion_filtro.upper()]
+
+
+    todos_programas = ProgramaFormacion.objects.filter(activo=True).order_by('denominacion')
+
+
+    todos_docentes = User.objects.filter(
+
+
+        Q(perfil__rol__nombre__icontains='Docente') |
+
+
+        Q(perfil__rol__nombre__icontains='Profesor') |
+
+
+        Q(perfil__rol__nombre__icontains='Instructor'),
+
+
+        is_active=True
+
+
+    ).distinct().order_by('last_name', 'first_name')
+
+
+    context = {
+
+
+        'grados_info': grados_info,
+
+
+        'grado_filtro': grado_filtro,
+
+
+        'seccion_filtro': seccion_filtro,
+
+
+        'grado_seleccionado': grado_seleccionado,
+
+
+        'estudiantes_grado': estudiantes_grado,
+
+
+        'cargas_seleccionadas': cargas_seleccionadas,
+
+
+        'todos_programas': todos_programas,
+
+
+        'todos_docentes': todos_docentes,
+
+
+        'total_estudiantes_colegio': total_estudiantes_colegio,
+
+
+        'total_cargas_colegio': total_cargas_colegio,
+
+
+        'total_programas_colegio': total_programas_colegio,
+
+
+        'total_docentes_colegio': total_docentes_colegio,
+
+
+        'q': q,
+
+
+    }
+
+
+    return render(request, 'academico/gestion_academica.html', context)
+
+
 def mockup_grados(request):
-    grados = [
-        {'titulo': 'Primer Grado', 'subtitulo': 'Nivel inicial de educación básica', 'orden': 1, 'estado': 'Activo'},
-        {'titulo': 'Segundo Grado', 'subtitulo': 'Segundo nivel de educación básica', 'orden': 2, 'estado': 'Activo'},
-        {'titulo': 'Tercer Grado', 'subtitulo': 'Tercer nivel de educación básica', 'orden': 3, 'estado': 'Activo'},
-        {'titulo': 'Cuarto Grado', 'subtitulo': 'Cuarto nivel de educación básica', 'orden': 4, 'estado': 'Activo'},
-        {'titulo': 'Quinto Grado', 'subtitulo': 'Quinto nivel de educación básica', 'orden': 5, 'estado': 'Activo'},
-        {'titulo': 'Sexto Grado', 'subtitulo': 'Sexto nivel de educación básica', 'orden': 6, 'estado': 'Activo'},
-    ]
-    return render(request, 'academico/mockup_grados.html', {'grados': grados})
+
+
+    return gestion_academica(request)
+
 
 def mockup_materias(request):
+
+
     materias = [
+
+
         {'titulo': 'Ciencias', 'subtitulo': 'Exploración del entorno natural y pensamiento científico', 'icono': 'bi-flask', 'bg': 'linear-gradient(135deg, #059669, #3b82f6)'},
+
+
         {'titulo': 'Ciudadanía y Valores', 'subtitulo': 'Convivencia, derechos y participación en sociedad', 'icono': 'bi-book-half', 'bg': 'linear-gradient(135deg, #1e3a8a, #3b82f6)'},
+
+
         {'titulo': 'Lenguaje', 'subtitulo': 'Lectura, escritura y comprensión', 'icono': 'bi-journal-text', 'bg': 'linear-gradient(135deg, #2563eb, #60a5fa)'},
+
+
         {'titulo': 'Matemática', 'subtitulo': 'Números, lógica y resolución de problemas', 'icono': 'bi-calculator', 'bg': 'linear-gradient(135deg, #4c1d95, #8b5cf6)'},
+
+
     ]
+
+
     grados_list = ['Primer Grado', 'Segundo Grado', 'Tercer Grado', 'Cuarto Grado', 'Quinto Grado', 'Sexto Grado', 'Séptimo Grado', 'Octavo Grado', 'Noveno Grado']
+
+
     return render(request, 'academico/mockup_materias.html', {'materias': materias, 'grados_list': grados_list})
 
+
 def mockup_temas(request):
+
+
     temas = [
+
+
         {'titulo': 'Ecología de poblaciones.', 'subtitulo': 'Séptimo Grado - Ciencias', 'tarjetas': 10, 'preguntas': 10},
+
+
         {'titulo': 'Interacciones ecológicas', 'subtitulo': 'Séptimo Grado - Ciencias', 'tarjetas': 12, 'preguntas': 10},
+
+
         {'titulo': 'El cuento de terror', 'subtitulo': 'Séptimo Grado - Lenguaje', 'tarjetas': 10, 'preguntas': 10},
+
+
         {'titulo': 'Álgebra fácil', 'subtitulo': 'Séptimo Grado - Matemática', 'tarjetas': 10, 'preguntas': 10},
+
+
         {'titulo': 'Ecuaciones de primer grado.', 'subtitulo': 'Séptimo Grado - Matemática', 'tarjetas': 10, 'preguntas': 10},
+
+
         {'titulo': 'Las tablas de multiplicar', 'subtitulo': 'Tercer Grado - Matemática', 'tarjetas': 10, 'preguntas': 10},
+
+
     ]
+
+
     return render(request, 'academico/mockup_temas.html', {'temas': temas})
 
+
 def mockup_estudiantes(request):
+
+
     return render(request, 'academico/mockup_estudiantes.html')
 
+
 def mockup_escuelas(request):
+
+
     return render(request, 'academico/mockup_escuelas.html')
 
+
 def mockup_lecciones(request):
+
+
     return render(request, 'academico/mockup_lecciones.html')
 
+
 def mockup_tarjetas(request):
+
+
     return render(request, 'academico/mockup_tarjetas.html')
 
+
 def mockup_quizzes(request):
+
+
     return render(request, 'academico/mockup_quizzes.html')
 
+
 def mockup_trabajos_ia(request):
+
+
     return render(request, 'academico/mockup_trabajos_ia.html')
 
+
 def mockup_progreso(request):
+
+
     return render(request, 'academico/mockup_progreso.html')
 
 
 @login_required
+
+
 def configurar_periodos_academicos(request):
+
+
     """
+
+
     Gestión oficial de los 4 períodos académicos por año lectivo (Período 1, 2, 3 y 4).
+
+
     Permite a los administradores, rectoría y secretaría editar fechas de inicio/fin,
+
+
     porcentajes y estados de cierre formal, con validación de fechas y advertencia de cruces.
+
+
     """
+
+
     from .models import PeriodoAcademico
+
+
     from datetime import date
+
+
     from decimal import Decimal
+
+
     from django.urls import reverse
 
+
     anio_sel = request.GET.get('anio', '2026')
+
+
     periodos = PeriodoAcademico.obtener_periodos_anio(anio_sel)
 
+
     if request.method == 'POST':
+
+
         periodo_id = request.POST.get('periodo_id')
+
+
         p_obj = PeriodoAcademico.objects.filter(id=periodo_id).first()
+
+
         if p_obj:
+
+
             f_ini_str = request.POST.get('fecha_inicio')
+
+
             f_fin_str = request.POST.get('fecha_fin')
+
+
             porc_str = request.POST.get('porcentaje', '25.0')
+
+
             cerrado_val = request.POST.get('cerrado') in ['1', 'true', 'True', 'on']
 
+
             if not f_ini_str or not f_fin_str:
+
+
                 messages.error(request, 'Debes ingresar fecha de inicio y finalización.')
+
+
             else:
+
+
                 try:
+
+
                     f_ini = date.fromisoformat(f_ini_str)
+
+
                     f_fin = date.fromisoformat(f_fin_str)
+
+
                     if f_fin < f_ini:
+
+
                         messages.error(request, f'Error en {p_obj.nombre}: La fecha final ({f_fin}) no puede ser anterior a la inicial ({f_ini}).')
+
+
                     else:
+
+
                         p_obj.fecha_inicio = f_ini
+
+
                         p_obj.fecha_fin = f_fin
+
+
                         try:
+
+
                             p_obj.porcentaje = Decimal(porc_str)
+
+
                         except Exception:
+
+
                             p_obj.porcentaje = Decimal('25.00')
+
+
                         p_obj.cerrado = cerrado_val
+
+
                         p_obj.save()
 
+
                         cruces = PeriodoAcademico.validar_cruces(anio_sel)
+
+
                         if cruces:
+
+
                             for c in cruces:
+
+
                                 messages.warning(request, f'Advertencia de solapamiento: {c}')
 
+
                         messages.success(request, f'¡{p_obj.nombre} actualizado correctamente!')
+
+
                         try:
+
+
                             from seguimiento.models import RegistroAuditoria
+
+
                             RegistroAuditoria.registrar(
+
+
                                 usuario=request.user,
+
+
                                 modulo='Periodos Académicos',
+
+
                                 accion='Actualización de Periodo',
+
+
                                 detalles=f'Modificó fechas de {p_obj.nombre} ({f_ini} a {f_fin}, cerrado={cerrado_val})',
+
+
                                 request=request
+
+
                             )
+
+
                         except Exception:
+
+
                             pass
+
+
                 except Exception as e:
+
+
                     messages.error(request, f'Error procesando fechas: {str(e)}')
+
+
             return redirect(f"{reverse('configurar_periodos_academicos')}?anio={anio_sel}")
 
+
     cruces = PeriodoAcademico.validar_cruces(anio_sel)
+
+
     return render(request, 'academico/periodos_academicos.html', {
+
+
         'periodos': periodos,
+
+
         'anio_sel': anio_sel,
+
+
         'cruces': cruces,
+
+
     })
 

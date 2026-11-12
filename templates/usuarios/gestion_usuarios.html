@@ -193,7 +193,7 @@
                                 {% endif %}
                             </td>
                             <td class="pe-3 text-end">
-                                {% if es_secretaria and u.is_superuser or es_secretaria and u.perfil.rol.nombre in 'Administrador Rectoría Rector Coordinador' %}
+                                {% if es_secretaria and u.es_directivo_protegido %}
                                     <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2.5 py-1.5" title="Cuenta con privilegios directivos protegidos"><i class="bi bi-shield-lock me-1"></i>Directivo Protegido</span>
                                 {% else %}
                                     <div class="btn-group btn-group-sm">

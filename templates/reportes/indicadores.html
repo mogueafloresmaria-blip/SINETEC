@@ -10,13 +10,13 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">SENA · Regional Magdalena</span>
-                <span class="text-muted small">Centro de Logística y Promoción Ecoturística</span>
+                <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #F5F2EB; color: #5a3825; border: 1px solid #E0D8CE;">EDUNOVA · Institución Educativa</span>
+                <span class="text-muted small">Gestión Administrativa y Académica Escolar</span>
             </div>
             <h1 class="h3 fw-bold text-dark mb-1">
                 <i class="bi bi-speedometer2 text-success me-2"></i>Cuadro de Mando e Indicadores Clave (KPIs)
             </h1>
-            <p class="text-muted mb-0">Monitoreo en tiempo real de la formación, desempeño evaluativo y atención de novedades.</p>
+            <p class="text-muted mb-0">Monitoreo en tiempo real de la matrícula, desempeño académico y novedades escolares.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{% url 'centro_reportes' %}" class="btn btn-outline-success fw-semibold">
@@ -48,9 +48,9 @@
             <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border-start border-4 border-primary">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-muted small text-uppercase fw-semibold">Cohortes y Fichas</span>
+                        <span class="text-muted small text-uppercase fw-semibold">Cursos y Grupos Escolares</span>
                         <h2 class="fw-bold text-primary mb-0 mt-1">{{ total_fichas }}</h2>
-                        <span class="text-muted small">{{ fichas_activas }} en ejecución activa</span>
+                        <span class="text-muted small">{{ fichas_activas }} cursos activos</span>
                     </div>
                     <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-layers-fill fs-3"></i>
@@ -62,7 +62,7 @@
             <div class="card border-0 shadow-sm p-4 bg-white rounded-4 border-start border-4 border-warning">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-muted small text-uppercase fw-semibold">Tasa de Aprobación RAP</span>
+                        <span class="text-muted small text-uppercase fw-semibold">Tasa de Aprobación Académica</span>
                         <h2 class="fw-bold text-dark mb-0 mt-1">{{ tasa_aprobacion }}%</h2>
                         <span class="text-warning small fw-semibold">{{ juicios_a }} aprobados / {{ juicios_d }} por mejorar</span>
                     </div>
@@ -91,12 +91,12 @@
     <!-- Segunda Fila: Métricas Detalladas de Rendimiento Formativo -->
     <div class="row g-4 mb-4">
 
-        <!-- 1. Desglose de Evaluación RAP -->
+        <!-- 1. Desglose de Evaluaciones Académicas -->
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="fw-bold text-dark mb-0">
-                        <i class="bi bi-award-fill text-success me-2"></i>Rendimiento en Evaluaciones (RAP)
+                        <i class="bi bi-award-fill text-success me-2"></i>Rendimiento en Evaluaciones Académicas
                     </h5>
                     <span class="badge bg-light text-dark border">{{ total_juicios }} juicios totales</span>
                 </div>
@@ -176,7 +176,7 @@
                 </div>
                 <div class="alert alert-info py-2 px-3 small mb-0 mt-auto">
                     <i class="bi bi-info-circle-fill me-1"></i>
-                    Los instructores deben registrar la retroalimentación pedagógica oportuna para mantener la vigencia de la ruta formativa SENA.
+                    Los docentes titulares registran la retroalimentación oportuna para mantener el seguimiento formativo continuo en EDUNOVA.
                 </div>
             </div>
         </div>

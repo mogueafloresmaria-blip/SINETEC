@@ -57,6 +57,16 @@ class MatriculaRapidaForm(forms.Form):
     acudiente_nombre = forms.CharField(max_length=150, required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del acudiente'}))
     acudiente_telefono = forms.CharField(max_length=20, required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono del acudiente'}))
 
+    def clean_numero_documento(self):
+        doc = self.cleaned_data['numero_documento'].strip()
+        from usuarios.models import PerfilUsuario
+        est_existente = PerfilUsuario.buscar_estudiante_por_documento(doc)
+        if est_existente:
+            raise forms.ValidationError(
+                f'No se permite crear otra cuenta: el documento {doc} ya pertenece al estudiante {est_existente.get_full_name()}.'
+            )
+        return doc
+
 
 class ImportarAprendicesForm(forms.Form):
     archivo = forms.FileField(

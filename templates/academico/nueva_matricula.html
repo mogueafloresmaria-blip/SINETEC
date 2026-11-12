@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Nueva Matrícula Oficial 2026 · EDUNOVA{% endblock %}
+{% block title %}Asignar Matrícula Oficial 2026 – EDUNOVA{% endblock %}
 
 {% block content %}
 <style>
-.nm-wrap { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem; }
+.nm-wrap { max-width: 820px; margin: 0 auto; padding: 1.5rem 1rem; }
 .nm-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(90, 56, 37, 0.08); border: 1px solid #E5DFD5; }
 .nm-head { background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-principal) 100%); color: #fff; padding: 1.5rem 1.8rem; display: flex; justify-content: space-between; align-items: center; }
 .nm-body { padding: 2rem 2.2rem; }
@@ -12,6 +12,56 @@
 .nm-submit:hover { filter: brightness(1.08); transform: translateY(-1px); color: #fff; }
 .mode-pill { cursor: pointer; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; border: 1.5px solid #E5DFD5; background: #fff; color: #4B382A; transition: all 0.2s; }
 .mode-pill.active { background: var(--color-secundario); color: #fff; border-color: var(--color-secundario); }
+
+/* Estilos de la lista de selección de estudiantes */
+.alumnos-lista-scroll {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1.5px solid #D8D1C7;
+  border-radius: 10px;
+  background: #fff;
+}
+.alumno-fila-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid #F0ECE6;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+.alumno-fila-item:last-child {
+  border-bottom: none;
+}
+.alumno-fila-item:hover {
+  background: #FAF8F5;
+}
+.alumno-fila-item.activo {
+  background: #F5EDE4 !important;
+  border-left: 4px solid var(--color-principal) !important;
+}
+.alumno-fila-item.activo .badge-elegir {
+  background: var(--color-principal) !important;
+  color: #fff !important;
+}
+.form-control.is-invalid, .form-select.is-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+}
+.form-control.is-valid, .form-select.is-valid {
+  border-color: #198754 !important;
+}
+.invalid-feedback {
+  display: none;
+  width: 100%;
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #dc3545;
+}
+.invalid-feedback.d-block {
+  display: block !important;
+}
 </style>
 
 <div class="nm-wrap">
@@ -24,47 +74,181 @@
     </span>
   </div>
 
+  <!-- AVISO DE CLARIFICACIÓN FUNCIONAL: ESTUDIANTE NUEVO VS EXISTENTE -->
+  <div class="alert border-0 rounded-4 p-3 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-3 shadow-2xs"
+       style="background: #ffffff; border: 1.5px solid var(--color-acento) !important;">
+    <div class="d-flex align-items-center gap-2.5">
+      <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: #FAF8F5; color: var(--color-principal); width: 40px; height: 40px;">
+        <i class="bi bi-person-plus-fill fs-5"></i>
+      </div>
+      <div class="small">
+        <strong class="text-dark">¿El estudiante es nuevo en la institución?</strong><br>
+        <span class="text-muted">Para registrar su expediente integral (datos personales, lugar de nacimiento y acudiente), utilice el formulario de registro completo.</span>
+      </div>
+    </div>
+    <a href="{% url 'registrar_aprendiz' %}" class="btn btn-sm fw-bold rounded-pill px-3 py-1.5 text-nowrap"
+       style="background: #FAF8F5; color: var(--color-principal); border: 1.5px solid var(--color-acento);">
+      <i class="bi bi-person-plus-fill me-1"></i> Registrar Estudiante Nuevo
+    </a>
+  </div>
+
   <div class="nm-card">
     <div class="nm-head">
       <div>
-        <h1 class="h5 fw-bold mb-1 text-white"><i class="bi bi-person-plus-fill me-2"></i>Nueva Matrícula Escolar</h1>
-        <p class="small mb-0 text-white-50">Formalización del registro institucional de matrícula por grado y sección</p>
+        <h1 class="h5 fw-bold mb-1 text-white"><i class="bi bi-person-check-fill me-2"></i>Asignar Matrícula – Estudiantes Registrados</h1>
+        <p class="small mb-0 text-white-50">Seleccione al estudiante registrado en la lista con un solo clic y formalice su matrícula escolar 2026</p>
       </div>
       <span class="badge bg-white text-dark fw-bold px-3 py-2 rounded-pill shadow-sm">Vigencia 2026</span>
     </div>
 
-    <form method="post" id="formNuevaMatricula">
+    <form method="post" id="formNuevaMatricula" novalidate>
       <div class="nm-body">
         {% csrf_token %}
+        <input type="hidden" name="modo_registro" id="inputModoRegistro" value="{{ form_data.modo_registro|default:'existente' }}">
+
+        {% if errors %}
+        <div class="alert alert-danger border-0 rounded-3 p-3 mb-4 shadow-xs" role="alert" style="background: #FDF2F2; border-left: 4px solid #DC2626 !important; color: #991B1B;">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="bi bi-exclamation-octagon-fill fs-5 text-danger"></i>
+            <strong class="fs-6">Se encontraron inconsistencias en la información ingresada:</strong>
+          </div>
+          <p class="small mb-1">Por favor verifique los campos marcados en rojo y corrija los datos para guardar la matrícula.</p>
+          {% if errors.general %}
+          <div class="p-2 rounded bg-white text-danger small fw-bold border border-danger-subtle mt-2">
+            <i class="bi bi-x-circle-fill me-1"></i> {{ errors.general }}
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
 
         <!-- Modalidad de Selección / Creación -->
         <div class="mb-4">
           <label class="nm-label">1. Modalidad de Selección del Estudiante</label>
           <div class="d-flex gap-2 mb-3">
             <button type="button" class="mode-pill active" id="btnModoExistente" onclick="cambiarModo('existente')">
-              <i class="bi bi-search me-1"></i> Estudiante Existente
+              <i class="bi bi-search me-1"></i> Estudiante Existente (Selección Rápida)
             </button>
             <button type="button" class="mode-pill" id="btnModoNuevo" onclick="cambiarModo('nuevo')">
-              <i class="bi bi-person-plus-fill me-1"></i> Nuevo Estudiante (Cuenta Automática)
+              <i class="bi bi-person-plus-fill me-1"></i> Nuevo Estudiante (Cuenta Rápida)
             </button>
           </div>
 
           <!-- Modo A: Estudiante Existente -->
           <div id="seccionExistente">
-            <div class="input-group mb-2">
-              <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-              <input type="text" id="filtroAlumnoTexto" class="form-control border-start-0" placeholder="Escriba nombre o documento para filtrar en la lista..." onkeyup="filtrarAlumnosRapido(this.value)">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="small text-muted fw-bold">Buscar estudiante por nombre, apellido o documento:</span>
+              <span class="small text-muted" id="totalAlumnosBadge">Escriba en el buscador para consultar</span>
             </div>
-            <select name="alumno_id" id="selectAlumnoMatricula" class="form-select form-select-lg fs-6" size="5" style="max-height: 180px;">
-              <option value="" disabled selected>-- Seleccione un estudiante de la lista --</option>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" id="filtroAlumnoTexto" class="form-control border-start-0 {% if errors.alumno_id %}is-invalid{% endif %}" 
+                     placeholder="Escriba para buscar estudiante (ej. Carla, Mateo, documento...)" 
+                     oninput="filtrarAlumnosRapido(this.value)">
+              <button type="button" class="btn btn-outline-secondary" onclick="limpiarFiltro()" title="Limpiar búsqueda">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback {% if errors.alumno_id %}d-block{% endif %} mb-2" id="error-alumno_id" style="font-weight: 600;">
+              {% if errors.alumno_id %}<i class="bi bi-exclamation-circle-fill me-1"></i>{{ errors.alumno_id }}{% endif %}
+            </div>
+
+            <!-- Campo oculto con el ID real del estudiante para el envío seguro -->
+            <input type="hidden" name="alumno_id" id="inputAlumnoId" value="{{ form_data.alumno_id|default:alumno_preseleccionado|default:'' }}">
+
+            <!-- Lista interactiva con selección por clic -->
+            <div class="alumnos-lista-scroll" id="listaAlumnosContainer">
+              <!-- Mensaje inicial de guía (cuando el buscador está vacío) -->
+              <div id="msgEscribaParaBuscar" class="p-4 text-center text-muted small {% if alumno_preseleccionado or form_data.alumno_id %}d-none{% endif %}">
+                <i class="bi bi-search fs-4 text-primary d-block mb-1"></i>
+                <span>Escriba el nombre, apellido o documento en el buscador para ver las coincidencias.</span>
+              </div>
+
+              <!-- Mensaje cuando no hay resultados de búsqueda -->
+              <div id="msgSinResultados" class="p-4 text-center text-muted small d-none">
+                <i class="bi bi-exclamation-circle fs-4 text-warning d-block mb-1"></i>
+                <span>No se encontró ningún estudiante registrado que coincida con la búsqueda.</span>
+              </div>
+
               {% for alumno in alumnos %}
-              <option value="{{ alumno.pk }}" {% if alumno_preseleccionado == alumno.pk|stringformat:"s" %}selected{% endif %}>
-                {{ alumno.get_full_name|default:alumno.username }} · Doc: {{ alumno.perfil.numero_documento|default:"N/A" }} {% if alumno.email %}· {{ alumno.email }}{% endif %}
-              </option>
+              <div class="alumno-fila-item {% if alumno_preseleccionado == alumno.pk|stringformat:'s' or form_data.alumno_id == alumno.pk|stringformat:'s' %}activo{% endif %}"
+                   id="item-alumno-{{ alumno.pk }}"
+                   style="display: {% if alumno_preseleccionado == alumno.pk|stringformat:'s' or form_data.alumno_id == alumno.pk|stringformat:'s' %}flex{% else %}none{% endif %};"
+                   data-id="{{ alumno.pk }}"
+                   data-nombre="{{ alumno.get_full_name|default:alumno.username }}"
+                   data-doc="{{ alumno.perfil.numero_documento|default:alumno.username }}"
+                   data-email="{{ alumno.email|default:'Sin correo registrado' }}"
+                   data-tiene-matricula="{% if alumno.info_mat.tiene_matricula %}1{% else %}0{% endif %}"
+                   data-es-activa="{% if alumno.info_mat.es_activa %}1{% else %}0{% endif %}"
+                   data-grado-num="{{ alumno.info_mat.grado_num }}"
+                   data-grado-display="{{ alumno.info_mat.grado_display }}"
+                   data-seccion="{{ alumno.info_mat.seccion }}"
+                   data-jornada="{{ alumno.info_mat.jornada }}"
+                   data-estado="{{ alumno.info_mat.estado }}"
+                   data-anio="{{ alumno.info_mat.anio }}"
+                   onclick="seleccionarEstudianteDirecto('{{ alumno.pk }}')">
+                <div class="d-flex flex-column py-1">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-dark alumno-txt-nombre">{{ alumno.get_full_name|default:alumno.username }}</span>
+                    <span class="badge bg-light text-muted border px-2 py-0.5" style="font-size: 0.72rem;">ID: #{{ alumno.pk }}</span>
+                  </div>
+                  <div class="small text-muted mt-0.5">
+                    <span>· Doc: <strong class="alumno-txt-doc">{{ alumno.perfil.numero_documento|default:alumno.username }}</strong></span>
+                    {% if alumno.email %}
+                    <span class="ms-1 d-none d-sm-inline">· {{ alumno.email }}</span>
+                    {% endif %}
+                    {% if alumno.info_mat.tiene_matricula %}
+                    <span class="ms-1 badge px-2 py-0.5 rounded-pill" style="background: #E8F4F8; color: #1E6B7B; border: 1px solid #C4E2EB; font-size: 0.72rem;">
+                      <i class="bi bi-mortarboard me-1"></i>{{ alumno.info_mat.grado_display|default:'Matriculado' }} - Gr. {{ alumno.info_mat.seccion }}
+                    </span>
+                    {% else %}
+                    <span class="ms-1 badge px-2 py-0.5 rounded-pill" style="background: #FFF8E6; color: #8A6D1C; border: 1px solid #FFE7A3; font-size: 0.72rem;">
+                      <i class="bi bi-person-exclamation me-1"></i>Sin Matrícula 2026
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+                <span class="badge badge-elegir rounded-pill px-2.5 py-1 small {% if alumno_preseleccionado == alumno.pk|stringformat:'s' or form_data.alumno_id == alumno.pk|stringformat:'s' %}bg-success text-white{% else %}bg-light text-muted border{% endif %}">
+                  {% if alumno_preseleccionado == alumno.pk|stringformat:'s' or form_data.alumno_id == alumno.pk|stringformat:'s' %}Seleccionado{% else %}Elegir{% endif %}
+                </span>
+              </div>
+              {% empty %}
+              <div class="p-3 text-center text-muted small">No hay estudiantes disponibles en la base de datos.</div>
               {% endfor %}
-            </select>
-            <small class="text-muted d-block mt-1">
-              <i class="bi bi-info-circle me-1 text-primary"></i> Estudiantes activos de la institución con expediente creado.
+            </div>
+
+            <!-- Panel visual de Confirmación del Estudiante Seleccionado e Información Académica Real -->
+            <div id="bannerEstudianteSeleccionado" class="card border-0 rounded-3 p-3 mt-3 shadow-xs" style="display: none; background: #FAF8F5; border: 1.5px solid var(--color-acento) !important;">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: #ECFDF5; color: #047857; width: 36px; height: 36px;">
+                    <i class="bi bi-person-check-fill fs-5"></i>
+                  </div>
+                  <div>
+                    <div class="d-flex align-items-center gap-2">
+                      <strong class="text-dark fs-6" id="nombreEstudianteSeleccionado"></strong>
+                      <span class="badge bg-secondary text-white" id="idEstudianteSeleccionado"></span>
+                    </div>
+                    <div class="small text-muted">
+                      <span>Documento: <strong class="text-dark" id="docEstudianteSeleccionado"></strong></span>
+                      <span class="mx-1">·</span>
+                      <span>Correo: <span class="text-dark" id="emailEstudianteSeleccionado"></span></span>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-bold" onclick="deseleccionarEstudiante()" title="Quitar selección actual">
+                  <i class="bi bi-x-circle me-1"></i> Quitar Selección
+                </button>
+              </div>
+
+              <!-- Estado Académico Real Consultado en Base de Datos -->
+              <div id="cardInfoAcademicaReal" class="p-2.5 rounded-3 mt-2" style="font-size: 0.85rem;">
+                <!-- Rellenado dinámicamente por JavaScript -->
+              </div>
+            </div>
+
+            <small class="text-muted mt-2" id="ayudaSeleccionEstudiante" style="display: {% if alumno_preseleccionado or form_data.alumno_id %}none{% else %}block{% endif %};">
+              <i class="bi bi-info-circle me-1 text-primary"></i> Escriba en el buscador para encontrar al estudiante y selecciónelo para formalizar su matrícula.
             </small>
           </div>
 
@@ -82,57 +266,107 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="nm-label">Número de Documento / Cédula *</label>
-                <input type="text" name="documento" id="inputDocumento" class="form-control" placeholder="Ej. 1098765432">
+                <input type="text" name="documento" id="inputDocumento" 
+                       class="form-control {% if errors.documento %}is-invalid{% elif form_data.documento %}is-valid{% endif %}" 
+                       placeholder="Ej. 1098765432" 
+                       value="{{ form_data.documento|default:'' }}"
+                       maxlength="12" autocomplete="off">
+                <div class="invalid-feedback {% if errors.documento %}d-block{% endif %}" id="error-documento">
+                  {{ errors.documento|default:'' }}
+                </div>
               </div>
               <div class="col-md-6">
                 <label class="nm-label">Correo Electrónico</label>
-                <input type="email" name="email" id="inputEmail" class="form-control" placeholder="ejemplo@edunova.edu">
+                <input type="email" name="email" id="inputEmail" 
+                       class="form-control {% if errors.email %}is-invalid{% elif form_data.email %}is-valid{% endif %}" 
+                       placeholder="ejemplo@edunova.edu" 
+                       value="{{ form_data.email|default:'' }}">
+                <div class="invalid-feedback {% if errors.email %}d-block{% endif %}" id="error-email">
+                  {{ errors.email|default:'' }}
+                </div>
               </div>
               <div class="col-md-6">
                 <label class="nm-label">Nombres del Estudiante *</label>
-                <input type="text" name="nombre" id="inputNombre" class="form-control" placeholder="Ej. Carlos Andrés">
+                <input type="text" name="nombre" id="inputNombre" 
+                       class="form-control {% if errors.nombre %}is-invalid{% elif form_data.nombre %}is-valid{% endif %}" 
+                       placeholder="Ej. Carlos Andrés" 
+                       value="{{ form_data.nombre|default:'' }}">
+                <div class="invalid-feedback {% if errors.nombre %}d-block{% endif %}" id="error-nombre">
+                  {{ errors.nombre|default:'' }}
+                </div>
               </div>
               <div class="col-md-6">
                 <label class="nm-label">Apellidos del Estudiante *</label>
-                <input type="text" name="apellido" id="inputApellido" class="form-control" placeholder="Ej. Rodríguez Gómez">
+                <input type="text" name="apellido" id="inputApellido" 
+                       class="form-control {% if errors.apellido %}is-invalid{% elif form_data.apellido %}is-valid{% endif %}" 
+                       placeholder="Ej. Rodríguez Gómez" 
+                       value="{{ form_data.apellido|default:'' }}">
+                <div class="invalid-feedback {% if errors.apellido %}d-block{% endif %}" id="error-apellido">
+                  {{ errors.apellido|default:'' }}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 2. Grado y Sección -->
+        <!-- 2. Grado y Sección (Campos limpios sin predeterminados fijos) -->
         <div class="row g-3 mb-4">
           <div class="col-md-7">
-            <label class="nm-label">2. Grado / Año Escolar</label>
-            <select name="grado_escolar" class="form-select" required>
-              <option value="">-- Seleccionar Grado --</option>
+            <label class="nm-label">2. Grado / Año Escolar *</label>
+            <select name="grado_escolar" id="selectGradoEscolar" 
+                    class="form-select {% if errors.grado_escolar %}is-invalid{% elif form_data.grado_escolar %}is-valid{% endif %}" required>
+              <option value="" disabled {% if not form_data.grado_escolar %}selected{% endif %}>-- Seleccionar Grado (1° a 11°) --</option>
               {% for value, label in grados %}
-              <option value="{{ value }}" {% if value == '10' %}selected{% endif %}>{{ label }}</option>
+              <option value="{{ value }}" {% if form_data.grado_escolar == value %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
+            <div class="invalid-feedback {% if errors.grado_escolar %}d-block{% endif %}" id="error-grado_escolar">
+              {{ errors.grado_escolar|default:'' }}
+            </div>
           </div>
           <div class="col-md-5">
-            <label class="nm-label">3. Sección / Grupo</label>
-            <select name="seccion" class="form-select" required>
+            <label class="nm-label">3. Sección / Grupo *</label>
+            <select name="seccion" id="selectSeccion" 
+                    class="form-select {% if errors.seccion %}is-invalid{% elif form_data.seccion %}is-valid{% endif %}" required>
+              <option value="" disabled {% if not form_data.seccion %}selected{% endif %}>-- Seleccionar Grupo (A, B, C, D) --</option>
               {% for seccion in secciones %}
-              <option value="{{ seccion }}">Sección "{{ seccion }}"</option>
+              <option value="{{ seccion }}" {% if form_data.seccion == seccion %}selected{% endif %}>Grupo "{{ seccion }}"</option>
               {% endfor %}
             </select>
+            <div class="invalid-feedback {% if errors.seccion %}d-block{% endif %}" id="error-seccion">
+              {{ errors.seccion|default:'' }}
+            </div>
           </div>
         </div>
 
-        <!-- 4. Curso / Grupo Específico -->
-        {% if fichas %}
-        <div class="mb-4">
-          <label class="nm-label">4. Curso / Grupo Vinculado (Opcional)</label>
-          <select name="ficha_id" class="form-select">
-            <option value="">-- Asignación automática por Grado y Sección --</option>
-            {% for ficha in fichas %}
-            <option value="{{ ficha.pk }}">Grado {{ ficha.codigo_ficha }} · {{ ficha.programa.denominacion }}</option>
-            {% endfor %}
-          </select>
+        <!-- 4. Jornada Escolar y Año Lectivo -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="nm-label">4. Jornada Escolar *</label>
+            <select name="jornada" id="selectJornada" 
+                    class="form-select {% if errors.jornada %}is-invalid{% elif form_data.jornada %}is-valid{% endif %}" required>
+              <option value="" disabled {% if not form_data.jornada %}selected{% endif %}>-- Seleccionar Jornada --</option>
+              {% for j in jornadas %}
+              <option value="{{ j }}" {% if form_data.jornada == j %}selected{% endif %}>Jornada {{ j }}</option>
+              {% endfor %}
+            </select>
+            <div class="invalid-feedback {% if errors.jornada %}d-block{% endif %}" id="error-jornada">
+              {{ errors.jornada|default:'' }}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="nm-label">Año Lectivo *</label>
+            <select name="anio_lectivo" id="selectAnioLectivo" 
+                    class="form-select {% if errors.anio_lectivo %}is-invalid{% elif form_data.anio_lectivo %}is-valid{% endif %}" required>
+              {% for a in anios_lectivos %}
+              <option value="{{ a }}" {% if form_data.anio_lectivo|stringformat:'s' == a|stringformat:'s' or not form_data.anio_lectivo and a == 2026 %}selected{% endif %}>Año Lectivo {{ a }}</option>
+              {% endfor %}
+            </select>
+            <div class="invalid-feedback {% if errors.anio_lectivo %}d-block{% endif %}" id="error-anio_lectivo">
+              {{ errors.anio_lectivo|default:'' }}
+            </div>
+          </div>
         </div>
-        {% endif %}
 
         <button class="nm-submit mt-2" type="submit">
           <i class="bi bi-check-circle-fill me-2"></i> Confirmar y Guardar Matrícula
@@ -144,58 +378,606 @@
 
 <script>
 let modoActual = 'existente';
+let alumnoSeleccionadoId = null;
+const ESTUDIANTES_INFO = {{ estudiantes_json|default:'{}'|safe }};
 
 function cambiarModo(modo) {
   modoActual = modo;
+  const inputModo = document.getElementById('inputModoRegistro');
+  if (inputModo) inputModo.value = modo;
   const btnExistente = document.getElementById('btnModoExistente');
   const btnNuevo = document.getElementById('btnModoNuevo');
   const seccionExistente = document.getElementById('seccionExistente');
   const seccionNuevo = document.getElementById('seccionNuevo');
-  const selectAlumno = document.getElementById('selectAlumnoMatricula');
-  const inputDoc = document.getElementById('inputDocumento');
-  const inputNom = document.getElementById('inputNombre');
-  const inputApe = document.getElementById('inputApellido');
+  const inputAlumnoId = document.getElementById('inputAlumnoId');
 
   if (modo === 'existente') {
     btnExistente.classList.add('active');
     btnNuevo.classList.remove('active');
     seccionExistente.style.display = 'block';
     seccionNuevo.style.display = 'none';
-    selectAlumno.required = true;
-    inputDoc.required = false;
-    inputNom.required = false;
-    inputApe.required = false;
   } else {
     btnNuevo.classList.add('active');
     btnExistente.classList.remove('active');
     seccionExistente.style.display = 'none';
     seccionNuevo.style.display = 'block';
-    selectAlumno.required = false;
-    selectAlumno.value = '';
-    inputDoc.required = true;
-    inputNom.required = true;
-    inputApe.required = true;
+    if (inputAlumnoId) inputAlumnoId.value = '';
+    deseleccionarEstudiante();
   }
 }
 
-function filtrarAlumnosRapido(query) {
-  const q = query.toLowerCase().trim();
-  const select = document.getElementById('selectAlumnoMatricula');
-  const options = select.getElementsByTagName('option');
-  for (let i = 0; i < options.length; i++) {
-    const opt = options[i];
-    if (!opt.value) continue;
-    const txt = opt.textContent.toLowerCase();
-    if (txt.includes(q)) {
-      opt.style.display = '';
+function marcarError(el, errorDivId, mensaje) {
+  if (el) {
+    el.classList.add('is-invalid');
+    el.classList.remove('is-valid');
+  }
+  const errDiv = document.getElementById(errorDivId);
+  if (errDiv) {
+    errDiv.textContent = mensaje;
+    errDiv.classList.add('d-block');
+  }
+}
+
+function limpiarError(el, errorDivId) {
+  if (el) {
+    el.classList.remove('is-invalid');
+    el.classList.add('is-valid');
+  }
+  const errDiv = document.getElementById(errorDivId);
+  if (errDiv) {
+    errDiv.textContent = '';
+    errDiv.classList.remove('d-block');
+  }
+}
+
+// Selección de estudiante por ID interno y carga de información académica real
+function seleccionarEstudianteDirecto(id) {
+  if (!id) return;
+  const strId = String(id);
+  alumnoSeleccionadoId = strId;
+  document.getElementById('inputAlumnoId').value = strId;
+
+  // Actualizar estilos visuales en la lista interactiva:
+  // SOLO el estudiante seleccionado queda visible; se ocultan todos los demás para no aparecer abajo
+  const filas = document.querySelectorAll('.alumno-fila-item');
+  let filaSeleccionada = null;
+
+  filas.forEach(f => {
+    if (f.getAttribute('data-id') === strId) {
+      f.classList.add('activo');
+      f.style.display = 'flex';
+      filaSeleccionada = f;
+      const badgeSel = f.querySelector('.badge-elegir');
+      if (badgeSel) {
+        badgeSel.textContent = 'Seleccionado';
+        badgeSel.className = 'badge badge-elegir rounded-pill px-2.5 py-1 small bg-success text-white shadow-2xs';
+      }
     } else {
-      opt.style.display = 'none';
+      f.classList.remove('activo');
+      f.style.display = 'none';
+      const badge = f.querySelector('.badge-elegir');
+      if (badge) {
+        badge.textContent = 'Elegir';
+        badge.className = 'badge badge-elegir rounded-pill px-2.5 py-1 small bg-light text-muted border';
+      }
+    }
+  });
+
+  const msgInicio = document.getElementById('msgEscribaParaBuscar');
+  if (msgInicio) msgInicio.classList.add('d-none');
+  const msgVacio = document.getElementById('msgSinResultados');
+  if (msgVacio) msgVacio.classList.add('d-none');
+
+  const totalBadge = document.getElementById('totalAlumnosBadge');
+  if (totalBadge) totalBadge.textContent = '1 estudiante seleccionado';
+
+  // Obtener la información del estudiante (desde el mapa JSON o los atributos dataset)
+  let info = ESTUDIANTES_INFO[strId];
+  if (!info && filaSeleccionada) {
+    info = {
+      id: strId,
+      nombre: filaSeleccionada.getAttribute('data-nombre') || '',
+      documento: filaSeleccionada.getAttribute('data-doc') || '',
+      email: filaSeleccionada.getAttribute('data-email') || 'Sin correo registrado',
+      tiene_matricula: filaSeleccionada.getAttribute('data-tiene-matricula') === '1',
+      es_activa: filaSeleccionada.getAttribute('data-es-activa') === '1',
+      grado_num: filaSeleccionada.getAttribute('data-grado-num') || '',
+      grado_display: filaSeleccionada.getAttribute('data-grado-display') || '',
+      seccion: filaSeleccionada.getAttribute('data-seccion') || '',
+      jornada: filaSeleccionada.getAttribute('data-jornada') || 'Mañana',
+      estado: filaSeleccionada.getAttribute('data-estado') || '',
+      anio: filaSeleccionada.getAttribute('data-anio') || '2026'
+    };
+  }
+
+  if (!info) return;
+
+  // 1. Mostrar confirmación visual e individual con datos personales de la base de datos
+  const banner = document.getElementById('bannerEstudianteSeleccionado');
+  document.getElementById('nombreEstudianteSeleccionado').textContent = info.nombre;
+  document.getElementById('idEstudianteSeleccionado').textContent = 'ID: #' + info.id;
+  document.getElementById('docEstudianteSeleccionado').textContent = info.documento;
+  document.getElementById('emailEstudianteSeleccionado').textContent = info.email;
+
+  // 2. Consultar y mostrar información académica real
+  const cardAcademica = document.getElementById('cardInfoAcademicaReal');
+  const selectGrado = document.getElementById('selectGradoEscolar');
+  const selectSeccion = document.getElementById('selectSeccion');
+  const selectJornada = document.getElementById('selectJornada');
+
+  if (info.tiene_matricula) {
+    // Caso A: Ya cuenta con matrícula registrada en la base de datos
+    cardAcademica.innerHTML = `
+      <div class="alert border-0 rounded-3 p-3 mb-0" style="background: #E8F4F8; border-left: 4px solid #1E6B7B !important; color: #154e5a;">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <strong class="d-flex align-items-center gap-1.5 fs-6">
+            <i class="bi bi-mortarboard-fill text-primary"></i> Matrícula Registrada en Base de Datos (Año Lectivo ${info.anio || '2026'})
+          </strong>
+          <span class="badge bg-success text-white px-2.5 py-1 rounded-pill">${info.estado || 'En Formación'}</span>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-sm-4">
+            <span class="text-muted small d-block">Grado Actual:</span>
+            <strong class="text-dark">${info.grado_display || info.grado_num + '° Grado'}</strong>
+          </div>
+          <div class="col-sm-4">
+            <span class="text-muted small d-block">Sección / Grupo:</span>
+            <strong class="text-dark">Grupo "${info.seccion}"</strong>
+          </div>
+          <div class="col-sm-4">
+            <span class="text-muted small d-block">Jornada Escolar:</span>
+            <strong class="text-dark">Jornada ${info.jornada || 'Mañana'}</strong>
+          </div>
+        </div>
+        <div class="small p-2 rounded-2 mt-1" style="background: rgba(255,255,255,0.7); border: 1px dashed #B8DCE5;">
+          <i class="bi bi-info-circle-fill text-primary me-1"></i>
+          <strong>Vigencia Activa:</strong> El estudiante ya cuenta con matrícula activa para 2026. Los campos inferiores reflejan su asignación actual. Si requiere reubicarlo de grupo o grado escolar, ajuste los selectores y confirme para guardar la actualización sin generar matrículas duplicadas.
+        </div>
+      </div>
+    `;
+
+    // Cargar los campos con su asignación real en la BD
+    if (info.grado_num) {
+      selectGrado.value = info.grado_num;
+    }
+    if (info.seccion) {
+      selectSeccion.value = info.seccion;
+    }
+    if (info.jornada) {
+      selectJornada.value = info.jornada;
+    } else {
+      selectJornada.value = 'Mañana';
+    }
+    const selectAnio = document.getElementById('selectAnioLectivo');
+    if (selectAnio && info.anio) {
+      selectAnio.value = String(info.anio);
+    }
+  } else {
+    // Caso B: Estudiante nuevo o registrado SIN matrícula en 2026
+    cardAcademica.innerHTML = `
+      <div class="alert border-0 rounded-3 p-3 mb-0" style="background: #FFF9E6; border-left: 4px solid #D97706 !important; color: #78350F;">
+        <div class="d-flex align-items-center justify-content-between mb-1">
+          <strong class="d-flex align-items-center gap-1.5 fs-6 text-dark">
+            <i class="bi bi-person-exclamation text-warning fs-5"></i> Estudiante Sin Matrícula Activa en 2026
+          </strong>
+          <span class="badge bg-warning text-dark px-2.5 py-1 rounded-pill">Listo para Matricular</span>
+        </div>
+        <p class="small mb-0 text-secondary">
+          El estudiante <strong>${info.nombre}</strong> está registrado en EduNova pero aún <strong>no tiene asignado grado, grupo ni jornada</strong> para el año lectivo 2026. Seleccione a continuación el grado escolar (1° a 11°), grupo y jornada para formalizar su asignación.
+        </p>
+      </div>
+    `;
+
+    // Dejar los campos disponibles y limpios para que Secretaría los seleccione (sin valores asumidos)
+    selectGrado.value = "";
+    selectSeccion.value = "";
+    selectJornada.value = "";
+  }
+
+  // Reflejar el nombre del estudiante seleccionado en el buscador
+  if (info && info.nombre) {
+    const inputFiltro = document.getElementById('filtroAlumnoTexto');
+    if (inputFiltro) {
+      inputFiltro.value = info.nombre;
     }
   }
+
+  const ayuda = document.getElementById('ayudaSeleccionEstudiante');
+  if (ayuda) ayuda.style.display = 'none';
+
+  banner.style.display = 'block';
 }
 
+// Quitar la selección del estudiante y restablecer campos
+function deseleccionarEstudiante() {
+  alumnoSeleccionadoId = null;
+  document.getElementById('inputAlumnoId').value = '';
+
+  const inputFiltro = document.getElementById('filtroAlumnoTexto');
+  if (inputFiltro) {
+    inputFiltro.value = '';
+  }
+
+  const filas = document.querySelectorAll('.alumno-fila-item');
+  filas.forEach(f => {
+    f.classList.remove('activo');
+    f.style.display = 'none'; // Al deseleccionar, no mostrar la lista abajo hasta que vuelva a buscar
+    const badge = f.querySelector('.badge-elegir');
+    if (badge) {
+      badge.textContent = 'Elegir';
+      badge.className = 'badge badge-elegir rounded-pill px-2.5 py-1 small bg-light text-muted border';
+    }
+  });
+
+  const ayuda = document.getElementById('ayudaSeleccionEstudiante');
+  if (ayuda) ayuda.style.display = 'block';
+
+  const msgInicio = document.getElementById('msgEscribaParaBuscar');
+  if (msgInicio) msgInicio.classList.remove('d-none');
+  const msgVacio = document.getElementById('msgSinResultados');
+  if (msgVacio) msgVacio.classList.add('d-none');
+
+  const totalBadge = document.getElementById('totalAlumnosBadge');
+  if (totalBadge) totalBadge.textContent = 'Escriba en el buscador para consultar';
+
+  const banner = document.getElementById('bannerEstudianteSeleccionado');
+  if (banner) banner.style.display = 'none';
+
+  const cardAcademica = document.getElementById('cardInfoAcademicaReal');
+  if (cardAcademica) cardAcademica.innerHTML = '';
+
+  // Limpiar campos de selección de grado, grupo y jornada
+  const selectGrado = document.getElementById('selectGradoEscolar');
+  const selectSeccion = document.getElementById('selectSeccion');
+  const selectJornada = document.getElementById('selectJornada');
+  const selectAnio = document.getElementById('selectAnioLectivo');
+  if (selectGrado) selectGrado.value = "";
+  if (selectSeccion) selectSeccion.value = "";
+  if (selectJornada) selectJornada.value = "";
+  if (selectAnio) selectAnio.value = "2026";
+}
+
+// Filtrado instantáneo en la lista por nombre o documento
+function filtrarAlumnosRapido(termino) {
+  const query = (termino || '').toLowerCase().trim();
+  const filas = document.querySelectorAll('.alumno-fila-item');
+  const msgInicio = document.getElementById('msgEscribaParaBuscar');
+  const msgVacio = document.getElementById('msgSinResultados');
+  const totalBadge = document.getElementById('totalAlumnosBadge');
+
+  if (!query) {
+    // Si el buscador está vacío:
+    if (alumnoSeleccionadoId) {
+      // Si hay un alumno seleccionado, mantener solo ese seleccionado visible
+      filas.forEach(fila => {
+        if (fila.getAttribute('data-id') === String(alumnoSeleccionadoId)) {
+          fila.style.display = 'flex';
+        } else {
+          fila.style.display = 'none';
+        }
+      });
+      if (msgInicio) msgInicio.classList.add('d-none');
+      if (msgVacio) msgVacio.classList.add('d-none');
+      if (totalBadge) totalBadge.textContent = '1 estudiante seleccionado';
+      return;
+    }
+
+    // Sin búsqueda ni selección: NO mostrar estudiantes abajo
+    filas.forEach(fila => {
+      fila.style.display = 'none';
+    });
+    if (msgInicio) msgInicio.classList.remove('d-none');
+    if (msgVacio) msgVacio.classList.add('d-none');
+    if (totalBadge) totalBadge.textContent = 'Escriba en el buscador para consultar';
+    return;
+  }
+
+  // Al escribir en el buscador:
+  if (msgInicio) msgInicio.classList.add('d-none');
+  let visibles = 0;
+
+  filas.forEach(fila => {
+    const nombre = fila.getAttribute('data-nombre') ? fila.getAttribute('data-nombre').toLowerCase() : '';
+    const doc = fila.getAttribute('data-doc') ? fila.getAttribute('data-doc').toLowerCase() : '';
+    if (nombre.includes(query) || doc.includes(query)) {
+      fila.style.display = 'flex';
+      visibles++;
+    } else {
+      fila.style.display = 'none';
+    }
+  });
+
+  if (msgVacio) {
+    if (visibles === 0) {
+      msgVacio.classList.remove('d-none');
+    } else {
+      msgVacio.classList.add('d-none');
+    }
+  }
+
+  if (totalBadge) {
+    totalBadge.textContent = visibles + (visibles === 1 ? ' estudiante encontrado' : ' estudiantes encontrados');
+  }
+}
+
+function limpiarFiltro() {
+  const inputFiltro = document.getElementById('filtroAlumnoTexto');
+  if (inputFiltro) {
+    inputFiltro.value = '';
+  }
+  deseleccionarEstudiante();
+}
+
+// Listeners en tiempo real para limpiar o validar campos al escribir o cambiar
 document.addEventListener('DOMContentLoaded', function() {
-  cambiarModo('existente');
+  const inputDoc = document.getElementById('inputDocumento');
+  if (inputDoc) {
+    inputDoc.addEventListener('input', function() {
+      const val = this.value.trim();
+      if (!val) {
+        marcarError(this, 'error-documento', 'El número de documento es obligatorio.');
+      } else if (!/^\d+$/.test(val)) {
+        marcarError(this, 'error-documento', 'El documento debe contener únicamente números (sin letras, puntos ni símbolos).');
+      } else if (val.length < 6 || val.length > 12) {
+        marcarError(this, 'error-documento', 'El documento debe tener una longitud válida entre 6 y 12 dígitos.');
+      } else {
+        let estExist = null;
+        for (const k in ESTUDIANTES_INFO) {
+          if (ESTUDIANTES_INFO[k] && ESTUDIANTES_INFO[k].documento === val) {
+            estExist = ESTUDIANTES_INFO[k];
+            break;
+          }
+        }
+        if (estExist) {
+          marcarError(this, 'error-documento', 'No se permite crear otra cuenta: el documento ' + val + ' ya pertenece al estudiante ' + estExist.nombre + '. Seleccione la opción "Estudiante Existente".');
+        } else {
+          limpiarError(this, 'error-documento');
+        }
+      }
+    });
+  }
+
+  const inputEmail = document.getElementById('inputEmail');
+  if (inputEmail) {
+    inputEmail.addEventListener('input', function() {
+      const val = this.value.trim();
+      const regex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+      if (val) {
+        if (!regex.test(val) || val.includes('..') || (val.match(/@/g) || []).length !== 1) {
+          marcarError(this, 'error-email', 'Ingrese un correo electrónico válido (ejemplo: usuario@edunova.edu). No use formatos como aminta@gmail, aminta.com o aminta@@gmail.com.');
+        } else {
+          limpiarError(this, 'error-email');
+        }
+      } else {
+        this.classList.remove('is-invalid');
+        this.classList.remove('is-valid');
+        const errDiv = document.getElementById('error-email');
+        if (errDiv) errDiv.classList.remove('d-block');
+      }
+    });
+  }
+
+  const inputNom = document.getElementById('inputNombre');
+  if (inputNom) {
+    inputNom.addEventListener('input', function() {
+      const val = this.value.trim();
+      if (!val) {
+        marcarError(this, 'error-nombre', 'Los nombres del estudiante son obligatorios.');
+      } else if (/^\d+$/.test(val) || !/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(val)) {
+        marcarError(this, 'error-nombre', 'Los nombres deben contener letras y no ser únicamente números ni símbolos.');
+      } else if (val.length < 2) {
+        marcarError(this, 'error-nombre', 'Los nombres deben tener al menos 2 caracteres.');
+      } else {
+        limpiarError(this, 'error-nombre');
+      }
+    });
+  }
+
+  const inputApe = document.getElementById('inputApellido');
+  if (inputApe) {
+    inputApe.addEventListener('input', function() {
+      const val = this.value.trim();
+      if (!val) {
+        marcarError(this, 'error-apellido', 'Los apellidos del estudiante son obligatorios.');
+      } else if (/^\d+$/.test(val) || !/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(val)) {
+        marcarError(this, 'error-apellido', 'Los apellidos deben contener letras y no ser únicamente números ni símbolos.');
+      } else if (val.length < 2) {
+        marcarError(this, 'error-apellido', 'Los apellidos deben tener al menos 2 caracteres.');
+      } else {
+        limpiarError(this, 'error-apellido');
+      }
+    });
+  }
+
+  const selectGrado = document.getElementById('selectGradoEscolar');
+  if (selectGrado) {
+    selectGrado.addEventListener('change', function() {
+      if (this.value) limpiarError(this, 'error-grado_escolar');
+      else marcarError(this, 'error-grado_escolar', 'Debe seleccionar un grado escolar obligatorio (1.° a 11.°).');
+    });
+  }
+
+  const selectSeccion = document.getElementById('selectSeccion');
+  if (selectSeccion) {
+    selectSeccion.addEventListener('change', function() {
+      if (this.value) limpiarError(this, 'error-seccion');
+      else marcarError(this, 'error-seccion', 'Debe seleccionar un grupo o sección obligatorio (A, B, C o D).');
+    });
+  }
+
+  const selectJornada = document.getElementById('selectJornada');
+  if (selectJornada) {
+    selectJornada.addEventListener('change', function() {
+      if (this.value) limpiarError(this, 'error-jornada');
+      else marcarError(this, 'error-jornada', 'Debe seleccionar una jornada escolar obligatoria (Mañana o Tarde).');
+    });
+  }
+
+  const selectAnio = document.getElementById('selectAnioLectivo');
+  if (selectAnio) {
+    selectAnio.addEventListener('change', function() {
+      if (this.value) limpiarError(this, 'error-anio_lectivo');
+      else marcarError(this, 'error-anio_lectivo', 'Debe seleccionar un año lectivo obligatorio.');
+    });
+  }
+
+  // Restaurar modo activo según contexto o datos de entrada
+  const modoInicial = "{{ form_data.modo_registro|default:'' }}" || (inputDoc && inputDoc.value ? 'nuevo' : 'existente');
+  if (modoInicial === 'nuevo') {
+    cambiarModo('nuevo');
+  } else {
+    cambiarModo('existente');
+    const preId = document.getElementById('inputAlumnoId').value;
+    if (preId) {
+      seleccionarEstudianteDirecto(preId);
+    } else {
+      const filas = document.querySelectorAll('.alumno-fila-item');
+      filas.forEach(f => {
+        f.style.display = 'none';
+      });
+      const msgInicio = document.getElementById('msgEscribaParaBuscar');
+      if (msgInicio) msgInicio.classList.remove('d-none');
+      const totalBadge = document.getElementById('totalAlumnosBadge');
+      if (totalBadge) totalBadge.textContent = 'Escriba en el buscador para consultar';
+    }
+  }
+});
+
+// Validación estricta y resaltado visual antes de enviar el formulario
+document.getElementById('formNuevaMatricula').addEventListener('submit', function(e) {
+  let hasErrors = false;
+  const modo = document.getElementById('inputModoRegistro').value || modoActual;
+
+  if (modo === 'nuevo') {
+    // 1. Documento
+    const inputDoc = document.getElementById('inputDocumento');
+    const docVal = inputDoc ? inputDoc.value.trim() : '';
+    if (!docVal) {
+      marcarError(inputDoc, 'error-documento', 'El número de documento es obligatorio.');
+      hasErrors = true;
+    } else if (!/^\d+$/.test(docVal)) {
+      marcarError(inputDoc, 'error-documento', 'El documento debe contener únicamente números (sin letras, puntos ni símbolos).');
+      hasErrors = true;
+    } else if (docVal.length < 6 || docVal.length > 12) {
+      marcarError(inputDoc, 'error-documento', 'El documento debe tener una longitud válida entre 6 y 12 dígitos.');
+      hasErrors = true;
+    } else {
+      let estExist = null;
+      for (const k in ESTUDIANTES_INFO) {
+        if (ESTUDIANTES_INFO[k] && ESTUDIANTES_INFO[k].documento === docVal) {
+          estExist = ESTUDIANTES_INFO[k];
+          break;
+        }
+      }
+      if (estExist) {
+        marcarError(inputDoc, 'error-documento', 'No se permite crear otra cuenta: el documento ' + docVal + ' ya pertenece al estudiante ' + estExist.nombre + '. Seleccione la opción "Estudiante Existente".');
+        hasErrors = true;
+      } else {
+        limpiarError(inputDoc, 'error-documento');
+      }
+    }
+
+    // 2. Correo
+    const inputEmail = document.getElementById('inputEmail');
+    const emailVal = inputEmail ? inputEmail.value.trim() : '';
+    const emailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+    if (emailVal) {
+      if (!emailRegex.test(emailVal) || emailVal.includes('..') || (emailVal.match(/@/g) || []).length !== 1) {
+        marcarError(inputEmail, 'error-email', 'Ingrese un correo electrónico válido (ejemplo: usuario@edunova.edu). No use formatos como aminta@gmail, aminta.com o aminta@@gmail.com.');
+        hasErrors = true;
+      } else {
+        limpiarError(inputEmail, 'error-email');
+      }
+    }
+
+    // 3. Nombres
+    const inputNom = document.getElementById('inputNombre');
+    const nomVal = inputNom ? inputNom.value.trim() : '';
+    if (!nomVal) {
+      marcarError(inputNom, 'error-nombre', 'Los nombres del estudiante son obligatorios.');
+      hasErrors = true;
+    } else if (/^\d+$/.test(nomVal) || !/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(nomVal)) {
+      marcarError(inputNom, 'error-nombre', 'Los nombres deben contener letras y no pueden ser únicamente números ni símbolos.');
+      hasErrors = true;
+    } else if (nomVal.length < 2) {
+      marcarError(inputNom, 'error-nombre', 'Los nombres deben tener al menos 2 caracteres.');
+      hasErrors = true;
+    } else {
+      limpiarError(inputNom, 'error-nombre');
+    }
+
+    // 4. Apellidos
+    const inputApe = document.getElementById('inputApellido');
+    const apeVal = inputApe ? inputApe.value.trim() : '';
+    if (!apeVal) {
+      marcarError(inputApe, 'error-apellido', 'Los apellidos del estudiante son obligatorios.');
+      hasErrors = true;
+    } else if (/^\d+$/.test(apeVal) || !/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(apeVal)) {
+      marcarError(inputApe, 'error-apellido', 'Los apellidos deben contener letras y no pueden ser únicamente números ni símbolos.');
+      hasErrors = true;
+    } else if (apeVal.length < 2) {
+      marcarError(inputApe, 'error-apellido', 'Los apellidos deben tener al menos 2 caracteres.');
+      hasErrors = true;
+    } else {
+      limpiarError(inputApe, 'error-apellido');
+    }
+  } else {
+    // Modo existente: Alumno ID obligatorio
+    const idVal = document.getElementById('inputAlumnoId').value;
+    const inputFiltro = document.getElementById('filtroAlumnoTexto');
+    if (!idVal) {
+      marcarError(inputFiltro, 'error-alumno_id', 'Debe buscar y seleccionar un estudiante de la lista haciendo clic sobre él.');
+      hasErrors = true;
+    } else {
+      limpiarError(inputFiltro, 'error-alumno_id');
+    }
+  }
+
+  // Grado escolar
+  const selectGrado = document.getElementById('selectGradoEscolar');
+  if (!selectGrado.value) {
+    marcarError(selectGrado, 'error-grado_escolar', 'Debe seleccionar un grado escolar obligatorio (1.° a 11.°).');
+    hasErrors = true;
+  } else {
+    limpiarError(selectGrado, 'error-grado_escolar');
+  }
+
+  // Sección / Grupo
+  const selectSeccion = document.getElementById('selectSeccion');
+  if (!selectSeccion.value) {
+    marcarError(selectSeccion, 'error-seccion', 'Debe seleccionar un grupo o sección obligatorio (A, B, C o D).');
+    hasErrors = true;
+  } else {
+    limpiarError(selectSeccion, 'error-seccion');
+  }
+
+  // Jornada
+  const selectJornada = document.getElementById('selectJornada');
+  if (!selectJornada.value) {
+    marcarError(selectJornada, 'error-jornada', 'Debe seleccionar una jornada escolar obligatoria (Mañana o Tarde).');
+    hasErrors = true;
+  } else {
+    limpiarError(selectJornada, 'error-jornada');
+  }
+
+  // Año Lectivo
+  const selectAnio = document.getElementById('selectAnioLectivo');
+  if (!selectAnio.value) {
+    marcarError(selectAnio, 'error-anio_lectivo', 'Debe seleccionar un año lectivo obligatorio.');
+    hasErrors = true;
+  } else {
+    limpiarError(selectAnio, 'error-anio_lectivo');
+  }
+
+  if (hasErrors) {
+    e.preventDefault();
+    e.stopPropagation();
+    const firstInvalid = document.querySelector('.is-invalid, .invalid-feedback.d-block');
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return false;
+  }
 });
 </script>
 {% endblock %}

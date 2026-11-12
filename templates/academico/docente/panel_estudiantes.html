@@ -28,7 +28,7 @@
 
         <!-- HERO FICHA INDIVIDUAL DEL ESTUDIANTE -->
         <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-             style="background: linear-gradient(135deg, #5a3825 0%, #3d2417 70%, #29170e 100%); color: #ffffff; border: 1px solid var(--color-secundario);">
+             style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); color: #ffffff; border: 1px solid var(--color-secundario);">
             <div class="row align-items-center position-relative z-1">
                 <div class="col-lg-8 d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-4">
                     <!-- Avatar con Iniciales Prominentes -->
@@ -450,7 +450,7 @@
 
     <!-- HERO DE BIENVENIDA MÓDULO MIS ESTUDIANTES -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #5a3825 0%, #3d2417 75%, #23140b 100%); color: #ffffff; border: 1px solid var(--color-secundario);">
+         style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); color: #ffffff; border: 1px solid var(--color-secundario);">
         <div class="row align-items-center position-relative z-1">
             <div class="col-lg-8 d-flex align-items-center gap-3.5">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-lg flex-shrink-0"
@@ -489,34 +489,32 @@
                 </div>
                 <div>
                     <h6 class="fw-bold text-dark mb-0.5" style="font-size: 1.05rem;">Resumen de la Nómina Docente</h6>
-                    <div class="d-flex align-items-center gap-2 small text-muted">
+                    <div class="d-flex align-items-center gap-2 small text-muted flex-wrap">
                         <span>Total Estudiantes: <strong class="text-dark">{{ total_estudiantes_docente }}</strong></span>
+                        {% for grp in grupos_lista %}
                         <span>·</span>
-                        <span>Grado 10°: <strong style="color: var(--color-principal);">{{ total_estudiantes_10 }}</strong></span>
+                        <span>{{ grp.grado_display }}: <strong style="color: var(--color-principal);">{{ grp.total_estudiantes }}</strong></span>
+                        {% empty %}
                         <span>·</span>
-                        <span>Grado 11°: <strong style="color: var(--color-principal);">{{ total_estudiantes_11 }}</strong></span>
+                        <span class="fst-italic">Sin grupos asignados</span>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
 
             <!-- Selector de Grados Limpio -->
             <ul class="nav nav-pills p-1.5 rounded-pill bg-light border d-inline-flex gap-1.5 shadow-2xs" id="pillsSelectorGrados" style="border-color: var(--color-acento) !important;">
+                {% for grp in grupos_lista %}
                 <li class="nav-item">
                     <button type="button" class="nav-link rounded-pill px-4 py-2 fw-bold small transition" 
-                            id="tab-btn-grado10" onclick="cambiarPestanaGrado('10');">
-                        <i class="bi bi-mortarboard-fill me-1.5"></i> Grado 10° 
-                        <span class="badge rounded-pill ms-1.5" style="background: var(--color-acento); color: var(--color-principal);">{{ total_estudiantes_10 }}</span>
+                            id="tab-btn-grado{{ grp.grado }}" onclick="cambiarPestanaGrado('{{ grp.grado }}');">
+                        <i class="bi bi-mortarboard-fill me-1.5"></i> Grado {{ grp.grado }}° 
+                        <span class="badge rounded-pill ms-1.5" style="background: var(--color-acento); color: var(--color-principal);">{{ grp.total_estudiantes }}</span>
                     </button>
                 </li>
+                {% endfor %}
                 <li class="nav-item">
-                    <button type="button" class="nav-link rounded-pill px-4 py-2 fw-bold small transition" 
-                            id="tab-btn-grado11" onclick="cambiarPestanaGrado('11');">
-                        <i class="bi bi-mortarboard-fill me-1.5"></i> Grado 11° 
-                        <span class="badge rounded-pill ms-1.5" style="background: var(--color-acento); color: var(--color-principal);">{{ total_estudiantes_11 }}</span>
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link rounded-pill px-4 py-2 fw-bold small transition" 
+                    <button type="button" class="nav-link rounded-pill px-4 py-2 fw-bold small transition active" 
                             id="tab-btn-todos" onclick="cambiarPestanaGrado('todos');">
                         <i class="bi bi-people-fill me-1.5"></i> Ver Todos 
                         <span class="badge rounded-pill ms-1.5" style="background: #e2e8f0; color: #475569;">{{ total_estudiantes_docente }}</span>
@@ -542,10 +540,11 @@
 
             <!-- Filtro Grupo -->
             <div class="col-6 col-md-2">
-                <select id="filtro-grupo" onchange="aplicarFiltrosEstudiantes();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.85rem;">
+                <select id="filtro-grupo" onchange="onCambiarFiltroGrupo();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.85rem;">
                     <option value="todos">Todos los Grupos</option>
-                    <option value="10°A">Grupo 10°A</option>
-                    <option value="11°A">Grupo 11°A</option>
+                    {% for grp in grupos_lista %}
+                    <option value="{{ grp.grado }}°{{ grp.seccion }}">{{ grp.grado_display }}</option>
+                    {% endfor %}
                 </select>
             </div>
 
@@ -562,36 +561,55 @@
             <div class="col-12 col-md-3 text-md-end">
                 <select id="filtro-materia" onchange="aplicarFiltrosEstudiantes();" class="form-select form-select-sm rounded-pill px-3 py-2 d-inline-block w-auto" style="border-color: var(--color-acento); font-size: 0.85rem;">
                     <option value="todas">Todas las Asignaturas</option>
+                    {% for asig in asignaturas_docente %}
+                    <option value="{{ asig.nombre }}">{{ asig.nombre }}</option>
+                    {% empty %}
                     <option value="Matemáticas">Matemáticas</option>
                     <option value="Informática">Informática</option>
+                    <option value="Lengua Castellana">Lengua Castellana</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
     </div>
 
-    <!-- 4. VISTA DE ESTUDIANTES DE GRADO 10° EN TARJETAS EJECUTIVAS -->
-    <div id="seccion-grado-10" class="mb-5 seccion-grado-bloque">
+    {% if not grupos_lista %}
+    <!-- ESTADO VACÍO CUANDO EL DOCENTE NO TIENE ASIGNACIONES -->
+    <div class="card border rounded-4 p-5 bg-white shadow-2xs mb-5 text-center" style="border-color: var(--color-acento) !important;">
+        <div class="rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3" style="background: #F5F2EB; color: var(--color-principal); width: 68px; height: 68px; border: 1px solid var(--color-acento);">
+            <i class="bi bi-mortarboard fs-2"></i>
+        </div>
+        <h4 class="fw-bold text-dark mb-1">Sin Grados ni Estudiantes Asignados</h4>
+        <p class="text-muted small mb-0" style="max-width: 520px; margin: 0 auto;">
+            Actualmente no tienes grados ni cursos asignados en el sistema por la Secretaría Académica.
+            Tan pronto se registre tu asignación académica oficial, los cursos y estudiantes matriculados aparecerán aquí automáticamente.
+        </p>
+    </div>
+    {% else %}
+    {% for grp in grupos_lista %}
+    <!-- VISTA DE ESTUDIANTES POR GRADO ASIGNADO REAL -->
+    <div id="seccion-grado-{{ grp.grado }}" class="mb-5 seccion-grado-bloque" data-seccion-grado="{{ grp.grado }}">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex align-items-center gap-2.5">
                 <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: var(--color-principal); width: 38px; height: 38px;">
                     <i class="bi bi-mortarboard-fill fs-5"></i>
                 </div>
                 <div>
-                    <h5 class="fw-bold text-dark mb-0">Estudiantes Asignados · Grado 10°</h5>
-                    <small class="text-muted">Grupo 10°A · Asignaturas: Matemáticas e Informática</small>
+                    <h5 class="fw-bold text-dark mb-0">Estudiantes Asignados · {{ grp.grado_display }}</h5>
+                    <small class="text-muted">Grupo {{ grp.grado_display }}{% if grp.materias %} · Asignaturas: {{ grp.materias|join:", " }}{% endif %}</small>
                 </div>
             </div>
             <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--color-acento); color: var(--color-secundario); border: 1px solid var(--color-acento);">
-                {{ total_estudiantes_10 }} estudiantes en grado 10
+                {{ grp.total_estudiantes }} estudiante(s) en {{ grp.grado_display }}
             </span>
         </div>
 
-        <div class="row g-3" id="grid-estudiantes-10">
-            {% for m in estudiantes_grado_10 %}
-            <div class="col-md-6 col-lg-6 fila-estudiante-item fila-g10" 
+        <div class="row g-3" id="grid-estudiantes-{{ grp.grado }}">
+            {% for m in grp.estudiantes %}
+            <div class="col-md-6 col-lg-6 fila-estudiante-item fila-g{{ grp.grado }}" 
                  data-nombre="{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}" 
                  data-doc="{{ m.aprendiz.username }}" 
-                 data-grado="10" 
+                 data-grado="{{ grp.grado }}" 
                  data-grupo="{{ m.grupo_display }}" 
                  data-materia="{{ m.asignaturas_docente_str }}" 
                  data-estado="{% if m.es_activo %}Activo{% else %}Retirado{% endif %}">
@@ -653,11 +671,11 @@
                                 <i class="bi bi-clipboard-pulse"></i>
                             </a>
                             {% if m.es_activo %}
-                            <button type="button" class="btn btn-sm rounded-circle p-2 shadow-2xs" style="background: #fef2f2; color: #b91c1c; width: 34px; height: 34px; display: grid; place-items: center;" title="Retirar Estudiante" onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', 'Grado 10°A', 'Retirado');">
+                            <button type="button" class="btn btn-sm rounded-circle p-2 shadow-2xs" style="background: #fef2f2; color: #b91c1c; width: 34px; height: 34px; display: grid; place-items: center;" title="Retirar Estudiante" onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', '{{ grp.grado_display|escapejs }}', 'Retirado');">
                                 <i class="bi bi-person-x-fill"></i>
                             </button>
                             {% else %}
-                            <button type="button" class="btn btn-sm rounded-circle p-2 shadow-2xs" style="background: #ecfdf5; color: #047857; width: 34px; height: 34px; display: grid; place-items: center;" title="Reactivar Estudiante" onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', 'Grado 10°A', 'En Formacion');">
+                            <button type="button" class="btn btn-sm rounded-circle p-2 shadow-2xs" style="background: #ecfdf5; color: #047857; width: 34px; height: 34px; display: grid; place-items: center;" title="Reactivar Estudiante" onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', '{{ grp.grado_display|escapejs }}', 'En Formacion');">
                                 <i class="bi bi-person-check-fill"></i>
                             </button>
                             {% endif %}
@@ -668,116 +686,13 @@
             {% empty %}
             <div class="col-12 text-center py-5 text-muted">
                 <i class="bi bi-people fs-2 d-block mb-2" style="color: var(--color-principal);"></i>
-                No hay estudiantes de grado 10 asignados.
+                No hay estudiantes asignados en este grupo.
             </div>
             {% endfor %}
         </div>
     </div>
-
-    <!-- 5. VISTA DE ESTUDIANTES DE GRADO 11° EN TARJETAS EJECUTIVAS -->
-    <div id="seccion-grado-11" class="mb-5 seccion-grado-bloque">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex align-items-center gap-2.5">
-                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: var(--color-principal); width: 38px; height: 38px;">
-                    <i class="bi bi-mortarboard fs-5"></i>
-                </div>
-                <div>
-                    <h5 class="fw-bold text-dark mb-0">Estudiantes Asignados · Grado 11°</h5>
-                    <small class="text-muted">Grupo 11°A · Asignaturas: Matemáticas e Informática</small>
-                </div>
-            </div>
-            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--color-acento); color: var(--color-secundario); border: 1px solid var(--color-acento);">
-                {{ total_estudiantes_11 }} estudiantes en grado 11
-            </span>
-        </div>
-
-        <div class="row g-3" id="grid-estudiantes-11">
-            {% for m in estudiantes_grado_11 %}
-            <div class="col-md-6 col-lg-6 fila-estudiante-item fila-g11" 
-                 data-nombre="{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}" 
-                 data-doc="{{ m.aprendiz.username }}" 
-                 data-grado="11" 
-                 data-grupo="{{ m.grupo_display }}" 
-                 data-materia="{{ m.asignaturas_docente_str }}" 
-                 data-estado="{% if m.es_activo %}Activo{% else %}Retirado{% endif %}">
-                <div class="card border rounded-4 p-4 bg-white shadow-2xs h-100 transition hover-shadow position-relative" style="border-color: var(--color-acento) !important;">
-                    <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <!-- Avatar Circular -->
-                            <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-xs flex-shrink-0"
-                                 style="width: 52px; height: 52px; background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); font-size: 1.15rem; border: 2px solid #ffffff;">
-                                {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
-                            </div>
-                            <div>
-                                <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=info" class="text-dark fw-bold text-decoration-none d-block fs-6 hover-coffee">
-                                    {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
-                                </a>
-                                <small class="text-muted d-block" style="font-size: 0.78rem;">
-                                    Doc: <strong class="font-monospace text-dark">{{ m.aprendiz.username }}</strong>
-                                </small>
-                            </div>
-                        </div>
-                        {% if m.es_activo %}
-                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.75rem;">
-                            <i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i> Activo
-                        </span>
-                        {% else %}
-                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-size: 0.75rem;">
-                            <i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i> Retirado
-                        </span>
-                        {% endif %}
-                    </div>
-
-                    <!-- Datos Académicos Clave -->
-                    <div class="p-3 rounded-3 bg-light mb-3 space-y-1.5" style="border: 1px solid var(--color-acento);">
-                        <div class="d-flex justify-content-between small">
-                            <span class="text-muted">Grado y Grupo:</span>
-                            <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" style="background: var(--color-acento); color: var(--color-principal);">{{ m.grupo_display }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between small">
-                            <span class="text-muted">Asignaturas:</span>
-                            <strong class="text-dark">{{ m.asignaturas_docente_str }}</strong>
-                        </div>
-                    </div>
-
-                    <!-- Botones de Acción Directa -->
-                    <div class="d-flex align-items-center justify-content-between pt-2 border-top gap-2 flex-wrap" style="border-color: var(--color-acento) !important;">
-                        <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=info" 
-                           class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold text-decoration-none shadow-2xs d-inline-flex align-items-center gap-1.5"
-                           style="background: #ffffff; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.8rem;">
-                            <i class="bi bi-person-lines-fill"></i> Ver Ficha
-                        </a>
-                        <div class="d-flex gap-1.5">
-                            <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=calificaciones" class="btn btn-sm rounded-circle p-2 shadow-2xs" style="background: #fff7ed; color: #c2410c; width: 34px; height: 34px; display: grid; place-items: center;" title="Ver Calificaciones">
-                                <i class="bi bi-award-fill"></i>
-                            </a>
-                            <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=asistencia" class="btn btn-sm rounded-circle p-2 shadow-2xs" style="background: #ecfdf5; color: #047857; width: 34px; height: 34px; display: grid; place-items: center;" title="Ver Asistencia">
-                                <i class="bi bi-calendar-check-fill"></i>
-                            </a>
-                            <a href="{% url 'mis_estudiantes' %}?estudiante_id={{ m.aprendiz.id }}&tab=seguimiento" class="btn btn-sm rounded-circle p-2 shadow-2xs" style="background: #F5F2EB; color: var(--color-principal); width: 34px; height: 34px; display: grid; place-items: center;" title="Seguimiento Pedagógico">
-                                <i class="bi bi-clipboard-pulse"></i>
-                            </a>
-                            {% if m.es_activo %}
-                            <button type="button" class="btn btn-sm rounded-circle p-2 shadow-2xs" style="background: #fef2f2; color: #b91c1c; width: 34px; height: 34px; display: grid; place-items: center;" title="Retirar Estudiante" onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', 'Grado 11°A', 'Retirado');">
-                                <i class="bi bi-person-x-fill"></i>
-                            </button>
-                            {% else %}
-                            <button type="button" class="btn btn-sm rounded-circle p-2 shadow-2xs" style="background: #ecfdf5; color: #047857; width: 34px; height: 34px; display: grid; place-items: center;" title="Reactivar Estudiante" onclick="abrirModalRetiro('{{ m.id }}', '{{ m.aprendiz.id }}', '{{ m.aprendiz.get_full_name|default:m.aprendiz.username|escapejs }}', 'Grado 11°A', 'En Formacion');">
-                                <i class="bi bi-person-check-fill"></i>
-                            </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-12 text-center py-5 text-muted">
-                <i class="bi bi-people fs-2 d-block mb-2" style="color: var(--color-principal);"></i>
-                No hay estudiantes de grado 11 asignados.
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+    {% endfor %}
+    {% endif %}
 
     <!-- MODAL 1: + AGREGAR ESTUDIANTE A LA NÓMINA -->
     <div class="modal fade" id="modalAgregarEstudiante" tabindex="-1" aria-labelledby="modalAgregarEstudianteLabel" aria-hidden="true">
@@ -906,55 +821,90 @@
 
 <!-- SCRIPTS DE NAVEGACIÓN Y FILTROS -->
 <script>
-let gradoActivo = '{{ grado_activo|default:"10" }}';
+let gradoActivo = 'todos';
 
-function cambiarPestanaGrado(grado) {
-    gradoActivo = grado;
-    const btn10 = document.getElementById('tab-btn-grado10');
-    const btn11 = document.getElementById('tab-btn-grado11');
-    const btnTodos = document.getElementById('tab-btn-todos');
-    const sec10 = document.getElementById('seccion-grado-10');
-    const sec11 = document.getElementById('seccion-grado-11');
+function cambiarPestanaGrado(grado, mantenerFiltroGrupo = false) {
+    gradoActivo = String(grado);
+    const selectGrupo = document.getElementById('filtro-grupo');
 
-    if (btn10) { btn10.classList.remove('active'); btn10.style.background = 'transparent'; btn10.style.color = '#64748b'; }
-    if (btn11) { btn11.classList.remove('active'); btn11.style.background = 'transparent'; btn11.style.color = '#64748b'; }
-    if (btnTodos) { btnTodos.classList.remove('active'); btnTodos.style.background = 'transparent'; btnTodos.style.color = '#64748b'; }
-
-    if (grado === '10') {
-        if (btn10) { btn10.classList.add('active'); btn10.style.background = 'var(--color-principal)'; btn10.style.color = '#ffffff'; }
-        if (sec10) sec10.style.display = 'block';
-        if (sec11) sec11.style.display = 'none';
-    } else if (grado === '11') {
-        if (btn11) { btn11.classList.add('active'); btn11.style.background = 'var(--color-principal)'; btn11.style.color = '#ffffff'; }
-        if (sec10) sec10.style.display = 'none';
-        if (sec11) sec11.style.display = 'block';
-    } else {
-        if (btnTodos) { btnTodos.classList.add('active'); btnTodos.style.background = 'var(--color-principal)'; btnTodos.style.color = '#ffffff'; }
-        if (sec10) sec10.style.display = 'block';
-        if (sec11) sec11.style.display = 'block';
+    if (!mantenerFiltroGrupo && selectGrupo) {
+        const val = selectGrupo.value;
+        if (grado !== 'todos' && val !== 'todos' && !val.startsWith(grado)) {
+            selectGrupo.value = 'todos';
+        } else if (grado === 'todos') {
+            selectGrupo.value = 'todos';
+        }
     }
 
+    // Resetear clases de todos los botones de pestaña
+    document.querySelectorAll('#pillsSelectorGrados .nav-link').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.background = 'transparent';
+        btn.style.color = '#64748b';
+    });
+
+    const btnTarget = document.getElementById('tab-btn-grado' + grado) || (grado === 'todos' ? document.getElementById('tab-btn-todos') : null);
+    if (btnTarget) {
+        btnTarget.classList.add('active');
+        btnTarget.style.background = 'var(--color-principal)';
+        btnTarget.style.color = '#ffffff';
+    }
+
+    // Mostrar u ocultar bloques de grado
+    document.querySelectorAll('.seccion-grado-bloque').forEach(sec => {
+        const secGrado = String(sec.getAttribute('data-seccion-grado') || '');
+        if (grado === 'todos' || secGrado === grado) {
+            sec.style.display = 'block';
+        } else {
+            sec.style.display = 'none';
+        }
+    });
+
     aplicarFiltrosEstudiantes();
+}
+
+function onCambiarFiltroGrupo() {
+    const selectGrupo = document.getElementById('filtro-grupo');
+    const grupoFiltro = selectGrupo ? selectGrupo.value.trim() : 'todos';
+
+    if (grupoFiltro === 'todos') {
+        cambiarPestanaGrado('todos', true);
+    } else {
+        const matchDigits = grupoFiltro.match(/\d+/);
+        if (matchDigits) {
+            cambiarPestanaGrado(matchDigits[0], true);
+        } else {
+            aplicarFiltrosEstudiantes();
+        }
+    }
+}
+
+function normalizarGrupo(str) {
+    if (!str) return '';
+    return str.replace(/[\s°\-_]/g, '').toLowerCase();
 }
 
 function aplicarFiltrosEstudiantes() {
     const inputBuscar = document.getElementById('buscar-estudiante-input');
     const term = inputBuscar ? inputBuscar.value.toLowerCase().trim() : '';
-    const grupoFiltro = document.getElementById('filtro-grupo') ? document.getElementById('filtro-grupo').value : 'todos';
-    const estadoFiltro = document.getElementById('filtro-estado') ? document.getElementById('filtro-estado').value : 'todos';
-    const materiaFiltro = document.getElementById('filtro-materia') ? document.getElementById('filtro-materia').value : 'todas';
+    const grupoFiltroRaw = document.getElementById('filtro-grupo') ? document.getElementById('filtro-grupo').value.trim() : 'todos';
+    const estadoFiltro = document.getElementById('filtro-estado') ? document.getElementById('filtro-estado').value.trim().toLowerCase() : 'todos';
+    const materiaFiltro = document.getElementById('filtro-materia') ? document.getElementById('filtro-materia').value.trim().toLowerCase() : 'todas';
+
+    const grupoFiltroNorm = normalizarGrupo(grupoFiltroRaw);
 
     document.querySelectorAll('.fila-estudiante-item').forEach(card => {
         const nombre = (card.getAttribute('data-nombre') || '').toLowerCase();
         const doc = (card.getAttribute('data-doc') || '').toLowerCase();
-        const grado = card.getAttribute('data-grado') || '';
-        const grupo = card.getAttribute('data-grupo') || '';
-        const estado = card.getAttribute('data-estado') || '';
-        const materia = card.getAttribute('data-materia') || '';
+        const grado = (card.getAttribute('data-grado') || '').trim();
+        const grupoCardRaw = card.getAttribute('data-grupo') || '';
+        const grupoCardNorm = normalizarGrupo(grupoCardRaw);
+        const estado = (card.getAttribute('data-estado') || '').trim().toLowerCase();
+        const materia = (card.getAttribute('data-materia') || '').toLowerCase();
 
         let matchGradoTab = (gradoActivo === 'todos') || (grado === gradoActivo);
         const matchTerm = !term || nombre.includes(term) || doc.includes(term);
-        const matchGrupo = (grupoFiltro === 'todos') || (grupo === grupoFiltro);
+        const matchGrupo = (grupoFiltroRaw === 'todos') || (grupoCardNorm === grupoFiltroNorm) || grupoCardNorm.includes(grupoFiltroNorm) || grupoFiltroNorm.includes(grupoCardNorm);
         const matchEstado = (estadoFiltro === 'todos') || (estado === estadoFiltro);
         const matchMateria = (materiaFiltro === 'todas') || materia.includes(materiaFiltro);
 
@@ -1001,12 +951,25 @@ function abrirModalRetiro(matriculaId, estudianteId, nombre, grado, nuevoEstado)
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const gradoUrl = urlParams.get('grado');
-    if (gradoUrl === '11') {
-        cambiarPestanaGrado('11');
-    } else if (gradoUrl === 'todos') {
-        cambiarPestanaGrado('todos');
+    const grupoUrl = urlParams.get('grupo');
+
+    if (grupoUrl) {
+        const selectGrupo = document.getElementById('filtro-grupo');
+        if (selectGrupo) {
+            selectGrupo.value = grupoUrl;
+            onCambiarFiltroGrupo();
+            return;
+        }
+    }
+
+    if (gradoUrl) {
+        cambiarPestanaGrado(gradoUrl);
     } else {
-        cambiarPestanaGrado('10');
+        {% if grupos_lista|length == 1 %}
+            cambiarPestanaGrado('{{ grupos_lista.0.grado }}');
+        {% else %}
+            cambiarPestanaGrado('todos');
+        {% endif %}
     }
 });
 </script>

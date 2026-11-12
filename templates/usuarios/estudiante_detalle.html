@@ -74,34 +74,27 @@
         </div>
     </div>
 
-    <!-- 4 Métricas Rápidas del Alumno -->
+    <!-- 3 Métricas Rápidas del Alumno -->
     <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-sm-6 col-md-4">
             <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-primary">
                 <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Asistencia Escolar</span>
                 <h3 class="fw-bold text-primary mb-0 mt-1">{{ porcentaje_asistencia }}%</h3>
                 <small class="text-muted">{{ total_asistencias }} sesiones registradas</small>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-sm-6 col-md-4">
             <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-success">
                 <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Semáforo: Aprobadas</span>
                 <h3 class="fw-bold text-success mb-0 mt-1">{{ semaforo_aprobados }} 🟢</h3>
                 <small class="text-muted">Competencias con desempeño óptimo</small>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-12 col-md-4">
             <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-warning">
                 <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">En Proceso / Recuperación</span>
                 <h3 class="fw-bold text-warning mb-0 mt-1">{{ semaforo_en_proceso }} 🟡 / {{ semaforo_recuperar }} 🔴</h3>
                 <small class="text-muted">Competencias pendientes</small>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm p-3 bg-white rounded-4 border-start border-4 border-info">
-                <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Tasa de Aprobación RAP</span>
-                <h3 class="fw-bold text-info mb-0 mt-1">{{ porcentaje_aprobacion|default:0 }}%</h3>
-                <small class="text-muted">{{ juicios_aprobados|default:0 }} de {{ total_juicios|default:0 }} evaluados</small>
             </div>
         </div>
     </div>
@@ -150,11 +143,13 @@
                         <i class="bi bi-journal-bookmark-fill me-1"></i> Observador
                     </button>
                 </li>
+                {% if not 'Secretar' in user.perfil.rol.nombre %}
                 <li class="nav-item" role="presentation">
                     <button class="nav-link fw-semibold text-nowrap py-3 px-3" id="tab-historial-btn" data-bs-toggle="tab" data-bs-target="#tab-historial" type="button" role="tab">
                         <i class="bi bi-clock-history me-1"></i> Historial
                     </button>
                 </li>
+                {% endif %}
             </ul>
         </div>
 
@@ -253,6 +248,82 @@
                                     <span class="badge bg-success">{{ matricula.get_estado_formacion_display }}</span>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- ASIGNATURAS Y CARGA ACADÉMICA DEL GRUPO -->
+                        <div class="mt-4 pt-3 border-top">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0">
+                                        <i class="bi bi-book-half text-primary me-2"></i>Asignaturas y Docentes del Grado {{ matricula.grado_escolar }}° {{ matricula.seccion }}
+                                    </h6>
+                                    <small class="text-muted">Materias asociadas al plan de estudios formal de este grupo.</small>
+                                </div>
+                                {% if user.is_superuser or 'Admin' in user.perfil.rol.nombre or 'Rector' in user.perfil.rol.nombre or 'Secretar' in user.perfil.rol.nombre %}
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#asignarMateriaGrupoModal">
+                                    <i class="bi bi-plus-circle-fill me-1"></i> Asignar Materia a este Grado
+                                </button>
+                                {% endif %}
+                            </div>
+
+                            {% if cargas_estudiante %}
+                                <div class="table-responsive rounded-3 border">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light small">
+                                            <tr>
+                                                <th>Asignatura / Área</th>
+                                                <th>Docente Asignado</th>
+                                                <th>Nivel</th>
+                                                <th>Año Lectivo</th>
+                                                <th class="text-end">Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for c in cargas_estudiante %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="fw-bold text-dark">{{ c.programa.denominacion|default:"Asignatura Institucional" }}</div>
+                                                        <small class="text-muted">Cód: {{ c.programa.codigo_programa|default:"ACAD" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        {% if c.profesor %}
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <i class="bi bi-person-badge text-primary"></i>
+                                                                <div>
+                                                                    <span class="fw-bold text-dark d-block">{{ c.profesor.get_full_name|default:c.profesor.username }}</span>
+                                                                    <small class="text-muted">{{ c.profesor.email|default:"Docente Activo" }}</small>
+                                                                </div>
+                                                            </div>
+                                                        {% else %}
+                                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                                                <i class="bi bi-exclamation-triangle me-1"></i> Docente pendiente
+                                                            </span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td><span class="badge bg-light text-dark border">{{ c.nivel_educativo|default:c.nivel }}</span></td>
+                                                    <td><span class="text-muted small">{{ c.anio_lectivo|default:"2026" }}</span></td>
+                                                    <td class="text-end">
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                            <i class="bi bi-check-circle me-1"></i> Activa
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info border-0 rounded-4 p-4 text-center">
+                                    <i class="bi bi-journal-x fs-2 d-block mb-2 text-primary opacity-50"></i>
+                                    <strong class="d-block mb-1">Este grado ({{ matricula.grado_escolar }}° {{ matricula.seccion }}) no tiene materias asignadas aún</strong>
+                                    <p class="text-muted small mb-3">La matrícula es completamente válida. Puedes asignarle las asignaturas y docentes de su pensum curricular ahora mismo.</p>
+                                    {% if user.is_superuser or 'Admin' in user.perfil.rol.nombre or 'Rector' in user.perfil.rol.nombre or 'Secretar' in user.perfil.rol.nombre %}
+                                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#asignarMateriaGrupoModal">
+                                        <i class="bi bi-plus-circle me-1"></i> Asignar Primera Asignatura
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
                         </div>
                     {% else %}
                         <div class="text-center py-5 text-muted">
@@ -543,6 +614,7 @@
                     {% endif %}
                 </div>
 
+                {% if not 'Secretar' in user.perfil.rol.nombre %}
                 <!-- 9. PESTAÑA HISTORIAL Y AUDITORÍA -->
                 <div class="tab-pane fade" id="tab-historial" role="tabpanel">
                     <h5 class="fw-bold text-dark mb-3">Registro Histórico de Auditoría y Trazabilidad</h5>
@@ -564,7 +636,7 @@
                                             <td>{{ h.fecha|date:"d/m/Y H:i:s" }}</td>
                                             <td><span class="badge bg-light text-dark border">{{ h.modulo }}</span></td>
                                             <td><code>{{ h.accion }}</code></td>
-                                            <td>{{ h.usuario.get_full_name|default:h.usuario.username }}</td>
+                                            <td>{% if h.usuario %}{{ h.usuario.get_full_name|default:h.usuario.username }}{% else %}Sistema{% endif %}</td>
                                             <td><small>{{ h.detalles }}</small></td>
                                         </tr>
                                     {% endfor %}
@@ -578,11 +650,62 @@
                         </div>
                     {% endif %}
                 </div>
+                {% endif %}
 
             </div>
         </div>
     </div>
 
+</div>
+
+<!-- Modal Asignar Materia y Docente al Grupo -->
+<div class="modal fade" id="asignarMateriaGrupoModal" tabindex="-1" aria-labelledby="asignarMateriaGrupoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+            <form method="POST" action="{% url 'estudiante_detalle' estudiante.usuario.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="asignar_materia_grupo">
+                <input type="hidden" name="grado" value="{{ matricula.grado_escolar|default:'10' }}">
+                <input type="hidden" name="seccion" value="{{ matricula.seccion|default:'A' }}">
+                
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #2f9ddd 0%, #1d72b8 100%);">
+                    <h5 class="modal-title fw-bold" id="asignarMateriaGrupoModalLabel">
+                        <i class="bi bi-book-half me-2"></i> Asignar Materia a Grado {{ matricula.grado_escolar }}° {{ matricula.seccion }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4 bg-white">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Asignatura / Área Curricular *</label>
+                        <select name="programa_id" class="form-select rounded-3" required>
+                            <option value="">-- Selecciona la Asignatura --</option>
+                            {% for prog in programas_disponibles %}
+                                <option value="{{ prog.id }}">{{ prog.denominacion }} ({{ prog.codigo_programa|default:'ACAD' }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Docente Responsable *</label>
+                        <select name="profesor_id" class="form-select rounded-3" required>
+                            <option value="">-- Selecciona el Docente --</option>
+                            {% for doc in docentes_disponibles %}
+                                <option value="{{ doc.id }}">{{ doc.get_full_name|default:doc.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="alert alert-light border small text-muted mb-0">
+                        <i class="bi bi-info-circle-fill text-primary me-1"></i> La materia y el profesor quedarán asignados a todo el Grado {{ matricula.grado_escolar }}° {{ matricula.seccion }}, actualizando el plan de estudios del estudiante y el panel del docente seleccionado.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-3">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        <i class="bi bi-check-circle-fill me-1"></i> Guardar Asignación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>

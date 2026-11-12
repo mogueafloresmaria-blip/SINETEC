@@ -208,28 +208,71 @@ def calcular_alertas_asistencia(matricula, fecha_referencia=None):
     }
 
 
-def registrar_asistencia_estudiante(matricula, fecha, estado, registrado_por=None, docente=None, carga=None, periodo='Periodo 1', observaciones=''):
+def registrar_asistencia_estudiante(matricula, fecha, estado, registrado_por=None, docente=None, carga=None, periodo='Periodo 1', observaciones='', motivo=''):
     """
     Guarda o actualiza la asistencia de UN estudiante de manera atómica y segura,
     sin borrar, alterar ni sobrescribir los registros de los demás estudiantes del grupo.
+    Si el registro ya existía y el estado u observaciones cambian, genera un registro
+    inmutable en HistorialCorreccionAsistencia garantizando trazabilidad total.
     """
     if estado not in ['P', 'T', 'A', 'J', 'E']:
         raise ValueError(f"Estado de asistencia inválido: {estado}")
+
+    from seguimiento.models import HistorialCorreccionAsistencia, RegistroAuditoria
 
     usuario_registrador = registrado_por or docente
     estado_normalizado = 'J' if estado == 'E' else estado
 
     with transaction.atomic():
-        asist_obj, created = AsistenciaAprendiz.objects.update_or_create(
-            matricula=matricula,
-            fecha=fecha,
-            defaults={
-                'estado': estado_normalizado,
-                'observaciones': observaciones,
-                'registrado_por': usuario_registrador,
-                'carga_academica': carga,
-                'periodo': periodo,
-            }
-        )
+        asist_anterior = AsistenciaAprendiz.objects.filter(matricula=matricula, fecha=fecha).first()
+        
+        if asist_anterior:
+            # Comprobar si hubo cambio de estado u observación
+            cambio_estado = asist_anterior.estado != estado_normalizado
+            cambio_obs = (asist_anterior.observaciones or '') != (observaciones or '')
+            
+            if cambio_estado or cambio_obs:
+                HistorialCorreccionAsistencia.objects.create(
+                    asistencia=asist_anterior,
+                    matricula=matricula,
+                    fecha_sesion=fecha,
+                    estado_anterior=asist_anterior.estado,
+                    estado_nuevo=estado_normalizado,
+                    motivo=motivo or ('Corrección de asistencia de sesión' if cambio_estado else 'Actualización de observaciones'),
+                    observaciones_anteriores=asist_anterior.observaciones or '',
+                    observaciones_nuevas=observaciones or '',
+                    modificado_por=usuario_registrador,
+                )
+                
+                # Registrar auditoría global de trazabilidad
+                RegistroAuditoria.registrar(
+                    usuario=usuario_registrador,
+                    modulo='Asistencia Escolar',
+                    accion=f'Corrección de Asistencia ({asist_anterior.get_estado_display()} -> {estado_normalizado})',
+                    detalles=f'Estudiante: {matricula.aprendiz.get_full_name() or matricula.aprendiz.username} (Doc: {matricula.aprendiz.username}) | Fecha: {fecha} | Anterior: {asist_anterior.estado} | Nuevo: {estado_normalizado} | Motivo: {motivo or "Ajuste docente"}'
+                )
+
+            asist_anterior.estado = estado_normalizado
+            asist_anterior.observaciones = observaciones
+            asist_anterior.registrado_por = usuario_registrador or asist_anterior.registrado_por
+            if carga:
+                asist_anterior.carga_academica = carga
+            if periodo:
+                asist_anterior.periodo = periodo
+            asist_anterior.save()
+            asist_obj = asist_anterior
+            created = False
+        else:
+            asist_obj = AsistenciaAprendiz.objects.create(
+                matricula=matricula,
+                fecha=fecha,
+                estado=estado_normalizado,
+                observaciones=observaciones,
+                registrado_por=usuario_registrador,
+                carga_academica=carga,
+                periodo=periodo,
+            )
+            created = True
 
     return asist_obj, created
+

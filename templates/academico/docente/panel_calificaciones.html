@@ -4,6 +4,33 @@
      Paleta: Café Institucional, Crema y Arena (#5a3825, #3d2417, #F5F2EB, #E0D8CE)
      Responsabilidad: Administración Exclusiva de Notas y Evaluaciones
      ========================================================================= -->
+<style>
+.btn-calif-side-floating {
+    position: absolute;
+    top: 65px;
+    z-index: 25;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #5A3825;
+    color: #FFFFFF;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.92;
+}
+.btn-calif-side-floating:hover {
+    background: #3D2417;
+    transform: scale(1.12);
+    opacity: 1;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+</style>
+
 <div class="panel-modulo-docente space-y-4" id="modulo-calificaciones">
 
     <!-- HERO BANNER CALIFICACIONES -->
@@ -273,47 +300,79 @@
                     </div>
                 </div>
 
-                <div class="table-responsive">
-                    {% if evaluaciones_periodo %}
-                    <table class="table align-middle table-hover mb-0" id="tabla-planilla-general">
-                        <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
-                            <tr>
-                                <th class="text-center py-3" style="width: 45px; color: var(--color-secundario); font-size: 0.76rem;">#</th>
-                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem; min-width: 220px;">ESTUDIANTE</th>
-                                <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">DOCUMENTO</th>
-                                
-                                <!-- Columnas dinámicas de cada evaluación del periodo -->
-                                {% for ev in evaluaciones_periodo %}
-                                <th class="text-center py-3" style="color: var(--color-secundario); font-size: 0.76rem; min-width: 110px;">
-                                    <span class="d-block text-truncate" style="max-width: 110px;" title="{{ ev.titulo }}">{{ ev.titulo }}</span>
-                                    <span class="badge rounded-pill px-2 py-0.5" style="background: #ffffff; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.68rem;">
-                                        {{ ev.porcentaje }}%
-                                    </span>
-                                </th>
-                                {% endfor %}
+                <!-- Barra superior de desplazamiento horizontal (evita tener que bajar hasta el final) -->
+                <div class="px-3.5 py-2 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2" style="background: #FAF8F5; border-color: var(--color-acento) !important;">
+                    <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.76rem;">
+                        <i class="bi bi-arrows-expand-vertical" style="transform: rotate(90deg); color: var(--color-principal);"></i>
+                        <span>Desliza lateralmente sin bajar la página</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold text-uppercase" style="font-size: 0.68rem; letter-spacing: 0.5px; color: #8C7B70;">DESLIZAR TABLA:</span>
+                        <div id="califScrollTrack" title="Clic o arrastra para deslizar lateralmente"
+                             style="width: 150px; height: 9px; background: #E8E2D9; border-radius: 999px; position: relative; cursor: pointer; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.08);">
+                            <div id="califScrollThumb" style="position: absolute; top: 0; left: 0; height: 100%; width: 55px; min-width: 34px; background: #A07855; border-radius: 999px; cursor: grab; transition: left 0.08s ease, width 0.08s ease;"></div>
+                        </div>
+                        <button type="button" id="btnCalifScrollLeft" class="btn btn-sm rounded-circle p-0 d-inline-flex align-items-center justify-content-center shadow-2xs"
+                                style="width: 28px; height: 28px; border: 1.5px solid #D6CBC0; background: #FFFFFF; color: #4A3E38;" title="Deslizar a la izquierda">
+                            <i class="bi bi-chevron-left" style="font-size: 0.75rem;"></i>
+                        </button>
+                        <button type="button" id="btnCalifScrollRight" class="btn btn-sm rounded-circle p-0 d-inline-flex align-items-center justify-content-center shadow-2xs"
+                                style="width: 28px; height: 28px; border: 1.5px solid #D6CBC0; background: #FFFFFF; color: #4A3E38;" title="Deslizar a la derecha">
+                            <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
+                        </button>
+                    </div>
+                </div>
 
-                                <th class="text-center py-3" style="width: 140px; color: var(--color-secundario); font-size: 0.76rem;">PROMEDIO FINAL</th>
-                                <th class="text-center py-3" style="width: 120px; color: var(--color-secundario); font-size: 0.76rem;">DESEMPEÑO</th>
-                                <th class="py-3" style="min-width: 200px; color: var(--color-secundario); font-size: 0.76rem;">OBSERVACIÓN DEL PERIODO</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for m in estudiantes_carga_sel %}
-                            <tr style="border-bottom: 1px solid var(--color-acento);">
-                                <td class="text-center fw-bold text-muted small">{{ forloop.counter }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2.5">
-                                        <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs" 
-                                             style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); width: 36px; height: 36px; font-size: 0.8rem;">
-                                            {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
+                <!-- Contenedor desplazable con botones laterales flotantes para deslizar sin bajar -->
+                <div class="position-relative">
+                    <button type="button" id="btnCalifSideLeft" class="btn-calif-side-floating" style="left: 10px;" title="Deslizar a la izquierda" aria-label="Deslizar a la izquierda">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button type="button" id="btnCalifSideRight" class="btn-calif-side-floating" style="right: 10px;" title="Deslizar a la derecha" aria-label="Deslizar a la derecha">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+
+                    <div class="table-responsive" id="califPlanillaScrollContainer" style="scroll-behavior: smooth; cursor: grab;">
+                        {% if evaluaciones_periodo %}
+                        <table class="table align-middle table-hover mb-0" id="tabla-planilla-general" style="min-width: 1450px;">
+                            <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
+                                <tr>
+                                    <th class="text-center py-3" style="width: 45px; color: var(--color-secundario); font-size: 0.76rem;">#</th>
+                                    <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem; min-width: 250px;">ESTUDIANTE</th>
+                                    <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem; min-width: 140px;">DOCUMENTO</th>
+                                    
+                                    <!-- Columnas dinámicas de cada evaluación del periodo -->
+                                    {% for ev in evaluaciones_periodo %}
+                                    <th class="text-center py-3" style="color: var(--color-secundario); font-size: 0.76rem; min-width: 120px;">
+                                        <span class="d-block text-truncate" style="max-width: 120px;" title="{{ ev.titulo }}">{{ ev.titulo }}</span>
+                                        <span class="badge rounded-pill px-2 py-0.5" style="background: #ffffff; color: var(--color-principal); border: 1px solid var(--color-acento); font-size: 0.68rem;">
+                                            {{ ev.porcentaje }}%
+                                        </span>
+                                    </th>
+                                    {% endfor %}
+
+                                    <th class="text-center py-3" style="width: 140px; color: var(--color-secundario); font-size: 0.76rem;">PROMEDIO FINAL</th>
+                                    <th class="text-center py-3" style="width: 120px; color: var(--color-secundario); font-size: 0.76rem;">DESEMPEÑO</th>
+                                    <th class="py-3" style="min-width: 240px; color: var(--color-secundario); font-size: 0.76rem;">OBSERVACIÓN DEL PERIODO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in estudiantes_carga_sel %}
+                                <tr style="border-bottom: 1px solid var(--color-acento);">
+                                    <td class="text-center fw-bold text-muted small">{{ forloop.counter }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2.5" style="white-space: nowrap;">
+                                            <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs flex-shrink-0" 
+                                                 style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); width: 36px; height: 36px; font-size: 0.8rem;">
+                                                {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
+                                            </div>
+                                            <div>
+                                                <strong class="text-dark d-block text-nowrap" style="font-size: 0.92rem;">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                                <small class="text-muted d-block" style="font-size: 0.74rem;">Grado {{ m.grado_escolar }}°{{ m.seccion }}</small>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <strong class="text-dark d-block" style="font-size: 0.92rem;">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
-                                            <small class="text-muted" style="font-size: 0.74rem;">Grado {{ m.grado_escolar }}°{{ m.seccion }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="text-muted small font-monospace fw-medium">{{ m.aprendiz.username }}</td>
+                                    </td>
+                                    <td class="text-muted small font-monospace fw-medium text-nowrap">{{ m.aprendiz.perfil.numero_documento|default:m.aprendiz.username }}</td>
 
                                 <!-- Notas de cada evaluación -->
                                 {% for item in m.notas_evaluaciones_lista %}
@@ -379,6 +438,7 @@
                     </div>
                     {% endif %}
                 </div>
+            </div>
 
                 <div class="p-3.5 bg-light border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: var(--color-acento) !important;">
                     <span class="text-muted small d-flex align-items-center gap-1.5">
@@ -557,42 +617,62 @@
                     <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
                         <tr>
                             <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ESTUDIANTE</th>
-                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">DOCUMENTO</th>
                             <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ASIGNATURA</th>
-                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">GRADO / GRUPO</th>
-                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">PERIODO</th>
+                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">EVALUACIÓN / PERIODO</th>
                             <th class="text-center py-3" style="color: var(--color-secundario); font-size: 0.76rem;">NOTA</th>
-                            <th class="text-center py-3" style="color: var(--color-secundario); font-size: 0.76rem;">DESEMPEÑO</th>
-                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">OBSERVACIÓN</th>
+                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">TRAZABILIDAD Y CAMBIOS</th>
+                            <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">DOCENTE RESPONSABLE</th>
                             <th class="py-3" style="color: var(--color-secundario); font-size: 0.76rem;">FECHA DE REGISTRO</th>
+                            <th class="text-end py-3" style="color: var(--color-secundario); font-size: 0.76rem;">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for cal in historial_calificaciones_escolares %}
-                        <tr style="border-bottom: 1px solid var(--color-acento);">
-                            <td><strong class="text-dark">{{ cal.matricula.aprendiz.get_full_name|default:cal.matricula.aprendiz.username }}</strong></td>
-                            <td class="font-monospace small text-muted">{{ cal.matricula.aprendiz.username }}</td>
+                        <tr style="border-bottom: 1px solid var(--color-acento);" class="fila-hist-nota">
+                            <td>
+                                <strong class="text-dark d-block" style="font-size: 0.88rem;">{{ cal.matricula.aprendiz.get_full_name|default:cal.matricula.aprendiz.username }}</strong>
+                                <small class="text-muted font-monospace">Doc: {{ cal.matricula.aprendiz.username }} · Grado {{ cal.carga_academica.grado }}°{{ cal.carga_academica.seccion }}</small>
+                            </td>
                             <td><span class="badge rounded-pill px-2.5 py-1" style="background: var(--color-acento); color: var(--color-secundario); border: 1px solid var(--color-acento);">{{ cal.carga_academica.programa.denominacion|default:'Matemáticas' }}</span></td>
-                            <td class="small fw-semibold">Grado {{ cal.carga_academica.grado }}°{{ cal.carga_academica.seccion }}</td>
-                            <td class="small">{{ cal.periodo }}</td>
+                            <td>
+                                <span class="fw-semibold text-dark small d-block">{{ cal.periodo }}</span>
+                                <small class="text-muted">{{ cal.desempeno }}</small>
+                            </td>
                             <td class="text-center">
                                 <span class="badge rounded-pill px-3 py-1 fw-bold fs-6 shadow-2xs" 
                                       style="{% if cal.nota >= 3.0 %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %}">
                                     {{ cal.nota }}
                                 </span>
                             </td>
-                            <td class="text-center">
-                                <span class="badge rounded-pill px-2.5 py-1 small fw-bold" 
-                                      style="{% if cal.desempeno == 'Superior' or cal.desempeno == 'Alto' %}background: #ecfdf5; color: #047857;{% elif cal.desempeno == 'Básico' %}background: #fefce8; color: #ca8a04;{% else %}background: #fef2f2; color: #b91c1c;{% endif %}">
-                                    {{ cal.desempeno }}
-                                </span>
+                            <td class="small" style="max-width: 280px;">
+                                {% if "Trazabilidad:" in cal.observaciones %}
+                                    <span class="badge rounded-pill px-2 py-0.5 text-warning bg-warning-subtle border border-warning-subtle fw-bold mb-1 d-inline-block">
+                                        <i class="bi bi-clock-history"></i> Modificada
+                                    </span>
+                                    <div class="text-muted small text-truncate" title="{{ cal.observaciones }}">{{ cal.observaciones }}</div>
+                                {% else %}
+                                    <span class="badge rounded-pill px-2 py-0.5 text-success bg-success-subtle border border-success-subtle fw-bold mb-1 d-inline-block">
+                                        <i class="bi bi-check-circle"></i> Registro Inicial
+                                    </span>
+                                    <div class="text-muted small text-truncate" title="{{ cal.observaciones|default:'Sin observaciones adicionales' }}">{{ cal.observaciones|default:'Asignada en planilla oficial' }}</div>
+                                {% endif %}
                             </td>
-                            <td class="small text-muted">{{ cal.observaciones|default:'—' }}</td>
+                            <td>
+                                <span class="small fw-semibold text-dark d-block">{{ cal.profesor.get_full_name|default:cal.profesor.username }}</span>
+                                <small class="text-muted">Docente titular</small>
+                            </td>
                             <td class="small text-muted">{{ cal.fecha_registro|date:"d/m/Y H:i" }}</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold shadow-2xs d-inline-flex align-items-center gap-1"
+                                        onclick="abrirModalEditarNotaHistorial('{{ cal.id }}', '{{ cal.matricula.aprendiz.get_full_name|default:cal.matricula.aprendiz.username|escapejs }}', '{{ cal.carga_academica.programa.denominacion|default:'Matemáticas'|escapejs }}', '{{ cal.periodo }}', '{{ cal.nota }}', '{{ cal.observaciones|default:''|escapejs }}');"
+                                        style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.78rem;">
+                                    <i class="bi bi-pencil-square"></i> Editar Nota
+                                </button>
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="9" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-5 text-muted">
                                 <i class="bi bi-journal-x fs-2 d-block mb-2" style="color: var(--color-principal);"></i>
                                 No hay calificaciones registradas en el historial.
                             </td>
@@ -809,10 +889,86 @@
     </div>
 </div>
 
+<!-- MODAL: EDITAR NOTA DESDE HISTORIAL CON TRAZABILIDAD -->
+<div class="modal fade" id="modalEditarNotaHistorial" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header text-white p-3.5" style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-pencil-square fs-5"></i>
+                    <h5 class="modal-title fw-bold mb-0" style="font-size: 1.05rem;">Editar Calificación con Trazabilidad</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form method="POST" action="{% url 'instructor_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="editar_nota_historial">
+                <input type="hidden" name="calificacion_id" id="modal-edit-calif-id" value="">
+
+                <div class="modal-body p-4 space-y-3">
+                    <div class="p-3 rounded-3 bg-light border mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark" id="modal-edit-estudiante-nombre">Estudiante</strong>
+                            <span class="badge rounded-pill bg-primary" id="modal-edit-periodo">Periodo</span>
+                        </div>
+                        <small class="text-muted d-block" id="modal-edit-asignatura">Asignatura</small>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-bold">Nota Anterior Registrada</label>
+                            <input type="text" id="modal-edit-nota-actual" class="form-control rounded-3 text-center fw-bold" readonly disabled
+                                   style="background: #f1f5f9; color: #64748b; font-size: 1.1rem;">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-dark small fw-bold">Nueva Nota (0.0 - 5.0) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" min="0.0" max="5.0" name="nueva_nota" id="modal-edit-nueva-nota" 
+                                   class="form-control rounded-3 text-center fw-bold text-dark" required
+                                   style="border: 2px solid var(--color-principal); font-size: 1.1rem;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-dark small fw-bold">Motivo del Ajuste / Justificación Pedagógica <span class="text-danger">*</span></label>
+                        <textarea name="motivo_ajuste" rows="3" class="form-control rounded-3" required
+                                  placeholder="Explique el motivo del cambio (ej: Corrección en sustentación, revisión de examen, entrega extemporánea justificada)..."
+                                  style="border-color: var(--color-acento); font-size: 0.88rem;"></textarea>
+                    </div>
+
+                    <div class="p-2.5 rounded-3 bg-warning-subtle border border-warning-subtle text-dark small">
+                        <i class="bi bi-info-circle-fill text-warning me-1"></i>
+                        Se registrará automáticamente la nota anterior, la nueva nota, la fecha y el docente responsable en el libro oficial de auditoría.
+                    </div>
+                </div>
+
+                <div class="modal-footer p-3 bg-light border-top">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn rounded-pill px-4 text-white fw-bold shadow-sm"
+                            style="background: var(--color-principal); border: 1px solid var(--color-principal);">
+                        <i class="bi bi-save me-1"></i> Guardar Modificación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- =========================================================================
      JAVASCRIPT: INTERACTIVIDAD Y BÚSQUEDA
      ========================================================================= -->
 <script>
+function abrirModalEditarNotaHistorial(calId, estudiante, asignatura, periodo, nota, obs) {
+    document.getElementById('modal-edit-calif-id').value = calId;
+    document.getElementById('modal-edit-estudiante-nombre').textContent = estudiante;
+    document.getElementById('modal-edit-asignatura').textContent = 'Asignatura: ' + asignatura;
+    document.getElementById('modal-edit-periodo').textContent = periodo;
+    document.getElementById('modal-edit-nota-actual').value = nota;
+    document.getElementById('modal-edit-nueva-nota').value = nota;
+    const modal = new bootstrap.Modal(document.getElementById('modalEditarNotaHistorial'));
+    modal.show();
+}
+
 function filtrarTablaHistorialCalif() {
     const query = (document.getElementById('buscar-historial-calif').value || '').toLowerCase().trim();
     const rows = document.querySelectorAll('#tabla-historial-notas tbody tr');
@@ -849,4 +1005,150 @@ function imprimirDocumentoCalificaciones() {
     `);
     ventana.document.close();
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('califPlanillaScrollContainer');
+    const track = document.getElementById('califScrollTrack');
+    const thumb = document.getElementById('califScrollThumb');
+    const btnLeft = document.getElementById('btnCalifScrollLeft');
+    const btnRight = document.getElementById('btnCalifScrollRight');
+
+    function updateCalifIndicator() {
+        if (!container || !thumb || !track) return;
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        const trackWidth = track.clientWidth || 150;
+
+        if (maxScroll <= 0) {
+            thumb.style.width = trackWidth + 'px';
+            thumb.style.left = '0px';
+            return;
+        }
+
+        const visibleRatio = Math.max(0.2, Math.min(1, container.clientWidth / container.scrollWidth));
+        const thumbWidth = Math.max(34, Math.round(visibleRatio * trackWidth));
+        const maxLeft = trackWidth - thumbWidth;
+        const scrollRatio = Math.min(1, Math.max(0, container.scrollLeft / maxScroll));
+        const thumbLeft = Math.round(scrollRatio * maxLeft);
+
+        thumb.style.width = thumbWidth + 'px';
+        thumb.style.left = thumbLeft + 'px';
+    }
+
+    if (container) {
+        container.addEventListener('scroll', updateCalifIndicator, { passive: true });
+        window.addEventListener('resize', updateCalifIndicator);
+        setTimeout(updateCalifIndicator, 150);
+
+        // Botones < y >
+        function deslizarCalif(delta) {
+            try {
+                container.scrollBy({ left: delta, behavior: 'smooth' });
+            } catch(e) {
+                container.scrollLeft += delta;
+            }
+            setTimeout(updateCalifIndicator, 120);
+        }
+
+        const btnSideLeft = document.getElementById('btnCalifSideLeft');
+        const btnSideRight = document.getElementById('btnCalifSideRight');
+
+        if (btnLeft) {
+            btnLeft.addEventListener('click', function(e) {
+                e.preventDefault();
+                deslizarCalif(-400);
+            });
+        }
+        if (btnRight) {
+            btnRight.addEventListener('click', function(e) {
+                e.preventDefault();
+                deslizarCalif(400);
+            });
+        }
+        if (btnSideLeft) {
+            btnSideLeft.addEventListener('click', function(e) {
+                e.preventDefault();
+                deslizarCalif(-400);
+            });
+        }
+        if (btnSideRight) {
+            btnSideRight.addEventListener('click', function(e) {
+                e.preventDefault();
+                deslizarCalif(400);
+            });
+        }
+
+        // Desplazamiento lateral con la rueda del ratón
+        container.addEventListener('wheel', function(e) {
+            if (e.deltaY !== 0 && !e.shiftKey) {
+                e.preventDefault();
+                container.scrollLeft += e.deltaY * 1.3;
+                updateCalifIndicator();
+            }
+        }, { passive: false });
+
+        // Clic en pista
+        if (track) {
+            track.addEventListener('click', function(e) {
+                const rect = track.getBoundingClientRect();
+                const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                const maxScroll = container.scrollWidth - container.clientWidth;
+                if (maxScroll > 0) {
+                    container.scrollTo({ left: ratio * maxScroll, behavior: 'smooth' });
+                }
+            });
+        }
+
+        // Arrastre del thumb
+        let draggingThumb = false, startThumbX = 0, startScrollLeft = 0;
+        if (thumb) {
+            thumb.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                draggingThumb = true;
+                startThumbX = e.clientX;
+                startScrollLeft = container.scrollLeft;
+                document.body.style.userSelect = 'none';
+            });
+        }
+        document.addEventListener('mousemove', function(e) {
+            if (!draggingThumb || !track) return;
+            const deltaX = e.clientX - startThumbX;
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            const usableTrack = track.clientWidth - (thumb ? thumb.offsetWidth : 40);
+            if (usableTrack > 0 && maxScroll > 0) {
+                container.scrollLeft = startScrollLeft + (deltaX / usableTrack) * maxScroll;
+            }
+        });
+        document.addEventListener('mouseup', function() {
+            if (draggingThumb) {
+                draggingThumb = false;
+                document.body.style.userSelect = '';
+            }
+        });
+
+        // Arrastre directo sobre la tabla (drag-to-scroll sin bajar hasta el fondo)
+        let isDraggingTable = false, startX = 0, scrollStart = 0;
+        container.addEventListener('mousedown', function(e) {
+            if (e.target.closest('input, select, textarea, button, a')) return;
+            isDraggingTable = true;
+            container.style.cursor = 'grabbing';
+            startX = e.pageX - container.offsetLeft;
+            scrollStart = container.scrollLeft;
+        });
+        container.addEventListener('mouseleave', function() {
+            isDraggingTable = false;
+            container.style.cursor = 'grab';
+        });
+        container.addEventListener('mouseup', function() {
+            isDraggingTable = false;
+            container.style.cursor = 'grab';
+        });
+        container.addEventListener('mousemove', function(e) {
+            if (!isDraggingTable) return;
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 1.4;
+            container.scrollLeft = scrollStart - walk;
+        });
+    }
+});
 </script>

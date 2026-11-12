@@ -108,9 +108,15 @@
                                 </div>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-bold">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Activo
-                                </span>
+                                {% if fam.estudiantes.all %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-bold">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Asignado
+                                    </span>
+                                {% else %}
+                                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background-color: #FEF3C7 !important; color: #92400E !important; border: 1px solid #FCD34D !important;">
+                                        <i class="bi bi-clock-history me-1"></i> Pendiente de asignación
+                                    </span>
+                                {% endif %}
                             </td>
                             <td class="pe-4 text-end">
                                 <div class="btn-group btn-group-sm">
@@ -119,9 +125,47 @@
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     {% endif %}
-                                    <a href="{% url 'crear_familia' %}" class="btn btn-outline-secondary" title="Vincular Otro Estudiante">
-                                        <i class="bi bi-link-45deg"></i>
-                                    </a>
+                                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalVincular{{ fam.id }}" title="Vincular Estudiante">
+                                        <i class="bi bi-person-plus-fill me-1"></i> Vincular
+                                    </button>
+                                </div>
+
+                                <!-- Modal para Vincular Estudiante a este Acudiente -->
+                                <div class="modal fade text-start" id="modalVincular{{ fam.id }}" tabindex="-1" aria-labelledby="modalVincularLabel{{ fam.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content rounded-4 border-0 shadow">
+                                            <div class="modal-header bg-light border-0 py-3">
+                                                <h6 class="modal-title fw-bold text-dark" id="modalVincularLabel{{ fam.id }}">
+                                                    <i class="bi bi-link-45deg text-primary me-1"></i> Vincular Estudiante a {{ fam.nombre_acudiente }}
+                                                </h6>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                            </div>
+                                            <form method="post" action="{% url 'vincular_estudiante_acudiente' fam.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-body p-4">
+                                                    <p class="small text-muted mb-3">
+                                                        Selecciona el estudiante que estará a cargo de <strong>{{ fam.nombre_acudiente }}</strong> (Parentesco: {{ fam.parentesco|default:"Acudiente" }}).
+                                                        Al guardarlo, el estado del acudiente cambiará inmediatamente a <span class="badge bg-success-subtle text-success">Asignado</span>.
+                                                    </p>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-bold text-dark">Estudiante Escolar *</label>
+                                                        <select name="estudiante_id" class="form-select" required>
+                                                            <option value="">-- Seleccionar Estudiante --</option>
+                                                            {% for est in todos_estudiantes %}
+                                                                <option value="{{ est.id }}">{{ est.last_name }}, {{ est.first_name }} (Doc: {{ est.perfil.numero_documento|default:est.username }})</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-0 pt-0">
+                                                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                                                        <i class="bi bi-check-circle-fill me-1"></i> Asignar Estudiante
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>

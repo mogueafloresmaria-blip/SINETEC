@@ -1,574 +1,1254 @@
 {% extends 'base.html' %}
+
 {% load static %}
+
 {% block title %}Gestión de Matrículas Escolares · EDUNOVA{% endblock %}
 
+
+
 {% block extra_head %}
+
 <style>
+
 body { background: #faf7f9 !important; }
+
 .mat-wrap { padding: 1.2rem 1.5rem; }
 
+
+
 /* Stat Cards */
+
 .mat-stat {
+
   background: #ffffff;
+
   border-radius: 16px;
+
   padding: 1.1rem 1.35rem;
+
   border: 1.5px solid var(--color-acento);
+
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
+
   box-shadow: 0 4px 14px rgba(90, 56, 37, 0.04);
+
   transition: transform 0.2s, box-shadow 0.2s;
+
 }
+
 .mat-stat:hover {
+
   transform: translateY(-2px);
+
   box-shadow: 0 8px 20px rgba(90, 56, 37, 0.08);
+
 }
+
 .mat-stat-val {
+
   font-size: 1.85rem;
+
   font-weight: 800;
+
   color: #0f172a;
+
   line-height: 1;
+
 }
+
 .mat-stat-lbl {
+
   font-size: 0.74rem;
+
   font-weight: 800;
+
   text-transform: uppercase;
+
   letter-spacing: 0.06em;
+
   color: #64748b;
+
   margin-top: 0.25rem;
+
 }
+
 .mat-stat-ico {
+
   width: 44px;
+
   height: 44px;
+
   border-radius: 12px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   font-size: 1.25rem;
+
   flex-shrink: 0;
+
 }
+
+
 
 /* Tabla de Matrículas */
+
 .mat-tbl {
+
   background: #ffffff;
+
   border-radius: 18px;
+
   border: 1.5px solid var(--color-acento);
+
   overflow: hidden;
+
   box-shadow: 0 4px 16px rgba(90, 56, 37, 0.04);
+
   margin-top: 1.2rem;
+
 }
+
 .mat-tbl .table thead th {
+
   background: #F5F2EB !important;
+
   color: var(--color-secundario) !important;
+
   font-size: 0.74rem !important;
+
   font-weight: 800 !important;
+
   text-transform: uppercase !important;
+
   letter-spacing: 0.06em !important;
+
   border-bottom: 1.5px solid var(--color-acento) !important;
+
   border-top: none !important;
+
   padding: 0.9rem 1.1rem !important;
+
 }
+
 .mat-tbl .table tbody td {
+
   padding: 0.85rem 1.1rem !important;
+
   font-size: 0.88rem !important;
+
   vertical-align: middle !important;
+
   border-color: var(--color-acento) !important;
+
 }
+
 .mat-tbl .table tbody tr:last-child td {
+
   border-bottom: none !important;
+
 }
+
 .mat-tbl .table tbody tr:hover {
+
   background: #fff9fb !important;
+
 }
+
+
 
 .mat-avatar {
+
   width: 40px;
+
   height: 40px;
+
   border-radius: 12px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   font-size: 0.88rem;
+
   font-weight: 800;
+
   color: #ffffff;
+
   flex-shrink: 0;
+
   background: linear-gradient(135deg, var(--color-principal), var(--color-secundario));
+
   box-shadow: 0 2px 8px rgba(90, 56, 37, 0.2);
+
 }
+
+
 
 .mat-badge-adelantado {
+
   background: #ecfdf5;
+
   color: #065f46;
+
   border: 1px solid #a7f3d0;
+
   padding: 0.3rem 0.75rem;
+
   border-radius: 999px;
+
   font-size: 0.73rem;
+
   font-weight: 700;
+
   display: inline-flex;
+
   align-items: center;
+
   gap: 4px;
+
 }
+
+
 
 .mat-btn {
+
   width: 32px;
+
   height: 32px;
+
   border-radius: 8px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   font-size: 0.88rem;
+
   border: 1px solid;
+
   cursor: pointer;
+
   transition: all 0.15s;
+
   text-decoration: none;
+
 }
+
 .mat-btn:hover {
+
   transform: scale(1.08);
+
 }
+
+
 
 .mat-group-header {
+
   background: #F5F2EB;
+
   border: 1px solid var(--color-acento);
+
   padding: 0.5rem 1.1rem;
+
   margin: 0.85rem 1rem;
+
   border-radius: 999px;
+
   display: inline-flex;
+
   align-items: center;
+
   gap: 6px;
+
   font-size: 0.76rem;
+
   font-weight: 800;
+
   text-transform: uppercase;
+
   letter-spacing: 0.05em;
+
   color: var(--color-secundario);
+
 }
+
+
 
 /* Cuadrícula de Tarjetas de Grados Escolares (1° a 11°) */
+
 .mat-grados-container {
+
   background: #ffffff;
+
   border-radius: 20px;
+
   border: 1.5px solid var(--color-acento);
+
   padding: 1.25rem 1.45rem;
+
   box-shadow: 0 4px 14px rgba(90, 56, 37, 0.04);
+
   margin-bottom: 1.5rem;
+
 }
+
 .mat-grado-grid {
+
   display: grid;
+
   grid-template-columns: repeat(4, 1fr);
+
   gap: 12px;
+
 }
+
 @media (max-width: 1200px) {
+
   .mat-grado-grid {
+
     grid-template-columns: repeat(3, 1fr);
+
   }
+
 }
+
 @media (max-width: 900px) {
+
   .mat-grado-grid {
+
     grid-template-columns: repeat(2, 1fr);
+
   }
+
 }
+
 @media (max-width: 576px) {
+
   .mat-grado-grid {
+
     grid-template-columns: 1fr;
+
   }
+
 }
+
 .mat-grado-card {
+
   background: #FAF8F5;
+
   border: 1.5px solid #ECE7DE;
+
   border-radius: 18px;
+
   padding: 10px 16px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
+
   text-decoration: none !important;
+
   color: #1f2937 !important;
+
   transition: all 0.2s ease;
+
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
   min-height: 52px;
+
 }
+
 .mat-grado-card:hover {
+
   background: #ffffff;
+
   border-color: #d8cfc4;
+
   transform: translateY(-2px);
+
   box-shadow: 0 6px 14px rgba(90, 56, 37, 0.06);
+
 }
+
 .mat-grado-card.active {
+
   background: #f8fafc !important;
+
   border-color: #93c5fd !important;
+
   box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.35) !important;
+
 }
+
 .mat-grado-icon {
+
   font-size: 1.65rem;
+
   line-height: 1;
+
   display: inline-flex;
+
   align-items: center;
+
   justify-content: center;
+
   width: 32px;
+
   height: 32px;
+
   flex-shrink: 0;
+
 }
+
 .mat-grado-nombre {
+
   font-size: 0.95rem;
+
   font-weight: 700;
+
   color: #1e293b;
+
   letter-spacing: -0.01em;
+
 }
+
 .mat-grado-badge-inactivo {
+
   background: #fee2e2;
+
   color: #b91c1c;
+
   border: 1px solid #fecaca;
+
   font-size: 0.72rem;
+
   font-weight: 700;
+
   padding: 2.5px 8px;
+
   border-radius: 999px;
+
   display: inline-flex;
+
   align-items: center;
+
   gap: 5px;
+
   flex-shrink: 0;
+
 }
+
 .mat-grado-dot {
+
   width: 6px;
+
   height: 6px;
+
   border-radius: 50%;
+
   background: #ef4444;
+
   display: inline-block;
+
 }
+
 </style>
+
 {% endblock %}
 
+
+
 {% block content %}
+
 <div class="mat-wrap">
 
+
+
   <!-- TÍTULO Y ACCIONES PRINCIPALES (SIN COLOR AZUL) -->
+
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
     <div class="d-flex align-items-center gap-3">
+
       <div class="rounded-4 p-2.5 d-flex align-items-center justify-content-center shadow-xs"
+
            style="background: #ffffff; color: var(--color-principal); width: 50px; height: 50px; border: 1.5px solid var(--color-acento);">
+
         <i class="bi bi-person-lines-fill" style="font-size: 1.6rem;"></i>
+
       </div>
+
       <div>
+
         <h1 class="h4 fw-bold text-dark mb-0">Gestión Oficial de Matrículas Escolares</h1>
+
         <p class="text-muted mb-0" style="font-size: 0.85rem;">Monitoreo de estudiantes matriculados, estados de vigencia y asignación de cursos en EDUNOVA.</p>
+
       </div>
+
     </div>
+
     <div class="d-flex flex-wrap gap-2">
+
       <!-- Carga Masiva con selección de grado 1° a 11° -->
+
       <div class="btn-group">
+
         <a href="{% url 'importar_estudiantes_masivo' %}" class="btn rounded-start-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+
            style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.88rem;">
+
           <i class="bi bi-file-earmark-spreadsheet-fill"></i> Carga Masiva Estudiantes
+
         </a>
+
         <button type="button" class="btn dropdown-toggle dropdown-toggle-split rounded-end-pill px-2.5" data-bs-toggle="dropdown" aria-expanded="false"
+
                 style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); border-left: none; font-size: 0.88rem;" title="Cargar masivamente por grado">
+
           <span class="visually-hidden">Elegir Grado</span>
+
         </button>
+
         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-4 py-2" style="font-size: 0.88rem; max-height: 360px; overflow-y: auto;">
+
           <li><h6 class="dropdown-header text-uppercase fw-bold text-muted" style="font-size: 0.72rem;">Carga por Grado Específico</h6></li>
+
           <li><a class="dropdown-item py-1.5 fw-bold" href="{% url 'importar_estudiantes_masivo' %}"><i class="bi bi-collection me-2" style="color: var(--color-principal);"></i>Todos los grados (General)</a></li>
+
           <li><hr class="dropdown-divider"></li>
+
           {% for g in grados_lista %}
+
             <li><a class="dropdown-item py-1.5" href="{% url 'importar_estudiantes_masivo' %}?grado={{ g.numero }}"><i class="bi bi-mortarboard me-2 text-muted"></i>Carga Masiva {{ g.nombre }}</a></li>
+
           {% endfor %}
+
         </ul>
+
       </div>
+
+
 
       <a href="{% url 'importar_instructores_masivo' %}" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+
          style="background: #ffffff; color: var(--color-secundario); border: 1.5px solid var(--color-acento); font-size: 0.88rem;">
+
         <i class="bi bi-person-badge-fill"></i> Carga Masiva Docentes
+
       </a>
+
       <a href="{% url 'registrar_aprendiz' %}" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
-         style="background: #FAF8F5; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.88rem;">
-        <i class="bi bi-person-plus-fill"></i> Matrícula Estudiante
+
+         style="background: #FAF8F5; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.88rem;" title="Registrar estudiante nuevo con expediente completo y matrícula">
+
+        <i class="bi bi-person-plus-fill"></i> Registrar Estudiante (Nuevo)
+
       </a>
+
       <a href="{% url 'matricula_nueva' %}" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
-         style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem;">
-        <i class="bi bi-person-check-fill"></i> + Asignar Matrícula
+
+         style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem;" title="Asignar matrícula a estudiante ya registrado">
+
+        <i class="bi bi-person-check-fill"></i> + Asignar Matrícula (Existente)
+
+      </a>
+
+      <a href="{% url 'gestionar_asignacion_grupo' %}" class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+         style="background: #FAF8F5; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.88rem;" title="Paso siguiente: Asignar materias y docentes a los grupos matriculados">
+        <i class="bi bi-arrow-right-circle-fill" style="color: var(--color-secundario);"></i> Siguiente Paso: Asignar Materias al Grupo
       </a>
     </div>
   </div>
+
+  <!-- GUÍA METODOLÓGICA DEL RECORRIDO DE SECRETARÍA (FLUJO OFICIAL EN 6 PASOS) -->
+  <div class="card border-0 rounded-4 shadow-2xs mb-4" style="background: #FFFFFF; border: 1.5px solid var(--color-acento) !important;">
+    <div class="card-body p-3.5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <div class="rounded-circle p-1.5 d-flex align-items-center justify-content-center" style="background: #FAF8F5; color: var(--color-principal); width: 34px; height: 34px; border: 1px solid var(--color-acento);">
+            <i class="bi bi-diagram-3-fill fs-6"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.92rem;">Ruta Oficial de Gestión de Secretaría (Proceso Integrado en 6 Pasos)</h6>
+            <span class="text-muted" style="font-size: 0.78rem;">Flujo estandarizado para matrícula, asignación académica, horarios y consulta institucional.</span>
+          </div>
+        </div>
+        <span class="badge px-3 py-1 rounded-pill fw-semibold" style="background: var(--color-acento); color: var(--color-secundario); font-size: 0.75rem;">
+          Guía de Procesos 2026
+        </span>
+      </div>
+
+      <div class="row g-2 text-center" style="font-size: 0.82rem;">
+        <!-- Paso 1 -->
+        <div class="col-lg-2 col-md-4 col-6">
+          <a href="{% url 'registrar_aprendiz' %}" class="text-decoration-none d-flex flex-column justify-content-between p-2.5 rounded-3 border h-100 transition-all hover-shadow"
+             style="background: #FAF8F5; border-color: #E5DFD5 !important;">
+            <div>
+              <span class="badge bg-light text-muted border px-2 py-0.5 rounded-pill mb-1.5" style="font-size: 0.68rem; font-weight: 700;">PASO 1</span>
+              <i class="bi bi-person-plus-fill fs-4 d-block mb-1" style="color: var(--color-principal);"></i>
+              <strong class="text-dark d-block">Registrar Estudiante</strong>
+            </div>
+            <span class="text-muted mt-1" style="font-size: 0.72rem;">Expediente personal y acudiente</span>
+          </a>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="col-lg-2 col-md-4 col-6">
+          <a href="{% url 'matricula_nueva' %}" class="text-decoration-none d-flex flex-column justify-content-between p-2.5 rounded-3 border h-100 transition-all shadow-xs"
+             style="background: #F4EBE1; border-color: var(--color-secundario) !important;">
+            <div>
+              <span class="badge text-white px-2 py-0.5 rounded-pill mb-1.5" style="background: var(--color-secundario); font-size: 0.68rem; font-weight: 700;">PASO 2 (Matrículas)</span>
+              <i class="bi bi-person-check-fill fs-4 d-block mb-1" style="color: var(--color-secundario);"></i>
+              <strong class="text-dark d-block">Formalizar Matrícula</strong>
+            </div>
+            <span class="text-muted mt-1" style="font-size: 0.72rem;">Selección y vinculación escolar</span>
+          </a>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="col-lg-2 col-md-4 col-6">
+          <div class="d-flex flex-column justify-content-between p-2.5 rounded-3 border h-100"
+               style="background: #FAF8F5; border-color: #E5DFD5 !important;">
+            <div>
+              <span class="badge bg-light text-muted border px-2 py-0.5 rounded-pill mb-1.5" style="font-size: 0.68rem; font-weight: 700;">PASO 3</span>
+              <i class="bi bi-check2-circle fs-4 d-block mb-1 text-success"></i>
+              <strong class="text-dark d-block">Grado, Grupo y Jornada</strong>
+            </div>
+            <span class="text-muted mt-1" style="font-size: 0.72rem;">Vigencia activa 2026</span>
+          </div>
+        </div>
+
+        <!-- Paso 4 -->
+        <div class="col-lg-2 col-md-4 col-6">
+          <a href="{% url 'programas_lista' %}" class="text-decoration-none d-flex flex-column justify-content-between p-2.5 rounded-3 border h-100 transition-all hover-shadow"
+             style="background: #FAF8F5; border-color: #E5DFD5 !important;">
+            <div>
+              <span class="badge bg-light text-muted border px-2 py-0.5 rounded-pill mb-1.5" style="font-size: 0.68rem; font-weight: 700;">PASO 4</span>
+              <i class="bi bi-mortarboard-fill fs-4 d-block mb-1" style="color: var(--color-principal);"></i>
+              <strong class="text-dark d-block">Asignación Académica</strong>
+            </div>
+            <span class="text-muted mt-1" style="font-size: 0.72rem;">Docentes y materias del grupo</span>
+          </a>
+        </div>
+
+        <!-- Paso 5 -->
+        <div class="col-lg-2 col-md-4 col-6">
+          <a href="{% url 'horarios_tablero' %}" class="text-decoration-none d-flex flex-column justify-content-between p-2.5 rounded-3 border h-100 transition-all hover-shadow"
+             style="background: #FAF8F5; border-color: #E5DFD5 !important;">
+            <div>
+              <span class="badge bg-light text-muted border px-2 py-0.5 rounded-pill mb-1.5" style="font-size: 0.68rem; font-weight: 700;">PASO 5</span>
+              <i class="bi bi-calendar3-week-fill fs-4 d-block mb-1" style="color: var(--color-secundario);"></i>
+              <strong class="text-dark d-block">Horarios Escolares</strong>
+            </div>
+            <span class="text-muted mt-1" style="font-size: 0.72rem;">Matriz semanal por grupo</span>
+          </a>
+        </div>
+
+        <!-- Paso 6 -->
+        <div class="col-lg-2 col-md-4 col-6">
+          <div class="d-flex flex-column justify-content-between p-2.5 rounded-3 border h-100"
+               style="background: #FAF8F5; border-color: #E5DFD5 !important;">
+            <div>
+              <span class="badge bg-light text-muted border px-2 py-0.5 rounded-pill mb-1.5" style="font-size: 0.68rem; font-weight: 700;">PASO 6</span>
+              <i class="bi bi-eye-fill fs-4 d-block mb-1 text-primary"></i>
+              <strong class="text-dark d-block">Consulta Integral</strong>
+            </div>
+            <span class="text-muted mt-1" style="font-size: 0.72rem;">Panel Estudiantes y Familias</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 
   <!-- SECCIÓN OFICIAL DE GRADOS ESCOLARES (1° A 11°) -->
+
   <div class="mat-grados-container">
+
     <div class="d-flex align-items-center gap-2 mb-3">
+
       <div class="d-flex align-items-center gap-1.5 fw-bold text-dark" style="font-size: 0.84rem; letter-spacing: 0.5px;">
+
         <i class="bi bi-mortarboard-fill" style="color: var(--color-principal); font-size: 1.05rem;"></i>
+
         <span class="text-uppercase" style="color: #475569;">GRADOS (1° A 11°):</span>
+
       </div>
+
       <a href="{% url 'matriculas_lista' %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold text-decoration-none shadow-2xs transition-all"
+
          style="font-size: 0.8rem; {% if not grado_filtro %}background: #dbeafe; color: #1e40af; border: 1.5px solid #bfdbfe;{% else %}background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0;{% endif %}">
+
         Todos los Grados
+
       </a>
+
     </div>
+
+
 
     <!-- CUADRÍCULA DE TARJETAS DE GRADOS -->
+
     <div class="mat-grado-grid">
+
       {% for g in grados_lista %}
+
         <a href="{% url 'matriculas_lista' %}?grado={{ g.numero }}" 
+
            class="mat-grado-card {% if grado_filtro == g.numero %}active{% endif %}"
+
            title="Filtrar por {{ g.nombre }}">
+
           <div class="d-flex align-items-center gap-2.5">
+
             <span class="mat-grado-icon">{{ g.icono }}</span>
+
             <span class="mat-grado-nombre">{{ g.nombre }}</span>
+
           </div>
+
           {% if g.inactivo %}
+
             <span class="mat-grado-badge-inactivo">
+
               <span class="mat-grado-dot"></span> Inactivo
+
             </span>
+
           {% endif %}
+
         </a>
+
       {% endfor %}
+
     </div>
+
   </div>
+
+
 
   <!-- 3 TARJETAS KPI DE MATRÍCULAS -->
+
   <div class="row g-3 mb-4">
+
     <div class="col-12 col-md-4">
+
       <div class="mat-stat" style="border-left: 4px solid var(--color-principal);">
+
         <div>
+
           <div class="mat-stat-val">{{ total_alumnos|default:"0" }}</div>
+
           <div class="mat-stat-lbl">Total Estudiantes</div>
+
         </div>
+
         <div class="mat-stat-ico" style="background: #F5F2EB; color: var(--color-principal); border: 1px solid var(--color-acento);">
+
           <i class="bi bi-people-fill"></i>
+
         </div>
+
       </div>
+
     </div>
+
     <div class="col-12 col-md-4">
+
       <div class="mat-stat" style="border-left: 4px solid #d97706;">
+
         <div>
+
           <div class="mat-stat-val">{{ total_primaria|default:"0" }}</div>
+
           <div class="mat-stat-lbl">Primaria (1° a 5°)</div>
+
         </div>
+
         <div class="mat-stat-ico" style="background: #fffbeb; color: #d97706; border: 1px solid #fde68a;">
+
           <i class="bi bi-play-circle-fill"></i>
+
         </div>
+
       </div>
+
     </div>
+
     <div class="col-12 col-md-4">
+
       <div class="mat-stat" style="border-left: 4px solid #047857;">
+
         <div>
+
           <div class="mat-stat-val">{{ total_secundaria|default:"0" }}</div>
+
           <div class="mat-stat-lbl">Secundaria / Media (6° a 11°)</div>
+
         </div>
+
         <div class="mat-stat-ico" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+
           <i class="bi bi-mortarboard-fill"></i>
+
         </div>
+
       </div>
+
     </div>
+
   </div>
+
+
 
   {% if grado_actual %}
+
   <!-- PANEL OFICIAL DE APERTURA DEL GRADO SELECCIONADO -->
+
   <div id="panel-grado-abierto" class="card border-0 rounded-4 p-4 mb-4 shadow-sm"
+
        style="background: linear-gradient(135deg, #FAF8F5 0%, #FFFFFF 100%); border: 2px solid var(--color-principal) !important;">
+
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+
       <div class="d-flex align-items-center gap-3">
+
         <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-xs"
+
              style="background: #ffffff; width: 68px; height: 68px; font-size: 2.2rem; border: 2px solid var(--color-acento);">
+
           {{ grado_actual.icono }}
+
         </div>
+
         <div>
+
           <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+
             <span class="badge rounded-pill px-3 py-1 fw-bold text-white shadow-2xs" style="background: var(--color-principal); font-size: 0.74rem; letter-spacing: 0.5px;">
+
               <i class="bi bi-folder2-open me-1"></i> GRADO ABIERTO
+
             </span>
+
             <span class="badge rounded-pill px-2.5 py-1 fw-bold bg-white text-secondary border" style="font-size: 0.74rem; border-color: var(--color-acento) !important;">
+
               {{ grado_actual.nivel }}
+
             </span>
+
             {% if grado_actual.inactivo %}
+
               <span class="badge rounded-pill px-2.5 py-1 fw-bold bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size: 0.74rem;">
+
                 <span class="mat-grado-dot me-1"></span> Inactivo en oferta regular
+
               </span>
+
             {% else %}
+
               <span class="badge rounded-pill px-2.5 py-1 fw-bold bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size: 0.74rem;">
+
                 <i class="bi bi-check-circle-fill me-1"></i> Habilitado para Matrículas
+
               </span>
+
             {% endif %}
+
           </div>
+
           <h2 class="h4 fw-bold text-dark mb-1">
+
             Estudiantes Matriculados en {{ grado_actual.nombre }}
+
           </h2>
+
           <p class="text-muted mb-0" style="font-size: 0.88rem;">
+
             <i class="bi bi-info-circle me-1" style="color: var(--color-principal);"></i>
+
             Aquí van y se gestionan todos los aprendices y expedientes asignados a <strong>{{ grado_actual.nombre }}</strong>.
+
           </p>
+
         </div>
+
       </div>
+
+
 
       <div class="d-flex flex-wrap align-items-center gap-2">
+
         <a href="{% url 'registrar_aprendiz' %}?grado={{ grado_actual.numero }}" 
+
            class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+
            style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.86rem;">
+
           <i class="bi bi-person-plus-fill"></i> + Matricular en {{ grado_actual.nombre }}
+
         </a>
+
         <a href="{% url 'importar_estudiantes_masivo' %}?grado={{ grado_actual.numero }}" 
+
            class="btn rounded-pill px-3.5 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+
            style="background: #ffffff; color: var(--color-secundario); border: 1.5px solid var(--color-acento); font-size: 0.86rem;">
+
           <i class="bi bi-file-earmark-spreadsheet-fill"></i> Carga Masiva (Excel)
+
         </a>
+
         <a href="{% url 'matriculas_lista' %}" 
+
            class="btn rounded-pill px-3 py-2 fw-bold shadow-2xs d-inline-flex align-items-center gap-1.5"
+
            style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 0.86rem;"
+
            title="Ver todos los grados">
+
           <i class="bi bi-x-circle"></i> Ver Todos los Grados
+
         </a>
+
       </div>
+
     </div>
+
+
 
     <!-- SUB-BARRA DE RESUMEN DEL GRADO -->
+
     <div class="mt-3 pt-3 border-top d-flex flex-wrap align-items-center justify-content-between gap-2" style="border-color: #ECE7DE !important; font-size: 0.85rem;">
+
       <div class="d-flex align-items-center gap-3">
+
         <span class="text-dark"><strong>Total de aprendices en este grado:</strong> <span class="badge rounded-pill bg-dark text-white px-2.5 py-1">{{ total_estudiantes_grado }}</span></span>
+
         <span class="text-muted">|</span>
+
         <span class="text-muted"><i class="bi bi-clock-history me-1"></i> Año Lectivo Vigente: <strong>2026</strong></span>
+
       </div>
+
       <div class="text-muted" style="font-size: 0.82rem;">
+
         <i class="bi bi-check2-circle text-success me-1"></i> Mostrando alumnos pertenecientes a <strong>{{ grado_actual.nombre }}</strong>
+
       </div>
+
     </div>
+
   </div>
+
   {% endif %}
 
+
+
   <!-- BUSCADOR Y FILTROS -->
+
   <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between mb-3 p-3 rounded-4 bg-white shadow-2xs"
+
        style="border: 1.5px solid var(--color-acento);">
+
     <form method="get" action="" class="d-flex gap-2 flex-grow-1 flex-wrap" style="max-width: 800px;">
+
       <div class="input-group" style="max-width: 320px;">
+
         <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: var(--color-acento);">
+
           <i class="bi bi-search" style="color: var(--color-principal);"></i>
+
         </span>
+
         <input type="text" name="q" value="{{ query|default:'' }}" class="form-control border-start-0 ps-0"
+
                placeholder="Buscar alumno por nombre o DNI..." style="border-color: var(--color-acento); font-size: 0.88rem;">
+
       </div>
+
       <select name="grado" class="form-select text-muted" style="border-color: var(--color-acento); font-size: 0.88rem; max-width: 220px;" onchange="this.form.submit();">
+
         <option value="">Todos los Grados (1° al 11°)</option>
+
         {% for g in grados_lista %}
+
           <option value="{{ g.numero }}" {% if grado_filtro == g.numero %}selected{% endif %}>{{ g.nombre }}</option>
+
         {% endfor %}
+
       </select>
+
     </form>
+
     <a href="{% url 'matricula_nueva' %}{% if grado_filtro %}?grado={{ grado_filtro }}{% endif %}" class="btn text-white fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 rounded-pill shadow-sm"
+
        style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.88rem; white-space: nowrap;">
+
       <i class="bi bi-plus-circle-fill"></i> Nueva Matrícula
+
     </a>
+
   </div>
 
+
+
   <!-- TABLA DE MATRÍCULAS -->
+
   <div class="mat-tbl">
+
     <div class="table-responsive">
+
       <table class="table table-hover mb-0">
+
         <thead>
+
           <tr>
+
             <th class="ps-4">ESTUDIANTE</th>
+
             <th>UBICACIÓN</th>
+
             <th class="text-center">ESTADO DE MATRÍCULA</th>
+
             <th class="text-end pe-4">ACCIONES</th>
+
           </tr>
+
         </thead>
+
         <tbody>
+
           {% regroup matriculas by ficha as fichas_list %}
+
           {% for ficha_group in fichas_list %}
+
             <tr>
+
               <td colspan="4" style="padding: 0 !important; background: #ffffff !important; border-bottom: none !important;">
+
                 <div class="mat-group-header">
+
                   <i class="bi bi-mortarboard-fill"></i>
+
                   {{ ficha_group.grouper.codigo_ficha|default:"CURSO REGULAR" }} — {{ ficha_group.grouper.programa.denominacion|default:"Formación Integral" }}
+
                 </div>
+
               </td>
+
             </tr>
+
             {% for m in ficha_group.list %}
+
             <tr>
+
               <td class="ps-4">
+
                 <div class="d-flex align-items-center gap-3">
+
                   <div class="mat-avatar">
+
                     {{ m.aprendiz.first_name|first|upper }}{{ m.aprendiz.last_name|first|upper|default:"" }}
+
                   </div>
+
                   <div>
+
                     <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="fw-bold text-dark text-decoration-none d-block hover-coffee" style="font-size: 0.9rem;">
+
                       {{ m.aprendiz.get_full_name|default:m.aprendiz.username }}
+
                     </a>
+
                     <div class="text-muted" style="font-size: 0.74rem;">
+
                       <i class="bi bi-person-vcard me-1" style="color: var(--color-principal);"></i> Usuario: {{ m.aprendiz.username }} · DNI: {{ m.aprendiz.perfil.documento|default:m.aprendiz.perfil.numero_documento|default:'—' }}
+
                     </div>
+
                   </div>
+
                 </div>
+
               </td>
+
               <td>
+
                 <div style="font-size: 0.84rem;">
+
                   <div class="fw-bold text-dark">{{ ficha_group.grouper.codigo_ficha|default:"10°A" }}</div>
+
                   <div class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">MEDIA TÉCNICA</div>
+
                 </div>
+
               </td>
+
               <td class="text-center">
+
                 <div class="d-flex flex-column align-items-center">
+
                   <span class="mat-badge-adelantado">
+
                     <i class="bi bi-check-circle-fill text-success"></i> ACTIVA
+
                   </span>
+
                   <span class="mt-1" style="font-size: 0.72rem; font-weight: 700; color: var(--color-principal);">Año Lectivo 2026</span>
+
                 </div>
+
               </td>
+
               <td class="text-end pe-4">
+
                 <div class="d-inline-flex gap-1.5 align-items-center">
+
                   <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold text-white shadow-2xs d-inline-flex align-items-center gap-1"
-                     style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.78rem;" title="Ver Ficha y Expediente">
-                    <i class="bi bi-person-vcard"></i> Ficha
+                     style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.78rem;" title="Ver Expediente Escolar">
+                    <i class="bi bi-person-vcard"></i> Expediente
                   </a>
-                  <a href="{% url 'estudiante_editar' m.aprendiz.pk %}" class="mat-btn" style="background: #fffbeb; color: #d97706; border-color: #fde68a;" title="Editar">
+
+                  <a href="{% url 'editar_matricula' m.pk %}" class="mat-btn" style="background: #fffbeb; color: #d97706; border-color: #fde68a;" title="Editar Matrícula">
+
                     <i class="bi bi-pencil-fill"></i>
+
                   </a>
-                  <a href="{% url 'estudiante_eliminar' m.aprendiz.pk %}" class="mat-btn" style="background: #fef2f2; color: #dc2626; border-color: #fecaca;" title="Eliminar">
-                    <i class="bi bi-trash-fill"></i>
+
+                  <a href="{% url 'traslado_matricula' m.pk %}" class="mat-btn" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;" title="Cambio de Grupo / Traslado">
+
+                    <i class="bi bi-arrow-left-right"></i>
+
                   </a>
+
+                  <a href="{% url 'actualizar_acudiente_matricula' m.pk %}" class="mat-btn" style="background: #fdf2f8; color: #db2777; border-color: #fbcfe8;" title="Actualizar Acudiente">
+
+                    <i class="bi bi-people-fill"></i>
+
+                  </a>
+
                 </div>
+
               </td>
+
             </tr>
+
             {% endfor %}
+
           {% empty %}
+
             <tr>
+
               <td colspan="4" class="text-center py-5">
+
                 {% if grado_actual %}
+
                   <div class="d-inline-flex p-3 rounded-circle mb-3 shadow-2xs" style="background: #FAF8F5; border: 1.5px dashed var(--color-principal);">
+
                     <span style="font-size: 2.6rem; line-height: 1;">{{ grado_actual.icono }}</span>
+
                   </div>
+
                   <h5 class="fw-bold text-dark mb-1">Aquí van los estudiantes de {{ grado_actual.nombre }}</h5>
+
                   <p class="text-muted mx-auto mb-3" style="max-width: 500px; font-size: 0.88rem;">
+
                     Este es el espacio asignado a <strong>{{ grado_actual.nombre }}</strong>. Actualmente no cuenta con estudiantes registrados en el sistema. Puedes matricular alumnos inmediatamente usando las siguientes opciones:
+
                   </p>
+
                   <div class="d-inline-flex flex-wrap gap-2 justify-content-center">
+
                     <a href="{% url 'registrar_aprendiz' %}?grado={{ grado_actual.numero }}" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--color-principal); font-size: 0.86rem;">
+
                       <i class="bi bi-person-plus-fill me-1"></i> + Matricular Estudiante en {{ grado_actual.nombre }}
+
                     </a>
+
                     <a href="{% url 'importar_estudiantes_masivo' %}?grado={{ grado_actual.numero }}" class="btn rounded-pill px-3.5 py-2 fw-bold" style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.86rem;">
+
                       <i class="bi bi-file-earmark-spreadsheet me-1"></i> Carga Masiva para este Grado
+
                     </a>
+
                     <a href="{% url 'matriculas_lista' %}" class="btn rounded-pill px-3.5 py-2 fw-bold" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 0.86rem;">
+
                       <i class="bi bi-collection me-1"></i> Ver Todos los Grados
+
                     </a>
+
                   </div>
+
                 {% else %}
+
                   <i class="bi bi-person-badge fs-2 d-block mb-2" style="color: var(--color-principal); opacity: 0.6;"></i>
+
                   <h6 class="fw-bold text-dark">No hay matrículas que coincidan con la búsqueda.</h6>
+
                   <p class="small mb-0 text-muted">Verifique los filtros o registre una nueva matrícula.</p>
+
                 {% endif %}
+
               </td>
+
             </tr>
+
           {% endfor %}
+
         </tbody>
+
       </table>
+
     </div>
+
   </div>
+
+
 
 </div>
 
+
+
 {% if grado_actual %}
+
 <script>
+
   document.addEventListener('DOMContentLoaded', function() {
+
     const p = document.getElementById('panel-grado-abierto');
+
     if (p) {
+
       setTimeout(() => {
+
         p.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
       }, 100);
+
     }
+
   });
+
 </script>
+
 {% endif %}
+
 {% endblock %}
+

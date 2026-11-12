@@ -523,10 +523,10 @@
                         Módulo de Trabajo Pedagógico
                     </div>
                     <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.85rem; letter-spacing: -0.4px;">
-                        ACTIVIDADES Y TAREAS
+                        MIS ACTIVIDADES Y TAREAS
                     </h2>
                     <p class="mb-0 text-muted" style="font-size: 0.88rem;">
-                        Gestiona las actividades, tareas, entregas y calificaciones de tus estudiantes.
+                        Gestiona, publica y califica las actividades, talleres y evaluaciones asignadas a tus cursos.
                     </p>
                 </div>
             </div>
@@ -534,7 +534,7 @@
                 <button type="button" class="btn text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
                         data-bs-toggle="modal" data-bs-target="#modalCrearActividadDocente" id="btn-crear-actividad"
                         style="background: var(--color-principal); border: 1px solid var(--color-principal); font-size: 0.9rem;">
-                    <i class="bi bi-plus-circle-fill"></i> + CREAR ACTIVIDAD / TAREA
+                    <i class="bi bi-plus-circle-fill"></i> + CREAR ACTIVIDAD
                 </button>
             </div>
         </div>
@@ -632,8 +632,11 @@
             <div class="col-6 col-md-2">
                 <select id="filtro-act-asig" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.82rem;">
                     <option value="todas">Todas las Asignaturas</option>
+                    {% for asig in asignaturas_metricas %}
+                    <option value="{{ asig.nombre }}">{{ asig.nombre }}</option>
+                    {% empty %}
                     <option value="Matemáticas">Matemáticas</option>
-                    <option value="Informática">Informática</option>
+                    {% endfor %}
                 </select>
             </div>
 
@@ -641,8 +644,9 @@
             <div class="col-6 col-md-2">
                 <select id="filtro-act-grado" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.82rem;">
                     <option value="todos">Todos los Grados</option>
-                    <option value="10">Grado 10°</option>
-                    <option value="11">Grado 11°</option>
+                    {% for c in cargas_unicas %}
+                    <option value="{{ c.grado }}">Grado {{ c.grado }}°</option>
+                    {% endfor %}
                 </select>
             </div>
 
@@ -650,8 +654,9 @@
             <div class="col-6 col-md-2">
                 <select id="filtro-act-grupo" onchange="aplicarFiltrosActividades();" class="form-select form-select-sm rounded-pill px-3 py-2" style="border-color: var(--color-acento); font-size: 0.82rem;">
                     <option value="todos">Todos los Grupos</option>
-                    <option value="10°A">Grupo 10°A</option>
-                    <option value="11°A">Grupo 11°A</option>
+                    {% for c in cargas_unicas %}
+                    <option value="{{ c.grado }}°{{ c.seccion }}">Grupo {{ c.grado }}°{{ c.seccion }}</option>
+                    {% endfor %}
                 </select>
             </div>
 
@@ -802,13 +807,21 @@
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            <div class="dropdown d-inline-block">
-                                <button class="btn rounded-pill px-3 py-1.5 fw-bold small shadow-2xs dropdown-toggle d-inline-flex align-items-center gap-1.5"
-                                        type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                                        style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.82rem;">
-                                    Acciones
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 p-1.5" style="border-color: var(--color-acento); font-size: 0.84rem;">
+                            <div class="d-inline-flex align-items-center gap-1.5 justify-content-end">
+                                <a href="{% url 'temas_actividades' %}?tarea_id={{ t.id }}" 
+                                   class="btn btn-sm rounded-pill px-3 py-1 fw-bold shadow-2xs d-inline-flex align-items-center gap-1"
+                                   style="background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento); font-size: 0.8rem;"
+                                   title="Ver actividad y calificar entregas">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn btn-sm rounded-circle p-0 d-inline-flex align-items-center justify-content-center shadow-2xs"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                            style="width: 32px; height: 32px; background: #ffffff; color: var(--color-principal); border: 1.5px solid var(--color-acento);"
+                                            title="Más opciones">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 p-1.5" style="border-color: var(--color-acento); font-size: 0.84rem;">
                                     <li>
                                         <a class="dropdown-item py-1.5 rounded-2 d-flex align-items-center gap-2" 
                                            href="{% url 'temas_actividades' %}?tarea_id={{ t.id }}">
@@ -856,7 +869,8 @@
                                     </li>
                                 </ul>
                             </div>
-                        </td>
+                        </div>
+                    </td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -937,9 +951,7 @@
                                         {{ c.programa.denominacion|default:'Matemáticas' }} — Grado {{ c.grado }}°{{ c.seccion }}
                                     </option>
                                     {% empty %}
-                                    <option value="1">Matemáticas — Grado 10°A</option>
-                                    <option value="2">Informática — Grado 10°A</option>
-                                    <option value="3">Matemáticas — Grado 11°A</option>
+                                    <option value="" disabled selected>Sin asignaturas asignadas por Secretaría</option>
                                     {% endfor %}
                                 </select>
                             </div>

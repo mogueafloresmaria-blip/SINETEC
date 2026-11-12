@@ -57,6 +57,50 @@ class AsistenciaAprendiz(models.Model):
         return f'{self.matricula} - {self.fecha} ({self.get_estado_display()})'
 
 
+class HistorialCorreccionAsistencia(models.Model):
+    """
+    Trazabilidad inmutable de correcciones sobre un registro de asistencia.
+    Garantiza que al corregir un registro guardado no se pierda la asistencia original
+    ni el historial de cambios, registrando quién, cuándo, estados y motivo.
+    """
+    asistencia = models.ForeignKey(
+        AsistenciaAprendiz,
+        on_delete=models.CASCADE,
+        related_name='historial_correcciones',
+        verbose_name='Registro de Asistencia'
+    )
+    matricula = models.ForeignKey(
+        Matricula,
+        on_delete=models.CASCADE,
+        related_name='historial_asistencias',
+        verbose_name='Estudiante Matriculado'
+    )
+    fecha_sesion = models.DateField(verbose_name='Fecha de la Sesión')
+    estado_anterior = models.CharField(max_length=2, choices=AsistenciaAprendiz.ESTADOS, verbose_name='Estado Anterior')
+    estado_nuevo = models.CharField(max_length=2, choices=AsistenciaAprendiz.ESTADOS, verbose_name='Estado Nuevo')
+    motivo = models.CharField(max_length=255, blank=True, default='', verbose_name='Motivo de la Corrección')
+    observaciones_anteriores = models.TextField(blank=True, default='', verbose_name='Observaciones Previas')
+    observaciones_nuevas = models.TextField(blank=True, default='', verbose_name='Nuevas Observaciones')
+    modificado_por = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='correcciones_asistencia_realizadas',
+        verbose_name='Modificado por'
+    )
+    fecha_correccion = models.DateTimeField(auto_now_add=True, verbose_name='Fecha y Hora de Corrección')
+
+    class Meta:
+        verbose_name = 'Historial de Corrección de Asistencia'
+        verbose_name_plural = 'Historiales de Corrección de Asistencia'
+        ordering = ['-fecha_correccion']
+
+    def __str__(self):
+        usr = self.modificado_por.username if self.modificado_por else 'Sistema'
+        return f"[{self.fecha_correccion.strftime('%d/%m/%Y %H:%M')}] {self.matricula} ({self.estado_anterior} -> {self.estado_nuevo}) por {usr}"
+
+
 class BitacoraSeguimiento(models.Model):
     """
     Registro formal de visitas presenciales o virtuales a las Instituciones Educativas,
@@ -1006,9 +1050,13 @@ class ComunicadoEscolar(models.Model):
     """
     ESTAMENTOS = [
         ('Toda', 'Toda la Comunidad Educativa'),
+        ('Grado', 'Un Grado Específico'),
+        ('Grupo', 'Un Grupo Específico'),
         ('Docentes', 'Cuerpo Docente'),
         ('Estudiantes', 'Estudiantes'),
         ('Familias', 'Acudientes y Familias'),
+        ('Directivos', 'Directivos y Administrativos'),
+        ('Individual', 'Destinatario Específico'),
     ]
 
     remitente = models.ForeignKey(
@@ -1049,6 +1097,12 @@ class ComunicadoEscolar(models.Model):
     urgente = models.BooleanField(
         default=False,
         verbose_name="¿Notificación Prioritaria / Urgente?"
+    )
+    adjunto_pdf = models.FileField(
+        upload_to='circulares_oficiales/',
+        null=True,
+        blank=True,
+        verbose_name="Circular Oficial en Formato PDF"
     )
     fecha_creacion = models.DateTimeField(
         auto_now_add=True,

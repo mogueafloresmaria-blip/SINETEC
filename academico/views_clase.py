@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from usuarios.decorators import _obtener_categorias_rol, solo_aprendiz, solo_instructor
 from .models import CargaAcademica, HorarioFicha, Matricula, ProgramaFormacion, Competencia, ResultadoAprendizaje, TareaClase, EntregaTarea, GuiaClase, ActividadClase, AvisoClase, CalificacionEscolar
@@ -61,11 +62,44 @@ def buscar_carga_desde_horario(request, horario_id):
 def detalle_clase(request, carga_id):
     carga = get_object_or_404(CargaAcademica, id=carga_id)
     
-    # Restrict to 10 and 11
-    if request.user == carga.profesor and not (request.user.is_superuser):
-        if carga.grado not in ['10', '11', '10mo Grado', '11mo Grado', '10°', '11°']:
-            messages.error(request, "Solo tienes acceso a los grados 10° y 11°.")
-            return redirect('horarios_tablero')
+    # Permitir al profesor de la carga o al personal directivo/superusuario
+    if request.user != carga.profesor and not (request.user.is_superuser or request.user.is_staff):
+        messages.error(request, "No tienes permiso para ver esta clase.")
+        return redirect('horarios_tablero')
+
+    # Procesar registro de asistencia docente
+    if request.method == 'POST' and request.POST.get('action') == 'guardar_asistencia':
+        fecha_str = request.POST.get('fecha')
+        from django.utils import timezone
+        import datetime
+        from seguimiento.models import AsistenciaAprendiz
+        
+        fecha = timezone.localdate()
+        if fecha_str:
+            try:
+                fecha = datetime.datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            except Exception:
+                pass
+                
+        for key, val in request.POST.items():
+            if key.startswith('asistencia_'):
+                mat_id = key.replace('asistencia_', '')
+                try:
+                    mat_obj = Matricula.objects.get(id=mat_id)
+                    AsistenciaAprendiz.objects.update_or_create(
+                        matricula=mat_obj,
+                        fecha=fecha,
+                        defaults={
+                            'estado': val,
+                            'observaciones': request.POST.get(f'obs_{mat_id}', ''),
+                            'registrado_por': request.user,
+                            'carga_academica': carga
+                        }
+                    )
+                except Exception:
+                    pass
+        messages.success(request, "Asistencia registrada correctamente.")
+        return redirect(f'/academico/clase/{carga.id}/?tab=asistencia')
 
     tab = request.GET.get('tab', 'informacion')
     
@@ -80,15 +114,13 @@ def detalle_clase(request, carga_id):
         'calificaciones': CalificacionEscolar.objects.filter(carga_academica=carga),
     }
     
-    # Matriculas (Students)
-    matriculas = Matricula.objects.filter(
-        estado_formacion='En Formacion',
-        grado_escolar__in=['10', '11']
-    )
-    # further filter by seccion and grado to match carga if needed
-    grado_num = ''.join(filter(str.isdigit, carga.grado))
+    # Matriculas de estudiantes en formación para el grado y sección de la carga (grados 1° a 11°)
+    grado_num = ''.join(filter(str.isdigit, str(carga.grado)))
+    matriculas = Matricula.objects.filter(estado_formacion='En Formacion')
     if grado_num:
-        matriculas = matriculas.filter(grado_escolar=grado_num, seccion=carga.seccion)
+        matriculas = matriculas.filter(Q(grado_escolar=grado_num) | Q(grado_escolar__icontains=grado_num))
+    if carga.seccion:
+        matriculas = matriculas.filter(seccion__iexact=carga.seccion)
     
     context['matriculas'] = matriculas
     
@@ -100,8 +132,8 @@ def crear_tarea(request, carga_id):
     carga = get_object_or_404(CargaAcademica, id=carga_id)
     if request.method == 'POST':
         titulo = request.POST.get('titulo')
-        instrucciones = request.POST.get('instrucciones')
-        fecha_limite = request.POST.get('fecha_limite')
+        instrucciones = request.POST.get('instrucciones') or request.POST.get('descripcion')
+        fecha_limite = request.POST.get('fecha_limite') or request.POST.get('fecha_entrega')
         
         if titulo and instrucciones:
             TareaClase.objects.create(
@@ -184,22 +216,39 @@ def panel_calificaciones(request):
 @solo_instructor
 def mis_actividades_docente(request):
     cargas = CargaAcademica.objects.filter(profesor=request.user)
-    tareas = TareaClase.objects.filter(carga_academica__in=cargas).annotate(
-        total_entregas=Count('entregas'),
-        pendientes=Count('entregas', filter=Q(entregas__estado__in=['ENTREGADA', 'ENTREGADA_TARDE']))
-    )
-    return render(request, 'academico/mis_actividades_docente.html', {'tareas': tareas})
+    tareas_qs = TareaClase.objects.filter(
+        Q(carga_academica__in=cargas) | Q(tema__profesor=request.user)
+    ).exclude(estado='Papelera').distinct().select_related(
+        'carga_academica', 'carga_academica__programa', 'tema'
+    ).annotate(
+        total_entregas=Count('entregas', distinct=True),
+        pendientes=Count('entregas', filter=Q(entregas__estado__in=['ENTREGADA', 'ENTREGADA_TARDE']), distinct=True)
+    ).order_by('-fecha_publicacion', '-id')
+
+    total_actividades = tareas_qs.count()
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(tareas_qs, 6)
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'academico/mis_actividades_docente.html', {
+        'tareas': page_obj,
+        'page_obj': page_obj,
+        'total_actividades': total_actividades,
+        'subpanel_activo': 'mis_actividades',
+    })
 
 @login_required
 @solo_instructor
 def crear_actividad_digital(request):
-    guias = GuiaClase.objects.filter(Q(carga_academica__profesor=request.user) | Q(carga_academica__isnull=True)).distinct()
-    if not guias.exists():
+    guias = GuiaClase.objects.filter(Q(carga_academica__profesor=request.user) | Q(profesor=request.user)).distinct()
+    if not guias.exists() and request.user.is_superuser:
         guias = GuiaClase.objects.all().distinct()
         
     cargas = CargaAcademica.objects.filter(profesor=request.user).select_related('programa').order_by('grado', 'programa__denominacion')
-    if not cargas.exists():
+    if not cargas.exists() and request.user.is_superuser:
         cargas = CargaAcademica.objects.all().select_related('programa').order_by('grado', 'programa__denominacion')
+
+    grados_cargas = sorted(list(set(''.join(ch for ch in str(c.grado) if ch.isdigit()) for c in cargas if c.grado)), key=lambda x: int(x) if x.isdigit() else 0)
 
     resultados = ResultadoAprendizaje.objects.all().order_by('codigo')
 
@@ -274,16 +323,25 @@ def crear_actividad_digital(request):
                 estado='Publicada'
             )
 
-            # Notificar y crear entregas pendientes para los estudiantes
+            # Notificar y crear entregas pendientes para los estudiantes del grado y curso correspondiente
             from seguimiento.models import Notificacion
             from django.urls import reverse
+            from usuarios.models import FamiliaAcudiente
             
-            g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit()) or '10'
+            g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit()) or str(c_obj.grado).strip()
+            sec_val = str(c_obj.seccion or '').strip()
+
             if destinatario_tipo == 'individual' and estudiante_id:
-                target_users = User.objects.filter(id=estudiante_id)
+                target_users = list(User.objects.filter(id=estudiante_id))
             else:
-                mats = [m for m in matriculas_qs if g_num in str(m.grado_escolar)]
-                target_users = [m.aprendiz for m in mats] if mats else [m.aprendiz for m in matriculas_qs[:2]]
+                mats = [
+                    m for m in matriculas_qs 
+                    if str(m.grado_escolar).strip() == g_num 
+                    and (not sec_val or not m.seccion or str(m.seccion).strip().upper() == sec_val.upper())
+                ]
+                if not mats:
+                    mats = [m for m in matriculas_qs if str(m.grado_escolar).strip() == g_num]
+                target_users = [m.aprendiz for m in mats if m.aprendiz]
 
             for u in target_users:
                 EntregaTarea.objects.get_or_create(
@@ -299,6 +357,26 @@ def crear_actividad_digital(request):
                     tipo='info'
                 )
 
+            # Notificar también a los acudientes de los estudiantes vinculados
+            try:
+                for u in target_users:
+                    doc_u = getattr(getattr(u, 'perfil', None), 'numero_documento', None) or u.username
+                    familias = FamiliaAcudiente.objects.filter(
+                        Q(estudiantes=u) | Q(documento=doc_u) | Q(email__iexact=u.email)
+                    ).distinct()
+                    for fam in familias:
+                        fam_user = User.objects.filter(Q(username=fam.documento) | Q(email__iexact=fam.email)).first()
+                        if fam_user:
+                            Notificacion.objects.create(
+                                usuario=fam_user,
+                                titulo=f"Nueva Actividad Asignada: {tarea.titulo}",
+                                mensaje=f"Se ha asignado la actividad '{tarea.titulo}' a tu acudido(a) {u.get_full_name() or u.username} en {c_obj.programa.denominacion if c_obj.programa else 'Clase'}.",
+                                enlace=reverse('entregar_tarea_clase', kwargs={'pk': tarea.id}),
+                                tipo='info'
+                            )
+            except Exception:
+                pass
+
             messages.success(request, f'¡Actividad "{tarea.titulo}" publicada y enviada a los estudiantes con éxito!')
             return redirect(f"{reverse('actividades_tareas')}?tarea_id={tarea.id}")
         else:
@@ -307,6 +385,7 @@ def crear_actividad_digital(request):
     return render(request, 'academico/crear_actividad_digital.html', {
         'guias': guias,
         'cargas': cargas,
+        'grados_cargas': grados_cargas,
         'resultados': resultados,
         'estudiantes': matriculas_qs,
     })
