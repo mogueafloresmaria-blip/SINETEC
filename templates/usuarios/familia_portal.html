@@ -43,72 +43,77 @@
             left: 0;
             width: 100%;
             height: 65%;
-            background: #0f172a; /* Dark blue/petroleum */
+            background: linear-gradient(135deg, #006B68 0%, #007F7B 50%, #12B8B0 100%);
             clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
             z-index: 0;
         }
         .family-welcome-card {
             position: relative;
             z-index: 1;
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 50px 60px;
             text-align: center;
             max-width: 550px;
             width: 100%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 45px rgba(20, 38, 79, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+            border: 1px solid #E2E8F0;
         }
         .family-welcome-title {
-            font-family: 'Georgia', serif;
-            color: #0f172a;
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #14264F;
+            font-size: 2.2rem;
+            font-weight: 800;
             margin-bottom: 15px;
             line-height: 1.2;
+            letter-spacing: -0.5px;
         }
         .family-welcome-text {
-            color: #334155;
-            font-size: 1.15rem;
-            margin-bottom: 40px;
+            color: #64748B;
+            font-size: 1.05rem;
+            margin-bottom: 35px;
         }
         .family-input {
-            background: transparent;
-            border: 1px solid #d4af37; /* Gold border */
-            border-radius: 8px;
+            background: #F8FAFC;
+            border: 1.5px solid #CBD5E1;
+            border-radius: 14px;
             padding: 15px 20px;
             width: 100%;
             font-size: 1.05rem;
-            color: #1e293b;
+            font-weight: 600;
+            color: #14264F;
             text-align: center;
             margin-bottom: 20px;
             transition: all 0.3s ease;
         }
         .family-input::placeholder {
-            color: #94a3b8;
+            color: #94A3B8;
         }
         .family-input:focus {
             outline: none;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+            border-color: #12B8B0;
+            box-shadow: 0 0 0 4px rgba(18, 184, 176, 0.2);
             background: #ffffff;
         }
         .family-btn {
-            background: #0f172a;
-            color: #d4af37;
-            border: 1px solid #d4af37;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #007F7B 0%, #006B68 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 9999px;
             padding: 15px 20px;
             width: 100%;
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.05rem;
+            font-weight: 700;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
+            box-shadow: 0 6px 20px rgba(0, 127, 123, 0.28);
+            cursor: pointer;
         }
         .family-btn:hover {
-            background: #1e293b;
+            background: linear-gradient(135deg, #006B68 0%, #004D4A 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.3);
+            box-shadow: 0 10px 24px rgba(0, 107, 104, 0.35);
         }
     </style>
 
@@ -230,16 +235,29 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Acciones directas del estudiante -->
+                        <div class="card-footer p-3 bg-white d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <span class="small text-muted"><i class="bi bi-shield-check text-success me-1"></i> Información académica oficial vinculada</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="{% url 'familia_horario' %}?estudiante={{ item.estudiante.id }}" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5 shadow-2xs" style="background-color: #007F7B; border-color: #007F7B;">
+                                    <i class="bi bi-calendar3"></i> Horario de Clases
+                                </a>
+                                <a href="{% url 'familia_asistencia' %}?estudiante={{ item.estudiante.id }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+                                    <i class="bi bi-clock-history"></i> Asistencia
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
         
-        <!-- Comunicados y Mensajes Recientes -->
+        <!-- Circulares Oficiales Institucionales -->
         {% if circulares %}
         <div class="d-flex align-items-center justify-content-between mb-3 mt-4">
-            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-megaphone-fill me-2 text-primary"></i> Comunicaciones del Estudiante</h5>
-            <a href="{% url 'familia_circulares' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold shadow-sm">Ver todas</a>
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-megaphone-fill me-2 text-primary"></i> Circulares Oficiales Institucionales</h5>
+            <a href="{% url 'familia_circulares' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold shadow-sm">Ver todas las circulares</a>
         </div>
         
         <div class="row g-3">
@@ -248,7 +266,7 @@
                 <div class="card h-100 border-0 shadow-sm rounded-3">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill small">General</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill small">Circular Oficial</span>
                             <small class="text-muted"><i class="bi bi-calendar-event me-1"></i> {{ circ.fecha_envio|default:circ.fecha_creacion|date:"d M" }}</small>
                         </div>
                         <h6 class="fw-bold mb-2 text-dark">{{ circ.asunto|truncatechars:45 }}</h6>

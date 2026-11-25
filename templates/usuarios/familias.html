@@ -130,40 +130,123 @@
                                     </button>
                                 </div>
 
-                                <!-- Modal para Vincular Estudiante a este Acudiente -->
+                                <!-- Modal para Vincular Estudiante a este Acudiente con Buscador Dinámico -->
                                 <div class="modal fade text-start" id="modalVincular{{ fam.id }}" tabindex="-1" aria-labelledby="modalVincularLabel{{ fam.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                                         <div class="modal-content rounded-4 border-0 shadow">
-                                            <div class="modal-header bg-light border-0 py-3">
-                                                <h6 class="modal-title fw-bold text-dark" id="modalVincularLabel{{ fam.id }}">
-                                                    <i class="bi bi-link-45deg text-primary me-1"></i> Vincular Estudiante a {{ fam.nombre_acudiente }}
-                                                </h6>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                            <div class="modal-header border-0 py-3 px-4" style="background: linear-gradient(135deg, #006B68, #007F7B, #12B8B0); color: white;">
+                                                <div>
+                                                    <h6 class="modal-title fw-bold mb-0" id="modalVincularLabel{{ fam.id }}">
+                                                        <i class="bi bi-link-45deg me-1"></i> Vincular Estudiante a {{ fam.nombre_acudiente }}
+                                                    </h6>
+                                                    <span class="small opacity-75">Parentesco: {{ fam.parentesco|default:"Acudiente principal" }} · Doc: {{ fam.documento|default:"N/A" }}</span>
+                                                </div>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                                             </div>
-                                            <form method="post" action="{% url 'vincular_estudiante_acudiente' fam.id %}">
-                                                {% csrf_token %}
-                                                <div class="modal-body p-4">
-                                                    <p class="small text-muted mb-3">
-                                                        Selecciona el estudiante que estará a cargo de <strong>{{ fam.nombre_acudiente }}</strong> (Parentesco: {{ fam.parentesco|default:"Acudiente" }}).
-                                                        Al guardarlo, el estado del acudiente cambiará inmediatamente a <span class="badge bg-success-subtle text-success">Asignado</span>.
-                                                    </p>
-                                                    <div class="mb-3">
-                                                        <label class="form-label small fw-bold text-dark">Estudiante Escolar *</label>
-                                                        <select name="estudiante_id" class="form-select" required>
-                                                            <option value="">-- Seleccionar Estudiante --</option>
-                                                            {% for est in todos_estudiantes %}
-                                                                <option value="{{ est.id }}">{{ est.last_name }}, {{ est.first_name }} (Doc: {{ est.perfil.numero_documento|default:est.username }})</option>
-                                                            {% endfor %}
+                                            <div class="modal-body p-4 bg-light">
+                                                <p class="small text-muted mb-3">
+                                                    Busca al estudiante por nombre o documento y filtra por grado escolar. Haz clic en <strong>«Vincular»</strong> para asociarlo de inmediato a este acudiente.
+                                                </p>
+
+                                                <!-- Barra de búsqueda y filtro por grado -->
+                                                <div class="row g-2 mb-3 bg-white p-3 rounded-3 shadow-sm border">
+                                                    <div class="col-md-7">
+                                                        <label class="form-label small fw-bold text-dark mb-1">Buscar por Nombre o Documento:</label>
+                                                        <div class="input-group input-group-sm">
+                                                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                                            <input type="text" class="form-control border-start-0" id="inputBuscarEst_{{ fam.id }}" placeholder="Ej: Juan Pérez o 1002345..." oninput="filtrarEstudiantesModal('{{ fam.id }}')">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <label class="form-label small fw-bold text-dark mb-1">Filtrar por Grado Escolar:</label>
+                                                        <select class="form-select form-select-sm" id="selectGradoEst_{{ fam.id }}" onchange="filtrarEstudiantesModal('{{ fam.id }}')">
+                                                            <option value="">-- Todos los grados (1° a 11°) --</option>
+                                                            <option value="1">Grado 1.°</option>
+                                                            <option value="2">Grado 2.°</option>
+                                                            <option value="3">Grado 3.°</option>
+                                                            <option value="4">Grado 4.°</option>
+                                                            <option value="5">Grado 5.°</option>
+                                                            <option value="6">Grado 6.°</option>
+                                                            <option value="7">Grado 7.°</option>
+                                                            <option value="8">Grado 8.°</option>
+                                                            <option value="9">Grado 9.°</option>
+                                                            <option value="10">Grado 10.°</option>
+                                                            <option value="11">Grado 11.°</option>
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer border-0 pt-0">
-                                                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
-                                                        <i class="bi bi-check-circle-fill me-1"></i> Asignar Estudiante
-                                                    </button>
+
+                                                <!-- Lista de Estudiantes Disponibles -->
+                                                <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                                                    <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center">
+                                                        <span class="small fw-bold text-dark"><i class="bi bi-people-fill text-primary me-1"></i> Estudiantes Disponibles:</span>
+                                                        <span class="badge rounded-pill bg-light text-secondary border" id="contadorEst_{{ fam.id }}">{{ todos_estudiantes|length }} estudiante{{ todos_estudiantes|length|pluralize }}</span>
+                                                    </div>
+                                                    <div class="list-group list-group-flush" id="listaEstudiantes_{{ fam.id }}" style="max-height: 320px; overflow-y: auto;">
+                                                        {% for est in todos_estudiantes %}
+                                                            <div class="list-group-item p-3 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 item-estudiante-modal"
+                                                                 data-fam-id="{{ fam.id }}"
+                                                                 data-nombre="{{ est.nombre_completo|lower }}"
+                                                                 data-documento="{{ est.documento|lower }}"
+                                                                 data-grado="{{ est.grado }}">
+                                                                <div class="d-flex align-items-center gap-3">
+                                                                    <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px; background: linear-gradient(135deg, #007F7B, #12B8B0); font-size: 0.9rem;">
+                                                                        {{ est.nombre_completo|slice:":1"|upper }}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="fw-bold text-dark">{{ est.nombre_completo }}</div>
+                                                                        <div class="text-muted small">
+                                                                            <span><i class="bi bi-card-text me-1"></i>Doc: {{ est.documento }}</span>
+                                                                            <span class="ms-2"><i class="bi bi-mortarboard me-1"></i>{{ est.grado_display }}</span>
+                                                                        </div>
+                                                                        <div class="mt-1">
+                                                                            {% if fam.id in est.familias_ids %}
+                                                                                <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
+                                                                                    <i class="bi bi-check-circle-fill me-1"></i> Ya vinculado a esta familia
+                                                                                </span>
+                                                                            {% elif est.tiene_familia %}
+                                                                                <span class="badge rounded-pill bg-light text-muted border" style="font-size: 0.7rem;">
+                                                                                    <i class="bi bi-person-check me-1"></i> Tiene otro acudiente registrado
+                                                                                </span>
+                                                                            {% else %}
+                                                                                <span class="badge rounded-pill" style="font-size: 0.7rem; background-color: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;">
+                                                                                    <i class="bi bi-clock-history me-1"></i> Sin acudiente asignado
+                                                                                </span>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex-shrink-0 text-sm-end">
+                                                                    {% if fam.id in est.familias_ids %}
+                                                                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 disabled" disabled>
+                                                                            <i class="bi bi-check2 me-1"></i> Vinculado
+                                                                        </button>
+                                                                    {% else %}
+                                                                        <form method="post" action="{% url 'vincular_estudiante_acudiente' fam.id %}" class="d-inline m-0">
+                                                                            {% csrf_token %}
+                                                                            <input type="hidden" name="estudiante_id" value="{{ est.id }}">
+                                                                            <button type="submit" class="btn btn-sm text-white rounded-pill px-3 py-1 fw-bold shadow-sm" style="background: #007F7B; border: none;">
+                                                                                <i class="bi bi-person-plus-fill me-1"></i> Vincular
+                                                                            </button>
+                                                                        </form>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        {% empty %}
+                                                            <div class="p-4 text-center text-muted small">
+                                                                No hay estudiantes registrados en la institución.
+                                                            </div>
+                                                        {% endfor %}
+                                                        <div id="noResultadosEst_{{ fam.id }}" class="p-4 text-center text-muted small d-none">
+                                                            <i class="bi bi-search fs-3 text-secondary opacity-50 d-block mb-2"></i>
+                                                            No se encontraron estudiantes que coincidan con la búsqueda o el grado seleccionado.
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </form>
+                                            </div>
+                                            <div class="modal-footer border-0 bg-white py-2 px-4">
+                                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -202,4 +285,50 @@
     {% endif %}
 
 </div>
+
+<script>
+function filtrarEstudiantesModal(famId) {
+    const inputBusqueda = document.getElementById(`inputBuscarEst_${famId}`);
+    const selectGrado = document.getElementById(`selectGradoEst_${famId}`);
+    const lista = document.getElementById(`listaEstudiantes_${famId}`);
+    const contador = document.getElementById(`contadorEst_${famId}`);
+    const noResultados = document.getElementById(`noResultadosEst_${famId}`);
+
+    if (!lista) return;
+
+    const query = inputBusqueda ? inputBusqueda.value.trim().toLowerCase() : '';
+    const gradoFiltro = selectGrado ? selectGrado.value.trim() : '';
+
+    const items = lista.querySelectorAll('.item-estudiante-modal');
+    let visibles = 0;
+
+    items.forEach(item => {
+        const nombre = item.getAttribute('data-nombre') || '';
+        const doc = item.getAttribute('data-documento') || '';
+        const grado = item.getAttribute('data-grado') || '';
+
+        const matchQuery = (!query || nombre.includes(query) || doc.includes(query));
+        const matchGrado = (!gradoFiltro || grado === gradoFiltro);
+
+        if (matchQuery && matchGrado) {
+            item.classList.remove('d-none');
+            visibles++;
+        } else {
+            item.classList.add('d-none');
+        }
+    });
+
+    if (contador) {
+        contador.innerText = `${visibles} estudiante${visibles !== 1 ? 's' : ''}`;
+    }
+
+    if (noResultados) {
+        if (visibles === 0) {
+            noResultados.classList.remove('d-none');
+        } else {
+            noResultados.classList.add('d-none');
+        }
+    }
+}
+</script>
 {% endblock %}

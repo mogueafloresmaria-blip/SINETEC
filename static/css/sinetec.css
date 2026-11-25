@@ -1,47 +1,68 @@
 /* ==============================================================================
    EDUNOVA · SISTEMA INTEGRADO DE EDUCACIÓN TÉCNICA
-   SISTEMA DE DISEÑO VISUAL INSTITUCIONAL MODERNO
-   IDENTIDAD: CAFÉ CLARO · BEIGE · CREMA · MARRÓN SUAVE
+   SISTEMA DE DISEÑO VISUAL INSTITUCIONAL MODERNO Y ELEGANTE
+   PALETA OFICIAL:
+   - Verde petróleo oscuro: #006B68
+   - Verde institucional:   #007F7B
+   - Turquesa principal:    #12B8B0
+   - Turquesa brillante:    #22C8C0
+   - Aguamarina suave:      #DDF7F5
+   - Blanco:                #FFFFFF
+   - Fondo gris azulado:    #F5F8FC
+   - Azul marino textos:    #14264F
+   - Gris secundario:       #64748B
    ============================================================================== */
 
 :root {
-    /* Paleta Institucional EduNova - Café Claro / Beige / Crema */
-    --sinetec-bg: var(--color-fondo);              /* Fondo general crema suave */
-    --sinetec-card-bg: #FFFFFF;         /* Blanco cálido para tarjetas */
-    --sinetec-border: #E5DFD5;          /* Borde beige neutro */
-    --sinetec-border-subtle: #EDE8E1;   /* Borde muy sutil */
-    --sinetec-text-main: var(--color-titulo);       /* Texto títulos marrón profundo */
-    --sinetec-text-body: var(--color-texto);       /* Texto general café suave */
-    --sinetec-text-muted: #75675E;      /* Texto secundario cálido */
-    --sinetec-text-light: #9C8E85;      /* Texto suave institucional */
+    /* 1. Colores Oficiales Institucionales */
+    --color-petroleo-oscuro: #006B68;
+    --color-verde-institucional: #007F7B;
+    --color-turquesa-principal: #12B8B0;
+    --color-turquesa-brillante: #22C8C0;
+    --color-aguamarina-suave: #DDF7F5;
+    --color-blanco: #FFFFFF;
+    --color-fondo-gris-azulado: #F5F8FC;
+    --color-azul-marino-textos: #14264F;
+    --color-gris-textos: #64748B;
 
-    /* Café Institucional Primario (Café Claro y Refinado) */
-    --sinetec-petroleum: var(--color-principal);
-    --sinetec-petroleum-hover: var(--color-secundario);
-    --sinetec-petroleum-dark: var(--color-secundario);
-    --sinetec-petroleum-gradient: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%);
+    /* 2. Variables del Sistema Sinetec / EduNova */
+    --sinetec-bg: #F5F8FC;
+    --sinetec-card-bg: #FFFFFF;
+    --sinetec-border: #E2E8F0;
+    --sinetec-border-subtle: #F1F5F9;
+    --sinetec-text-main: #14264F;
+    --sinetec-text-body: #14264F;
+    --sinetec-text-muted: #64748B;
+    --sinetec-text-light: #94A3B8;
 
-    /* Enlaces y Acentos Café Suave */
-    --sinetec-blue: var(--color-principal);
-    --sinetec-blue-hover: var(--color-secundario);
-    --sinetec-blue-light: var(--color-fondo);
-    --sinetec-blue-soft: var(--color-acento);
-    --sinetec-blue-border: #E0D8CE;
+    /* 3. Verdes Institucionales y Degradados */
+    --sinetec-petroleum: #007F7B;
+    --sinetec-petroleum-hover: #006B68;
+    --sinetec-petroleum-dark: #004D4A;
+    --sinetec-petroleum-gradient: linear-gradient(135deg, #006B68 0%, #007F7B 50%, #12B8B0 100%);
+    --sinetec-sidebar-gradient: linear-gradient(180deg, #006B68 0%, #004D4A 100%);
 
-    /* Tonos Crema y Beige */
-    --sinetec-lavender: #F5F2EB;
-    --sinetec-lavender-border: #E5DFD5;
-    --sinetec-lavender-text: var(--color-secundario);
-    --sinetec-lavender-soft: var(--color-fondo);
+    /* 4. Enlaces y Acentos Turquesa */
+    --sinetec-blue: #007F7B;
+    --sinetec-blue-hover: #006B68;
+    --sinetec-blue-light: #DDF7F5;
+    --sinetec-blue-soft: #DDF7F5;
+    --sinetec-blue-border: #BCEFEA;
 
-    /* Acentos Refinados Café Claro */
-    --sinetec-rose: var(--color-principal);
-    --sinetec-rose-hover: var(--color-secundario);
-    --sinetec-rose-soft: var(--color-acento);
-    --sinetec-rose-border: #E0D8CE;
-    --sinetec-rose-text: var(--color-secundario);
+    /* 5. Tonos Aguamarina */
+    --sinetec-lavender: #DDF7F5;
+    --sinetec-lavender-border: #BCEFEA;
+    --sinetec-lavender-text: #006B68;
+    --sinetec-lavender-soft: #F5F8FC;
 
-    /* Semáforo Oficial de Competencias (🟢 🟡 🔴) - Preservados semánticamente */
+    /* 6. Turquesas Vibrantes */
+    --sinetec-rose: #12B8B0;
+    --sinetec-rose-hover: #007F7B;
+    --sinetec-rose-soft: #DDF7F5;
+    --sinetec-rose-border: #BCEFEA;
+    --sinetec-rose-text: #006B68;
+
+    /* 7. Semáforos Oficiales */
     --semaforo-aprobado: #10B981;
     --semaforo-aprobado-soft: #ECFDF5;
     --semaforo-aprobado-border: #A7F3D0;
@@ -52,35 +73,41 @@
     --semaforo-recuperar-soft: #FEF2F2;
     --semaforo-recuperar-border: #FECACA;
 
-    /* Sombras y Radios */
-    --sinetec-radius: 16px;
-    --sinetec-radius-sm: 10px;
-    --sinetec-shadow-sm: 0 1px 3px 0 rgba(90, 56, 37, 0.05), 0 1px 2px -1px rgba(90, 56, 37, 0.05);
-    --sinetec-shadow: 0 4px 20px -2px rgba(90, 56, 37, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
-    --sinetec-shadow-hover: 0 10px 25px -4px rgba(90, 56, 37, 0.14), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+    /* 8. Sombras y Bordes Redondeados (18-22px para tarjetas) */
+    --sinetec-radius: 20px;
+    --sinetec-radius-sm: 12px;
+    --sinetec-radius-pill: 9999px;
+    --sinetec-shadow-sm: 0 1px 3px 0 rgba(20, 38, 79, 0.04), 0 1px 2px -1px rgba(20, 38, 79, 0.03);
+    --sinetec-shadow: 0 4px 20px -2px rgba(20, 38, 79, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+    --sinetec-shadow-hover: 0 10px 25px -4px rgba(0, 107, 104, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
 
-    /* Tipografías */
+    /* 9. Tipografías */
     --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-    /* Aliases de compatibilidad */
-    --sinetec-primary: var(--color-principal);
-    --sinetec-primary-dark: var(--color-secundario);
-    --sinetec-secondary: #B8977E;
-    --sinetec-cream: var(--sinetec-bg);
-    --sinetec-line: var(--sinetec-border);
-    --sinetec-white: #ffffff;
-    --sinetec-ink: var(--sinetec-text-main);
-    --sinetec-muted: var(--sinetec-text-muted);
+    /* 10. Aliases Globales EduNova */
+    --color-principal: #007F7B;
+    --color-secundario: #006B68;
+    --color-turquesa: #12B8B0;
+    --color-turquesa-brillante: #22C8C0;
+    --color-acento: #DDF7F5;
+    --color-fondo: #F5F8FC;
+    --color-titulo: #14264F;
+    --color-texto: #14264F;
+    --color-boton: #007F7B;
+    --color-texto-boton: #FFFFFF;
+    --color-enlace: #12B8B0;
+    --color-tarjeta: #FFFFFF;
+    --color-navbar: #006B68;
+    --color-texto-nav: #FFFFFF;
 
-    /* Variables globales EduNova */
-    --edunova-primary: var(--color-principal);
-    --edunova-primary-dark: var(--color-secundario);
-    --edunova-secondary: #B8977E;
-    --edunova-background: var(--color-fondo);
+    --edunova-primary: #007F7B;
+    --edunova-primary-dark: #006B68;
+    --edunova-secondary: #12B8B0;
+    --edunova-background: #F5F8FC;
     --edunova-surface: #FFFFFF;
-    --edunova-text: var(--color-titulo);
-    --edunova-border: #E5DFD5;
+    --edunova-text: #14264F;
+    --edunova-border: #E2E8F0;
 }
 
 * {
@@ -115,7 +142,7 @@ a:hover {
 }
 
 /* ==============================================================================
-   ESTRUCTURA PRINCIPAL Y SIDEBAR ESCOLAR
+   ESTRUCTURA PRINCIPAL Y SIDEBAR INSTITUCIONAL
    ============================================================================== */
 
 .sinetec-shell {
@@ -126,13 +153,14 @@ a:hover {
     background: var(--sinetec-bg);
 }
 
-/* Sidebar Fijo Desktop */
+/* Barra Lateral Izquierda (Sidebar) Institucional */
 .sinetec-sidebar {
-    background: #FFFFFF !important;
-    color: var(--color-titulo) !important;
-    width: 264px;
-    min-width: 264px;
-    max-width: 264px;
+    background: var(--sinetec-sidebar-gradient) !important;
+    background-color: #006B68 !important;
+    color: #FFFFFF !important;
+    width: 260px;
+    min-width: 260px;
+    max-width: 260px;
     height: 100vh;
     padding: 0;
     position: fixed;
@@ -144,34 +172,52 @@ a:hover {
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 2px 0 16px rgba(90, 56, 37, 0.05);
-    border-right: 1px solid var(--sinetec-border) !important;
+    box-shadow: 4px 0 24px rgba(0, 77, 74, 0.18) !important;
+    border-right: 1px solid rgba(18, 184, 176, 0.25) !important;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease;
     will-change: transform;
     transform: translateZ(0);
+    scrollbar-width: thin;
+    scrollbar-color: #12B8B0 rgba(0, 77, 74, 0.4);
+}
+
+.sinetec-sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sinetec-sidebar::-webkit-scrollbar-track {
+    background: rgba(0, 77, 74, 0.4);
+}
+
+.sinetec-sidebar::-webkit-scrollbar-thumb {
+    background: #12B8B0;
+    border-radius: 10px;
 }
 
 .sinetec-brand {
-    padding: 20px 18px;
+    padding: 18px 18px;
     display: flex;
     align-items: center;
     gap: 12px;
     text-decoration: none;
-    border-bottom: 1px solid var(--sinetec-border);
-    background: #FFFFFF;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(0, 0, 0, 0.14) !important;
+    flex-shrink: 0;
 }
 
 .sinetec-brand-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%);
-    color: #ffffff;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: #FFFFFF !important;
+    color: #006B68 !important;
     display: grid;
     place-items: center;
     font-size: 1.25rem;
-    box-shadow: 0 4px 12px rgba(90, 56, 37, 0.2);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
     flex-shrink: 0;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .sinetec-brand-text {
@@ -180,23 +226,34 @@ a:hover {
 
 .sinetec-brand-title {
     font-family: var(--font-heading);
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 800;
-    color: var(--sinetec-text-main);
-    letter-spacing: -0.01em;
+    color: #FFFFFF !important;
+    letter-spacing: -0.02em;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
+.sinetec-brand-title .badge {
+    background: #22C8C0 !important;
+    color: #14264F !important;
+    font-weight: 800 !important;
+    border: none !important;
+    border-radius: 6px;
+    font-size: 0.62rem;
+    padding: 2px 7px;
+}
+
 .sinetec-brand-subtitle {
     font-size: 0.72rem;
-    color: var(--sinetec-text-muted);
+    color: #DDF7F5 !important;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 170px;
+    opacity: 0.9;
 }
 
 .sinetec-nav {
@@ -207,81 +264,87 @@ a:hover {
 }
 
 .sinetec-nav-label {
-    color: var(--color-secundario) !important;
+    color: #A3E7E4 !important;
     text-transform: uppercase;
     font-size: 0.68rem;
     font-weight: 800;
     letter-spacing: 0.08em;
-    padding: 16px 12px 6px;
+    padding: 16px 14px 6px;
     margin-top: 4px;
+    opacity: 0.92;
 }
 
 .sinetec-nav .nav-link {
-    color: var(--color-texto);
-    border-radius: 10px;
-    padding: 9px 12px;
+    color: #E6F7F6 !important;
+    border-radius: 14px !important;
+    padding: 9px 14px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 2px 0;
+    gap: 11px;
+    margin: 3px 0;
     font-size: 0.88rem;
-    font-weight: 600;
+    font-weight: 500;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid transparent;
 }
 
 .sinetec-nav .nav-link i {
-    width: 20px;
+    width: 22px;
     text-align: center;
-    color: var(--color-principal);
-    font-size: 1.1rem;
-    transition: color 0.2s ease, transform 0.2s ease;
+    color: #FFFFFF !important;
+    font-size: 1.15rem;
+    opacity: 0.92;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .sinetec-nav .nav-link:hover {
-    color: var(--color-secundario);
-    background: #F5F2EB;
-    border-color: #E5DFD5;
-    transform: translateX(2px);
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    transform: translateX(3px);
 }
 
 .sinetec-nav .nav-link:hover i {
-    color: var(--color-secundario);
+    opacity: 1;
+    transform: scale(1.08);
 }
 
 .sinetec-nav .nav-link.active {
-    color: var(--color-secundario) !important;
-    background: var(--color-acento) !important;
-    border-color: #E0D8CE !important;
+    color: #FFFFFF !important;
+    background: linear-gradient(90deg, #12B8B0 0%, #22C8C0 100%) !important;
+    border-color: transparent !important;
     font-weight: 700 !important;
-    box-shadow: 0 2px 8px rgba(90, 56, 37, 0.06);
+    box-shadow: 0 4px 14px rgba(18, 184, 176, 0.4) !important;
 }
 
 .sinetec-nav .nav-link.active i {
-    color: var(--color-principal) !important;
+    color: #FFFFFF !important;
+    opacity: 1;
 }
 
 .sinetec-sidebar-footer {
-    border-top: 1px solid var(--sinetec-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
     padding: 14px 16px;
-    background: #FAF8F5;
-    font-size: 0.75rem;
-    color: var(--sinetec-text-muted);
+    background: rgba(0, 0, 0, 0.18) !important;
+    font-size: 0.74rem;
+    color: #DDF7F5 !important;
+    border-radius: 14px;
+    margin: 12px;
 }
 
 .sinetec-sidebar-footer strong {
-    color: var(--sinetec-text-main);
+    color: #FFFFFF !important;
     display: block;
     font-size: 0.82rem;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
+    font-weight: 700;
 }
 
 /* Área Principal */
 .sinetec-main {
     min-width: 0;
-    margin-left: 264px;
-    width: calc(100% - 264px);
-    max-width: calc(100% - 264px);
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    max-width: calc(100% - 260px);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -291,7 +354,7 @@ a:hover {
 
 /* Estado Colapsado en Desktop */
 .sinetec-shell.is-collapsed .sinetec-sidebar {
-    transform: translateX(-264px);
+    transform: translateX(-260px);
 }
 
 .sinetec-shell.is-collapsed .sinetec-main {
@@ -305,8 +368,8 @@ a:hover {
    ============================================================================== */
 
 .sinetec-topbar {
-    background: rgba(255, 255, 255, 0.96);
-    border-bottom: 1px solid var(--sinetec-border);
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-bottom: 1px solid #E2E8F0 !important;
     min-height: 68px;
     display: flex;
     align-items: center;
@@ -318,45 +381,55 @@ a:hover {
     z-index: 1020;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 2px 10px rgba(90, 56, 37, 0.03);
+    box-shadow: 0 1px 4px rgba(20, 38, 79, 0.04) !important;
 }
 
 .sinetec-search {
     max-width: 420px;
     width: 100%;
-    background: #F5F2EB;
-    border: 1px solid transparent;
-    border-radius: 12px;
+    background: #F5F8FC !important;
+    border: 1.5px solid #E2E8F0 !important;
+    border-radius: 9999px !important;
     display: flex;
     align-items: center;
-    padding: 0 14px;
+    padding: 4px 16px;
     color: var(--sinetec-text-muted);
     transition: all 0.2s ease;
 }
 
 .sinetec-search:focus-within {
-    border-color: var(--sinetec-blue);
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.15);
+    border-color: #12B8B0 !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 3px rgba(18, 184, 176, 0.15) !important;
+}
+
+.sinetec-search i {
+    color: #007F7B !important;
+    font-size: 0.95rem;
 }
 
 .sinetec-search input {
     border: 0;
     outline: 0;
     background: transparent;
-    padding: 9px 8px;
+    padding: 8px 8px;
     width: 100%;
     font-size: 0.88rem;
-    color: var(--sinetec-text-main);
+    color: #14264F !important;
+    font-weight: 500;
+}
+
+.sinetec-search input::placeholder {
+    color: #94A3B8;
 }
 
 .sinetec-icon-btn {
-    border: 1px solid var(--sinetec-border);
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: #ffffff;
-    color: var(--sinetec-text-body);
+    border: 1px solid #E2E8F0 !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 50% !important;
+    background: #F5F8FC !important;
+    color: #007F7B !important;
     display: grid;
     place-items: center;
     transition: all 0.2s ease;
@@ -364,39 +437,42 @@ a:hover {
 }
 
 .sinetec-icon-btn:hover {
-    color: var(--sinetec-blue);
-    border-color: var(--sinetec-blue);
-    background: var(--sinetec-blue-light);
+    color: #006B68 !important;
+    border-color: #BCEFEA !important;
+    background: #DDF7F5 !important;
+    transform: translateY(-1px);
 }
 
 .sinetec-user-pill {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 5px 12px 5px 6px;
+    padding: 5px 14px 5px 6px;
     border-radius: 9999px;
-    background: #FAF8F5;
-    border: 1px solid var(--sinetec-border);
-    color: var(--sinetec-text-main);
+    background: #F5F8FC;
+    border: 1.5px solid #E2E8F0;
+    color: #14264F;
     text-decoration: none;
-    transition: background 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .sinetec-user-pill:hover {
-    background: var(--color-acento);
-    color: var(--sinetec-text-main);
+    background: #DDF7F5;
+    border-color: #BCEFEA;
+    color: #006B68;
 }
 
 .sinetec-avatar {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, #007F7B 0%, #12B8B0 100%) !important;
+    color: #FFFFFF !important;
     display: grid;
     place-items: center;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.85rem;
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(0, 127, 123, 0.25);
 }
 
 .sinetec-content {
@@ -408,23 +484,35 @@ a:hover {
     z-index: auto !important;
 }
 
-/* Modales Bootstrap */
-.modal {
-    z-index: 1070 !important;
-}
-.modal-backdrop {
-    z-index: 1060 !important;
+/* ==============================================================================
+   HERO BANNERS EDUCATIVOS
+   ============================================================================== */
+
+.sinetec-dashboard-hero,
+.banner-hero-docente,
+.docente-hero-banner {
+    background: linear-gradient(135deg, #006B68 0%, #007F7B 50%, #12B8B0 100%) !important;
+    color: #FFFFFF !important;
+    padding: 2rem 2.5rem !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 25px -4px rgba(0, 107, 104, 0.3) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
-/* Hero unificado para módulos internos: Café Institucional Elegante */
-.sinetec-dashboard-hero {
-    background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%) !important;
-    color: #FFFFFF !important;
-    padding: 1.85rem 2.25rem !important;
-    border-radius: 1.25rem !important;
-    box-shadow: 0 10px 25px -4px rgba(90, 56, 37, 0.25) !important;
-    position: relative;
-    overflow: hidden;
+.sinetec-dashboard-hero::after,
+.banner-hero-docente::after,
+.docente-hero-banner::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -30px !important;
+    right: -30px !important;
+    width: 260px !important;
+    height: 260px !important;
+    background: radial-gradient(circle, rgba(34, 200, 192, 0.28) 0%, rgba(34, 200, 192, 0) 70%) !important;
+    border-radius: 50% !important;
+    pointer-events: none !important;
 }
 
 .sinetec-dashboard-hero h1,
@@ -435,29 +523,30 @@ a:hover {
 }
 
 /* ==============================================================================
-   TARJETAS, COMPONENTES Y TABLAS
+   TARJETAS Y COMPONENTES
    ============================================================================== */
 
 .sinetec-card,
 .card {
-    background: var(--sinetec-card-bg);
-    border: 1px solid var(--sinetec-border) !important;
-    border-radius: var(--sinetec-radius);
-    box-shadow: 0 4px 16px -2px rgba(90, 56, 37, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: var(--sinetec-radius) !important;
+    box-shadow: var(--sinetec-shadow) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.sinetec-card:hover {
-    box-shadow: var(--sinetec-shadow-hover);
+.sinetec-card:hover,
+.card:hover {
+    box-shadow: var(--sinetec-shadow-hover) !important;
 }
 
 .sinetec-card-header,
 .card-header {
     background: transparent;
-    border-bottom: 1px solid var(--sinetec-border);
+    border-bottom: 1px solid #E2E8F0;
     padding: 16px 22px;
     font-weight: 700;
-    color: var(--sinetec-text-main);
+    color: #14264F;
 }
 
 .sinetec-card-body,
@@ -465,11 +554,11 @@ a:hover {
     padding: 22px;
 }
 
-/* Tarjetas de Métricas de Dashboard */
+/* Tarjetas Métricas */
 .metric-card {
-    background: #ffffff;
-    border: 1px solid var(--sinetec-border);
-    border-radius: 14px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
     padding: 18px 20px;
     box-shadow: var(--sinetec-shadow-sm);
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
@@ -481,23 +570,25 @@ a:hover {
 
 .metric-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--sinetec-shadow);
+    box-shadow: var(--sinetec-shadow-hover);
 }
 
 .metric-card-icon {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
+    border-radius: 14px;
     display: grid;
     place-items: center;
     font-size: 1.25rem;
+    background: #DDF7F5 !important;
+    color: #007F7B !important;
 }
 
 .metric-card-val {
     font-family: var(--font-heading);
     font-size: 1.85rem;
     font-weight: 800;
-    color: var(--sinetec-text-main);
+    color: #14264F;
     line-height: 1.1;
     margin: 8px 0 2px;
 }
@@ -505,15 +596,18 @@ a:hover {
 .metric-card-lbl {
     font-size: 0.78rem;
     font-weight: 600;
-    color: var(--sinetec-text-muted);
+    color: #64748B;
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
-/* Tablas Modernas */
+/* ==============================================================================
+   TABLAS Y LISTADOS
+   ============================================================================== */
+
 .sinetec-table-wrap {
-    background: #ffffff;
-    border: 1px solid var(--sinetec-border);
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
     border-radius: var(--sinetec-radius);
     overflow: hidden;
     box-shadow: var(--sinetec-shadow-sm);
@@ -522,150 +616,148 @@ a:hover {
 .sinetec-table,
 .table {
     margin-bottom: 0;
-    color: var(--sinetec-text-body);
+    color: #14264F;
 }
 
 .sinetec-table thead th,
 .table thead th {
-    background: #FAF8F5;
-    color: var(--sinetec-text-muted);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 700;
-    border-bottom: 1px solid var(--sinetec-border);
-    padding: 14px 16px;
-    white-space: nowrap;
+    background: #DDF7F5 !important;
+    color: #14264F !important;
+    font-size: 0.76rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid #12B8B0 !important;
+    padding: 13px 16px !important;
+    white-space: nowrap !important;
 }
 
 .sinetec-table tbody td,
 .table tbody td {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--sinetec-border-subtle);
-    vertical-align: middle;
-    font-size: 0.88rem;
+    padding: 13px 16px !important;
+    border-bottom: 1px solid #F1F5F9 !important;
+    vertical-align: middle !important;
+    font-size: 0.88rem !important;
+    color: #14264F !important;
 }
 
 .sinetec-table tbody tr:hover,
 .table-hover tbody tr:hover {
-    background-color: #FAF8F5;
+    background-color: #F8FDFA !important;
 }
 
-/* Botones Modernos */
-.btn-sinetec-primary {
-    background: var(--sinetec-petroleum);
-    border-color: var(--sinetec-petroleum);
-    color: #ffffff;
-    font-weight: 600;
-    border-radius: var(--sinetec-radius-sm);
-    padding: 8px 18px;
-    transition: all 0.2s ease;
+/* ==============================================================================
+   BOTONES INSTITUCIONALES
+   ============================================================================== */
+
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+.sinetec-btn-primary,
+.btn-sinetec-primary,
+.btn-petroleum,
+.btn-submit,
+button[type="submit"]:not(.btn-danger):not(.btn-success):not(.btn-warning):not(.btn-secondary):not(.btn-info):not(.btn-outline-danger):not(.btn-outline-success):not(.btn-outline-warning):not(.btn-outline-secondary):not(.btn-close) {
+    background: linear-gradient(135deg, #007F7B 0%, #006B68 100%) !important;
+    background-color: #007F7B !important;
+    border-color: #006B68 !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    border-radius: var(--sinetec-radius-pill) !important;
+    padding: 8px 20px !important;
+    box-shadow: 0 4px 14px rgba(0, 127, 123, 0.25) !important;
+    transition: all 0.2s ease !important;
 }
 
-.btn-sinetec-primary:hover {
-    background: var(--sinetec-petroleum-hover);
-    border-color: var(--sinetec-petroleum-hover);
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(90, 56, 37, 0.25);
-    transform: translateY(-1px);
+.btn-primary:hover,
+button.btn-primary:hover,
+a.btn-primary:hover,
+.sinetec-btn-primary:hover,
+.btn-sinetec-primary:hover,
+.btn-petroleum:hover,
+.btn-submit:hover,
+button[type="submit"]:not(.btn-danger):not(.btn-success):not(.btn-warning):not(.btn-secondary):not(.btn-info):not(.btn-outline-danger):not(.btn-outline-success):not(.btn-outline-warning):not(.btn-outline-secondary):not(.btn-close):hover {
+    background: #006B68 !important;
+    border-color: #004D4A !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 6px 18px rgba(0, 107, 104, 0.35) !important;
+    transform: translateY(-1px) !important;
 }
 
-.btn-sinetec-blue {
-    background: var(--sinetec-blue);
-    border-color: var(--sinetec-blue);
-    color: #ffffff;
-    font-weight: 600;
-    border-radius: var(--sinetec-radius-sm);
-    padding: 8px 18px;
-    transition: all 0.2s ease;
+.btn-secondary,
+.btn-outline-primary,
+.btn-sinetec-outline {
+    background: #FFFFFF !important;
+    border: 1.5px solid #12B8B0 !important;
+    color: #007F7B !important;
+    font-weight: 600 !important;
+    border-radius: var(--sinetec-radius-pill) !important;
+    padding: 8px 20px !important;
+    transition: all 0.2s ease !important;
 }
 
-.btn-sinetec-blue:hover {
-    background: var(--sinetec-blue-hover);
-    border-color: var(--sinetec-blue-hover);
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(90, 56, 37, 0.25);
-    transform: translateY(-1px);
-}
-
-.btn-sinetec-rose {
-    background: var(--sinetec-rose);
-    border-color: var(--sinetec-rose);
-    color: #ffffff;
-    font-weight: 600;
-    border-radius: var(--sinetec-radius-sm);
-    padding: 8px 18px;
-    transition: all 0.2s ease;
-}
-
-.btn-sinetec-rose:hover {
-    background: var(--sinetec-rose-hover);
-    border-color: var(--sinetec-rose-hover);
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(90, 56, 37, 0.25);
-    transform: translateY(-1px);
+.btn-secondary:hover,
+.btn-outline-primary:hover,
+.btn-sinetec-outline:hover {
+    background: #DDF7F5 !important;
+    color: #006B68 !important;
+    border-color: #12B8B0 !important;
+    transform: translateY(-1px) !important;
 }
 
 /* Badges y Pastillas */
-.badge-soft-blue {
-    background-color: var(--sinetec-blue-soft);
-    color: var(--sinetec-blue-hover);
-    border: 1px solid var(--sinetec-blue-border);
-}
-
-.badge-soft-lavender {
-    background-color: var(--sinetec-lavender);
-    color: var(--sinetec-lavender-text);
-    border: 1px solid var(--sinetec-lavender-border);
-}
-
+.badge-soft-blue,
+.badge-soft-lavender,
 .badge-soft-rose {
-    background-color: var(--sinetec-rose-soft);
-    color: var(--sinetec-rose-text);
-    border: 1px solid var(--sinetec-rose-border);
+    background-color: #DDF7F5 !important;
+    color: #006B68 !important;
+    border: 1px solid #BCEFEA !important;
+    font-weight: 600;
+    border-radius: 9999px;
+    padding: 0.35rem 0.75rem;
 }
 
 .badge-soft-success {
-    background-color: var(--semaforo-aprobado-soft);
-    color: #065F46;
-    border: 1px solid var(--semaforo-aprobado-border);
+    background-color: var(--semaforo-aprobado-soft) !important;
+    color: #065F46 !important;
+    border: 1px solid var(--semaforo-aprobado-border) !important;
 }
 
 .badge-soft-warning {
-    background-color: var(--semaforo-proceso-soft);
-    color: #92400E;
-    border: 1px solid var(--semaforo-proceso-border);
+    background-color: var(--semaforo-proceso-soft) !important;
+    color: #92400E !important;
+    border: 1px solid var(--semaforo-proceso-border) !important;
 }
 
 .badge-soft-danger {
-    background-color: var(--semaforo-recuperar-soft);
-    color: #991B1B;
-    border: 1px solid var(--semaforo-recuperar-border);
+    background-color: var(--semaforo-recuperar-soft) !important;
+    color: #991B1B !important;
+    border: 1px solid var(--semaforo-recuperar-border) !important;
 }
 
 /* Formularios */
 .form-control, .form-select {
-    border-color: var(--sinetec-border);
-    border-radius: var(--sinetec-radius-sm);
-    padding: 9px 13px;
+    border-color: #E2E8F0;
+    border-radius: 12px;
+    padding: 9px 14px;
     font-size: 0.9rem;
-    color: var(--sinetec-text-main);
+    color: #14264F;
     background-color: #FFFFFF;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: var(--sinetec-blue) !important;
-    box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.18) !important;
+    border-color: #12B8B0 !important;
+    box-shadow: 0 0 0 3px rgba(18, 184, 176, 0.18) !important;
 }
 
 /* Pestañas (Tabs) */
 .nav-tabs {
-    border-bottom: 1px solid var(--sinetec-border);
+    border-bottom: 1px solid #E2E8F0;
 }
 
 .nav-tabs .nav-link {
-    color: var(--sinetec-text-muted);
+    color: #64748B;
     font-weight: 600;
     border: 0;
     border-bottom: 2px solid transparent;
@@ -674,14 +766,14 @@ a:hover {
 }
 
 .nav-tabs .nav-link:hover {
-    color: var(--sinetec-text-main);
+    color: #14264F;
     border-bottom-color: #CBD5E1;
 }
 
 .nav-tabs .nav-link.active {
-    color: var(--sinetec-petroleum);
+    color: #007F7B;
     background: transparent;
-    border-bottom: 2px solid var(--sinetec-petroleum);
+    border-bottom: 2px solid #007F7B;
     font-weight: 700;
 }
 
@@ -693,7 +785,7 @@ a:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(45, 35, 30, 0.55);
+    background: rgba(20, 38, 79, 0.45);
     z-index: 1040;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -735,113 +827,5 @@ a:hover {
 
     .sinetec-content {
         padding: 18px 16px;
-    }
-}
-
-/* ==============================================================================
-   SOBREESCRITURAS GLOBALES BOOTSTRAP - IDENTIDAD CAFÉ CLARO EDUNOVA OFICIAL
-   ============================================================================== */
-.btn-primary,
-button.btn-primary,
-a.btn-primary,
-.sinetec-btn-primary {
-    background: linear-gradient(135deg, var(--color-boton, var(--color-principal)) 0%, var(--color-button-hover, var(--color-secundario)) 100%) !important;
-    background-color: var(--color-boton, var(--color-principal)) !important;
-    border-color: var(--color-boton, var(--color-principal)) !important;
-    color: var(--color-texto-botones, #ffffff) !important;
-    box-shadow: 0 4px 12px rgba(90, 56, 37, 0.22) !important;
-}
-
-.btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active,
-.btn-primary.active,
-.sinetec-btn-primary:hover {
-    background: linear-gradient(135deg, var(--color-button-hover, var(--color-secundario)) 0%, var(--color-button-hover, var(--color-secundario)) 100%) !important;
-    background-color: var(--color-button-hover, var(--color-secundario)) !important;
-    border-color: var(--color-button-hover, var(--color-secundario)) !important;
-    color: var(--color-texto-botones, #ffffff) !important;
-    box-shadow: 0 6px 16px rgba(90, 56, 37, 0.3) !important;
-}
-
-.btn-outline-primary {
-    color: var(--color-principal) !important;
-    border-color: var(--color-principal) !important;
-    background-color: transparent !important;
-}
-
-.btn-outline-primary:hover,
-.btn-outline-primary:active {
-    background-color: var(--color-principal) !important;
-    border-color: var(--color-principal) !important;
-    color: #ffffff !important;
-}
-
-.text-primary,
-i.text-primary {
-    color: var(--color-principal) !important;
-}
-
-.bg-primary {
-    background-color: var(--color-principal) !important;
-}
-
-.bg-primary-subtle {
-    background-color: var(--color-acento) !important;
-    color: var(--color-secundario) !important;
-}
-
-.border-primary {
-    border-color: var(--color-principal) !important;
-}
-
-.badge.bg-primary,
-.badge-primary {
-    background-color: var(--color-acento) !important;
-    color: var(--color-secundario) !important;
-    border: 1px solid #E0D8CE !important;
-}
-
-.badge-blue-soft,
-.badge-soft-blue {
-    background-color: var(--color-acento) !important;
-    color: var(--color-secundario) !important;
-    border: 1px solid #E0D8CE !important;
-}
-
-.avatar-circle-blue,
-.bg-blue-100 {
-    background-color: var(--color-acento) !important;
-    color: var(--color-secundario) !important;
-}
-
-/* ==============================================================================
-   OPTIMIZACIONES RESPONSIVE Y RENDIMIENTO TÁCTIL EDUNOVA
-   ============================================================================== */
-.table-responsive {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #B8977E #F8F6F0;
-}
-
-.table-responsive::-webkit-scrollbar {
-    height: 6px;
-}
-
-.table-responsive::-webkit-scrollbar-track {
-    background: #F8F6F0;
-    border-radius: 4px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb {
-    background: #B8977E;
-    border-radius: 4px;
-}
-
-/* Scroll táctil suave sin bloqueos */
-@media (max-width: 767.98px) {
-    .table td, .table th {
-        white-space: nowrap;
     }
 }

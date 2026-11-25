@@ -3010,61 +3010,50 @@ def tablero_horarios(request):
 
     ]
 
+    from datetime import datetime
+    ahora_dt = datetime.now()
+    dia_actual_num = str(ahora_dt.isoweekday())
+    hora_actual_val = ahora_dt.time()
+    nombres_dias_map = {'1': 'Lunes', '2': 'Martes', '3': 'Miércoles', '4': 'Jueves', '5': 'Viernes'}
+    dia_actual_nombre = nombres_dias_map.get(dia_actual_num, 'Fin de semana')
+
+    todos_horarios_activos = HorarioFicha.objects.filter(activo=True).select_related(
+        'instructor', 'programa', 'ficha'
+    ).order_by('hora_inicio')
+
+    clases_en_curso_institucion = [
+        h for h in todos_horarios_activos
+        if str(getattr(h, 'dia', '')) == dia_actual_num and h.hora_inicio <= hora_actual_val <= h.hora_fin
+    ]
+    proximas_clases_institucion = [
+        h for h in todos_horarios_activos
+        if str(getattr(h, 'dia', '')) == dia_actual_num and h.hora_inicio > hora_actual_val
+    ]
+    proximas_clases_institucion.sort(key=lambda x: x.hora_inicio)
 
     return render(request, 'academico/horarios.html', {
-
-
         'horarios': horarios_qs.order_by('dia', 'hora_inicio'),
-
-
         'horarios_por_dia': horarios_por_dia,
-
-
         'docentes': docentes,
-
-
         'programas': programas,
-
-
         'aulas': aulas_disponibles,
-
-
         'horas_sugeridas': horas_inicio_sugeridas,
-
-
         'nivel': nivel,
-
-
         'grado': grado,
-
-
         'seccion': seccion,
-
-
         'dia': dia,
-
-
         'docente_sel': docente_id,
-
-
         'docente_obj': User.objects.filter(id=docente_id).first() if docente_id else None,
-
-
         'aula_sel': aula_filtro,
-
-
         'q': q,
-
-
         'grados_por_nivel': GRADOS_POR_NIVEL,
-
-
         'secciones': SECCIONES_ESCOLARES,
-
-
         'dias': HorarioFicha.DIAS,
-
-
+        'clases_en_curso_institucion': clases_en_curso_institucion,
+        'proximas_clases_institucion': proximas_clases_institucion,
+        'total_clases_en_curso': len(clases_en_curso_institucion),
+        'hora_actual_str': ahora_dt.strftime('%I:%M %p'),
+        'dia_actual_nombre': dia_actual_nombre,
     })
 
 

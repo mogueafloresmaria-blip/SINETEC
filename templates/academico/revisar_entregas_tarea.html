@@ -64,80 +64,226 @@
         <!-- 1. Entregas Recibidas -->
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
-                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold text-dark mb-0">
-                        <i class="bi bi-file-earmark-check-fill text-success me-2"></i> Entregas Recibidas ({{ entregas.count }})
-                    </h5>
-                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3">
-                        Trabajos Enviados
-                    </span>
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-file-earmark-check-fill text-success me-2"></i> Entregas de Estudiantes
+                        </h5>
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #EBF8F7; color: #007F7B; border: 1px solid #BCEFEA;">
+                            {{ entregas.count }} Recibida{{ entregas.count|pluralize }}
+                        </span>
+                    </div>
+
+                    <!-- Pestañas de filtrado rápido: Pendientes vs Calificadas -->
+                    <ul class="nav nav-pills gap-1" id="pills-entregas-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill px-3 py-1 fw-bold small active" id="tab-pendientes-btn" data-bs-toggle="pill" data-bs-target="#tab-pendientes" type="button" role="tab">
+                                <i class="bi bi-hourglass-split me-1"></i> Pendientes ({{ entregas_pendientes_calificar|length }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill px-3 py-1 fw-bold small" id="tab-calificadas-btn" data-bs-toggle="pill" data-bs-target="#tab-calificadas" type="button" role="tab">
+                                <i class="bi bi-check2-circle me-1"></i> Calificadas ({{ entregas_calificadas|length }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill px-3 py-1 fw-bold small" id="tab-todas-btn" data-bs-toggle="pill" data-bs-target="#tab-todas" type="button" role="tab">
+                                Todas ({{ entregas.count }})
+                            </button>
+                        </li>
+                    </ul>
                 </div>
+
                 <div class="card-body p-4">
-                    {% if entregas %}
-                        <div class="d-flex flex-column gap-3">
-                            {% for e in entregas %}
-                            <div class="p-3 rounded-4 border border-secondary-subtle bg-light">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h5 class="fw-bold text-dark mb-0">{{ e.estudiante.get_full_name|default:e.estudiante.username }}</h5>
-                                        <small class="text-muted"><i class="bi bi-clock me-1"></i> Entregado: {{ e.fecha_entrega|date:"d M Y, h:i A" }}</small>
-                                    </div>
-                                    {% if e.estado == 'CALIFICADA' %}
-                                    <span class="badge bg-success text-white px-3 py-1.5 rounded-pill">
-                                        <i class="bi bi-check-circle-fill me-1"></i> Calificada: {{ e.calificacion }}
-                                    </span>
-                                    {% else %}
-                                    <span class="badge bg-warning text-dark px-3 py-1.5 rounded-pill">
-                                        <i class="bi bi-hourglass-split me-1"></i> Pendiente de Calificar
-                                    </span>
-                                    {% endif %}
-                                </div>
-
-                                <!-- Contenido de la Entrega -->
-                                {% if e.respuesta %}
-                                <div class="p-3 bg-white rounded-3 border mb-3 text-secondary small">
-                                    <strong class="text-dark d-block mb-1">Respuesta del estudiante:</strong>
-                                    {{ e.respuesta }}
-                                </div>
-                                {% endif %}
-
-                                {% if e.archivo %}
-                                <div class="mb-3">
-                                    <a href="{{ e.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-primary fw-bold rounded-pill">
-                                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Descargar Documento Entregado
-                                    </a>
-                                </div>
-                                {% endif %}
-
-                                <!-- Formulario de Calificación y Retroalimentación -->
-                                <form method="post" class="p-3 bg-white rounded-3 border">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="entrega_id" value="{{ e.id }}">
-                                    <div class="row g-2 align-items-center">
-                                        <div class="col-sm-3">
-                                            <label class="form-label small fw-bold text-dark mb-1">Nota (0.0 - 5.0) *</label>
-                                            <input type="number" step="0.1" min="0" max="5.0" name="calificacion" value="{{ e.calificacion|default:'' }}" class="form-control text-center fw-bold" placeholder="4.5" required>
+                    <div class="tab-content" id="pills-entregasContent">
+                        
+                        <!-- TAB 1: PENDIENTES POR CALIFICAR -->
+                        <div class="tab-pane fade show active" id="tab-pendientes" role="tabpanel">
+                            {% if entregas_pendientes_calificar %}
+                                <div class="d-flex flex-column gap-3">
+                                    {% for e in entregas_pendientes_calificar %}
+                                    <div class="p-3.5 rounded-4 border bg-light transition shadow-2xs {% if focus_id and focus_id == e.id|stringformat:'s' %}border-primary ring-2 ring-primary bg-blue-50{% else %}border-secondary-subtle{% endif %}" id="entrega-card-{{ e.id }}">
+                                        <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                            <div>
+                                                <h5 class="fw-bold text-dark mb-0.5">{{ e.estudiante.get_full_name|default:e.estudiante.username }}</h5>
+                                                <small class="text-muted"><i class="bi bi-clock me-1"></i> Entregado: {{ e.fecha_entrega|date:"d M Y, h:i A" }}</small>
+                                            </div>
+                                            <span class="badge bg-warning bg-opacity-20 text-dark border border-warning px-3 py-1.5 rounded-pill fw-bold">
+                                                <i class="bi bi-hourglass-split me-1 text-warning"></i> Pendiente de Calificar
+                                            </span>
                                         </div>
-                                        <div class="col-sm-6">
-                                            <label class="form-label small fw-bold text-dark mb-1">Retroalimentación para el Alumno</label>
-                                            <input type="text" name="retroalimentacion" value="{{ e.retroalimentacion|default:'' }}" class="form-control" placeholder="Observaciones formativas...">
+
+                                        <!-- Respuesta de texto si existe -->
+                                        {% if e.respuesta %}
+                                        <div class="p-3 bg-white rounded-3 border mb-3 text-secondary small">
+                                            <strong class="text-dark d-block mb-1"><i class="bi bi-chat-left-text me-1"></i> Respuesta del estudiante:</strong>
+                                            {{ e.respuesta }}
                                         </div>
-                                        <div class="col-sm-3 pt-sm-4 text-end">
-                                            <button type="submit" class="btn btn-primary fw-bold w-100 rounded-pill">
-                                                <i class="bi bi-save me-1"></i> Guardar
+                                        {% endif %}
+
+                                        <!-- Opciones de Archivo: Principal = «Abrir archivo», Alternativa = «Descargar archivo» -->
+                                        {% if e.archivo %}
+                                        <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+                                            <button type="button" class="btn btn-sm text-white fw-bold rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5 shadow-2xs"
+                                                    style="background: linear-gradient(135deg, #007F7B 0%, #006B68 100%); border: none;"
+                                                    onclick="abrirVisorEduNova('{{ e.archivo.url }}', '{{ e.estudiante.get_full_name|escapejs }}', '{{ tarea.titulo|escapejs }}');">
+                                                <i class="bi bi-eye-fill"></i> Abrir archivo
                                             </button>
+                                            <a href="{{ e.archivo.url }}" download class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 bg-white">
+                                                <i class="bi bi-download"></i> Descargar archivo
+                                            </a>
                                         </div>
+                                        {% endif %}
+
+                                        <!-- Formulario de Calificación Individual con Continuación -->
+                                        <form method="post" class="p-3 bg-white rounded-3 border">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="entrega_id" value="{{ e.id }}">
+                                            <div class="row g-2 align-items-end">
+                                                <div class="col-sm-3">
+                                                    <label class="form-label small fw-bold text-dark mb-1">Nota (0.0 - 5.0) *</label>
+                                                    <input type="number" step="0.1" min="0" max="5.0" name="calificacion" value="{{ e.calificacion|default:'' }}" class="form-control text-center fw-bold" placeholder="4.5" required>
+                                                </div>
+                                                <div class="col-sm-5">
+                                                    <label class="form-label small fw-bold text-dark mb-1">Retroalimentación pedagógica</label>
+                                                    <input type="text" name="retroalimentacion" value="{{ e.retroalimentacion|default:'' }}" class="form-control" placeholder="Observaciones formativas...">
+                                                </div>
+                                                <div class="col-sm-4 d-flex gap-1.5">
+                                                    <button type="submit" class="btn btn-primary fw-bold rounded-pill flex-grow-1" style="background: var(--color-principal); border-color: var(--color-principal);">
+                                                        <i class="bi bi-save me-1"></i> Guardar
+                                                    </button>
+                                                    <button type="submit" name="guardar_siguiente" value="1" class="btn btn-success fw-bold rounded-pill text-white flex-grow-1" title="Guarda y pasa al siguiente pendiente" style="background: #059669; border-color: #059669;">
+                                                        Siguiente <i class="bi bi-arrow-right"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
-                                </form>
-                            </div>
-                            {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-muted">
+                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2" style="background: #ECFDF5; color: #047857;">
+                                        <i class="bi bi-check2-all fs-2"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-1">¡No hay entregas pendientes por calificar!</h6>
+                                    <p class="small text-muted mb-0">Todas las entregas recibidas han sido calificadas o aún no hay nuevos envíos.</p>
+                                </div>
+                            {% endif %}
                         </div>
-                    {% else %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox fs-1 text-secondary d-block mb-2"></i>
-                            <h6>Aún no hay entregas de estudiantes registradas para esta tarea.</h6>
+
+                        <!-- TAB 2: CALIFICADAS -->
+                        <div class="tab-pane fade" id="tab-calificadas" role="tabpanel">
+                            {% if entregas_calificadas %}
+                                <div class="d-flex flex-column gap-3">
+                                    {% for e in entregas_calificadas %}
+                                    <div class="p-3.5 rounded-4 border border-secondary-subtle bg-white transition shadow-2xs">
+                                        <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                            <div>
+                                                <h5 class="fw-bold text-dark mb-0.5">{{ e.estudiante.get_full_name|default:e.estudiante.username }}</h5>
+                                                <small class="text-muted"><i class="bi bi-clock me-1"></i> Entregado: {{ e.fecha_entrega|date:"d M Y, h:i A" }}</small>
+                                            </div>
+                                            <span class="badge bg-success text-white px-3 py-1.5 rounded-pill fw-bold">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Nota: {{ e.calificacion }} / 5.0
+                                            </span>
+                                        </div>
+
+                                        {% if e.respuesta %}
+                                        <div class="p-3 bg-light rounded-3 border mb-3 text-secondary small">
+                                            <strong class="text-dark d-block mb-1"><i class="bi bi-chat-left-text me-1"></i> Respuesta:</strong>
+                                            {{ e.respuesta }}
+                                        </div>
+                                        {% endif %}
+
+                                        {% if e.archivo %}
+                                        <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+                                            <button type="button" class="btn btn-sm text-white fw-bold rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5 shadow-2xs"
+                                                    style="background: linear-gradient(135deg, #007F7B 0%, #006B68 100%); border: none;"
+                                                    onclick="abrirVisorEduNova('{{ e.archivo.url }}', '{{ e.estudiante.get_full_name|escapejs }}', '{{ tarea.titulo|escapejs }}');">
+                                                <i class="bi bi-eye-fill"></i> Abrir archivo
+                                            </button>
+                                            <a href="{{ e.archivo.url }}" download class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 bg-white">
+                                                <i class="bi bi-download"></i> Descargar archivo
+                                            </a>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Modificar Calificación -->
+                                        <form method="post" class="p-3 bg-light rounded-3 border">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="entrega_id" value="{{ e.id }}">
+                                            <div class="row g-2 align-items-end">
+                                                <div class="col-sm-3">
+                                                    <label class="form-label small fw-bold text-dark mb-1">Modificar Nota</label>
+                                                    <input type="number" step="0.1" min="0" max="5.0" name="calificacion" value="{{ e.calificacion|default:'' }}" class="form-control text-center fw-bold" required>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <label class="form-label small fw-bold text-dark mb-1">Comentario</label>
+                                                    <input type="text" name="retroalimentacion" value="{{ e.retroalimentacion|default:'' }}" class="form-control">
+                                                </div>
+                                                <div class="col-sm-3 text-end">
+                                                    <button type="submit" class="btn btn-outline-primary fw-bold w-100 rounded-pill">
+                                                        <i class="bi bi-pencil me-1"></i> Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-muted small">
+                                    Aún no has calificado ninguna entrega de esta actividad.
+                                </div>
+                            {% endif %}
                         </div>
-                    {% endif %}
+
+                        <!-- TAB 3: TODAS LAS ENTREGAS -->
+                        <div class="tab-pane fade" id="tab-todas" role="tabpanel">
+                            {% if entregas %}
+                                <div class="d-flex flex-column gap-3">
+                                    {% for e in entregas %}
+                                    <div class="p-3 rounded-4 border bg-light">
+                                        <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                            <div>
+                                                <h5 class="fw-bold text-dark mb-0.5">{{ e.estudiante.get_full_name|default:e.estudiante.username }}</h5>
+                                                <small class="text-muted"><i class="bi bi-clock me-1"></i> {{ e.fecha_entrega|date:"d M Y, h:i A" }}</small>
+                                            </div>
+                                            {% if e.estado == 'CALIFICADA' %}
+                                            <span class="badge bg-success text-white px-3 py-1.5 rounded-pill fw-bold">
+                                                Calificada: {{ e.calificacion }}
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-warning text-dark px-3 py-1.5 rounded-pill fw-bold">
+                                                Pendiente
+                                            </span>
+                                            {% endif %}
+                                        </div>
+
+                                        {% if e.archivo %}
+                                        <div class="mb-2 d-flex align-items-center gap-2 flex-wrap">
+                                            <button type="button" class="btn btn-sm text-white fw-bold rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5 shadow-2xs"
+                                                    style="background: linear-gradient(135deg, #007F7B 0%, #006B68 100%); border: none;"
+                                                    onclick="abrirVisorEduNova('{{ e.archivo.url }}', '{{ e.estudiante.get_full_name|escapejs }}', '{{ tarea.titulo|escapejs }}');">
+                                                <i class="bi bi-eye-fill"></i> Abrir archivo
+                                            </button>
+                                            <a href="{{ e.archivo.url }}" download class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 bg-white">
+                                                <i class="bi bi-download"></i> Descargar archivo
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 text-secondary d-block mb-2"></i>
+                                    <h6>Aún no hay entregas registradas para esta tarea.</h6>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -187,4 +333,95 @@
     </div>
 
 </div>
+
+<!-- MODAL VISOR DE ARCHIVO DIRECTO EN EDUNOVA (SIN DESCARGAR) -->
+<div class="modal fade" id="modalVisorEduNova" tabindex="-1" aria-labelledby="modalVisorEduNovaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 92vw;">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden" style="height: 88vh;">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #006B68 0%, #007F7B 100%); color: #ffffff;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-text-fill fs-5 text-white"></i>
+                    <div>
+                        <h6 class="modal-title fw-bold text-white mb-0" id="modalVisorEduNovaLabel">Visualizador Oficial de Entrega · EduNova</h6>
+                        <small class="text-white-50" id="modalVisorSubtitulo">Estudiante</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="#" id="modalVisorDescargaAlt" download class="btn btn-sm btn-light rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5 shadow-2xs">
+                        <i class="bi bi-download"></i> Descargar archivo
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0 d-flex flex-column bg-light" style="height: calc(88vh - 65px);">
+                <div id="visorLoading" class="text-center py-5 text-muted">
+                    <div class="spinner-border text-primary mb-2" role="status"></div>
+                    <p class="small fw-semibold">Cargando documento en EduNova...</p>
+                </div>
+                <iframe id="visorIframeEduNova" src="" class="w-100 h-100 border-0" style="display:none;" title="Visor de archivo escolar"></iframe>
+                <div id="visorImgContainer" class="w-100 h-100 p-3 text-center overflow-auto" style="display:none;">
+                    <img id="visorImgEduNova" src="" alt="Entrega del estudiante" class="img-fluid rounded shadow-sm" style="max-height: 100%; object-fit: contain;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function abrirVisorEduNova(archivoUrl, estudianteNombre, tareaTitulo) {
+    if (!archivoUrl) return;
+    const modalEl = document.getElementById('modalVisorEduNova');
+    const subtitulo = document.getElementById('modalVisorSubtitulo');
+    const linkDescarga = document.getElementById('modalVisorDescargaAlt');
+    const iframe = document.getElementById('visorIframeEduNova');
+    const imgContainer = document.getElementById('visorImgContainer');
+    const imgEl = document.getElementById('visorImgEduNova');
+    const loading = document.getElementById('visorLoading');
+
+    if (subtitulo) subtitulo.textContent = estudianteNombre + (tareaTitulo ? ' · ' + tareaTitulo : '');
+    if (linkDescarga) linkDescarga.href = archivoUrl;
+
+    if (loading) loading.style.display = 'block';
+    if (iframe) iframe.style.display = 'none';
+    if (imgContainer) imgContainer.style.display = 'none';
+
+    const urlLower = archivoUrl.toLowerCase();
+    const esImagen = urlLower.endsWith('.png') || urlLower.endsWith('.jpg') || urlLower.endsWith('.jpeg') || urlLower.endsWith('.gif') || urlLower.endsWith('.webp') || urlLower.endsWith('.svg');
+
+    if (esImagen) {
+        if (imgEl) imgEl.src = archivoUrl;
+        if (imgContainer) imgContainer.style.display = 'block';
+        if (loading) loading.style.display = 'none';
+    } else {
+        if (iframe) {
+            iframe.src = archivoUrl;
+            iframe.onload = function() {
+                if (loading) loading.style.display = 'none';
+                iframe.style.display = 'block';
+            };
+            setTimeout(function() {
+                if (loading) loading.style.display = 'none';
+                iframe.style.display = 'block';
+            }, 600);
+        }
+    }
+
+    if (modalEl && typeof bootstrap !== 'undefined') {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+}
+
+// Auto-scroll y focus en la entrega siguiente
+document.addEventListener('DOMContentLoaded', function() {
+    const focusId = "{{ focus_id|default:'' }}";
+    if (focusId) {
+        const targetCard = document.getElementById('entrega-card-' + focusId);
+        if (targetCard) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetCard.classList.add('border-primary', 'shadow-md');
+        }
+    }
+});
+</script>
 {% endblock %}

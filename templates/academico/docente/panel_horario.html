@@ -106,6 +106,81 @@
         </div>
     </div>
 
+    <!-- 2.5 MONITOREO DE CLASE EN CURSO AHORA Y PRÓXIMAS CLASES DEL DOCENTE -->
+    <div class="card border rounded-4 p-3.5 bg-white shadow-2xs mb-4" style="border-color: var(--color-acento) !important;">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="rounded-3 p-1.5 d-flex align-items-center justify-content-center" style="background: #F5F2EB; color: var(--color-principal); width: 34px; height: 34px;">
+                    <i class="bi bi-broadcast fs-6"></i>
+                </span>
+                <div>
+                    <h6 class="fw-bold text-dark mb-0">Supervisión en Tiempo Real de su Carga Docente</h6>
+                    <small class="text-muted">Estado de clases activas y próximas sesiones del día</small>
+                </div>
+            </div>
+            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #F5F2EB; color: var(--color-principal); border: 1px solid var(--color-acento);">
+                <i class="bi bi-dot text-success fs-5 align-middle"></i> Jornada Activa
+            </span>
+        </div>
+
+        <div class="row g-3">
+            <!-- Clase en curso para el docente -->
+            <div class="col-md-6">
+                <div class="p-3 rounded-4 h-100 {% if clase_actual %}border border-success bg-success bg-opacity-10{% else %}bg-light border{% endif %}">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-bold text-uppercase {% if clase_actual %}text-success{% else %}text-muted{% endif %}" style="letter-spacing: 0.5px; font-size: 0.75rem;">
+                            <i class="bi bi-play-circle-fill me-1"></i> Su Clase en Curso Ahora
+                        </span>
+                        {% if clase_actual %}
+                        <span class="badge bg-success text-white rounded-pill px-2.5 py-0.5 fw-bold" style="font-size: 0.68rem;">EN DESARROLLO</span>
+                        {% endif %}
+                    </div>
+                    {% if clase_actual %}
+                    <h5 class="fw-bold text-dark mb-1">{{ clase_actual.nombre_materia|default:clase_actual.programa.denominacion }}</h5>
+                    <div class="small text-muted mb-2">
+                        Grado <strong>{% if clase_actual.grado %}{{ clase_actual.grado }}{% elif clase_actual.ficha %}{{ clase_actual.ficha.codigo_ficha }}{% else %}10{% endif %}°{{ clase_actual.seccion|default:'A' }}</strong> · Aula: <strong class="text-dark">{{ clase_actual.ambiente|default:'Aula Asignada' }}</strong>
+                    </div>
+                    <div class="small text-success fw-bold">
+                        <i class="bi bi-clock-fill me-1"></i> {{ clase_actual.hora_inicio|time:"h:i A" }} - {{ clase_actual.hora_fin|time:"h:i A" }}
+                    </div>
+                    {% else %}
+                    <div class="py-2 text-muted small">
+                        <i class="bi bi-info-circle me-1"></i> Sin clase presencial en curso en este bloque horario.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Próximas clases de hoy para el docente -->
+            <div class="col-md-6">
+                <div class="p-3 rounded-4 h-100 bg-light border">
+                    <span class="small fw-bold text-uppercase text-muted d-block mb-2" style="letter-spacing: 0.5px; font-size: 0.75rem;">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Sesiones Programadas para Hoy
+                    </span>
+                    {% if clases_hoy %}
+                    <div class="d-flex flex-column gap-2" style="max-height: 110px; overflow-y: auto;">
+                        {% for ch in clases_hoy %}
+                        <div class="bg-white p-2 rounded-3 border-start border-3 border-primary shadow-2xs d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="text-dark small d-block">{{ ch.nombre_materia|default:ch.programa.denominacion }}</strong>
+                                <span class="text-muted" style="font-size: 0.72rem;">Grado {% if ch.grado %}{{ ch.grado }}{% elif ch.ficha %}{{ ch.ficha.codigo_ficha }}{% else %}10{% endif %}°{{ ch.seccion|default:'A' }} · Aula {{ ch.ambiente|default:'Gen' }}</span>
+                            </div>
+                            <span class="badge bg-light text-dark border small" style="font-size: 0.68rem;">
+                                {{ ch.hora_inicio|time:"h:i A" }} - {{ ch.hora_fin|time:"h:i A" }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="py-2 text-muted small">
+                        <i class="bi bi-calendar-check me-1"></i> No tiene más clases programadas en la fecha.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 3. MALLA DE HORARIO SEMANAL (LUNES A VIERNES) -->
     <div class="row g-3">
         {% for dia in dias_con_clases %}

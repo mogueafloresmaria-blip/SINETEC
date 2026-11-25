@@ -192,8 +192,13 @@ def revision_entrega(request, entrega_id):
             messages.success(request, 'Calificación guardada correctamente.')
             if request.POST.get('guardar_continuar'):
                 siguiente = EntregaTarea.objects.filter(tarea=entrega.tarea, estado__in=['PENDIENTE', 'ENTREGADA', 'ENTREGADA_TARDE']).exclude(id=entrega.id).first()
+                if not siguiente:
+                    cargas_doc = CargaAcademica.objects.filter(profesor=request.user)
+                    siguiente = EntregaTarea.objects.filter(tarea__carga_academica__in=cargas_doc, estado__in=['PENDIENTE', 'ENTREGADA', 'ENTREGADA_TARDE']).exclude(id=entrega.id).first()
                 if siguiente:
                     return redirect('revision_entrega', entrega_id=siguiente.id)
+                else:
+                    messages.info(request, '¡Has calificado todas las actividades y entregas pendientes!')
             return redirect('panel_calificaciones')
 
     return render(request, 'academico/revision_entrega.html', {'entrega': entrega})
@@ -422,8 +427,19 @@ def comunicaciones(request):
             if msg.destinatario == request.user:
                 msg.eliminado_por_destinatario = True
             msg.save()
-            messages.success(request, 'Mensaje movido a la papelera.')
-            return redirect('comunicaciones')
+            try:
+                from usuarios.papelera_service import PapeleraService
+                PapeleraService.enviar_a_papelera(
+                    msg,
+                    usuario=request.user,
+                    motivo='Eliminado desde Mensajería Directa',
+                    modulo_origen='Mensajería Directa'
+                )
+            except Exception:
+                pass
+            messages.success(request, 'Mensaje movido a la papelera de reciclaje.')
+            next_url = request.POST.get('next_url') or 'comunicaciones'
+            return redirect(next_url)
             
         elif action == 'restaurar':
             msg_id = request.POST.get('msg_id')
@@ -433,109 +449,274 @@ def comunicaciones(request):
             if msg.destinatario == request.user:
                 msg.eliminado_por_destinatario = False
             msg.save()
-            messages.success(request, 'Mensaje restaurado.')
-            return redirect('comunicaciones')
+            try:
+                from usuarios.models import PapeleraReciclaje
+                PapeleraReciclaje.objects.filter(tipo_objeto='Mensaje', objeto_id=msg.id).update(restaurado=True)
+            except Exception:
+                pass
+            messages.success(request, 'Mensaje restaurado exitosamente.')
+            next_url = request.POST.get('next_url') or 'comunicaciones'
+            return redirect(next_url)
             
         elif action == 'eliminar_definitivo':
             msg_id = request.POST.get('msg_id')
             msg = get_object_or_404(mensajes_del_usuario, id=msg_id)
-            # Solo si el usuario es dueño en alguna parte
             if msg.remitente == request.user or msg.destinatario == request.user:
+                try:
+                    from usuarios.models import PapeleraReciclaje
+                    PapeleraReciclaje.objects.filter(tipo_objeto='Mensaje', objeto_id=msg.id).delete()
+                except Exception:
+                    pass
                 msg.delete()
-                messages.success(request, 'Mensaje eliminado definitivamente.')
-            return redirect('comunicaciones')
+                messages.success(request, 'Mensaje eliminado definitivamente de la base de datos.')
+            next_url = request.POST.get('next_url') or 'comunicaciones'
+            return redirect(next_url)
 
-        # Si no es ninguna de esas, es enviar mensaje
-        destinatario_id = request.POST.get('destinatario_id')
-        grupo_destino = request.POST.get('grupo_destino')
-        asunto = request.POST.get('asunto')
-        mensaje = request.POST.get('mensaje')
+        # Enviar mensaje directo a uno o múltiples destinatarios
+        enviar_a_todos = request.POST.get('enviar_a_todos', '').strip() in ['1', 'true', 'True'] or request.POST.get('destinatarios_ids_csv', '').strip() == 'TODOS'
+        dest_single = request.POST.get('destinatario_id', '').strip()
+        dest_ids_raw = request.POST.getlist('destinatarios_ids')
+        csv_ids = request.POST.get('destinatarios_ids_csv', '').strip()
+        if csv_ids and csv_ids != 'TODOS':
+            dest_ids_raw.extend([x.strip() for x in csv_ids.split(',') if x.strip()])
+        if dest_single and dest_single != 'TODOS':
+            dest_ids_raw.append(dest_single)
 
-        if es_aprendiz:
-            cargas = _cargas_para_aprendiz(request.user)
-            matriculas = Matricula.objects.filter(
-                aprendiz=request.user,
-                estado_formacion='En Formacion',
-            )
-            fichas_ids = matriculas.values_list('ficha_id', flat=True)
-            instructores_ids = set(matriculas.values_list('ficha__instructor_lider_id', flat=True))
-            instructores_ids.update(
-                HorarioFicha.objects.filter(ficha_id__in=fichas_ids)
-                .exclude(instructor_id__isnull=True)
-                .values_list('instructor_id', flat=True)
-            )
-            instructores_ids.update(cargas.values_list('profesor_id', flat=True))
-            if grupo_destino or not destinatario_id or not User.objects.filter(
-                pk=destinatario_id,
-                is_active=True,
-                pk__in=instructores_ids,
-            ).exists():
-                messages.error(request, 'Solo puedes escribir a docentes asignados a tu matrícula.')
-                return redirect('comunicaciones')
-        
-        if asunto and mensaje:
+        grupo_destino = request.POST.get('grupo_destino', '').strip()
+        roles_seleccionados = request.POST.getlist('roles_seleccionados')
+        asunto = request.POST.get('asunto', '').strip()
+        mensaje = request.POST.get('mensaje', '').strip()
+
+        next_url = request.POST.get('next_url', '').strip() or 'comunicaciones'
+
+        if not asunto or not mensaje:
+            messages.error(request, 'Por favor completa el asunto y el contenido del mensaje.')
+            return redirect(next_url)
+
+        destinatarios_finales = set()
+        if enviar_a_todos:
+            destinatarios_finales = set(User.objects.filter(is_active=True).exclude(pk=request.user.pk))
+        else:
+            ids_a_enviar = set()
+            for r_id in dest_ids_raw:
+                if str(r_id).isdigit():
+                    ids_a_enviar.add(int(r_id))
+
+            if ids_a_enviar:
+                destinatarios_finales.update(User.objects.filter(is_active=True, id__in=ids_a_enviar).exclude(pk=request.user.pk))
+
+            from usuarios.views import obtener_usuarios_destinatarios_autorizados
+            for rol_cod in roles_seleccionados:
+                destinatarios_finales.update(obtener_usuarios_destinatarios_autorizados(request.user, rol=rol_cod))
+
+            if grupo_destino:
+                destinatarios_finales.update(obtener_usuarios_destinatarios_autorizados(request.user, grado=grupo_destino))
+
+        if not destinatarios_finales:
+            messages.error(request, 'Debes seleccionar una persona del directorio institucional para enviarle el mensaje.')
+            return redirect(next_url)
+
+        from seguimiento.models import Notificacion
+
+        mensaje_padre_id = request.POST.get('mensaje_padre_id', '').strip()
+        padre_obj = None
+        if mensaje_padre_id and mensaje_padre_id.isdigit():
+            padre_obj = ComunicacionMensaje.objects.filter(pk=int(mensaje_padre_id)).first()
+
+        total_enviados = 0
+        ultimo_msg = None
+        for dest_u in destinatarios_finales:
             msg = ComunicacionMensaje.objects.create(
                 remitente=request.user,
-                destinatario_id=destinatario_id if destinatario_id else None,
-                grupo_destino=grupo_destino,
+                destinatario=dest_u,
+                grupo_destino=grupo_destino or None,
                 asunto=asunto,
-                mensaje=mensaje
+                mensaje=mensaje,
+                mensaje_padre=padre_obj
             )
-            
-            from seguimiento.models import Notificacion
-            
-            if msg.destinatario:
-                Notificacion.objects.create(
-                    usuario=msg.destinatario,
-                    titulo=f"Nuevo mensaje: {asunto}",
-                    mensaje=f"Tienes un nuevo mensaje de {request.user.get_full_name()}.",
-                    tipo='info',
-                    enlace='/academico/comunicaciones/'
-                )
-            elif msg.grupo_destino:
-                estudiantes = User.objects.filter(matriculas_academicas__grado_escolar=msg.grupo_destino)
-                for est in estudiantes:
-                    Notificacion.objects.create(
-                        usuario=est,
-                        titulo=f"Nuevo mensaje para grado {msg.grupo_destino}: {asunto}",
-                        mensaje=f"Tienes un nuevo mensaje de {request.user.get_full_name()}.",
-                        tipo='info',
-                        enlace='/academico/comunicaciones/'
-                    )
-            
-            messages.success(request, 'Mensaje enviado.')
-            return redirect('comunicaciones')
-            
-    # Obtener usuarios activos institucionales disponibles para mensajería
-    usuarios_disponibles = User.objects.filter(is_active=True).exclude(
-        id=request.user.id
-    ).select_related('perfil', 'perfil__rol')
-    if es_aprendiz:
-        cargas = _cargas_para_aprendiz(request.user)
-        matriculas = Matricula.objects.filter(
-            aprendiz=request.user,
-            estado_formacion='En Formacion',
-        )
-        fichas_ids = matriculas.values_list('ficha_id', flat=True)
-        instructores_ids = set(matriculas.values_list('ficha__instructor_lider_id', flat=True))
-        instructores_ids.update(
-            HorarioFicha.objects.filter(ficha_id__in=fichas_ids)
-            .exclude(instructor_id__isnull=True)
-            .values_list('instructor_id', flat=True)
-        )
-        instructores_ids.update(cargas.values_list('profesor_id', flat=True))
-        usuarios_disponibles = usuarios_disponibles.filter(pk__in=instructores_ids)
-    usuarios_disponibles = usuarios_disponibles.order_by('first_name', 'last_name')
+            ultimo_msg = msg
+            total_enviados += 1
+
+            # Notificación institucional en tiempo real
+            perfil_d = getattr(dest_u, 'perfil', None)
+            rol_nom_d = perfil_d.rol.nombre if (perfil_d and perfil_d.rol) else ''
+            if any(r in rol_nom_d for r in ['Docente', 'Instructor', 'Profesor']):
+                enlace_dest = f"/instructor/?subpanel=comunicaciones&chat_user={request.user.id}&chat_tipo=estudiante"
+            elif any(r in rol_nom_d for r in ['Estudiante', 'Aprendiz']):
+                enlace_dest = "/estudiante/?subpanel=comunicaciones"
+            elif 'Familia' in rol_nom_d:
+                enlace_dest = "/familia/comunicaciones/"
+            else:
+                enlace_dest = "/comunicaciones/"
+
+            Notificacion.objects.create(
+                usuario=dest_u,
+                titulo=f"Mensaje de {request.user.get_full_name() or request.user.username}: {asunto[:60]}",
+                mensaje=f"{mensaje[:150]}",
+                tipo='info',
+                enlace=enlace_dest
+            )
+            total_enviados += 1
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('is_ajax') == '1':
+            return JsonResponse({
+                'success': True,
+                'total_enviados': total_enviados,
+                'asunto': asunto,
+                'mensaje': mensaje,
+                'fecha': ultimo_msg.fecha_envio.strftime('%d/%m/%Y %I:%M %p') if ultimo_msg else '',
+                'remitente_nombre': request.user.get_full_name() or request.user.username,
+            })
+
+        if total_enviados == 1:
+            u_unico = list(destinatarios_finales)[0]
+            messages.success(request, f'¡Mensaje directo enviado exitosamente a {u_unico.get_full_name() or u_unico.username}!')
+        else:
+            messages.success(request, f'¡Comunicado general enviado exitosamente a toda la plataforma ({total_enviados} usuarios)!')
+        return redirect(next_url)
+
+    # Directorio visible completo con TODOS los usuarios registrados activos (excepto el propio usuario)
+    usuarios_todos = User.objects.filter(is_active=True).exclude(pk=request.user.pk).select_related('perfil', 'perfil__rol').order_by('perfil__rol__nombre', 'first_name', 'last_name', 'username')
+
+    directorio_usuarios = []
+    for u in usuarios_todos:
+        p = getattr(u, 'perfil', None)
+        r_nom = p.rol.nombre if (p and p.rol) else ('Administrador' if u.is_superuser else 'Usuario')
+        r_lower = r_nom.lower()
+
+        if 'rector' in r_lower:
+            badge_style = 'background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA;'
+            avatar_bg = '#DC2626'
+            cat = 'directivos'
+        elif 'admin' in r_lower:
+            badge_style = 'background: #E0E7FF; color: #3730A3; border: 1px solid #C7D2FE;'
+            avatar_bg = '#4F46E5'
+            cat = 'admin'
+        elif any(d in r_lower for d in ['docente', 'profesor', 'instructor']):
+            badge_style = 'background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0;'
+            avatar_bg = '#059669'
+            cat = 'docentes'
+        elif 'secretar' in r_lower:
+            badge_style = 'background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;'
+            avatar_bg = '#D97706'
+            cat = 'secretaria'
+        elif any(e in r_lower for e in ['estudiante', 'aprendiz', 'alumno']):
+            badge_style = 'background: #E0F2FE; color: #075985; border: 1px solid #BAE6FD;'
+            avatar_bg = '#0284C7'
+            cat = 'estudiantes'
+        elif 'familia' in r_lower:
+            badge_style = 'background: #F3E8FF; color: #6B21A8; border: 1px solid #E9D5FF;'
+            avatar_bg = '#9333EA'
+            cat = 'familias'
+        else:
+            badge_style = 'background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1;'
+            avatar_bg = '#64748B'
+            cat = 'otros'
+
+        full_name = u.get_full_name() or u.username
+        parts = full_name.split()
+        iniciales = (parts[0][0] + (parts[1][0] if len(parts) > 1 else ''))[:2].upper() if parts else u.username[:2].upper()
+
+        m = u.matriculas_academicas.first() if hasattr(u, 'matriculas_academicas') else None
+        grado_str = f"Grado {m.grado_escolar}°{m.seccion}" if (m and m.grado_escolar) else ""
+        doc_str = p.numero_documento if (p and p.numero_documento) else ""
+
+        directorio_usuarios.append({
+            'id': u.id,
+            'nombre': full_name,
+            'username': u.username,
+            'rol': r_nom,
+            'categoria': cat,
+            'badge_style': badge_style,
+            'avatar_bg': avatar_bg,
+            'iniciales': iniciales,
+            'grado': grado_str,
+            'documento': doc_str,
+        })
+
+    from usuarios.views import obtener_usuarios_destinatarios_autorizados
+    usuarios_disponibles = obtener_usuarios_destinatarios_autorizados(request.user)
+
+    roles_institucionales = [
+        {'codigo': 'Docente', 'nombre': '👨‍🏫 Docentes e Instructores'},
+        {'codigo': 'Estudiante', 'nombre': '🎒 Estudiantes y Aprendices'},
+        {'codigo': 'Familia', 'nombre': '👨‍👩‍👧‍👦 Familias y Acudientes'},
+        {'codigo': 'Admin', 'nombre': '🏛️ Directivos y Secretaría'},
+    ]
+    grados_catalogo = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
 
     return render(request, 'academico/comunicaciones.html', {
         'recibidos': recibidos,
         'enviados': enviados,
         'papelera': papelera,
         'usuarios': usuarios_disponibles,
+        'directorio_usuarios': directorio_usuarios,
+        'total_directorio': len(directorio_usuarios),
+        'destinatarios_muestra': directorio_usuarios[:60],
+        'roles_institucionales': roles_institucionales,
+        'grados_catalogo': grados_catalogo,
         'total_recibidos': recibidos.count(),
         'total_enviados': enviados.count(),
         'total_papelera': papelera.count(),
     })
+
+
+@login_required
+def api_conversacion_historial(request, otro_usuario_id):
+    """
+    Retorna el historial completo cronológico (antiguo a reciente) de la conversación
+    entre el usuario autenticado y otro_usuario_id.
+    """
+    from django.contrib.auth.models import User
+    from academico.models import ComunicacionMensaje
+    from django.db.models import Q
+    from django.http import JsonResponse
+    from django.shortcuts import get_object_or_404
+
+    otro_usuario = get_object_or_404(User, pk=otro_usuario_id)
+    mensajes_qs = ComunicacionMensaje.objects.filter(
+        (Q(remitente=request.user, destinatario=otro_usuario, eliminado_por_remitente=False) |
+         Q(remitente=otro_usuario, destinatario=request.user, eliminado_por_destinatario=False))
+    ).select_related('remitente', 'remitente__perfil', 'remitente__perfil__rol').order_by('fecha_envio')
+
+    # Marcar como leídos los mensajes recibidos del otro usuario
+    ComunicacionMensaje.objects.filter(
+        remitente=otro_usuario,
+        destinatario=request.user,
+        leido=False
+    ).update(leido=True)
+
+    items = []
+    for m in mensajes_qs:
+        perf = getattr(m.remitente, 'perfil', None)
+        rol_nom = perf.rol.nombre if (perf and perf.rol) else ('Administrador' if m.remitente.is_superuser else 'Usuario')
+        items.append({
+            'id': m.id,
+            'es_mio': m.remitente_id == request.user.id,
+            'remitente_id': m.remitente_id,
+            'remitente_nombre': m.remitente.get_full_name() or m.remitente.username,
+            'remitente_rol': rol_nom,
+            'asunto': m.asunto,
+            'mensaje': m.mensaje,
+            'fecha': m.fecha_envio.strftime('%d/%m/%Y %I:%M %p'),
+            'hora': m.fecha_envio.strftime('%I:%M %p'),
+            'leido': m.leido,
+        })
+
+    perf_otro = getattr(otro_usuario, 'perfil', None)
+    rol_otro = perf_otro.rol.nombre if (perf_otro and perf_otro.rol) else ('Administrador' if otro_usuario.is_superuser else 'Usuario')
+    return JsonResponse({
+        'success': True,
+        'otro_usuario': {
+            'id': otro_usuario.id,
+            'nombre': otro_usuario.get_full_name() or otro_usuario.username,
+            'rol': rol_otro,
+            'username': otro_usuario.username,
+        },
+        'total': len(items),
+        'mensajes': items
+    })
+
 
 @login_required
 @solo_aprendiz

@@ -293,9 +293,16 @@
                             </td>
                             <td>
                                 {% if item.archivo_url %}
-                                <a href="{{ item.archivo_url }}" target="_blank" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 fw-semibold small d-inline-flex align-items-center gap-1">
-                                    <i class="bi bi-file-earmark-arrow-down text-primary"></i> Archivo
-                                </a>
+                                <div class="d-inline-flex align-items-center gap-1.5 flex-wrap">
+                                    <button type="button" class="btn btn-sm text-white rounded-pill px-2.5 py-1 fw-bold small d-inline-flex align-items-center gap-1 shadow-2xs"
+                                            style="background: linear-gradient(135deg, #007F7B 0%, #006B68 100%); border: none; font-size: 0.78rem;"
+                                            onclick="abrirVisorEduNova('{{ item.archivo_url }}', '{{ item.nombre_completo|escapejs }}', '{{ tarea_seleccionada.titulo|escapejs }}');">
+                                        <i class="bi bi-eye-fill"></i> Abrir archivo
+                                    </button>
+                                    <a href="{{ item.archivo_url }}" download class="btn btn-sm btn-light border rounded-pill px-2 py-1 fw-semibold small d-inline-flex align-items-center gap-1" title="Descargar archivo en su equipo" style="font-size: 0.78rem;">
+                                        <i class="bi bi-download text-secondary"></i> Descargar
+                                    </a>
+                                </div>
                                 {% elif item.respuesta %}
                                 <span class="small text-dark text-truncate d-inline-block" style="max-width: 140px;" title="{{ item.respuesta }}">
                                     {{ item.respuesta }}
@@ -370,9 +377,15 @@
                                 <strong class="d-block text-dark mb-0.5" id="modal-calif-estudiante-nombre">Estudiante</strong>
                                 <small class="text-muted">Actividad: {{ tarea_seleccionada.titulo }}</small>
                                 <div id="modal-calif-archivo-contenedor" class="mt-2" style="display: none;">
-                                    <a href="#" id="modal-calif-archivo-link" target="_blank" class="btn btn-sm btn-white bg-white border rounded-pill px-3 py-1 small fw-bold">
-                                        <i class="bi bi-download text-primary me-1"></i> Abrir Trabajo Entregado
-                                    </a>
+                                    <div class="d-inline-flex align-items-center gap-2 flex-wrap">
+                                        <button type="button" id="modal-calif-archivo-btn-abrir" class="btn btn-sm text-white rounded-pill px-3 py-1.5 small fw-bold d-inline-flex align-items-center gap-1.5 shadow-2xs"
+                                                style="background: linear-gradient(135deg, #007F7B 0%, #006B68 100%); border: none;">
+                                            <i class="bi bi-eye-fill"></i> Abrir archivo
+                                        </button>
+                                        <a href="#" id="modal-calif-archivo-link" download class="btn btn-sm btn-white bg-white border rounded-pill px-3 py-1.5 small fw-bold d-inline-flex align-items-center gap-1.5 text-secondary">
+                                            <i class="bi bi-download"></i> Descargar archivo
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1210,6 +1223,7 @@ function abrirModalCalificar(estudianteId, nombre, calificacion, retroalimentaci
     const elEstado = document.getElementById('modal-calif-estado-select');
     const elArchCont = document.getElementById('modal-calif-archivo-contenedor');
     const elArchLink = document.getElementById('modal-calif-archivo-link');
+    const elArchBtnAbrir = document.getElementById('modal-calif-archivo-btn-abrir');
 
     if (elId) elId.value = estudianteId;
     if (elNom) elNom.textContent = nombre;
@@ -1220,6 +1234,11 @@ function abrirModalCalificar(estudianteId, nombre, calificacion, retroalimentaci
     if (archivoUrl && elArchCont && elArchLink) {
         elArchCont.style.display = 'block';
         elArchLink.href = archivoUrl;
+        if (elArchBtnAbrir) {
+            elArchBtnAbrir.onclick = function() {
+                abrirVisorEduNova(archivoUrl, nombre, '{{ tarea_seleccionada.titulo|escapejs }}');
+            };
+        }
     } else if (elArchCont) {
         elArchCont.style.display = 'none';
     }
@@ -1316,3 +1335,82 @@ function abrirModalCalificar(estudianteId, nombre, calificacion, retroalimentaci
         </div>
     </div>
 </div>
+
+<!-- MODAL VISOR DE ARCHIVO DIRECTO EN EDUNOVA (SIN DESCARGAR) -->
+<div class="modal fade" id="modalVisorEduNova" tabindex="-1" aria-labelledby="modalVisorEduNovaLabel" aria-hidden="true" style="z-index: 1070;">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 92vw;">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden" style="height: 88vh;">
+            <div class="modal-header px-4 py-3" style="background: linear-gradient(135deg, #006B68 0%, #007F7B 100%); color: #ffffff;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-text-fill fs-5 text-white"></i>
+                    <div>
+                        <h6 class="modal-title fw-bold text-white mb-0" id="modalVisorEduNovaLabel">Visualizador Oficial de Entrega · EduNova</h6>
+                        <small class="text-white-50" id="modalVisorSubtitulo">Estudiante</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="#" id="modalVisorDescargaAlt" download class="btn btn-sm btn-light rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5 shadow-2xs">
+                        <i class="bi bi-download"></i> Descargar archivo
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0 d-flex flex-column bg-light" style="height: calc(88vh - 65px);">
+                <div id="visorLoading" class="text-center py-5 text-muted">
+                    <div class="spinner-border text-primary mb-2" role="status"></div>
+                    <p class="small fw-semibold">Cargando documento en EduNova...</p>
+                </div>
+                <iframe id="visorIframeEduNova" src="" class="w-100 h-100 border-0" style="display:none;" title="Visor de archivo escolar"></iframe>
+                <div id="visorImgContainer" class="w-100 h-100 p-3 text-center overflow-auto" style="display:none;">
+                    <img id="visorImgEduNova" src="" alt="Entrega del estudiante" class="img-fluid rounded shadow-sm" style="max-height: 100%; object-fit: contain;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function abrirVisorEduNova(archivoUrl, estudianteNombre, tareaTitulo) {
+    if (!archivoUrl) return;
+    const modalEl = document.getElementById('modalVisorEduNova');
+    const subtitulo = document.getElementById('modalVisorSubtitulo');
+    const linkDescarga = document.getElementById('modalVisorDescargaAlt');
+    const iframe = document.getElementById('visorIframeEduNova');
+    const imgContainer = document.getElementById('visorImgContainer');
+    const imgEl = document.getElementById('visorImgEduNova');
+    const loading = document.getElementById('visorLoading');
+
+    if (subtitulo) subtitulo.textContent = estudianteNombre + (tareaTitulo ? ' · ' + tareaTitulo : '');
+    if (linkDescarga) linkDescarga.href = archivoUrl;
+
+    if (loading) loading.style.display = 'block';
+    if (iframe) iframe.style.display = 'none';
+    if (imgContainer) imgContainer.style.display = 'none';
+
+    const urlLower = archivoUrl.toLowerCase();
+    const esImagen = urlLower.endsWith('.png') || urlLower.endsWith('.jpg') || urlLower.endsWith('.jpeg') || urlLower.endsWith('.gif') || urlLower.endsWith('.webp') || urlLower.endsWith('.svg');
+
+    if (esImagen) {
+        if (imgEl) imgEl.src = archivoUrl;
+        if (imgContainer) imgContainer.style.display = 'block';
+        if (loading) loading.style.display = 'none';
+    } else {
+        if (iframe) {
+            iframe.src = archivoUrl;
+            iframe.onload = function() {
+                if (loading) loading.style.display = 'none';
+                iframe.style.display = 'block';
+            };
+            setTimeout(function() {
+                if (loading) loading.style.display = 'none';
+                iframe.style.display = 'block';
+            }, 600);
+        }
+    }
+
+    if (modalEl && typeof bootstrap !== 'undefined') {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+}
+</script>

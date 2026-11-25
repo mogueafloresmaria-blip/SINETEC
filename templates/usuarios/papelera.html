@@ -6,30 +6,29 @@
 {% block content %}
 <div class="container-fluid px-0 py-2">
 
-    <!-- Header Hero Papelera -->
-    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #334155 0%, #1e293b 60%, #0f172a 100%); color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);">
+    <!-- Header Hero Papelera Unificada -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #1e293b 0%, #334155 60%, #0f172a 100%); color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.35);">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div>
-                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
-                    <i class="bi bi-trash3-fill me-1 text-warning"></i> Depósito y Recuperación de Datos
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold d-inline-flex align-items-center gap-1.5">
+                    <i class="bi bi-trash3-fill text-warning"></i> Papelera de Reciclaje · Rol: {{ rol_nombre|default:"Usuario" }}
                 </span>
                 <h1 class="h3 fw-bold mb-1 text-white">Papelera de Reciclaje Institucional</h1>
                 <p class="mb-0 text-white-50 small">
-                    Recupere con un clic estudiantes, matrículas y clases eliminadas o ejecute la depuración definitiva del sistema.
+                    Resguardo lógico (Soft Delete): restaure con un clic elementos eliminados a su ubicación original o ejecute la depuración autorizada.
                 </p>
             </div>
-            <div class="d-flex gap-2">
-                {% if total_general > 0 %}
-                <form method="post" action="{% url 'vaciar_papelera' %}" onsubmit="return confirm('¿ATENCIÓN: Está seguro de vaciar COMPLETAMENTE la papelera? Esta acción eliminará permanentemente todos los registros y no se puede deshacer.');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger text-white border-danger-subtle btn-sm fw-bold rounded-pill px-3 shadow-sm">
-                        <i class="bi bi-radioactive me-1"></i> Vaciar Papelera
-                    </button>
-                </form>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                {% if total_general > 0 and es_admin or es_directivo or es_docente %}
+                <button type="button" class="btn btn-outline-danger text-white border-danger-subtle btn-sm fw-bold rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalVaciarPapelera">
+                    <i class="bi bi-radioactive me-1"></i> Vaciar Papelera
+                </button>
                 {% endif %}
-                <a href="{% url 'estudiantes_lista' %}" class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm">
-                    <i class="bi bi-people-fill text-primary me-1"></i> Ver Estudiantes Activos
+                {% if not es_estudiante %}
+                <a href="{{ url_panel_origen|default:'/' }}" class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm text-dark">
+                    <i class="bi bi-arrow-left me-1"></i> Regresar a mi Panel
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -37,7 +36,7 @@
     <!-- Mensajes del Sistema -->
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
                 <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
             </div>
@@ -46,77 +45,87 @@
 
     <!-- 4 Métricas de la Papelera -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
+        <div class="col-sm-6 col-lg-3">
             <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-secondary">
-                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Total en Papelera</span>
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Total Resguardado</span>
                 <div class="h3 fw-bold text-dark mb-0 mt-1">{{ total_general }}</div>
-                <small class="text-muted">Registros resguardados</small>
+                <small class="text-muted">Elementos disponibles para recuperar</small>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-danger">
-                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Estudiantes</span>
-                <div class="h3 fw-bold text-danger mb-0 mt-1">{{ total_estudiantes }}</div>
-                <small class="text-muted">Expedientes en papelera</small>
-            </div>
-        </div>
-        <div class="col-md-3">
+        <div class="col-sm-6 col-lg-3">
             <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-primary">
-                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Matrículas</span>
-                <div class="h3 fw-bold text-primary mb-0 mt-1">{{ total_matriculas }}</div>
-                <small class="text-muted">Inscripciones pausadas</small>
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Académico & Clases</span>
+                <div class="h3 fw-bold text-primary mb-0 mt-1">{{ total_actividades|add:total_guias|add:total_horarios }}</div>
+                <small class="text-muted">Tareas, guías y horarios</small>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-warning">
-                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Clases / Horarios</span>
-                <div class="h3 fw-bold text-warning text-dark mb-0 mt-1">{{ total_horarios }}</div>
-                <small class="text-muted">Bloques retirados</small>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-info">
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Comunicaciones</span>
+                <div class="h3 fw-bold text-info mb-0 mt-1">{{ total_comunicados|add:total_mensajes }}</div>
+                <small class="text-muted">Circulares y mensajes directos</small>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-danger">
+                <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Expedientes / Usuarios</span>
+                <div class="h3 fw-bold text-danger mb-0 mt-1">{{ total_estudiantes|add:total_matriculas|add:total_cargas }}</div>
+                <small class="text-muted">Alumnos, matrículas y asignaciones</small>
             </div>
         </div>
     </div>
 
-    <!-- Barra de Filtros y Búsqueda -->
+    <!-- Barra de Filtros, Categorías y Búsqueda -->
     <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <!-- Pestañas de tipo -->
+            <!-- Pestañas de Filtro por Tipo -->
             <div class="d-flex flex-wrap gap-2">
                 <a href="?tipo=Todos{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Todos' or not tipo_sel %}btn-dark{% else %}btn-outline-secondary{% endif %}">
                     Todos ({{ total_general }})
                 </a>
-                <a href="?tipo=TareaClase{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'TareaClase' %}btn-success{% else %}btn-outline-success{% endif %}">
-                    <i class="bi bi-journal-text me-1"></i> Actividades ({{ total_actividades }})
-                </a>
-                <a href="?tipo=EntregaTarea{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'EntregaTarea' %}btn-info text-dark{% else %}btn-outline-info text-dark{% endif %}">
-                    <i class="bi bi-file-earmark-check me-1"></i> Respuestas / Entregas ({{ total_entregas }})
-                </a>
-                <a href="?tipo=Estudiante{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Estudiante' %}btn-danger{% else %}btn-outline-danger{% endif %}">
-                    <i class="bi bi-person-x me-1"></i> Estudiantes ({{ total_estudiantes }})
-                </a>
-                <a href="?tipo=Matricula{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Matricula' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                    <i class="bi bi-file-earmark-person me-1"></i> Matrículas ({{ total_matriculas }})
-                </a>
-                <a href="?tipo=Horario{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Horario' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">
-                    <i class="bi bi-clock-history me-1"></i> Horarios ({{ total_horarios }})
-                </a>
-                {% if total_cargas %}
-                <a href="?tipo=CargaAcademica{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'CargaAcademica' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                    <i class="bi bi-book me-1"></i> Asignaciones ({{ total_cargas }})
+                {% if total_actividades or es_admin or es_docente %}
+                <a href="?tipo=TareaClase{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'TareaClase' %}btn-success text-white{% else %}btn-outline-success{% endif %}">
+                    <i class="bi bi-journal-text me-1"></i> Tareas ({{ total_actividades }})
                 </a>
                 {% endif %}
-                {% if total_fichas %}
-                <a href="?tipo=Ficha{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Ficha' %}btn-dark{% else %}btn-outline-dark{% endif %}">
-                    <i class="bi bi-folder me-1"></i> Fichas ({{ total_fichas }})
+                {% if total_guias or es_admin or es_docente %}
+                <a href="?tipo=GuiaClase{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'GuiaClase' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">
+                    <i class="bi bi-file-earmark-text me-1"></i> Guías/Docs ({{ total_guias }})
                 </a>
                 {% endif %}
-                {% if total_bitacoras %}
-                <a href="?tipo=Bitacora{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Bitacora' %}btn-info text-dark{% else %}btn-outline-info text-dark{% endif %}">
-                    <i class="bi bi-journal-check me-1"></i> Bitácoras ({{ total_bitacoras }})
+                {% if total_mensajes %}
+                <a href="?tipo=Mensaje{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Mensaje' %}btn-info text-dark{% else %}btn-outline-info text-dark{% endif %}">
+                    <i class="bi bi-chat-dots me-1"></i> Mensajes ({{ total_mensajes }})
                 </a>
                 {% endif %}
                 {% if total_comunicados %}
                 <a href="?tipo=Comunicado{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Comunicado' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
-                    <i class="bi bi-envelope me-1"></i> Comunicados ({{ total_comunicados }})
+                    <i class="bi bi-megaphone me-1"></i> Circulares ({{ total_comunicados }})
+                </a>
+                {% endif %}
+                {% if total_estudiantes and es_admin or es_directivo or es_secretaria %}
+                <a href="?tipo=Estudiante{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Estudiante' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                    <i class="bi bi-person-x me-1"></i> Estudiantes ({{ total_estudiantes }})
+                </a>
+                {% endif %}
+                {% if total_matriculas and es_admin or es_directivo or es_secretaria %}
+                <a href="?tipo=Matricula{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Matricula' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    <i class="bi bi-file-earmark-person me-1"></i> Matrículas ({{ total_matriculas }})
+                </a>
+                {% endif %}
+                {% if total_horarios %}
+                <a href="?tipo=Horario{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Horario' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">
+                    <i class="bi bi-calendar2-week me-1"></i> Horarios ({{ total_horarios }})
+                </a>
+                {% endif %}
+                {% if total_calificaciones %}
+                <a href="?tipo=Calificacion{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'Calificacion' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    <i class="bi bi-mortarboard me-1"></i> Calificaciones ({{ total_calificaciones }})
+                </a>
+                {% endif %}
+                {% if total_cargas and es_admin or es_directivo or es_secretaria %}
+                <a href="?tipo=CargaAcademica{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill px-3 fw-bold {% if tipo_sel == 'CargaAcademica' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    <i class="bi bi-book me-1"></i> Asignaciones ({{ total_cargas }})
                 </a>
                 {% endif %}
             </div>
@@ -124,158 +133,322 @@
             <!-- Buscador -->
             <form method="get" class="d-flex gap-2">
                 <input type="hidden" name="tipo" value="{{ tipo_sel }}">
-                <div class="input-group input-group-sm" style="min-width: 260px;">
+                <div class="input-group input-group-sm" style="min-width: 270px;">
                     <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="q" class="form-control border-start-0" placeholder="Buscar por nombre, documento o motivo..." value="{{ q }}">
+                    <input type="text" name="q" class="form-control border-start-0 py-1.5" placeholder="Buscar por nombre, motivo o módulo..." value="{{ q }}">
                     {% if q %}
                         <a href="?tipo={{ tipo_sel }}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
                     {% endif %}
                 </div>
-                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">Buscar</button>
+                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" style="background-color: #007F7B; border-color: #007F7B;">
+                    Buscar
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- Tabla Principal de Elementos en Papelera -->
-    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
-        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <h3 class="h6 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                <i class="bi bi-archive-fill text-secondary"></i> Elementos Resguardados para Recuperación
-            </h3>
-            <span class="small text-muted">Resultados: {{ items|length }}</span>
-        </div>
-        <div class="card-body p-0">
-            {% if items %}
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light small text-uppercase" style="font-size: 0.74rem;">
-                        <tr>
-                            <th class="ps-4 py-3">Tipo</th>
-                            <th class="py-3">Nombre / Identificador</th>
-                            <th class="py-3">Módulo de Origen</th>
-                            <th class="py-3">Usuario que Eliminó</th>
-                            <th class="py-3">Fecha de Eliminación</th>
-                            <th class="py-3">Motivo Registrado</th>
-                            <th class="pe-4 py-3 text-end">Acciones de Recuperación</th>
-                        </tr>
-                    </thead>
-                    <tbody class="small">
-                        {% for item in items %}
-                        <tr>
-                            <td class="ps-4">
-                                {% if item.tipo_objeto == 'TareaClase' %}
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
-                                        <i class="bi bi-journal-text me-1"></i> Actividad
-                                    </span>
-                                {% elif item.tipo_objeto == 'EntregaTarea' %}
-                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-bold" style="color: #0891b2 !important;">
-                                        <i class="bi bi-file-earmark-check me-1"></i> Respuesta / Entrega
-                                    </span>
-                                {% elif item.tipo_objeto == 'Estudiante' %}
-                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-1 fw-bold">
-                                        <i class="bi bi-person-fill me-1"></i> Estudiante
-                                    </span>
-                                {% elif item.tipo_objeto == 'Matricula' %}
-                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
-                                        <i class="bi bi-file-earmark-person-fill me-1"></i> Matrícula
-                                    </span>
-                                {% elif item.tipo_objeto == 'Horario' %}
-                                    <span class="badge bg-warning bg-opacity-10 text-warning text-dark border border-warning border-opacity-25 rounded-pill px-2 py-1 fw-bold">
-                                        <i class="bi bi-calendar2-week-fill me-1"></i> Horario
-                                    </span>
-                                {% elif item.tipo_objeto == 'GuiaClase' %}
-                                    <span class="badge bg-warning bg-opacity-10 text-warning text-dark border border-warning border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
-                                        <i class="bi bi-file-earmark-text me-1"></i> Documento / Guía
-                                    </span>
-                                {% elif item.tipo_objeto == 'Transporte' %}
-                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
-                                        <i class="bi bi-bus-front me-1"></i> Ruta Escolar
-                                    </span>
-                                {% elif item.tipo_objeto == 'Comunicado' %}
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
-                                        <i class="bi bi-envelope me-1"></i> Comunicado
-                                    </span>
-                                {% elif item.tipo_objeto == 'CargaAcademica' %}
-                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
-                                        <i class="bi bi-book me-1"></i> Asignación Docente
-                                    </span>
-                                {% elif item.tipo_objeto == 'Ficha' %}
-                                    <span class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
-                                        <i class="bi bi-folder me-1"></i> Ficha Escolar
-                                    </span>
-                                {% elif item.tipo_objeto == 'Bitacora' %}
-                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
-                                        <i class="bi bi-journal-check me-1"></i> Bitácora
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1">
-                                        {{ item.tipo_objeto }}
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <strong class="text-dark d-block fs-6">{{ item.titulo }}</strong>
-                                <span class="text-muted small">ID Registro: #{{ item.objeto_id }}</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1 fw-semibold">
-                                    <i class="bi bi-geo-alt me-1 text-muted"></i>{{ item.modulo_origen|default:item.subtitulo|default:"Módulo General" }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="text-dark fw-semibold">
-                                    <i class="bi bi-person-circle me-1 text-muted"></i>
-                                    {% if item.eliminado_por %}
-                                        {{ item.eliminado_por.get_full_name|default:item.eliminado_por.username }}
-                                    {% else %}
-                                        Sistema
-                                    {% endif %}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="text-dark d-block">{{ item.fecha_eliminacion|date:"d/m/Y" }}</span>
-                                <span class="text-muted" style="font-size: 0.72rem;">{{ item.fecha_eliminacion|time:"h:i A" }}</span>
-                            </td>
-                            <td>
-                                <span class="text-muted fst-italic" style="font-size: 0.8rem;">{{ item.motivo|truncatechars:60 }}</span>
-                            </td>
-                            <td class="pe-4 text-end">
-                                <div class="d-inline-flex gap-2">
-                                    <!-- Botón Recuperar -->
-                                    <form method="post" action="{% url 'restaurar_elemento_papelera' item.pk %}" class="d-inline" onsubmit="return confirm('¿Desea recuperar a {{ item.titulo|escapejs }} al estado activo del sistema?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" title="Recuperar elemento al sistema">
-                                            <i class="bi bi-recycle me-1"></i> ♻️ Recuperar
-                                        </button>
-                                    </form>
+    <!-- FORMULARIO PRINCIPAL DE ACCIONES MÚLTIPLES Y TABLA DE ELEMENTOS -->
+    <form method="post" action="{% url 'papelera_acciones_multiples' %}" id="formPapeleraMultiples">
+        {% csrf_token %}
 
-                                    <!-- Botón Eliminar Definitivo -->
-                                    <form method="post" action="{% url 'eliminar_definitivo_papelera' item.pk %}" class="d-inline" onsubmit="return confirm('¡ADVERTENCIA! ¿Está seguro de eliminar definitivamente a {{ item.titulo|escapejs }}? Esta acción borrará permanentemente sus datos.');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Eliminar definitivamente">
-                                            <i class="bi bi-trash3-fill"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center py-5 text-muted">
-                <i class="bi bi-trash3 text-secondary fs-1 d-block mb-2 opacity-50"></i>
-                <h5 class="fw-bold text-dark mb-1">La Papelera de Reciclaje está vacía</h5>
-                <p class="small text-muted mb-0">No se encontraron elementos dados de baja {% if tipo_sel != 'Todos' %}en la categoría {{ tipo_sel }}{% endif %}.</p>
-                <div class="mt-3">
-                    <a href="{% url 'estudiantes_lista' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                        <i class="bi bi-people me-1"></i> Ir a Lista de Estudiantes
-                    </a>
+        <!-- Barra de Herramientas de Selección Múltiple -->
+        <div id="toolbarSeleccion" class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white d-none border-start border-4 border-success">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success rounded-pill px-3 py-1.5 fw-bold fs-6" id="badgeSeleccionados">0 seleccionados</span>
+                    <span class="small text-muted">¿Qué acción deseas aplicar sobre estos elementos?</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="submit" name="accion" value="restaurar" class="btn btn-sm btn-success rounded-pill px-3.5 py-1.5 fw-bold shadow-xs">
+                        <i class="bi bi-recycle me-1"></i> Restaurar Seleccionados
+                    </button>
+                    {% if es_admin or es_directivo %}
+                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 fw-bold" onclick="confirmarEliminarMultiples();">
+                        <i class="bi bi-trash3-fill me-1"></i> Eliminar Definitivamente Seleccionados
+                    </button>
+                    {% endif %}
+                    <button type="button" class="btn btn-sm btn-light rounded-pill px-2.5 py-1 text-secondary" onclick="deseleccionarTodos();">
+                        Cancelar
+                    </button>
                 </div>
             </div>
-            {% endif %}
+        </div>
+
+        <!-- Tabla Principal de Elementos en Papelera -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h3 class="h6 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-archive-fill text-secondary"></i> Elementos Resguardados para Recuperación
+                </h3>
+                <span class="small text-muted">Total mostrados: {{ items|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if items %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase" style="font-size: 0.74rem;">
+                            <tr>
+                                <th class="ps-3 py-3" style="width: 40px;">
+                                    <input type="checkbox" class="form-check-input" id="checkAll" title="Seleccionar todos los elementos visibles">
+                                </th>
+                                <th class="py-3">Tipo</th>
+                                <th class="py-3">Nombre / Identificador</th>
+                                <th class="py-3">Módulo de Origen</th>
+                                <th class="py-3">Usuario que Eliminó</th>
+                                <th class="py-3">Fecha de Eliminación</th>
+                                <th class="py-3">Motivo Registrado</th>
+                                <th class="pe-4 py-3 text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="small">
+                            {% for item in items %}
+                            <tr>
+                                <td class="ps-3">
+                                    <input type="checkbox" name="seleccionados" value="{{ item.id }}" class="form-check-input item-check" onchange="actualizarBarraSeleccion();">
+                                </td>
+                                <td>
+                                    {% if item.tipo_objeto == 'TareaClase' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                            <i class="bi bi-journal-text me-1"></i> Tarea
+                                        </span>
+                                    {% elif item.tipo_objeto == 'EntregaTarea' %}
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-bold" style="color: #0891b2 !important;">
+                                            <i class="bi bi-file-earmark-check me-1"></i> Entrega
+                                        </span>
+                                    {% elif item.tipo_objeto == 'Estudiante' %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-1 fw-bold">
+                                            <i class="bi bi-person-fill me-1"></i> Estudiante
+                                        </span>
+                                    {% elif item.tipo_objeto == 'Matricula' %}
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
+                                            <i class="bi bi-file-earmark-person-fill me-1"></i> Matrícula
+                                        </span>
+                                    {% elif item.tipo_objeto == 'Horario' %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning text-dark border border-warning border-opacity-25 rounded-pill px-2 py-1 fw-bold">
+                                            <i class="bi bi-calendar2-week-fill me-1"></i> Horario
+                                        </span>
+                                    {% elif item.tipo_objeto == 'GuiaClase' or item.tipo_objeto == 'Documento' %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning text-dark border border-warning border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                            <i class="bi bi-file-earmark-text me-1"></i> Guía/Doc
+                                        </span>
+                                    {% elif item.tipo_objeto == 'Comunicado' %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
+                                            <i class="bi bi-megaphone me-1"></i> Circular
+                                        </span>
+                                    {% elif item.tipo_objeto == 'Mensaje' %}
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2 py-1 fw-bold">
+                                            <i class="bi bi-chat-dots me-1"></i> Mensaje
+                                        </span>
+                                    {% elif item.tipo_objeto == 'Calificacion' %}
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
+                                            <i class="bi bi-mortarboard me-1"></i> Calificación
+                                        </span>
+                                    {% elif item.tipo_objeto == 'CargaAcademica' %}
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                            <i class="bi bi-book me-1"></i> Asignación
+                                        </span>
+                                    {% elif item.tipo_objeto == 'Ficha' %}
+                                        <span class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                            <i class="bi bi-folder me-1"></i> Ficha
+                                        </span>
+                                    {% elif item.tipo_objeto == 'Transporte' %}
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-1 fw-bold">
+                                            <i class="bi bi-bus-front me-1"></i> Transporte
+                                        </span>
+                                    {% elif item.tipo_objeto == 'Bitacora' %}
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
+                                            <i class="bi bi-journal-check me-1"></i> Bitácora
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1">
+                                            {{ item.tipo_objeto }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong class="text-dark d-block fs-6">{{ item.titulo }}</strong>
+                                    {% if item.subtitulo %}
+                                    <span class="text-muted small d-block" style="font-size: 0.74rem;">{{ item.subtitulo }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1 fw-semibold">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i>{{ item.modulo_origen|default:"Módulo General" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-dark fw-semibold">
+                                        <i class="bi bi-person-circle me-1 text-muted"></i>
+                                        {% if item.eliminado_por %}
+                                            {{ item.eliminado_por.get_full_name|default:item.eliminado_por.username }}
+                                        {% else %}
+                                            Sistema
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-dark d-block">{{ item.fecha_eliminacion|date:"d/m/Y" }}</span>
+                                    <span class="text-muted" style="font-size: 0.72rem;">{{ item.fecha_eliminacion|time:"h:i A" }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted fst-italic" style="font-size: 0.8rem;" title="{{ item.motivo }}">{{ item.motivo|truncatechars:45 }}</span>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <div class="d-inline-flex gap-2">
+                                        <!-- Botón Recuperar Individual -->
+                                        <button type="submit" form="formRestaurar_{{ item.id }}" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-2xs" title="Restaurar elemento a su ubicación original">
+                                            <i class="bi bi-recycle me-1"></i> Restaurar
+                                        </button>
+
+                                        <!-- Botón Eliminar Definitivo Individual -->
+                                        {% if es_admin or es_directivo or item.eliminado_por_id == request.user.id %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Eliminar permanentemente de la base de datos" onclick="abrirModalEliminarIndividual('{{ item.id }}', '{{ item.titulo|escapejs }}', '{{ item.tipo_objeto|escapejs }}');">
+                                            <i class="bi bi-trash3-fill"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-trash3 text-secondary fs-1 d-block mb-2 opacity-50"></i>
+                    <h5 class="fw-bold text-dark mb-1">La Papelera de Reciclaje está vacía</h5>
+                    <p class="small text-muted mb-0">No se encontraron elementos dados de baja {% if tipo_sel != 'Todos' %}en la categoría {{ tipo_sel }}{% endif %}.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+    <!-- Formularios Ocultos para Restauración Directa -->
+    {% for item in items %}
+    <form id="formRestaurar_{{ item.id }}" method="post" action="{% url 'restaurar_elemento_papelera' item.pk %}" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    </form>
+    {% endfor %}
+
+</div>
+
+<!-- MODAL: CONFIRMAR ELIMINACIÓN DEFINITIVA INDIVIDUAL -->
+<div class="modal fade" id="modalEliminarDefinitivo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill"></i> ¿Eliminar definitivamente?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="mb-2">Estás a punto de borrar permanentemente de la base de datos el siguiente elemento:</p>
+                <div class="p-3 bg-light rounded-3 border mb-3">
+                    <strong class="d-block text-dark" id="modalItemTitulo"></strong>
+                    <small class="text-muted" id="modalItemTipo"></small>
+                </div>
+                <div class="alert alert-danger mb-0 small">
+                    <i class="bi bi-shield-slash-fill me-1"></i> <strong>Esta acción es irreversible:</strong> Toda su información y archivos asociados serán removidos permanentemente.
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formModalEliminarDefinitivo" method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="bi bi-trash3-fill me-1"></i> Sí, Eliminar Definitivamente
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- MODAL: CONFIRMAR VACIADO COMPLETO DE PAPELERA -->
+<div class="modal fade" id="modalVaciarPapelera" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2">
+                    <i class="bi bi-radioactive"></i> ¿Vaciar completamente la papelera?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="mb-2">Esta acción borrará de forma permanente todos los elementos resguardados en tu papelera de reciclaje.</p>
+                <div class="alert alert-danger mb-0 small">
+                    <i class="bi bi-exclamation-octagon-fill me-1"></i> No será posible recuperar ninguno de los elementos después de vaciar la papelera.
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" action="{% url 'vaciar_papelera' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="bi bi-trash3-fill me-1"></i> Sí, Vaciar Papelera
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Gestión de Casillas de Selección Múltiple
+    const checkAll = document.getElementById('checkAll');
+    const itemChecks = document.querySelectorAll('.item-check');
+    const toolbarSeleccion = document.getElementById('toolbarSeleccion');
+    const badgeSeleccionados = document.getElementById('badgeSeleccionados');
+
+    if (checkAll) {
+        checkAll.addEventListener('change', function() {
+            itemChecks.forEach(cb => cb.checked = this.checked);
+            actualizarBarraSeleccion();
+        });
+    }
+
+    function actualizarBarraSeleccion() {
+        const checkedCount = document.querySelectorAll('.item-check:checked').length;
+        if (checkedCount > 0) {
+            toolbarSeleccion.classList.remove('d-none');
+            badgeSeleccionados.textContent = checkedCount + ' seleccionado' + (checkedCount > 1 ? 's' : '');
+        } else {
+            toolbarSeleccion.classList.add('d-none');
+            if (checkAll) checkAll.checked = false;
+        }
+    }
+
+    function deseleccionarTodos() {
+        if (checkAll) checkAll.checked = false;
+        itemChecks.forEach(cb => cb.checked = false);
+        actualizarBarraSeleccion();
+    }
+
+    function confirmarEliminarMultiples() {
+        const checkedCount = document.querySelectorAll('.item-check:checked').length;
+        if (checkedCount === 0) return;
+        if (confirm('¡ADVERTENCIA! ¿Está seguro de eliminar definitivamente los ' + checkedCount + ' elementos seleccionados? Esta acción no se puede deshacer.')) {
+            const form = document.getElementById('formPapeleraMultiples');
+            const hiddenAccion = document.createElement('input');
+            hiddenAccion.type = 'hidden';
+            hiddenAccion.name = 'accion';
+            hiddenAccion.value = 'eliminar_definitivo';
+            form.appendChild(hiddenAccion);
+            form.submit();
+        }
+    }
+
+    function abrirModalEliminarIndividual(itemId, itemTitulo, itemTipo) {
+        document.getElementById('modalItemTitulo').textContent = itemTitulo;
+        document.getElementById('modalItemTipo').textContent = 'Tipo: ' + itemTipo;
+        const form = document.getElementById('formModalEliminarDefinitivo');
+        form.action = '/papelera/' + itemId + '/eliminar-definitivo/';
+        const modal = new bootstrap.Modal(document.getElementById('modalEliminarDefinitivo'));
+        modal.show();
+    }
+</script>
 {% endblock %}

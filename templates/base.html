@@ -47,40 +47,84 @@
             transition: transform 0.08s ease;
         }
 
-        /* SISTEMA INSTITUCIONAL EDUNOVA - PALETA CAFÉ CLARO Y BEIGE UNIFICADA */
-        body,
-        body.role-docente,
-        body.bg-edunova-shell {
-            background-color: var(--color-fondo) !important;
-            background: var(--color-fondo) !important;
-            color: var(--color-texto) !important;
+        /* =========================================================================
+           EDUNOVA · SISTEMA DE DISEÑO INSTITUCIONAL OFICIAL
+           PALETA: VERDE PETRÓLEO, TURQUESA, AGUAMARINA, BLANCO Y AZUL MARINO
+           ========================================================================= */
+        :root {
+            /* 1. Colores Oficiales Exactos */
+            --color-petroleo-oscuro: #006B68;
+            --color-verde-institucional: #007F7B;
+            --color-turquesa-principal: #12B8B0;
+            --color-turquesa-brillante: #22C8C0;
+            --color-aguamarina-suave: #DDF7F5;
+            --color-blanco: #FFFFFF;
+            --color-fondo-gris-azulado: #F5F8FC;
+            --color-azul-marino-textos: #14264F;
+            --color-gris-textos: #64748B;
+
+            /* 2. Variables de Integración Global EduNova */
+            --color-principal: #007F7B;
+            --color-secundario: #006B68;
+            --color-turquesa: #12B8B0;
+            --color-turquesa-brillante: #22C8C0;
+            --color-acento: #DDF7F5;
+            --color-fondo: #F5F8FC;
+            --color-titulo: #14264F;
+            --color-texto: #14264F;
+            --color-boton: #007F7B;
+            --color-texto-boton: #FFFFFF;
+            --color-enlace: #12B8B0;
+            --color-tarjeta: #FFFFFF;
+            --color-navbar: #006B68;
+            --color-texto-nav: #FFFFFF;
+
+            /* Aliases para compatibilidad */
+            --color-primary: #007F7B;
+            --color-secondary: #006B68;
+            --color-background: #F5F8FC;
+            --color-surface: #FFFFFF;
+            --color-text: #14264F;
+            --color-button: #007F7B;
+            --color-button-hover: #006B68;
+            --color-border: #E2E8F0;
+            --color-sidebar: #006B68;
+            --color-header: #FFFFFF;
+
+            --sinetec-bg: #F5F8FC;
+            --sinetec-card-bg: #FFFFFF;
+            --sinetec-border: #E2E8F0;
+            --sinetec-text-main: #14264F;
+            --sinetec-text-body: #14264F;
+            --sinetec-text-muted: #64748B;
+            --sinetec-petroleum: #007F7B;
+            --sinetec-petroleum-hover: #006B68;
+            --sinetec-petroleum-dark: #004D4A;
+            --sinetec-petroleum-gradient: linear-gradient(135deg, #006B68 0%, #007F7B 50%, #12B8B0 100%);
+            --sinetec-sidebar-gradient: linear-gradient(180deg, #006B68 0%, #004D4A 100%);
         }
 
-        .sinetec-shell,
-        body.role-docente .sinetec-shell {
-            background-color: var(--color-fondo) !important;
-            background: var(--color-fondo) !important;
+        /* FONDOS Y CONTENEDORES GLOBALES */
+        body, body.role-docente, body.bg-edunova-shell,
+        .sinetec-shell, body.role-docente .sinetec-shell,
+        .sinetec-main, body.role-docente .sinetec-main, body.role-docente .docente-shell {
+            background-color: #F5F8FC !important;
+            background: #F5F8FC !important;
+            color: #14264F !important;
         }
 
-        .sinetec-main,
-        body.role-docente .sinetec-main,
-        body.role-docente .docente-shell {
-            background: var(--color-fondo) !important;
-            background-color: var(--color-fondo) !important;
-        }
-
-        /* SIDEBAR UNIFICADO: BLANCO CÁLIDO, CAFÉ CLARO ELEGANTE, SCROLL FLUIDO */
+        /* BARRA LATERAL IZQUIERDA (SIDEBAR) INSTITUCIONAL CON DEGRADADO */
         .sinetec-sidebar,
         body.role-docente .sinetec-sidebar,
         .sinetec-sidebar.is-docente-sidebar {
-            background: #ffffff !important;
-            background-color: #ffffff !important;
-            color: var(--color-titulo) !important;
-            border-right: 1px solid #E5DFD5 !important;
-            box-shadow: 2px 0 10px rgba(90, 56, 37, 0.03) !important;
-            width: 255px !important;
-            min-width: 255px !important;
-            max-width: 255px !important;
+            background: linear-gradient(180deg, #006B68 0%, #004D4A 100%) !important;
+            background-color: #006B68 !important;
+            color: #FFFFFF !important;
+            border-right: 1px solid rgba(18, 184, 176, 0.25) !important;
+            box-shadow: 4px 0 24px rgba(0, 77, 74, 0.18) !important;
+            width: 260px !important;
+            min-width: 260px !important;
+            max-width: 260px !important;
             height: 100vh !important;
             max-height: 100vh !important;
             position: fixed !important;
@@ -94,7 +138,7 @@
             display: flex !important;
             flex-direction: column !important;
             scrollbar-width: thin !important;
-            scrollbar-color: #B8977E var(--color-fondo) !important;
+            scrollbar-color: #12B8B0 rgba(0, 77, 74, 0.4) !important;
         }
 
         @media (max-width: 991.98px) {
@@ -119,7 +163,7 @@
         .sinetec-sidebar::-webkit-scrollbar-thumb,
         body.role-docente .sinetec-sidebar::-webkit-scrollbar-thumb,
         .sinetec-sidebar.is-docente-sidebar::-webkit-scrollbar-thumb {
-            background: #B8977E !important;
+            background: #12B8B0 !important;
             border-radius: 10px !important;
         }
 
@@ -130,7 +174,7 @@
             overflow: visible !important;
             overflow-y: visible !important;
             flex: 1 0 auto !important;
-            padding: 10px 12px 30px 12px !important;
+            padding: 12px 12px 30px 12px !important;
             background: transparent !important;
         }
 
@@ -138,9 +182,9 @@
         .sinetec-brand,
         body.role-docente .sinetec-brand,
         .sinetec-sidebar.is-docente-sidebar .sinetec-brand {
-            background: transparent !important;
-            border-bottom: 1px solid #E5DFD5 !important;
-            padding: 16px 18px !important;
+            background: rgba(0, 0, 0, 0.14) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+            padding: 18px 18px !important;
             display: flex !important;
             align-items: center !important;
             gap: 12px !important;
@@ -151,94 +195,127 @@
         .sinetec-brand-icon,
         body.role-docente .sinetec-brand-icon,
         .sinetec-sidebar.is-docente-sidebar .sinetec-brand-icon {
-            background: #ffffff !important;
-            border: 1.5px solid #E5DFD5 !important;
-            color: var(--color-principal) !important;
+            background: #FFFFFF !important;
+            border: 1px solid rgba(255, 255, 255, 0.4) !important;
+            color: #006B68 !important;
             width: 44px !important;
             height: 44px !important;
-            border-radius: 12px !important;
+            border-radius: 14px !important;
             display: grid !important;
             place-items: center !important;
-            box-shadow: 0 2px 8px rgba(90, 56, 37, 0.08) !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
             flex-shrink: 0 !important;
-            padding: 3px !important;
+            padding: 4px !important;
         }
 
         .sinetec-brand-title,
         body.role-docente .sinetec-brand-title,
         .sinetec-sidebar.is-docente-sidebar .sinetec-brand-title {
-            color: var(--color-titulo) !important;
+            color: #FFFFFF !important;
             font-weight: 800 !important;
-            font-size: 1.15rem !important;
+            font-size: 1.2rem !important;
             display: flex !important;
             align-items: center !important;
             gap: 6px !important;
+            letter-spacing: -0.02em !important;
         }
 
         .sinetec-brand-title .badge,
         body.role-docente .sinetec-brand-title .badge,
         .sinetec-sidebar.is-docente-sidebar .sinetec-brand-title .badge {
-            background: var(--color-principal) !important;
-            color: #ffffff !important;
+            background: #22C8C0 !important;
+            color: #14264F !important;
             border: none !important;
-            border-radius: 8px !important;
-            font-size: 0.6rem !important;
-            padding: 2px 6px !important;
-            font-weight: 700 !important;
+            border-radius: 6px !important;
+            font-size: 0.62rem !important;
+            padding: 2px 7px !important;
+            font-weight: 800 !important;
         }
 
         .sinetec-brand-subtitle,
         body.role-docente .sinetec-brand-subtitle,
         .sinetec-sidebar.is-docente-sidebar .sinetec-brand-subtitle {
-            color: #75675E !important;
+            color: #DDF7F5 !important;
             font-size: 0.72rem !important;
             font-weight: 500 !important;
+            opacity: 0.9 !important;
         }
 
         /* LABELS Y LINKS PARA TODOS LOS ROLES */
         .sinetec-nav .sinetec-nav-label {
-            color: var(--color-secundario) !important;
+            color: #A3E7E4 !important;
             font-weight: 700 !important;
-            font-size: 0.7rem !important;
+            font-size: 0.68rem !important;
             text-transform: uppercase !important;
             letter-spacing: 0.08em !important;
-            padding: 10px 14px 4px !important;
+            padding: 14px 14px 4px !important;
+            opacity: 0.92 !important;
         }
 
         .sinetec-nav .nav-link {
             display: flex !important;
             align-items: center !important;
-            padding: 8px 14px !important;
-            color: var(--color-texto) !important;
+            padding: 9px 14px !important;
+            color: #E6F7F6 !important;
             font-weight: 500 !important;
             font-size: 0.88rem !important;
             text-decoration: none !important;
-            border-radius: 12px !important;
-            transition: all 0.15s ease !important;
-            margin: 2px 0 !important;
-            gap: 10px !important;
+            border-radius: 14px !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            margin: 3px 0 !important;
+            gap: 11px !important;
+            border: 1px solid transparent !important;
         }
 
         .sinetec-nav .nav-link i {
-            color: var(--color-principal) !important;
-            font-size: 1.12rem !important;
-            min-width: 22px !important;
+            color: #FFFFFF !important;
+            font-size: 1.15rem !important;
+            min-width: 24px !important;
             text-align: center !important;
+            opacity: 0.92 !important;
+            transition: transform 0.2s ease, opacity 0.2s ease !important;
         }
 
         .sinetec-nav .nav-link:hover {
-            background-color: #F5F2EB !important;
-            color: var(--color-secundario) !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+            color: #FFFFFF !important;
+            transform: translateX(3px) !important;
+        }
+
+        .sinetec-nav .nav-link:hover i {
+            opacity: 1 !important;
+            transform: scale(1.08) !important;
         }
 
         .sinetec-nav .nav-link.active {
-            background-color: var(--color-acento) !important;
-            color: var(--color-secundario) !important;
+            background: linear-gradient(90deg, #12B8B0 0%, #22C8C0 100%) !important;
+            color: #FFFFFF !important;
             font-weight: 700 !important;
+            border: none !important;
+            box-shadow: 0 4px 14px rgba(18, 184, 176, 0.4) !important;
         }
 
         .sinetec-nav .nav-link.active i {
-            color: var(--color-principal) !important;
+            color: #FFFFFF !important;
+            opacity: 1 !important;
+        }
+
+        /* PIE DEL SIDEBAR (ESLOGAN INSTITUCIONAL) */
+        .sinetec-sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+            padding: 14px 16px !important;
+            background: rgba(0, 0, 0, 0.18) !important;
+            font-size: 0.74rem !important;
+            color: #DDF7F5 !important;
+            border-radius: 14px !important;
+            margin: 12px !important;
+        }
+        .sinetec-sidebar-footer strong {
+            color: #FFFFFF !important;
+            display: block !important;
+            font-size: 0.82rem !important;
+            margin-bottom: 3px !important;
+            font-weight: 700 !important;
         }
 
         /* OCULTAR ELEMENTOS QUE NO VAN EN EL SIDEBAR DOCENTE */
@@ -251,238 +328,291 @@
             display: none !important;
         }
 
-        /* ITEMS DEL MENÚ LATERAL DOCENTE - CAFÉ INSTITUCIONAL */
+        /* ITEMS DEL MENÚ LATERAL DOCENTE */
         .teacher-nav-item,
         .teacher-pink-item {
             display: flex !important;
             align-items: center !important;
             padding: 9px 14px !important;
-            color: var(--color-texto) !important;
+            color: #E6F7F6 !important;
             font-weight: 500 !important;
             font-size: 0.88rem !important;
             text-decoration: none !important;
-            border-radius: 12px !important;
-            transition: all 0.15s ease !important;
-            margin: 2px 0 !important;
-            border: none !important;
+            border-radius: 14px !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            margin: 3px 0 !important;
+            gap: 11px !important;
+            border: 1px solid transparent !important;
         }
 
         .teacher-nav-item i,
         .teacher-nav-item .teacher-icon-nav,
         .teacher-pink-item i,
         .teacher-pink-item .teacher-icon-pink {
-            color: var(--color-principal) !important;
+            color: #FFFFFF !important;
             font-size: 1.15rem !important;
             min-width: 24px !important;
             text-align: center !important;
-            transition: none !important;
+            opacity: 0.92 !important;
+            transition: transform 0.2s ease, opacity 0.2s ease !important;
         }
 
         .teacher-nav-item:hover,
         .teacher-pink-item:hover {
-            background-color: #F5F2EB !important;
-            color: var(--color-secundario) !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+            color: #FFFFFF !important;
+            transform: translateX(3px) !important;
+        }
+
+        .teacher-nav-item:hover i,
+        .teacher-pink-item:hover i {
+            opacity: 1 !important;
+            transform: scale(1.08) !important;
         }
 
         .teacher-nav-item.is-active,
         .teacher-pink-item.is-active {
-            background-color: var(--color-acento) !important;
-            color: var(--color-secundario) !important;
+            background: linear-gradient(90deg, #12B8B0 0%, #22C8C0 100%) !important;
+            color: #FFFFFF !important;
             font-weight: 700 !important;
             border: none !important;
-            box-shadow: none !important;
+            box-shadow: 0 4px 14px rgba(18, 184, 176, 0.4) !important;
         }
 
         .teacher-nav-item.is-active i,
         .teacher-nav-item.is-active .teacher-icon-nav,
         .teacher-pink-item.is-active i,
         .teacher-pink-item.is-active .teacher-icon-pink {
-            color: var(--color-principal) !important;
-        }
-    </style>
-    {% block extra_head %}{% endblock %}
-    {% block extra_css %}{% endblock %}
-    {% if tema_colores %}
-    <style id="tema-dinamico">
-        :root {
-            /* Variables Centralizadas EDUNOVA */
-            --color-principal: {{ tema_colores.color_primario }};
-            --color-secundario: {{ tema_colores.color_secundario }};
-            --color-acento: {{ tema_colores.color_acento }};
-            --color-fondo: {{ tema_colores.color_fondo }};
-            --color-titulo: {{ tema_colores.color_titulos }};
-            --color-texto: {{ tema_colores.color_texto }};
-            --color-boton: {{ tema_colores.color_botones }};
-            --color-texto-boton: {{ tema_colores.color_texto_botones }};
-            --color-enlace: {{ tema_colores.color_enlaces }};
-            --color-tarjeta: {{ tema_colores.color_tarjetas }};
-            --color-navbar: {{ tema_colores.color_navbar }};
-            --color-texto-nav: {{ tema_colores.color_texto_nav }};
-
-            /* Variables CSS Centralizadas Solicitadas */
-            --color-primary: {{ tema_colores.color_primary|default:tema_colores.color_primario }};
-            --color-secondary: {{ tema_colores.color_secondary|default:tema_colores.color_secundario }};
-            --color-background: {{ tema_colores.color_background|default:tema_colores.color_fondo }};
-            --color-surface: {{ tema_colores.color_surface|default:tema_colores.color_tarjetas }};
-            --color-text: {{ tema_colores.color_text|default:tema_colores.color_texto }};
-            --color-button: {{ tema_colores.color_button|default:tema_colores.color_botones }};
-            --color-button-hover: {{ tema_colores.color_button_hover|default:tema_colores.color_secundario }};
-            --color-border: {{ tema_colores.color_border|default:tema_colores.color_acento }};
-            --color-sidebar: {{ tema_colores.color_sidebar|default:tema_colores.color_navbar }};
-            --color-header: {{ tema_colores.color_header|default:tema_colores.color_navbar }};
-
-            /* Colores Base y Sistema (Backgrounds y Textos) */
-            --sinetec-bg: var(--color-fondo);
-            --sinetec-text-main: var(--color-titulo);
-            --sinetec-text-body: var(--color-texto);
-            
-            /* Colores Principales / Primarios */
-            --sinetec-petroleum: {{ tema_colores.color_primario }};
-            --sinetec-petroleum-hover: {{ tema_colores.color_secundario }};
-            --sinetec-petroleum-dark: {{ tema_colores.color_secundario }};
-            --sinetec-petroleum-gradient: linear-gradient(135deg, {{ tema_colores.color_secundario }} 0%, {{ tema_colores.color_primario }} 55%, {{ tema_colores.color_primario }} 100%);
-            --sinetec-blue: {{ tema_colores.color_enlaces }};
-            --sinetec-blue-hover: {{ tema_colores.color_secundario }};
-            --sinetec-blue-light: {{ tema_colores.color_fondo }};
-            --sinetec-blue-soft: {{ tema_colores.color_acento }};
-            
-            /* Colores Secundarios y Acentos */
-            --sinetec-lavender: {{ tema_colores.color_fondo }};
-            --sinetec-lavender-border: {{ tema_colores.color_acento }};
-            --sinetec-lavender-text: {{ tema_colores.color_primario }};
-            --sinetec-lavender-soft: {{ tema_colores.color_fondo }};
-            --sinetec-rose: {{ tema_colores.color_primario }};
-            --sinetec-rose-hover: {{ tema_colores.color_secundario }};
-            --sinetec-rose-soft: {{ tema_colores.color_acento }};
-            
-            /* Tarjetas y Contenedores */
-            --sinetec-card-bg: {{ tema_colores.color_tarjetas }};
-        }
-        
-        /* Aplicación Global de Fondos y Textos */
-        body, body.role-docente, body.bg-edunova-shell,
-        .sinetec-shell, body.role-docente .sinetec-shell,
-        .sinetec-main, body.role-docente .sinetec-main, body.role-docente .docente-shell {
-            background-color: {{ tema_colores.color_fondo }} !important;
-            background: {{ tema_colores.color_fondo }} !important;
-            color: {{ tema_colores.color_texto }} !important;
+            color: #FFFFFF !important;
+            opacity: 1 !important;
         }
 
-        /* Títulos */
-        h1, h2, h3, h4, h5, h6, .font-heading {
-            color: {{ tema_colores.color_titulos }} !important;
+        /* BARRA SUPERIOR (HEADER / TOPBAR) */
+        .sinetec-topbar {
+            background: rgba(255, 255, 255, 0.96) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border-bottom: 1px solid #E2E8F0 !important;
+            box-shadow: 0 1px 4px rgba(20, 38, 79, 0.04) !important;
+            height: 70px !important;
+            padding: 0 24px !important;
         }
 
-        /* Enlaces */
-        a:not(.btn):not(.nav-link):not(.dropdown-item):not(.text-muted):not(.text-white):not(.badge):not(.page-link),
-        .text-primary {
-            color: {{ tema_colores.color_enlaces }} !important;
+        .sinetec-search {
+            background: #F5F8FC !important;
+            border: 1.5px solid #E2E8F0 !important;
+            border-radius: 9999px !important;
+            padding: 4px 16px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            transition: all 0.2s ease !important;
+        }
+        .sinetec-search:focus-within {
+            background: #FFFFFF !important;
+            border-color: #12B8B0 !important;
+            box-shadow: 0 0 0 3px rgba(18, 184, 176, 0.15) !important;
+        }
+        .sinetec-search i {
+            color: #007F7B !important;
+            font-size: 0.95rem !important;
+        }
+        .sinetec-search input {
+            border: none !important;
+            outline: none !important;
+            background: transparent !important;
+            color: #14264F !important;
+            font-size: 0.88rem !important;
+            font-weight: 500 !important;
+        }
+        .sinetec-search input::placeholder {
+            color: #94A3B8 !important;
         }
 
-        /* Botones Principales y Acciones Principales */
+        .edunova-topbar-fecha-capsule {
+            background: #DDF7F5 !important;
+            border: 1px solid #BCEFEA !important;
+            color: #006B68 !important;
+            border-radius: 9999px !important;
+        }
+        .edunova-topbar-fecha-capsule i {
+            color: #007F7B !important;
+        }
+        .edunova-topbar-fecha-capsule span {
+            color: #14264F !important;
+        }
+
+        .sinetec-icon-btn {
+            background: #F5F8FC !important;
+            border: 1px solid #E2E8F0 !important;
+            color: #007F7B !important;
+            border-radius: 50% !important;
+            width: 40px !important;
+            height: 40px !important;
+            display: grid !important;
+            place-items: center !important;
+            transition: all 0.2s ease !important;
+        }
+        .sinetec-icon-btn:hover {
+            background: #DDF7F5 !important;
+            color: #006B68 !important;
+            border-color: #BCEFEA !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .badge-campana {
+            background: #22C8C0 !important;
+            color: #14264F !important;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 8px rgba(34, 200, 192, 0.5) !important;
+        }
+
+        /* TARJETAS DE INFORMACIÓN (18-22px BORDES REDONDEADOS) */
+        .card,
+        .sinetec-card,
+        .sinetec-card-modern {
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 20px !important;
+            box-shadow: 0 4px 20px -2px rgba(20, 38, 79, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+            transition: all 0.25s ease !important;
+        }
+        .card:hover,
+        .sinetec-card:hover,
+        .sinetec-card-modern:hover {
+            box-shadow: 0 10px 25px -4px rgba(0, 107, 104, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.02) !important;
+        }
+
+        /* ICONOS DENTRO DE CÍRCULOS CON FONDOS AGUAMARINA */
+        .icon-circle-teal,
+        .metric-card-icon,
+        .card .rounded-3.p-2,
+        .card .rounded-circle.p-2 {
+            background-color: #DDF7F5 !important;
+            color: #007F7B !important;
+        }
+        .icon-circle-teal i,
+        .metric-card-icon i {
+            color: #007F7B !important;
+        }
+
+        /* TÍTULOS EN AZUL MARINO (#14264F) Y SUBTÍTULOS EN GRIS (#64748B) */
+        h1, h2, h3, h4, h5, h6, .font-heading, .card-title, .h2, .h3, .h4, .h5 {
+            color: #14264F !important;
+        }
+        .text-muted, small.text-muted, p.text-muted {
+            color: #64748B !important;
+        }
+
+        /* ENCABEZADOS PRINCIPALES / BANNERS CON DEGRADADO INSTITUCIONAL */
+        .sinetec-dashboard-hero,
+        .banner-hero-docente,
+        .docente-hero-banner,
+        .estudiante-hero-banner {
+            background: linear-gradient(135deg, #006B68 0%, #007F7B 50%, #12B8B0 100%) !important;
+            border-radius: 20px !important;
+            box-shadow: 0 10px 30px -5px rgba(0, 107, 104, 0.3) !important;
+            color: #FFFFFF !important;
+            position: relative !important;
+            overflow: hidden !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        }
+        .sinetec-dashboard-hero h1, .sinetec-dashboard-hero h2, .sinetec-dashboard-hero p,
+        .banner-hero-docente h1, .banner-hero-docente h2, .banner-hero-docente p,
+        .docente-hero-banner h1, .docente-hero-banner h2, .docente-hero-banner p,
+        .estudiante-hero-banner h1, .estudiante-hero-banner h2, .estudiante-hero-banner p {
+            color: #FFFFFF !important;
+        }
+
+        /* BOTONES PRINCIPALES (VERDE PETRÓLEO / TURQUESA, REDONDEADOS) */
         .btn-primary,
         button.btn-primary,
         a.btn-primary,
         .btn-petroleum,
         .sinetec-btn-primary,
         .btn-sinetec-primary,
-        .btn-sinetec-rose,
         .btn-submit,
         button[type="submit"]:not(.btn-danger):not(.btn-success):not(.btn-warning):not(.btn-secondary):not(.btn-info):not(.btn-outline-danger):not(.btn-outline-success):not(.btn-outline-warning):not(.btn-outline-secondary):not(.btn-close) {
-            background-color: {{ tema_colores.color_botones }} !important;
-            background: {{ tema_colores.color_botones }} !important;
-            border-color: {{ tema_colores.color_botones }} !important;
-            color: {{ tema_colores.color_texto_botones }} !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+            background: linear-gradient(135deg, #007F7B 0%, #006B68 100%) !important;
+            background-color: #007F7B !important;
+            border-color: #006B68 !important;
+            color: #FFFFFF !important;
+            border-radius: 9999px !important;
+            font-weight: 600 !important;
+            padding: 8px 22px !important;
+            box-shadow: 0 4px 14px rgba(0, 127, 123, 0.25) !important;
+            transition: all 0.2s ease !important;
         }
-
         .btn-primary:hover,
-        .btn-primary:focus,
-        .btn-primary:active,
-        .btn-primary.active,
+        button.btn-primary:hover,
+        a.btn-primary:hover,
         .btn-petroleum:hover,
         .sinetec-btn-primary:hover,
         .btn-sinetec-primary:hover,
-        .btn-sinetec-rose:hover,
         .btn-submit:hover,
         button[type="submit"]:not(.btn-danger):not(.btn-success):not(.btn-warning):not(.btn-secondary):not(.btn-info):not(.btn-outline-danger):not(.btn-outline-success):not(.btn-outline-warning):not(.btn-outline-secondary):not(.btn-close):hover {
-            background-color: {{ tema_colores.color_secundario }} !important;
-            background: {{ tema_colores.color_secundario }} !important;
-            border-color: {{ tema_colores.color_secundario }} !important;
-            color: {{ tema_colores.color_texto_botones }} !important;
+            background: #006B68 !important;
+            border-color: #004D4A !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 6px 18px rgba(0, 107, 104, 0.35) !important;
+            transform: translateY(-1px) !important;
         }
 
-        /* Botones Outline Primarios */
-        .btn-outline-primary {
-            color: {{ tema_colores.color_primario }} !important;
-            border-color: {{ tema_colores.color_primario }} !important;
-            background-color: transparent !important;
+        /* BOTONES SECUNDARIOS (FONDO BLANCO Y BORDE TURQUESA) */
+        .btn-secondary,
+        .btn-outline-primary,
+        .btn-outline-secondary {
+            background: #FFFFFF !important;
+            border: 1.5px solid #12B8B0 !important;
+            color: #007F7B !important;
+            border-radius: 9999px !important;
+            font-weight: 600 !important;
+            padding: 8px 20px !important;
+            transition: all 0.2s ease !important;
         }
+        .btn-secondary:hover,
         .btn-outline-primary:hover,
-        .btn-outline-primary:focus,
-        .btn-outline-primary:active {
-            background-color: {{ tema_colores.color_primario }} !important;
-            border-color: {{ tema_colores.color_primario }} !important;
-            color: {{ tema_colores.color_texto_botones }} !important;
+        .btn-outline-secondary:hover {
+            background: #DDF7F5 !important;
+            color: #006B68 !important;
+            border-color: #12B8B0 !important;
+            transform: translateY(-1px) !important;
         }
 
-        /* Protección Estricta de Botones Semánticos (No homogeneizar indiscriminadamente) */
-        .btn-success, a.btn-success, button.btn-success {
-            background-color: #16a34a !important;
-            background: #16a34a !important;
-            border-color: #15803d !important;
-            color: #ffffff !important;
+        /* TABLAS Y LISTADOS (CABECERAS AGUAMARINA, FILAS BLANCAS) */
+        .table thead th {
+            background-color: #DDF7F5 !important;
+            color: #14264F !important;
+            font-weight: 700 !important;
+            font-size: 0.78rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.04em !important;
+            border-bottom: 2px solid #12B8B0 !important;
+            padding: 13px 16px !important;
         }
-        .btn-danger, a.btn-danger, button.btn-danger {
-            background-color: #dc2626 !important;
-            background: #dc2626 !important;
-            border-color: #b91c1c !important;
-            color: #ffffff !important;
+        .table tbody tr {
+            background-color: #FFFFFF !important;
+            border-bottom: 1px solid #E2E8F0 !important;
+            transition: background-color 0.15s ease !important;
         }
-        .btn-warning, a.btn-warning, button.btn-warning {
-            background-color: #d97706 !important;
-            background: #d97706 !important;
-            border-color: #b45309 !important;
-            color: #ffffff !important;
+        .table tbody tr:hover {
+            background-color: #F8FDFA !important;
         }
-        .btn-info, a.btn-info, button.btn-info {
-            background-color: #0284c7 !important;
-            background: #0284c7 !important;
-            border-color: #0369a1 !important;
-            color: #ffffff !important;
-        }
-
-        /* Tarjetas (Cards) */
-        .card:not(.bg-transparent):not(.bg-success):not(.bg-danger):not(.bg-warning):not(.bg-info):not(.bg-primary):not(.text-bg-primary):not(.text-bg-dark) {
-            background-color: {{ tema_colores.color_tarjetas }} !important;
-            border-color: {{ tema_colores.color_acento }} !important;
+        .table tbody td {
+            color: #14264F !important;
+            padding: 13px 16px !important;
+            vertical-align: middle !important;
         }
 
-        /* Formularios en foco */
-        .form-control:focus, .form-select:focus {
-            border-color: {{ tema_colores.color_primario }} !important;
-            box-shadow: 0 0 0 0.25rem rgba(139, 94, 60, 0.18) !important;
-        }
-
-        /* Barra de Navegación Lateral y Topbar */
-        .sinetec-sidebar, .sinetec-topbar {
-            background-color: {{ tema_colores.color_navbar }} !important;
-            border-color: {{ tema_colores.color_acento }} !important;
-        }
-        .sinetec-nav .nav-link,
-        .sinetec-topbar,
-        .sinetec-topbar a:not(.btn),
-        .sinetec-sidebar,
-        .sinetec-sidebar a:not(.btn):not(.btn-role-quick) {
-            color: {{ tema_colores.color_texto_nav }} !important;
-        }
-        .sinetec-nav .nav-link:hover,
-        .sinetec-nav .nav-link.active {
-            background-color: {{ tema_colores.color_acento }} !important;
-            color: {{ tema_colores.color_primario }} !important;
+        /* BADGES */
+        .badge.bg-primary {
+            background-color: #DDF7F5 !important;
+            color: #006B68 !important;
+            border: 1px solid #BCEFEA !important;
         }
     </style>
-    {% endif %}
+    {% block extra_head %}{% endblock %}
+    {% block extra_css %}{% endblock %}
 </head>
 <body class="{% if 'Docente' in request.user.perfil.rol.nombre or 'Instructor' in request.user.perfil.rol.nombre or 'Profesor' in request.user.perfil.rol.nombre or '/instructor/' in request.path or '/perfil-profesional/' in request.path or '/mis-asignaturas/' in request.path or '/mis-estudiantes/' in request.path or '/actividades-y-tareas/' in request.path or '/asistencia/' in request.path %}role-docente bg-edunova-shell{% endif %}">
 
@@ -533,6 +663,9 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_asistencia' %}active{% endif %}" href="{% url 'familia_asistencia' %}">
                             <i class="bi bi-calendar-check-fill"></i> Asistencia del hijo
                         </a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'familia_horario' %}active{% endif %}" href="{% url 'familia_horario' %}">
+                            <i class="bi bi-calendar2-week-fill"></i> Horario de clases
+                        </a>
                         <div class="sinetec-nav-label">Comunicación & Documentos</div>
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_comunicaciones' %}active{% endif %}" href="{% url 'familia_comunicaciones' %}">
                             <i class="bi bi-chat-dots-fill"></i> Comunicaciones del estudiante
@@ -540,8 +673,8 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'familia_circulares' or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'familia_circulares' %}">
                             <i class="bi bi-megaphone-fill"></i> Circulares oficiales
                         </a>
-                        <a class="nav-link {% if request.resolver_match.url_name == 'familia_pdf_oficial' %}active{% endif %}" href="{% url 'familia_pdf_oficial' %}" target="_blank">
-                            <i class="bi bi-file-earmark-pdf-fill"></i> PDF oficiales
+                        <a class="nav-link {% if 'papelera' in request.resolver_match.url_name or request.path == '/papelera/' %}active{% endif %}" href="{% url 'papelera_reciclaje' %}" id="nav-fam-papelera">
+                            <i class="bi bi-trash3-fill"></i> Papelera de reciclaje
                         </a>
                     {% endif %}
 
@@ -577,8 +710,11 @@
                     <a class="nav-link {% if 'gestion_usuarios' in request.resolver_match.url_name or request.path == '/usuarios/' %}active{% endif %}" href="{% url 'gestion_usuarios' %}">
                         <i class="bi bi-person-gear"></i> Usuarios
                     </a>
-                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name or request.path == '/comunicaciones/' %}active{% endif %}" href="{% url 'mensajeria' %}">
-                        <i class="bi bi-megaphone-fill"></i> Comunicados
+                    <a class="nav-link {% if request.resolver_match.url_name == 'comunicaciones' %}active{% endif %}" href="{% url 'comunicaciones' %}">
+                        <i class="bi bi-chat-dots-fill"></i> Comunicaciones
+                    </a>
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
+                        <i class="bi bi-megaphone-fill"></i> Circulares oficiales
                     </a>
                     <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento_asistencia' or '/seguimiento/asistencia/' in request.path %}active{% endif %}" href="{% url 'seguimiento_asistencia' %}">
                         <i class="bi bi-calendar-check-fill"></i> Asistencia
@@ -628,9 +764,8 @@
                     <a class="nav-link {% if subpanel_activo == 'comunicaciones' %}active{% endif %}" id="student-nav-comunicaciones" data-subpanel="comunicaciones" href="{% url 'estudiante_dashboard' %}?subpanel=comunicaciones">
                         <i class="bi bi-chat-dots-fill"></i> Comunicaciones
                     </a>
-
-                    <a class="nav-link {% if subpanel_activo == 'documentos' %}active{% endif %}" id="student-nav-documentos" data-subpanel="documentos" href="{% url 'estudiante_dashboard' %}?subpanel=documentos">
-                        <i class="bi bi-file-earmark-text-fill"></i> Documentos
+                    <a class="nav-link {% if 'papelera' in request.resolver_match.url_name or request.path == '/papelera/' %}active{% endif %}" id="student-nav-papelera" href="{% url 'papelera_reciclaje' %}">
+                        <i class="bi bi-trash3-fill"></i> Papelera de reciclaje
                     </a>
 
 
@@ -713,7 +848,7 @@
 
 
                         <!-- 13. Papelera -->
-                        <a href="{% url 'papelera_docente' %}" class="teacher-nav-item {% if subpanel_activo == 'papelera' %}is-active{% endif %}" id="nav-item-papelera">
+                        <a href="{% url 'papelera_reciclaje' %}" class="teacher-nav-item {% if request.resolver_match.url_name == 'papelera_reciclaje' or subpanel_activo == 'papelera' %}is-active{% endif %}" id="nav-item-papelera">
                             <i class="bi bi-trash3-fill teacher-icon-nav"></i>
                             <span class="teacher-label-text">Papelera</span>
                         </a>
@@ -743,28 +878,34 @@
                     <a class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'instructores_lista' %}" id="nav-sec-docentes">
                         <i class="bi bi-person-badge-fill"></i> Directorio Docente
                     </a>
+                    <a class="nav-link {% if 'horario' in request.resolver_match.url_name or request.path == '/academico/horarios/' %}active{% endif %}" href="{% url 'horarios_tablero' %}" id="nav-sec-horarios">
+                        <i class="bi bi-calendar2-week-fill"></i> Horarios Escolares
+                    </a>
                     <div class="sinetec-nav-label">Administración</div>
-                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}" id="nav-sec-comunicados">
-                        <i class="bi bi-chat-dots-fill"></i> Mensajería y Comunicados
+                    <a class="nav-link {% if request.resolver_match.url_name == 'comunicaciones' %}active{% endif %}" href="{% url 'comunicaciones' %}" id="nav-sec-comunicaciones">
+                        <i class="bi bi-chat-dots-fill"></i> Comunicaciones
+                    </a>
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}" id="nav-sec-circulares">
+                        <i class="bi bi-megaphone-fill"></i> Circulares oficiales
                     </a>
                     <a class="nav-link {% if 'reporte' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'centro_reportes' %}" id="nav-sec-reportes">
                         <i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes
                     </a>
+                    <a class="nav-link {% if 'papelera' in request.resolver_match.url_name or request.path == '/papelera/' %}active{% endif %}" href="{% url 'papelera_reciclaje' %}" id="nav-sec-papelera">
+                        <i class="bi bi-trash3-fill"></i> Papelera de reciclaje
+                    </a>
 
                 {% elif 'Rector' in rol %}
-                    <!-- 6. RECTORÍA OFICIAL EDUNOVA (8 MÓDULOS RECTORALES) -->
+                    <!-- 6. RECTORÍA OFICIAL EDUNOVA (MÓDULOS RECTORALES) -->
                     <div class="sinetec-nav-label">Rectoría</div>
                     <a class="nav-link {% if request.resolver_match.url_name == 'rectoria_dashboard' %}active{% endif %}" href="{% url 'rectoria_dashboard' %}" id="nav-rec-inicio">
                         <i class="bi bi-house-door-fill"></i> Inicio
                     </a>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'gestion_usuarios' %}active{% endif %}" href="{% url 'gestion_usuarios' %}" id="nav-rec-usuarios">
-                        <i class="bi bi-people-fill"></i> Usuarios
-                    </a>
                     <a class="nav-link {% if request.resolver_match.url_name == 'gestion_academica' or request.resolver_match.url_name == 'programas_lista' or request.resolver_match.url_name == 'cursos_lista' or request.resolver_match.url_name == 'mockup_grados' %}active{% endif %}" href="{% url 'gestion_academica' %}" id="nav-rec-gestion-academica">
                         <i class="bi bi-mortarboard-fill"></i> Gestión académica
                     </a>
-                    <a class="nav-link {% if 'horario' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'horarios_tablero' %}" id="nav-rec-horarios">
-                        <i class="bi bi-calendar3-week-fill"></i> Horarios
+                    <a class="nav-link {% if request.resolver_match.url_name == 'rectoria_consulta_horarios' %}active{% endif %}" href="{% url 'rectoria_consulta_horarios' %}" id="nav-rec-horarios">
+                        <i class="bi bi-calendar3-week-fill"></i> Consulta de Horarios
                     </a>
                     <a class="nav-link {% if 'matricula' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}" id="nav-rec-matriculas">
                         <i class="bi bi-person-check-fill"></i> Matrículas y seguimiento
@@ -778,6 +919,9 @@
                     </a>
                     <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}" id="nav-rec-circulares">
                         <i class="bi bi-megaphone-fill"></i> Circulares oficiales
+                    </a>
+                    <a class="nav-link {% if 'papelera' in request.resolver_match.url_name or request.path == '/papelera/' %}active{% endif %}" href="{% url 'papelera_reciclaje' %}" id="nav-rec-papelera">
+                        <i class="bi bi-trash3-fill"></i> Papelera de reciclaje
                     </a>
 
                 {% else %}
@@ -809,8 +953,11 @@
                     <a class="nav-link {% if 'gestion_usuarios' in request.resolver_match.url_name or request.path == '/usuarios/' %}active{% endif %}" href="{% url 'gestion_usuarios' %}">
                         <i class="bi bi-person-gear"></i> Usuarios
                     </a>
-                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name or request.path == '/comunicaciones/' %}active{% endif %}" href="{% url 'mensajeria' %}">
-                        <i class="bi bi-megaphone-fill"></i> Comunicados
+                    <a class="nav-link {% if request.resolver_match.url_name == 'comunicaciones' %}active{% endif %}" href="{% url 'comunicaciones' %}">
+                        <i class="bi bi-chat-dots-fill"></i> Comunicaciones
+                    </a>
+                    <a class="nav-link {% if 'mensajeria' in request.resolver_match.url_name or 'circular' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'mensajeria' %}">
+                        <i class="bi bi-megaphone-fill"></i> Circulares oficiales
                     </a>
                     <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento_asistencia' or '/seguimiento/asistencia/' in request.path %}active{% endif %}" href="{% url 'seguimiento_asistencia' %}">
                         <i class="bi bi-calendar-check-fill"></i> Asistencia
@@ -830,8 +977,8 @@
                     </a>
                 {% endif %}
 
-                <!-- AJUSTES (Sin botón de cerrar sesión en la izquierda) -->
-                {% if not 'Estudiante' in rol and not 'Aprendiz' in rol and not 'Alumno' in rol and not 'Familia' in rol and not 'Acudiente' in rol %}
+                <!-- AJUSTES (Sin botón de cerrar sesión en la izquierda - Exclusivo Administrador) -->
+                {% if request.user.is_superuser or 'Administrador' in rol %}
                 <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-end sidebar-bottom-actions" style="border-color: rgba(226, 232, 240, 0.8) !important;">
                     <a href="{% url 'configuracion_sistema' %}" class="btn btn-sm btn-light rounded-circle p-2 text-secondary border" title="Configuración">
                         <i class="bi bi-gear-fill"></i>
@@ -1034,7 +1181,7 @@
                                 </span>
                             </li>
 
-                            {% if 'Administrador' in user.perfil.rol.nombre or 'Secretar' in user.perfil.rol.nombre or user.is_superuser %}
+                            {% if request.user.is_superuser or 'Administrador' in user.perfil.rol.nombre %}
                             <li>
                                 <a class="dropdown-item py-2 rounded-2 small" href="{% url 'configuracion_sistema' %}">
                                     <i class="bi bi-sliders text-secondary me-2"></i> Configuración del Sistema
@@ -1064,24 +1211,35 @@
 
             <!-- CONTENIDO DE LA PÁGINA -->
             <main class="sinetec-content {% if request.resolver_match.url_name == 'home' or request.path == '/' or modo_consulta_inicial %}p-0 m-0 w-100 border-0 bg-transparent{% endif %}">
+                <!-- CONTENEDOR FLOTANTE PARA NOTIFICACIÓN EMERGENTE ÚNICA Y DISCRETA (LADO DERECHO) -->
+                <div id="edunova-toast-floating-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1099; pointer-events: none; margin-top: 68px; width: 100%; max-width: 380px;"></div>
+
                 {% if messages %}
-                    <div class="container-fluid mt-3">
+                    <div class="container-fluid mt-3" id="django-messages-wrapper" style="display: none;">
                         {% for message in messages %}
-                            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}success{% endif %} alert-dismissible fade show shadow-sm rounded-3" role="alert">
-                                <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <div class="django-message-item" data-tags="{{ message.tags }}" data-text="{{ message|escapejs }}">
+                                {{ message }}
                             </div>
                         {% endfor %}
                     </div>
                     <script>
                         document.addEventListener("DOMContentLoaded", function() {
-                            const alerts = document.querySelectorAll('.alert-dismissible');
-                            alerts.forEach(function(alert) {
-                                setTimeout(function() {
-                                    const bsAlert = new bootstrap.Alert(alert);
-                                    bsAlert.close();
-                                }, 3500); // Se cierra automáticamente después de 3.5 segundos
-                            });
+                            const msgEls = document.querySelectorAll('.django-message-item');
+                            if (msgEls.length > 0) {
+                                // Mostrar una sola notificación emergente discreta en el lado derecho
+                                const firstEl = msgEls[0];
+                                const tag = firstEl.getAttribute('data-tags') || 'info';
+                                const rawText = firstEl.textContent.trim();
+                                let tipo = 'info';
+                                let tit = 'Información EduNova';
+                                if (tag.includes('success')) { tipo = 'success'; tit = 'Operación Exitosa'; }
+                                else if (tag.includes('error') || tag.includes('danger')) { tipo = 'danger'; tit = 'Atención Requerida'; }
+                                else if (tag.includes('warning')) { tipo = 'warning'; tit = 'Aviso Importante'; }
+                                
+                                if (window.mostrarNotificacionEmergente) {
+                                    window.mostrarNotificacionEmergente(tit, rawText, tipo);
+                                }
+                            }
                         });
                     </script>
                 {% endif %}
@@ -1219,6 +1377,121 @@
 
     <!-- EduNova Sistema Unificado de Notificaciones (Script Dinámico y Polling) -->
     <script>
+    // =========================================================================
+    // SISTEMA GLOBAL DE NOTIFICACIONES EMERGENTES ÚNICAS Y DISCRETAS EDUNOVA
+    // - Aparece una sola notificación a la vez en el lado derecho
+    // - Mensaje corto y discreto
+    // - Permanece visible durante un minuto (60 segundos) y desaparece automáticamente
+    // - Deduplicación para evitar repetidas
+    // =========================================================================
+    window._notifEmergenteTimer = null;
+    window._notifEmergentesMostradas = window._notifEmergentesMostradas || new Set();
+
+    window.cerrarNotificacionEmergente = function() {
+        const toastEl = document.getElementById('edunova-single-toast');
+        if (toastEl) {
+            toastEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            toastEl.style.opacity = '0';
+            toastEl.style.transform = 'translateX(20px)';
+            setTimeout(() => {
+                if (toastEl && toastEl.parentNode) toastEl.parentNode.removeChild(toastEl);
+            }, 300);
+        }
+        if (window._notifEmergenteTimer) {
+            clearTimeout(window._notifEmergenteTimer);
+            window._notifEmergenteTimer = null;
+        }
+    };
+
+    window.mostrarNotificacionEmergente = function(titulo, mensaje, tipo, enlace) {
+        if (!mensaje && !titulo) return;
+        const msgTexto = (mensaje || '').trim();
+        const titTexto = (titulo || 'Aviso EduNova').trim();
+        const clave = (titTexto + '||' + msgTexto).toLowerCase();
+
+        // Evitar duplicadas o repetidas
+        if (window._notifEmergentesMostradas.has(clave)) {
+            return;
+        }
+        window._notifEmergentesMostradas.add(clave);
+
+        let container = document.getElementById('edunova-toast-floating-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'edunova-toast-floating-container';
+            container.className = 'position-fixed top-0 end-0 p-3';
+            container.style.cssText = 'z-index: 1099; pointer-events: none; margin-top: 68px; width: 100%; max-width: 380px;';
+            document.body.appendChild(container);
+        }
+
+        // Garantizar que solo exista UNA notificación visible a la vez
+        window.cerrarNotificacionEmergente();
+
+        let icono = '<i class="bi bi-info-circle-fill fs-5" style="color: #0284c7;"></i>';
+        let colorBorde = '#0284c7';
+        if (tipo === 'success') {
+            icono = '<i class="bi bi-check-circle-fill fs-5" style="color: #059669;"></i>';
+            colorBorde = '#059669';
+        } else if (tipo === 'warning') {
+            icono = '<i class="bi bi-exclamation-triangle-fill fs-5" style="color: #d97706;"></i>';
+            colorBorde = '#d97706';
+        } else if (tipo === 'danger' || tipo === 'error') {
+            icono = '<i class="bi bi-exclamation-circle-fill fs-5" style="color: #dc2626;"></i>';
+            colorBorde = '#dc2626';
+        }
+
+        const titCorto = titTexto.length > 40 ? titTexto.substring(0, 38) + '...' : titTexto;
+        const msgCorto = msgTexto.length > 95 ? msgTexto.substring(0, 92) + '...' : msgTexto;
+
+        const enlaceHtml = enlace ? `
+            <div class="mt-1">
+                <a href="${enlace}" class="btn btn-xs rounded-pill px-2.5 py-0.5 fw-bold text-decoration-none" style="background: rgba(0,0,0,0.05); color: #334155; font-size: 0.72rem;">
+                    Ver detalle <i class="bi bi-arrow-right ms-0.5"></i>
+                </a>
+            </div>
+        ` : '';
+
+        const toast = document.createElement('div');
+        toast.id = 'edunova-single-toast';
+        toast.className = 'toast show border-0 bg-white shadow-lg rounded-4 overflow-hidden mb-0';
+        toast.style.cssText = `pointer-events: auto; border-left: 4.5px solid ${colorBorde} !important; border-top: 1px solid rgba(0,0,0,0.06); border-right: 1px solid rgba(0,0,0,0.06); border-bottom: 1px solid rgba(0,0,0,0.06); box-shadow: 0 10px 25px -3px rgba(0,0,0,0.12), 0 4px 6px -2px rgba(0,0,0,0.05) !important;`;
+
+        toast.innerHTML = `
+            <div class="p-3 d-flex align-items-start gap-2.5">
+                <div class="flex-shrink-0 mt-0.5">
+                    ${icono}
+                </div>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <div class="d-flex align-items-center justify-content-between gap-1 mb-0.5">
+                        <strong class="text-dark d-block text-truncate" style="font-size: 0.84rem; letter-spacing: -0.2px;">${titCorto}</strong>
+                        <span class="badge rounded-pill text-muted px-1.5 py-0.5" style="font-size: 0.65rem; background: #F8FAFC;">Alerta</span>
+                    </div>
+                    <p class="text-muted small mb-1 text-truncate" style="font-size: 0.78rem; line-height: 1.35;">${msgCorto}</p>
+                    ${enlaceHtml}
+                </div>
+                <button type="button" class="btn-close flex-shrink-0 ms-1" style="font-size: 0.68rem;" onclick="window.cerrarNotificacionEmergente()"></button>
+            </div>
+            <div class="progress" style="height: 2.5px; background: rgba(0,0,0,0.03);">
+                <div id="edunova-toast-progress" class="progress-bar" style="width: 100%; transition: width 60s linear; background: ${colorBorde};"></div>
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        // Barra de tiempo decreciente suave
+        setTimeout(() => {
+            const bar = document.getElementById('edunova-toast-progress');
+            if (bar) bar.style.width = '0%';
+        }, 50);
+
+        // Permanecer visible durante exactamente un minuto (60 segundos)
+        window._notifEmergenteTimer = setTimeout(() => {
+            window.cerrarNotificacionEmergente();
+        }, 60000);
+    };
+
+    window.mostrarToast = window.mostrarNotificacionEmergente;
+
     (function() {
         const badgeCampana = document.getElementById('badge-campana');
         const headerBadge = document.getElementById('notif-header-badge');
@@ -1382,6 +1655,9 @@
             enlazarEventosItems();
         }
 
+        let esPrimeraCargaCampana = true;
+        window._notificacionesConocidasIds = window._notificacionesConocidasIds || new Set();
+
         function consultarNotificacionesAPI() {
             fetch('/notificaciones/api/campana/', {
                 headers: {
@@ -1393,6 +1669,17 @@
             .then(data => {
                 if (data.status === 'ok') {
                     renderNotificaciones(data.notificaciones, data.num_no_leidas);
+                    if (data.notificaciones && data.notificaciones.length > 0) {
+                        data.notificaciones.forEach(n => {
+                            if (!window._notificacionesConocidasIds.has(n.id)) {
+                                window._notificacionesConocidasIds.add(n.id);
+                                if (!esPrimeraCargaCampana && !n.leida) {
+                                    window.mostrarNotificacionEmergente(n.titulo, n.mensaje, n.tipo, n.enlace);
+                                }
+                            }
+                        });
+                    }
+                    esPrimeraCargaCampana = false;
                 }
             })
             .catch(err => console.debug('Polling notificaciones:', err));

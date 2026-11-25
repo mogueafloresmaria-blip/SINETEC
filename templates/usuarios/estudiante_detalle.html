@@ -156,98 +156,169 @@
         <div class="card-body p-4">
             <div class="tab-content" id="perfilTabsContent">
 
-                <!-- 1. PESTAÑA INFORMACIÓN GENERAL -->
+                <!-- 1. PESTAÑA INFORMACIÓN GENERAL / PERSONAL -->
                 <div class="tab-pane fade show active" id="tab-personales" role="tabpanel">
-                    <h5 class="fw-bold text-dark mb-3">Información General del Alumno</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-person-lines-fill text-primary me-2"></i>Información Personal del Estudiante</h5>
+                        <a href="{% url 'estudiante_editar' estudiante.usuario.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                            <i class="bi bi-pencil-fill me-1"></i> Editar Información
+                        </a>
+                    </div>
                     <div class="row g-4">
-                        <div class="col-md-7">
-                            <dl class="row mb-0">
-                                <dt class="col-sm-5 text-muted">Nombres y Apellidos:</dt>
-                                <dd class="col-sm-7 fw-bold">{{ estudiante.usuario.get_full_name|default:estudiante.usuario.username }}</dd>
+                        <div class="col-md-8">
+                            <div class="card border-0 bg-light p-3 rounded-4 mb-3">
+                                <dl class="row mb-0 gy-2">
+                                    <dt class="col-sm-5 text-muted">Nombres y Apellidos:</dt>
+                                    <dd class="col-sm-7 fw-bold text-dark">{{ estudiante.usuario.get_full_name|default:estudiante.usuario.username }}</dd>
 
-                                <dt class="col-sm-5 text-muted">Tipo de Documento:</dt>
-                                <dd class="col-sm-7">{{ estudiante.get_tipo_documento_display }}</dd>
+                                    <dt class="col-sm-5 text-muted">Tipo de Documento:</dt>
+                                    <dd class="col-sm-7">{{ estudiante.get_tipo_documento_display|default:estudiante.tipo_documento|default:"TI" }}</dd>
 
-                                <dt class="col-sm-5 text-muted">Número de Documento:</dt>
-                                <dd class="col-sm-7 fw-bold">{{ estudiante.numero_documento }}</dd>
+                                    <dt class="col-sm-5 text-muted">Número de Documento:</dt>
+                                    <dd class="col-sm-7 fw-bold text-dark">{{ estudiante.numero_documento|default:estudiante.usuario.username }}</dd>
 
-                                <dt class="col-sm-5 text-muted">Correo Electrónico:</dt>
-                                <dd class="col-sm-7">{{ estudiante.usuario.email|default:"Sin registrar" }}</dd>
+                                    <dt class="col-sm-5 text-muted">Fecha de Nacimiento:</dt>
+                                    <dd class="col-sm-7">
+                                        {% if estudiante.fecha_nacimiento %}
+                                            <span class="fw-semibold text-dark">{{ estudiante.fecha_nacimiento|date:"d \d\e F \d\e Y" }}</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                        {% endif %}
+                                    </dd>
 
-                                <dt class="col-sm-5 text-muted">Teléfono Móvil:</dt>
-                                <dd class="col-sm-7">{{ estudiante.telefono|default:"Sin registrar" }}</dd>
+                                    <dt class="col-sm-5 text-muted">Edad:</dt>
+                                    <dd class="col-sm-7">
+                                        {% if edad != None %}
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 fw-bold">{{ edad }} años</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                        {% endif %}
+                                    </dd>
 
-                                <dt class="col-sm-5 text-muted">Institución Educativa:</dt>
-                                <dd class="col-sm-7">{{ colegio.nombre|default:"Institución Educativa Técnica" }}</dd>
+                                    <dt class="col-sm-5 text-muted">Género:</dt>
+                                    <dd class="col-sm-7">
+                                        {% if estudiante.genero %}
+                                            <span class="text-dark fw-semibold">{{ estudiante.genero }}</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                        {% endif %}
+                                    </dd>
 
-                                <dt class="col-sm-5 text-muted">Estado de Cuenta:</dt>
-                                <dd class="col-sm-7">
-                                    {% if estudiante.usuario.is_active %}
-                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Activa</span>
-                                    {% else %}
-                                        <span class="badge bg-danger">Inactiva</span>
-                                    {% endif %}
-                                </dd>
+                                    <dt class="col-sm-5 text-muted">Dirección de Residencia:</dt>
+                                    <dd class="col-sm-7">
+                                        {% if acudiente_data.direccion %}
+                                            <span class="text-dark">{{ acudiente_data.direccion }}</span>
+                                        {% elif estudiante.direccion %}
+                                            <span class="text-dark">{{ estudiante.direccion }}</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                        {% endif %}
+                                    </dd>
 
-                                <dt class="col-sm-5 text-muted">Usuario de Acceso:</dt>
-                                <dd class="col-sm-7 fw-bold font-monospace">{{ estudiante.usuario.username }}</dd>
+                                    <dt class="col-sm-5 text-muted">Teléfono Móvil:</dt>
+                                    <dd class="col-sm-7">
+                                        {% if estudiante.telefono %}
+                                            <span class="text-dark"><i class="bi bi-telephone me-1 text-primary"></i>{{ estudiante.telefono }}</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                        {% endif %}
+                                    </dd>
 
-                                <dt class="col-sm-5 text-muted">Contraseña:</dt>
-                                <dd class="col-sm-7 text-secondary">
-                                    <i class="bi bi-shield-lock-fill me-1 text-success"></i> Configurada
-                                </dd>
+                                    <dt class="col-sm-5 text-muted">Correo Electrónico:</dt>
+                                    <dd class="col-sm-7">
+                                        {% if estudiante.usuario.email %}
+                                            <span class="text-dark"><i class="bi bi-envelope me-1 text-primary"></i>{{ estudiante.usuario.email }}</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                        {% endif %}
+                                    </dd>
 
-                                <dt class="col-sm-5 text-muted">Acciones de Cuenta:</dt>
-                                <dd class="col-sm-7">
-                                    <a href="{% url 'usuario_reset_clave' estudiante.usuario.id %}" class="btn btn-sm btn-outline-secondary">
+                                    <dt class="col-sm-5 text-muted">Estado de Cuenta:</dt>
+                                    <dd class="col-sm-7">
+                                        {% if estudiante.usuario.is_active %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1">Activa</span>
+                                        {% else %}
+                                            <span class="badge bg-danger rounded-pill px-3 py-1">Inactiva</span>
+                                        {% endif %}
+                                    </dd>
+
+                                    <dt class="col-sm-5 text-muted">Usuario de Acceso:</dt>
+                                    <dd class="col-sm-7 fw-bold font-monospace">{{ estudiante.usuario.username }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-xs bg-white p-3 rounded-4 mb-3 border">
+                                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-lock-fill text-success me-1"></i> Seguridad de Cuenta</h6>
+                                <p class="small text-muted mb-3">Las credenciales de acceso institucional permiten al estudiante ingresar a su aula virtual y calificaciones.</p>
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'usuario_reset_clave' estudiante.usuario.id %}" class="btn btn-sm btn-outline-secondary rounded-pill fw-bold">
                                         <i class="bi bi-key-fill me-1"></i> Restablecer Contraseña
                                     </a>
-                                    <a href="{% url 'editar_usuario' estudiante.usuario.id %}" class="btn btn-sm btn-outline-primary ms-1">
-                                        <i class="bi bi-gear-fill me-1"></i> Gestionar Cuenta
+                                    <a href="{% url 'editar_usuario' estudiante.usuario.id %}" class="btn btn-sm btn-outline-primary rounded-pill fw-bold">
+                                        <i class="bi bi-gear-fill me-1"></i> Gestionar Permisos
                                     </a>
-                                </dd>
-                            </dl>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. PESTAÑA MATRÍCULA Y CURSO -->
+                <!-- 2. PESTAÑA MATRÍCULA Y CURSO / INFORMACIÓN ACADÉMICA -->
                 <div class="tab-pane fade" id="tab-matricula" role="tabpanel">
-                    <h5 class="fw-bold text-dark mb-3">Matrícula Escolar y Asignación de Curso</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-mortarboard-fill text-primary me-2"></i>Información Académica y Matrícula</h5>
+                    </div>
                     {% if matricula %}
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="p-3 border rounded-3 bg-light">
-                                    <span class="text-muted small text-uppercase fw-semibold d-block">Programa / Énfasis:</span>
-                                    <h6 class="fw-bold text-dark mb-1">{{ matricula.ficha.programa.denominacion }}</h6>
-                                    <small class="text-muted">Código: {{ matricula.ficha.programa.codigo_programa }}</small>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded-3 bg-light h-100">
+                                    <span class="text-muted small text-uppercase fw-semibold d-block">Grado y Grupo:</span>
+                                    <h5 class="fw-bold text-dark mb-1">Grado {{ matricula.grado_escolar }}° - Grupo {{ matricula.seccion }}</h5>
+                                    <small class="text-muted">{{ matricula.get_grado_escolar_display }}</small>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="p-3 border rounded-3 bg-light">
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded-3 bg-light h-100">
+                                    <span class="text-muted small text-uppercase fw-semibold d-block">Año Lectivo:</span>
+                                    <h5 class="fw-bold text-dark mb-1">{{ matricula.fecha_matricula.year|default:"2026" }}</h5>
+                                    <small class="text-muted">Vigencia Escolar Activa</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded-3 bg-light h-100">
+                                    <span class="text-muted small text-uppercase fw-semibold d-block">Estado de Matrícula:</span>
+                                    <div class="mt-1">
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1.5 fs-6 fw-bold">
+                                            🟢 {{ matricula.get_estado_formacion_display|default:matricula.estado_formacion }}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Fecha: {{ matricula.fecha_matricula|date:"d/m/Y" }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded-3 h-100">
+                                    <span class="text-muted small text-uppercase fw-semibold d-block">Jornada Escolar:</span>
+                                    <strong class="text-dark d-block mt-1 fs-6"><i class="bi bi-sun text-warning me-1"></i>Jornada Mañana</strong>
+                                    <small class="text-muted">Horario ordinario de 07:00 AM a 01:00 PM</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded-3 h-100">
+                                    <span class="text-muted small text-uppercase fw-semibold d-block">Curso / Ficha:</span>
+                                    <strong class="text-dark d-block mt-1 fs-6">Grupo {{ matricula.ficha.codigo_ficha }}</strong>
+                                    <small class="text-muted">{{ matricula.ficha.programa.denominacion|default:"Formación Integral" }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded-3 h-100">
                                     <span class="text-muted small text-uppercase fw-semibold d-block">Sede / Institución:</span>
-                                    <h6 class="fw-bold text-dark mb-1">{{ matricula.ficha.institucion.nombre }}</h6>
-                                    <small class="text-muted">{{ matricula.ficha.institucion.municipio }}</small>
+                                    <strong class="text-dark d-block mt-1 fs-6">{{ matricula.ficha.institucion.nombre|default:colegio.nombre|default:"Institución Educativa Técnica" }}</strong>
+                                    <small class="text-muted">{{ matricula.ficha.institucion.municipio|default:"Sede Principal" }}</small>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="p-3 border rounded-3">
-                                    <span class="text-muted small d-block">Curso / Grupo:</span>
-                                    <strong>Grupo {{ matricula.ficha.codigo_ficha }}</strong>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-3 border rounded-3">
-                                    <span class="text-muted small d-block">Grado Escolar:</span>
-                                    <strong>{{ matricula.grado_escolar|default:'10° / 11°' }}</strong>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-3 border rounded-3">
-                                    <span class="text-muted small d-block">Estado de Matrícula:</span>
-                                    <span class="badge bg-success">{{ matricula.get_estado_formacion_display }}</span>
-                                </div>
-                            </div>
+                        </div>
                         </div>
 
                         <!-- ASIGNATURAS Y CARGA ACADÉMICA DEL GRUPO -->
@@ -333,43 +404,135 @@
                     {% endif %}
                 </div>
 
-                <!-- 3. PESTAÑA NÚCLEO FAMILIAR -->
+                <!-- 3. PESTAÑA NÚCLEO FAMILIAR / INFORMACIÓN FAMILIAR -->
                 <div class="tab-pane fade" id="tab-familia" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Núcleo Familiar y Acudientes</h5>
-                        <a href="{% url 'familias_lista' %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-people me-1"></i> Directorio Familiar
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-people-fill text-primary me-2"></i>Información Familiar y Acudiente</h5>
+                        <a href="{% url 'familias_lista' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                            <i class="bi bi-person-plus me-1"></i> Vincular / Gestionar en Directorio Familiar
                         </a>
                     </div>
-                    {% if familias %}
+                    {% if acudiente_data.nombre or familias %}
                         <div class="row g-3">
-                            {% for fam in familias %}
-                                <div class="col-md-6">
-                                    <div class="card border rounded-3 p-3 bg-light">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <h6 class="fw-bold text-dark mb-0">{{ fam.nombre_acudiente }}</h6>
-                                                <span class="badge bg-primary bg-opacity-10 text-primary">{{ fam.parentesco }}</span>
+                            {% if familias %}
+                                {% for fam in familias %}
+                                    <div class="col-md-6">
+                                        <div class="card border rounded-4 p-4 bg-light shadow-xs h-100">
+                                            <div class="d-flex justify-content-between align-items-start mb-3 border-bottom pb-2">
+                                                <div>
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 fw-bold mb-1">
+                                                        {{ fam.parentesco|default:"Acudiente Responsable" }}
+                                                    </span>
+                                                    <h5 class="fw-bold text-dark mb-0">{{ fam.nombre_acudiente }}</h5>
+                                                </div>
+                                                {% if fam.documento %}
+                                                    <span class="badge bg-white text-dark border px-2.5 py-1">Doc: {{ fam.documento }}</span>
+                                                {% endif %}
                                             </div>
-                                            <span class="badge bg-light text-dark border">{{ fam.tipo_documento }} {{ fam.numero_documento }}</span>
+                                            <dl class="row mb-0 gy-2 small">
+                                                <dt class="col-sm-5 text-muted">Teléfono de Contacto:</dt>
+                                                <dd class="col-sm-7 fw-bold text-dark">
+                                                    {% if fam.telefono %}
+                                                        <i class="bi bi-telephone me-1 text-primary"></i>{{ fam.telefono }}
+                                                    {% else %}
+                                                        <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                                    {% endif %}
+                                                </dd>
+
+                                                <dt class="col-sm-5 text-muted">Correo Electrónico:</dt>
+                                                <dd class="col-sm-7">
+                                                    {% if fam.email %}
+                                                        <i class="bi bi-envelope me-1 text-primary"></i>{{ fam.email }}
+                                                    {% else %}
+                                                        <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                                    {% endif %}
+                                                </dd>
+
+                                                <dt class="col-sm-5 text-muted">Dirección de Residencia:</dt>
+                                                <dd class="col-sm-7">
+                                                    {% if fam.direccion %}
+                                                        <i class="bi bi-geo-alt me-1 text-primary"></i>{{ fam.direccion }}
+                                                    {% else %}
+                                                        <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                                    {% endif %}
+                                                </dd>
+
+                                                <dt class="col-sm-5 text-muted">Contacto de Emergencia:</dt>
+                                                <dd class="col-sm-7">
+                                                    {% if fam.telefono_secundario %}
+                                                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25"><i class="bi bi-telephone-plus me-1 text-danger"></i>{{ fam.telefono_secundario }}</span>
+                                                    {% elif fam.telefono %}
+                                                        <span class="badge bg-light text-dark border"><i class="bi bi-telephone-forward me-1 text-primary"></i>{{ fam.telefono }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                                    {% endif %}
+                                                </dd>
+                                            </dl>
                                         </div>
-                                        <div class="small text-muted mb-1"><i class="bi bi-telephone me-1"></i> {{ fam.telefono_principal }} {% if fam.telefono_secundario %}/ {{ fam.telefono_secundario }}{% endif %}</div>
-                                        <div class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i> {{ fam.correo|default:"Sin correo" }}</div>
-                                        <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i> {{ fam.direccion }} ({{ fam.barrio }})</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="col-md-8">
+                                    <div class="card border rounded-4 p-4 bg-light shadow-xs">
+                                        <div class="d-flex justify-content-between align-items-start mb-3 border-bottom pb-2">
+                                            <div>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 fw-bold mb-1">
+                                                    {{ acudiente_data.parentesco|default:"Acudiente de Matrícula" }}
+                                                </span>
+                                                <h5 class="fw-bold text-dark mb-0">{{ acudiente_data.nombre }}</h5>
+                                            </div>
+                                        </div>
+                                        <dl class="row mb-0 gy-2 small">
+                                            <dt class="col-sm-5 text-muted">Teléfono de Contacto:</dt>
+                                            <dd class="col-sm-7 fw-bold text-dark">
+                                                {% if acudiente_data.telefono %}
+                                                    <i class="bi bi-telephone me-1 text-primary"></i>{{ acudiente_data.telefono }}
+                                                {% else %}
+                                                    <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                                {% endif %}
+                                            </dd>
+
+                                            <dt class="col-sm-5 text-muted">Correo Electrónico:</dt>
+                                            <dd class="col-sm-7">
+                                                {% if acudiente_data.email %}
+                                                    <i class="bi bi-envelope me-1 text-primary"></i>{{ acudiente_data.email }}
+                                                {% else %}
+                                                    <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                                {% endif %}
+                                            </dd>
+
+                                            <dt class="col-sm-5 text-muted">Dirección:</dt>
+                                            <dd class="col-sm-7">
+                                                {% if acudiente_data.direccion %}
+                                                    {{ acudiente_data.direccion }}
+                                                {% else %}
+                                                    <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                                {% endif %}
+                                            </dd>
+
+                                            <dt class="col-sm-5 text-muted">Contacto de Emergencia:</dt>
+                                            <dd class="col-sm-7">
+                                                {% if acudiente_data.contacto_emergencia %}
+                                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25"><i class="bi bi-telephone-plus me-1 text-danger"></i>{{ acudiente_data.contacto_emergencia }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-light text-muted border fw-normal">Información pendiente</span>
+                                                {% endif %}
+                                            </dd>
+                                        </dl>
                                     </div>
                                 </div>
-                            {% endfor %}
-                        </div>
-                    {% elif matricula.acudiente_nombre %}
-                        <div class="p-3 border rounded-3 bg-light">
-                            <h6 class="fw-bold text-dark mb-1">Acudiente de Matrícula:</h6>
-                            <p class="mb-1"><strong>{{ matricula.acudiente_nombre }}</strong></p>
-                            <p class="text-muted small mb-0"><i class="bi bi-telephone me-1"></i> Teléfono: {{ matricula.acudiente_telefono|default:"No especificado" }}</p>
+                            {% endif %}
                         </div>
                     {% else %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-people fs-1 d-block mb-2 opacity-50"></i>
-                            Sin información de acudiente asociada. Puedes vincularlo desde el directorio de familias.
+                        <div class="card border rounded-4 p-4 text-center text-muted bg-light">
+                            <i class="bi bi-people fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <h6 class="fw-bold text-dark mb-1">Información Familiar Pendiente</h6>
+                            <p class="small text-muted mb-3">Este estudiante aún no tiene asignado un acudiente en su expediente escolar.</p>
+                            <div>
+                                <a href="{% url 'familias_lista' %}" class="btn btn-sm btn-primary rounded-pill px-4 fw-bold">
+                                    <i class="bi bi-link-45deg me-1"></i> Vincular Acudiente Ahora
+                                </a>
+                            </div>
                         </div>
                     {% endif %}
                 </div>

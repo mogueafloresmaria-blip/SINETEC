@@ -26,19 +26,46 @@
         </div>
     </div>
 
-    <!-- Selector de Estudiante (Si hay más de 1) -->
-    {% if hijos_qs|length > 1 %}
-    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <span class="fw-bold text-dark small"><i class="bi bi-person-fill text-primary me-1"></i> Seleccionar Estudiante:</span>
-            <div class="d-flex flex-wrap gap-2">
-                {% for h in hijos_qs %}
-                    <a href="?estudiante={{ h.id }}&estado={{ estado_sel }}&fecha={{ fecha_sel }}" class="btn btn-sm rounded-pill px-3 fw-bold {% if estudiante_sel.id == h.id %}btn-success text-white{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-person me-1"></i> {{ h.get_full_name|default:h.username }}
-                    </a>
-                {% endfor %}
+    <!-- Selector de Estudiantes en Perfiles Independientes (Sebastián Gómez / Sofía Gómez) -->
+    {% if hijos_qs %}
+    <div class="row g-3 mb-4">
+        {% for h in hijos_qs %}
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white position-relative {% if estudiante_sel.id == h.id %}border-start border-4 border-primary shadow-sm{% else %}opacity-75{% endif %}" style="{% if estudiante_sel.id == h.id %}background: #F5F8FC !important; border-left: 5px solid #007F7B !important;{% endif %}">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-4 shadow-xs" style="width: 50px; height: 50px; background: {% if estudiante_sel.id == h.id %}linear-gradient(135deg, #006B68, #007F7B){% else %}#94A3B8{% endif %};">
+                            {{ h.first_name|slice:":1" }}{{ h.last_name|slice:":1"|default:h.username|slice:":1" }}
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0.5">{{ h.get_full_name|default:h.username }}</h5>
+                            <div class="small text-muted">
+                                <span class="me-2"><i class="bi bi-card-text me-1"></i>Doc: <strong>{{ h.perfil.numero_documento|default:h.username }}</strong></span>
+                                <span><i class="bi bi-mortarboard me-1"></i>
+                                    {% for m in h.matriculas_academicas.all %}
+                                        <strong>{{ m.get_grado_escolar_display }} - Grupo {{ m.seccion }}</strong>
+                                    {% empty %}
+                                        <strong>Estudiante</strong>
+                                    {% endfor %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        {% if estudiante_sel.id == h.id %}
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #007F7B; color: #FFFFFF;">
+                                <i class="bi bi-check-circle-fill me-1"></i> Estudiante Activo
+                            </span>
+                        {% else %}
+                            <a href="?estudiante={{ h.id }}&estado={{ estado_sel }}&fecha={{ fecha_sel }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-bold">
+                                Consultar Asistencia <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
     {% endif %}
 
@@ -121,11 +148,12 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light small text-uppercase" style="font-size: 0.75rem;">
                         <tr>
-                            <th class="ps-4 py-3">Fecha de la Sesión</th>
+                            <th class="ps-4 py-3">Fecha y Día</th>
+                            <th class="py-3">Hora / Jornada</th>
                             <th class="py-3">Asignatura / Módulo</th>
-                            <th class="py-3 text-center">Estado Registrado</th>
-                            <th class="py-3">Docente / Registrador</th>
-                            <th class="pe-4 py-3">Observaciones Registradas</th>
+                            <th class="py-3 text-center">Estado de Asistencia</th>
+                            <th class="py-3">Docente Titular</th>
+                            <th class="pe-4 py-3">Observaciones de la Sesión</th>
                         </tr>
                     </thead>
                     <tbody class="small">
@@ -136,7 +164,12 @@
                                 <span class="text-muted" style="font-size: 0.72rem;">{{ a.fecha|date:"d/m/Y" }}</span>
                             </td>
                             <td>
-                                <strong class="text-primary">{{ a.matricula.ficha.programa.denominacion|default:"Jornada Ordinaria de Clases" }}</strong>
+                                <span class="badge bg-light text-dark border px-2.5 py-1">
+                                    <i class="bi bi-clock me-1 text-primary"></i>{{ a.hora|default:"07:00 AM - 08:30 AM" }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong class="text-primary">{{ a.asignatura|default:"Jornada Ordinaria de Clases" }}</strong>
                             </td>
                             <td class="text-center">
                                 {% if a.estado == 'P' %}
@@ -160,14 +193,10 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if a.registrado_por %}
-                                    <i class="bi bi-person-check text-muted me-1"></i>{{ a.registrado_por.get_full_name|default:a.registrado_por.username }}
-                                {% else %}
-                                    <span class="text-muted">Docente Titular</span>
-                                {% endif %}
+                                <i class="bi bi-person-check text-muted me-1"></i><span class="fw-semibold text-dark">{{ a.docente|default:"Docente Titular" }}</span>
                             </td>
-                            <td class="pe-4 text-muted">
-                                {{ a.observaciones|default:"Asistencia registrada en la sesión académica correspondiente." }}
+                            <td class="pe-4 text-secondary">
+                                {{ a.observaciones|default:"Sesión académica registrada en el sistema." }}
                             </td>
                         </tr>
                         {% endfor %}

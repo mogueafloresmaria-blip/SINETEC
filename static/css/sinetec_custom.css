@@ -1,65 +1,75 @@
 /* ==============================================================================
    EDUNOVA · SISTEMA INTEGRADO DE EDUCACIÓN TÉCNICA
    ESTILOS PERSONALIZADOS, COMPONENTES Y VISTAS ESPECÍFICAS
-   IDENTIDAD: CAFÉ CLARO · BEIGE · CREMA · MARRÓN SUAVE
+   PALETA OFICIAL:
+   - Verde petróleo oscuro: #006B68
+   - Verde institucional:   #007F7B
+   - Turquesa principal:    #12B8B0
+   - Turquesa brillante:    #22C8C0
+   - Aguamarina suave:      #DDF7F5
+   - Blanco:                #FFFFFF
+   - Fondo gris azulado:    #F5F8FC
+   - Azul marino textos:    #14264F
+   - Gris secundario:       #64748B
    ============================================================================== */
 
 :root {
-  --sinetec-primary: var(--color-principal);
-  --sinetec-primary-dark: var(--color-secundario);
-  --sinetec-secondary: #B8977E;
-  --sinetec-accent: #F5F2EB;
+  --sinetec-primary: #007F7B;
+  --sinetec-primary-dark: #006B68;
+  --sinetec-secondary: #12B8B0;
+  --sinetec-accent: #DDF7F5;
   --sinetec-success: #10B981;
   --sinetec-warning: #F59E0B;
   --sinetec-danger: #EF4444;
-  --sinetec-bg-light: var(--color-fondo);
+  --sinetec-bg-light: #F5F8FC;
   --sinetec-card-bg: #FFFFFF;
-  --sinetec-border: #E5DFD5;
-  --sinetec-text-main: var(--color-titulo);
-  --sinetec-text-muted: #75675E;
+  --sinetec-border: #E2E8F0;
+  --sinetec-text-main: #14264F;
+  --sinetec-text-muted: #64748B;
   --sinetec-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Colores Escolares Suaves */
-  --sinetec-blue: var(--color-principal);
-  --sinetec-blue-hover: var(--color-secundario);
-  --sinetec-blue-soft: var(--color-acento);
-  --sinetec-blue-border: #E0D8CE;
-  --sinetec-blue-deep: var(--color-secundario);
+  --sinetec-blue: #007F7B;
+  --sinetec-blue-hover: #006B68;
+  --sinetec-blue-soft: #DDF7F5;
+  --sinetec-blue-border: #BCEFEA;
+  --sinetec-blue-deep: #004D4A;
 
-  --sinetec-lavender: #F5F2EB;
-  --sinetec-lavender-border: #E5DFD5;
-  --sinetec-lavender-text: var(--color-secundario);
+  --sinetec-lavender: #DDF7F5;
+  --sinetec-lavender-border: #BCEFEA;
+  --sinetec-lavender-text: #006B68;
 
-  --sinetec-rose: var(--color-principal);
-  --sinetec-rose-hover: var(--color-secundario);
-  --sinetec-rose-soft: var(--color-acento);
-  --sinetec-rose-border: #E0D8CE;
+  --sinetec-rose: #12B8B0;
+  --sinetec-rose-hover: #007F7B;
+  --sinetec-rose-soft: #DDF7F5;
+  --sinetec-rose-border: #BCEFEA;
 
-  --sinetec-card-radius: 16px;
-  --sinetec-soft-shadow: 0 4px 20px -2px rgba(90, 56, 37, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
-  --sinetec-soft-shadow-hover: 0 10px 25px -4px rgba(90, 56, 37, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+  --sinetec-card-radius: 20px;
+  --sinetec-soft-shadow: 0 4px 20px -2px rgba(20, 38, 79, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  --sinetec-soft-shadow-hover: 0 10px 25px -4px rgba(0, 107, 104, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
 }
 
 /* Tarjetas Modernas */
 .sinetec-card-modern {
-  background: #ffffff;
-  border: 1px solid var(--sinetec-border);
-  border-radius: var(--sinetec-card-radius);
-  box-shadow: var(--sinetec-soft-shadow);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: var(--sinetec-card-radius) !important;
+  box-shadow: var(--sinetec-soft-shadow) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .sinetec-card-modern:hover {
-  box-shadow: var(--sinetec-soft-shadow-hover);
+  box-shadow: var(--sinetec-soft-shadow-hover) !important;
+  transform: translateY(-2px);
 }
 
-/* Badges Institucionales EduNova (Beige y Café Suave) */
+/* Badges Institucionales EduNova (Aguamarina y Verde Petróleo) */
 .badge-rose-soft,
 .badge-blue-soft,
 .badge-lavender-soft {
-  background-color: var(--sinetec-rose-soft) !important;
-  color: var(--sinetec-primary-dark) !important;
-  border: 1px solid var(--sinetec-rose-border) !important;
+  background-color: #DDF7F5 !important;
+  color: #006B68 !important;
+  border: 1px solid #BCEFEA !important;
   font-weight: 600;
   border-radius: 9999px;
   padding: 0.35rem 0.75rem;
@@ -82,7 +92,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: #E5DFD5;
+  background: #E2E8F0;
   transform: translateY(-50%);
   z-index: 1;
 }
@@ -90,7 +100,7 @@
 .wizard-step {
   position: relative;
   z-index: 2;
-  background: #ffffff;
+  background: #FFFFFF;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -103,9 +113,9 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #F5F2EB;
-  border: 2px solid #E0D8CE;
-  color: #75675E;
+  background: #F5F8FC;
+  border: 2px solid #CBD5E1;
+  color: #64748B;
   display: grid;
   place-items: center;
   font-weight: 700;
@@ -114,29 +124,29 @@
 }
 
 .wizard-step.active .wizard-step-circle {
-  background: var(--sinetec-primary);
-  border-color: var(--sinetec-primary-dark);
-  color: #ffffff;
-  box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.18);
+  background: #007F7B !important;
+  border-color: #006B68 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 0 4px rgba(18, 184, 176, 0.22) !important;
 }
 
 .wizard-step.completed .wizard-step-circle {
-  background: var(--sinetec-success);
-  border-color: var(--semaforo-aprobado);
-  color: #ffffff;
+  background: #10B981 !important;
+  border-color: #059669 !important;
+  color: #FFFFFF !important;
 }
 
 .wizard-step-label {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #75675E;
+  color: #64748B;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
 .wizard-step.active .wizard-step-label {
-  color: var(--sinetec-primary);
+  color: #007F7B;
 }
 
 /* Carnet Escolar Digital Moderno EduNova */
@@ -151,9 +161,9 @@
   width: 360px;
   height: 540px;
   border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 20px 40px -10px rgba(90, 56, 37, 0.18);
-  border: 1px solid #E5DFD5;
+  background: #FFFFFF;
+  box-shadow: 0 20px 40px -10px rgba(0, 77, 74, 0.18);
+  border: 1px solid #E2E8F0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -161,8 +171,8 @@
 }
 
 .carnet-header {
-  background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 60%, var(--color-principal) 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, #006B68 0%, #007F7B 60%, #12B8B0 100%);
+  color: #FFFFFF;
   padding: 22px 20px 18px;
   text-align: center;
   position: relative;
@@ -175,7 +185,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #B8977E 0%, var(--color-principal) 50%, var(--color-secundario) 100%);
+  background: linear-gradient(90deg, #22C8C0 0%, #12B8B0 50%, #006B68 100%);
 }
 
 .carnet-colegio-nombre {
@@ -189,7 +199,7 @@
 
 .carnet-colegio-lema {
   font-size: 0.68rem;
-  color: #D7C4B7;
+  color: #DDF7F5;
   margin-top: 2px;
 }
 
@@ -206,9 +216,9 @@
   height: 125px;
   border-radius: 12px;
   overflow: hidden;
-  border: 3px solid #ffffff;
-  box-shadow: 0 6px 16px rgba(90, 56, 37, 0.12);
-  background: var(--color-acento);
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 6px 16px rgba(0, 107, 104, 0.15);
+  background: #DDF7F5;
   display: grid;
   place-items: center;
   margin-top: -10px;
@@ -225,16 +235,16 @@
   font-family: var(--font-heading);
   font-size: 1.1rem;
   font-weight: 800;
-  color: var(--color-titulo);
+  color: #14264F;
   text-align: center;
   margin: 0 0 4px;
 }
 
 .carnet-student-role {
   display: inline-block;
-  background: var(--color-acento);
-  color: var(--color-secundario);
-  border: 1px solid #E0D8CE;
+  background: #DDF7F5;
+  color: #006B68;
+  border: 1px solid #BCEFEA;
   font-size: 0.72rem;
   font-weight: 700;
   padding: 2px 10px;
@@ -249,22 +259,22 @@
   gap: 8px 12px;
   font-size: 0.78rem;
   margin-bottom: 14px;
-  background: var(--color-fondo);
+  background: #F5F8FC;
   padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #E5DFD5;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
 }
 
 .carnet-info-item span {
   display: block;
-  color: #75675E;
+  color: #64748B;
   font-size: 0.65rem;
   text-transform: uppercase;
   font-weight: 700;
 }
 
 .carnet-info-item strong {
-  color: var(--color-titulo);
+  color: #14264F;
 }
 
 .carnet-qr-area {
@@ -272,8 +282,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #ffffff;
-  border: 1px solid #E5DFD5;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
   padding: 6px 12px;
   border-radius: 12px;
 }

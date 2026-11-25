@@ -485,6 +485,57 @@
                 </div>
             </div>
 
+            <!-- Monitor en Tiempo Real de Clases del Estudiante -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 h-100 {% if clase_en_curso_estudiante %}border border-success bg-success bg-opacity-10{% else %}bg-light border{% endif %}">
+                        <div class="d-flex align-items-center justify-content-between mb-1.5">
+                            <span class="small fw-bold text-uppercase {% if clase_en_curso_estudiante %}text-success{% else %}text-muted{% endif %}" style="letter-spacing: 0.5px; font-size: 0.75rem;">
+                                <i class="bi bi-play-circle-fill me-1"></i> Tu Clase en Curso Ahora
+                            </span>
+                            {% if clase_en_curso_estudiante %}
+                            <span class="badge bg-success text-white rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.68rem;">EN DESARROLLO</span>
+                            {% endif %}
+                        </div>
+                        {% if clase_en_curso_estudiante %}
+                        <h6 class="fw-bold text-dark mb-1">{{ clase_en_curso_estudiante.nombre_materia|default:clase_en_curso_estudiante.programa.denominacion }}</h6>
+                        <div class="small text-muted mb-1">
+                            Docente: <strong class="text-dark">{{ clase_en_curso_estudiante.instructor.get_full_name|default:clase_en_curso_estudiante.instructor.username }}</strong> · Aula: <strong>{{ clase_en_curso_estudiante.ambiente|default:'Principal' }}</strong>
+                        </div>
+                        <div class="small text-success fw-semibold">
+                            <i class="bi bi-clock me-1"></i> {{ clase_en_curso_estudiante.hora_inicio|time:"h:i A" }} - {{ clase_en_curso_estudiante.hora_fin|time:"h:i A" }}
+                        </div>
+                        {% else %}
+                        <div class="py-2 text-muted small">
+                            <i class="bi bi-info-circle me-1"></i> No tienes clase en desarrollo en este momento.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 h-100 bg-light border">
+                        <span class="small fw-bold text-uppercase text-muted d-block mb-1.5" style="letter-spacing: 0.5px; font-size: 0.75rem;">
+                            <i class="bi bi-arrow-right-circle me-1"></i> Próximas Clases de Hoy
+                        </span>
+                        {% if proximas_clases_estudiante %}
+                        <div class="d-flex flex-column gap-1.5" style="max-height: 90px; overflow-y: auto;">
+                            {% for pc in proximas_clases_estudiante %}
+                            <div class="bg-white p-2 rounded-3 border-start border-3 border-primary shadow-2xs d-flex justify-content-between align-items-center">
+                                <span class="small fw-bold text-dark">{{ pc.nombre_materia|default:pc.programa.denominacion }}</span>
+                                <span class="badge bg-light text-dark border small" style="font-size: 0.68rem;">{{ pc.hora_inicio|time:"h:i A" }} · Aula {{ pc.ambiente|default:'Gen' }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="py-2 text-muted small">
+                            <i class="bi bi-check2-circle me-1"></i> No hay más clases pendientes para hoy.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
             <!-- Grilla Semanal: 5 Columnas (Lunes a Viernes) -->
             <div class="row g-2.5 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5">
                 {% for dia in horario_semanal_grid %}
@@ -1243,116 +1294,81 @@
     </section>
 
     <!-- =========================================================================
-         9. SUBPANEL: COMUNICACIONES (CIRCULARES Y MENSAJES CON DOCENTES)
+         9. SUBPANEL: COMUNICACIONES Y MENSAJERÍA INSTITUCIONAL ESTUDIANTIL
          ========================================================================= -->
+    <style>
+        #comunicacionesTabsEst .nav-link.active {
+            background-color: var(--stu-coffee-primary) !important;
+            color: #ffffff !important;
+            border-color: var(--stu-coffee-primary) !important;
+        }
+        .chat-est-contact-item {
+            transition: all 0.18s ease;
+            text-decoration: none !important;
+            border-left: 3px solid transparent;
+        }
+        .chat-est-contact-item:hover {
+            background: var(--stu-coffee-soft) !important;
+            border-left-color: #B8977E;
+        }
+        .chat-est-contact-item.is-selected {
+            background: var(--stu-coffee-soft) !important;
+            border-left-color: var(--stu-coffee-primary) !important;
+        }
+        .chat-est-bubble-sent {
+            background: linear-gradient(135deg, var(--stu-coffee-soft) 0%, #E8DFC8 100%);
+            border: 1px solid var(--stu-coffee-border);
+            border-radius: 18px 18px 4px 18px;
+            max-width: 82%;
+        }
+        .chat-est-bubble-received {
+            background: #ffffff;
+            border: 1px solid var(--stu-coffee-border);
+            border-radius: 18px 18px 18px 4px;
+            max-width: 82%;
+        }
+    </style>
+
     <section id="subpanel-comunicaciones" class="subpanel-section {% if subpanel_activo != 'comunicaciones' %}d-none{% endif %}">
-        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-chat-dots-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                    <h6 class="fw-bold text-dark mb-0">Bandeja de Comunicaciones Institucionales</h6>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn text-white rounded-pill px-3 py-1.5 fw-bold shadow-2xs" data-bs-toggle="modal" data-bs-target="#modalMensajeSecretaria" style="background: var(--stu-coffee-dark, #5A3825); border: none; font-size: 0.82rem;">
-                        <i class="bi bi-envelope-paper-fill me-1"></i> Escribir a Secretaría
-                    </button>
-                    <button type="button" class="btn text-white rounded-pill px-3.5 py-1.5 fw-bold shadow-2xs" data-bs-toggle="modal" data-bs-target="#modalMensajeDocente" style="background: var(--stu-coffee-primary); border: none; font-size: 0.82rem;">
-                        <i class="bi bi-send-fill me-1"></i> Escribir a un Docente
-                    </button>
-                </div>
-            </div>
-
-            <!-- Conversaciones / Mensajes -->
-            <div class="row g-4">
-                <div class="col-lg-7">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0 small text-uppercase">Mensajes Recientes</h6>
-                        <span class="badge rounded-pill px-2.5 py-0.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-primary); font-size: 0.72rem;">
-                            {{ mensajes_conversacion|length }} mensaje{{ mensajes_conversacion|length|pluralize }}
-                        </span>
-                    </div>
-                    {% for msg in mensajes_conversacion %}
-                    <div class="p-3 mb-2.5 rounded-3 border bg-light" style="border-color: var(--stu-coffee-border) !important;">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <strong class="text-dark small">
-                                {% if msg.remitente == user %}
-                                    <span class="text-muted">Tú para:</span> Prof. {{ msg.destinatario.get_full_name|default:msg.destinatario.username }}
-                                {% else %}
-                                    Prof. {{ msg.remitente.get_full_name|default:msg.remitente.username }}
-                                {% endif %}
-                            </strong>
-                            <small class="text-muted" style="font-size: 0.72rem;">{{ msg.fecha_envio|date:"d/m H:i" }}</small>
-                        </div>
-                        <div class="fw-semibold text-dark small mb-1">{{ msg.asunto }}</div>
-                        <p class="text-muted small mb-0">{{ msg.mensaje }}</p>
-                    </div>
-                    {% empty %}
-                    <div class="text-center py-4 text-muted small">
-                        <i class="bi bi-chat-left-dots fs-3 d-block mb-1" style="color: var(--stu-coffee-primary);"></i>
-                        No tienes mensajes todavía.
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <div class="col-lg-5">
-                    <h6 class="fw-bold text-dark mb-3 small text-uppercase">Circulares Escolares</h6>
-                    {% for c in comunicados_estudiante %}
-                    <div class="p-3 mb-2 rounded-3 border bg-white shadow-2xs" style="border-color: var(--stu-coffee-border) !important;">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <strong class="text-dark small">{{ c.asunto }}</strong>
-                            <span class="text-muted" style="font-size: 0.72rem;">{{ c.fecha_creacion|date:"d/m/Y H:i" }}</span>
-                        </div>
-                        <p class="text-muted small mb-2 text-truncate" style="max-height: 42px;">{{ c.mensaje }}</p>
-                        <div class="text-end">
-                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-0.5" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#modalCircularEst{{ c.id }}" onclick="fetch('/comunicaciones/{{ c.id }}/leer/?format=json')">
-                                <i class="bi bi-eye me-1"></i> Leer Circular
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- MODAL LECTURA CIRCULAR ESTUDIANTE -->
-                    <div class="modal fade text-start" id="modalCircularEst{{ c.id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
-                                <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--color-principal, #8B5E3C) 0%, var(--color-secundario, #5A3825) 100%);">
-                                    <h6 class="modal-title fw-bold">
-                                        <i class="bi bi-megaphone-fill me-2"></i>{{ c.asunto }}
-                                    </h6>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body p-4 bg-white">
-                                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                                        <div>
-                                            <small class="text-muted d-block">Emisor:</small>
-                                            <strong class="text-dark">{{ c.remitente.get_full_name|default:c.remitente.username }}</strong>
-                                        </div>
-                                        <div class="text-end">
-                                            <small class="text-muted d-block">Fecha:</small>
-                                            <strong class="text-dark">{{ c.fecha_creacion|date:"d/m/Y H:i" }}</strong>
-                                        </div>
-                                    </div>
-                                    <div class="p-3 bg-light rounded-3 text-dark border">
-                                        {{ c.mensaje|default:c.contenido|linebreaks }}
-                                    </div>
-                                    <div class="mt-3 text-success small">
-                                        <i class="bi bi-check2-all me-1"></i> Lectura confirmada en secretaría escolar
-                                    </div>
-                                </div>
-                                <div class="modal-footer bg-light py-2">
-                                    <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="text-center py-4 text-muted small">
-                        No hay circulares publicadas para tu grupo.
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
+        {% include 'academico/componente_mensajeria_directa.html' with origen_panel="estudiante" next_url_override="estudiante_comunicaciones" %}
     </section>
+
+    <script>
+    function filtrarContactosChatEstudiante() {
+        const q = (document.getElementById('buscar-contacto-chat-est').value || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.item-contacto-lista-est');
+        items.forEach(it => {
+            const text = it.textContent.toLowerCase();
+            if (!q || text.includes(q)) {
+                it.classList.remove('d-none');
+            } else {
+                it.classList.add('d-none');
+            }
+        });
+    }
+
+    function hacerScrollBajoChatEstudiante() {
+        const stream = document.getElementById('stream-mensajes-chat-est');
+        if (stream) {
+            stream.scrollTop = stream.scrollHeight;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        hacerScrollBajoChatEstudiante();
+        const formChatEst = document.getElementById('form-envio-mensaje-chat-est');
+        if (formChatEst) {
+            formChatEst.addEventListener('submit', function(e) {
+                const input = document.getElementById('input-mensaje-texto-est');
+                const txt = (input ? input.value : '').trim();
+                if (!txt) {
+                    e.preventDefault();
+                    return;
+                }
+            });
+        }
+    });
+    </script>
 
     <!-- =========================================================================
          10. SUBPANEL: NOTIFICACIONES
@@ -1431,51 +1447,6 @@
         </div>
     </section>
 
-    <!-- =========================================================================
-         11. SUBPANEL: DOCUMENTOS
-         ========================================================================= -->
-    <section id="subpanel-documentos" class="subpanel-section {% if subpanel_activo != 'documentos' %}d-none{% endif %}">
-        <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--stu-coffee-border) !important;">
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--stu-coffee-border) !important;">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-file-earmark-text-fill fs-5" style="color: var(--stu-coffee-primary);"></i>
-                    <h6 class="fw-bold text-dark mb-0">Documentos Institucionales y Formatos</h6>
-                </div>
-                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: var(--stu-coffee-soft); color: var(--stu-coffee-dark); border: 1px solid var(--stu-coffee-border);">
-                    Descargas Oficiales
-                </span>
-            </div>
-
-            <div class="row g-3">
-                {% for doc in documentos_institucionales %}
-                <div class="col-md-6">
-                    <div class="p-3 rounded-4 border bg-white h-100 d-flex justify-content-between align-items-center" style="border-color: var(--stu-coffee-border) !important;">
-                        <div>
-                            <strong class="text-dark d-block mb-1" style="font-size: 0.92rem;">{{ doc.titulo }}</strong>
-                            <small class="text-muted d-block">{{ doc.categoria|default:"Institucional" }} · {{ doc.fecha_subida|date:"d/m/Y" }}</small>
-                        </div>
-                        {% if doc.archivo %}
-                        <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm text-white rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1 shadow-xs" style="background: var(--stu-coffee-primary);">
-                            <i class="bi bi-paperclip"></i> <i class="bi bi-download"></i> Descargar
-                        </a>
-                        {% else %}
-                        <span class="badge rounded-pill px-3 py-1.5 bg-light text-muted border small d-inline-flex align-items-center gap-1">
-                            <i class="bi bi-clock-history"></i> Todavía no disponible
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% empty %}
-                <div class="col-12 text-center py-5 text-muted">
-                    <i class="bi bi-folder-x fs-2 d-block mb-2" style="color: var(--stu-coffee-primary);"></i>
-                    <h6 class="fw-bold text-dark">No hay documentos institucionales disponibles por ahora.</h6>
-                    <p class="small mb-0">Los manuales de convivencia y formatos se publicarán aquí cuando estén disponibles.</p>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-
 </div>
 
 <!-- MODAL ENVIAR MENSAJE A DOCENTE -->
@@ -1517,6 +1488,54 @@
                 <div class="modal-footer border-top py-2.5 bg-light">
                     <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-sm text-white rounded-pill px-4 fw-bold" style="background: var(--stu-coffee-primary); border-color: var(--stu-coffee-primary);">
+                        <i class="bi bi-send-fill me-1.5"></i> Enviar Mensaje
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ENVIAR MENSAJE A COMPAÑERO -->
+<div class="modal fade" id="modalMensajeCompanero" tabindex="-1" aria-labelledby="modalMensajeCompaneroLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <form method="post" action="{% url 'estudiante_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="enviar_mensaje_companero">
+                <div class="modal-header border-bottom py-3 text-white" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+                    <h6 class="modal-title fw-bold text-white d-flex align-items-center gap-2" id="modalMensajeCompaneroLabel">
+                        <i class="bi bi-people-fill"></i> Enviar Mensaje a un Compañero
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Seleccionar Compañero de Clase</label>
+                        <select class="form-select rounded-pill px-3 py-2" name="companero_id" style="border-color: var(--stu-coffee-border);" required>
+                            <option value="">-- Elige un compañero de tu grado --</option>
+                            {% for comp in companeros_curso %}
+                                <option value="{{ comp.id }}">{{ comp.get_full_name|default:comp.username }} ({{ comp.username }})</option>
+                            {% empty %}
+                                <option value="" disabled>No hay otros compañeros registrados en tu grado</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Asunto</label>
+                        <input type="text" class="form-control rounded-pill px-3 py-2" name="asunto" style="border-color: var(--stu-coffee-border);" placeholder="Motivo del mensaje..." value="Mensaje entre compañeros" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Tu Mensaje</label>
+                        <textarea class="form-control rounded-4 px-3 py-2" name="mensaje" rows="4" style="border-color: var(--stu-coffee-border);" placeholder="Escribe tu mensaje a tu compañero..." required></textarea>
+                    </div>
+                    <div class="form-text small text-muted">
+                        <i class="bi bi-shield-check text-success me-1"></i> Mensajería escolar institucional de EduNova.
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-2.5 bg-light">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-sm text-white rounded-pill px-4 fw-bold" style="background: #0284c7; border-color: #0284c7;">
                         <i class="bi bi-send-fill me-1.5"></i> Enviar Mensaje
                     </button>
                 </div>

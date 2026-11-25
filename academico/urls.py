@@ -45,6 +45,7 @@ urlpatterns = [
     path('mis-actividades-docente/', views_clase.mis_actividades_docente, name='mis_actividades_docente'),
     path('panel-calificaciones/', views_clase.panel_calificaciones, name='panel_calificaciones'),
     path('comunicaciones/', views_clase.comunicaciones, name='comunicaciones'),
+    path('comunicaciones/api/conversacion/<int:otro_usuario_id>/', views_clase.api_conversacion_historial, name='api_conversacion_historial'),
     path('mis-actividades/', views_clase.actividades_estudiante, name='actividades_estudiante'),
     path('tarea/<int:tarea_id>/entregar/', views_clase.entregar_tarea, name='entregar_tarea'),
     path('crear-actividad-digital/', views_clase.crear_actividad_digital, name='crear_actividad_digital'),

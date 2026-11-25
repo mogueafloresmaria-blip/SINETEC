@@ -1,0 +1,984 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Consulta de Horarios · Rectoría Institucional{% endblock %}
+
+{% block content %}
+<style>
+    @media print {
+        .sinetec-sidebar, .sinetec-topbar, .btn-no-print, .filter-section, #chatWidgetSinetec, .sidebar-bottom-actions {
+            display: none !important;
+        }
+        .sinetec-main {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+        .card {
+            border: 1px solid #CBD5E1 !important;
+            box-shadow: none !important;
+        }
+    }
+    .horario-dia-card {
+        border-radius: 14px;
+        border: 1px solid #E2E8F0;
+        background: #FFFFFF;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .horario-bloque {
+        border-left: 4px solid #007F7B;
+        background: #F8FAFC;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 10px;
+        transition: all 0.2s ease;
+    }
+    .horario-bloque:hover {
+        background: #F1F5F9;
+        border-left-color: #004D4A;
+    }
+
+    /* Cuadrícula y Tarjetas Visuales Académicas de Grados Escolares */
+    .grados-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 1.15rem;
+    }
+    @media (max-width: 1399px) {
+        .grados-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+    @media (max-width: 991px) {
+        .grados-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    @media (max-width: 650px) {
+        .grados-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @media (max-width: 420px) {
+        .grados-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .grado-card {
+        background: #FFFFFF;
+        border: 2px solid #E2E8F0;
+        border-radius: 18px;
+        padding: 1.25rem 0.95rem 1rem 0.95rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        text-decoration: none;
+        color: #1E293B;
+        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        position: relative;
+        overflow: hidden;
+        user-select: none;
+    }
+    .grado-card:hover {
+        background-color: #FAFCFC;
+        border-color: #007F7B;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0, 127, 123, 0.14);
+        color: #004D4A;
+    }
+    .grado-card.active {
+        background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%);
+        border: 2.5px solid #007F7B;
+        box-shadow: 0 0 0 3.5px rgba(0, 127, 123, 0.22), 0 10px 25px rgba(0, 127, 123, 0.18);
+        transform: translateY(-3px) scale(1.02);
+    }
+    .grado-card-icon-wrap {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: #F1F5F9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.55rem;
+        margin-bottom: 0.55rem;
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .grado-card:hover .grado-card-icon-wrap {
+        transform: scale(1.1);
+        background: #E6F4F3;
+    }
+    .grado-card.active .grado-card-icon-wrap {
+        background: #CCFBF1;
+        transform: scale(1.1);
+    }
+    .grado-num-grande {
+        font-size: 2.35rem;
+        font-weight: 800;
+        line-height: 1;
+        color: #0F172A;
+        letter-spacing: -1px;
+        margin-bottom: 0.25rem;
+    }
+    .grado-card.active .grado-num-grande {
+        color: #004D4A;
+    }
+    .grado-card-nombre {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 0.25rem;
+        letter-spacing: -0.2px;
+    }
+    .grado-card-etapa {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #64748B;
+        background: #F8FAFC;
+        padding: 2px 8px;
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        margin-bottom: 0.65rem;
+    }
+    .grado-card.active .grado-card-etapa {
+        background: #E6F4F3;
+        color: #0F766E;
+        border-color: #99F6E4;
+    }
+    .grado-grupos-mini-pills {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        margin-top: auto;
+        padding-top: 0.45rem;
+        border-top: 1px dashed #E2E8F0;
+        width: 100%;
+    }
+    .grado-grupo-tag {
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: #F1F5F9;
+        color: #475569;
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+    }
+    .grado-card:hover .grado-grupo-tag {
+        background: #E2E8F0;
+        color: #0F172A;
+    }
+    .grado-card.active .grado-grupo-tag {
+        background: #CCFBF1;
+        color: #0F766E;
+        font-weight: 800;
+    }
+    .badge-card-active-pill {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #007F7B;
+        color: #FFFFFF;
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 2px 7px;
+        border-radius: 10px;
+        letter-spacing: 0.3px;
+        box-shadow: 0 2px 5px rgba(0, 127, 123, 0.3);
+    }
+</style>
+
+<div class="container-fluid px-0 py-2">
+
+    <!-- Header Hero Escolar -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #004D4A 0%, #006B68 50%, #007F7B 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(0, 107, 104, 0.25);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="badge rounded-pill px-3 py-1.5 mb-2 fw-semibold d-inline-flex align-items-center gap-1.5" style="background: rgba(255, 255, 255, 0.18) !important; color: #FFFFFF !important; border: 1px solid rgba(255, 255, 255, 0.35) !important; font-size: 0.8rem;">
+                    <i class="bi bi-shield-check"></i> Supervisión y Rectoría Institucional
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Consulta de Horarios Escolares</h1>
+                <p class="mb-0 text-white-50 small">
+                    Búsqueda y consulta individual de horarios de estudiantes organizados por grado, grupo, asignaturas y docentes. Modo exclusivo de consulta y supervisión.
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-2 btn-no-print">
+                {% if estudiante_sel %}
+                <a href="{% url 'rectoria_horario_estudiante_pdf' estudiante_sel.id %}" target="_blank" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2" title="Imprimir horario oficial en PDF">
+                    <i class="bi bi-printer-fill"></i> Imprimir Horario
+                </a>
+                <a href="{% url 'rectoria_horario_estudiante_pdf' estudiante_sel.id %}?descargar=1" class="btn btn-light fw-bold rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center gap-2" style="color: #004D4A;" title="Descargar documento oficial en PDF">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Descargar en PDF
+                </a>
+                {% else %}
+                <a href="{% url 'rectoria_horario_general_pdf' %}" target="_blank" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2" title="Imprimir horario oficial en PDF">
+                    <i class="bi bi-printer-fill"></i> Imprimir Horario
+                </a>
+                <a href="{% url 'rectoria_horario_general_pdf' %}?descargar=1" class="btn btn-light fw-bold rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center gap-2" style="color: #004D4A;" title="Descargar documento oficial en PDF">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Descargar en PDF
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Selección Visual de Grados Escolares (1° a 11°) según Modelo Institucional -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white btn-no-print filter-section">
+        <!-- Encabezado con título de Grados, botón Todos los Grados y buscador de estudiante -->
+        <div class="d-flex align-items-center justify-content-between mb-3.5 pb-2 flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2.5 flex-wrap">
+                <h5 class="fw-bold mb-0 d-inline-flex align-items-center gap-2" style="color: #004D4A; font-size: 1.15rem; letter-spacing: -0.2px;">
+                    <span style="font-size: 1.45rem;">🎓</span> GRADOS (1° A 11°):
+                </h5>
+                <a href="{% url 'rectoria_consulta_horarios' %}{% if q %}?q={{ q }}{% endif %}"
+                   class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-bold text-decoration-none transition"
+                   style="{% if not grado_sel %}background: #2563EB; color: #FFFFFF; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);{% else %}background: #EBF3FE; color: #2563EB; border: 1px solid #BFDBFE;{% endif %} font-size: 0.88rem;"
+                   title="Mostrar programación de todos los grados escolares">
+                    Todos los Grados
+                </a>
+            </div>
+
+            <!-- Buscador Integrado de Estudiantes -->
+            <form method="get" class="d-flex align-items-center gap-2" style="min-width: 290px; max-width: 440px; flex-grow: 1;">
+                {% if grado_sel %}<input type="hidden" name="grado" value="{{ grado_sel }}">{% endif %}
+                {% if grupo_sel %}<input type="hidden" name="grupo" value="{{ grupo_sel }}">{% endif %}
+                <div class="input-group input-group-sm w-100 shadow-2xs rounded-pill overflow-hidden border">
+                    <span class="input-group-text bg-light border-0 ps-3 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q" value="{{ q }}" class="form-control bg-light border-0 py-2" placeholder="Buscar estudiante (nombre o documento)..." style="font-size: 0.85rem;">
+                    <button type="submit" class="btn btn-primary px-3 fw-bold" style="background-color: #007F7B; border: none;">
+                        Buscar
+                    </button>
+                </div>
+                {% if q or grado_sel or grupo_sel %}
+                <a href="{% url 'rectoria_consulta_horarios' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-1.5" title="Restablecer todos los filtros">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Cuadrícula Visual Académica de Grados (1° al 11°) -->
+        <div class="grados-grid">
+            <!-- Grado 1° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=1{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '1' %}active{% endif %}" title="Consultar horarios de Grado 1°">
+                {% if grado_sel == '1' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">🎒</div>
+                <div class="grado-num-grande">1°</div>
+                <div class="grado-card-nombre">Grado Primero</div>
+                <span class="grado-card-etapa">Básica Primaria</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 2° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=2{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '2' %}active{% endif %}" title="Consultar horarios de Grado 2°">
+                {% if grado_sel == '2' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">✏️</div>
+                <div class="grado-num-grande">2°</div>
+                <div class="grado-card-nombre">Grado Segundo</div>
+                <span class="grado-card-etapa">Básica Primaria</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 3° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=3{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '3' %}active{% endif %}" title="Consultar horarios de Grado 3°">
+                {% if grado_sel == '3' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">📖</div>
+                <div class="grado-num-grande">3°</div>
+                <div class="grado-card-nombre">Grado Tercero</div>
+                <span class="grado-card-etapa">Básica Primaria</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 4° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=4{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '4' %}active{% endif %}" title="Consultar horarios de Grado 4°">
+                {% if grado_sel == '4' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">🎨</div>
+                <div class="grado-num-grande">4°</div>
+                <div class="grado-card-nombre">Grado Cuarto</div>
+                <span class="grado-card-etapa">Básica Primaria</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 5° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=5{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '5' %}active{% endif %}" title="Consultar horarios de Grado 5°">
+                {% if grado_sel == '5' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">🌍</div>
+                <div class="grado-num-grande">5°</div>
+                <div class="grado-card-nombre">Grado Quinto</div>
+                <span class="grado-card-etapa">Básica Primaria</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 6° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=6{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '6' %}active{% endif %}" title="Consultar horarios de Grado 6°">
+                {% if grado_sel == '6' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">🧪</div>
+                <div class="grado-num-grande">6°</div>
+                <div class="grado-card-nombre">Grado Sexto</div>
+                <span class="grado-card-etapa">Básica Secundaria</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 7° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=7{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '7' %}active{% endif %}" title="Consultar horarios de Grado 7°">
+                {% if grado_sel == '7' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">📐</div>
+                <div class="grado-num-grande">7°</div>
+                <div class="grado-card-nombre">Grado Séptimo</div>
+                <span class="grado-card-etapa">Básica Secundaria</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 8° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=8{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '8' %}active{% endif %}" title="Consultar horarios de Grado 8°">
+                {% if grado_sel == '8' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">💻</div>
+                <div class="grado-num-grande">8°</div>
+                <div class="grado-card-nombre">Grado Octavo</div>
+                <span class="grado-card-etapa">Básica Secundaria</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 9° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=9{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '9' %}active{% endif %}" title="Consultar horarios de Grado 9°">
+                {% if grado_sel == '9' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">🔬</div>
+                <div class="grado-num-grande">9°</div>
+                <div class="grado-card-nombre">Grado Noveno</div>
+                <span class="grado-card-etapa">Básica Secundaria</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 10° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=10{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '10' %}active{% endif %}" title="Consultar horarios de Grado 10°">
+                {% if grado_sel == '10' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">⚛️</div>
+                <div class="grado-num-grande">10°</div>
+                <div class="grado-card-nombre">Grado Décimo</div>
+                <span class="grado-card-etapa">Media Técnica</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+
+            <!-- Grado 11° -->
+            <a href="{% url 'rectoria_consulta_horarios' %}?grado=11{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
+               class="grado-card {% if grado_sel == '11' %}active{% endif %}" title="Consultar horarios de Grado 11°">
+                {% if grado_sel == '11' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
+                <div class="grado-card-icon-wrap">🎓</div>
+                <div class="grado-num-grande">11°</div>
+                <div class="grado-card-nombre">Grado Undécimo</div>
+                <span class="grado-card-etapa">Media Vocacional</span>
+                <div class="grado-grupos-mini-pills">
+                    <span class="grado-grupo-tag">A</span>
+                    <span class="grado-grupo-tag">B</span>
+                    <span class="grado-grupo-tag">C</span>
+                    <span class="grado-grupo-tag">D</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Selector de Grupos Disponibles (A, B, C y D) para el Grado Seleccionado -->
+        <div class="mt-4 pt-3 border-top">
+            <div class="p-3 rounded-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background: #FAF9F5; border: 1.5px solid #EDE8E1;">
+                <div class="d-flex align-items-center gap-2.5">
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5" style="background: #004D4A; color: #FFFFFF; font-size: 0.85rem;">
+                        <i class="bi bi-mortarboard-fill"></i> {% if grado_sel %}Grado {{ grado_sel }}°{% else %}Grados 1° a 11°{% endif %}
+                    </span>
+                    <span class="fw-bold text-dark small">
+                        Grupos Disponibles (A, B, C y D):
+                    </span>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    {% for gr in grupos_disponibles %}
+                    <a href="{% url 'rectoria_consulta_horarios' %}?{% if grado_sel %}grado={{ grado_sel }}&{% endif %}grupo={{ gr }}{% if q %}&q={{ q }}{% endif %}"
+                       class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-bold transition shadow-2xs"
+                       style="{% if grupo_sel == gr %}background-color: #007F7B !important; border-color: #007F7B !important; color: #FFFFFF !important; box-shadow: 0 2px 8px rgba(0, 127, 123, 0.3);{% else %}background: #FFFFFF; color: #334155; border: 1.5px solid #CBD5E1;{% endif %}"
+                       title="Consultar horario específico del Grupo {{ gr }}">
+                        <i class="bi bi-people-fill me-1"></i> Grupo {{ gr }}
+                    </a>
+                    {% endfor %}
+                    <a href="{% url 'rectoria_consulta_horarios' %}{% if grado_sel %}?grado={{ grado_sel }}{% if q %}&q={{ q }}{% endif %}{% elif q %}?q={{ q }}{% endif %}"
+                       class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-semibold transition"
+                       style="{% if not grupo_sel %}background: #475569; color: #FFFFFF;{% else %}background: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0;{% endif %}"
+                       title="Ver programación completa de todos los grupos de este grado">
+                        Todos los Grupos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Monitoreo Institucional de Clases en Tiempo Real (Por Horas) -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white btn-no-print">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2.5">
+                <div class="rounded-3 p-2 text-white d-flex align-items-center justify-content-center shadow-xs" style="background: #004D4A; width: 42px; height: 42px;">
+                    <i class="bi bi-broadcast-pin fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Monitoreo Institucional de Clases por Hora{% if grado_sel %} · Grado {{ grado_sel }}°{% if grupo_sel %} Grupo {{ grupo_sel }}{% endif %}{% endif %}</h5>
+                    <small class="text-muted">Supervisión en vivo: qué docente orienta cada clase, en qué grado, grupo y aula ahora mismo</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge rounded-pill px-3 py-1.5 fw-semibold" style="background: #E0F2FE; color: #0369A1; font-size: 0.78rem;">
+                    <i class="bi bi-clock me-1"></i> {{ hora_actual_str }} · {{ dia_actual_nombre }}
+                </span>
+                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #DCFCE7; color: #15803D; font-size: 0.78rem;">
+                    <i class="bi bi-circle-fill text-success me-1" style="font-size: 0.5rem;"></i> {{ total_clases_en_curso }} Clases en Desarrollo
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- Columna 1: Clases en Desarrollo Ahora -->
+            <div class="col-lg-7">
+                <div class="p-3.5 rounded-4 h-100 border" style="background: #F8FAFC;">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="small fw-bold text-uppercase text-success" style="letter-spacing: 0.5px;">
+                            <i class="bi bi-play-circle-fill me-1"></i> Clases Desarrollándose en Esta Hora
+                        </span>
+                        <span class="badge bg-success rounded-pill px-2.5 py-0.5 fw-bold" style="font-size: 0.7rem;">EN CURSO</span>
+                    </div>
+
+                    {% if clases_en_curso_institucion %}
+                    <div class="d-flex flex-column gap-2.5" style="max-height: 280px; overflow-y: auto;">
+                        {% for c in clases_en_curso_institucion %}
+                        <div class="p-3 bg-white rounded-3 border-start border-4 border-success shadow-2xs d-flex align-items-center justify-content-between flex-wrap gap-2 cursor-pointer hover-shadow transition"
+                             role="button"
+                             onclick="abrirModalDetalleBloque(this)"
+                             data-materia="{{ c.nombre_materia|default:c.programa.denominacion }}"
+                             data-docente="{{ c.instructor.get_full_name|default:c.instructor.username }}"
+                             data-docente-doc="{{ c.instructor.perfil.numero_documento|default:'Sin documento' }}"
+                             data-docente-email="{{ c.instructor.email|default:'docente@edunova.edu.co' }}"
+                             data-grado="Grado {% if c.grado %}{{ c.grado }}{% elif c.ficha %}{{ c.ficha.codigo_ficha }}{% else %}10{% endif %}°{{ c.seccion|default:'A' }}"
+                             data-dia="{{ dia_actual_nombre }}"
+                             data-horario="{{ c.hora_inicio|time:'h:i A' }} - {{ c.hora_fin|time:'h:i A' }}"
+                             data-aula="{{ c.ambiente|default:'Aula General' }}"
+                             data-en-curso="1"
+                             title="Clic para ver detalle de la clase y estudiantes">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold small shadow-2xs" style="width: 40px; height: 40px; background: linear-gradient(135deg, #006B68, #007F7B);">
+                                    {{ c.instructor.first_name|slice:":1"|default:"D" }}{{ c.instructor.last_name|slice:":1"|default:"" }}
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0.5 d-flex align-items-center gap-1.5" style="font-size: 0.92rem;">
+                                        {{ c.nombre_materia|default:c.programa.denominacion }}
+                                        <i class="bi bi-box-arrow-up-right text-primary small" style="font-size: 0.75rem;"></i>
+                                    </h6>
+                                    <div class="small text-muted d-flex align-items-center gap-2 flex-wrap">
+                                        <span><i class="bi bi-person-badge me-0.5"></i> Docente: <strong class="text-dark">{{ c.instructor.get_full_name|default:c.instructor.username }}</strong></span>
+                                        <span>•</span>
+                                        <span><i class="bi bi-mortarboard me-0.5"></i> Grado <strong>{% if c.grado %}{{ c.grado }}{% elif c.ficha %}{{ c.ficha.codigo_ficha }}{% else %}10{% endif %}°{{ c.seccion|default:'A' }}</strong></span>
+                                        <span>•</span>
+                                        <span><i class="bi bi-geo-alt me-0.5"></i> Aula: <strong class="text-dark">{{ c.ambiente|default:'Aula General' }}</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="badge bg-light text-dark border px-2.5 py-1 rounded-pill fw-bold" style="font-size: 0.75rem;">
+                                    {{ c.hora_inicio|time:"h:i A" }} - {{ c.hora_fin|time:"h:i A" }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 bg-white rounded-3 border border-dashed">
+                        <i class="bi bi-info-circle fs-3 text-secondary opacity-50 d-block mb-1"></i>
+                        <h6 class="fw-bold text-dark mb-1 small">No hay clases programadas desarrollándose en este minuto exacto{% if grado_sel %} para Grado {{ grado_sel }}°{% if grupo_sel %} Grupo {{ grupo_sel }}{% endif %}{% endif %}</h6>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">
+                            Puede tratarse de cambio de bloque pedagógico, receso o jornada finalizada.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Columna 2: Próximas Clases de la Jornada -->
+            <div class="col-lg-5">
+                <div class="p-3.5 rounded-4 h-100 border" style="background: #F8FAFC;">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">
+                            <i class="bi bi-arrow-right-circle me-1"></i> Próximos Bloques de Hoy
+                        </span>
+                        <span class="badge bg-light text-secondary border small">{{ proximas_clases_institucion|length }} pendientes</span>
+                    </div>
+
+                    {% if proximas_clases_institucion %}
+                    <div class="d-flex flex-column gap-2" style="max-height: 280px; overflow-y: auto;">
+                        {% for pc in proximas_clases_institucion|slice:":8" %}
+                        <div class="bg-white p-2.5 rounded-3 border-start border-3 border-primary shadow-2xs d-flex justify-content-between align-items-center cursor-pointer hover-shadow transition"
+                             role="button"
+                             onclick="abrirModalDetalleBloque(this)"
+                             data-materia="{{ pc.nombre_materia|default:pc.programa.denominacion }}"
+                             data-docente="{{ pc.instructor.get_full_name|default:pc.instructor.username }}"
+                             data-docente-doc="{{ pc.instructor.perfil.numero_documento|default:'Sin documento' }}"
+                             data-docente-email="{{ pc.instructor.email|default:'docente@edunova.edu.co' }}"
+                             data-grado="Grado {% if pc.grado %}{{ pc.grado }}{% elif pc.ficha %}{{ pc.ficha.codigo_ficha }}{% else %}10{% endif %}°{{ pc.seccion|default:'A' }}"
+                             data-dia="{{ dia_actual_nombre }}"
+                             data-horario="{{ pc.hora_inicio|time:'h:i A' }} - {{ pc.hora_fin|time:'h:i A' }}"
+                             data-aula="{{ pc.ambiente|default:'Aula General' }}"
+                             data-en-curso="0"
+                             title="Clic para ver detalle de la clase">
+                            <div>
+                                <strong class="text-dark small d-block">{{ pc.nombre_materia|default:pc.programa.denominacion }}</strong>
+                                <div class="text-muted" style="font-size: 0.74rem;">
+                                    {{ pc.instructor.get_full_name|default:pc.instructor.username }} · Grado {% if pc.grado %}{{ pc.grado }}{% elif pc.ficha %}{{ pc.ficha.codigo_ficha }}{% else %}10{% endif %}°{{ pc.seccion|default:'A' }} · Aula {{ pc.ambiente|default:'Gen' }}
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-dark border small" style="font-size: 0.7rem;">
+                                {{ pc.hora_inicio|time:"h:i A" }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 bg-white rounded-3 border border-dashed">
+                        <i class="bi bi-calendar-check fs-3 text-secondary opacity-50 d-block mb-1"></i>
+                        <h6 class="fw-bold text-dark mb-1 small">Jornada escolar del día concluida{% if grado_sel %} para Grado {{ grado_sel }}°{% if grupo_sel %} Grupo {{ grupo_sel }}{% endif %}{% endif %}</h6>
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">
+                            No hay más bloques pendientes programados para la fecha.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal: Dos Columnas -->
+    <div class="row g-4">
+
+        <!-- Columna Izquierda: Lista de Estudiantes Encontrados -->
+        <div class="col-lg-4 btn-no-print">
+            <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-people-fill text-primary"></i> Estudiantes ({{ total_encontrados }})
+                    </h6>
+                    <span class="badge bg-light text-secondary border small">Seleccionar</span>
+                </div>
+                <div class="list-group list-group-flush overflow-auto" style="max-height: 650px;">
+                    {% for est in estudiantes %}
+                    <a href="?estudiante={{ est.id }}&q={{ q }}&grado={{ grado_sel }}&grupo={{ grupo_sel }}" 
+                       class="list-group-item list-group-item-action p-3 d-flex align-items-center justify-content-between border-bottom {% if estudiante_sel.id == est.id %}bg-light border-start border-4{% endif %}"
+                       style="{% if estudiante_sel.id == est.id %}border-start-color: #007F7B !important; background: #F5F8FC !important;{% endif %}">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold small shadow-2xs" style="width: 36px; height: 36px; background: {% if estudiante_sel.id == est.id %}#007F7B{% else %}#64748B{% endif %};">
+                                {{ est.first_name|slice:":1" }}{{ est.last_name|slice:":1"|default:est.username|slice:":1" }}
+                            </div>
+                            <div>
+                                <strong class="text-dark d-block small">{{ est.get_full_name|default:est.username }}</strong>
+                                <span class="text-muted" style="font-size: 0.72rem;">Doc: {{ est.perfil.numero_documento|default:est.username }}</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge rounded-pill bg-white text-dark border px-2 py-0.5 small" style="font-size: 0.68rem;">
+                                {% for m in est.matriculas_academicas.all %}
+                                    {{ m.get_grado_escolar_display }}-{{ m.seccion }}
+                                {% empty %}
+                                    S/M
+                                {% endfor %}
+                            </span>
+                            {% if estudiante_sel.id == est.id %}
+                                <i class="bi bi-chevron-right text-primary ms-1 small"></i>
+                            {% endif %}
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-person-x fs-2 d-block mb-2 opacity-50"></i>
+                        <h6 class="fw-bold text-dark mb-1 small">Sin estudiantes matriculados</h6>
+                        <span class="small" style="font-size: 0.78rem;">No se encontraron estudiantes matriculados en {% if grado_sel %}Grado {{ grado_sel }}°{% elif grado_objetivo %}Grado {{ grado_objetivo }}°{% endif %}{% if grupo_sel %} Grupo {{ grupo_sel }}{% elif grupo_objetivo %} Grupo {{ grupo_objetivo }}{% endif %}.</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Detalle y Horario Semanal Completo -->
+        <div class="col-lg-8">
+            {% if estudiante_sel %}
+            <!-- Tarjeta de Identificación del Estudiante Seleccionado -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border-start border-4" style="border-start-color: #007F7B !important;">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-3 shadow-xs" style="width: 58px; height: 58px; background: linear-gradient(135deg, #006B68, #007F7B);">
+                            {{ estudiante_sel.first_name|slice:":1" }}{{ estudiante_sel.last_name|slice:":1"|default:estudiante_sel.username|slice:":1" }}
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h4 class="fw-bold text-dark mb-0">{{ estudiante_sel.get_full_name|default:estudiante_sel.username }}</h4>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill small">Activo</span>
+                            </div>
+                            <div class="text-muted small mt-1">
+                                <span class="me-3"><i class="bi bi-card-text me-1"></i>Documento: <strong>{{ estudiante_sel.perfil.numero_documento|default:estudiante_sel.username }}</strong></span>
+                                <span class="me-3"><i class="bi bi-mortarboard me-1"></i>Grado: <strong>{% if matricula_sel %}{{ matricula_sel.get_grado_escolar_display }} - Grupo {{ matricula_sel.seccion }}{% else %}Grado {{ grado_objetivo }}°{{ grupo_objetivo }}{% endif %}</strong></span>
+                                <span><i class="bi bi-calendar-event me-1"></i>Vigencia: <strong>2026</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-md-end">
+                        <span class="badge px-3 py-2 rounded-pill fw-bold" style="background: #DDF7F5; color: #006B68; font-size: 0.85rem;">
+                            <i class="bi bi-clock me-1"></i> {{ total_bloques }} Clases Programadas
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Tarjeta del Grado Consultado (Cuando no hay estudiante seleccionado individual) -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border-start border-4" style="border-start-color: #007F7B !important;">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center text-white fw-bold fs-3 shadow-xs" style="width: 58px; height: 58px; background: linear-gradient(135deg, #006B68, #007F7B);">
+                            {{ grado_objetivo }}°
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h4 class="fw-bold text-dark mb-0">Horario Oficial de Clases · Grado {{ grado_objetivo }}° Grupo {{ grupo_objetivo }}</h4>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill small">Supervisión Rectoría</span>
+                            </div>
+                            <div class="text-muted small mt-1">
+                                <span class="me-3"><i class="bi bi-mortarboard me-1"></i>Nivel: <strong>{% if grado_objetivo|add:0 <= 5 %}Básica Primaria{% elif grado_objetivo|add:0 <= 9 %}Básica Secundaria{% else %}Media Académica{% endif %}</strong></span>
+                                <span class="me-3"><i class="bi bi-people me-1"></i>Estudiantes en Grupo: <strong>{{ estudiantes_grupo|length }} matriculados</strong></span>
+                                <span><i class="bi bi-calendar-event me-1"></i>Vigencia: <strong>2026</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-md-end">
+                        <span class="badge px-3 py-2 rounded-pill fw-bold" style="background: #DDF7F5; color: #006B68; font-size: 0.85rem;">
+                            <i class="bi bi-clock me-1"></i> {{ total_bloques }} Clases Programadas
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if total_bloques == 0 %}
+            <!-- Mensaje claro cuando no hay bloques de clase programados para el grado/grupo -->
+            <div class="card border-0 rounded-4 p-4 text-center bg-white shadow-sm mb-4 border-start border-4 border-warning">
+                <div class="py-2">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2 shadow-2xs" style="width: 48px; height: 48px; background: #FEF3C7; color: #D97706;">
+                        <i class="bi bi-calendar-x fs-4"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Sin programación de clases registrada</h6>
+                    <p class="text-muted small mb-0 mx-auto" style="max-width: 520px; font-size: 0.82rem;">
+                        No se encontraron horarios escolares registrados para {% if grado_sel %}el Grado {{ grado_sel }}°{% elif grado_objetivo %}el Grado {{ grado_objetivo }}°{% endif %}{% if grupo_sel %} Grupo {{ grupo_sel }}{% elif grupo_objetivo %} Grupo {{ grupo_objetivo }}{% endif %}. Las asignaturas y bloques aparecerán aquí tan pronto sean programados oficialmente por los docentes orientadores.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Grilla Semanal de Horarios (Lunes a Viernes) -->
+            <div class="row g-3">
+                {% for dia_id, dia_data in horarios_por_dia.items %}
+                <div class="col-md-6 col-xl-4">
+                    <div class="horario-dia-card h-100 p-3 shadow-sm d-flex flex-column">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                            <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                <span class="badge rounded-circle p-1.5" style="background: #DDF7F5; color: #007F7B;"><i class="bi bi-calendar-day"></i></span>
+                                {{ dia_data.nombre }}
+                            </h6>
+                            <span class="badge bg-light text-muted border small">{{ dia_data.bloques|length }} clases</span>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            {% for b in dia_data.bloques %}
+                            <div class="horario-bloque cursor-pointer position-relative hover-shadow"
+                                 role="button"
+                                 tabindex="0"
+                                 onclick="abrirModalDetalleBloque(this)"
+                                 data-materia="{{ b.materia_titulo }}"
+                                 data-docente="{{ b.docente_nombre }}"
+                                 data-docente-doc="{{ b.docente_doc }}"
+                                 data-docente-email="{{ b.docente_email }}"
+                                 data-grado="{{ b.grado_texto }}"
+                                 data-dia="{{ b.dia_nombre }}"
+                                 data-horario="{{ b.hora_inicio_str }} - {{ b.hora_fin_str }}"
+                                 data-aula="{{ b.ambiente_texto }}"
+                                 data-en-curso="{% if b.es_en_curso %}1{% else %}0{% endif %}"
+                                 title="Clic para consultar el detalle de esta clase">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge bg-white text-dark border fw-bold small px-2 py-0.5" style="font-size: 0.72rem;">
+                                        <i class="bi bi-clock me-1 text-primary"></i>{{ b.hora_inicio|time:"h:i A" }} - {{ b.hora_fin|time:"h:i A" }}
+                                    </span>
+                                    <div class="d-flex align-items-center gap-1">
+                                        {% if b.es_en_curso %}
+                                        <span class="badge bg-success text-white rounded-pill px-1.5 py-0.5 fw-bold" style="font-size: 0.65rem;">
+                                            EN VIVO
+                                        </span>
+                                        {% endif %}
+                                        <span class="badge bg-light text-secondary border small" style="font-size: 0.65rem;">
+                                            <i class="bi bi-geo-alt"></i> {{ b.ambiente_texto }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-start gap-1">
+                                    <strong class="text-dark d-block small mb-1" style="font-size: 0.88rem;">
+                                        {{ b.materia_titulo }}
+                                    </strong>
+                                    <i class="bi bi-box-arrow-up-right text-primary opacity-50" style="font-size: 0.75rem;"></i>
+                                </div>
+                                <div class="d-flex align-items-center gap-1.5 text-muted small" style="font-size: 0.76rem;">
+                                    <i class="bi bi-person-badge text-secondary"></i>
+                                    <span>Docente: {{ b.docente_nombre }}</span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-calendar-minus fs-4 d-block mb-1 text-secondary opacity-50"></i>
+                                <span class="small" style="font-size: 0.75rem;">Sin bloques de clase programados</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Banner Informativo de Supervisión -->
+            <div class="mt-4 p-3 rounded-4 bg-white border shadow-xs d-flex align-items-center justify-content-between flex-wrap gap-2 btn-no-print" style="border-color: #E2E8F0;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+                    <span class="small text-muted">
+                        Haz clic en cualquier bloque o línea de horario para consultar el detalle pedagógico, docente, aula y lista de estudiantes matriculados.
+                    </span>
+                </div>
+                <span class="badge bg-light text-dark border px-2.5 py-1 rounded-pill small">Sincronización en Vivo</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal de Consulta Detallada de Bloque Horario -->
+<div class="modal fade" id="modalDetalleBloqueHorario" tabindex="-1" aria-labelledby="modalDetalleTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header text-white p-3.5 px-4" style="background: linear-gradient(135deg, #004D4A 0%, #006B68 100%);">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="rounded-3 p-2 text-white d-flex align-items-center justify-content-center shadow-xs" style="background: rgba(255,255,255,0.2); width: 42px; height: 42px;">
+                        <i class="bi bi-calendar3-event fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0 text-white" id="modalDetalleTitulo">Detalle de Clase y Bloque Horario</h5>
+                        <small class="text-white-50" id="modalDetalleDiaHorario">Lunes · 07:00 AM - 08:30 AM</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Banner Asignatura y Estado -->
+                <div class="p-3.5 rounded-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: #F0FDFA; border: 1px solid #CCFBF1;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-3 shadow-xs" style="width: 52px; height: 52px; background: #007F7B;">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                        <div>
+                            <span class="badge rounded-pill px-2.5 py-0.5 fw-bold mb-1" style="background: #CCFBF1; color: #006B68; font-size: 0.72rem;">ASIGNATURA PROGRAMADA</span>
+                            <h4 class="fw-bold text-dark mb-0" id="modalMateriaNombre">Matemáticas</h4>
+                        </div>
+                    </div>
+                    <div id="modalEstadoBadgeContainer">
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #E2E8F0; color: #475569;" id="modalEstadoBadge">
+                            <i class="bi bi-clock me-1"></i> Programada
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Grid de Parámetros -->
+                <div class="row g-3 mb-4">
+                    <!-- Docente -->
+                    <div class="col-md-6">
+                        <div class="p-3.5 rounded-4 bg-white border h-100 shadow-2xs">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-4 shadow-xs" style="width: 48px; height: 48px; background: linear-gradient(135deg, #14264F, #2563EB);">
+                                    <i class="bi bi-person-video3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.7rem;">Docente Orientador</small>
+                                    <h6 class="fw-bold text-dark mb-0.5" id="modalDocenteNombre">Docente Titular</h6>
+                                    <div class="text-muted small" style="font-size: 0.76rem;" id="modalDocenteMeta">Doc: N/A · docente@edunova.edu.co</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grado, Grupo y Aula -->
+                    <div class="col-md-6">
+                        <div class="p-3.5 rounded-4 bg-white border h-100 shadow-2xs">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-4 shadow-xs" style="width: 48px; height: 48px; background: linear-gradient(135deg, #006B68, #007F7B);">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.7rem;">Ubicación y Grupo</small>
+                                    <h6 class="fw-bold text-dark mb-0.5" id="modalGradoGrupo">Grado 10° - Sección A</h6>
+                                    <div class="text-muted small" style="font-size: 0.76rem;">
+                                        <i class="bi bi-geo-alt me-0.5 text-danger"></i> <span id="modalAulaNombre">Aula 101</span> · Jornada Mañana 2026
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Estudiantes Vinculados al Grupo -->
+                <div class="border rounded-4 p-3.5 bg-white shadow-2xs">
+                    <div class="d-flex align-items-center justify-content-between mb-2.5 pb-2 border-bottom flex-wrap gap-2">
+                        <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                            <i class="bi bi-people-fill text-primary"></i> Estudiantes Vinculados al Grupo (<span id="modalTotalEstudiantes">0</span>)
+                        </h6>
+                        <span class="badge bg-light text-muted border small">Registro Oficial de Matrícula EduNova</span>
+                    </div>
+                    <div class="overflow-auto" style="max-height: 220px;">
+                        <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.82rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-2">Estudiante</th>
+                                    <th>Documento</th>
+                                    <th>Correo Electrónico</th>
+                                    <th class="text-end pe-2">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalEstudiantesTbody">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light p-3 px-4 rounded-bottom-4 d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i> Modo exclusivo de consulta y supervisión institucional</small>
+                <button type="button" class="btn btn-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var estudiantesGrupoData = {{ estudiantes_grupo_json|safe|default:'[]' }};
+
+    function abrirModalDetalleBloque(el) {
+        var materia = el.getAttribute('data-materia') || 'Clase Curricular';
+        var docente = el.getAttribute('data-docente') || 'Docente Titular';
+        var docenteDoc = el.getAttribute('data-docente-doc') || 'N/A';
+        var docenteEmail = el.getAttribute('data-docente-email') || 'docente@edunova.edu.co';
+        var grado = el.getAttribute('data-grado') || 'Grado 10°A';
+        var dia = el.getAttribute('data-dia') || 'Día Lectivo';
+        var horario = el.getAttribute('data-horario') || '07:00 AM - 08:30 AM';
+        var aula = el.getAttribute('data-aula') || 'Aula General';
+        var enCurso = el.getAttribute('data-en-curso') === '1';
+
+        document.getElementById('modalMateriaNombre').innerText = materia;
+        document.getElementById('modalDetalleDiaHorario').innerText = dia + ' · ' + horario;
+        document.getElementById('modalDocenteNombre').innerText = docente;
+        document.getElementById('modalDocenteMeta').innerText = 'Doc: ' + docenteDoc + ' · ' + docenteEmail;
+        document.getElementById('modalGradoGrupo').innerText = grado;
+        document.getElementById('modalAulaNombre').innerText = aula;
+
+        var badgeContainer = document.getElementById('modalEstadoBadgeContainer');
+        if (enCurso) {
+            badgeContainer.innerHTML = '<span class="badge rounded-pill px-3 py-1.5 fw-bold bg-success text-white shadow-xs"><i class="bi bi-play-circle-fill me-1"></i> CLASE EN DESARROLLO AHORA</span>';
+        } else {
+            badgeContainer.innerHTML = '<span class="badge rounded-pill px-3 py-1.5 fw-bold bg-light text-secondary border shadow-2xs"><i class="bi bi-clock me-1"></i> Bloque Horario Programado</span>';
+        }
+
+        // Renderizar lista de estudiantes
+        var tbody = document.getElementById('modalEstudiantesTbody');
+        var countSpan = document.getElementById('modalTotalEstudiantes');
+        tbody.innerHTML = '';
+        countSpan.innerText = estudiantesGrupoData.length;
+
+        if (estudiantesGrupoData && estudiantesGrupoData.length > 0) {
+            estudiantesGrupoData.forEach(function(est) {
+                var tr = document.createElement('tr');
+                tr.innerHTML = '<td class="ps-2 fw-semibold text-dark"><i class="bi bi-person me-1.5 text-muted"></i>' + est.nombre + '</td>' +
+                               '<td><span class="badge bg-light text-dark border small">' + est.documento + '</span></td>' +
+                               '<td class="text-muted">' + est.email + '</td>' +
+                               '<td class="text-end pe-2"><span class="badge bg-success bg-opacity-10 text-success rounded-pill">' + est.estado + '</span></td>';
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">No hay estudiantes matriculados en este grupo específico aún.</td></tr>';
+        }
+
+        var modalEl = document.getElementById('modalDetalleBloqueHorario');
+        var bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        bsModal.show();
+    }
+</script>
+{% endblock %}
+

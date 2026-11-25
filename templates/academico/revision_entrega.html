@@ -24,11 +24,16 @@
             
             <div class="p-4 flex-grow flex flex-col bg-gray-100">
                 {% if entrega.archivo %}
-                    <!-- Visor en iframe -->
-                    <iframe src="{{ entrega.archivo.url }}" class="w-full h-full border-0 rounded-lg shadow-inner bg-white" title="Vista previa de entrega"></iframe>
-                    <div class="mt-4 text-center">
-                        <a href="{{ entrega.archivo.url }}" target="_blank" class="text-blue-600 hover:underline font-medium text-sm"><i class="bi bi-box-arrow-up-right"></i> Abrir en otra pestaña / Descargar</a>
+                    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                        <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1.5 rounded-pill">
+                            <i class="bi bi-eye-fill me-1"></i> Visualización directa en EduNova
+                        </span>
+                        <a href="{{ entrega.archivo.url }}" download class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5 bg-white">
+                            <i class="bi bi-download"></i> Descargar archivo
+                        </a>
                     </div>
+                    <!-- Visor directo en EduNova (sin descargarlo) -->
+                    <iframe src="{{ entrega.archivo.url }}" class="w-full h-full border-0 rounded-lg shadow-inner bg-white" title="Vista previa de entrega en EduNova"></iframe>
                 {% elif entrega.respuesta %}
                     <div class="bg-white p-6 rounded-lg shadow-inner w-full h-full overflow-y-auto whitespace-pre-wrap text-gray-700">
                         {{ entrega.respuesta }}

@@ -6,45 +6,23 @@
 {% block extra_css %}
 <style>
     /* =========================================================================
-       SISTEMA DE DISEÑO: PANEL DEL DOCENTE EDUNOVA (TEMA ROSADO IDÉNTICO A LA FOTO)
+       SISTEMA DE DISEÑO: PANEL DEL DOCENTE EDUNOVA (PALETA INSTITUCIONAL)
        ========================================================================= */
     :root {
-        --edunova-navy: #0f172a;
-        --edunova-pink-primary: var(--color-principal);
-        --edunova-pink-dark: var(--color-secundario);
-        --edunova-pink-light: var(--color-acento);
-        --edunova-pink-soft: #F5F2EB;
-        --edunova-pink-accent: #B8977E;
-        --edunova-pink-border: var(--color-acento);
-        --edunova-page-bg: var(--color-fondo);
-        --edunova-border: var(--color-acento);
+        --edunova-navy: #14264F;
+        --edunova-pink-primary: #007F7B;
+        --edunova-pink-dark: #006B68;
+        --edunova-pink-light: #DDF7F5;
+        --edunova-pink-soft: #F5F8FC;
+        --edunova-pink-accent: #12B8B0;
+        --edunova-pink-border: #E2E8F0;
+        --edunova-page-bg: #F5F8FC;
+        --edunova-border: #E2E8F0;
     }
 
     body {
         background-color: var(--edunova-page-bg) !important;
         background: var(--edunova-page-bg) !important;
-    }
-
-    .sinetec-topbar {
-        background: #ffffff !important;
-        border-bottom: 1px solid var(--color-acento) !important;
-    }
-
-    .sinetec-sidebar {
-        background: #ffffff !important;
-        border-right: 1px solid var(--color-acento) !important;
-    }
-
-    .sinetec-brand-icon {
-        background: var(--color-principal) !important;
-        color: #ffffff !important;
-        border-radius: 10px;
-    }
-
-    .sinetec-brand-title .badge {
-        background: var(--color-acento) !important;
-        color: var(--color-principal) !important;
-        border: 1px solid #E0D8CE !important;
     }
 
     .docente-shell {
@@ -54,7 +32,7 @@
         padding-bottom: 60px;
     }
 
-    /* BARRA LATERAL ROSADA ELEGANTE */
+    /* BARRA LATERAL INSTITUCIONAL */
     .teacher-sidebar-pink {
         background: transparent;
     }
@@ -63,8 +41,8 @@
         display: flex;
         align-items: center;
         padding: 10px 16px;
-        color: #334155;
-        font-weight: 500;
+        color: #14264F;
+        font-weight: 600;
         font-size: 0.88rem;
         text-decoration: none;
         border-radius: 12px;
@@ -73,20 +51,24 @@
     }
 
     .teacher-pink-item:hover {
-        background-color: #F5F2EB;
-        color: var(--color-principal);
+        background-color: #DDF7F5;
+        color: #006B68;
     }
 
     .teacher-pink-item.is-active {
-        background-color: var(--color-acento) !important;
-        color: var(--color-principal) !important;
+        background: linear-gradient(135deg, #007F7B 0%, #006B68 100%) !important;
+        color: #ffffff !important;
         font-weight: 700 !important;
         border: none !important;
-        box-shadow: none !important;
+        box-shadow: 0 4px 12px rgba(0, 127, 123, 0.25) !important;
+    }
+
+    .teacher-pink-item.is-active .teacher-icon-pink {
+        color: #ffffff !important;
     }
 
     .teacher-icon-pink {
-        color: var(--color-principal) !important;
+        color: #007F7B !important;
         font-size: 1.15rem;
         min-width: 24px;
         text-align: center;
@@ -108,9 +90,9 @@
     }
 
     .card {
-        border: 1px solid var(--color-acento) !important;
+        border: 1px solid #E2E8F0 !important;
         border-radius: 20px !important;
-        box-shadow: 0 4px 14px rgba(90, 56, 37, 0.02) !important;
+        box-shadow: 0 4px 14px rgba(20, 38, 79, 0.04) !important;
     }
 
     .table-clean {
@@ -120,33 +102,33 @@
     }
 
     .table-clean th {
-        background: var(--color-acento);
-        color: #475569;
+        background: #DDF7F5;
+        color: #006B68;
         font-size: 0.78rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         padding: 12px 16px;
-        border-bottom: 2px solid var(--color-acento);
+        border-bottom: 2px solid #12B8B0;
     }
 
     .table-clean td {
         padding: 13px 16px;
         font-size: 0.85rem;
-        border-bottom: 1px solid #F5F2EB;
+        border-bottom: 1px solid #E2E8F0;
         vertical-align: middle;
-        color: #1e293b;
+        color: #14264F;
     }
 
     .table-clean tr:hover td {
-        background-color: #F5F2EB;
+        background-color: #F0FDFB;
     }
 
     /* Pestañas de subpanel interno */
     .inner-subtabs {
         display: flex;
         gap: 8px;
-        border-bottom: 2px solid var(--color-acento);
+        border-bottom: 2px solid #E2E8F0;
         margin-bottom: 20px;
     }
 
@@ -154,7 +136,7 @@
         padding: 8px 18px;
         font-size: 0.85rem;
         font-weight: 600;
-        color: #64748b;
+        color: #64748B;
         background: transparent;
         border: none;
         border-bottom: 2px solid transparent;
@@ -163,8 +145,8 @@
     }
 
     .inner-subtab-btn.active {
-        color: var(--color-principal);
-        border-bottom-color: var(--color-principal);
+        color: #007F7B;
+        border-bottom-color: #007F7B;
     }
 </style>
 {% endblock %}

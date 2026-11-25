@@ -953,6 +953,7 @@ class ComunicacionMensaje(models.Model):
     leido = models.BooleanField(default=False)
     eliminado_por_remitente = models.BooleanField(default=False)
     eliminado_por_destinatario = models.BooleanField(default=False)
+    mensaje_padre = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='respuestas')
 
     class Meta:
         verbose_name = "Comunicación"

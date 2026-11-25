@@ -1,0 +1,755 @@
+{% load static %}
+<!-- =========================================================================
+     COMPONENTE UNIFICADO DE MENSAJERÍA DIRECTA INSTITUCIONAL EDUNOVA
+     Diseño: Modelo oficial unificado de Rectoría para todos los paneles
+     (Administrador, Rectoría, Secretaría, Docente, Estudiante y Familia)
+     ========================================================================= -->
+
+<div class="modulo-mensajeria-edunova w-100">
+
+    <!-- Hero Header de Comunicaciones -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-secundario) 50%, var(--color-principal) 100%) !important; color: #FFFFFF; padding: 2rem 2.2rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(90, 56, 37, 0.35);">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 mb-2 rounded-pill fw-semibold">
+                    <i class="bi bi-chat-heart-fill me-1"></i> Mensajería Interna Directa · {{ request.user.perfil.rol.nombre|default:"Institucional" }}
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Centro de Comunicaciones</h1>
+                <p class="mb-0 text-white-50 small">
+                    Directorio institucional unificado y mensajería directa entre directivos, docentes, aprendices y familias.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="#panelRedaccionMsg" onclick="document.getElementById('input_asunto_dir').focus();" class="btn btn-light fw-bold rounded-pill px-4 shadow-sm" style="color: var(--color-principal);">
+                    <i class="bi bi-pencil-square me-1"></i> Redactar Mensaje
+                </a>
+                <a href="{% url 'mensajeria' %}" class="btn btn-outline-light fw-semibold rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-megaphone-fill me-1"></i> Circulares Oficiales
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ESPACIO DE MENSAJERÍA DIRECTA CON DIRECTORIO VISIBLE -->
+    <div class="row g-4 mb-4" id="seccion-mensajeria-directa">
+        <!-- Columna Izquierda: Directorio de Usuarios Registrados Visible -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center pb-2 border-bottom mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-people-fill" style="color: var(--color-principal); font-size: 1.2rem;"></i>
+                        <h6 class="fw-bold text-dark mb-0">Directorio Institucional</h6>
+                    </div>
+                    <span class="badge rounded-pill px-2.5 py-1" style="background: #E6F7F6; color: #007F7B; font-weight: 700;">
+                        {{ total_directorio|default:directorio_usuarios|length }} usuarios
+                    </span>
+                </div>
+
+                <!-- Botón Visible para Seleccionar a Todos los Usuarios (Comunicado General) -->
+                <div class="mb-2">
+                    <button type="button" class="btn btn-outline-primary w-100 fw-bold py-2 px-3 rounded-3 shadow-2xs d-flex align-items-center justify-content-center gap-2 transition" id="btnSeleccionarTodosMsg" onclick="dir_seleccionarTodos()" style="border-width: 2px;">
+                        <i class="bi bi-megaphone-fill fs-5"></i>
+                        <span>📢 Seleccionar a todos los usuarios</span>
+                    </button>
+                    <div class="text-center mt-1">
+                        <small class="text-muted" style="font-size: 0.73rem;">
+                            <i class="bi bi-info-circle me-1"></i>O haz clic en cualquier usuario abajo para escribirle de forma individual.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Lista Visible de Todos los Usuarios Registrados -->
+                <div id="dir_listaUsuariosMsg" class="p-1 rounded-3 bg-light overflow-y-auto" style="max-height: 520px;">
+                    {% for u in directorio_usuarios %}
+                    <div class="user-dir-card p-2.5 mb-1.5 rounded-3 border bg-white shadow-2xs d-flex align-items-center justify-content-between transition"
+                         id="user-card-msg-{{ u.id }}"
+                         data-id="{{ u.id }}"
+                         data-nombre="{{ u.nombre|escapejs }}"
+                         data-rol="{{ u.rol|escapejs }}"
+                         onclick="dir_seleccionarUsuario('{{ u.id }}', '{{ u.nombre|escapejs }}', '{{ u.rol|escapejs }}')"
+                         style="cursor: pointer; transition: all 0.2s ease;">
+                        <div class="d-flex align-items-center gap-2.5 overflow-hidden">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs flex-shrink-0"
+                                 style="width: 38px; height: 38px; background: {{ u.avatar_bg }}; font-size: 0.85rem;">
+                                {{ u.iniciales }}
+                            </div>
+                            <div class="overflow-hidden">
+                                <div class="fw-bold text-dark small mb-0 text-truncate">{{ u.nombre }}</div>
+                                <div class="d-flex align-items-center gap-1 mt-0.5 flex-wrap">
+                                    <span class="badge rounded-pill px-2 py-0.5" style="{{ u.badge_style }}; font-size: 0.68rem;">{{ u.rol }}</span>
+                                    {% if u.grado %}
+                                    <span class="badge bg-light text-primary border" style="font-size: 0.65rem;">{{ u.grado }}</span>
+                                    {% endif %}
+                                    {% if u.documento %}
+                                    <span class="text-muted" style="font-size: 0.68rem;">Doc: {{ u.documento }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 ms-2">
+                            <span class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-primary fw-semibold btn-escribir-item" style="font-size: 0.74rem;">
+                                <i class="bi bi-pencil me-1"></i> Escribir
+                            </span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted small">No hay otros usuarios registrados en el sistema.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Espacio de Redacción Directa y Conversación -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 p-4" id="panelRedaccionMsg" style="display: flex; flex-direction: column;">
+                <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark" id="redaccionTituloMsg">
+                            <i class="bi bi-chat-dots-fill me-2" style="color: var(--color-principal, #007F7B);"></i>Conversación y Mensaje Directo
+                        </h5>
+                        <p class="small text-muted mb-0" id="redaccionSubtituloMsg">Selecciona un usuario del directorio para consultar el historial completo y responder directamente.</p>
+                    </div>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" id="badgeModoEnvioMsg" style="background: #E6F7F6; color: #007F7B; border: 1px solid #B3EAE6;">
+                        Mensaje Individual
+                    </span>
+                </div>
+
+                <!-- Banner Informativo del Destinatario Seleccionado -->
+                <div id="destinatarioBannerMsg" class="p-3 rounded-3 mb-3 border d-flex align-items-center justify-content-between transition" style="background: #F8FAFC; border-color: #E2E8F0;">
+                    <div class="d-flex align-items-center gap-2.5" id="destinatarioInfoMsg">
+                        <i class="bi bi-person-fill-gear text-secondary fs-4" id="destinatarioIconMsg"></i>
+                        <div>
+                            <span class="small text-muted d-block lh-1 mb-1">Contacto de la conversación:</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <strong class="text-dark" id="destinatarioNombreMsg">Ningún usuario seleccionado</strong>
+                                <span class="badge rounded-pill" id="destinatarioRolMsg" style="display: none;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" id="btnLimpiarDestMsg" onclick="dir_limpiarSeleccion()" style="display: none;">
+                        <i class="bi bi-x-circle me-1"></i> Deseleccionar
+                    </button>
+                </div>
+
+                <!-- Contenedor del Historial de Conversación (WhatsApp / Correo Elegante) -->
+                <div id="contenedorHistorialChatMsg" class="mb-3 rounded-3 p-3 border overflow-y-auto" style="min-height: 220px; max-height: 380px; background: #F8FAFC; border-color: #E2E8F0; display: none;">
+                    <div class="text-center py-2 text-muted border-bottom mb-3" style="font-size: 0.75rem;">
+                        <i class="bi bi-shield-lock-fill text-teal me-1"></i> Historial permanente de conversación cifrado y sincronizado en EduNova
+                    </div>
+                    <div id="chatStreamMsg">
+                        <!-- Mensajes cargados dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Formulario de Respuesta / Envío -->
+                <form method="post" action="{% url 'comunicaciones' %}" id="formMensajeDirectoComponente" onsubmit="return dir_enviarMensajeAsync(event);">
+                    {% csrf_token %}
+                    <input type="hidden" name="destinatario_id" id="input_destinatario_id_dir" value="">
+                    <input type="hidden" name="enviar_a_todos" id="input_enviar_a_todos_dir" value="0">
+                    <input type="hidden" name="mensaje_padre_id" id="input_mensaje_padre_id_dir" value="">
+                    <input type="hidden" name="next_url" value="{% if next_url_override %}{{ next_url_override }}{% else %}{{ request.path }}{% endif %}">
+
+                    <div class="mb-2" id="grupoAsuntoMsg">
+                        <label class="form-label small fw-bold text-dark mb-1" for="input_asunto_dir">Asunto o Referencia *</label>
+                        <input type="text" name="asunto" id="input_asunto_dir" class="form-control rounded-3" placeholder="Ej: Consulta pedagógica, seguimiento, respuesta..." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1" for="input_mensaje_dir" id="labelMensajeMsg">Escribir Mensaje *</label>
+                        <textarea name="mensaje" id="input_mensaje_dir" class="form-control rounded-3" rows="3" placeholder="Escribe tu mensaje o respuesta aquí..." required></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <button type="button" class="btn btn-light rounded-pill px-3 text-muted" onclick="dir_limpiarFormulario()">
+                            <i class="bi bi-eraser me-1"></i> Limpiar
+                        </button>
+                        <button type="submit" class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm" id="btnEnviarMensajeMsg" style="background: linear-gradient(135deg, #007F7B, #12B8B0); border: none;">
+                            <i class="bi bi-send-check-fill me-1"></i> <span id="btnEnviarTextoMsg">Enviar Mensaje Directo</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3 Tarjetas Resumen de Mensajería -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Bandeja de Entrada</span>
+                    <div class="rounded-3 p-2" style="background-color: #F5F2EB; color: var(--color-principal);">
+                        <i class="bi bi-inbox-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_recibidos|default:recibidos|length }}</div>
+                <div class="small text-muted mt-1">Mensajes recibidos activos</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Mensajes Enviados</span>
+                    <div class="rounded-3 p-2" style="background-color: #ecfdf5; color: #047857;">
+                        <i class="bi bi-send-check-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_enviados|default:enviados|length }}</div>
+                <div class="small text-muted mt-1">Comunicaciones enviadas</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Papelera</span>
+                    <div class="rounded-3 p-2" style="background-color: #f8fafc; color: #64748b;">
+                        <i class="bi bi-trash3-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold text-dark mb-0">{{ total_papelera|default:papelera|length }}</div>
+                <div class="small text-muted mt-1">Mensajes archivados</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3 Columnas: Recibidos | Enviados | Papelera -->
+    <div class="row g-4 mb-4">
+        <!-- Columna 1: Bandeja de Entrada -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--color-acento) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-inbox-fill" style="color: var(--color-principal);"></i>
+                        <h6 class="fw-bold text-dark mb-0">Bandeja de Entrada</h6>
+                    </div>
+                    <span class="badge rounded-pill px-2.5 py-1" style="background: #F5F2EB; color: var(--color-principal);">
+                        {{ recibidos|length }}
+                    </span>
+                </div>
+                <div class="card-body p-3 overflow-y-auto" style="max-height: 580px;">
+                    <div class="d-flex flex-column gap-2.5">
+                        {% for msg in recibidos %}
+                        <div class="p-3 rounded-4 border bg-white shadow-2xs transition" style="border-color: {% if not msg.leido %}#E0D8CE{% else %}#f1f5f9{% endif %} !important; {% if not msg.leido %}background: #fffdfd !important; border-left: 4px solid var(--color-principal) !important;{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start mb-1.5">
+                                <div>
+                                    <span class="fw-bold text-dark small d-block">
+                                        {{ msg.remitente.get_full_name|default:msg.remitente.username }}
+                                    </span>
+                                    <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 0.68rem;">
+                                        {{ msg.remitente.perfil.rol.nombre|default:"Usuario" }}
+                                    </span>
+                                </div>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ msg.fecha_envio|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">{{ msg.asunto }}</h6>
+                            <p class="text-muted small mb-2" style="font-size: 0.82rem; line-height: 1.4;">{{ msg.mensaje|linebreaksbr }}</p>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5 fw-semibold" style="font-size: 0.75rem;"
+                                        onclick="dir_responder('{{ msg.remitente.id }}', '{{ msg.remitente.get_full_name|default:msg.remitente.username|escapejs }}', '{{ msg.remitente.perfil.rol.nombre|default:"Usuario"|escapejs }}', '{{ msg.asunto|escapejs }}')">
+                                    <i class="bi bi-reply-fill me-1"></i> Responder directamente
+                                </button>
+                                <form method="post" action="{% url 'comunicaciones' %}" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="eliminar">
+                                    <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                                    <input type="hidden" name="next_url" value="{% if next_url_override %}{{ next_url_override }}{% else %}{{ request.path }}{% endif %}">
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" style="font-size: 0.78rem;">
+                                        <i class="bi bi-trash me-1"></i> Papelera
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-envelope-open fs-2 text-primary d-block mb-2 opacity-50" style="color: var(--color-principal);"></i>
+                            <h6 class="fw-bold text-dark mb-1">Sin mensajes recibidos</h6>
+                            <p class="small text-muted mb-0">Cuando otros usuarios te escriban, aparecerán aquí.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna 2: Mensajes Enviados -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--color-acento) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-send-check-fill text-success"></i>
+                        <h6 class="fw-bold text-dark mb-0">Mensajes Enviados</h6>
+                    </div>
+                    <span class="badge rounded-pill px-2.5 py-1 bg-success bg-opacity-10 text-success">
+                        {{ enviados|length }}
+                    </span>
+                </div>
+                <div class="card-body p-3 overflow-y-auto" style="max-height: 580px;">
+                    <div class="d-flex flex-column gap-2.5">
+                        {% for msg in enviados %}
+                        <div class="p-3 rounded-4 border bg-white shadow-2xs transition" style="border-color: #f1f5f9 !important;">
+                            <div class="d-flex justify-content-between align-items-start mb-1.5">
+                                <div>
+                                    <span class="fw-bold text-dark small d-block">
+                                        Para: {% if msg.destinatario %}{{ msg.destinatario.get_full_name|default:msg.destinatario.username }}{% else %}Toda la Comunidad escolar{% endif %}
+                                    </span>
+                                    {% if msg.destinatario %}
+                                    <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 0.68rem;">
+                                        {{ msg.destinatario.perfil.rol.nombre|default:"Usuario" }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge rounded-pill bg-info-subtle text-info border" style="font-size: 0.68rem;">General</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ msg.fecha_envio|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">{{ msg.asunto }}</h6>
+                            <p class="text-muted small mb-2" style="font-size: 0.82rem; line-height: 1.4;">{{ msg.mensaje|linebreaksbr }}</p>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
+                                    <i class="bi bi-check2 me-1"></i> Entregado
+                                </span>
+                                <form method="post" action="{% url 'comunicaciones' %}" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="eliminar">
+                                    <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                                    <input type="hidden" name="next_url" value="{% if next_url_override %}{{ next_url_override }}{% else %}{{ request.path }}{% endif %}">
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" style="font-size: 0.78rem;">
+                                        <i class="bi bi-trash me-1"></i> Papelera
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-send fs-2 text-success d-block mb-2 opacity-50"></i>
+                            <h6 class="fw-bold text-dark mb-1">Sin mensajes enviados</h6>
+                            <p class="small text-muted mb-0">Selecciona a cualquier usuario del directorio para enviar tu primera comunicación.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna 3: Papelera -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--color-acento) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-trash3-fill text-secondary"></i>
+                        <h6 class="fw-bold text-dark mb-0">Papelera</h6>
+                    </div>
+                    <span class="badge rounded-pill px-2.5 py-1 bg-secondary bg-opacity-10 text-secondary">
+                        {{ papelera|length }}
+                    </span>
+                </div>
+                <div class="card-body p-3 overflow-y-auto" style="max-height: 580px;">
+                    <div class="d-flex flex-column gap-2.5">
+                        {% for msg in papelera %}
+                        <div class="p-3 rounded-4 border bg-light shadow-2xs transition" style="border-color: #e2e8f0 !important;">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary" style="font-size: 0.7rem;">En papelera</span>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ msg.fecha_envio|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.88rem;">{{ msg.asunto }}</h6>
+                            <p class="text-muted small mb-2" style="font-size: 0.8rem; line-height: 1.4;">{{ msg.mensaje|truncatechars:90 }}</p>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <form method="post" action="{% url 'comunicaciones' %}" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="restaurar">
+                                    <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                                    <input type="hidden" name="next_url" value="{% if next_url_override %}{{ next_url_override }}{% else %}{{ request.path }}{% endif %}">
+                                    <button type="submit" class="btn btn-sm btn-link text-primary p-0 text-decoration-none fw-semibold" style="font-size: 0.78rem;">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'comunicaciones' %}" class="m-0" onsubmit="return confirm('¿Eliminar definitivamente este mensaje?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="eliminar_definitivo">
+                                    <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                                    <input type="hidden" name="next_url" value="{% if next_url_override %}{{ next_url_override }}{% else %}{{ request.path }}{% endif %}">
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none fw-bold" style="font-size: 0.78rem;">
+                                        <i class="bi bi-x-circle me-1"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-trash2 fs-2 text-secondary d-block mb-2 opacity-50"></i>
+                            <h6 class="fw-bold text-dark mb-1">Papelera vacía</h6>
+                            <p class="small text-muted mb-0">Los mensajes eliminados se archivarán temporalmente aquí.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// =========================================================================
+// SISTEMA DE DIRECTORIO VISIBLE Y MENSAJERÍA DIRECTA UNIFICADA DE EDUNOVA
+// =========================================================================
+
+function dir_cargarHistorialConversacion(id, nombre, rol) {
+    const contenedor = document.getElementById('contenedorHistorialChatMsg');
+    const stream = document.getElementById('chatStreamMsg');
+    if (!contenedor || !stream) return;
+
+    contenedor.style.display = 'block';
+    stream.innerHTML = `
+        <div class="text-center py-4 text-muted">
+            <div class="spinner-border spinner-border-sm text-teal mb-2" role="status"></div>
+            <p class="small mb-0">Cargando conversación con <strong>${nombre}</strong>...</p>
+        </div>
+    `;
+
+    fetch('/comunicaciones/api/conversacion/' + id + '/', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success || !data.mensajes || data.mensajes.length === 0) {
+            stream.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-chat-heart text-teal opacity-75 fs-2 d-block mb-1"></i>
+                    <h6 class="fw-bold text-dark small mb-1">Inicio de Conversación</h6>
+                    <p class="small text-muted mb-0" style="font-size: 0.8rem;">No hay mensajes anteriores con <strong>${nombre}</strong>. Escribe abajo para enviar el primer mensaje directo.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        data.mensajes.forEach(m => {
+            if (m.es_mio) {
+                html += `
+                <div class="d-flex mb-3 justify-content-end">
+                    <div class="p-3 rounded-4 shadow-2xs" style="max-width: 82%; background: #F0FDFA; border: 1px solid #99F6E4; border-bottom-right-radius: 4px;">
+                        <div class="d-flex align-items-center justify-content-between gap-3 mb-1">
+                            <span class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-clock me-1"></i>${m.fecha}</span>
+                            <span class="badge rounded-pill fw-bold" style="background: #CCFBF1; color: #0F766E; font-size: 0.68rem;">Tú</span>
+                        </div>
+                        <div class="fw-bold small mb-1" style="color: #006B68; font-size: 0.85rem;"><i class="bi bi-chat-square-text me-1"></i>${m.asunto}</div>
+                        <p class="text-dark mb-1.5" style="white-space: pre-wrap; font-size: 0.86rem; line-height: 1.45;">${m.mensaje}</p>
+                        <div class="text-end text-teal" style="font-size: 0.7rem;">
+                            <i class="bi bi-check2-all text-primary me-1"></i> Guardado en historial
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                html += `
+                <div class="d-flex mb-3 justify-content-start">
+                    <div class="p-3 rounded-4 shadow-2xs" style="max-width: 82%; background: #FFFFFF; border: 1px solid #E2E8F0; border-bottom-left-radius: 4px;">
+                        <div class="d-flex align-items-center justify-content-between gap-3 mb-1">
+                            <strong class="text-dark small">${m.remitente_nombre}</strong>
+                            <span class="badge bg-light text-secondary border" style="font-size: 0.68rem;">${m.remitente_rol}</span>
+                        </div>
+                        <div class="fw-bold small mb-1" style="color: #14264F; font-size: 0.85rem;"><i class="bi bi-chat-left-quote me-1 text-primary"></i>${m.asunto}</div>
+                        <p class="text-secondary mb-1.5" style="white-space: pre-wrap; font-size: 0.86rem; line-height: 1.45;">${m.mensaje}</p>
+                        <div class="text-end text-muted" style="font-size: 0.7rem;"><i class="bi bi-clock me-1"></i>${m.fecha}</div>
+                    </div>
+                </div>`;
+            }
+        });
+
+        stream.innerHTML = html;
+        setTimeout(() => {
+            contenedor.scrollTop = contenedor.scrollHeight;
+        }, 100);
+    })
+    .catch(err => {
+        stream.innerHTML = `
+            <div class="text-center py-3 text-muted small">
+                <i class="bi bi-info-circle me-1"></i> Escribe tu mensaje para iniciar o continuar la conversación.
+            </div>
+        `;
+    });
+}
+
+function dir_seleccionarUsuario(id, nombre, rol) {
+    // 1. Quitar selección previa de tarjetas y del botón masivo
+    document.querySelectorAll('.user-dir-card').forEach(c => {
+        c.style.borderColor = '#e2e8f0';
+        c.style.backgroundColor = '#ffffff';
+        c.classList.remove('selected-user-card');
+        const btn = c.querySelector('.btn-escribir-item');
+        if (btn) {
+            btn.className = 'btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-primary fw-semibold btn-escribir-item';
+            btn.innerHTML = '<i class="bi bi-pencil me-1"></i> Escribir';
+        }
+    });
+
+    const btnTodos = document.getElementById('btnSeleccionarTodosMsg');
+    if (btnTodos) {
+        btnTodos.className = 'btn btn-outline-primary w-100 fw-bold py-2 px-3 rounded-3 shadow-2xs d-flex align-items-center justify-content-center gap-2 transition';
+        btnTodos.style.background = '';
+        btnTodos.style.color = '';
+    }
+
+    // 2. Destacar tarjeta seleccionada
+    const selectedCard = document.getElementById('user-card-msg-' + id);
+    if (selectedCard) {
+        selectedCard.style.borderColor = '#007F7B';
+        selectedCard.style.backgroundColor = '#F0FDFA';
+        selectedCard.classList.add('selected-user-card');
+        const btn = selectedCard.querySelector('.btn-escribir-item');
+        if (btn) {
+            btn.className = 'btn btn-sm btn-primary rounded-pill px-2.5 py-1 text-white fw-bold btn-escribir-item';
+            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Seleccionado';
+        }
+    }
+
+    // 3. Actualizar inputs y panel de redacción
+    document.getElementById('input_destinatario_id_dir').value = id;
+    document.getElementById('input_enviar_a_todos_dir').value = '0';
+
+    document.getElementById('destinatarioNombreMsg').innerText = nombre;
+    const badgeRol = document.getElementById('destinatarioRolMsg');
+    badgeRol.innerText = rol;
+    badgeRol.className = 'badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25';
+    badgeRol.style.display = 'inline-block';
+
+    const banner = document.getElementById('destinatarioBannerMsg');
+    banner.style.background = '#F0FDFA';
+    banner.style.borderColor = '#99F6E4';
+
+    const icon = document.getElementById('destinatarioIconMsg');
+    icon.className = 'bi bi-person-check-fill text-success fs-4';
+
+    document.getElementById('btnLimpiarDestMsg').style.display = 'inline-block';
+    document.getElementById('badgeModoEnvioMsg').innerText = 'Conversación Activa';
+    document.getElementById('badgeModoEnvioMsg').style.background = '#ECFDF5';
+    document.getElementById('badgeModoEnvioMsg').style.color = '#047857';
+    document.getElementById('badgeModoEnvioMsg').style.borderColor = '#A7F3D0';
+
+    const primerNombre = nombre.split(' ')[0];
+    document.getElementById('btnEnviarTextoMsg').innerText = 'Enviar Respuesta a ' + primerNombre;
+
+    // 4. Cargar Historial de Conversación permanente
+    dir_cargarHistorialConversacion(id, nombre, rol);
+
+    // Foco en el asunto si está vacío, o en el mensaje
+    const inputAsunto = document.getElementById('input_asunto_dir');
+    if (!inputAsunto.value.trim()) {
+        inputAsunto.value = 'Mensaje institucional EduNova';
+        document.getElementById('input_mensaje_dir').focus();
+    } else {
+        document.getElementById('input_mensaje_dir').focus();
+    }
+}
+
+function dir_seleccionarTodos() {
+    // 1. Quitar selección de usuarios individuales
+    document.querySelectorAll('.user-dir-card').forEach(c => {
+        c.style.borderColor = '#e2e8f0';
+        c.style.backgroundColor = '#ffffff';
+        c.classList.remove('selected-user-card');
+        const btn = c.querySelector('.btn-escribir-item');
+        if (btn) {
+            btn.className = 'btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-primary fw-semibold btn-escribir-item';
+            btn.innerHTML = '<i class="bi bi-pencil me-1"></i> Escribir';
+        }
+    });
+
+    // 2. Destacar botón de todos
+    const btnTodos = document.getElementById('btnSeleccionarTodosMsg');
+    if (btnTodos) {
+        btnTodos.className = 'btn btn-primary w-100 fw-bold py-2 px-3 rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2 transition text-white';
+        btnTodos.style.background = 'linear-gradient(135deg, #007F7B, #12B8B0)';
+        btnTodos.style.border = 'none';
+    }
+
+    // 3. Actualizar inputs y panel
+    document.getElementById('input_destinatario_id_dir').value = '';
+    document.getElementById('input_enviar_a_todos_dir').value = '1';
+
+    document.getElementById('destinatarioNombreMsg').innerText = '📢 Toda la Comunidad Escolar (Todos los Usuarios Registrados)';
+    const badgeRol = document.getElementById('destinatarioRolMsg');
+    badgeRol.innerText = 'Comunicado General';
+    badgeRol.className = 'badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle';
+    badgeRol.style.display = 'inline-block';
+
+    const banner = document.getElementById('destinatarioBannerMsg');
+    banner.style.background = '#FFFBEB';
+    banner.style.borderColor = '#FDE68A';
+
+    const icon = document.getElementById('destinatarioIconMsg');
+    icon.className = 'bi bi-megaphone-fill text-warning fs-4';
+
+    document.getElementById('btnLimpiarDestMsg').style.display = 'inline-block';
+    document.getElementById('badgeModoEnvioMsg').innerText = 'Comunicado General (Toda la Plataforma)';
+    document.getElementById('badgeModoEnvioMsg').style.background = '#FEF3C7';
+    document.getElementById('badgeModoEnvioMsg').style.color = '#92400E';
+    document.getElementById('badgeModoEnvioMsg').style.borderColor = '#FDE68A';
+
+    document.getElementById('btnEnviarTextoMsg').innerText = 'Enviar Comunicado a Toda la Plataforma';
+
+    const inputAsunto = document.getElementById('input_asunto_dir');
+    if (!inputAsunto.value.trim()) {
+        inputAsunto.focus();
+    } else {
+        document.getElementById('input_mensaje_dir').focus();
+    }
+}
+
+function dir_limpiarSeleccion() {
+    document.querySelectorAll('.user-dir-card').forEach(c => {
+        c.style.borderColor = '#e2e8f0';
+        c.style.backgroundColor = '#ffffff';
+        c.classList.remove('selected-user-card');
+        const btn = c.querySelector('.btn-escribir-item');
+        if (btn) {
+            btn.className = 'btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-primary fw-semibold btn-escribir-item';
+            btn.innerHTML = '<i class="bi bi-pencil me-1"></i> Escribir';
+        }
+    });
+
+    const btnTodos = document.getElementById('btnSeleccionarTodosMsg');
+    if (btnTodos) {
+        btnTodos.className = 'btn btn-outline-primary w-100 fw-bold py-2 px-3 rounded-3 shadow-2xs d-flex align-items-center justify-content-center gap-2 transition';
+        btnTodos.style.background = '';
+        btnTodos.style.color = '';
+    }
+
+    document.getElementById('input_destinatario_id_dir').value = '';
+    document.getElementById('input_enviar_a_todos_dir').value = '0';
+    document.getElementById('input_mensaje_padre_id_dir').value = '';
+
+    document.getElementById('destinatarioNombreMsg').innerText = 'Ningún usuario seleccionado';
+    document.getElementById('destinatarioRolMsg').style.display = 'none';
+
+    const banner = document.getElementById('destinatarioBannerMsg');
+    banner.style.background = '#F8FAFC';
+    banner.style.borderColor = '#E2E8F0';
+
+    const icon = document.getElementById('destinatarioIconMsg');
+    icon.className = 'bi bi-person-fill-gear text-secondary fs-4';
+
+    document.getElementById('btnLimpiarDestMsg').style.display = 'none';
+    document.getElementById('badgeModoEnvioMsg').innerText = 'Mensaje Individual';
+    document.getElementById('badgeModoEnvioMsg').style.background = '#E6F7F6';
+    document.getElementById('badgeModoEnvioMsg').style.color = '#007F7B';
+    document.getElementById('badgeModoEnvioMsg').style.borderColor = '#B3EAE6';
+
+    document.getElementById('btnEnviarTextoMsg').innerText = 'Enviar Mensaje Directo';
+
+    const contenedor = document.getElementById('contenedorHistorialChatMsg');
+    if (contenedor) contenedor.style.display = 'none';
+    const stream = document.getElementById('chatStreamMsg');
+    if (stream) stream.innerHTML = '';
+}
+
+function dir_limpiarFormulario() {
+    document.getElementById('input_asunto_dir').value = '';
+    document.getElementById('input_mensaje_dir').value = '';
+    dir_limpiarSeleccion();
+}
+
+function dir_responder(remitenteId, remitenteNombre, remitenteRol, asuntoOriginal, mensajeId) {
+    if (mensajeId) {
+        document.getElementById('input_mensaje_padre_id_dir').value = mensajeId;
+    }
+    dir_seleccionarUsuario(remitenteId, remitenteNombre, remitenteRol);
+
+    let nuevoAsunto = (asuntoOriginal || '').trim();
+    if (!nuevoAsunto.toLowerCase().startsWith('re:')) {
+        nuevoAsunto = 'Re: ' + nuevoAsunto;
+    }
+    document.getElementById('input_asunto_dir').value = nuevoAsunto;
+
+    const panel = document.getElementById('panelRedaccionMsg');
+    if (panel) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    setTimeout(() => {
+        document.getElementById('input_mensaje_dir').focus();
+    }, 400);
+}
+
+function dir_enviarMensajeAsync(e) {
+    const destId = document.getElementById('input_destinatario_id_dir').value.trim();
+    const todos = document.getElementById('input_enviar_a_todos_dir').value.trim();
+
+    if (!destId && todos !== '1') {
+        alert('Por favor selecciona a un usuario del directorio a la izquierda o haz clic en "Seleccionar a todos los usuarios".');
+        e.preventDefault();
+        return false;
+    }
+
+    const asunto = document.getElementById('input_asunto_dir').value.trim();
+    const mensaje = document.getElementById('input_mensaje_dir').value.trim();
+
+    if (!asunto || !mensaje) {
+        alert('Por favor escribe el asunto y el mensaje antes de enviar.');
+        e.preventDefault();
+        return false;
+    }
+
+    if (todos === '1') {
+        return true;
+    }
+
+    e.preventDefault();
+    const form = document.getElementById('formMensajeDirectoComponente');
+    const formData = new FormData(form);
+    const btn = document.getElementById('btnEnviarMensajeMsg');
+    const btnTexto = document.getElementById('btnEnviarTextoMsg');
+    const originalText = btnTexto.innerText;
+
+    btn.disabled = true;
+    btnTexto.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Enviando...';
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        btnTexto.innerText = originalText;
+        if (data.success) {
+            const stream = document.getElementById('chatStreamMsg');
+            const contenedor = document.getElementById('contenedorHistorialChatMsg');
+            if (stream && contenedor) {
+                contenedor.style.display = 'block';
+                const div = document.createElement('div');
+                div.className = 'd-flex mb-3 justify-content-end';
+                div.innerHTML = `
+                    <div class="p-3 rounded-4 shadow-2xs" style="max-width: 82%; background: #F0FDFA; border: 1px solid #99F6E4; border-bottom-right-radius: 4px;">
+                        <div class="d-flex align-items-center justify-content-between gap-3 mb-1">
+                            <span class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-clock me-1"></i>${data.fecha || 'Ahora'}</span>
+                            <span class="badge rounded-pill fw-bold" style="background: #CCFBF1; color: #0F766E; font-size: 0.68rem;">Tú</span>
+                        </div>
+                        <div class="fw-bold small mb-1" style="color: #006B68; font-size: 0.85rem;"><i class="bi bi-chat-square-text me-1"></i>${data.asunto}</div>
+                        <p class="text-dark mb-1.5" style="white-space: pre-wrap; font-size: 0.86rem; line-height: 1.45;">${data.mensaje}</p>
+                        <div class="text-end text-teal" style="font-size: 0.7rem;">
+                            <i class="bi bi-check2-all text-primary me-1"></i> Entregado al destinatario
+                        </div>
+                    </div>
+                `;
+                stream.appendChild(div);
+                contenedor.scrollTop = contenedor.scrollHeight;
+            }
+            document.getElementById('input_mensaje_dir').value = '';
+            document.getElementById('input_mensaje_dir').focus();
+        } else {
+            form.submit();
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btnTexto.innerText = originalText;
+        form.submit();
+    });
+
+    return false;
+}
+</script>
+

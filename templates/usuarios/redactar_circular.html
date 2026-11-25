@@ -48,38 +48,38 @@
                                 <small class="text-muted">Un título claro y descriptivo para que estudiantes, docentes y acudientes identifiquen el comunicado.</small>
                             </div>
 
-                            <!-- Destinatario, Grado y Estudiante Específico -->
-                            <div class="col-md-3">
+                            <!-- Destinatario y Alcance Institucional -->
+                            <div class="col-md-4">
                                 <label for="destinatario_tipo" class="form-label small fw-bold text-dark mb-1">
-                                    <i class="bi bi-people-fill text-primary me-1"></i> Destinatarios Principales *
+                                    <i class="bi bi-people-fill text-primary me-1"></i> Alcance Institucional *
                                 </label>
-                                <select name="destinatario_tipo" id="destinatario_tipo" class="form-select border-primary-subtle rounded-3 py-2" required onchange="actualizarCamposDestinatarios();">
+                                <select name="destinatario_tipo" id="destinatario_tipo" class="form-select border-primary-subtle rounded-3 py-2" required onchange="circ_onCambioAlcance(this.value)">
                                     <option value="Toda" {% if destinatario_tipo == 'Toda' or not destinatario_tipo %}selected{% endif %}>📢 Toda la Institución</option>
-                                    <option value="Grado" {% if destinatario_tipo == 'Grado' %}selected{% endif %}>🎓 Un Grado Específico</option>
-                                    <option value="Grupo" {% if destinatario_tipo == 'Grupo' %}selected{% endif %}>🏫 Un Grupo / Curso Específico</option>
-                                    <option value="Docentes" {% if destinatario_tipo == 'Docentes' %}selected{% endif %}>👨‍🏫 Todos los Docentes</option>
-                                    <option value="Estudiantes" {% if destinatario_tipo == 'Estudiantes' %}selected{% endif %}>🎒 Todos los Estudiantes</option>
-                                    <option value="Familias" {% if destinatario_tipo == 'Familias' %}selected{% endif %}>👨‍👩‍👧‍👦 Todas las Familias</option>
+                                    <option value="Docentes" {% if destinatario_tipo == 'Docentes' %}selected{% endif %}>👨‍🏫 Todos los Docentes e Instructores</option>
+                                    <option value="Estudiantes" {% if destinatario_tipo == 'Estudiantes' %}selected{% endif %}>🎒 Todos los Estudiantes y Aprendices</option>
+                                    <option value="Familias" {% if destinatario_tipo == 'Familias' %}selected{% endif %}>👨‍👩‍👧‍👦 Todas las Familias y Acudientes</option>
                                     <option value="Directivos" {% if destinatario_tipo == 'Directivos' %}selected{% endif %}>🏛️ Directivos y Administrativos</option>
-                                    <option value="Individual" {% if destinatario_tipo == 'Individual' %}selected{% endif %}>👤 Un Destinatario Específico</option>
+                                    <option value="Grado" {% if destinatario_tipo == 'Grado' %}selected{% endif %}>🎓 Un Grado Escolar Específico</option>
+                                    <option value="Grupo" {% if destinatario_tipo == 'Grupo' %}selected{% endif %}>🏫 Un Curso / Ficha Específica</option>
+                                    <option value="Individual" {% if destinatario_tipo == 'Individual' %}selected{% endif %}>👤 Personas Específicas Seleccionadas</option>
                                 </select>
                             </div>
 
-                            <div class="col-md-3" id="wrap_grado_especifico">
+                            <div class="col-md-4" id="wrap_grado_especifico">
                                 <label for="grado_especifico" class="form-label small fw-bold text-dark mb-1">
                                     <i class="bi bi-award-fill text-primary me-1"></i> Grado Escolar Específico
                                 </label>
                                 <select name="grado_especifico" id="grado_especifico" class="form-select border-primary-subtle rounded-3 py-2">
                                     <option value="">-- Seleccionar Grado --</option>
-                                    {% for g in "6,7,8,9,10,11"|make_list %}
+                                    {% for g in grados_catalogo %}
                                         <option value="{{ g }}" {% if grado_especifico == g %}selected{% endif %}>Grado {{ g }}°</option>
                                     {% endfor %}
                                 </select>
                             </div>
 
-                            <div class="col-md-3" id="wrap_curso_id">
+                            <div class="col-md-4" id="wrap_curso_id">
                                 <label for="curso_id" class="form-label small fw-bold text-dark mb-1">
-                                    <i class="bi bi-mortarboard-fill text-primary me-1"></i> Curso / Grupo Específico
+                                    <i class="bi bi-mortarboard-fill text-primary me-1"></i> Curso / Ficha Específica
                                 </label>
                                 <select name="curso_id" id="curso_id" class="form-select border-primary-subtle rounded-3 py-2">
                                     <option value="">-- Todos los Grupos --</option>
@@ -91,40 +91,91 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-3" id="wrap_estudiante_id">
-                                <label for="estudiante_id" class="form-label small fw-bold text-dark mb-1">
-                                    <i class="bi bi-person-fill text-primary me-1"></i> Destinatario Específico
-                                </label>
-                                <select name="estudiante_id" id="estudiante_id" class="form-select border-primary-subtle rounded-3 py-2">
-                                    <option value="">-- Seleccionar Persona --</option>
-                                    {% if directivos %}
-                                    <optgroup label="Directivos y Administrativos">
-                                        {% for d in directivos %}
-                                            <option value="{{ d.id }}" {% if estudiante_id == d.id|stringformat:"s" %}selected{% endif %}>
-                                                {{ d.get_full_name|default:d.username }} ({{ d.perfil.rol.nombre|default:'Directivo' }})
-                                            </option>
+                            <!-- Selector Unificado de Destinatarios (Instructores, Estudiantes, Familias) -->
+                            <div class="col-12">
+                                <input type="hidden" name="destinatarios_ids_csv" id="circ_hidden_destinatarios_ids_csv" value="">
+                                <div class="card border rounded-3 p-3 bg-light shadow-2xs">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <h6 class="fw-bold mb-0" style="color: #14264F;">
+                                            <i class="bi bi-person-lines-fill text-primary me-2"></i>Destinatarios Específicos (Instructores, Aprendices, Familias y Funcionarios)
+                                        </h6>
+                                        <span class="badge rounded-pill px-3 py-1 fw-bold" id="circ_badgeTotalSeleccionados" style="background: #E6F7F6; color: #007F7B; border: 1px solid #B3EAE6;">
+                                            0 seleccionados
+                                        </span>
+                                    </div>
+                                    <p class="small text-muted mb-3">Puedes filtrar por rol o grado, buscar por nombre o documento, y seleccionar una o varias personas específicas.</p>
+
+                                    <!-- Filtros y Búsqueda -->
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-md-6">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                                <input type="text" id="circ_inputBuscar" class="form-control border-start-0 bg-white" placeholder="Buscar por nombre o documento..." oninput="circ_onInputBuscar(this.value)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select id="circ_filtroRol" class="form-select form-select-sm bg-white" onchange="circ_ejecutarBusqueda()">
+                                                <option value="">Todos los Roles</option>
+                                                <option value="Docente">Docentes / Instructores</option>
+                                                <option value="Estudiante">Estudiantes / Aprendices</option>
+                                                <option value="Familia">Familias / Acudientes</option>
+                                                <option value="Admin">Directivos / Rectoría</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select id="circ_filtroGrado" class="form-select form-select-sm bg-white" onchange="circ_ejecutarBusqueda()">
+                                                <option value="">Todos los Grados</option>
+                                                {% for g in grados_catalogo %}
+                                                    <option value="{{ g }}">Grado {{ g }}°</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botones de Selección Rápida -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2 pt-1 border-top">
+                                        <span class="small text-muted" id="circ_contadorVisibles">Usuarios autorizados en el sistema:</span>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-0" onclick="circ_seleccionarTodosVisibles(true)">
+                                                <i class="bi bi-check-all"></i> Seleccionar visibles
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-0 ms-1" onclick="circ_limpiarSeleccion()">
+                                                <i class="bi bi-x"></i> Limpiar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Lista de Selección -->
+                                    <div id="circ_contenedorLista" class="border rounded-3 p-2 bg-white" style="max-height: 200px; overflow-y: auto;">
+                                        {% for u in destinatarios_muestra %}
+                                            <div class="d-flex justify-content-between align-items-center p-2 mb-1 bg-light rounded border circ_item_destinatario" data-id="{{ u.id }}">
+                                                <div class="form-check m-0 d-flex align-items-center">
+                                                    <input class="form-check-input circ_check_usuario" type="checkbox" value="{{ u.id }}" id="circ_user_check_{{ u.id }}" onchange="circ_onToggleCheck(this, '{{ u.id }}', '{{ u.nombre|escapejs }}', '{{ u.rol|escapejs }}')">
+                                                    <label class="form-check-label small fw-semibold text-dark ms-2" for="circ_user_check_{{ u.id }}">
+                                                        {{ u.nombre }}
+                                                        <span class="text-muted fw-normal ms-1">· Doc: {{ u.documento }}</span>
+                                                    </label>
+                                                </div>
+                                                <div class="d-flex gap-1 align-items-center">
+                                                    {% if u.grado %}
+                                                        <span class="badge bg-white text-primary border" style="font-size: 0.65rem;">{{ u.grado }}</span>
+                                                    {% endif %}
+                                                    <span class="badge rounded-pill bg-white text-secondary border" style="font-size: 0.65rem;">{{ u.rol }}</span>
+                                                </div>
+                                            </div>
+                                        {% empty %}
+                                            <div class="text-center py-3 text-muted small">Cargando usuarios disponibles...</div>
                                         {% endfor %}
-                                    </optgroup>
-                                    {% endif %}
-                                    {% if docentes %}
-                                    <optgroup label="Docentes y Profesores">
-                                        {% for doc in docentes %}
-                                            <option value="{{ doc.id }}" {% if estudiante_id == doc.id|stringformat:"s" %}selected{% endif %}>
-                                                {{ doc.get_full_name|default:doc.username }} (Docente)
-                                            </option>
-                                        {% endfor %}
-                                    </optgroup>
-                                    {% endif %}
-                                    {% if estudiantes %}
-                                    <optgroup label="Estudiantes">
-                                        {% for est in estudiantes %}
-                                            <option value="{{ est.id }}" {% if estudiante_id == est.id|stringformat:"s" %}selected{% endif %}>
-                                                {{ est.get_full_name|default:est.username }} (Doc: {{ est.perfil.numero_documento|default:est.username }})
-                                            </option>
-                                        {% endfor %}
-                                    </optgroup>
-                                    {% endif %}
-                                </select>
+                                    </div>
+
+                                    <!-- Previsualización de Destinatarios Seleccionados -->
+                                    <div class="mt-2 pt-2 border-top">
+                                        <span class="small fw-bold text-dark d-block mb-1"><i class="bi bi-check2-circle text-primary me-1"></i> Destinatarios directos seleccionados:</span>
+                                        <div id="circ_contenedorPills" class="d-flex flex-wrap gap-1 p-2 rounded bg-white border" style="min-height: 38px; max-height: 80px; overflow-y: auto;">
+                                            <span class="text-muted small fst-italic" id="circ_placeholderPills">Ninguno seleccionado (se enviará según el Alcance Institucional superior).</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Fecha de Emisión y Estado -->
@@ -206,4 +257,165 @@
         </div>
     </div>
 </div>
+
+<script>
+const circ_seleccionadosMap = new Map();
+let circ_debounceTimer = null;
+
+function circ_onCambioAlcance(val) {
+    const wrapGrado = document.getElementById('wrap_grado_especifico');
+    const wrapCurso = document.getElementById('wrap_curso_id');
+    if (wrapGrado) {
+        wrapGrado.style.display = (val === 'Grado' || val === 'Estudiantes' || val === 'Familias') ? 'block' : 'none';
+    }
+    if (wrapCurso) {
+        wrapCurso.style.display = (val === 'Grupo' || val === 'Estudiantes') ? 'block' : 'none';
+    }
+}
+
+function circ_onSelectGrado(gradoVal) {
+    const filtroGrado = document.getElementById('circ_filtroGrado');
+    if (filtroGrado && gradoVal) {
+        filtroGrado.value = gradoVal;
+        circ_ejecutarBusqueda();
+    }
+}
+
+function circ_onInputBuscar(val) {
+    clearTimeout(circ_debounceTimer);
+    circ_debounceTimer = setTimeout(() => {
+        circ_ejecutarBusqueda();
+    }, 300);
+}
+
+function circ_ejecutarBusqueda() {
+    const q = document.getElementById('circ_inputBuscar').value.trim();
+    const rol = document.getElementById('circ_filtroRol').value.trim();
+    const grado = document.getElementById('circ_filtroGrado').value.trim();
+    const contenedor = document.getElementById('circ_contenedorLista');
+
+    contenedor.innerHTML = '<div class="text-center py-3 text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Buscando usuarios...</div>';
+
+    const url = `{% url 'api_destinatarios_notificaciones' %}?q=${encodeURIComponent(q)}&rol=${encodeURIComponent(rol)}&grado=${encodeURIComponent(grado)}`;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            contenedor.innerHTML = '';
+            if (!data.destinatarios || data.destinatarios.length === 0) {
+                contenedor.innerHTML = '<div class="text-center py-3 text-muted small">No se encontraron personas con los filtros seleccionados.</div>';
+                return;
+            }
+            data.destinatarios.forEach(u => {
+                const isChecked = circ_seleccionadosMap.has(String(u.id));
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'd-flex justify-content-between align-items-center p-2 mb-1 bg-light rounded border circ_item_destinatario';
+                itemDiv.setAttribute('data-id', u.id);
+
+                itemDiv.innerHTML = `
+                    <div class="form-check m-0 d-flex align-items-center">
+                        <input class="form-check-input circ_check_usuario" type="checkbox" value="${u.id}" id="circ_user_check_${u.id}" ${isChecked ? 'checked' : ''}>
+                        <label class="form-check-label small fw-semibold text-dark ms-2" for="circ_user_check_${u.id}">
+                            ${u.nombre}
+                            <span class="text-muted fw-normal ms-1">· Doc: ${u.documento}</span>
+                        </label>
+                    </div>
+                    <div class="d-flex gap-1 align-items-center">
+                        ${u.grado ? `<span class="badge bg-white text-primary border" style="font-size: 0.65rem;">${u.grado}</span>` : ''}
+                        <span class="badge rounded-pill bg-white text-secondary border" style="font-size: 0.65rem;">${u.rol}</span>
+                    </div>
+                `;
+
+                const checkbox = itemDiv.querySelector('.circ_check_usuario');
+                checkbox.addEventListener('change', function() {
+                    circ_onToggleCheck(this, u.id, u.nombre, u.rol);
+                });
+                contenedor.appendChild(itemDiv);
+            });
+        })
+        .catch(err => {
+            console.error('Error cargando usuarios circulares:', err);
+            contenedor.innerHTML = '<div class="text-center py-3 text-danger small">Error de conexión al cargar usuarios.</div>';
+        });
+}
+
+function circ_onToggleCheck(checkbox, id, nombre, rol) {
+    const strId = String(id);
+    if (checkbox.checked) {
+        circ_seleccionadosMap.set(strId, { nombre: nombre, rol: rol });
+    } else {
+        circ_seleccionadosMap.delete(strId);
+    }
+    circ_actualizarPills();
+}
+
+function circ_seleccionarTodosVisibles(estado) {
+    const checkboxes = document.querySelectorAll('#circ_contenedorLista .circ_check_usuario');
+    checkboxes.forEach(cb => {
+        cb.checked = estado;
+        const item = cb.closest('.circ_item_destinatario');
+        const id = cb.value;
+        const nombre = item.querySelector('label').innerText.split('·')[0].trim();
+        const rolBadge = item.querySelector('.badge:last-child');
+        const rol = rolBadge ? rolBadge.innerText.trim() : '';
+
+        if (estado) {
+            circ_seleccionadosMap.set(String(id), { nombre: nombre, rol: rol });
+        } else {
+            circ_seleccionadosMap.delete(String(id));
+        }
+    });
+    circ_actualizarPills();
+}
+
+function circ_limpiarSeleccion() {
+    circ_seleccionadosMap.clear();
+    const checkboxes = document.querySelectorAll('#circ_contenedorLista .circ_check_usuario');
+    checkboxes.forEach(cb => cb.checked = false);
+    circ_actualizarPills();
+}
+
+function circ_desmarcar(id) {
+    const strId = String(id);
+    circ_seleccionadosMap.delete(strId);
+    const cb = document.getElementById(`circ_user_check_${id}`);
+    if (cb) cb.checked = false;
+    circ_actualizarPills();
+}
+
+function circ_actualizarPills() {
+    const contenedor = document.getElementById('circ_contenedorPills');
+    const badge = document.getElementById('circ_badgeTotalSeleccionados');
+    contenedor.innerHTML = '';
+
+    if (circ_seleccionadosMap.size === 0) {
+        contenedor.innerHTML = '<span class="text-muted small fst-italic" id="circ_placeholderPills">Ninguno seleccionado (se enviará según el Alcance Institucional superior).</span>';
+        badge.innerText = '0 seleccionados';
+    } else {
+        circ_seleccionadosMap.forEach((val, id) => {
+            const pill = document.createElement('span');
+            pill.className = 'badge rounded-pill bg-light text-dark border px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm';
+            pill.style.fontSize = '0.72rem';
+            pill.innerHTML = `
+                <span>${val.nombre}</span>
+                <span class="text-muted">(${val.rol})</span>
+                <button type="button" class="btn-close ms-1" style="font-size: 0.5rem;" onclick="circ_desmarcar('${id}')" title="Quitar"></button>
+            `;
+            contenedor.appendChild(pill);
+        });
+        const total = circ_seleccionadosMap.size;
+        badge.innerText = `${total} persona${total !== 1 ? 's' : ''} seleccionada${total !== 1 ? 's' : ''}`;
+    }
+
+    const idsArray = Array.from(circ_seleccionadosMap.keys());
+    document.getElementById('circ_hidden_destinatarios_ids_csv').value = idsArray.join(',');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sel = document.getElementById('destinatario_tipo');
+    if (sel) {
+        circ_onCambioAlcance(sel.value);
+    }
+});
+</script>
 {% endblock %}

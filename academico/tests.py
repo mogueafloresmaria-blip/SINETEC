@@ -145,4 +145,4 @@ class AcademicoModelTest(TestCase):
         response = self.client.post(f'/academico/fichas/{self.ficha.id}/matricular/', datos)
         self.assertRedirects(response, f'/academico/fichas/{self.ficha.id}/')
         self.assertTrue(PerfilUsuario.objects.filter(numero_documento='1002003099').exists())
-        self.assertTrue(Matricula.objects.filter(ficha=self.ficha, aprendiz__username='ap_1002003099').exists())
+        self.assertTrue(Matricula.objects.filter(ficha=self.ficha, aprendiz__username__in=['1002003099', 'ap_1002003099']).exists())

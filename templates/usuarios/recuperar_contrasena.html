@@ -14,15 +14,15 @@
     
     <style>
         :root {
-            --color-principal: {{ tema_colores.color_primario|default:'#8B5E3C' }};
-            --color-secundario: {{ tema_colores.color_secundario|default:'#5A3825' }};
-            --color-acento: {{ tema_colores.color_acento|default:'#EFEBE4' }};
-            --color-fondo: {{ tema_colores.color_fondo|default:'#F8F6F0' }};
-            --color-titulo: {{ tema_colores.color_titulos|default:'#2D231E' }};
-            --color-texto: {{ tema_colores.color_texto|default:'#3E322A' }};
-            --color-boton: {{ tema_colores.color_botones|default:'#8B5E3C' }};
+            --color-principal: {{ tema_colores.color_primario|default:'#007F7B' }};
+            --color-secundario: {{ tema_colores.color_secundario|default:'#006B68' }};
+            --color-acento: {{ tema_colores.color_acento|default:'#DDF7F5' }};
+            --color-fondo: {{ tema_colores.color_fondo|default:'#F5F8FC' }};
+            --color-titulo: {{ tema_colores.color_titulos|default:'#14264F' }};
+            --color-texto: {{ tema_colores.color_texto|default:'#14264F' }};
+            --color-boton: {{ tema_colores.color_botones|default:'#007F7B' }};
             --color-tarjeta: #FFFFFF;
-            --border-subtle: #E8E2D9;
+            --border-subtle: #E2E8F0;
             --danger-bg: #FEF2F2;
             --danger-border: #FCA5A5;
             --danger-text: #991B1B;
@@ -42,9 +42,9 @@
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--color-fondo);
             background-image: 
-                radial-gradient(circle at 10% 15%, rgba(229, 223, 213, 0.70), transparent 45%),
-                radial-gradient(circle at 90% 80%, rgba(184, 151, 126, 0.28), transparent 50%),
-                radial-gradient(circle at 50% 95%, rgba(248, 246, 240, 0.85), transparent 60%);
+                radial-gradient(circle at 10% 15%, rgba(221, 247, 245, 0.70), transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(18, 184, 176, 0.20), transparent 50%),
+                radial-gradient(circle at 50% 95%, rgba(245, 248, 252, 0.85), transparent 60%);
             background-attachment: fixed;
             display: flex;
             align-items: center;
@@ -63,7 +63,7 @@
             border: 1px solid var(--border-subtle);
             border-radius: 24px;
             box-shadow: 
-                0 20px 50px rgba(90, 56, 37, 0.12),
+                0 20px 50px rgba(20, 38, 79, 0.08),
                 0 2px 10px rgba(0, 0, 0, 0.04);
             overflow: hidden;
             transition: all 0.3s ease;
@@ -71,7 +71,7 @@
 
         /* Encabezado */
         .card-header {
-            background: linear-gradient(145deg, #FAF8F5 0%, var(--color-acento) 100%);
+            background: linear-gradient(145deg, #FFFFFF 0%, #DDF7F5 100%);
             border-bottom: 1px solid var(--border-subtle);
             padding: 32px 28px 24px;
             text-align: center;
@@ -82,7 +82,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(139, 94, 60, 0.10);
+            background: rgba(0, 127, 123, 0.12);
             color: var(--color-secundario);
             font-size: 0.76rem;
             font-weight: 700;
@@ -196,7 +196,7 @@
         .form-input:focus {
             background: #FFFFFF;
             border-color: var(--color-principal);
-            box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.14);
+            box-shadow: 0 0 0 4px rgba(0, 127, 123, 0.16);
         }
 
         .form-input:focus + .input-icon-left,
@@ -280,7 +280,7 @@
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            box-shadow: 0 10px 22px rgba(90, 56, 37, 0.24);
+            box-shadow: 0 10px 22px rgba(0, 107, 104, 0.24);
             transition: all 0.25s ease;
             text-decoration: none;
             margin-top: 6px;
@@ -288,7 +288,7 @@
 
         .btn-action-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 14px 28px rgba(90, 56, 37, 0.32);
+            box-shadow: 0 14px 28px rgba(0, 107, 104, 0.32);
             filter: brightness(1.05);
         }
 

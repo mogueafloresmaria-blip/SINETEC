@@ -297,8 +297,20 @@ def requerir_roles(*roles_permitidos):
 
 
 def solo_admin(view_func):
-
-    return requerir_roles('Administrador')(view_func)
+    """Acceso restringido única y exclusivamente para el rol Administrador (o superusuario)."""
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
+        perfil = getattr(request.user, 'perfil', None)
+        rol_nombre = perfil.rol.nombre if (perfil and perfil.rol) else ''
+        if 'administrador' in rol_nombre.lower():
+            return view_func(request, *args, **kwargs)
+        messages.error(request, "Acceso Restringido: Únicamente el Administrador tiene autorización para acceder a esta sección.")
+        return redirect(obtener_url_redireccion_por_rol(request.user))
+    return _wrapped_view
 
 
 

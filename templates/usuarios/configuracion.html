@@ -184,7 +184,8 @@
             </div>
         </div>
 
-            <!-- 4. Configuración de Colores Institucionales -->
+            <!-- 4. Configuración de Colores Institucionales (Exclusivo Administrador) -->
+            {% if es_admin or request.user.is_superuser or 'Administrador' in user.perfil.rol.nombre %}
             <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mt-4">
                 <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
                     <div class="d-flex align-items-center gap-2">
@@ -283,6 +284,7 @@
                     </div>
                 </form>
             </div>
+            {% endif %}
         </div>
 
         <!-- Columna Derecha: Información del Entorno Institucional -->
@@ -402,6 +404,7 @@
             const vpBoton = document.getElementById('vp_boton');
             const indicador = document.getElementById('indicadorAutoguardado');
             
+            {% if es_admin or request.user.is_superuser or 'Administrador' in user.perfil.rol.nombre %}
             // Catálogo completo de campos de color institucionales
             const camposColores = [
                 'color_primario', 'color_secundario', 'color_acento', 'color_fondo',
@@ -538,6 +541,7 @@
                     autoguardarColor(campo, e.target.value);
                 });
             });
+            {% endif %}
         });
     </script>
 </div>

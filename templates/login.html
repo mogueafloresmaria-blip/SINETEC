@@ -15,21 +15,21 @@
     
     <style>
         :root {
-            /* Paleta Institucional EduNova Café / Mocha / Crema */
-            --color-chocolate-dark: #3E2010;
-            --color-chocolate-btn: #5C3116;
-            --color-chocolate-hover: #45230D;
-            --color-mocha: #8D5B36;
-            --color-caramel: #C49A76;
-            --color-input-bg: #FAF4EC;
-            --color-input-border: #ECDCCE;
+            /* Paleta Institucional EduNova */
+            --color-petroleo: #006B68;
+            --color-institucional: #007F7B;
+            --color-turquesa: #12B8B0;
+            --color-turquesa-brillante: #22C8C0;
+            --color-aguamarina: #DDF7F5;
             --color-card-bg: #FFFFFF;
-            --color-card-border: #EFE4D6;
-            --color-text-dark: #2E170A;
-            --color-text-muted: #6B4931;
-            --color-btn-role-bg: #F8EFE6;
-            --color-btn-role-border: #ECDCCB;
-            --color-btn-role-active: #EEDCCE;
+            --color-card-border: #E2E8F0;
+            --color-text-dark: #14264F;
+            --color-text-muted: #64748B;
+            --color-input-bg: #F8FAFC;
+            --color-input-border: #CBD5E1;
+            --color-btn-role-bg: #F5F8FC;
+            --color-btn-role-border: #E2E8F0;
+            --color-btn-role-active: #DDF7F5;
         }
 
         *, *::before, *::after {
@@ -42,7 +42,7 @@
             min-height: 100vh;
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             color: var(--color-text-dark);
-            background-color: #F8F3ED;
+            background-color: #F5F8FC;
             position: relative;
             overflow-x: hidden;
             display: flex;
@@ -51,7 +51,7 @@
             padding: clamp(16px, 3vw, 40px);
         }
 
-        /* Fondos de ondas orgánicas cafés/crema decorativas inspiradas en el diseño */
+        /* Fondos de ondas orgánicas turquesa y verde petróleo institucional */
         .bg-waves-wrapper {
             position: fixed;
             inset: 0;
@@ -74,14 +74,14 @@
             grid-template-columns: repeat(6, 6px);
             grid-gap: 12px;
             z-index: 1;
-            opacity: 0.45;
+            opacity: 0.55;
         }
 
         .dots-grid span {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background-color: var(--color-chocolate-dark);
+            background-color: var(--color-turquesa);
         }
 
         .dots-top-right {
@@ -106,11 +106,11 @@
         .login-card {
             background: var(--color-card-bg);
             border: 1.5px solid var(--color-card-border);
-            border-radius: 36px;
+            border-radius: 28px;
             padding: clamp(28px, 4.5vw, 42px) clamp(22px, 4.5vw, 44px) clamp(24px, 3.5vw, 36px);
             box-shadow: 
-                0 25px 60px rgba(62, 32, 16, 0.12),
-                0 6px 20px rgba(0, 0, 0, 0.04);
+                0 25px 60px rgba(20, 38, 79, 0.10),
+                0 6px 20px rgba(0, 107, 104, 0.05);
             text-align: center;
             position: relative;
         }
@@ -124,25 +124,25 @@
         }
 
         .brand-logo-img {
-            height: 52px;
+            height: 54px;
             width: auto;
             max-width: 160px;
             object-fit: contain;
             margin-bottom: 6px;
-            filter: drop-shadow(0 2px 4px rgba(62, 32, 16, 0.1));
+            filter: drop-shadow(0 2px 6px rgba(0, 107, 104, 0.15));
         }
 
         .brand-main-title {
             font-family: 'Outfit', sans-serif;
             font-size: clamp(2.2rem, 5vw, 2.75rem);
             font-weight: 900;
-            color: var(--color-chocolate-dark);
+            color: var(--color-text-dark);
             letter-spacing: -0.025em;
             line-height: 1.05;
             margin-bottom: 8px;
         }
 
-        /* Líneas con subtítulo: —— Sistema Integrado de Educación Técnica —— */
+        /* Líneas con subtítulo */
         .brand-subtitle-bar {
             display: flex;
             align-items: center;
@@ -155,25 +155,25 @@
         .brand-subtitle-bar .sub-line {
             flex: 1;
             height: 1.5px;
-            background: #DFD0C1;
+            background: #CBD5E1;
             border-radius: 2px;
         }
 
         .brand-subtitle-bar .sub-text {
             font-size: clamp(0.76rem, 2vw, 0.88rem);
             font-weight: 700;
-            color: var(--color-chocolate-dark);
+            color: var(--color-institucional);
             white-space: nowrap;
             letter-spacing: 0.01em;
         }
 
         /* Alertas de Error / Información */
         .login-alert {
-            background: #FDF2F2;
-            border: 1.5px solid #F8B4B4;
+            background: #FEF2F2;
+            border: 1.5px solid #FECACA;
             border-radius: 14px;
             padding: 10px 14px;
-            color: #9B1C1C;
+            color: #991B1B;
             font-size: 0.84rem;
             display: flex;
             align-items: center;
@@ -184,7 +184,7 @@
 
         .login-alert i {
             font-size: 1.15rem;
-            color: #E02424;
+            color: #DC2626;
             flex-shrink: 0;
         }
 
@@ -218,8 +218,8 @@
 
         .field-input-box:focus-within {
             background: #FFFFFF;
-            border-color: var(--color-mocha);
-            box-shadow: 0 0 0 4px rgba(141, 91, 54, 0.15);
+            border-color: var(--color-turquesa);
+            box-shadow: 0 0 0 4px rgba(18, 184, 176, 0.18);
         }
 
         .field-input-box.highlight-loaded {
@@ -227,13 +227,13 @@
         }
 
         @keyframes highlightPulse {
-            0% { border-color: var(--color-mocha); box-shadow: 0 0 0 5px rgba(92, 49, 22, 0.25); }
+            0% { border-color: var(--color-institucional); box-shadow: 0 0 0 5px rgba(0, 127, 123, 0.25); }
             100% { border-color: var(--color-input-border); box-shadow: none; }
         }
 
         .field-icon {
             font-size: 1.2rem;
-            color: var(--color-chocolate-dark);
+            color: var(--color-institucional);
             flex-shrink: 0;
         }
 
@@ -250,7 +250,7 @@
         }
 
         .field-input::placeholder {
-            color: #A38B78;
+            color: #94A3B8;
             font-weight: 500;
         }
 
@@ -258,17 +258,17 @@
             background: transparent;
             border: none;
             padding: 4px;
-            color: var(--color-chocolate-dark);
+            color: var(--color-text-muted);
             font-size: 1.2rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.2s;
+            transition: color 0.2s;
         }
 
         .btn-eye-toggle:hover {
-            opacity: 0.75;
+            color: var(--color-institucional);
         }
 
         /* Opciones: Recordar sesión y Olvidaste tu clave */
@@ -306,8 +306,8 @@
         }
 
         .remember-checkbox:checked {
-            background: var(--color-chocolate-btn);
-            border-color: var(--color-chocolate-btn);
+            background: var(--color-institucional);
+            border-color: var(--color-institucional);
         }
 
         .remember-checkbox:checked::before {
@@ -320,14 +320,14 @@
         }
 
         .forgot-password-link {
-            color: var(--color-text-dark);
+            color: var(--color-institucional);
             font-weight: 700;
             text-decoration: none;
             transition: color 0.2s;
         }
 
         .forgot-password-link:hover {
-            color: var(--color-mocha);
+            color: var(--color-petroleo);
             text-decoration: underline;
         }
 
@@ -335,7 +335,7 @@
         .btn-submit-main {
             width: 100%;
             height: 52px;
-            background-color: var(--color-chocolate-btn);
+            background: linear-gradient(135deg, #007F7B 0%, #006B68 100%);
             color: #FFFFFF;
             border: none;
             border-radius: 9999px;
@@ -348,14 +348,14 @@
             justify-content: center;
             gap: 8px;
             cursor: pointer;
-            box-shadow: 0 8px 22px rgba(92, 49, 22, 0.28);
+            box-shadow: 0 8px 22px rgba(0, 127, 123, 0.28);
             transition: all 0.25s ease;
         }
 
         .btn-submit-main:hover {
-            background-color: var(--color-chocolate-hover);
+            background: linear-gradient(135deg, #006B68 0%, #004D4A 100%);
             transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(92, 49, 22, 0.35);
+            box-shadow: 0 12px 28px rgba(0, 107, 104, 0.35);
         }
 
         .btn-submit-main:active {
@@ -367,9 +367,9 @@
         }
 
         @keyframes btnPulse {
-            0% { transform: scale(1); box-shadow: 0 8px 22px rgba(92, 49, 22, 0.28); }
-            50% { transform: scale(1.02); box-shadow: 0 12px 30px rgba(92, 49, 22, 0.45); }
-            100% { transform: scale(1); box-shadow: 0 8px 22px rgba(92, 49, 22, 0.28); }
+            0% { transform: scale(1); box-shadow: 0 8px 22px rgba(0, 127, 123, 0.28); }
+            50% { transform: scale(1.02); box-shadow: 0 12px 30px rgba(0, 127, 123, 0.45); }
+            100% { transform: scale(1); box-shadow: 0 8px 22px rgba(0, 127, 123, 0.28); }
         }
 
         /* Divisor: —— O inicia sesión con —— */
@@ -383,7 +383,7 @@
         .divider-roles-row .div-line {
             flex: 1;
             height: 1px;
-            background: #ECDCCE;
+            background: #E2E8F0;
         }
 
         .divider-roles-row .div-text {
@@ -423,21 +423,21 @@
         }
 
         .role-card-btn:hover {
-            background: #F2E4D6;
-            border-color: var(--color-mocha);
+            background: #EBF8F7;
+            border-color: var(--color-turquesa);
             transform: translateY(-2px);
-            box-shadow: 0 6px 14px rgba(92, 49, 22, 0.12);
+            box-shadow: 0 6px 14px rgba(18, 184, 176, 0.15);
         }
 
         .role-card-btn.active-selected {
             background: var(--color-btn-role-active);
-            border-color: var(--color-chocolate-dark);
-            box-shadow: 0 0 0 2px var(--color-chocolate-dark);
+            border-color: var(--color-institucional);
+            box-shadow: 0 0 0 2px var(--color-institucional);
         }
 
         .role-card-icon {
             font-size: 1.35rem;
-            color: var(--color-chocolate-dark);
+            color: var(--color-institucional);
             margin-bottom: 4px;
             transition: transform 0.2s;
         }
@@ -456,9 +456,9 @@
         /* Aviso visual de credenciales cargadas */
         .loaded-feedback-badge {
             display: none;
-            background: #FDF6EE;
-            border: 1px solid #ECDCCE;
-            color: var(--color-chocolate-dark);
+            background: #DDF7F5;
+            border: 1px solid #BCEFEA;
+            color: #006B68;
             border-radius: 20px;
             padding: 6px 14px;
             font-size: 0.78rem;
@@ -491,31 +491,31 @@
         }
 
         .back-home-link:hover {
-            color: var(--color-chocolate-dark);
+            color: var(--color-institucional);
         }
     </style>
 </head>
 <body>
 
-    <!-- Fondos de Ondas Cálidas y Decoraciones Exactas al Diseño -->
+    <!-- Fondos de Ondas Cálidas y Decoraciones Institucionales -->
     <div class="bg-waves-wrapper" aria-hidden="true">
         <svg class="bg-wave-svg" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Fondo suave base crema -->
-            <rect width="1440" height="900" fill="#F8F3ED"/>
+            <!-- Fondo suave base gris azulado muy claro -->
+            <rect width="1440" height="900" fill="#F5F8FC"/>
             
             <!-- Curvas en esquina superior izquierda -->
-            <path d="M-60 -40 C 220 20, 280 260, -20 380 Z" fill="#E8D5C2" opacity="0.6"/>
-            <path d="M-40 -40 C 180 0, 220 180, -40 280 Z" fill="#C49A76" opacity="0.5"/>
-            <path d="M-40 -40 C 100 -20, 140 100, -40 180 Z" fill="#5C3116" opacity="0.75"/>
+            <path d="M-60 -40 C 220 20, 280 260, -20 380 Z" fill="#DDF7F5" opacity="0.7"/>
+            <path d="M-40 -40 C 180 0, 220 180, -40 280 Z" fill="#12B8B0" opacity="0.35"/>
+            <path d="M-40 -40 C 100 -20, 140 100, -40 180 Z" fill="#007F7B" opacity="0.8"/>
             
             <!-- Curvas en esquina inferior derecha -->
-            <path d="M1500 520 C 1260 620, 1200 820, 1500 940 Z" fill="#E8D5C2" opacity="0.65"/>
-            <path d="M1500 620 C 1300 700, 1280 840, 1500 940 Z" fill="#C49A76" opacity="0.5"/>
-            <path d="M1500 720 C 1380 760, 1360 860, 1500 940 Z" fill="#5C3116" opacity="0.85"/>
+            <path d="M1500 520 C 1260 620, 1200 820, 1500 940 Z" fill="#DDF7F5" opacity="0.75"/>
+            <path d="M1500 620 C 1300 700, 1280 840, 1500 940 Z" fill="#12B8B0" opacity="0.4"/>
+            <path d="M1500 720 C 1380 760, 1360 860, 1500 940 Z" fill="#006B68" opacity="0.85"/>
 
             <!-- Curvas suaves de fondo envolventes -->
-            <path d="M0 750 C 400 680, 500 900, 800 900 L 0 900 Z" fill="#EFE5D9" opacity="0.5"/>
-            <path d="M900 0 C 1100 120, 1300 80, 1440 180 L 1440 0 Z" fill="#EFE5D9" opacity="0.4"/>
+            <path d="M0 750 C 400 680, 500 900, 800 900 L 0 900 Z" fill="#E6F7F6" opacity="0.5"/>
+            <path d="M900 0 C 1100 120, 1300 80, 1440 180 L 1440 0 Z" fill="#E6F7F6" opacity="0.4"/>
         </svg>
 
         <!-- Matriz de Puntos Decorativos (Superior Derecha) -->
@@ -564,8 +564,8 @@
 
             {% if messages %}
                 {% for msg in messages %}
-                    <div class="login-alert" style="background: #FDF6EE; border-color: #ECDCCE; color: var(--color-chocolate-dark);" role="status">
-                        <i class="bi bi-info-circle-fill" style="color: var(--color-mocha);"></i>
+                    <div class="login-alert" style="background: #DDF7F5; border-color: #BCEFEA; color: #006B68;" role="status">
+                        <i class="bi bi-info-circle-fill" style="color: #007F7B;"></i>
                         <div>{{ msg }}</div>
                     </div>
                 {% endfor %}

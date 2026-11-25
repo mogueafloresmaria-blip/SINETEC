@@ -20,12 +20,18 @@
             </div>
             <div class="d-flex flex-wrap gap-2">
                 {% if user.is_superuser or 'Admin' in user.perfil.rol.nombre or 'Rector' in user.perfil.rol.nombre or 'Secretar' in user.perfil.rol.nombre or 'Docente' in user.perfil.rol.nombre or 'Instructor' in user.perfil.rol.nombre %}
-                <a href="{% url 'redactar_circular' %}" class="btn btn-light fw-bold rounded-pill px-4 shadow-sm" style="color: var(--color-principal);">
-                    <i class="bi bi-pencil-square me-1"></i> Redactar Circular o Aviso
+                <button type="button" data-bs-toggle="modal" data-bs-target="#nuevoMensajeModal" class="btn btn-light fw-bold rounded-pill px-4 shadow-sm" style="color: var(--color-principal);">
+                    <i class="bi bi-megaphone-fill me-1"></i> Canal Oficial de Circulares
+                </button>
+                <a href="{% url 'redactar_circular' %}" class="btn btn-outline-light fw-semibold rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-file-earmark-plus me-1"></i> Formulario Avanzado
                 </a>
                 {% endif %}
+                <button type="button" data-bs-toggle="modal" data-bs-target="#modalMensajeDirecto" class="btn btn-outline-light fw-semibold rounded-pill px-4 shadow-sm">
+                    <i class="bi bi-chat-dots-fill me-1"></i> Redactar Mensaje Directo
+                </button>
                 <a href="{% url 'comunicaciones' %}" class="btn btn-outline-light fw-semibold rounded-pill px-3 shadow-sm">
-                    <i class="bi bi-chat-heart-fill me-1"></i> Mensajería Directa
+                    <i class="bi bi-inbox-fill me-1"></i> Bandeja Completa
                 </a>
             </div>
         </div>
@@ -175,68 +181,300 @@
 
 </div>
 
-<!-- MODAL PARA REDACTAR NUEVA CIRCULAR / AVISO (Ubicado fuera de contenedores para evitar problemas de stacking) -->
+<!-- MODAL PARA CANAL OFICIAL DE CIRCULARES Y AVISOS -->
 <div class="modal fade" id="nuevoMensajeModal" tabindex="-1" aria-labelledby="nuevoMensajeModalLabel" aria-hidden="true" style="z-index: 1070;">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <form method="POST" enctype="multipart/form-data" action="{% url 'mensajeria' %}" id="formRedactarComunicado">
                 {% csrf_token %}
-                <div class="modal-header text-white" style="background: linear-gradient(135deg, #5CA8D8 0%, #2F79A8 100%);">
-                    <h5 class="modal-title fw-bold" id="nuevoMensajeModalLabel">
-                        <i class="bi bi-pencil-square me-2"></i> Redactar Circular o Aviso Escolar
-                    </h5>
+                <input type="hidden" name="destinatarios_ids_csv" id="circ_hidden_destinatarios_ids_csv" value="">
+
+                <div class="modal-header text-white py-3 px-4" style="background: linear-gradient(135deg, #006B68, #007F7B, #12B8B0);">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="nuevoMensajeModalLabel">
+                            <i class="bi bi-megaphone-fill me-2"></i> Canal Oficial de Circulares y Avisos
+                        </h5>
+                        <p class="small mb-0 opacity-75">Publicación institucional para toda la comunidad o destinatarios específicos</p>
+                    </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal-body p-4 bg-white">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-dark" for="destinatario_tipo">Estamento Destinatario *</label>
-                            <select class="form-select border-primary-subtle rounded-3" id="destinatario_tipo" name="destinatario_tipo" required>
-                                <option value="Toda" selected>Toda la Comunidad Educativa</option>
-                                <option value="Familias">Acudientes y Familias</option>
-                                <option value="Estudiantes">Estudiantes</option>
-                                <option value="Docentes">Cuerpo Docente</option>
-                                <option value="Directivos">Directivos (Rectoría, Coordinación, Administración)</option>
-                            </select>
+
+                <div class="modal-body p-4 bg-light">
+                    <!-- Alcance y Configuración General -->
+                    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-3">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1" for="destinatario_tipo">
+                                    <i class="bi bi-people-fill text-success me-1"></i> Alcance Institucional *
+                                </label>
+                                <select class="form-select border-primary-subtle rounded-3" id="destinatario_tipo" name="destinatario_tipo" required onchange="circ_onCambioAlcance(this.value)">
+                                    <option value="Toda" selected>📢 Toda la Comunidad Educativa</option>
+                                    <option value="Docentes">👨‍🏫 Cuerpo Docente e Instructores</option>
+                                    <option value="Estudiantes">🎒 Estudiantes y Aprendices</option>
+                                    <option value="Familias">👨‍👩‍👧‍👦 Acudientes y Familias</option>
+                                    <option value="Directivos">🏛️ Directivos y Administrativos</option>
+                                    <option value="Grado">🎓 Un Grado Escolar Específico</option>
+                                    <option value="Individual">👤 Personas Específicas Seleccionadas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="circ_wrap_curso">
+                                <label class="form-label small fw-bold text-dark mb-1" for="curso_id">
+                                    <i class="bi bi-mortarboard-fill text-success me-1"></i> Curso / Ficha Específica (Opcional)
+                                </label>
+                                <select class="form-select border-primary-subtle rounded-3" id="curso_id" name="curso_id">
+                                    <option value="">-- Todos los Cursos y Grados --</option>
+                                    {% for f in fichas %}
+                                        <option value="{{ f.id }}">Grado {{ f.codigo_ficha }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-dark" for="curso_id">Curso o Grado Específico (Opcional)</label>
-                            <select class="form-select border-primary-subtle rounded-3" id="curso_id" name="curso_id">
-                                <option value="">-- Todos los Cursos y Grados --</option>
-                                {% for f in fichas %}
-                                    <option value="{{ f.id }}">Grado {{ f.codigo_ficha }}</option>
-                                {% endfor %}
-                            </select>
+                    </div>
+
+                    <!-- SELECTOR INTELIGENTE DE DESTINATARIOS (Instructores, Estudiantes, Familias) -->
+                    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-bold mb-0" style="color: #14264F;">
+                                <i class="bi bi-person-lines-fill text-success me-2"></i>Selección de Personas Específicas (Opcional o Individual)
+                            </h6>
+                            <span class="badge rounded-pill px-3 py-1 fw-bold" id="circ_badgeTotalSeleccionados" style="background: #E6F7F6; color: #007F7B; border: 1px solid #B3EAE6;">
+                                0 seleccionados
+                            </span>
                         </div>
-                        <div class="col-12">
-                            <label class="form-label small fw-bold text-dark" for="asunto_input">Asunto de la Circular *</label>
-                            <input type="text" id="asunto_input" name="asunto" class="form-control border-primary-subtle rounded-3" placeholder="Ej. Convocatoria a Escuela de Padres y entrega de informes" required autofocus>
+                        <p class="small text-muted mb-2">Selecciona instructores, aprendices o directivos específicos que deban recibir la circular y confirmar su lectura.</p>
+
+                        <!-- Filtros rápidos -->
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                    <input type="text" id="circ_inputBuscar" class="form-control border-start-0" placeholder="Buscar por nombre o documento..." oninput="circ_onInputBuscar(this.value)">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="circ_filtroRol" class="form-select form-select-sm" onchange="circ_ejecutarBusqueda()">
+                                    <option value="">Todos los Roles</option>
+                                    <option value="Docente">Docentes / Instructores</option>
+                                    <option value="Estudiante">Estudiantes / Aprendices</option>
+                                    <option value="Familia">Familias / Acudientes</option>
+                                    <option value="Admin">Directivos / Rectoría</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="circ_filtroGrado" class="form-select form-select-sm" onchange="circ_ejecutarBusqueda()">
+                                    <option value="">Todos los Grados</option>
+                                    {% for g in grados_catalogo %}
+                                        <option value="{{ g }}">Grado {{ g }}°</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-12">
+
+                        <!-- Botones de selección rápida -->
+                        <div class="d-flex justify-content-between align-items-center mb-2 pt-1 border-top">
+                            <span class="small text-muted" id="circ_contadorVisibles">Usuarios disponibles en el sistema:</span>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-0" onclick="circ_seleccionarTodosVisibles(true)">
+                                    <i class="bi bi-check-all"></i> Seleccionar visibles
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-0 ms-1" onclick="circ_limpiarSeleccion()">
+                                    <i class="bi bi-x"></i> Limpiar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Lista con scroll -->
+                        <div id="circ_contenedorLista" class="border rounded-3 p-2 bg-light" style="max-height: 180px; overflow-y: auto;">
+                            {% for u in destinatarios_muestra %}
+                                <div class="d-flex justify-content-between align-items-center p-2 mb-1 bg-white rounded border circ_item_destinatario" data-id="{{ u.id }}">
+                                    <div class="form-check m-0 d-flex align-items-center">
+                                        <input class="form-check-input circ_check_usuario" type="checkbox" value="{{ u.id }}" id="circ_user_check_{{ u.id }}" onchange="circ_onToggleCheck(this, '{{ u.id }}', '{{ u.nombre|escapejs }}', '{{ u.rol|escapejs }}')">
+                                        <label class="form-check-label small fw-semibold text-dark ms-2" for="circ_user_check_{{ u.id }}">
+                                            {{ u.nombre }}
+                                            <span class="text-muted fw-normal ms-1">· Doc: {{ u.documento }}</span>
+                                        </label>
+                                    </div>
+                                    <div class="d-flex gap-1 align-items-center">
+                                        {% if u.grado %}
+                                            <span class="badge bg-light text-primary border" style="font-size: 0.65rem;">{{ u.grado }}</span>
+                                        {% endif %}
+                                        <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 0.65rem;">{{ u.rol }}</span>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="text-center py-3 text-muted small">Cargando usuarios disponibles...</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pills seleccionados -->
+                        <div class="mt-2 pt-2 border-top">
+                            <span class="small fw-bold text-dark d-block mb-1"><i class="bi bi-check2-circle text-primary me-1"></i> Destinatarios directos seleccionados:</span>
+                            <div id="circ_contenedorPills" class="d-flex flex-wrap gap-1 p-2 rounded bg-light border" style="min-height: 36px; max-height: 80px; overflow-y: auto;">
+                                <span class="text-muted small fst-italic" id="circ_placeholderPills">Ninguno seleccionado (se enviará según el Alcance Institucional superior).</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Datos del Asunto y Contenido -->
+                    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-2">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark" for="asunto_input">Asunto de la Circular o Aviso *</label>
+                            <input type="text" id="asunto_input" name="asunto" class="form-control border-primary-subtle rounded-3" placeholder="Ej. Convocatoria a Escuela de Padres y entrega de informes" required>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-bold text-dark" for="mensaje_textarea">Contenido de la Comunicación Oficial *</label>
-                            <textarea id="mensaje_textarea" name="mensaje" class="form-control border-primary-subtle rounded-3" rows="5" placeholder="Escribe aquí los detalles, fechas e indicaciones de la circular escolar..." required></textarea>
+                            <textarea id="mensaje_textarea" name="mensaje" class="form-control border-primary-subtle rounded-3" rows="4" placeholder="Escribe aquí los detalles, fechas e indicaciones de la circular escolar..." required></textarea>
                         </div>
-                        <div class="col-12">
+                        <div class="mb-3">
                             <label class="form-label small fw-bold text-dark" for="adjunto_pdf_input">
                                 <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Adjuntar Circular Oficial (PDF)
                             </label>
                             <input type="file" name="adjunto_pdf" id="adjunto_pdf_input" accept=".pdf" class="form-control border-primary-subtle rounded-3">
                             <small class="text-muted">Opcional. Adjunta el documento oficial en formato PDF para los destinatarios.</small>
                         </div>
-                        <div class="col-12">
-                            <div class="form-check p-3 bg-light rounded-3 border">
-                                <input class="form-check-input ms-1 me-2" type="checkbox" id="urgenteCheck" name="urgente">
-                                <label class="form-check-label small fw-bold text-danger" for="urgenteCheck">
-                                    <i class="bi bi-exclamation-circle-fill me-1"></i> Marcar como Notificación Prioritaria (Alerta Inmediata)
-                                </label>
+                        <div class="form-check p-3 bg-light rounded-3 border">
+                            <input class="form-check-input ms-1 me-2" type="checkbox" id="urgenteCheck" name="urgente">
+                            <label class="form-check-label small fw-bold text-danger" for="urgenteCheck">
+                                <i class="bi bi-exclamation-circle-fill me-1"></i> Marcar como Notificación Prioritaria (Alerta Inmediata)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-white border-top py-3 px-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-bold px-4 rounded-pill shadow-sm" style="background: linear-gradient(135deg, #006B68, #007F7B, #12B8B0); border: none;">
+                        <i class="bi bi-send-fill me-1"></i> Enviar Comunicación Oficial
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA REDACTAR MENSAJE DIRECTO (Unificado e interactivo) -->
+<div class="modal fade" id="modalMensajeDirecto" tabindex="-1" aria-labelledby="modalMensajeDirectoLabel" aria-hidden="true" style="z-index: 1070;">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <form method="POST" action="{% url 'comunicaciones' %}" id="formMensajeDirecto">
+                {% csrf_token %}
+                <input type="hidden" name="next_url" value="mensajeria">
+                <input type="hidden" name="destinatarios_ids_csv" id="dir_hidden_destinatarios_ids_csv" value="">
+
+                <div class="modal-header text-white py-3 px-4" style="background: linear-gradient(135deg, #006B68, #007F7B, #12B8B0);">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalMensajeDirectoLabel">
+                            <i class="bi bi-pencil-square me-2"></i> Redactar Mensaje Directo
+                        </h5>
+                        <p class="small mb-0 opacity-75">Selección de instructores, estudiantes, familias o directivos autorizados</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body p-4 bg-light">
+                    <!-- Datos del Mensaje -->
+                    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-3">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark mb-1" for="dir_asunto">Asunto o Título del Mensaje *</label>
+                            <input type="text" id="dir_asunto" name="asunto" class="form-control border-primary-subtle rounded-3" placeholder="Ej. Consulta académica o seguimiento formativo" required>
+                        </div>
+                        <div>
+                            <label class="form-label small fw-bold text-dark mb-1" for="dir_mensaje">Contenido del Mensaje Directo *</label>
+                            <textarea id="dir_mensaje" name="mensaje" class="form-control border-primary-subtle rounded-3" rows="4" placeholder="Escribe aquí tu comunicación directa y detallada..." required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Selector Unificado de Destinatarios -->
+                    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-bold mb-0" style="color: #14264F;">
+                                <i class="bi bi-people-fill text-success me-2"></i>Destinatarios Disponibles
+                            </h6>
+                            <span class="badge rounded-pill px-3 py-1 fw-bold" id="dir_badgeTotalSeleccionados" style="background: #E6F7F6; color: #007F7B; border: 1px solid #B3EAE6;">
+                                0 seleccionados
+                            </span>
+                        </div>
+                        <p class="small text-muted mb-2">Busca instructores, aprendices o acudientes por nombre o documento y selecciona uno o varios destinatarios.</p>
+
+                        <!-- Filtros -->
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                    <input type="text" id="dir_inputBuscar" class="form-control border-start-0" placeholder="Buscar por nombre o documento..." oninput="dir_onInputBuscar(this.value)">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="dir_filtroRol" class="form-select form-select-sm" onchange="dir_ejecutarBusqueda()">
+                                    <option value="">Todos los Roles</option>
+                                    <option value="Docente">Docentes / Instructores</option>
+                                    <option value="Estudiante">Estudiantes / Aprendices</option>
+                                    <option value="Familia">Familias / Acudientes</option>
+                                    <option value="Admin">Directivos / Rectoría</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="dir_filtroGrado" class="form-select form-select-sm" onchange="dir_ejecutarBusqueda()">
+                                    <option value="">Todos los Grados</option>
+                                    {% for g in grados_catalogo %}
+                                        <option value="{{ g }}">Grado {{ g }}°</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Botones de selección rápida -->
+                        <div class="d-flex justify-content-between align-items-center mb-2 pt-1 border-top">
+                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fw-bold" onclick="dir_seleccionarTodosPlataforma()">
+                                <i class="bi bi-megaphone-fill me-1"></i> Seleccionar a todos los usuarios
+                            </button>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-0" onclick="dir_seleccionarTodosVisibles(true)">
+                                    <i class="bi bi-check-all"></i> Seleccionar visibles
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-0 ms-1" onclick="dir_limpiarSeleccion()">
+                                    <i class="bi bi-x"></i> Limpiar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Lista con scroll -->
+                        <div id="dir_contenedorLista" class="border rounded-3 p-2 bg-light" style="max-height: 190px; overflow-y: auto;">
+                            {% for u in destinatarios_muestra %}
+                                <div class="d-flex justify-content-between align-items-center p-2 mb-1 bg-white rounded border dir_item_destinatario" data-id="{{ u.id }}">
+                                    <div class="form-check m-0 d-flex align-items-center">
+                                        <input class="form-check-input dir_check_usuario" type="checkbox" value="{{ u.id }}" id="dir_user_check_{{ u.id }}" onchange="dir_onToggleCheck(this, '{{ u.id }}', '{{ u.nombre|escapejs }}', '{{ u.rol|escapejs }}')">
+                                        <label class="form-check-label small fw-semibold text-dark ms-2" for="dir_user_check_{{ u.id }}">
+                                            {{ u.nombre }}
+                                            <span class="text-muted fw-normal ms-1">· Doc: {{ u.documento }}</span>
+                                        </label>
+                                    </div>
+                                    <div class="d-flex gap-1 align-items-center">
+                                        {% if u.grado %}
+                                            <span class="badge bg-light text-primary border" style="font-size: 0.65rem;">{{ u.grado }}</span>
+                                        {% endif %}
+                                        <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 0.65rem;">{{ u.rol }}</span>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="text-center py-3 text-muted small">Cargando personas disponibles...</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Previsualización de Destinatarios Seleccionados -->
+                        <div class="mt-2 pt-2 border-top">
+                            <span class="small fw-bold text-dark d-block mb-1"><i class="bi bi-check2-circle text-primary me-1"></i> Destinatarios que recibirán el mensaje directo:</span>
+                            <div id="dir_contenedorPills" class="d-flex flex-wrap gap-1 p-2 rounded bg-light border" style="min-height: 38px; max-height: 85px; overflow-y: auto;">
+                                <span class="text-muted small fst-italic" id="dir_placeholderPills">Selecciona una o varias personas de la lista superior.</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light py-3">
-                    <button type="button" class="btn btn-outline-secondary px-3 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary fw-semibold px-4 rounded-pill text-white shadow-sm" style="background: linear-gradient(135deg, #5CA8D8 0%, #2F79A8 100%); border: none;">
-                        <i class="bi bi-send-fill me-1"></i> Enviar Comunicación Oficial
+
+                <div class="modal-footer bg-white border-top py-3 px-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-bold px-4 rounded-pill shadow-sm" style="background: linear-gradient(135deg, #006B68, #007F7B, #12B8B0); border: none;">
+                        <i class="bi bi-send-check-fill me-1"></i> Enviar Mensaje Directo
                     </button>
                 </div>
             </form>
@@ -331,6 +569,306 @@
 {% endfor %}
 
 <script>
+// ==========================================
+// 1. SELECTOR PARA CANAL OFICIAL DE CIRCULARES
+// ==========================================
+const circ_seleccionadosMap = new Map();
+let circ_debounceTimer = null;
+
+function circ_onCambioAlcance(val) {
+    const wrapCurso = document.getElementById('circ_wrap_curso');
+    if (wrapCurso) {
+        if (val === 'Toda' || val === 'Docentes' || val === 'Directivos') {
+            wrapCurso.style.display = 'none';
+        } else {
+            wrapCurso.style.display = 'block';
+        }
+    }
+}
+
+function circ_onInputBuscar(val) {
+    clearTimeout(circ_debounceTimer);
+    circ_debounceTimer = setTimeout(() => {
+        circ_ejecutarBusqueda();
+    }, 300);
+}
+
+function circ_ejecutarBusqueda() {
+    const q = document.getElementById('circ_inputBuscar').value.trim();
+    const rol = document.getElementById('circ_filtroRol').value.trim();
+    const grado = document.getElementById('circ_filtroGrado').value.trim();
+    const contenedor = document.getElementById('circ_contenedorLista');
+
+    contenedor.innerHTML = '<div class="text-center py-3 text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Buscando usuarios...</div>';
+
+    const url = `{% url 'api_destinatarios_notificaciones' %}?q=${encodeURIComponent(q)}&rol=${encodeURIComponent(rol)}&grado=${encodeURIComponent(grado)}`;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            contenedor.innerHTML = '';
+            if (!data.destinatarios || data.destinatarios.length === 0) {
+                contenedor.innerHTML = '<div class="text-center py-3 text-muted small">No se encontraron usuarios con los filtros aplicados.</div>';
+                return;
+            }
+            data.destinatarios.forEach(u => {
+                const isChecked = circ_seleccionadosMap.has(String(u.id));
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'd-flex justify-content-between align-items-center p-2 mb-1 bg-white rounded border circ_item_destinatario';
+                itemDiv.setAttribute('data-id', u.id);
+
+                itemDiv.innerHTML = `
+                    <div class="form-check m-0 d-flex align-items-center">
+                        <input class="form-check-input circ_check_usuario" type="checkbox" value="${u.id}" id="circ_user_check_${u.id}" ${isChecked ? 'checked' : ''}>
+                        <label class="form-check-label small fw-semibold text-dark ms-2" for="circ_user_check_${u.id}">
+                            ${u.nombre}
+                            <span class="text-muted fw-normal ms-1">· Doc: ${u.documento}</span>
+                        </label>
+                    </div>
+                    <div class="d-flex gap-1 align-items-center">
+                        ${u.grado ? `<span class="badge bg-light text-primary border" style="font-size: 0.65rem;">${u.grado}</span>` : ''}
+                        <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 0.65rem;">${u.rol}</span>
+                    </div>
+                `;
+
+                const checkbox = itemDiv.querySelector('.circ_check_usuario');
+                checkbox.addEventListener('change', function() {
+                    circ_onToggleCheck(this, u.id, u.nombre, u.rol);
+                });
+                contenedor.appendChild(itemDiv);
+            });
+        })
+        .catch(err => {
+            console.error('Error cargando usuarios circulares:', err);
+            contenedor.innerHTML = '<div class="text-center py-3 text-danger small">Error de conexión al cargar usuarios.</div>';
+        });
+}
+
+function circ_onToggleCheck(checkbox, id, nombre, rol) {
+    const strId = String(id);
+    if (checkbox.checked) {
+        circ_seleccionadosMap.set(strId, { nombre: nombre, rol: rol });
+    } else {
+        circ_seleccionadosMap.delete(strId);
+    }
+    circ_actualizarPills();
+}
+
+function circ_seleccionarTodosVisibles(estado) {
+    const checkboxes = document.querySelectorAll('#circ_contenedorLista .circ_check_usuario');
+    checkboxes.forEach(cb => {
+        cb.checked = estado;
+        const item = cb.closest('.circ_item_destinatario');
+        const id = cb.value;
+        const nombre = item.querySelector('label').innerText.split('·')[0].trim();
+        const rolBadge = item.querySelector('.badge:last-child');
+        const rol = rolBadge ? rolBadge.innerText.trim() : '';
+
+        if (estado) {
+            circ_seleccionadosMap.set(String(id), { nombre: nombre, rol: rol });
+        } else {
+            circ_seleccionadosMap.delete(String(id));
+        }
+    });
+    circ_actualizarPills();
+}
+
+function circ_limpiarSeleccion() {
+    circ_seleccionadosMap.clear();
+    const checkboxes = document.querySelectorAll('#circ_contenedorLista .circ_check_usuario');
+    checkboxes.forEach(cb => cb.checked = false);
+    circ_actualizarPills();
+}
+
+function circ_desmarcar(id) {
+    const strId = String(id);
+    circ_seleccionadosMap.delete(strId);
+    const cb = document.getElementById(`circ_user_check_${id}`);
+    if (cb) cb.checked = false;
+    circ_actualizarPills();
+}
+
+function circ_actualizarPills() {
+    const contenedor = document.getElementById('circ_contenedorPills');
+    const badge = document.getElementById('circ_badgeTotalSeleccionados');
+    contenedor.innerHTML = '';
+
+    if (circ_seleccionadosMap.size === 0) {
+        contenedor.innerHTML = '<span class="text-muted small fst-italic" id="circ_placeholderPills">Ninguno seleccionado (se enviará según el Alcance Institucional superior).</span>';
+        badge.innerText = '0 seleccionados';
+    } else {
+        circ_seleccionadosMap.forEach((val, id) => {
+            const pill = document.createElement('span');
+            pill.className = 'badge rounded-pill bg-white text-dark border px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm';
+            pill.style.fontSize = '0.72rem';
+            pill.innerHTML = `
+                <span>${val.nombre}</span>
+                <span class="text-muted">(${val.rol})</span>
+                <button type="button" class="btn-close ms-1" style="font-size: 0.5rem;" onclick="circ_desmarcar('${id}')" title="Quitar"></button>
+            `;
+            contenedor.appendChild(pill);
+        });
+        const total = circ_seleccionadosMap.size;
+        badge.innerText = `${total} persona${total !== 1 ? 's' : ''} seleccionada${total !== 1 ? 's' : ''}`;
+    }
+
+    const idsArray = Array.from(circ_seleccionadosMap.keys());
+    document.getElementById('circ_hidden_destinatarios_ids_csv').value = idsArray.join(',');
+}
+
+
+// ==========================================
+// 2. SELECTOR PARA REDACTAR MENSAJE DIRECTO
+// ==========================================
+const dir_seleccionadosMap = new Map();
+let dir_debounceTimer = null;
+
+function dir_onInputBuscar(val) {
+    clearTimeout(dir_debounceTimer);
+    dir_debounceTimer = setTimeout(() => {
+        dir_ejecutarBusqueda();
+    }, 300);
+}
+
+function dir_ejecutarBusqueda() {
+    const q = document.getElementById('dir_inputBuscar').value.trim();
+    const rol = document.getElementById('dir_filtroRol').value.trim();
+    const grado = document.getElementById('dir_filtroGrado').value.trim();
+    const contenedor = document.getElementById('dir_contenedorLista');
+
+    contenedor.innerHTML = '<div class="text-center py-3 text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Buscando personas...</div>';
+
+    const url = `{% url 'api_destinatarios_notificaciones' %}?q=${encodeURIComponent(q)}&rol=${encodeURIComponent(rol)}&grado=${encodeURIComponent(grado)}`;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            contenedor.innerHTML = '';
+            if (!data.destinatarios || data.destinatarios.length === 0) {
+                contenedor.innerHTML = '<div class="text-center py-3 text-muted small">No se encontraron destinatarios autorizados.</div>';
+                return;
+            }
+            data.destinatarios.forEach(u => {
+                const isChecked = dir_seleccionadosMap.has(String(u.id));
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'd-flex justify-content-between align-items-center p-2 mb-1 bg-white rounded border dir_item_destinatario';
+                itemDiv.setAttribute('data-id', u.id);
+
+                itemDiv.innerHTML = `
+                    <div class="form-check m-0 d-flex align-items-center">
+                        <input class="form-check-input dir_check_usuario" type="checkbox" value="${u.id}" id="dir_user_check_${u.id}" ${isChecked ? 'checked' : ''}>
+                        <label class="form-check-label small fw-semibold text-dark ms-2" for="dir_user_check_${u.id}">
+                            ${u.nombre}
+                            <span class="text-muted fw-normal ms-1">· Doc: ${u.documento}</span>
+                        </label>
+                    </div>
+                    <div class="d-flex gap-1 align-items-center">
+                        ${u.grado ? `<span class="badge bg-light text-primary border" style="font-size: 0.65rem;">${u.grado}</span>` : ''}
+                        <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 0.65rem;">${u.rol}</span>
+                    </div>
+                `;
+
+                const checkbox = itemDiv.querySelector('.dir_check_usuario');
+                checkbox.addEventListener('change', function() {
+                    dir_onToggleCheck(this, u.id, u.nombre, u.rol);
+                });
+                contenedor.appendChild(itemDiv);
+            });
+        })
+        .catch(err => {
+            console.error('Error cargando usuarios directos:', err);
+            contenedor.innerHTML = '<div class="text-center py-3 text-danger small">Error al conectar con la lista de usuarios.</div>';
+        });
+}
+
+function dir_onToggleCheck(checkbox, id, nombre, rol) {
+    const strId = String(id);
+    if (checkbox.checked) {
+        dir_seleccionadosMap.set(strId, { nombre: nombre, rol: rol });
+    } else {
+        dir_seleccionadosMap.delete(strId);
+    }
+    dir_actualizarPills();
+}
+
+function dir_seleccionarTodosPlataforma() {
+    document.querySelectorAll('#dir_contenedorLista .dir_check_usuario').forEach(cb => {
+        cb.checked = true;
+        const item = cb.closest('.dir_item_destinatario');
+        const id = cb.value;
+        const nombre = item.querySelector('label').innerText.split('·')[0].trim();
+        const rolBadge = item.querySelector('.badge:last-child');
+        const rol = rolBadge ? rolBadge.innerText.trim() : '';
+        dir_seleccionadosMap.set(String(id), { nombre: nombre, rol: rol });
+    });
+    document.getElementById('dir_hidden_destinatarios_ids_csv').value = 'TODOS';
+    dir_actualizarPills();
+    const badge = document.getElementById('dir_badgeTotalSeleccionados');
+    if (badge) badge.innerText = 'Toda la plataforma seleccionada';
+}
+
+function dir_seleccionarTodosVisibles(estado) {
+    const checkboxes = document.querySelectorAll('#dir_contenedorLista .dir_check_usuario');
+    checkboxes.forEach(cb => {
+        cb.checked = estado;
+        const item = cb.closest('.dir_item_destinatario');
+        const id = cb.value;
+        const nombre = item.querySelector('label').innerText.split('·')[0].trim();
+        const rolBadge = item.querySelector('.badge:last-child');
+        const rol = rolBadge ? rolBadge.innerText.trim() : '';
+
+        if (estado) {
+            dir_seleccionadosMap.set(String(id), { nombre: nombre, rol: rol });
+        } else {
+            dir_seleccionadosMap.delete(String(id));
+        }
+    });
+    dir_actualizarPills();
+}
+
+function dir_limpiarSeleccion() {
+    dir_seleccionadosMap.clear();
+    const checkboxes = document.querySelectorAll('#dir_contenedorLista .dir_check_usuario');
+    checkboxes.forEach(cb => cb.checked = false);
+    dir_actualizarPills();
+}
+
+function dir_desmarcar(id) {
+    const strId = String(id);
+    dir_seleccionadosMap.delete(strId);
+    const cb = document.getElementById(`dir_user_check_${id}`);
+    if (cb) cb.checked = false;
+    dir_actualizarPills();
+}
+
+function dir_actualizarPills() {
+    const contenedor = document.getElementById('dir_contenedorPills');
+    const badge = document.getElementById('dir_badgeTotalSeleccionados');
+    contenedor.innerHTML = '';
+
+    if (dir_seleccionadosMap.size === 0) {
+        contenedor.innerHTML = '<span class="text-muted small fst-italic" id="dir_placeholderPills">Selecciona una o varias personas de la lista superior.</span>';
+        badge.innerText = '0 seleccionados';
+    } else {
+        dir_seleccionadosMap.forEach((val, id) => {
+            const pill = document.createElement('span');
+            pill.className = 'badge rounded-pill bg-white text-dark border px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm';
+            pill.style.fontSize = '0.72rem';
+            pill.innerHTML = `
+                <span>${val.nombre}</span>
+                <span class="text-muted">(${val.rol})</span>
+                <button type="button" class="btn-close ms-1" style="font-size: 0.5rem;" onclick="dir_desmarcar('${id}')" title="Quitar"></button>
+            `;
+            contenedor.appendChild(pill);
+        });
+        const total = dir_seleccionadosMap.size;
+        badge.innerText = `${total} persona${total !== 1 ? 's' : ''} seleccionada${total !== 1 ? 's' : ''}`;
+    }
+
+    const idsArray = Array.from(dir_seleccionadosMap.keys());
+    document.getElementById('dir_hidden_destinatarios_ids_csv').value = idsArray.join(',');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const modalEl = document.getElementById('nuevoMensajeModal');
     if (modalEl) {

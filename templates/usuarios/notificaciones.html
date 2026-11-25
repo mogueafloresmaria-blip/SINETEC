@@ -10,24 +10,27 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #F5F2EB; color: #5a3825; border: 1px solid #E0D8CE;">EDUNOVA · Gestión Institucional</span>
+                <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #E6F7F6; color: #007F7B; border: 1px solid #B3EAE6;">EDUNOVA · Gestión Institucional</span>
                 <span class="text-muted small">Centro de Notificaciones y Avisos Escolares</span>
             </div>
-            <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-bell-fill text-success me-2"></i>Bandeja de Notificaciones y Avisos
+            <h1 class="h3 fw-bold mb-1" style="color: #14264F;">
+                <i class="bi bi-bell-fill me-2" style="color: #12B8B0;"></i>Bandeja de Notificaciones y Avisos
             </h1>
-            <p class="text-muted mb-0">Alertas de seguimiento, respuestas de secretaría y novedades del proceso formativo.</p>
+            <p class="text-muted mb-0">Alertas de seguimiento, avisos académicos y novedades del proceso formativo escolar.</p>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
-            <a href="?filtro=todas" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold {% if filtro != 'no_leidas' %}text-white{% else %}btn-outline-secondary{% endif %}" style="{% if filtro != 'no_leidas' %}background: var(--color-principal, #5A3825); border-color: var(--color-principal, #5A3825);{% endif %}">
-                Todas las Notificaciones
+            <button type="button" class="btn btn-sm text-white rounded-pill px-3 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #007F7B, #12B8B0); border: none;" data-bs-toggle="modal" data-bs-target="#modalRedactarNotificacion">
+                <i class="bi bi-send-plus-fill me-1"></i> Redactar Notificación
+            </button>
+            <a href="?filtro=todas" class="btn btn-sm rounded-pill px-3 py-2 fw-bold {% if filtro != 'no_leidas' %}text-white{% else %}btn-outline-secondary{% endif %}" style="{% if filtro != 'no_leidas' %}background: #006B68; border-color: #006B68;{% endif %}">
+                Todas
             </a>
-            <a href="?filtro=no_leidas" class="btn btn-sm rounded-pill px-3 py-1.5 fw-bold {% if filtro == 'no_leidas' %}text-white{% else %}btn-outline-secondary{% endif %}" style="{% if filtro == 'no_leidas' %}background: #C46820; border-color: #C46820;{% endif %}">
+            <a href="?filtro=no_leidas" class="btn btn-sm rounded-pill px-3 py-2 fw-bold {% if filtro == 'no_leidas' %}text-white{% else %}btn-outline-secondary{% endif %}" style="{% if filtro == 'no_leidas' %}background: #E65100; border-color: #E65100;{% endif %}">
                 No Leídas ({{ total_no_leidas }})
             </a>
             <form method="post" action="{% url 'marcar_todas_notificaciones_leidas' %}" class="d-inline m-0">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-bold" title="Marcar todas como leídas">
+                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 fw-bold" title="Marcar todas como leídas">
                     <i class="bi bi-check2-all me-1"></i> Marcar todas leídas
                 </button>
             </form>
@@ -35,12 +38,20 @@
     </div>
 
     <!-- Listado de Notificaciones -->
-    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
+        <div class="card-header bg-light border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold mb-0" style="color: #14264F;">
+                <i class="bi bi-inbox-fill text-primary me-2"></i>Mensajes en Bandeja
+            </h6>
+            <span class="badge rounded-pill bg-white text-secondary border px-3 py-1">
+                Total: {{ notificaciones|length }}
+            </span>
+        </div>
         <div class="list-group list-group-flush">
             {% for n in notificaciones %}
-                <div class="list-group-item p-4 d-flex justify-content-between align-items-start gap-3 {% if not n.leida %}bg-light border-start border-4{% endif %}" style="{% if not n.leida %}border-color: #9C7A5B !important; background: #FDFBF7 !important;{% endif %}">
+                <div class="list-group-item p-4 d-flex justify-content-between align-items-start gap-3 {% if not n.leida %}border-start border-4{% endif %}" style="{% if not n.leida %}border-color: #12B8B0 !important; background: #F8FDFA !important;{% endif %}">
                     <div class="d-flex gap-3">
-                        <div class="p-3 rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; background: {% if not n.leida %}#9C7A5B{% else %}#D6CBC0{% endif %};">
+                        <div class="p-3 rounded-circle text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px; background: {% if not n.leida %}linear-gradient(135deg, #007F7B, #12B8B0){% else %}#94A3B8{% endif %};">
                             {% if n.tipo == 'EXITO' %}
                                 <i class="bi bi-check-circle-fill fs-5"></i>
                             {% elif n.tipo == 'ALERTA' or n.tipo == 'warning' %}
@@ -52,22 +63,23 @@
                             {% endif %}
                         </div>
                         <div>
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <h6 class="fw-bold text-dark mb-0">{{ n.titulo }}</h6>
+                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                <h6 class="fw-bold mb-0" style="color: #14264F;">{{ n.titulo }}</h6>
                                 {% if not n.leida %}
                                     <span class="badge rounded-pill fw-bold px-2 py-0.5" style="background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; font-size: 0.68rem;">NUEVA</span>
                                 {% else %}
                                     <span class="badge rounded-pill bg-light text-muted border" style="font-size: 0.68rem;">LEÍDA</span>
                                 {% endif %}
+                                <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 0.68rem;">{{ n.tipo|default:"INFORMACIÓN" }}</span>
                             </div>
-                            <p class="text-muted small mb-2">{{ n.mensaje }}</p>
-                            <span class="text-secondary small" style="font-size: 0.75rem;">
+                            <p class="text-secondary small mb-2">{{ n.mensaje }}</p>
+                            <span class="text-muted small" style="font-size: 0.75rem;">
                                 <i class="bi bi-clock me-1"></i> {{ n.fecha_creacion|date:"d/m/Y H:i" }}
                             </span>
                         </div>
                     </div>
                     <div class="d-flex flex-column align-items-end gap-2 flex-shrink-0">
-                        <button type="button" class="btn btn-sm text-white fw-semibold rounded-pill px-3" style="background-color: var(--color-principal, #5A3825);"
+                        <button type="button" class="btn btn-sm text-white fw-semibold rounded-pill px-3 shadow-sm" style="background: #007F7B;"
                                 onclick="window.abrirDetalleNotificacion('{{ n.pk }}', '{{ n.titulo|escapejs }}', '{{ n.fecha_creacion|date:'d/m/Y h:i A' }}', '{{ n.mensaje|escapejs }}', '{{ n.enlace|default:''|escapejs }}', {% if n.leida %}true{% else %}false{% endif %});">
                             Ver Detalle <i class="bi bi-eye ms-1"></i>
                         </button>
@@ -84,8 +96,8 @@
                 </div>
             {% empty %}
                 <div class="p-5 text-center text-muted">
-                    <i class="bi bi-bell-slash fs-1 d-block mb-2 opacity-50"></i>
-                    <h5 class="fw-bold text-dark">No tienes notificaciones pendientes</h5>
+                    <i class="bi bi-bell-slash fs-1 d-block mb-2 opacity-50" style="color: #007F7B;"></i>
+                    <h5 class="fw-bold" style="color: #14264F;">No tienes notificaciones pendientes</h5>
                     <p class="text-muted small mb-0">Cuando se registren novedades en tus clases, calificaciones, comunicaciones o trámites escolares aparecerán aquí.</p>
                 </div>
             {% endfor %}
@@ -93,4 +105,423 @@
     </div>
 
 </div>
+
+<!-- MODAL: Redactar y Enviar Notificación con Selector Dinámico de Destinatarios -->
+<div class="modal fade" id="modalRedactarNotificacion" tabindex="-1" aria-labelledby="modalRedactarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header text-white py-3 px-4" style="background: linear-gradient(135deg, #006B68, #007F7B, #12B8B0);">
+                <div>
+                    <h5 class="modal-title fw-bold mb-0" id="modalRedactarLabel">
+                        <i class="bi bi-send-fill me-2"></i>Redactar Notificación Institucional
+                    </h5>
+                    <p class="small mb-0 opacity-75">Selección dinámica por roles, grados académicos o destinatarios individuales</p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="post" action="{% url 'enviar_notificacion_masiva' %}" id="formEnviarNotificacion">
+                {% csrf_token %}
+                <input type="hidden" name="destinatarios_ids_csv" id="hidden_destinatarios_ids_csv" value="">
+
+                <div class="modal-body p-4 bg-light">
+                    <!-- DATOS DE LA NOTIFICACIÓN -->
+                    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-3">
+                        <h6 class="fw-bold mb-3" style="color: #14264F;">
+                            <i class="bi bi-pencil-square text-primary me-2"></i>Contenido del Mensaje
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold text-dark">Asunto o Título del Aviso *</label>
+                                <input type="text" name="asunto" class="form-control" placeholder="Ej: Citación a reunión de entrega de boletines..." required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Tipo de Notificación</label>
+                                <select name="tipo" class="form-select">
+                                    <option value="info" selected>Informativa</option>
+                                    <option value="alerta">Alerta Académica</option>
+                                    <option value="urgente">Urgente / Citación</option>
+                                    <option value="exito">Felicitación / Éxito</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-dark">Mensaje Detallado *</label>
+                                <textarea name="mensaje" rows="3" class="form-control" placeholder="Escribe aquí el texto que recibirán los destinatarios seleccionados..." required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-dark">Enlace o Módulo Asociado (Opcional)</label>
+                                <input type="text" name="enlace" class="form-control" placeholder="Ej: /calificaciones/ o /boletines/">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SELECTOR DE DESTINATARIOS -->
+                    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold mb-0" style="color: #14264F;">
+                                <i class="bi bi-people-fill text-success me-2"></i>Selector Inteligente de Destinatarios
+                            </h6>
+                            <span class="badge rounded-pill px-3 py-1 fw-bold" id="badgeTotalSeleccionados" style="background: #E6F7F6; color: #007F7B; border: 1px solid #B3EAE6;">
+                                0 seleccionados
+                            </span>
+                        </div>
+                        <p class="small text-muted mb-3">Puedes combinar roles, grupos académicos o buscar usuarios específicos. El sistema evita automáticamente envíos duplicados.</p>
+
+                        <!-- Acordeón / Secciones de selección -->
+                        <!-- 1. POR ROLES INSTITUCIONALES -->
+                        <div class="p-3 rounded-3 mb-3 border bg-light">
+                            <div class="fw-bold small text-dark mb-2">
+                                <i class="bi bi-diagram-3-fill text-primary me-1"></i> 1. Enviar por Roles Institucionales Completos:
+                            </div>
+                            <div class="row g-2">
+                                {% for r in roles_institucionales %}
+                                    <div class="col-6 col-md-4">
+                                        <div class="form-check form-check-inline m-0 p-2 bg-white rounded border w-100">
+                                            <input class="form-check-input check-rol-global" type="checkbox" name="roles_seleccionados" value="{{ r.codigo }}" id="rol_{{ r.codigo }}" onchange="actualizarContadorGlobal()">
+                                            <label class="form-check-label small fw-semibold text-dark text-truncate d-block" for="rol_{{ r.codigo }}">
+                                                {{ r.nombre }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- 2. POR GRADO Y SECCIÓN ESCOLAR -->
+                        <div class="p-3 rounded-3 mb-3 border bg-light">
+                            <div class="fw-bold small text-dark mb-2">
+                                <i class="bi bi-mortarboard-fill text-success me-1"></i> 2. Filtrar Estudiantes por Grado y Grupo:
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted mb-1">Grado Escolar:</label>
+                                    <select name="grado_seleccionado" id="selector_grado" class="form-select form-select-sm" onchange="ejecutarBusquedaDestinatarios(); actualizarContadorGlobal();">
+                                        <option value="">-- Todos los Grados (1° a 11°) --</option>
+                                        {% for g in grados_catalogo %}
+                                            <option value="{{ g }}">Grado {{ g }}°</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted mb-1">Grupo / Sección:</label>
+                                    <select name="seccion_seleccionada" id="selector_seccion" class="form-select form-select-sm" onchange="ejecutarBusquedaDestinatarios(); actualizarContadorGlobal();">
+                                        <option value="">-- Todos los Grupos (A, B, C, D) --</option>
+                                        {% for s in secciones_catalogo %}
+                                            <option value="{{ s }}">Grupo {{ s }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. BUSCADOR DINÁMICO DE USUARIOS INDIVIDUALES -->
+                        <div class="p-3 rounded-3 mb-3 border bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="fw-bold small text-dark">
+                                    <i class="bi bi-search text-info me-1"></i> 3. Buscar y Seleccionar Personas Específicas:
+                                </div>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2 py-0" onclick="seleccionarTodosVisibles(true)">
+                                        <i class="bi bi-check-all"></i> Seleccionar visibles
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2 py-0 ms-1" onclick="limpiarSeleccion()">
+                                        <i class="bi bi-x"></i> Limpiar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="inputBuscarDestinatario" class="form-control border-start-0" placeholder="Escribe nombre, apellido o número de documento..." oninput="onInputBuscar(this.value)">
+                                <select id="filtroRolIndividual" class="form-select form-select-sm" style="max-width: 170px;" onchange="ejecutarBusquedaDestinatarios()">
+                                    <option value="">Cualquier Rol</option>
+                                    <option value="Estudiante">Estudiantes</option>
+                                    <option value="Docente">Docentes</option>
+                                    <option value="Familia">Familias / Acudientes</option>
+                                    <option value="Secretaria">Secretaría</option>
+                                    <option value="Rector">Rectoría</option>
+                                    <option value="Admin">Administradores</option>
+                                </select>
+                            </div>
+
+                            <!-- Listado de resultados con checkboxes -->
+                            <div id="contenedorDestinatariosLista" class="border rounded-3 p-2 bg-light" style="max-height: 220px; overflow-y: auto;">
+                                {% for u in destinatarios_muestra %}
+                                    <div class="d-flex justify-content-between align-items-center p-2 mb-1 bg-white rounded border item-destinatario" data-id="{{ u.id }}" data-nombre="{{ u.nombre }}" data-doc="{{ u.documento }}" data-rol="{{ u.rol }}">
+                                        <div class="form-check m-0">
+                                            <input class="form-check-input check-usuario" type="checkbox" value="{{ u.id }}" id="user_check_{{ u.id }}" onchange="onToggleUsuarioCheck(this, '{{ u.id }}', '{{ u.nombre|escapejs }}', '{{ u.rol|escapejs }}')">
+                                            <label class="form-check-label small fw-semibold text-dark ms-1" for="user_check_{{ u.id }}">
+                                                {{ u.nombre }}
+                                                <span class="text-muted fw-normal">· Doc: {{ u.documento }}</span>
+                                            </label>
+                                        </div>
+                                        <div class="d-flex gap-1 align-items-center">
+                                            {% if u.grado %}
+                                                <span class="badge bg-light text-primary border" style="font-size: 0.65rem;">{{ u.grado }}</span>
+                                            {% endif %}
+                                            <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 0.65rem;">{{ u.rol }}</span>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="text-center py-3 text-muted small">Escribe un término o aplica filtros para buscar usuarios.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- 4. VISTA PREVIA DE SELECCIONADOS -->
+                        <div class="p-3 rounded-3 border bg-light">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-bold text-dark"><i class="bi bi-eye-fill text-muted me-1"></i> Resumen de Selección:</span>
+                                <span class="small text-muted" id="resumenRolesTexto">Ningún rol general seleccionado</span>
+                            </div>
+                            <div id="contenedorPillsSeleccionados" class="d-flex flex-wrap gap-1" style="max-height: 100px; overflow-y: auto;">
+                                <span class="text-muted small fst-italic py-1" id="placeholderSinSeleccion">Aún no has seleccionado destinatarios individuales.</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer bg-white border-top py-3 px-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background: linear-gradient(135deg, #007F7B, #12B8B0); border: none;">
+                        <i class="bi bi-send-check-fill me-1"></i> Enviar Notificaciones
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Detalle de Notificación -->
+<div class="modal fade" id="modalDetalleNotificacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-light border-0 py-3">
+                <h6 class="modal-title fw-bold" id="detalleNotifTitulo" style="color: #14264F;">Detalle de la Notificación</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge rounded-pill bg-light text-muted border" id="detalleNotifFecha">Fecha</span>
+                    <span class="badge rounded-pill" id="detalleNotifEstado">Estado</span>
+                </div>
+                <div class="p-3 rounded-3 bg-light border mb-3">
+                    <p class="mb-0 text-dark" id="detalleNotifMensaje" style="white-space: pre-wrap; font-size: 0.95rem;"></p>
+                </div>
+                <div id="detalleNotifEnlaceWrap" class="d-none text-end">
+                    <a href="#" id="detalleNotifEnlace" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold">
+                        Abrir módulo relacionado <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4 btn-sm" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Estado de selección individual de usuarios
+const seleccionadosSet = new Map(); // id -> {nombre, rol}
+let debounceTimer = null;
+
+function onInputBuscar(val) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        ejecutarBusquedaDestinatarios();
+    }, 300);
+}
+
+function ejecutarBusquedaDestinatarios() {
+    const q = document.getElementById('inputBuscarDestinatario').value.trim();
+    const rol = document.getElementById('filtroRolIndividual').value.trim();
+    const grado = document.getElementById('selector_grado').value.trim();
+    const seccion = document.getElementById('selector_seccion').value.trim();
+
+    const contenedor = document.getElementById('contenedorDestinatariosLista');
+    contenedor.innerHTML = '<div class="text-center py-3 text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Buscando usuarios...</div>';
+
+    const url = `{% url 'api_destinatarios_notificaciones' %}?q=${encodeURIComponent(q)}&rol=${encodeURIComponent(rol)}&grado=${encodeURIComponent(grado)}&seccion=${encodeURIComponent(seccion)}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            contenedor.innerHTML = '';
+            if (!data.destinatarios || data.destinatarios.length === 0) {
+                contenedor.innerHTML = '<div class="text-center py-3 text-muted small">No se encontraron personas con los filtros seleccionados.</div>';
+                return;
+            }
+
+            data.destinatarios.forEach(u => {
+                const isChecked = seleccionadosSet.has(String(u.id));
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'd-flex justify-content-between align-items-center p-2 mb-1 bg-white rounded border item-destinatario';
+                itemDiv.setAttribute('data-id', u.id);
+
+                itemDiv.innerHTML = `
+                    <div class="form-check m-0">
+                        <input class="form-check-input check-usuario" type="checkbox" value="${u.id}" id="user_check_${u.id}" ${isChecked ? 'checked' : ''}>
+                        <label class="form-check-label small fw-semibold text-dark ms-1" for="user_check_${u.id}">
+                            ${u.nombre}
+                            <span class="text-muted fw-normal">· Doc: ${u.documento}</span>
+                        </label>
+                    </div>
+                    <div class="d-flex gap-1 align-items-center">
+                        ${u.grado ? `<span class="badge bg-light text-primary border" style="font-size: 0.65rem;">${u.grado}</span>` : ''}
+                        <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 0.65rem;">${u.rol}</span>
+                    </div>
+                `;
+
+                const checkbox = itemDiv.querySelector('.check-usuario');
+                checkbox.addEventListener('change', function() {
+                    onToggleUsuarioCheck(this, u.id, u.nombre, u.rol);
+                });
+
+                contenedor.appendChild(itemDiv);
+            });
+        })
+        .catch(err => {
+            console.error('Error cargando destinatarios:', err);
+            contenedor.innerHTML = '<div class="text-center py-3 text-danger small">Ocurrió un error al cargar la lista. Intenta de nuevo.</div>';
+        });
+}
+
+function onToggleUsuarioCheck(checkbox, id, nombre, rol) {
+    const strId = String(id);
+    if (checkbox.checked) {
+        seleccionadosSet.set(strId, { nombre: nombre, rol: rol });
+    } else {
+        seleccionadosSet.delete(strId);
+    }
+    actualizarVistaPills();
+    actualizarContadorGlobal();
+}
+
+function seleccionarTodosVisibles(estado) {
+    const checkboxes = document.querySelectorAll('#contenedorDestinatariosLista .check-usuario');
+    checkboxes.forEach(cb => {
+        cb.checked = estado;
+        const item = cb.closest('.item-destinatario');
+        const id = cb.value;
+        const nombre = item.querySelector('label').innerText.split('·')[0].trim();
+        const rolBadge = item.querySelector('.badge:last-child');
+        const rol = rolBadge ? rolBadge.innerText.trim() : '';
+
+        if (estado) {
+            seleccionadosSet.set(String(id), { nombre: nombre, rol: rol });
+        } else {
+            seleccionadosSet.delete(String(id));
+        }
+    });
+    actualizarVistaPills();
+    actualizarContadorGlobal();
+}
+
+function limpiarSeleccion() {
+    seleccionadosSet.clear();
+    const checkboxes = document.querySelectorAll('#contenedorDestinatariosLista .check-usuario');
+    checkboxes.forEach(cb => cb.checked = false);
+    actualizarVistaPills();
+    actualizarContadorGlobal();
+}
+
+function desmarcarUsuario(id) {
+    const strId = String(id);
+    seleccionadosSet.delete(strId);
+    const cb = document.getElementById(`user_check_${id}`);
+    if (cb) cb.checked = false;
+    actualizarVistaPills();
+    actualizarContadorGlobal();
+}
+
+function actualizarVistaPills() {
+    const contenedor = document.getElementById('contenedorPillsSeleccionados');
+    contenedor.innerHTML = '';
+
+    if (seleccionadosSet.size === 0) {
+        contenedor.innerHTML = '<span class="text-muted small fst-italic py-1" id="placeholderSinSeleccion">Aún no has seleccionado destinatarios individuales.</span>';
+    } else {
+        seleccionadosSet.forEach((val, id) => {
+            const pill = document.createElement('span');
+            pill.className = 'badge rounded-pill bg-white text-dark border px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm';
+            pill.style.fontSize = '0.72rem';
+            pill.innerHTML = `
+                <span>${val.nombre}</span>
+                <span class="text-muted">(${val.rol})</span>
+                <button type="button" class="btn-close ms-1" style="font-size: 0.5rem;" onclick="desmarcarUsuario('${id}')" title="Quitar"></button>
+            `;
+            contenedor.appendChild(pill);
+        });
+    }
+
+    // Sincronizar hidden input CSV
+    const idsArray = Array.from(seleccionadosSet.keys());
+    document.getElementById('hidden_destinatarios_ids_csv').value = idsArray.join(',');
+}
+
+function actualizarContadorGlobal() {
+    const rolesChecked = document.querySelectorAll('.check-rol-global:checked');
+    const gradoVal = document.getElementById('selector_grado').value;
+    const seccionVal = document.getElementById('selector_seccion').value;
+    const badge = document.getElementById('badgeTotalSeleccionados');
+    const resumenRoles = document.getElementById('resumenRolesTexto');
+
+    let rolesTextos = [];
+    rolesChecked.forEach(rc => {
+        const lbl = document.querySelector(`label[for="${rc.id}"]`);
+        if (lbl) rolesTextos.push(lbl.innerText.trim());
+    });
+
+    if (gradoVal) {
+        rolesTextos.push(`Grado ${gradoVal}°${seccionVal ? ' Grupo ' + seccionVal : ''}`);
+    }
+
+    if (rolesTextos.length > 0) {
+        resumenRoles.innerText = `Grupos seleccionados: ${rolesTextos.join(', ')}`;
+        resumenRoles.className = 'small fw-bold text-primary';
+    } else {
+        resumenRoles.innerText = 'Ningún grupo general seleccionado';
+        resumenRoles.className = 'small text-muted';
+    }
+
+    const totalIndiv = seleccionadosSet.size;
+    let label = `${totalIndiv} persona${totalIndiv !== 1 ? 's' : ''} individual${totalIndiv !== 1 ? 'es' : ''}`;
+    if (rolesTextos.length > 0) {
+        label += ` + ${rolesTextos.length} grupo${rolesTextos.length !== 1 ? 's' : ''} institucional${rolesTextos.length !== 1 ? 'es' : ''}`;
+    }
+    badge.innerText = label;
+}
+
+// Modal Detalle Notificación
+window.abrirDetalleNotificacion = function(id, titulo, fecha, mensaje, enlace, leida) {
+    document.getElementById('detalleNotifTitulo').innerText = titulo;
+    document.getElementById('detalleNotifFecha').innerText = fecha;
+    document.getElementById('detalleNotifMensaje').innerText = mensaje;
+
+    const badgeEstado = document.getElementById('detalleNotifEstado');
+    if (leida) {
+        badgeEstado.className = 'badge rounded-pill bg-light text-muted border';
+        badgeEstado.innerText = 'Leída';
+    } else {
+        badgeEstado.className = 'badge rounded-pill fw-bold';
+        badgeEstado.style.background = '#FEF3C7';
+        badgeEstado.style.color = '#92400E';
+        badgeEstado.innerText = 'Nueva';
+        // Marcar leída en segundo plano
+        fetch(`/notificaciones/${id}/marcar-leida/`).catch(() => {});
+    }
+
+    const enlaceWrap = document.getElementById('detalleNotifEnlaceWrap');
+    const enlaceA = document.getElementById('detalleNotifEnlace');
+    if (enlace && enlace.trim() !== '') {
+        enlaceA.href = enlace;
+        enlaceWrap.classList.remove('d-none');
+    } else {
+        enlaceWrap.classList.add('d-none');
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalleNotificacion'));
+    modal.show();
+};
+</script>
 {% endblock %}

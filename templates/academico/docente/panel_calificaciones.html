@@ -12,7 +12,7 @@
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    background: #5A3825;
+    background: #007F7B;
     color: #FFFFFF;
     border: 2px solid #FFFFFF;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
@@ -24,10 +24,10 @@
     opacity: 0.92;
 }
 .btn-calif-side-floating:hover {
-    background: #3D2417;
+    background: #006B68;
     transform: scale(1.12);
     opacity: 1;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 6px 18px rgba(0, 107, 104, 0.35);
 }
 </style>
 
@@ -35,20 +35,20 @@
 
     <!-- HERO BANNER CALIFICACIONES -->
     <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden mb-4 shadow-sm" 
-         style="background: linear-gradient(135deg, #5a3825 0%, #3d2417 70%, #29170e 100%); color: #ffffff; border: 1px solid var(--color-secundario);">
+         style="background: linear-gradient(135deg, #006B68 0%, #007F7B 50%, #12B8B0 100%); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">
         <div class="row align-items-center position-relative z-1">
             <div class="col-lg-7 d-flex align-items-center gap-3.5 mb-3 mb-lg-0">
                 <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-md flex-shrink-0"
-                     style="background: rgba(255, 255, 255, 0.15); color: #ffffff; width: 66px; height: 66px; border: 1px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(8px);">
-                    <i class="bi bi-mortarboard-fill" style="font-size: 2.1rem; color: #fef08a;"></i>
+                     style="background: rgba(255, 255, 255, 0.18); color: #ffffff; width: 66px; height: 66px; border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(8px);">
+                    <i class="bi bi-mortarboard-fill" style="font-size: 2.1rem; color: #DDF7F5;"></i>
                 </div>
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: rgba(255, 255, 255, 0.18); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); font-size: 0.75rem;">
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: rgba(255, 255, 255, 0.22); color: #ffffff; border: 1px solid rgba(255,255,255,0.35); font-size: 0.75rem;">
                             SISTEMA OFICIAL DE NOTAS
                         </span>
-                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #fefce8; color: #854d0e; font-size: 0.75rem;">
-                            Escala 0.0 - 5.0
+                        <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #DDF7F5; color: #006B68; font-size: 0.75rem;">
+                            Escala Oficial 0.0 - 5.0
                         </span>
                     </div>
                     <h2 class="fw-bold mb-1 text-white" style="font-size: 2rem; letter-spacing: -0.5px;">
@@ -62,12 +62,12 @@
             <div class="col-lg-5 text-lg-end d-flex justify-content-lg-end align-items-center gap-2 flex-wrap">
                 <button type="button" class="btn rounded-pill px-3.5 py-2.5 bg-white fw-bold shadow-sm d-inline-flex align-items-center gap-2 transition hover-shadow"
                         data-bs-toggle="modal" data-bs-target="#modalDocumentoCalificaciones"
-                        style="border: 1.5px solid var(--color-acento); color: var(--color-principal); font-size: 0.86rem;">
-                    <i class="bi bi-file-earmark-pdf-fill" style="color: var(--color-principal);"></i> Planilla Imprimible PDF
+                        style="border: 1.5px solid #E2E8F0; color: #007F7B; font-size: 0.86rem;">
+                    <i class="bi bi-file-earmark-pdf-fill" style="color: #007F7B;"></i> Planilla Imprimible PDF
                 </button>
                 <button type="button" class="btn rounded-pill px-4 py-2.5 text-white fw-bold shadow-md d-inline-flex align-items-center gap-2 transition hover-shadow"
                         data-bs-toggle="modal" data-bs-target="#modalCrearEvaluacionDocente"
-                        style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); border: none; font-size: 0.88rem;">
+                        style="background: linear-gradient(135deg, #007F7B 0%, #006B68 100%); border: none; font-size: 0.88rem;">
                     <i class="bi bi-plus-circle-fill"></i> + NUEVA EVALUACIÓN
                 </button>
             </div>
@@ -81,10 +81,10 @@
             <a href="{% url 'calificaciones_docente' %}?carga={{ carga_seleccionada.id }}&periodo={{ p.codigo_periodo }}&tab={{ tab_calif|default:'planilla' }}"
                class="text-decoration-none d-block h-100">
                 <div class="card border rounded-4 p-3 bg-white h-100 transition shadow-2xs hover-shadow"
-                     style="{% if periodo_seleccionado == p.codigo_periodo or periodo_seleccionado == p.nombre %}border: 2px solid var(--color-secundario) !important; background: #FAF8F5 !important; box-shadow: 0 6px 18px rgba(90, 56, 37, 0.15);{% else %}border-color: var(--color-acento) !important;{% endif %}">
+                     style="{% if periodo_seleccionado == p.codigo_periodo or periodo_seleccionado == p.nombre or periodo_seleccionado in p.nombre %}border: 2px solid #007F7B !important; background: #F0FDFB !important; box-shadow: 0 6px 18px rgba(0, 127, 123, 0.15);{% else %}border-color: #E2E8F0 !important;{% endif %}">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="badge rounded-pill px-2.5 py-1 fw-bold" 
-                              style="{% if periodo_seleccionado == p.codigo_periodo or periodo_seleccionado == p.nombre %}background: var(--color-principal); color: #fff;{% else %}background: #F5F2EB; color: var(--color-principal);{% endif %} font-size: 0.76rem;">
+                              style="{% if periodo_seleccionado == p.codigo_periodo or periodo_seleccionado == p.nombre or periodo_seleccionado in p.nombre %}background: #007F7B; color: #fff;{% else %}background: #F5F8FC; color: #14264F; border: 1px solid #E2E8F0;{% endif %} font-size: 0.76rem;">
                             {{ p.nombre }}
                         </span>
                         {% if p.cerrado %}
@@ -333,8 +333,26 @@
                     </button>
 
                     <div class="table-responsive" id="califPlanillaScrollContainer" style="scroll-behavior: smooth; cursor: grab;">
-                        {% if evaluaciones_periodo %}
-                        <table class="table align-middle table-hover mb-0" id="tabla-planilla-general" style="min-width: 1450px;">
+                        {% if not evaluaciones_periodo %}
+                        <div class="alert alert-info border-0 rounded-4 m-3 d-flex align-items-center justify-content-between flex-wrap gap-3 shadow-2xs" style="background: #E6F7F6; border-left: 4px solid var(--color-principal) !important;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle p-2 text-white d-flex align-items-center justify-content-center" style="background: var(--color-principal); width: 38px; height: 38px;">
+                                    <i class="bi bi-info-circle-fill fs-5"></i>
+                                </div>
+                                <div>
+                                    <strong style="color: var(--color-secundario); font-size: 0.92rem;">Sin evaluaciones parciales creadas en este período</strong>
+                                    <p class="mb-0 text-muted small">Puedes ingresar y guardar directamente las calificaciones del periodo para cada estudiante en la planilla a continuación, o crear evaluaciones y actividades ponderadas.</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn rounded-pill px-3 py-1.5 text-white fw-bold shadow-sm"
+                                    data-bs-toggle="modal" data-bs-target="#modalCrearEvaluacionDocente"
+                                    style="background: var(--color-principal); font-size: 0.82rem;">
+                                <i class="bi bi-plus-circle-fill me-1"></i> Nueva Evaluación
+                            </button>
+                        </div>
+                        {% endif %}
+
+                        <table class="table align-middle table-hover mb-0" id="tabla-planilla-general" style="min-width: {% if evaluaciones_periodo %}1450px{% else %}980px{% endif %};">
                             <thead style="background: #F5F2EB; border-bottom: 2px solid var(--color-acento);">
                                 <tr>
                                     <th class="text-center py-3" style="width: 45px; color: var(--color-secundario); font-size: 0.76rem;">#</th>
@@ -351,8 +369,10 @@
                                     </th>
                                     {% endfor %}
 
-                                    <th class="text-center py-3" style="width: 140px; color: var(--color-secundario); font-size: 0.76rem;">PROMEDIO FINAL</th>
-                                    <th class="text-center py-3" style="width: 120px; color: var(--color-secundario); font-size: 0.76rem;">DESEMPEÑO</th>
+                                    <th class="text-center py-3" style="width: 160px; color: var(--color-secundario); font-size: 0.76rem;">
+                                        {% if evaluaciones_periodo %}PROMEDIO FINAL{% else %}CALIFICACIÓN PERIODO (0.0 - 5.0){% endif %}
+                                    </th>
+                                    <th class="text-center py-3" style="width: 130px; color: var(--color-secundario); font-size: 0.76rem;">DESEMPEÑO</th>
                                     <th class="py-3" style="min-width: 240px; color: var(--color-secundario); font-size: 0.76rem;">OBSERVACIÓN DEL PERIODO</th>
                                 </tr>
                             </thead>
@@ -374,70 +394,58 @@
                                     </td>
                                     <td class="text-muted small font-monospace fw-medium text-nowrap">{{ m.aprendiz.perfil.numero_documento|default:m.aprendiz.username }}</td>
 
-                                <!-- Notas de cada evaluación -->
-                                {% for item in m.notas_evaluaciones_lista %}
-                                <td class="text-center">
-                                    {% if item.nota is not None %}
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold fs-6 shadow-2xs" 
-                                          style="{% if item.nota >= 3.0 %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %}">
-                                        {{ item.nota }}
-                                    </span>
-                                    {% else %}
-                                    <span class="text-muted small fst-italic">—</span>
-                                    {% endif %}
-                                </td>
+                                    <!-- Notas de cada evaluación -->
+                                    {% for item in m.notas_evaluaciones_lista %}
+                                    <td class="text-center">
+                                        {% if item.nota is not None %}
+                                        <span class="badge rounded-pill px-2.5 py-1 fw-bold fs-6 shadow-2xs" 
+                                              style="{% if item.nota >= 3.0 %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %}">
+                                            {{ item.nota }}
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted small fst-italic">—</span>
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+
+                                    <!-- Promedio ponderado editable / campo nota_ID -->
+                                    <td class="text-center">
+                                        <input type="number" step="0.1" min="0.0" max="5.0" name="nota_{{ m.id }}" 
+                                               value="{% if m.nota_actual is not None %}{{ m.nota_actual }}{% elif m.promedio_calculado %}{{ m.promedio_calculado }}{% else %}0.0{% endif %}" 
+                                               class="form-control form-control-sm text-center fw-bold rounded-pill mx-auto shadow-2xs"
+                                               style="border: 1.5px solid var(--color-acento); color: #0f172a; max-width: 105px; font-size: 0.95rem; {% if periodo_esta_cerrado %}background-color: #f1f5f9; cursor: not-allowed;{% endif %}" 
+                                               {% if periodo_esta_cerrado %}readonly disabled{% else %}required{% endif %}>
+                                    </td>
+
+                                    <!-- Nivel de Desempeño Cualitativo -->
+                                    <td class="text-center">
+                                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" 
+                                               style="{% if m.desempeno_calculado == 'Superior' or m.desempeno_calculado == 'Alto' %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% elif m.desempeno_calculado == 'Básico' %}background: #fefce8; color: #ca8a04; border: 1px solid #fef08a;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %} font-size: 0.75rem;">
+                                            {{ m.desempeno_calculado|default:m.desempeno_actual|default:'Bajo' }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Observación pedagógica -->
+                                    <td>
+                                        <input type="text" name="obs_{{ m.id }}" 
+                                               value="{{ m.observaciones_actual|default:'' }}" 
+                                               class="form-control form-control-sm rounded-pill px-3" 
+                                               placeholder="Retroalimentación general del periodo..."
+                                               style="border: 1px solid var(--color-acento); font-size: 0.82rem; {% if periodo_esta_cerrado %}background-color: #f1f5f9; cursor: not-allowed;{% endif %}"
+                                               {% if periodo_esta_cerrado %}readonly disabled{% endif %}>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="12" class="text-center py-5 text-muted">
+                                        <i class="bi bi-people fs-2 d-block mb-2" style="color: var(--color-principal);"></i>
+                                        No hay estudiantes matriculados en este curso.
+                                    </td>
+                                </tr>
                                 {% endfor %}
-
-                                <!-- Promedio ponderado editable / campo nota_ID -->
-                                <td class="text-center">
-                                    <input type="number" step="0.1" min="0.0" max="5.0" name="nota_{{ m.id }}" 
-                                           value="{{ m.promedio_calculado|default:'0.0' }}" 
-                                           class="form-control form-control-sm text-center fw-bold rounded-pill mx-auto shadow-2xs"
-                                           style="border: 1.5px solid var(--color-acento); color: #0f172a; max-width: 105px; font-size: 0.95rem; {% if periodo_esta_cerrado %}background-color: #f1f5f9; cursor: not-allowed;{% endif %}" 
-                                           {% if periodo_esta_cerrado %}readonly disabled{% else %}required{% endif %}>
-                                </td>
-
-                                <!-- Nivel de Desempeño Cualitativo -->
-                                <td class="text-center">
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold" 
-                                           style="{% if m.desempeno_calculado == 'Superior' or m.desempeno_calculado == 'Alto' %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% elif m.desempeno_calculado == 'Básico' %}background: #fefce8; color: #ca8a04; border: 1px solid #fef08a;{% else %}background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;{% endif %} font-size: 0.75rem;">
-                                        {{ m.desempeno_calculado }}
-                                    </span>
-                                </td>
-
-                                <!-- Observación pedagógica -->
-                                <td>
-                                    <input type="text" name="obs_{{ m.id }}" 
-                                           value="{{ m.calificacion_actual.observaciones|default:'' }}" 
-                                           class="form-control form-control-sm rounded-pill px-3" 
-                                           placeholder="Retroalimentación general del periodo..."
-                                           style="border: 1px solid var(--color-acento); font-size: 0.82rem; {% if periodo_esta_cerrado %}background-color: #f1f5f9; cursor: not-allowed;{% endif %}"
-                                           {% if periodo_esta_cerrado %}readonly disabled{% endif %}>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="12" class="text-center py-5 text-muted">
-                                    <i class="bi bi-people fs-2 d-block mb-2" style="color: var(--color-principal);"></i>
-                                    No hay estudiantes matriculados en este curso.
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div class="p-5 text-center text-muted">
-                        <i class="bi bi-journal-x fs-1 mb-3 d-block" style="color: var(--color-principal);"></i>
-                        <h4 class="fw-bold text-dark">No hay evaluaciones creadas para este período.</h4>
-                        <p class="mb-3">Aún no se han creado actividades calificables para este grupo en el periodo seleccionado.</p>
-                        <button type="button" class="btn rounded-pill px-4 py-2 text-white fw-bold shadow-sm"
-                                data-bs-toggle="modal" data-bs-target="#modalCrearEvaluacionDocente"
-                                style="background: var(--color-principal); font-size: 0.88rem;">
-                            <i class="bi bi-plus-circle-fill me-1"></i> Crear la primera evaluación
-                        </button>
+                            </tbody>
+                        </table>
                     </div>
-                    {% endif %}
-                </div>
             </div>
 
                 <div class="p-3.5 bg-light border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: var(--color-acento) !important;">
@@ -555,22 +563,22 @@
                                 <td class="text-muted small font-monospace">{{ m.aprendiz.username }}</td>
                                 <td>
                                     <input type="number" step="0.1" min="0.0" max="5.0" name="nota_{{ m.aprendiz.id }}" 
-                                           value="{{ m.entrega_eval_sel.calificacion|default:'' }}" 
+                                           value="{% if m.entrega_eval_sel %}{{ m.entrega_eval_sel.calificacion|default:'' }}{% endif %}" 
                                            class="form-control form-control-sm text-center fw-bold rounded-pill mx-auto shadow-2xs"
                                            placeholder="4.5"
                                            style="border: 1.5px solid var(--color-acento); color: #0f172a; max-width: 110px; font-size: 0.95rem;">
                                 </td>
                                 <td>
                                     <input type="text" name="retro_{{ m.aprendiz.id }}" 
-                                           value="{{ m.entrega_eval_sel.retroalimentacion|default:'' }}" 
+                                           value="{% if m.entrega_eval_sel %}{{ m.entrega_eval_sel.retroalimentacion|default:'' }}{% endif %}" 
                                            class="form-control form-control-sm rounded-pill px-3" 
                                            placeholder="Ej: Excelente sustentación, revisar punto 2..."
                                            style="border: 1px solid var(--color-acento); font-size: 0.82rem;">
                                 </td>
                                 <td>
                                     <select name="estado_{{ m.aprendiz.id }}" class="form-select form-select-sm rounded-pill px-3" style="border-color: var(--color-acento); font-size: 0.82rem;">
-                                        <option value="CALIFICADA" {% if m.entrega_eval_sel.estado == 'CALIFICADA' or not m.entrega_eval_sel %}selected{% endif %}>✓ Calificada</option>
-                                        <option value="DEVUELTA" {% if m.entrega_eval_sel.estado == 'DEVUELTA' %}selected{% endif %}>↩ Devuelta</option>
+                                        <option value="CALIFICADA" {% if not m.entrega_eval_sel or m.entrega_eval_sel.estado == 'CALIFICADA' %}selected{% endif %}>✓ Calificada</option>
+                                        <option value="DEVUELTA" {% if m.entrega_eval_sel and m.entrega_eval_sel.estado == 'DEVUELTA' %}selected{% endif %}>↩ Devuelta</option>
                                     </select>
                                 </td>
                             </tr>

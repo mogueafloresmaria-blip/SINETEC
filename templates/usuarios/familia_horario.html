@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Horario de Clases · Portal de Familias · EduNova{% endblock %}
+
+{% block content %}
+<style>
+    @media print {
+        .sinetec-sidebar, .sinetec-topbar, .btn-no-print, .filter-section, #chatWidgetSinetec, .sidebar-bottom-actions {
+            display: none !important;
+        }
+        .sinetec-main {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+        .card {
+            border: 1px solid #CBD5E1 !important;
+            box-shadow: none !important;
+        }
+    }
+    .dia-col-card {
+        border-radius: 14px;
+        border: 1px solid #E2E8F0;
+        background: #FFFFFF;
+        transition: all 0.2s ease;
+    }
+    .bloque-horario-item {
+        border-left: 4px solid #007F7B;
+        background: #F8FAFC;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        transition: all 0.2s ease;
+    }
+    .bloque-horario-item:hover {
+        background: #F1F5F9;
+        border-left-color: #004D4A;
+        transform: translateY(-1px);
+    }
+    .bloque-activo {
+        border-left: 4px solid #10B981 !important;
+        background: #ECFDF5 !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+    }
+</style>
+
+<div class="container-fluid px-0 py-2">
+
+    <!-- Header Hero Escolar -->
+    <div class="sinetec-dashboard-hero mb-4" style="background: linear-gradient(135deg, #004D4A 0%, #006B68 50%, #007F7B 100%) !important; color: #FFFFFF; padding: 2rem 2.5rem; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(0, 107, 104, 0.25);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="badge rounded-pill px-3 py-1.5 mb-2 fw-semibold d-inline-flex align-items-center gap-1.5" style="background: rgba(255, 255, 255, 0.18) !important; color: #FFFFFF !important; border: 1px solid rgba(255, 255, 255, 0.35) !important; font-size: 0.8rem;">
+                    <i class="bi bi-calendar3"></i> Portal de Familias · Consulta de Horario Escolar
+                </span>
+                <h1 class="h3 fw-bold mb-1 text-white">Horario de Clases y Bloques por Hora</h1>
+                <p class="mb-0 text-white-50 small">
+                    Consulta el horario escolar oficial de tu hijo(a), asignaturas por hora, docentes a cargo y aula asignada en tiempo real.
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-2 btn-no-print">
+                <button type="button" onclick="window.print()" class="btn btn-light fw-bold rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center gap-2" style="color: #004D4A;" title="Imprimir horario oficial">
+                    <i class="bi bi-printer-fill"></i> Imprimir Horario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de Hijos Vinculados (Aislamiento Estricto) -->
+    {% if hijos_qs and hijos_qs.count > 1 %}
+    <div class="row g-3 mb-4 btn-no-print">
+        {% for h in hijos_qs %}
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white position-relative {% if estudiante_sel.id == h.id %}border-start border-4 border-primary shadow-sm{% else %}opacity-75{% endif %}" style="{% if estudiante_sel.id == h.id %}background: #F5F8FC !important; border-left: 5px solid #007F7B !important;{% endif %}">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-4 shadow-xs" style="width: 46px; height: 46px; background: {% if estudiante_sel.id == h.id %}linear-gradient(135deg, #006B68, #007F7B){% else %}#94A3B8{% endif %};">
+                            {{ h.first_name|slice:":1" }}{{ h.last_name|slice:":1"|default:h.username|slice:":1" }}
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0.5">{{ h.get_full_name|default:h.username }}</h6>
+                            <div class="small text-muted">
+                                <span class="me-2"><i class="bi bi-card-text me-1"></i>Doc: <strong>{{ h.perfil.numero_documento|default:h.username }}</strong></span>
+                                <span><i class="bi bi-mortarboard me-1"></i>
+                                    {% for m in h.matriculas_academicas.all %}
+                                        <strong>{{ m.get_grado_escolar_display }} - Grupo {{ m.seccion }}</strong>
+                                    {% empty %}
+                                        <strong>Estudiante</strong>
+                                    {% endfor %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        {% if estudiante_sel.id == h.id %}
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: #007F7B; color: #FFFFFF;">
+                                <i class="bi bi-check-circle-fill me-1"></i> Estudiante Activo
+                            </span>
+                        {% else %}
+                            <a href="?estudiante={{ h.id }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-bold">
+                                Seleccionar
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Ficha del Estudiante Seleccionado & Monitoreo en Tiempo Real -->
+    <div class="row g-3 mb-4">
+        <!-- Tarjeta del Estudiante -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-3 shadow-xs" style="width: 58px; height: 58px; background: linear-gradient(135deg, #006B68, #007F7B);">
+                        {{ estudiante_sel.first_name|slice:":1" }}{{ estudiante_sel.last_name|slice:":1"|default:estudiante_sel.username|slice:":1" }}
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">{{ estudiante_sel.get_full_name|default:estudiante_sel.username }}</h5>
+                        <div class="badge rounded-pill px-2.5 py-1 text-white fw-semibold" style="background: #006B68; font-size: 0.75rem;">
+                            {% if matricula_sel %}{{ matricula_sel.get_grado_escolar_display }} · Sección {{ matricula_sel.seccion|default:'A' }}{% else %}Estudiante Inscrito{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-2.5 text-muted opacity-25">
+                <div class="d-flex flex-column gap-2 small text-muted">
+                    <div class="d-flex justify-content-between">
+                        <span><i class="bi bi-person-badge me-1"></i> Documento:</span>
+                        <strong class="text-dark">{{ estudiante_sel.perfil.numero_documento|default:estudiante_sel.username }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="bi bi-calendar-event me-1"></i> Año Lectivo:</span>
+                        <strong class="text-dark">2026</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="bi bi-clock-history me-1"></i> Hora Actual:</span>
+                        <strong class="text-dark">{{ hora_actual_str }} ({{ nombre_dia_hoy }})</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="bi bi-journal-bookmark me-1"></i> Sesiones Hoy:</span>
+                        <strong class="text-dark">{{ total_clases_hoy }} clase(s) programada(s)</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitor de Clase en Curso Ahora y Próximas Clases -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="p-2 rounded-3 text-white" style="background: #007F7B;">
+                            <i class="bi bi-broadcast fs-6"></i>
+                        </span>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">Estado de Clases en Tiempo Real</h6>
+                            <small class="text-muted">Monitoreo minuto a minuto de las asignaturas asignadas</small>
+                        </div>
+                    </div>
+                    <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #E6F4EA; color: #137333;">
+                        <i class="bi bi-dot"></i> Monitoreo Activo
+                    </span>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Clase en Curso -->
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4 h-100 {% if clase_en_curso %}bloque-activo border border-success{% else %}bg-light border{% endif %}">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="small fw-bold text-uppercase {% if clase_en_curso %}text-success{% else %}text-muted{% endif %}" style="letter-spacing: 0.5px;">
+                                    <i class="bi bi-play-circle-fill me-1"></i> Clase en Curso Ahora
+                                </span>
+                                {% if clase_en_curso %}
+                                <span class="badge bg-success rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.68rem;">EN VIVO</span>
+                                {% endif %}
+                            </div>
+                            {% if clase_en_curso %}
+                            <h6 class="fw-bold text-dark mb-1">{{ clase_en_curso.nombre_materia|default:clase_en_curso.programa.denominacion }}</h6>
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-person-video3 me-1"></i> Docente: <strong class="text-dark">{{ clase_en_curso.instructor.get_full_name|default:clase_en_curso.instructor.username }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between small text-muted">
+                                <span><i class="bi bi-clock me-1"></i> {{ clase_en_curso.hora_inicio|time:"h:i A" }} - {{ clase_en_curso.hora_fin|time:"h:i A" }}</span>
+                                <span><i class="bi bi-geo-alt me-1"></i> Aula: <strong>{{ clase_en_curso.ambiente|default:'Principal' }}</strong></span>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-3 text-muted">
+                                <i class="bi bi-cup-hot fs-3 d-block mb-1 text-secondary opacity-50"></i>
+                                <span class="small fw-semibold">No hay clase en desarrollo en este momento.</span>
+                                <p class="mb-0 text-muted" style="font-size: 0.75rem;">Descanso, cambio de bloque o jornada concluida.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Próximas Clases de Hoy -->
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4 h-100 bg-light border">
+                            <span class="small fw-bold text-uppercase text-muted d-block mb-2" style="letter-spacing: 0.5px;">
+                                <i class="bi bi-arrow-right-circle me-1"></i> Próximas Clases de Hoy
+                            </span>
+                            {% if proximas_clases_hoy %}
+                            <div class="d-flex flex-column gap-2" style="max-height: 140px; overflow-y: auto;">
+                                {% for pc in proximas_clases_hoy %}
+                                <div class="bg-white p-2.5 rounded-3 border-start border-3 border-primary shadow-2xs">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong class="text-dark small">{{ pc.nombre_materia|default:pc.programa.denominacion }}</strong>
+                                        <span class="badge bg-light text-dark border small" style="font-size: 0.7rem;">{{ pc.hora_inicio|time:"h:i A" }}</span>
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        Docente: {{ pc.instructor.get_full_name|default:pc.instructor.username }} · Aula {{ pc.ambiente|default:'Principal' }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-3 text-muted">
+                                <i class="bi bi-check2-circle fs-3 d-block mb-1 text-secondary opacity-50"></i>
+                                <span class="small fw-semibold">No hay más clases programadas para hoy.</span>
+                                <p class="mb-0 text-muted" style="font-size: 0.75rem;">Todas las sesiones del día han concluido.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Malla Horaria Semanal Completa (Lunes a Viernes) -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="p-2 rounded-3 text-white" style="background: #004D4A;">
+                    <i class="bi bi-calendar2-week fs-6"></i>
+                </span>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Malla Semanal de Horario Escolar</h5>
+                    <small class="text-muted">Distribución de asignaturas de Lunes a Viernes</small>
+                </div>
+            </div>
+            <span class="badge bg-light text-dark border px-3 py-1.5 rounded-pill fw-semibold">
+                Grado {% if matricula_sel %}{{ matricula_sel.get_grado_escolar_display }} - Sección {{ matricula_sel.seccion|default:'A' }}{% else %}Regular{% endif %}
+            </span>
+        </div>
+
+        <div class="row g-3">
+            {% for d in horario_por_dia %}
+            <div class="col-lg">
+                <div class="dia-col-card p-3 h-100 {% if d.es_hoy %}border-primary border-2 shadow-sm{% endif %}" style="{% if d.es_hoy %}background: #F8FAFC; border-color: #007F7B !important;{% endif %}">
+                    <!-- Cabecera del Día -->
+                    <div class="p-2 text-center rounded-3 fw-bold text-uppercase small mb-3" style="{% if d.es_hoy %}background: #007F7B; color: #FFFFFF;{% else %}background: #F1F5F9; color: #334155;{% endif %} font-size: 0.8rem; letter-spacing: 0.5px;">
+                        {{ d.nombre }}
+                        {% if d.es_hoy %}
+                        <span class="badge bg-white text-dark ms-1 px-1.5 py-0.5 rounded-pill" style="font-size: 0.65rem;">HOY</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Lista de Bloques -->
+                    {% if d.bloques %}
+                    <div class="d-flex flex-column gap-2">
+                        {% for b in d.bloques %}
+                        <div class="bloque-horario-item {% if b.id == clase_en_curso.id %}bloque-activo{% endif %}">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-white text-dark border fw-bold" style="font-size: 0.68rem;">
+                                    {{ b.hora_inicio|time:"h:i A" }} - {{ b.hora_fin|time:"h:i A" }}
+                                </span>
+                                {% if b.ambiente %}
+                                <span class="badge bg-light text-secondary" style="font-size: 0.65rem;">
+                                    {{ b.ambiente }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.84rem;">
+                                {{ b.nombre_materia|default:b.programa.denominacion }}
+                            </h6>
+                            <div class="text-muted" style="font-size: 0.74rem;">
+                                <i class="bi bi-person me-0.5"></i> {{ b.instructor.get_full_name|default:b.instructor.username }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-calendar-x fs-4 d-block mb-1 text-secondary opacity-50"></i>
+                        <span class="small">Sin clases</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

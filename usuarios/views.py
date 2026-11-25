@@ -1186,43 +1186,46 @@ def editar_aprendiz(request, pk):
 
 
 @login_required
-@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor', 'Instructor SENA')
 def papelera_reciclaje(request):
     """
-    Papelera de reciclaje institucional:
-    Permite consultar los elementos borrados lógicamente correspondientes a cada rol,
-    restaurarlos al estado activo con un solo clic o eliminarlos de forma definitiva.
+    Papelera de reciclaje institucional EDUNOVA:
+    Disponible para TODOS los roles actuales (Administrador, Rectoría, Secretaría,
+    Docente, Estudiante, Familia) y cualquier rol que se cree en el futuro.
+    Muestra elementos resguardados según el alcance y permisos de cada usuario.
+    Permite restaurar de forma individual o múltiple, o depurar definitivamente.
     """
-    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
-    es_docente = any(r in user_rol_nombre for r in ['Docente', 'Profesor', 'Instructor']) and not request.user.is_superuser
+    from usuarios.papelera_service import PapeleraService
 
     q = request.GET.get('q', '').strip()
     tipo_sel = request.GET.get('tipo', 'Todos').strip()
 
-    items_base = PapeleraReciclaje.objects.filter(restaurado=False).select_related('eliminado_por')
-    if es_docente:
-        items_base = items_base.filter(eliminado_por=request.user)
+    items = PapeleraService.obtener_items_para_usuario(request.user, tipo_sel=tipo_sel, q=q)
+    items_base = PapeleraService.obtener_items_para_usuario(request.user, tipo_sel='Todos', q='')
 
-    items = items_base
-    if tipo_sel and tipo_sel != 'Todos':
-        items = items.filter(tipo_objeto=tipo_sel)
-
-    if q:
-        items = items.filter(
-            Q(titulo__icontains=q) | Q(subtitulo__icontains=q) | Q(motivo__icontains=q)
-        )
-
-    # Conteo por tipo
+    # Conteo dinámico de métricas para las pestañas según la vista del usuario
+    total_general = items_base.count()
     total_estudiantes = items_base.filter(tipo_objeto='Estudiante').count()
     total_horarios = items_base.filter(tipo_objeto='Horario').count()
     total_matriculas = items_base.filter(tipo_objeto='Matricula').count()
     total_actividades = items_base.filter(tipo_objeto='TareaClase').count()
     total_entregas = items_base.filter(tipo_objeto='EntregaTarea').count()
+    total_guias = items_base.filter(tipo_objeto__in=['GuiaClase', 'Documento', 'MaterialClase']).count()
+    total_comunicados = items_base.filter(tipo_objeto='Comunicado').count()
+    total_mensajes = items_base.filter(tipo_objeto='Mensaje').count()
+    total_calificaciones = items_base.filter(tipo_objeto='Calificacion').count()
     total_cargas = items_base.filter(tipo_objeto='CargaAcademica').count()
     total_fichas = items_base.filter(tipo_objeto='Ficha').count()
-    total_comunicados = items_base.filter(tipo_objeto='Comunicado').count()
     total_bitacoras = items_base.filter(tipo_objeto='Bitacora').count()
-    total_general = items.count()
+
+    # Rol y permisos del usuario actual
+    perfil = getattr(request.user, 'perfil', None)
+    rol_nombre = perfil.rol.nombre if (perfil and perfil.rol) else ('Administrador' if request.user.is_superuser else 'Usuario')
+    es_admin = request.user.is_superuser or any(r in rol_nombre for r in ['Admin', 'Administrador'])
+    es_directivo = any(r in rol_nombre for r in ['Rector', 'Rectoría', 'Coordinador'])
+    es_secretaria = any(r in rol_nombre for r in ['Secretar', 'Secretaría'])
+    es_docente = any(r in rol_nombre for r in ['Docente', 'Profesor', 'Instructor'])
+    es_estudiante = any(r in rol_nombre for r in ['Estudiante', 'Aprendiz', 'Alumno'])
+    es_familia = any(r in rol_nombre for r in ['Familia', 'Acudiente', 'Padre', 'Madre'])
 
     return render(request, 'usuarios/papelera.html', {
         'items': items,
@@ -1234,206 +1237,121 @@ def papelera_reciclaje(request):
         'total_matriculas': total_matriculas,
         'total_actividades': total_actividades,
         'total_entregas': total_entregas,
+        'total_guias': total_guias,
+        'total_comunicados': total_comunicados,
+        'total_mensajes': total_mensajes,
+        'total_calificaciones': total_calificaciones,
         'total_cargas': total_cargas,
         'total_fichas': total_fichas,
-        'total_comunicados': total_comunicados,
         'total_bitacoras': total_bitacoras,
+        'rol_nombre': rol_nombre,
+        'es_admin': es_admin,
+        'es_directivo': es_directivo,
+        'es_secretaria': es_secretaria,
         'es_docente': es_docente,
+        'es_estudiante': es_estudiante,
+        'es_familia': es_familia,
+        'url_panel_origen': reverse(obtener_url_redireccion_por_rol(request.user)) if obtener_url_redireccion_por_rol(request.user) else '/',
     })
 
 
 @login_required
-@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor', 'Instructor SENA')
 def restaurar_elemento_papelera(request, pk):
-    """Restaurar un elemento de la papelera a su estado activo original."""
+    """Restaura un elemento de la papelera a su estado y ubicación original."""
+    from usuarios.papelera_service import PapeleraService
     elem = get_object_or_404(PapeleraReciclaje, pk=pk)
-    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
-    es_docente = any(r in user_rol_nombre for r in ['Docente', 'Profesor', 'Instructor']) and not request.user.is_superuser
-
-    if es_docente and elem.eliminado_por_id != request.user.id:
-        messages.error(request, "No tienes permisos para restaurar elementos eliminados por otro funcionario.")
-        return redirect('papelera_reciclaje')
 
     if request.method == 'POST':
-        if elem.tipo_objeto == 'Estudiante':
-            user_obj = User.objects.filter(pk=elem.objeto_id).first()
-            if user_obj:
-                user_obj.is_active = True
-                user_obj.save(update_fields=['is_active'])
-                if hasattr(user_obj, 'perfil') and user_obj.perfil:
-                    user_obj.perfil.esta_activo = True
-                    user_obj.perfil.save(update_fields=['esta_activo'])
-                Matricula.objects.filter(aprendiz=user_obj).update(estado_formacion='En Formacion')
+        exito, msg = PapeleraService.restaurar_elemento(elem, request.user)
+        if exito:
+            messages.success(request, msg)
+        else:
+            messages.error(request, msg)
 
-        elif elem.tipo_objeto == 'Horario':
-            HorarioFicha.objects.filter(pk=elem.objeto_id).update(activo=True)
-
-        elif elem.tipo_objeto == 'Matricula':
-            Matricula.objects.filter(pk=elem.objeto_id).update(estado_formacion='En Formacion')
-
-        elif elem.tipo_objeto == 'TareaClase':
-            from academico.models import TareaClase
-            tarea = TareaClase.objects.filter(pk=elem.objeto_id).first()
-            if tarea:
-                tarea.estado = 'Publicada'
-                tarea.save(update_fields=['estado'])
-            else:
-                datos = elem.datos_recuperacion or {}
-                if datos and datos.get('carga_id'):
-                    TareaClase.objects.create(
-                        id=elem.objeto_id,
-                        carga_academica_id=datos.get('carga_id'),
-                        titulo=datos.get('titulo', elem.titulo),
-                        instrucciones=datos.get('instrucciones', ''),
-                        tipo_actividad=datos.get('tipo_actividad', 'Tarea'),
-                        estado='Publicada'
-                    )
-
-        elif elem.tipo_objeto == 'EntregaTarea':
-            from academico.models import EntregaTarea
-            EntregaTarea.objects.filter(pk=elem.objeto_id).update(estado='ENTREGADA')
-
-        elif elem.tipo_objeto == 'CargaAcademica':
-            from academico.models import CargaAcademica
-            datos = elem.datos_recuperacion or {}
-            if datos:
-                CargaAcademica.objects.get_or_create(
-                    profesor_id=datos.get('profesor_id'),
-                    programa_id=datos.get('programa_id'),
-                    grado=datos.get('grado'),
-                    seccion=datos.get('seccion')
-                )
-
-        elif elem.tipo_objeto == 'Ficha':
-            from academico.models import FichaSena
-            FichaSena.objects.filter(pk=elem.objeto_id).update(estado='En Ejecución')
-
-        elif elem.tipo_objeto == 'GuiaClase':
-            from academico.models import GuiaClase
-            datos = elem.datos_recuperacion or {}
-            if datos and datos.get('titulo'):
-                GuiaClase.objects.get_or_create(
-                    id=elem.objeto_id,
-                    defaults={
-                        'titulo': datos.get('titulo'),
-                        'instrucciones': datos.get('instrucciones', ''),
-                    }
-                )
-
-        elif elem.tipo_objeto == 'Bitacora':
-            from seguimiento.models import BitacoraSeguimiento
-            datos = elem.datos_recuperacion or {}
-            if datos and datos.get('ficha_id'):
-                BitacoraSeguimiento.objects.get_or_create(
-                    id=elem.objeto_id,
-                    defaults={'ficha_id': datos.get('ficha_id'), 'observaciones': datos.get('observaciones', '')}
-                )
-
-        elem.restaurado = True
-        elem.save(update_fields=['restaurado'])
-
-        RegistroAuditoria.registrar(
-            usuario=request.user,
-            modulo='Papelera',
-            accion='Restauración de Elemento',
-            detalles=f"Restauró '{elem.titulo}' ({elem.tipo_objeto}) al estado activo.",
-            request=request
-        )
-        messages.success(request, f"¡El elemento '{elem.titulo}' ha sido restaurado exitosamente al sistema!")
-
-    return redirect('papelera_reciclaje')
+    next_url = request.POST.get('next') or request.GET.get('next') or 'papelera_reciclaje'
+    return redirect(next_url)
 
 
 @login_required
-@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor', 'Instructor SENA')
 def eliminar_definitivo_papelera(request, pk):
-    """Eliminación permanente irreversible de un registro."""
+    """Eliminación física definitiva de un registro bajo autorización."""
+    from usuarios.papelera_service import PapeleraService
     elem = get_object_or_404(PapeleraReciclaje, pk=pk)
-    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
-    es_docente = any(r in user_rol_nombre for r in ['Docente', 'Profesor', 'Instructor']) and not request.user.is_superuser
-
-    if es_docente and elem.eliminado_por_id != request.user.id:
-        messages.error(request, "No tienes permisos para eliminar definitivamente elementos de otro funcionario.")
-        return redirect('papelera_reciclaje')
 
     if request.method == 'POST':
-        titulo = elem.titulo
-        tipo = elem.tipo_objeto
-        if tipo == 'Estudiante':
-            user_obj = User.objects.filter(pk=elem.objeto_id).first()
-            if user_obj:
-                Matricula.objects.filter(aprendiz=user_obj).delete()
-                user_obj.delete()
-        elif tipo == 'Horario':
-            HorarioFicha.objects.filter(pk=elem.objeto_id).delete()
-        elif tipo == 'Matricula':
-            Matricula.objects.filter(pk=elem.objeto_id).delete()
-        elif tipo == 'TareaClase':
-            from academico.models import TareaClase
-            TareaClase.objects.filter(pk=elem.objeto_id).delete()
-        elif tipo == 'EntregaTarea':
-            from academico.models import EntregaTarea
-            EntregaTarea.objects.filter(pk=elem.objeto_id).delete()
-        elif tipo == 'CargaAcademica':
-            from academico.models import CargaAcademica
-            CargaAcademica.objects.filter(pk=elem.objeto_id).delete()
-        elif tipo == 'Ficha':
-            from academico.models import FichaSena
-            FichaSena.objects.filter(pk=elem.objeto_id).delete()
-        elif tipo == 'Bitacora':
-            from seguimiento.models import BitacoraSeguimiento
-            BitacoraSeguimiento.objects.filter(pk=elem.objeto_id).delete()
+        exito, msg = PapeleraService.eliminar_definitivo(elem, request.user)
+        if exito:
+            messages.success(request, msg)
+        else:
+            messages.error(request, msg)
 
-        elem.delete()
-        RegistroAuditoria.registrar(
-            usuario=request.user,
-            modulo='Papelera',
-            accion='Eliminación Definitiva',
-            detalles=f"Eliminación permanente e irreversible de '{titulo}' ({tipo}).",
-            request=request
-        )
-        messages.success(request, f"El registro '{titulo}' fue eliminado definitivamente de la base de datos.")
+    next_url = request.POST.get('next') or request.GET.get('next') or 'papelera_reciclaje'
+    return redirect(next_url)
+
+
+@login_required
+def papelera_acciones_multiples(request):
+    """
+    Permite restaurar o eliminar definitivamente múltiples elementos seleccionados
+    mediante casillas de verificación.
+    """
+    from usuarios.papelera_service import PapeleraService
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+        ids = request.POST.getlist('seleccionados')
+
+        if not ids:
+            messages.warning(request, "No has seleccionado ningún elemento de la papelera.")
+            return redirect('papelera_reciclaje')
+
+        elementos = list(PapeleraReciclaje.objects.filter(id__in=ids, restaurado=False))
+        total_ok = 0
+        total_err = 0
+
+        if accion == 'restaurar':
+            for elem in elementos:
+                exito, _ = PapeleraService.restaurar_elemento(elem, request.user)
+                if exito:
+                    total_ok += 1
+                else:
+                    total_err += 1
+            if total_ok:
+                messages.success(request, f"¡Se restauraron exitosamente {total_ok} elementos a sus módulos originales!")
+            if total_err:
+                messages.warning(request, f"{total_err} elementos no pudieron ser restaurados por falta de permisos.")
+
+        elif accion == 'eliminar_definitivo':
+            for elem in elementos:
+                exito, _ = PapeleraService.eliminar_definitivo(elem, request.user)
+                if exito:
+                    total_ok += 1
+                else:
+                    total_err += 1
+            if total_ok:
+                messages.success(request, f"Se eliminaron definitivamente {total_ok} registros de la base de datos.")
+            if total_err:
+                messages.error(request, f"{total_err} registros no pudieron ser eliminados por no contar con autorización.")
 
     return redirect('papelera_reciclaje')
 
 
 @login_required
-@requerir_roles('Administrador', 'Rectoría', 'Rector', 'Coordinador', 'Secretaría', 'Secretaria', 'Docente', 'Docente I.E.', 'Profesor', 'Profesor / Docente', 'Instructor', 'Instructor SENA')
 def vaciar_papelera(request):
-    """Vaciar todos los elementos de la papelera correspondientes al usuario."""
-    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
-    es_docente = any(r in user_rol_nombre for r in ['Docente', 'Profesor', 'Instructor']) and not request.user.is_superuser
-
+    """Vacía los elementos de la papelera autorizados para el usuario."""
+    from usuarios.papelera_service import PapeleraService
     if request.method == 'POST':
-        elems = PapeleraReciclaje.objects.filter(restaurado=False)
-        if es_docente:
-            elems = elems.filter(eliminado_por=request.user)
+        elementos = list(PapeleraService.obtener_items_para_usuario(request.user))
+        total_ok = 0
+        for elem in elementos:
+            exito, _ = PapeleraService.eliminar_definitivo(elem, request.user)
+            if exito:
+                total_ok += 1
 
-        total = elems.count()
-        for e in elems:
-            if not es_docente:
-                if e.tipo_objeto == 'Estudiante':
-                    u = User.objects.filter(pk=e.objeto_id).first()
-                    if u:
-                        Matricula.objects.filter(aprendiz=u).delete()
-                        u.delete()
-                elif e.tipo_objeto == 'Horario':
-                    HorarioFicha.objects.filter(pk=e.objeto_id).delete()
-                elif e.tipo_objeto == 'Matricula':
-                    Matricula.objects.filter(pk=e.objeto_id).delete()
-            elif e.tipo_objeto == 'TareaClase':
-                from academico.models import TareaClase
-                TareaClase.objects.filter(pk=e.objeto_id).delete()
-            e.delete()
+        if total_ok > 0:
+            messages.success(request, f"Se vació la papelera de reciclaje ({total_ok} elementos eliminados definitivamente).")
+        else:
+            messages.info(request, "No se encontraron elementos disponibles para vaciar o no cuenta con autorización.")
 
-        RegistroAuditoria.registrar(
-            usuario=request.user,
-            modulo='Papelera',
-            accion='Vaciado de Papelera',
-            detalles=f"Vació la papelera de reciclaje ({total} registros eliminados).",
-            request=request
-        )
-        messages.success(request, f"Se vació la papelera de reciclaje ({total} elementos eliminados definitivamente).")
     return redirect('papelera_reciclaje')
 
 
@@ -1536,6 +1454,7 @@ def matriculas_lista(request):
         'estado_filtro': estado_filtro,
         'grados_catalogo': Matricula.GRADOS_ESCOLARES,
         'grados_lista': grados_catalogo,
+        'es_rectoria': bool(getattr(getattr(request.user, 'perfil', None), 'rol', None) and 'rector' in request.user.perfil.rol.nombre.lower()),
     }
     return render(request, 'usuarios/matriculas_lista.html', context)
 
@@ -2631,19 +2550,25 @@ def editar_circular(request, pk):
 
 @login_required
 def eliminar_circular(request, pk):
-    """Elimina una circular o aviso oficial con trazabilidad en auditoría."""
+    """Elimina una circular o aviso oficial enviándolo de forma segura a la Papelera de Reciclaje."""
     from seguimiento.models import ComunicadoEscolar
+    from usuarios.papelera_service import PapeleraService
     com = get_object_or_404(ComunicadoEscolar, pk=pk)
     asunto = com.asunto
-    com.delete()
+    PapeleraService.enviar_a_papelera(
+        com,
+        usuario=request.user,
+        motivo='Eliminada desde Canal Oficial de Circulares hacia la Papelera',
+        modulo_origen='Canal Oficial de Circulares'
+    )
     RegistroAuditoria.registrar(
         usuario=request.user,
         modulo='Comunicaciones',
-        accion='Eliminación de Circular Escolar',
-        detalles=f"Se eliminó la circular '{asunto}'.",
+        accion='Envío a Papelera de Circular Escolar',
+        detalles=f"Se envió a la papelera de reciclaje la circular '{asunto}'.",
         request=request
     )
-    messages.success(request, f'Circular "{asunto}" eliminada correctamente del sistema.')
+    messages.success(request, f'La circular "{asunto}" ha sido movida a la Papelera de Reciclaje. Puede restaurarla en cualquier momento.')
     return redirect('mensajeria')
 
 
@@ -2949,18 +2874,24 @@ def editar_ruta_transporte(request, pk):
 
 @login_required
 def eliminar_ruta_transporte(request, pk):
-    """Elimina una ruta escolar con verificación de auditoría."""
+    """Elimina una ruta escolar enviándola de forma segura a la Papelera de Reciclaje."""
+    from usuarios.papelera_service import PapeleraService
     ruta = get_object_or_404(TransporteRuta, pk=pk)
     nom = ruta.nombre
-    ruta.delete()
+    PapeleraService.enviar_a_papelera(
+        ruta,
+        usuario=request.user,
+        motivo='Eliminada desde Gestión de Rutas Escolares hacia la Papelera',
+        modulo_origen='Rutas de Transporte'
+    )
     RegistroAuditoria.registrar(
         usuario=request.user,
         modulo='Transportes',
-        accion='Eliminación de Ruta Escolar',
-        detalles=f"Se eliminó la ruta escolar {nom}.",
+        accion='Envío a Papelera de Ruta Escolar',
+        detalles=f"Se envió a la papelera la ruta escolar {nom}.",
         request=request
     )
-    messages.success(request, f'Ruta {nom} eliminada del sistema.')
+    messages.success(request, f'La ruta {nom} ha sido movida a la Papelera de Reciclaje. Puede restaurarla en cualquier momento.')
     return redirect('transporte_escolar')
 
 
@@ -3427,6 +3358,89 @@ def familia_circulares(request):
     })
 
 
+@login_required
+def familia_horario(request):
+    """
+    Módulo Familias → Horario de Clases por Hora:
+    Permite a la familia/acudiente consultar el horario oficial del estudiante vinculado
+    con las asignaturas que le corresponden en cada hora, su docente y aula.
+    Destaca la clase en curso en tiempo real y las próximas clases del día.
+    Aislamiento estricto: no permite ver información privada de otros estudiantes.
+    """
+    fam_rec, hijos_qs, estudiante_sel, matricula_sel, ficha_sel = _obtener_datos_familia(request)
+    if not estudiante_sel and hijos_qs.exists():
+        estudiante_sel = hijos_qs.first()
+        matricula_sel = Matricula.objects.filter(aprendiz=estudiante_sel).select_related('ficha', 'ficha__programa').first()
+        ficha_sel = matricula_sel.ficha if matricula_sel else None
+
+    if not estudiante_sel:
+        messages.warning(request, 'Debe consultar o seleccionar primero el número de documento de su hijo o hija para ver su horario.')
+        return redirect('familia_portal')
+
+    from academico.models import HorarioFicha
+    from datetime import datetime
+
+    grado_num = ''.join(c for c in str(getattr(matricula_sel, 'grado_escolar', '')) if c.isdigit())
+    secc = getattr(matricula_sel, 'seccion', 'A') or 'A'
+
+    filtro_h = Q(ficha=ficha_sel) if ficha_sel else Q(pk__isnull=True)
+    if grado_num:
+        filtro_h = filtro_h | Q(grado__icontains=grado_num, seccion=secc)
+
+    horarios_qs = HorarioFicha.objects.filter(filtro_h, activo=True).select_related('instructor', 'programa', 'ficha').order_by('dia', 'hora_inicio').distinct()
+
+    ahora = datetime.now()
+    dia_actual_num = str(ahora.isoweekday())
+    hora_actual = ahora.time()
+
+    clase_en_curso = None
+    proximas_clases_hoy = []
+    clases_hoy = []
+
+    dias_nombres_map = {'1': 'Lunes', '2': 'Martes', '3': 'Miércoles', '4': 'Jueves', '5': 'Viernes'}
+    nombre_dia_hoy = dias_nombres_map.get(dia_actual_num, 'Fin de Semana')
+
+    for h in horarios_qs:
+        dia_str = str(getattr(h, 'dia', ''))
+        if dia_str == dia_actual_num:
+            clases_hoy.append(h)
+            if h.hora_inicio <= hora_actual <= h.hora_fin:
+                if not clase_en_curso:
+                    clase_en_curso = h
+            elif h.hora_inicio > hora_actual:
+                proximas_clases_hoy.append(h)
+
+    proximas_clases_hoy.sort(key=lambda x: x.hora_inicio)
+
+    horario_por_dia = []
+    dias_lista = [('1', 'Lunes'), ('2', 'Martes'), ('3', 'Miércoles'), ('4', 'Jueves'), ('5', 'Viernes')]
+    for d_num, d_nom in dias_lista:
+        bloques = [h for h in horarios_qs if str(h.dia) == d_num]
+        horario_por_dia.append({
+            'num': d_num,
+            'nombre': d_nom,
+            'es_hoy': d_num == dia_actual_num,
+            'bloques': bloques,
+            'total_bloques': len(bloques),
+        })
+
+    return render(request, 'usuarios/familia_horario.html', {
+        'acudiente': fam_rec,
+        'hijos_qs': hijos_qs,
+        'estudiante_sel': estudiante_sel,
+        'matricula_sel': matricula_sel,
+        'ficha_sel': ficha_sel,
+        'horarios': horarios_qs,
+        'horario_por_dia': horario_por_dia,
+        'clase_en_curso': clase_en_curso,
+        'proximas_clases_hoy': proximas_clases_hoy,
+        'clases_hoy': clases_hoy,
+        'total_clases_hoy': len(clases_hoy),
+        'nombre_dia_hoy': nombre_dia_hoy,
+        'hora_actual_str': ahora.strftime('%I:%M %p'),
+    })
+
+
 def familia_comunicaciones(request):
     """
     Módulo Familias → Comunicaciones y Mensajería Escolar:
@@ -3513,7 +3527,7 @@ def familia_comunicaciones(request):
         total_recibidos = 0
         total_enviados = 0
 
-    return render(request, 'usuarios/familia_comunicaciones.html', {
+    context_fam = {
         'acudiente': fam_rec,
         'hijos_qs': hijos_qs,
         'estudiante_sel': estudiante_sel,
@@ -3524,7 +3538,11 @@ def familia_comunicaciones(request):
         'total_comunicaciones': comunicaciones_qs.count(),
         'total_recibidos': total_recibidos,
         'total_enviados': total_enviados,
-    })
+    }
+    usr_target = request.user if (hasattr(request, 'user') and request.user.is_authenticated) else (estudiante_sel or User.objects.first())
+    if usr_target:
+        context_fam.update(obtener_contexto_mensajeria_unificada(usr_target))
+    return render(request, 'usuarios/familia_comunicaciones.html', context_fam)
 
 
 def familia_pensiones(request):
@@ -6570,6 +6588,8 @@ def instructor_dashboard(request):
         'manual': 'manual',
     }
     subpanel_activo = mapa_subpaneles.get(subpanel_solicitado, 'inicio')
+    if subpanel_activo == 'papelera':
+        return redirect('papelera_reciclaje')
 
     grado_param = request.GET.get('grado', request.GET.get('grado_filtro', '')).strip()
     grado_filtro = ''.join(ch for ch in grado_param if ch.isdigit())
@@ -6996,7 +7016,11 @@ def instructor_dashboard(request):
             calificaciones_map[cal.matricula_id] = cal
 
     for mat in estudiantes_carga_sel:
-        mat.calificacion_actual = calificaciones_map.get(mat.id)
+        cal_act = calificaciones_map.get(mat.id)
+        mat.calificacion_actual = cal_act
+        mat.nota_actual = cal_act.nota if cal_act else None
+        mat.desempeno_actual = cal_act.desempeno if cal_act else 'Bajo'
+        mat.observaciones_actual = cal_act.observaciones if cal_act else ''
 
     # === ASISTENCIA: FECHA, PERIODO Y REGISTROS DEL DÍA ===
     fecha_asist_param = request.GET.get('fecha')
@@ -7614,6 +7638,8 @@ def instructor_dashboard(request):
         'periodo_obj_actual': periodo_obj_actual,
         'periodo_esta_cerrado': periodo_esta_cerrado,
     }
+    if hasattr(request, 'user') and request.user.is_authenticated:
+        contexto.update(obtener_contexto_mensajeria_unificada(request.user))
     return render(request, 'academico/profesor_dashboard.html', contexto)
 
 
@@ -7710,11 +7736,8 @@ def notificaciones_docente_view(request):
 @login_required
 @solo_instructor
 def papelera_docente_view(request):
-    """Ruta oficial /papelera-docente/ que renderiza directamente el módulo de Papelera."""
-    q = request.GET.copy()
-    q['subpanel'] = 'papelera'
-    request.GET = q
-    return instructor_dashboard(request)
+    """Ruta oficial /papelera-docente/ que redirige a la papelera general unificada institucional."""
+    return redirect('papelera_reciclaje')
 
 
 @login_required
@@ -7878,6 +7901,8 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         'portafolio': 'actividades',
     }
     subpanel_activo = mapa_subpaneles.get(subpanel_solicitado, 'inicio')
+    if subpanel_activo == 'papelera':
+        return redirect('papelera_reciclaje')
 
     matricula = Matricula.objects.filter(aprendiz=request.user).select_related(
         'ficha', 'ficha__programa', 'ficha__institucion'
@@ -7910,6 +7935,17 @@ def aprendiz_dashboard(request, subpanel_directo=None):
 
         dia_semana_str = str(hoy.isoweekday()) if hoy.isoweekday() <= 5 else '1'
         horarios_hoy = todos_horarios.filter(dia=dia_semana_str)
+
+        hora_actual_val = ahora.time()
+        clase_en_curso_estudiante = None
+        proximas_clases_estudiante = []
+        for h in horarios_hoy:
+            if h.hora_inicio <= hora_actual_val <= h.hora_fin:
+                if not clase_en_curso_estudiante:
+                    clase_en_curso_estudiante = h
+            elif h.hora_inicio > hora_actual_val:
+                proximas_clases_estudiante.append(h)
+        proximas_clases_estudiante.sort(key=lambda x: x.hora_inicio)
 
         dias_semana_nombres = [
             ('1', 'Lunes'),
@@ -8240,7 +8276,7 @@ def aprendiz_dashboard(request, subpanel_directo=None):
 
     promedio_general_acumulado = round(total_acumulado / periodos_con_nota, 2) if periodos_con_nota > 0 else None
 
-    return render(request, 'aprendiz.html', {
+    context_aprendiz = {
         'perfil': perfil,
         'ficha': ficha,
         'matricula': matricula,
@@ -8268,6 +8304,8 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         'todos_horarios': todos_horarios,
         'horarios_hoy': horarios_hoy,
         'horario_semanal_grid': horario_semanal_grid,
+        'clase_en_curso_estudiante': clase_en_curso_estudiante if 'clase_en_curso_estudiante' in locals() else None,
+        'proximas_clases_estudiante': proximas_clases_estudiante if 'proximas_clases_estudiante' in locals() else [],
         'comunicados_estudiante': comunicados_estudiante,
         'solicitudes': solicitudes,
         'logros': logros,
@@ -8282,7 +8320,10 @@ def aprendiz_dashboard(request, subpanel_directo=None):
         'documentos_institucionales': documentos_institucionales,
         'notificaciones_estudiante': notificaciones_estudiante,
         'subpanel_activo': subpanel_activo,
-    })
+    }
+    if hasattr(request, 'user') and request.user.is_authenticated:
+        context_aprendiz.update(obtener_contexto_mensajeria_unificada(request.user))
+    return render(request, 'aprendiz.html', context_aprendiz)
 
 
 
@@ -10111,138 +10152,59 @@ def configuracion_sistema(request):
     from django.db import connection
     db_engine = connection.settings_dict.get('ENGINE', '')
     db_name = connection.settings_dict.get('NAME', '')
-    db_host = connection.settings_dict.get('HOST', 'localhost') or 'localhost'
-    db_port = connection.settings_dict.get('PORT', '3306') or '3306'
-    db_vendor = connection.vendor
 
-    motor_display = 'MySQL' if (db_vendor == 'mysql' or 'mysql' in db_engine.lower()) else ('SQLite' if db_vendor == 'sqlite' else db_vendor.upper())
 
-    db_conectada = False
-    total_tablas = 0
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1;")
-            db_conectada = True
-            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s;", [db_name])
-            res = cursor.fetchone()
-            total_tablas = res[0] if res else 0
-    except Exception:
-        db_conectada = True
-        try:
-            total_tablas = len(connection.introspection.table_names())
-        except Exception:
-            total_tablas = 75
-
-    db_info = {
-        'motor': motor_display,
-        'engine': db_engine,
-        'name': db_name,
-        'host': db_host,
-        'port': db_port,
-        'vendor': db_vendor,
-        'conectada': db_conectada,
-        'total_tablas': total_tablas,
-    }
-
-    context = {
-        'user': user,
-        'perfil': perfil,
+    return render(request, 'usuarios/configuracion.html', {
         'colegio': colegio,
-        'regional': 'Regional Magdalena',
-        'centro': 'Centro de Logística y Promoción Ecoturística',
-        'vigencia': '2026',
-        'db_info': db_info,
-    }
-    return render(request, 'usuarios/configuracion.html', context)
+        'db_engine': db_engine,
+        'db_name': db_name,
+    })
 
 
 @login_required
 @solo_coordinador_o_admin
 def api_guardar_color(request):
-    """
-    API para guardado automático, seguro y en tiempo real de colores institucionales en MySQL.
-    Protegido por autenticación de usuario, validación de permisos de administrador y CSRF.
-    """
+    """Guarda de forma asíncrona un color de la paleta institucional."""
     if request.method != 'POST':
-        return JsonResponse({'ok': False, 'error': 'Método no permitido. Utilice POST.'}, status=405)
-
+        return JsonResponse({'ok': False, 'error': 'Método no permitido'}, status=405)
     import json
-    campo = None
-    valor = None
     try:
-        if request.content_type == 'application/json':
-            data = json.loads(request.body.decode('utf-8'))
-            campo = data.get('campo')
-            valor = data.get('valor')
-        else:
-            campo = request.POST.get('campo')
-            valor = request.POST.get('valor')
-    except Exception as e:
-        return JsonResponse({'ok': False, 'error': f'Solicitud malformada: {str(e)}'}, status=400)
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    campo = data.get('campo', '').strip()
+    valor = data.get('valor', '').strip()
 
     if not campo or not valor:
-        return JsonResponse({'ok': False, 'error': 'Faltan parámetros requeridos: campo y valor'}, status=400)
+        return JsonResponse({'ok': False, 'error': 'Datos incompletos'}, status=400)
 
-    campo = campo.strip()
-    valor = valor.strip()
-
-    if campo not in ConfiguracionColegio.COLORES_POR_DEFECTO:
-        return JsonResponse({'ok': False, 'error': f'Campo de color no válido: {campo}'}, status=400)
-
-    if not ConfiguracionColegio.es_color_hex_valido(valor):
-        return JsonResponse({'ok': False, 'error': f'Formato de color hexadecimal no válido: {valor}. Debe ser formato #RRGGBB'}, status=400)
-
-    try:
-        colegio = ConfiguracionColegio.get_solo()
-        setattr(colegio, campo, valor)
-        colegio.save()  # Limpia la caché global 'edunova_colegio_identidad'
-        from django.core.cache import cache
-        cache.delete('edunova_colegio_identidad')
-
-        return JsonResponse({
-            'ok': True,
-            'mensaje': f'Color {campo} guardado correctamente en la base de datos',
-            'campo': campo,
-            'valor': valor,
-            'paleta': colegio.paleta()
-        })
-    except Exception as e:
-        return JsonResponse({'ok': False, 'error': f'Error al persistir en base de datos: {str(e)}'}, status=500)
-
+    colegio = ConfiguracionColegio.get_solo()
+    if campo in ConfiguracionColegio.COLORES_POR_DEFECTO:
+        if ConfiguracionColegio.es_color_hex_valido(valor):
+            setattr(colegio, campo, valor)
+            colegio.save(update_fields=[campo])
+            paleta = {c: getattr(colegio, c) for c in ConfiguracionColegio.COLORES_POR_DEFECTO.keys()}
+            return JsonResponse({'ok': True, 'paleta': paleta})
+        return JsonResponse({'ok': False, 'error': 'Color hexadecimal inválido'}, status=400)
+    return JsonResponse({'ok': False, 'error': 'Campo de color desconocido'}, status=400)
 
 
 @login_required
 @solo_secretaria_o_coordinador
 def usuario_toggle_activo(request, pk):
-    """
-    Alterna el acceso activo/inactivo de un usuario institucional.
-    Protege cuentas de nivel Administrador/Rectoría de ser modificadas por Secretaría.
-    """
     usuario_obj = get_object_or_404(User, pk=pk)
-    if usuario_obj == request.user:
-        messages.warning(request, "No puedes desactivar tu propia cuenta en uso.")
-        return redirect('gestion_usuarios')
-
-    # Validación de seguridad de roles
-    rol_solicitante = getattr(getattr(request.user, 'perfil', None), 'rol', None)
-    rol_sol_nombre = getattr(rol_solicitante, 'nombre', '').strip().lower() if rol_solicitante else ''
-    es_secretaria = ('secretar' in rol_sol_nombre or not (request.user.is_superuser or 'admin' in rol_sol_nombre or 'rector' in rol_sol_nombre)) and not request.user.is_superuser
-
-    rol_obj = getattr(getattr(usuario_obj, 'perfil', None), 'rol', None)
-    rol_obj_nombre = getattr(rol_obj, 'nombre', '').strip().lower() if rol_obj else ''
-    es_objetivo_admin = (
-        usuario_obj.is_superuser or
-        usuario_obj.is_staff or
-        any(r in rol_obj_nombre for r in ['admin', 'rector', 'coordinador']) or
-        ('admin' in usuario_obj.username.lower())
-    )
+    user_rol_nombre = getattr(getattr(request.user, 'perfil', None), 'rol', None).nombre if getattr(request.user, 'perfil', None) and request.user.perfil.rol else ''
+    es_secretaria = 'Secretar' in user_rol_nombre and not request.user.is_superuser
+    obj_rol_nombre = getattr(getattr(usuario_obj, 'perfil', None), 'rol', None).nombre if getattr(usuario_obj, 'perfil', None) and usuario_obj.perfil.rol else ''
+    es_objetivo_admin = usuario_obj.is_superuser or any(k in obj_rol_nombre for k in ['Administrador', 'Rector', 'Coordinador'])
 
     if es_secretaria and es_objetivo_admin:
         messages.error(request, "Acceso denegado: Secretaría no tiene permisos para desactivar o modificar cuentas con rol de Administrador o Directivo.")
         return redirect('gestion_usuarios')
 
     usuario_obj.is_active = not usuario_obj.is_active
-    usuario_obj.save()
+    usuario_obj.save(update_fields=['is_active'])
 
     estado = "Activo" if usuario_obj.is_active else "Inactivo"
     RegistroAuditoria.registrar(
@@ -13311,4 +13273,851 @@ def api_historial_estudiante_asistencia(request, matricula_id):
         'estado_resumen': alertas_info['estado_resumen'],
         'historial': items
     })
+
+# ============================================================================
+# FUNCIONES INSTITUCIONALES EDUNOVA (ADMINISTRACIÓN, NOTIFICACIONES, HORARIOS Y MENSAJERÍA)
+# ============================================================================
+
+@login_required
+@solo_admin
+def eliminar_usuario(request, pk):
+    """
+    Permite al Administrador desactivar o retirar un usuario del sistema de forma segura.
+    Exclusivo para el rol Administrador.
+    """
+    user = request.user
+    perfil_req = getattr(user, 'perfil', None)
+    rol_nombre_req = perfil_req.rol.nombre.lower() if (perfil_req and perfil_req.rol) else ''
+    es_admin_req = user.is_superuser or ('administrador' in rol_nombre_req)
+    if not es_admin_req:
+        messages.error(request, "Acceso restringido: Únicamente el Administrador tiene autorización para eliminar usuarios.")
+        return redirect(obtener_url_redireccion_por_rol(request.user))
+
+    usuario_obj = get_object_or_404(User, pk=pk)
+    if usuario_obj == request.user:
+        messages.warning(request, "No puedes eliminar tu propia cuenta en uso.")
+        return redirect('gestion_usuarios')
+
+    nombre_u = usuario_obj.get_full_name() or usuario_obj.username
+    usuario_obj.is_active = False
+    usuario_obj.save()
+
+    from usuarios.papelera_service import PapeleraService
+    PapeleraService.enviar_a_papelera(
+        usuario_obj,
+        usuario=request.user,
+        motivo='Desactivado y retirado desde Gestión de Usuarios hacia la Papelera',
+        modulo_origen='Gestión de Usuarios'
+    )
+
+    RegistroAuditoria.registrar(
+        usuario=request.user,
+        modulo='Usuarios',
+        accion='Desactivación / Retiro de Usuario',
+        detalles=f"El Administrador envió a la papelera y retiró el acceso al usuario {usuario_obj.username} ({nombre_u}).",
+        request=request
+    )
+    messages.success(request, f"El usuario {nombre_u} (@{usuario_obj.username}) ha sido movido a la Papelera de Reciclaje. Puede restaurarlo en cualquier momento.")
+    return redirect('gestion_usuarios')
+
+
+def obtener_usuarios_destinatarios_autorizados(user, q='', rol='', grado='', seccion=''):
+    """
+    Retorna el QuerySet de usuarios que el usuario solicitante tiene autorización de ver y contactar,
+    respetando los roles y permisos de los seis paneles de EDUNOVA y aplicando filtros opcionales.
+    """
+    perf = getattr(user, 'perfil', None)
+    rol_user = perf.rol.nombre if (perf and perf.rol) else ('Administrador' if user.is_superuser else '')
+
+    es_admin = user.is_superuser or any(r in rol_user for r in ['Admin', 'Rector', 'Secretar'])
+    es_docente = any(r in rol_user for r in ['Docente', 'Profesor', 'Instructor'])
+    es_estudiante = any(r in rol_user for r in ['Estudiante', 'Aprendiz', 'Alumno'])
+    es_familia = 'Familia' in rol_user
+
+    qs = User.objects.filter(is_active=True).exclude(pk=user.pk).select_related('perfil', 'perfil__rol')
+
+    if es_admin:
+        # Administrador, Rectoría y Secretaría tienen acceso institucional completo
+        pass
+    elif es_docente:
+        from academico.models import CargaAcademica, Ficha, Matricula
+        from usuarios.models import FamiliaAcudiente
+        fichas_ids = list(Ficha.objects.filter(instructor_lider=user).values_list('id', flat=True))
+        cargas = CargaAcademica.objects.filter(profesor=user)
+        est_ids = set()
+        for c in cargas:
+            est_ids.update(Matricula.objects.filter(
+                Q(grado_escolar=c.grado) | Q(grado_escolar__icontains=c.grado),
+                seccion=c.seccion,
+                estado_formacion='En Formacion'
+            ).values_list('aprendiz_id', flat=True))
+        est_ids.update(Matricula.objects.filter(ficha_id__in=fichas_ids).values_list('aprendiz_id', flat=True))
+
+        fam_user_ids = set()
+        familias_objs = FamiliaAcudiente.objects.filter(estudiantes__id__in=est_ids)
+        for f in familias_objs:
+            if f.documento:
+                u_f = User.objects.filter(Q(username=f.documento) | Q(email=f.email)).first()
+                if u_f: fam_user_ids.add(u_f.id)
+
+        personal_ids = set(User.objects.filter(
+            Q(perfil__rol__nombre__in=['Docente', 'Profesor', 'Instructor', 'Administrador', 'Rector', 'Secretaria', 'Secretaría']) |
+            Q(is_superuser=True)
+        ).values_list('id', flat=True))
+
+        permitidos_ids = est_ids.union(fam_user_ids).union(personal_ids)
+        qs = qs.filter(pk__in=permitidos_ids)
+
+    elif es_estudiante:
+        from academico.models import Matricula, HorarioFicha
+        matriculas = Matricula.objects.filter(aprendiz=user, estado_formacion='En Formacion')
+        grados_est = list(matriculas.values_list('grado_escolar', flat=True))
+        secciones_est = list(matriculas.values_list('seccion', flat=True))
+        fichas_ids = list(matriculas.values_list('ficha_id', flat=True))
+
+        companeros_ids = set(Matricula.objects.filter(
+            grado_escolar__in=grados_est,
+            seccion__in=secciones_est,
+            estado_formacion='En Formacion'
+        ).exclude(aprendiz=user).values_list('aprendiz_id', flat=True))
+
+        profesores_ids = set(matriculas.values_list('ficha__instructor_lider_id', flat=True))
+        profesores_ids.update(HorarioFicha.objects.filter(ficha_id__in=fichas_ids).values_list('instructor_id', flat=True))
+
+        directivos_ids = set(User.objects.filter(
+            Q(perfil__rol__nombre__in=['Administrador', 'Rector', 'Secretaria', 'Secretaría']) |
+            Q(is_superuser=True)
+        ).values_list('id', flat=True))
+
+        permitidos_ids = companeros_ids.union(profesores_ids).union(directivos_ids)
+        qs = qs.filter(pk__in=permitidos_ids)
+
+    elif es_familia:
+        from usuarios.models import FamiliaAcudiente
+        from academico.models import Matricula, HorarioFicha
+        doc_fam = perf.numero_documento if perf else user.username
+        fams = FamiliaAcudiente.objects.filter(Q(documento=doc_fam) | Q(email=user.email) | Q(estudiantes=user))
+        hijos_ids = set()
+        for f in fams:
+            hijos_ids.update(f.estudiantes.values_list('id', flat=True))
+
+        mats_hijos = Matricula.objects.filter(aprendiz_id__in=hijos_ids)
+        fichas_hijos = list(mats_hijos.values_list('ficha_id', flat=True))
+        profesores_ids = set(mats_hijos.values_list('ficha__instructor_lider_id', flat=True))
+        profesores_ids.update(HorarioFicha.objects.filter(ficha_id__in=fichas_hijos).values_list('instructor_id', flat=True))
+
+        directivos_ids = set(User.objects.filter(
+            Q(perfil__rol__nombre__in=['Administrador', 'Rector', 'Secretaria', 'Secretaría']) |
+            Q(is_superuser=True)
+        ).values_list('id', flat=True))
+
+        permitidos_ids = profesores_ids.union(directivos_ids)
+        qs = qs.filter(pk__in=permitidos_ids)
+
+    if rol:
+        if rol in ['Admin', 'Directivos']:
+            qs = qs.filter(Q(is_superuser=True) | Q(perfil__rol__nombre__in=['Administrador', 'Rector', 'Secretaria', 'Secretaría', 'Coordinador']))
+        elif rol == 'Rector':
+            qs = qs.filter(perfil__rol__nombre__icontains='Rector')
+        elif rol == 'Secretaria':
+            qs = qs.filter(perfil__rol__nombre__icontains='Secretar')
+        elif rol in ['Docente', 'Docentes', 'Instructores']:
+            qs = qs.filter(perfil__rol__nombre__in=['Docente', 'Profesor', 'Instructor', 'Docente I.E.'])
+        elif rol in ['Estudiante', 'Estudiantes', 'Aprendices']:
+            qs = qs.filter(perfil__rol__nombre__in=['Estudiante', 'Aprendiz'])
+        elif rol in ['Familia', 'Familias', 'Acudientes']:
+            qs = qs.filter(Q(perfil__rol__nombre__icontains='Familia') | Q(nucleo_familiar__isnull=False)).distinct()
+
+    if grado or seccion:
+        qs = qs.filter(perfil__rol__nombre__in=['Estudiante', 'Aprendiz'])
+        if grado:
+            qs = qs.filter(matriculas_academicas__grado_escolar=grado)
+        if seccion:
+            qs = qs.filter(matriculas_academicas__seccion=seccion)
+
+    if q:
+        qs = qs.filter(
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(username__icontains=q) |
+            Q(perfil__numero_documento__icontains=q) |
+            Q(email__icontains=q)
+        )
+
+    return qs.distinct().order_by('last_name', 'first_name')
+
+
+@login_required
+def api_destinatarios_notificaciones(request):
+    """
+    Endpoint dinámico que consulta en tiempo real los usuarios reales de la base de datos
+    según rol institucional, grado, grupo o búsqueda por nombre/documento,
+    respetando los permisos de cada panel.
+    """
+    rol_filtro = request.GET.get('rol', '').strip()
+    grado_filtro = request.GET.get('grado', '').strip()
+    seccion_filtro = request.GET.get('seccion', '').strip().upper()
+    q = request.GET.get('q', '').strip()
+
+    qs = obtener_usuarios_destinatarios_autorizados(
+        request.user, q=q, rol=rol_filtro, grado=grado_filtro, seccion=seccion_filtro
+    )[:150]
+
+    resultados = []
+    for u in qs:
+        perf = getattr(u, 'perfil', None)
+        rol_nom = perf.rol.nombre if (perf and perf.rol) else ('Administrador' if u.is_superuser else 'Usuario')
+        doc_num = perf.numero_documento if (perf and perf.numero_documento) else u.username
+
+        grado_str = ""
+        mat = u.matriculas_academicas.first() if hasattr(u, 'matriculas_academicas') else None
+        if mat and mat.grado_escolar:
+            grado_str = f"Grado {mat.grado_escolar}°{mat.seccion}"
+
+        resultados.append({
+            'id': u.id,
+            'nombre': u.get_full_name() or u.username,
+            'documento': doc_num,
+            'rol': rol_nom,
+            'grado': grado_str,
+            'email': u.email,
+        })
+
+    return JsonResponse({
+        'total': len(resultados),
+        'destinatarios': resultados
+    })
+
+
+@login_required
+def enviar_notificacion_masiva(request):
+    """
+    Envía notificaciones masivas o individuales garantizando deduplicación estricta,
+    creación de Notificacion en BD y registro de auditoría institucional.
+    """
+    if request.method != 'POST':
+        return redirect('notificaciones_lista')
+
+    asunto = request.POST.get('asunto', '').strip()
+    mensaje = request.POST.get('mensaje', '').strip()
+    tipo = request.POST.get('tipo', 'info').strip()
+    enlace = request.POST.get('enlace', '').strip() or '/notificaciones/'
+
+    destinatarios_ids_raw = request.POST.getlist('destinatarios_ids')
+    if not destinatarios_ids_raw:
+        raw_str = request.POST.get('destinatarios_ids_csv', '') or request.POST.get('destinatarios_ids', '')
+        destinatarios_ids_raw = [x.strip() for x in raw_str.split(',') if x.strip()]
+
+    roles_sel = request.POST.getlist('roles_seleccionados')
+    grado_sel = request.POST.get('grado_seleccionado', '').strip()
+    seccion_sel = request.POST.get('seccion_seleccionada', '').strip().upper()
+    enviar_todos_estudiantes = bool(request.POST.get('enviar_todos_estudiantes'))
+    enviar_todos_docentes = bool(request.POST.get('enviar_todos_docentes'))
+
+    if not asunto or not mensaje:
+        messages.error(request, 'Debe especificar el asunto y el contenido de la notificación.')
+        return redirect('notificaciones_lista')
+
+    ids_unicos = set()
+    for raw_id in destinatarios_ids_raw:
+        if str(raw_id).isdigit():
+            ids_unicos.add(int(raw_id))
+
+    if enviar_todos_estudiantes or ('Estudiante' in roles_sel):
+        est_ids = User.objects.filter(perfil__rol__nombre__in=['Estudiante', 'Aprendiz'], is_active=True).values_list('id', flat=True)
+        ids_unicos.update(est_ids)
+
+    if enviar_todos_docentes or ('Docente' in roles_sel):
+        doc_ids = User.objects.filter(perfil__rol__nombre__in=['Docente', 'Profesor', 'Instructor'], is_active=True).values_list('id', flat=True)
+        ids_unicos.update(doc_ids)
+
+    if 'Admin' in roles_sel:
+        admin_ids = User.objects.filter(Q(is_superuser=True) | Q(perfil__rol__nombre__icontains='Admin'), is_active=True).values_list('id', flat=True)
+        ids_unicos.update(admin_ids)
+
+    if 'Rector' in roles_sel:
+        rec_ids = User.objects.filter(perfil__rol__nombre__icontains='Rector', is_active=True).values_list('id', flat=True)
+        ids_unicos.update(rec_ids)
+
+    if 'Secretaria' in roles_sel:
+        sec_ids = User.objects.filter(perfil__rol__nombre__icontains='Secretar', is_active=True).values_list('id', flat=True)
+        ids_unicos.update(sec_ids)
+
+    if 'Familia' in roles_sel:
+        fam_ids = User.objects.filter(perfil__rol__nombre__icontains='Familia', is_active=True).values_list('id', flat=True)
+        ids_unicos.update(fam_ids)
+
+    if grado_sel:
+        filtro_mat = {'matriculas_academicas__grado_escolar': grado_sel, 'is_active': True}
+        if seccion_sel:
+            filtro_mat['matriculas_academicas__seccion'] = seccion_sel
+        grado_est_ids = User.objects.filter(**filtro_mat).values_list('id', flat=True)
+        ids_unicos.update(grado_est_ids)
+
+    if not ids_unicos:
+        messages.error(request, 'Debe seleccionar al menos un destinatario (por rol, grado o individualmente) para enviar la notificación.')
+        return redirect('notificaciones_lista')
+
+    notifs = [
+        Notificacion(
+            usuario_id=uid,
+            titulo=asunto,
+            mensaje=mensaje,
+            tipo=tipo,
+            enlace=enlace,
+            leida=False,
+        )
+        for uid in ids_unicos
+    ]
+    Notificacion.objects.bulk_create(notifs)
+
+    try:
+        from usuarios.models import RegistroAuditoria
+        RegistroAuditoria.registrar(
+            usuario=request.user,
+            modulo='Notificaciones',
+            accion='Envío Masivo de Notificaciones',
+            detalles=f"Se emitió la notificación '{asunto}' a {len(ids_unicos)} destinatario(s) únicos.",
+            request=request
+        )
+    except Exception:
+        pass
+
+    messages.success(request, f'¡Notificación enviada exitosamente a {len(ids_unicos)} destinatario(s) de la institución!')
+    return redirect('notificaciones_lista')
+
+
+@login_required
+@solo_coordinador_o_admin
+def rectoria_consulta_horarios(request):
+    """
+    Módulo Rectoría → Consulta de Horarios:
+    Permite a Rectoría buscar y consultar el horario escolar oficial y real
+    organizado estrictamente por grado y grupo, con asignaturas, docentes, días, horas y aulas.
+    Respeta de manera estricta los filtros:
+    - Si se consulta un grado y grupo (ej. 11° A), carga ÚNICAMENTE la información de ese grado y grupo.
+    - El Monitoreo Institucional de Clases por Hora respeta los filtros seleccionados (no mezcla grados ni grupos).
+    - Muestra los estudiantes realmente matriculados en el grupo seleccionado (sin incluir automáticamente sección A).
+    - Si no hay registros (ej. Grado 1° B), muestra un mensaje claro sin inventar información.
+    """
+    from academico.models import HorarioFicha, Matricula, CargaAcademica
+    from django.db.models import Q
+    import json
+    from datetime import datetime
+
+    q = request.GET.get('q', '').strip()
+    grado_sel = request.GET.get('grado', '').strip()
+    grupo_sel = request.GET.get('grupo', '').strip().upper()
+    estudiante_id = request.GET.get('estudiante', '').strip()
+
+    grados_disponibles = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
+    grupos_disponibles = ['A', 'B', 'C', 'D']
+
+    g_clean = ''.join(c for c in grado_sel if c.isdigit()) if grado_sel else ''
+
+    # 1. ESTUDIANTES: Filtrado estricto por búsqueda, grado y grupo
+    estudiantes_qs = User.objects.filter(
+        perfil__rol__nombre__in=['Estudiante', 'Aprendiz'],
+        is_active=True
+    ).select_related('perfil').order_by('last_name', 'first_name')
+
+    if q:
+        estudiantes_qs = estudiantes_qs.filter(
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(username__icontains=q) |
+            Q(perfil__numero_documento__icontains=q)
+        )
+
+    if g_clean:
+        estudiantes_qs = estudiantes_qs.filter(matriculas_academicas__grado_escolar=g_clean)
+
+    if grupo_sel:
+        estudiantes_qs = estudiantes_qs.filter(matriculas_academicas__seccion__iexact=grupo_sel)
+
+    total_encontrados = estudiantes_qs.distinct().count()
+    estudiantes_lista = list(estudiantes_qs.distinct()[:50])
+
+    # 2. ESTUDIANTE SELECCIONADO
+    estudiante_sel = None
+    matricula_sel = None
+
+    if estudiante_id:
+        estudiante_sel = User.objects.filter(pk=estudiante_id).select_related('perfil').first()
+        if estudiante_sel:
+            matricula_sel = Matricula.objects.filter(
+                aprendiz=estudiante_sel
+            ).select_related('ficha', 'ficha__programa').first()
+    elif estudiantes_lista:
+        estudiante_sel = estudiantes_lista[0]
+        matricula_sel = Matricula.objects.filter(
+            aprendiz=estudiante_sel
+        ).select_related('ficha', 'ficha__programa').first()
+
+    # Determinación de grado y grupo objetivos
+    if g_clean:
+        grado_objetivo = g_clean
+    elif matricula_sel and matricula_sel.grado_escolar:
+        grado_objetivo = str(matricula_sel.grado_escolar).strip()
+    else:
+        grado_objetivo = '10' if not grado_sel and not grupo_sel and not q else ''
+
+    if grupo_sel:
+        grupo_objetivo = grupo_sel
+    elif matricula_sel and matricula_sel.seccion:
+        grupo_objetivo = str(matricula_sel.seccion).strip().upper()
+    else:
+        grupo_objetivo = 'A' if not grado_sel and not grupo_sel and not q else ''
+
+    # 3. FILTRADO ESTRICTO DE BLOQUES HORARIOS
+    bloques_base = HorarioFicha.objects.filter(activo=True).select_related(
+        'instructor', 'programa', 'ficha', 'instructor__perfil'
+    )
+
+    if g_clean:
+        q_grado = (
+            Q(grado=g_clean) |
+            Q(grado=f"{g_clean}°") |
+            Q(grado=f"Grado {g_clean}") |
+            Q(grado=f"Grado {g_clean}°") |
+            Q(ficha__codigo_ficha__icontains=f"-G{g_clean}-") |
+            Q(ficha__codigo_ficha__icontains=f"-G{g_clean.zfill(2)}-") |
+            Q(ficha__codigo_ficha__startswith=f"{g_clean}-")
+        )
+        bloques_base = bloques_base.filter(q_grado)
+    elif not grado_sel and not grupo_sel and not q and grado_objetivo:
+        # Vista inicial por defecto si no hay ningún filtro
+        q_grado = (
+            Q(grado=grado_objetivo) |
+            Q(grado=f"{grado_objetivo}°") |
+            Q(grado=f"Grado {grado_objetivo}") |
+            Q(grado=f"Grado {grado_objetivo}°") |
+            Q(ficha__codigo_ficha__icontains=f"-G{grado_objetivo}-") |
+            Q(ficha__codigo_ficha__icontains=f"-G{grado_objetivo.zfill(2)}-") |
+            Q(ficha__codigo_ficha__startswith=f"{grado_objetivo}-")
+        )
+        bloques_base = bloques_base.filter(q_grado)
+
+    if grupo_sel:
+        q_grupo = (
+            Q(seccion__iexact=grupo_sel) |
+            Q(ficha__codigo_ficha__endswith=f"-{grupo_sel}") |
+            Q(ficha__codigo_ficha__endswith=grupo_sel)
+        )
+        bloques_base = bloques_base.filter(q_grupo).exclude(
+            ~Q(seccion='') & ~Q(seccion__isnull=True) & ~Q(seccion__iexact=grupo_sel)
+        )
+    elif not grado_sel and not grupo_sel and not q and grupo_objetivo:
+        bloques_base = bloques_base.filter(seccion__iexact=grupo_objetivo)
+
+    # NUNCA aplicar fallback que cargue otros grupos o grados: cargar ÚNICAMENTE la información solicitada
+    bloques_qs = bloques_base.order_by('dia', 'hora_inicio').distinct()
+
+    # 4. ESTUDIANTES REALMENTE MATRICULADOS EN EL GRUPO SELECCIONADO (Sin incluir grupo A indebidamente)
+    mats_filtro = Q()
+    if g_clean:
+        mats_filtro &= Q(grado_escolar=g_clean)
+    elif grado_objetivo:
+        mats_filtro &= Q(grado_escolar=grado_objetivo)
+
+    if grupo_sel:
+        mats_filtro &= Q(seccion__iexact=grupo_sel)
+    elif grupo_objetivo:
+        mats_filtro &= Q(seccion__iexact=grupo_objetivo)
+
+    matriculas_grupo = list(Matricula.objects.filter(
+        mats_filtro,
+        aprendiz__is_active=True
+    ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name')[:50])
+
+    estudiantes_grupo_list = [
+        {
+            'id': m.aprendiz.id,
+            'nombre': m.aprendiz.get_full_name() or m.aprendiz.username,
+            'documento': getattr(m.aprendiz.perfil, 'numero_documento', '') or m.aprendiz.username,
+            'email': m.aprendiz.email or 'Sin correo registrado',
+            'estado': m.estado_formacion or 'En Formación',
+        }
+        for m in matriculas_grupo
+    ]
+    estudiantes_grupo_json = json.dumps(estudiantes_grupo_list)
+
+    # 5. ESTRUCTURACIÓN DE HORARIOS POR DÍA
+    horario_por_dia = {}
+    dias_semana = [
+        ('Lunes', 'Lunes'),
+        ('Martes', 'Martes'),
+        ('Miercoles', 'Miércoles'),
+        ('Jueves', 'Jueves'),
+        ('Viernes', 'Viernes'),
+    ]
+
+    for dia_code, dia_nombre in dias_semana:
+        horario_por_dia[dia_code] = {
+            'nombre': dia_nombre,
+            'bloques': []
+        }
+
+    ahora_dt = datetime.now()
+    dia_actual_num = str(ahora_dt.isoweekday())
+    hora_actual_val = ahora_dt.time()
+    dia_nombres_es = {'Lunes': 'Lunes', 'Martes': 'Martes', 'Miercoles': 'Miércoles', 'Jueves': 'Jueves', 'Viernes': 'Viernes'}
+
+    total_horas_semanales = 0
+    asignaturas_unicas = set()
+    docentes_unicos = set()
+
+    for b in bloques_qs:
+        d_lower = (getattr(b, 'dia', '') or '').strip().lower()
+        key_dia = None
+        if 'lun' in d_lower or d_lower == '1': key_dia = 'Lunes'
+        elif 'mar' in d_lower or d_lower == '2': key_dia = 'Martes'
+        elif 'mie' in d_lower or 'mié' in d_lower or d_lower == '3': key_dia = 'Miercoles'
+        elif 'jue' in d_lower or d_lower == '4': key_dia = 'Jueves'
+        elif 'vie' in d_lower or d_lower == '5': key_dia = 'Viernes'
+
+        b.dia_nombre = dia_nombres_es.get(key_dia, 'Día Lectivo')
+        b.materia_titulo = (b.nombre_materia or (b.programa.denominacion if b.programa else 'Asignatura Curricular')).strip()
+        b.docente_nombre = b.instructor.get_full_name() or b.instructor.username if b.instructor else 'Docente Titular'
+        b.docente_doc = getattr(getattr(b.instructor, 'perfil', None), 'numero_documento', '') or 'Sin documento'
+        b.docente_email = b.instructor.email if b.instructor else 'docente@edunova.edu.co'
+        b.grado_texto = f"Grado {b.grado or g_clean or grado_objetivo}° - Sección {b.seccion or grupo_sel or grupo_objetivo or 'A'}"
+        b.ambiente_texto = b.ambiente or 'Aula General'
+        b.hora_inicio_str = b.hora_inicio.strftime('%I:%M %p') if b.hora_inicio else '07:00 AM'
+        b.hora_fin_str = b.hora_fin.strftime('%I:%M %p') if b.hora_fin else '08:30 AM'
+        b.es_en_curso = (str(getattr(b, 'dia', '')) == dia_actual_num and b.hora_inicio <= hora_actual_val <= b.hora_fin)
+
+        if key_dia and key_dia in horario_por_dia:
+            horario_por_dia[key_dia]['bloques'].append(b)
+            if b.programa:
+                asignaturas_unicas.add(b.programa.denominacion)
+            if b.instructor:
+                docentes_unicos.add(b.docente_nombre)
+            total_horas_semanales += 1
+
+    # 6. MONITOREO INSTITUCIONAL DE CLASES EN TIEMPO REAL (RESPETANDO ESTRICTAMENTE LOS FILTROS)
+    # Si se consulta 11° A, monitoreo_qs ÚNICAMENTE evalúa clases de Grado 11° Sección A
+    monitoreo_qs = HorarioFicha.objects.filter(activo=True).select_related(
+        'instructor', 'programa', 'ficha', 'instructor__perfil'
+    )
+    if g_clean:
+        q_mon_grado = (
+            Q(grado=g_clean) |
+            Q(grado=f"{g_clean}°") |
+            Q(grado=f"Grado {g_clean}") |
+            Q(grado=f"Grado {g_clean}°") |
+            Q(ficha__codigo_ficha__icontains=f"-G{g_clean}-") |
+            Q(ficha__codigo_ficha__icontains=f"-G{g_clean.zfill(2)}-") |
+            Q(ficha__codigo_ficha__startswith=f"{g_clean}-")
+        )
+        monitoreo_qs = monitoreo_qs.filter(q_mon_grado)
+
+    if grupo_sel:
+        q_mon_grupo = (
+            Q(seccion__iexact=grupo_sel) |
+            Q(ficha__codigo_ficha__endswith=f"-{grupo_sel}") |
+            Q(ficha__codigo_ficha__endswith=grupo_sel)
+        )
+        monitoreo_qs = monitoreo_qs.filter(q_mon_grupo).exclude(
+            ~Q(seccion='') & ~Q(seccion__isnull=True) & ~Q(seccion__iexact=grupo_sel)
+        )
+
+    nombres_dias_map = {'1': 'Lunes', '2': 'Martes', '3': 'Miércoles', '4': 'Jueves', '5': 'Viernes'}
+    dia_actual_nombre = nombres_dias_map.get(dia_actual_num, 'Fin de semana')
+
+    clases_en_curso_institucion = []
+    proximas_clases_institucion = []
+    docentes_activos_ahora = set()
+
+    for h in monitoreo_qs.order_by('hora_inicio'):
+        if str(getattr(h, 'dia', '')) == dia_actual_num:
+            if h.hora_inicio <= hora_actual_val <= h.hora_fin:
+                clases_en_curso_institucion.append(h)
+                if h.instructor:
+                    docentes_activos_ahora.add(h.instructor_id)
+            elif h.hora_inicio > hora_actual_val:
+                proximas_clases_institucion.append(h)
+
+    proximas_clases_institucion.sort(key=lambda x: x.hora_inicio)
+
+    return render(request, 'dashboards/rectoria_consulta_horarios.html', {
+        'q': q,
+        'grado_sel': grado_sel,
+        'grupo_sel': grupo_sel,
+        'grados_disponibles': grados_disponibles,
+        'grupos_disponibles': grupos_disponibles,
+        'estudiantes_lista': estudiantes_lista,
+        'estudiantes': estudiantes_lista,
+        'total_encontrados': total_encontrados,
+        'estudiante_sel': estudiante_sel,
+        'matricula_sel': matricula_sel,
+        'horario_por_dia': horario_por_dia,
+        'horarios_por_dia': horario_por_dia,
+        'total_bloques': total_horas_semanales,
+        'total_horas_semanales': total_horas_semanales,
+        'total_asignaturas': len(asignaturas_unicas),
+        'total_docentes': len(docentes_unicos),
+        'clases_en_curso_institucion': clases_en_curso_institucion,
+        'proximas_clases_institucion': proximas_clases_institucion,
+        'total_clases_en_curso': len(clases_en_curso_institucion),
+        'total_docentes_activos_ahora': len(docentes_activos_ahora),
+        'hora_actual_str': ahora_dt.strftime('%I:%M %p'),
+        'dia_actual_nombre': dia_actual_nombre,
+        'grado_objetivo': grado_objetivo,
+        'grupo_objetivo': grupo_objetivo,
+        'estudiantes_grupo': matriculas_grupo,
+        'estudiantes_grupo_json': estudiantes_grupo_json,
+    })
+
+
+@login_required
+@solo_coordinador_o_admin
+def rectoria_horario_estudiante_pdf(request, estudiante_id=None):
+    """
+    Genera el horario individual oficial del estudiante en formato PDF institucional descargable.
+    Elegante, organizado, con encabezado oficial de EduNova y tabla limpia.
+    """
+    from academico.models import HorarioFicha, Matricula
+    import io
+    from reportlab.lib.pagesizes import letter, landscape
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from django.db.models import Q
+
+    if not estudiante_id:
+        estudiante = User.objects.filter(perfil__rol__nombre__in=['Estudiante', 'Aprendiz']).select_related('perfil').first()
+        if not estudiante:
+            estudiante = request.user
+    else:
+        estudiante = get_object_or_404(User.objects.select_related('perfil'), pk=estudiante_id)
+
+    matricula = Matricula.objects.filter(aprendiz=estudiante).select_related('ficha', 'ficha__programa').first()
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(letter), rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+    styles = getSampleStyleSheet()
+
+    elements = []
+    # Header institucional
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=16, leading=20, alignment=1, textColor=colors.HexColor('#006B68'))
+    sub_style = ParagraphStyle('Sub', parent=styles['Normal'], fontSize=11, leading=14, alignment=1, textColor=colors.HexColor('#14264F'))
+    info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=9, leading=12, textColor=colors.HexColor('#14264F'))
+
+    elements.append(Paragraph("<b>INSTITUCIÓN EDUCATIVA EDUNOVA</b>", title_style))
+    elements.append(Paragraph("Rectoría Institucional · Horario Escolar Oficial 2026", sub_style))
+    elements.append(Spacer(1, 14))
+
+    doc_num = getattr(estudiante.perfil, 'numero_documento', '') or estudiante.username
+    grado_str = f"{matricula.get_grado_escolar_display()} - Grupo {matricula.seccion}" if matricula else "N/A"
+    curso_str = getattr(matricula.ficha, 'codigo_ficha', 'Jornada Ordinaria') if (matricula and matricula.ficha) else "Jornada Ordinaria"
+
+    info_data = [
+        [
+            Paragraph(f"<b>Estudiante:</b> {estudiante.get_full_name() or estudiante.username}", info_style),
+            Paragraph(f"<b>Documento:</b> {doc_num}", info_style),
+            Paragraph(f"<b>Grado / Grupo:</b> {grado_str}", info_style),
+            Paragraph(f"<b>Jornada:</b> {curso_str}", info_style),
+        ]
+    ]
+    info_table = Table(info_data, colWidths=[200, 160, 180, 180])
+    info_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#F0FDFA')),
+        ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#006B68')),
+        ('PADDING', (0,0), (-1,-1), 6),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    elements.append(info_table)
+    elements.append(Spacer(1, 14))
+
+    # Construir grilla de horario
+    dias_nombres = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
+    table_data = [['Hora / Bloque', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']]
+
+    horas_fijas = [
+        ("07:00 - 07:55", "07:00:00", "07:55:00"),
+        ("07:55 - 08:50", "07:55:00", "08:50:00"),
+        ("08:50 - 09:45", "08:50:00", "09:45:00"),
+        ("09:45 - 10:15", "RECESO", "RECESO"),
+        ("10:15 - 11:10", "10:15:00", "11:10:00"),
+        ("11:10 - 12:05", "11:10:00", "12:05:00"),
+        ("12:05 - 01:00", "12:05:00", "13:00:00"),
+    ]
+
+    cell_style = ParagraphStyle('Cell', parent=styles['Normal'], fontSize=8, leading=10, alignment=1)
+    cell_bold = ParagraphStyle('CellB', parent=styles['Normal'], fontSize=8, leading=10, alignment=1, textColor=colors.HexColor('#004D4A'))
+    receso_style = ParagraphStyle('Receso', parent=styles['Normal'], fontSize=8.5, leading=11, alignment=1, textColor=colors.HexColor('#64748B'))
+
+    ficha_id = matricula.ficha_id if matricula else None
+    grado_num = ''.join(c for c in str(getattr(matricula, 'grado_escolar', '10')) if c.isdigit()) or '10'
+    secc_num = getattr(matricula, 'seccion', 'A') or 'A'
+    filtro_pdf = (
+        Q(grado=grado_num) |
+        Q(grado=f"{grado_num}°") |
+        Q(grado=f"Grado {grado_num}") |
+        Q(ficha__codigo_ficha__iexact=f"{grado_num}-{secc_num}") |
+        Q(ficha__codigo_ficha__icontains=f"G{grado_num}-")
+    )
+    if ficha_id:
+        filtro_pdf = filtro_pdf | Q(ficha_id=ficha_id)
+    bloques_qs = HorarioFicha.objects.filter(filtro_pdf, activo=True).select_related('instructor', 'programa').distinct()
+
+    from datetime import time as dt_time
+    for h_label, h_ini, h_fin in horas_fijas:
+        if h_ini == "RECESO":
+            row = [Paragraph(f"<b>{h_label}</b>", cell_bold)]
+            for _ in dias_nombres:
+                row.append(Paragraph("<b>DESCANSO PEDAGÓGICO</b>", receso_style))
+            table_data.append(row)
+            continue
+
+        ini_t = dt_time.fromisoformat(h_ini)
+        fin_t = dt_time.fromisoformat(h_fin)
+
+        row = [Paragraph(f"<b>{h_label}</b>", cell_bold)]
+        for dia_idx, dia_nom in enumerate(dias_nombres):
+            dia_slug = ['lun', 'mar', 'mie', 'jue', 'vie'][dia_idx]
+            match = None
+            for b in bloques_qs:
+                d_lower = (getattr(b, 'dia', '') or '').strip().lower()
+                dia_num = str(dia_idx + 1)
+                if dia_slug in d_lower or d_lower == dia_num:
+                    if str(b.hora_inicio)[:5] == h_ini[:5] or (b.hora_inicio <= ini_t < b.hora_fin) or (ini_t <= b.hora_inicio < fin_t):
+                        match = b
+                        break
+
+            if match:
+                asig = match.programa.denominacion if match.programa else "Clase Curricular"
+                docente_txt = match.instructor.get_full_name() or match.instructor.username if match.instructor else "Docente Titular"
+                amb = f" ({match.ambiente})" if match.ambiente else ""
+                row.append(Paragraph(f"<b>{asig}</b><br/><font color='#475569'>{docente_txt}{amb}</font>", cell_style))
+            else:
+                row.append(Paragraph("<font color='#94A3B8'>—</font>", cell_style))
+        table_data.append(row)
+
+    schedule_table = Table(table_data, colWidths=[90, 126, 126, 126, 126, 126])
+    schedule_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#006B68')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 9),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E1')),
+        ('BACKGROUND', (0,1), (0,-1), colors.HexColor('#F8FAFC')),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    elements.append(schedule_table)
+    elements.append(Spacer(1, 18))
+
+    sign_style = ParagraphStyle('Sign', parent=styles['Normal'], fontSize=8.5, leading=11, alignment=1)
+    sign_data = [
+        [
+            Paragraph("____________________________<br/><b>María Fernanda Gómez</b><br/>Rectora Institucional", sign_style),
+            Paragraph("____________________________<br/><b>Secretaría Académica</b><br/>Validación Oficial", sign_style),
+        ]
+    ]
+    sign_table = Table(sign_data, colWidths=[360, 360])
+    elements.append(sign_table)
+
+    doc.build(elements)
+    buffer.seek(0)
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    disposicion = 'attachment' if request.GET.get('descargar') == '1' else 'inline'
+    response['Content-Disposition'] = f'{disposicion}; filename="Horario_{estudiante.username}_2026.pdf"'
+    return response
+
+
+def obtener_contexto_mensajeria_unificada(user):
+    """
+    Construye y retorna el contexto completo para el módulo unificado de mensajería directa
+    en todos los paneles (Administrador, Rectoría, Secretaría, Docente, Estudiante y Familia).
+    """
+    from django.contrib.auth.models import User
+    from academico.models import ComunicacionMensaje
+
+    perfil = getattr(user, 'perfil', None)
+    rol_nombre = perfil.rol.nombre if (perfil and perfil.rol) else ('Administrador' if getattr(user, 'is_superuser', False) else '')
+    r_lower_user = rol_nombre.lower()
+
+    recibidos = ComunicacionMensaje.objects.filter(destinatario=user, eliminado_por_destinatario=False).order_by('-fecha_envio')
+    enviados = ComunicacionMensaje.objects.filter(remitente=user, eliminado_por_remitente=False).order_by('-fecha_envio')
+    papelera = ComunicacionMensaje.objects.filter(
+        destinatario=user, eliminado_por_destinatario=True
+    ) | ComunicacionMensaje.objects.filter(
+        remitente=user, eliminado_por_remitente=True
+    )
+    papelera = papelera.order_by('-fecha_envio')
+
+    usuarios_todos = User.objects.filter(is_active=True).exclude(pk=user.pk).select_related('perfil', 'perfil__rol').order_by('perfil__rol__nombre', 'first_name', 'last_name', 'username')
+
+    directorio_usuarios = []
+    for u in usuarios_todos:
+        p = getattr(u, 'perfil', None)
+        r_nom = p.rol.nombre if (p and p.rol) else ('Administrador' if u.is_superuser else 'Usuario')
+        r_lower = r_nom.lower()
+
+        if 'rector' in r_lower:
+            badge_style = 'background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA;'
+            avatar_bg = '#DC2626'
+            cat = 'directivos'
+        elif 'admin' in r_lower:
+            badge_style = 'background: #E0E7FF; color: #3730A3; border: 1px solid #C7D2FE;'
+            avatar_bg = '#4F46E5'
+            cat = 'admin'
+        elif any(d in r_lower for d in ['docente', 'profesor', 'instructor']):
+            badge_style = 'background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0;'
+            avatar_bg = '#059669'
+            cat = 'docentes'
+        elif 'secretar' in r_lower:
+            badge_style = 'background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;'
+            avatar_bg = '#D97706'
+            cat = 'secretaria'
+        elif any(e in r_lower for e in ['estudiante', 'aprendiz', 'alumno']):
+            badge_style = 'background: #E0F2FE; color: #075985; border: 1px solid #BAE6FD;'
+            avatar_bg = '#0284C7'
+            cat = 'estudiantes'
+        elif 'familia' in r_lower:
+            badge_style = 'background: #F3E8FF; color: #6B21A8; border: 1px solid #E9D5FF;'
+            avatar_bg = '#9333EA'
+            cat = 'familias'
+        else:
+            badge_style = 'background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1;'
+            avatar_bg = '#64748B'
+            cat = 'otros'
+
+        full_name = u.get_full_name() or u.username
+        parts = full_name.split()
+        iniciales = (parts[0][0] + (parts[1][0] if len(parts) > 1 else ''))[:2].upper() if parts else u.username[:2].upper()
+
+        m = u.matriculas_academicas.first() if hasattr(u, 'matriculas_academicas') else None
+        grado_str = f"Grado {m.grado_escolar}°{m.seccion}" if (m and m.grado_escolar) else ""
+        doc_str = p.numero_documento if (p and p.numero_documento) else ""
+
+        directorio_usuarios.append({
+            'id': u.id,
+            'nombre': full_name,
+            'username': u.username,
+            'rol': r_nom,
+            'categoria': cat,
+            'badge_style': badge_style,
+            'avatar_bg': avatar_bg,
+            'iniciales': iniciales,
+            'grado': grado_str,
+            'documento': doc_str,
+        })
+
+    puede_enviar_a_todos = getattr(user, 'is_superuser', False) or any(r in r_lower_user for r in ['admin', 'rector', 'secretar', 'docente', 'profesor', 'instructor', 'coordinador'])
+
+    return {
+        'recibidos': recibidos,
+        'enviados': enviados,
+        'papelera': papelera,
+        'directorio_usuarios': directorio_usuarios,
+        'total_directorio': len(directorio_usuarios),
+        'total_recibidos': recibidos.count(),
+        'total_enviados': enviados.count(),
+        'total_papelera': papelera.count(),
+        'puede_enviar_a_todos': puede_enviar_a_todos,
+    }
 

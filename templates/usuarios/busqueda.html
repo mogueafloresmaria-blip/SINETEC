@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Búsqueda Global Administrativa · EDUNOVA SENA{% endblock %}
+{% block title %}{% if es_docente %}Búsqueda Escolar · EDUNOVA{% else %}Búsqueda Global Administrativa · EDUNOVA{% endif %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-2 px-md-3">
@@ -10,12 +10,16 @@
     <div class="sinetec-card-modern p-4 mb-4 bg-white">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div>
-                <span class="badge badge-rose-soft mb-2">Motor de Exploración EDUNOVA</span>
+                <span class="badge badge-rose-soft mb-2">{% if es_docente %}Exploración Escolar Docente{% else %}Motor de Exploración EDUNOVA{% endif %}</span>
                 <h1 class="h3 fw-bold text-dark mb-1">
-                    <i class="bi bi-search text-success me-2"></i>Búsqueda Global del Sistema
+                    <i class="bi bi-search text-success me-2"></i>{% if es_docente %}Búsqueda Escolar del Sistema{% else %}Búsqueda Global del Sistema{% endif %}
                 </h1>
                 <p class="text-muted small mb-0">
+                    {% if es_docente %}
+                    Búsqueda de funciones escolares: Estudiantes, Docentes, Asignaturas, Grados, Grupos, Evaluaciones y Actividades.
+                    {% else %}
                     Búsqueda transversal e instantánea en Instituciones, Fichas Técnicas, Aprendices, Instructores y Seguimientos.
+                    {% endif %}
                 </p>
             </div>
             {% if query %}
@@ -34,7 +38,7 @@
                     <i class="bi bi-search text-success fs-5"></i>
                 </span>
                 <input type="text" class="form-control border-0 ps-2" name="q" value="{{ query }}" 
-                       placeholder="Escribe el nombre de un colegio, código DANE, número de ficha, aprendiz o instructor..." 
+                       placeholder="{% if es_docente %}Escribe el nombre de un estudiante, docente, asignatura, grado (ej: 10, 11), grupo o evaluación...{% else %}Escribe el nombre de un colegio, código DANE, número de ficha, aprendiz o instructor...{% endif %}" 
                        autofocus style="box-shadow: none;">
                 <button class="btn btn-sinetec-rose px-4 fw-semibold" type="submit">
                     Buscar
@@ -44,7 +48,227 @@
     </div>
 
     {% if query %}
-        <!-- 5 CATEGORÍAS EN TARJETAS LIMPIAS -->
+        {% if es_docente %}
+        <!-- =========================================================================
+             RESULTADOS EXCLUSIVOS PARA PANEL DOCENTE (ENTIDADES ESCOLARES)
+             Eliminados: Contactos, Enlaces y Repositorio Documental administrativo.
+             Incluye: Estudiantes, Docentes, Asignaturas, Grados, Grupos, Evaluaciones y Actividades.
+             ========================================================================= -->
+        <div class="row g-4">
+
+            <!-- 1. ESTUDIANTES -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-people-fill text-success me-2"></i>Estudiantes ({{ estudiantes_escolares|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Alumnos</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for m in estudiantes_escolares %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs flex-shrink-0"
+                                             style="background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 100%); width: 38px; height: 38px; font-size: 0.82rem;">
+                                            {{ m.aprendiz.first_name|slice:':1'|default:'E' }}{{ m.aprendiz.last_name|slice:':1'|default:'S' }}
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block">{{ m.aprendiz.get_full_name|default:m.aprendiz.username }}</strong>
+                                            <small class="text-muted">Grado {{ m.grado_escolar }}°{{ m.seccion }} · Doc: {{ m.aprendiz.perfil.numero_documento|default:m.aprendiz.username }}</small>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'estudiante_detalle' m.aprendiz.id %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                        <i class="bi bi-eye me-1"></i> Expediente
+                                    </a>
+                                </div>
+                                <div class="small text-muted mt-2 d-flex align-items-center gap-3">
+                                    <span><i class="bi bi-envelope me-1"></i>{{ m.aprendiz.email|default:'Sin correo registrado' }}</span>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-person-slash fs-3 d-block mb-1 opacity-50"></i>
+                                Sin estudiantes que coincidan con la búsqueda.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. DOCENTES -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-person-badge-fill text-warning me-2"></i>Docentes ({{ docentes_escolares|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Profesores</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for d in docentes_escolares %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-2xs flex-shrink-0"
+                                             style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); width: 38px; height: 38px; font-size: 0.82rem;">
+                                            {{ d.first_name|slice:':1'|default:'D' }}{{ d.last_name|slice:':1'|default:'P' }}
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark d-block">{{ d.get_full_name|default:d.username }}</strong>
+                                            <small class="text-muted">{{ d.perfil.rol.nombre|default:'Docente' }} · Usuario: {{ d.username }}</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25">
+                                        Activo
+                                    </span>
+                                </div>
+                                <div class="small text-muted mt-2">
+                                    <i class="bi bi-envelope me-1"></i>{{ d.email|default:'Sin correo institucional' }}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-person-x fs-3 d-block mb-1 opacity-50"></i>
+                                Sin docentes que coincidan con la búsqueda.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. ASIGNATURAS / MATERIAS ESCOLARES -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-journal-bookmark-fill text-primary me-2"></i>Asignaturas Escolares ({{ asignaturas_escolares|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Materias</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for a in asignaturas_escolares %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">{{ a.denominacion }}</strong>
+                                    <span class="badge bg-primary bg-opacity-15 text-primary border border-primary border-opacity-25">
+                                        {{ a.tipo_programa|default:'Asignatura' }}
+                                    </span>
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    <span>Código: <code>{{ a.codigo_programa }}</code></span>
+                                </div>
+                                <div class="mt-2 d-flex gap-2">
+                                    <a href="{% url 'calificaciones_docente' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="font-size: 0.78rem;">
+                                        <i class="bi bi-grid-3x3-gap me-1"></i> Planilla de Calificaciones
+                                    </a>
+                                    <a href="{% url 'actividades_docente' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="font-size: 0.78rem;">
+                                        <i class="bi bi-journal-text me-1"></i> Actividades
+                                    </a>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-journal-x fs-3 d-block mb-1 opacity-50"></i>
+                                Sin asignaturas que coincidan con la búsqueda.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. GRADOS Y GRUPOS -->
+            <div class="col-lg-6">
+                <div class="sinetec-card-modern p-0 overflow-hidden h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-mortarboard-fill text-info me-2"></i>Grados y Grupos ({{ grados_grupos_escolares|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Cursos</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for g in grados_grupos_escolares %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-dark">Grado {{ g.grado }}°{{ g.seccion }} · {{ g.programa.denominacion }}</strong>
+                                    <span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25">
+                                        Nivel: {{ g.nivel }}
+                                    </span>
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    <i class="bi bi-person me-1"></i>Docente: {{ g.profesor.get_full_name|default:g.profesor.username }}
+                                </div>
+                                <div class="mt-2 d-flex gap-2">
+                                    <a href="{% url 'calificaciones_docente' %}?carga={{ g.id }}" class="btn btn-sm btn-outline-success rounded-pill px-3" style="font-size: 0.78rem;">
+                                        <i class="bi bi-pencil-square me-1"></i> Calificaciones
+                                    </a>
+                                    <a href="{% url 'asistencia_docente' %}?carga={{ g.id }}" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size: 0.78rem;">
+                                        <i class="bi bi-check2-circle me-1"></i> Asistencia
+                                    </a>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-collection fs-3 d-block mb-1 opacity-50"></i>
+                                Sin grados o grupos coincidentes.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. EVALUACIONES Y ACTIVIDADES -->
+            <div class="col-12">
+                <div class="sinetec-card-modern p-0 overflow-hidden">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-clipboard-check-fill text-danger me-2"></i>Evaluaciones y Actividades Escolares ({{ evaluaciones_escolares|length }})
+                        </h6>
+                        <span class="badge bg-white text-secondary border">Tareas y Pruebas</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for ev in evaluaciones_escolares %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <strong class="text-dark fs-6">{{ ev.titulo }}</strong>
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ ev.tipo_actividad }}</span>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">{{ ev.porcentaje }}%</span>
+                                            <span class="badge bg-light text-dark border">{{ ev.periodo }}</span>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <span><i class="bi bi-mortarboard me-1"></i>{{ ev.carga_academica.programa.denominacion }} (Grado {{ ev.carga_academica.grado }}°{{ ev.carga_academica.seccion }})</span> · 
+                                            <span><i class="bi bi-calendar-event me-1"></i>Fecha límite: {{ ev.fecha_limite|date:'d/m/Y H:i'|default:'Sin fecha estricta' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'revisar_entregas_tarea' ev.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="bi bi-file-earmark-check me-1"></i> Revisar Entregas
+                                        </a>
+                                        <a href="{% url 'calificaciones_docente' %}?tab=evaluacion&carga={{ ev.carga_academica.id }}&periodo={{ ev.periodo }}&evaluacion={{ ev.id }}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                            <i class="bi bi-pencil-square me-1"></i> Calificar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="p-4 text-center text-muted small">
+                                <i class="bi bi-clipboard-x fs-3 d-block mb-1 opacity-50"></i>
+                                Sin evaluaciones o actividades escolares que coincidan con los términos buscados.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {% else %}
+        <!-- =========================================================================
+             BÚSQUEDA GLOBAL ADMINISTRATIVA INTACTA (ADMIN, RECTORÍA, SECRETARÍA)
+             ========================================================================= -->
         <div class="row g-4">
 
             <!-- 1. INSTITUCIONES EDUCATIVAS -->
@@ -355,6 +579,7 @@
             </div>
 
         </div>
+        {% endif %}
 
     {% else %}
         <!-- ESTADO INICIAL VACÍO -->
@@ -362,6 +587,18 @@
             <div class="rounded-circle p-4 bg-light d-inline-flex text-success mb-3 fs-1">
                 <i class="bi bi-search"></i>
             </div>
+            {% if es_docente %}
+            <h4 class="fw-bold text-dark">Explora el entorno académico de EDUNOVA</h4>
+            <p class="text-muted mx-auto" style="max-width: 540px;">
+                Ingresa en la barra superior cualquier término: nombre de estudiante, documento, profesor, asignatura (ej: Matemáticas), grado (ej: 10, 11) o actividad escolar.
+            </p>
+            <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+                <a href="{% url 'calificaciones_docente' %}" class="btn btn-sm btn-outline-secondary rounded-3">Planilla de Calificaciones</a>
+                <a href="{% url 'actividades_docente' %}" class="btn btn-sm btn-outline-secondary rounded-3">Gestión de Actividades</a>
+                <a href="{% url 'asistencia_docente' %}" class="btn btn-sm btn-outline-secondary rounded-3">Control de Asistencia</a>
+                <a href="{% url 'instructor_dashboard' %}" class="btn btn-sm btn-outline-secondary rounded-3">Panel Principal Docente</a>
+            </div>
+            {% else %}
             <h4 class="fw-bold text-dark">Empieza a explorar el sistema EDUNOVA</h4>
             <p class="text-muted mx-auto" style="max-width: 540px;">
                 Ingresa en la barra superior cualquier término de búsqueda: nombre de institución educativa, código DANE, número de ficha, nombre de aprendiz o instructor.
@@ -372,6 +609,7 @@
                 <a href="{% url 'estudiantes_lista' %}" class="btn btn-sm btn-outline-secondary rounded-3">Nómina de Aprendices</a>
                 <a href="{% url 'instructores_lista' %}" class="btn btn-sm btn-outline-secondary rounded-3">Directorio de Profesores</a>
             </div>
+            {% endif %}
         </div>
     {% endif %}
 
