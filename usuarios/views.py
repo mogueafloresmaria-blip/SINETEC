@@ -214,7 +214,7 @@ def recuperar_contrasena(request):
     reset_directo_url = None
 
     if request.method == 'POST':
-        identificador = request.POST.get('identificador', '').strip()
+        correo_ingresado = (request.POST.get('email') or request.POST.get('identificador') or '').strip()
         nueva_clave = request.POST.get('nueva_contrasena', '').strip()
         confirmar_clave = request.POST.get('confirmar_contrasena', '').strip()
         usuario_id = request.POST.get('usuario_id', '').strip()
@@ -233,56 +233,71 @@ def recuperar_contrasena(request):
                     messages.success(request, f"¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.")
                     return redirect('login_short')
 
-        if identificador:
-            id_limpio = identificador.replace('.', '').replace('-', '').replace(' ', '')
-            
-            # Validar contra la base de datos real
-            u = User.objects.filter(
-                Q(perfil__numero_documento=identificador) |
-                Q(perfil__numero_documento=id_limpio) |
-                Q(username__iexact=identificador) |
-                Q(username__iexact=id_limpio) |
-                Q(email__iexact=identificador)
-            ).first()
+        if correo_ingresado:
+            # Buscar primero por correo electrónico exacto (case-insensitive)
+            u = User.objects.filter(email__iexact=correo_ingresado).first()
+            if not u:
+                # Soporte para búsqueda alternativa por nombre de usuario o documento
+                id_limpio = correo_ingresado.replace('.', '').replace('-', '').replace(' ', '')
+                u = User.objects.filter(
+                    Q(username__iexact=correo_ingresado) |
+                    Q(username__iexact=id_limpio) |
+                    Q(perfil__numero_documento=correo_ingresado) |
+                    Q(perfil__numero_documento=id_limpio)
+                ).first()
 
             if u:
-                uid = urlsafe_base64_encode(force_bytes(u.pk))
-                token = default_token_generator.make_token(u)
-                reset_path = reverse('confirmar_recuperacion', kwargs={'uidb64': uid, 'token': token})
-                reset_url = request.build_absolute_uri(reset_path)
-                reset_directo_url = reset_path
+                if not u.email:
+                    mensaje_error = "La cuenta localizada no tiene un correo electrónico registrado en el sistema. Por favor comunícate con la Secretaría Académica institucional para actualizar tus datos de contacto."
+                else:
+                    uid = urlsafe_base64_encode(force_bytes(u.pk))
+                    token = default_token_generator.make_token(u)
+                    reset_path = reverse('confirmar_recuperacion', kwargs={'uidb64': uid, 'token': token})
+                    reset_url = request.build_absolute_uri(reset_path)
+                    reset_directo_url = reset_path
 
-                if u.email:
+                    # Envío real mediante SMTP
+                    asunto = "Recuperación de Contraseña - EduNova"
+                    cuerpo_mensaje = (
+                        f"Hola {u.get_full_name() or u.username},\n\n"
+                        f"Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en la plataforma EduNova.\n\n"
+                        f"Para crear tu nueva contraseña, ingresa al siguiente enlace seguro:\n"
+                        f"{reset_url}\n\n"
+                        f"Este enlace es personal y tiene una validez de 24 horas.\n"
+                        f"Si no realizaste esta solicitud, puedes ignorar este mensaje de forma segura.\n\n"
+                        f"Atentamente,\n"
+                        f"Equipo de Seguridad y Soporte EduNova"
+                    )
+
                     try:
                         send_mail(
-                            'Restablecer contraseña - EduNova',
-                            f'Sigue este enlace para restablecer tu contraseña: {reset_url}',
-                            getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@edunova.edu'),
+                            asunto,
+                            cuerpo_mensaje,
+                            getattr(settings, 'DEFAULT_FROM_EMAIL', 'EDUNOVA <notificaciones@edunova.edu.co>'),
                             [u.email],
                             fail_silently=False
                         )
-                    except Exception:
-                        pass
-                    
+                    except Exception as err:
+                        import logging
+                        logging.getLogger(__name__).warning("Error enviando correo SMTP: %s", err)
+
                     # Enmascarar el correo para privacidad
                     partes = u.email.split('@')
                     user_part = partes[0]
                     domain_part = partes[1] if len(partes) > 1 else ''
                     enmascarado = f"{user_part[:2]}***@{domain_part}" if len(user_part) >= 2 else f"{user_part}***@{domain_part}"
-                    mensaje_exito = f"Se ha enviado el enlace de recuperación al correo registrado ({enmascarado}). Por favor revisa tu bandeja de entrada o spam para restablecer tu contraseña."
-                else:
-                    mensaje_exito = "Cuenta localizada con éxito en el sistema. Puedes restablecer tu contraseña a continuación."
+                    mensaje_exito = f"Hemos enviado el enlace de recuperación a tu correo electrónico registrado ({enmascarado}). Por favor revisa tu bandeja de entrada o spam para restablecer tu contraseña."
             else:
-                # Si la cuenta NO existe: NO SIMULAR EL ENVÍO
-                mensaje_error = f"No se encontró ninguna cuenta registrada con el número de identificación \"{identificador}\". Por favor verifica el número o comunícate con la Secretaría Académica."
+                mensaje_error = f"No se encontró ninguna cuenta registrada con el correo electrónico \"{correo_ingresado}\". Por favor verifica la dirección o comunícate con la Secretaría Académica."
         elif not nueva_clave:
-            mensaje_error = "Por favor ingresa tu número de identificación."
+            mensaje_error = "Por favor ingresa tu correo electrónico registrado."
 
     return render(request, 'usuarios/recuperar_contrasena.html', {
         'mensaje_exito': mensaje_exito,
         'mensaje_error': mensaje_error,
         'reset_directo_url': reset_directo_url,
-        'identificador_previo': identificador if mensaje_error else '',
+        'correo_previo': correo_ingresado if mensaje_error else '',
+        'identificador_previo': correo_ingresado if mensaje_error else '',
     })
 
 

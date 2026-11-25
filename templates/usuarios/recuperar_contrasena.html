@@ -436,7 +436,7 @@
                     {% if token_valido %}
                         Crea una nueva contraseña segura para acceder a tu cuenta institucional en EduNova.
                     {% else %}
-                        Ingresa tu número de identificación registrado para restablecer tus credenciales de acceso.
+                        Ingresa tu correo electrónico registrado para recibir el enlace de recuperación de contraseña.
                     {% endif %}
                 </p>
             </header>
@@ -574,40 +574,32 @@
                     }
                 </script>
 
-                <!-- PASO 1: Ingreso de Identificación para solicitar recuperación -->
+                <!-- PASO 1: Ingreso de Correo Electrónico para solicitar recuperación -->
                 {% else %}
                 <form method="post" autocomplete="off" id="formRecuperar">
                     {% csrf_token %}
                     
                     <div class="form-group">
-                        <label for="identificador" class="form-label">
-                            <span>Número de Identificación<span class="required">*</span></span>
-                            <span class="label-badge">Solo dígitos</span>
+                        <label for="correo" class="form-label">
+                            <span>Correo Electrónico<span class="required">*</span></span>
+                            <span class="label-badge">Registrado en EduNova</span>
                         </label>
                         <div class="input-group-custom">
-                            <i class="bi bi-person-vcard input-icon-left"></i>
+                            <i class="bi bi-envelope-at-fill input-icon-left"></i>
                             <input 
-                                id="identificador" 
-                                type="text" 
-                                name="identificador" 
+                                id="correo" 
+                                type="email" 
+                                name="email" 
                                 class="form-input" 
-                                inputmode="numeric" 
-                                pattern="[0-9]+" 
-                                maxlength="20"
-                                value="{{ identificador_previo|default:'' }}"
-                                placeholder="Ej: 1001001001" 
-                                oninput="this.value = this.value.replace(/[^0-9]/g, ''); document.getElementById('errorFormato').style.display='none';" 
-                                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.key === 'Enter'"
+                                value="{{ correo_previo|default:'' }}"
+                                placeholder="Ej: usuario@edunova.edu.co o tu-correo@gmail.com" 
                                 required 
                                 autofocus
                             >
                         </div>
                         <div class="form-hint">
                             <i class="bi bi-info-circle"></i>
-                            <span>Ingresa únicamente los dígitos de tu documento de identidad (sin puntos ni letras).</span>
-                        </div>
-                        <div id="errorFormato" style="display: none; color: #DC2626; font-size: 0.78rem; font-weight: 600; margin-top: 5px;">
-                            <i class="bi bi-exclamation-circle"></i> Solo se permiten caracteres numéricos en este campo.
+                            <span>Ingresa el correo institucional o personal asociado a tu cuenta para enviarte el enlace seguro.</span>
                         </div>
                     </div>
 
@@ -618,55 +610,12 @@
 
                 <script>
                     (function() {
-                        const inputId = document.getElementById('identificador');
-                        const errorMsg = document.getElementById('errorFormato');
                         const form = document.getElementById('formRecuperar');
-
-                        if (inputId) {
-                            // Prevenir pegar texto con caracteres no numéricos
-                            inputId.addEventListener('paste', function(e) {
-                                const pasteData = (e.clipboardData || window.clipboardData).getData('text');
-                                if (/[^0-9]/.test(pasteData)) {
-                                    e.preventDefault();
-                                    const cleaned = pasteData.replace(/[^0-9]/g, '');
-                                    document.execCommand('insertText', false, cleaned);
-                                    if (errorMsg) {
-                                        errorMsg.style.display = 'block';
-                                        setTimeout(() => { errorMsg.style.display = 'none'; }, 3500);
-                                    }
-                                }
-                            });
-
-                            // Notificar visualmente si el usuario intenta teclear letras
-                            inputId.addEventListener('keydown', function(e) {
-                                const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
-                                if (allowedKeys.includes(e.key) || e.ctrlKey || e.metaKey) {
-                                    return;
-                                }
-                                if (!/^[0-9]$/.test(e.key)) {
-                                    if (errorMsg) {
-                                        errorMsg.style.display = 'block';
-                                        setTimeout(() => { errorMsg.style.display = 'none'; }, 2500);
-                                    }
-                                }
-                            });
-                        }
-
                         if (form) {
-                            form.addEventListener('submit', function(e) {
-                                const val = (inputId.value || '').trim();
-                                if (!val || !/^[0-9]+$/.test(val)) {
-                                    e.preventDefault();
-                                    if (errorMsg) {
-                                        errorMsg.textContent = 'Por favor ingresa un número de identificación válido (solo números).';
-                                        errorMsg.style.display = 'block';
-                                    }
-                                    inputId.focus();
-                                    return false;
-                                }
+                            form.addEventListener('submit', function() {
                                 const btn = document.getElementById('btnEnviarRecuperacion');
                                 if (btn) {
-                                    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verificando datos...';
+                                    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando enlace...';
                                     btn.style.opacity = '0.85';
                                     btn.style.pointerEvents = 'none';
                                 }

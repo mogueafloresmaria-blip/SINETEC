@@ -191,7 +191,18 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'SINETEC SENA <notificaciones@sena.edu.co>')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'EDUNOVA <notificaciones@edunova.edu.co>')
+
+# ==============================================================================
+# CONFIGURACIÓN DE CORREO ELECTRÓNICO (SMTP)
+# ==============================================================================
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 't')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+PASSWORD_RESET_TIMEOUT = 86400  # 24 horas para token de recuperación
 
 # ==============================================================================
 # CONFIGURACIÓN ROBUSTA DE SESIONES Y PERSISTENCIA (RECORDAR SESIÓN)
