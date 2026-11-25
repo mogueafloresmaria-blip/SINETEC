@@ -38,162 +38,104 @@
         border-left-color: #004D4A;
     }
 
-    /* Cuadrícula y Tarjetas Visuales Académicas de Grados Escolares */
+    /* Cuadrícula y Tarjetas Visuales Académicas de Grados Escolares según Referencia Oficial */
     .grados-grid {
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 1.15rem;
     }
-    @media (max-width: 1399px) {
-        .grados-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-    }
-    @media (max-width: 991px) {
+    @media (max-width: 1200px) {
         .grados-grid {
             grid-template-columns: repeat(3, 1fr);
         }
     }
-    @media (max-width: 650px) {
+    @media (max-width: 860px) {
         .grados-grid {
             grid-template-columns: repeat(2, 1fr);
         }
     }
-    @media (max-width: 420px) {
+    @media (max-width: 520px) {
         .grados-grid {
             grid-template-columns: 1fr;
         }
     }
 
     .grado-card {
-        background: #FFFFFF;
-        border: 2px solid #E2E8F0;
-        border-radius: 18px;
-        padding: 1.25rem 0.95rem 1rem 0.95rem;
+        background: #FAF8F5;
+        border: 1.5px solid #EDE8E1;
+        border-radius: 20px;
+        padding: 1.05rem 1.45rem;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        text-align: center;
+        gap: 1rem;
         text-decoration: none;
         color: #1E293B;
-        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-        position: relative;
-        overflow: hidden;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
         user-select: none;
+        min-height: 66px;
     }
     .grado-card:hover {
-        background-color: #FAFCFC;
+        background: #F4EFEB;
         border-color: #007F7B;
-        transform: translateY(-4px);
-        box-shadow: 0 10px 24px rgba(0, 127, 123, 0.14);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 127, 123, 0.12);
         color: #004D4A;
     }
     .grado-card.active {
-        background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%);
-        border: 2.5px solid #007F7B;
-        box-shadow: 0 0 0 3.5px rgba(0, 127, 123, 0.22), 0 10px 25px rgba(0, 127, 123, 0.18);
-        transform: translateY(-3px) scale(1.02);
-    }
-    .grado-card-icon-wrap {
-        width: 46px;
-        height: 46px;
-        border-radius: 14px;
-        background: #F1F5F9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.55rem;
-        margin-bottom: 0.55rem;
-        transition: transform 0.2s ease, background 0.2s ease;
-    }
-    .grado-card:hover .grado-card-icon-wrap {
-        transform: scale(1.1);
-        background: #E6F4F3;
-    }
-    .grado-card.active .grado-card-icon-wrap {
-        background: #CCFBF1;
-        transform: scale(1.1);
-    }
-    .grado-num-grande {
-        font-size: 2.35rem;
-        font-weight: 800;
-        line-height: 1;
-        color: #0F172A;
-        letter-spacing: -1px;
-        margin-bottom: 0.25rem;
-    }
-    .grado-card.active .grado-num-grande {
+        background: #EDF7F6;
+        border: 2px solid #007F7B;
+        box-shadow: 0 0 0 3px rgba(0, 127, 123, 0.18), 0 6px 20px rgba(0, 127, 123, 0.14);
         color: #004D4A;
+        transform: translateY(-1px);
     }
-    .grado-card-nombre {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #334155;
-        margin-bottom: 0.25rem;
-        letter-spacing: -0.2px;
-    }
-    .grado-card-etapa {
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        color: #64748B;
-        background: #F8FAFC;
-        padding: 2px 8px;
-        border-radius: 10px;
-        border: 1px solid #E2E8F0;
-        margin-bottom: 0.65rem;
-    }
-    .grado-card.active .grado-card-etapa {
-        background: #E6F4F3;
-        color: #0F766E;
-        border-color: #99F6E4;
-    }
-    .grado-grupos-mini-pills {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        margin-top: auto;
-        padding-top: 0.45rem;
-        border-top: 1px dashed #E2E8F0;
-        width: 100%;
-    }
-    .grado-grupo-tag {
-        font-size: 0.72rem;
-        font-weight: 700;
-        background: #F1F5F9;
-        color: #475569;
-        width: 22px;
-        height: 22px;
-        border-radius: 6px;
+    .grado-icon-wrap {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.15s ease;
+        width: 36px;
+        height: 36px;
+        font-size: 1.65rem;
+        flex-shrink: 0;
+        line-height: 1;
     }
-    .grado-card:hover .grado-grupo-tag {
-        background: #E2E8F0;
-        color: #0F172A;
-    }
-    .grado-card.active .grado-grupo-tag {
-        background: #CCFBF1;
-        color: #0F766E;
-        font-weight: 800;
-    }
-    .badge-card-active-pill {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: #007F7B;
+    .grado-badge-abc {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: #3B82F6;
         color: #FFFFFF;
-        font-size: 0.65rem;
+        font-size: 0.85rem;
         font-weight: 800;
-        padding: 2px 7px;
-        border-radius: 10px;
-        letter-spacing: 0.3px;
-        box-shadow: 0 2px 5px rgba(0, 127, 123, 0.3);
+        letter-spacing: -0.5px;
+        box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+    }
+    .grado-badge-atom {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: #7C3AED;
+        color: #FFFFFF;
+        font-size: 1.25rem;
+        box-shadow: 0 2px 5px rgba(124, 58, 237, 0.3);
+        line-height: 1;
+    }
+    .grado-card-text {
+        font-size: 1.22rem;
+        font-weight: 700;
+        color: #0F172A;
+        letter-spacing: -0.2px;
+        white-space: nowrap;
+    }
+    .grado-card.active .grado-card-text {
+        color: #004D4A;
     }
 </style>
 
@@ -234,14 +176,14 @@
     <!-- Sección de Selección Visual de Grados Escolares (1° a 11°) según Modelo Institucional -->
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white btn-no-print filter-section">
         <!-- Encabezado con título de Grados, botón Todos los Grados y buscador de estudiante -->
-        <div class="d-flex align-items-center justify-content-between mb-3.5 pb-2 flex-wrap gap-3">
-            <div class="d-flex align-items-center gap-2.5 flex-wrap">
-                <h5 class="fw-bold mb-0 d-inline-flex align-items-center gap-2" style="color: #004D4A; font-size: 1.15rem; letter-spacing: -0.2px;">
-                    <span style="font-size: 1.45rem;">🎓</span> GRADOS (1° A 11°):
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-1 flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <h5 class="fw-bold mb-0 d-inline-flex align-items-center gap-2" style="color: #005C57; font-size: 1.18rem; letter-spacing: -0.2px;">
+                    <span style="font-size: 1.45rem;">🎓</span>GRADOS (1° A 11°):
                 </h5>
                 <a href="{% url 'rectoria_consulta_horarios' %}{% if q %}?q={{ q }}{% endif %}"
-                   class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-bold text-decoration-none transition"
-                   style="{% if not grado_sel %}background: #2563EB; color: #FFFFFF; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);{% else %}background: #EBF3FE; color: #2563EB; border: 1px solid #BFDBFE;{% endif %} font-size: 0.88rem;"
+                   class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-semibold text-decoration-none transition shadow-2xs"
+                   style="{% if not grado_sel %}background: #DCE8FA; color: #1D4ED8; font-weight: 700; border: none;{% else %}background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0;{% endif %} font-size: 0.95rem;"
                    title="Mostrar programación de todos los grados escolares">
                     Todos los Grados
                 </a>
@@ -273,177 +215,78 @@
             <!-- Grado 1° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=1{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '1' %}active{% endif %}" title="Consultar horarios de Grado 1°">
-                {% if grado_sel == '1' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">🎒</div>
-                <div class="grado-num-grande">1°</div>
-                <div class="grado-card-nombre">Grado Primero</div>
-                <span class="grado-card-etapa">Básica Primaria</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap"><span class="grado-badge-abc">abc</span></span>
+                <span class="grado-card-text">Grado 1°</span>
             </a>
 
             <!-- Grado 2° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=2{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '2' %}active{% endif %}" title="Consultar horarios de Grado 2°">
-                {% if grado_sel == '2' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">✏️</div>
-                <div class="grado-num-grande">2°</div>
-                <div class="grado-card-nombre">Grado Segundo</div>
-                <span class="grado-card-etapa">Básica Primaria</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap">✏️</span>
+                <span class="grado-card-text">Grado 2°</span>
             </a>
 
             <!-- Grado 3° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=3{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '3' %}active{% endif %}" title="Consultar horarios de Grado 3°">
-                {% if grado_sel == '3' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">📖</div>
-                <div class="grado-num-grande">3°</div>
-                <div class="grado-card-nombre">Grado Tercero</div>
-                <span class="grado-card-etapa">Básica Primaria</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap">📖</span>
+                <span class="grado-card-text">Grado 3°</span>
             </a>
 
             <!-- Grado 4° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=4{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '4' %}active{% endif %}" title="Consultar horarios de Grado 4°">
-                {% if grado_sel == '4' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">🎨</div>
-                <div class="grado-num-grande">4°</div>
-                <div class="grado-card-nombre">Grado Cuarto</div>
-                <span class="grado-card-etapa">Básica Primaria</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap">🎨</span>
+                <span class="grado-card-text">Grado 4°</span>
             </a>
 
             <!-- Grado 5° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=5{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '5' %}active{% endif %}" title="Consultar horarios de Grado 5°">
-                {% if grado_sel == '5' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">🌍</div>
-                <div class="grado-num-grande">5°</div>
-                <div class="grado-card-nombre">Grado Quinto</div>
-                <span class="grado-card-etapa">Básica Primaria</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap">🌍</span>
+                <span class="grado-card-text">Grado 5°</span>
             </a>
 
             <!-- Grado 6° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=6{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '6' %}active{% endif %}" title="Consultar horarios de Grado 6°">
-                {% if grado_sel == '6' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">🧪</div>
-                <div class="grado-num-grande">6°</div>
-                <div class="grado-card-nombre">Grado Sexto</div>
-                <span class="grado-card-etapa">Básica Secundaria</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap">🧪</span>
+                <span class="grado-card-text">Grado 6°</span>
             </a>
 
             <!-- Grado 7° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=7{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '7' %}active{% endif %}" title="Consultar horarios de Grado 7°">
-                {% if grado_sel == '7' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">📐</div>
-                <div class="grado-num-grande">7°</div>
-                <div class="grado-card-nombre">Grado Séptimo</div>
-                <span class="grado-card-etapa">Básica Secundaria</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap">📐</span>
+                <span class="grado-card-text">Grado 7°</span>
             </a>
 
             <!-- Grado 8° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=8{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '8' %}active{% endif %}" title="Consultar horarios de Grado 8°">
-                {% if grado_sel == '8' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">💻</div>
-                <div class="grado-num-grande">8°</div>
-                <div class="grado-card-nombre">Grado Octavo</div>
-                <span class="grado-card-etapa">Básica Secundaria</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap">💻</span>
+                <span class="grado-card-text">Grado 8°</span>
             </a>
 
             <!-- Grado 9° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=9{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '9' %}active{% endif %}" title="Consultar horarios de Grado 9°">
-                {% if grado_sel == '9' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">🔬</div>
-                <div class="grado-num-grande">9°</div>
-                <div class="grado-card-nombre">Grado Noveno</div>
-                <span class="grado-card-etapa">Básica Secundaria</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap">🔬</span>
+                <span class="grado-card-text">Grado 9°</span>
             </a>
 
             <!-- Grado 10° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=10{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '10' %}active{% endif %}" title="Consultar horarios de Grado 10°">
-                {% if grado_sel == '10' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">⚛️</div>
-                <div class="grado-num-grande">10°</div>
-                <div class="grado-card-nombre">Grado Décimo</div>
-                <span class="grado-card-etapa">Media Técnica</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap"><span class="grado-badge-atom">⚛️</span></span>
+                <span class="grado-card-text">Grado 10°</span>
             </a>
 
             <!-- Grado 11° -->
             <a href="{% url 'rectoria_consulta_horarios' %}?grado=11{% if grupo_sel %}&grupo={{ grupo_sel }}{% endif %}{% if q %}&q={{ q }}{% endif %}"
                class="grado-card {% if grado_sel == '11' %}active{% endif %}" title="Consultar horarios de Grado 11°">
-                {% if grado_sel == '11' %}<span class="badge-card-active-pill"><i class="bi bi-check2"></i> Activo</span>{% endif %}
-                <div class="grado-card-icon-wrap">🎓</div>
-                <div class="grado-num-grande">11°</div>
-                <div class="grado-card-nombre">Grado Undécimo</div>
-                <span class="grado-card-etapa">Media Vocacional</span>
-                <div class="grado-grupos-mini-pills">
-                    <span class="grado-grupo-tag">A</span>
-                    <span class="grado-grupo-tag">B</span>
-                    <span class="grado-grupo-tag">C</span>
-                    <span class="grado-grupo-tag">D</span>
-                </div>
+                <span class="grado-icon-wrap">🎓</span>
+                <span class="grado-card-text">Grado 11°</span>
             </a>
         </div>
 
