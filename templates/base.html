@@ -869,6 +869,9 @@
                     <a class="nav-link {% if 'matricular' in request.resolver_match.url_name or 'matriculas_lista' in request.resolver_match.url_name or 'registrar_aprendiz' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'matriculas_lista' %}" id="nav-sec-matriculas">
                         <i class="bi bi-person-plus-fill"></i> Matrículas y Cupos
                     </a>
+                    <a class="nav-link {% if 'estadisticas_poblacion' in request.resolver_match.url_name or 'poblacion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'secretaria_estadisticas_poblacion' %}" id="nav-sec-estadisticas">
+                        <i class="bi bi-graph-up-arrow"></i> Estadísticas y Población
+                    </a>
                     <a class="nav-link {% if request.resolver_match.url_name == 'programas_lista' or request.resolver_match.url_name == 'gestion_academica' %}active{% endif %}" href="{% url 'programas_lista' %}" id="nav-sec-carga">
                         <i class="bi bi-mortarboard-fill"></i> Asignación Académica
                     </a>

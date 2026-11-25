@@ -14121,3 +14121,233 @@ def obtener_contexto_mensajeria_unificada(user):
         'puede_enviar_a_todos': puede_enviar_a_todos,
     }
 
+
+@login_required
+def secretaria_estadisticas_poblacion(request):
+    """
+    Módulo de Estadísticas y Población Estudiantil para Secretaría General y Dirección:
+    - Indicadores en tiempo real de estudiantes matriculados, activos, retirados y nuevos.
+    - Desglose por grado escolar (1° a 11°) y por grupos (A, B, C y D).
+    - Gráficos estadísticos interactivos de distribución poblacional.
+    - Filtrado dinámico por año lectivo, grado, grupo y estado.
+    - Datos obtenidos directamente desde MySQL sin duplicados.
+    """
+    from datetime import timedelta
+    import json
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from academico.models import Matricula, PeriodoAcademico, Ficha
+
+    # Verificación de permisos: Secretaría, Rectoría o Administrador
+    perfil = getattr(request.user, 'perfil', None)
+    rol_nombre = perfil.rol.nombre if perfil and perfil.rol else ''
+    rol_lower = rol_nombre.lower()
+    is_admin = getattr(request.user, 'is_superuser', False) or 'admin' in rol_lower
+    is_sec = 'secretar' in rol_lower
+    is_rec = 'rector' in rol_lower
+
+    if not (is_admin or is_sec or is_rec):
+        messages.error(request, "Acceso restringido: Este módulo estadístico es exclusivo de Secretaría y Dirección.")
+        return redirect('dashboard')
+
+    # Parámetros de filtrado
+    ano_filtro = request.GET.get('ano', '').strip()
+    grado_filtro = request.GET.get('grado', '').strip()
+    grupo_filtro = request.GET.get('grupo', '').strip()
+    estado_filtro = request.GET.get('estado', '').strip()
+    q_busqueda = request.GET.get('q', '').strip()
+
+    hoy = timezone.localdate()
+    hace_60_dias = hoy - timedelta(days=60)
+
+    # Base de matrículas en el sistema
+    base_qs = Matricula.objects.select_related('aprendiz', 'aprendiz__perfil', 'ficha', 'ficha__programa')
+
+    # Años disponibles en base de datos
+    anos_matricula = list(Matricula.objects.dates('fecha_matricula', 'year'))
+    anos_disponibles = sorted(list(set([str(d.year) for d in anos_matricula] + ['2026'])), reverse=True)
+
+    # Si no se seleccionó año y hay años, por defecto mostrar el año actual o todos
+    # Permitimos filtrar por año específico o "todos"
+    filtered_qs = base_qs
+    if ano_filtro and ano_filtro.isdigit():
+        filtered_qs = filtered_qs.filter(fecha_matricula__year=int(ano_filtro))
+
+    if grado_filtro:
+        filtered_qs = filtered_qs.filter(grado_escolar=grado_filtro)
+
+    if grupo_filtro:
+        filtered_qs = filtered_qs.filter(seccion=grupo_filtro.upper())
+
+    if estado_filtro:
+        if estado_filtro.lower() == 'activos':
+            filtered_qs = filtered_qs.filter(estado_formacion='En Formacion')
+        elif estado_filtro.lower() == 'retirados':
+            filtered_qs = filtered_qs.filter(estado_formacion__in=['Desertado', 'Retirado', 'Trasladado'])
+        elif estado_filtro.lower() == 'nuevos':
+            filtered_qs = filtered_qs.filter(fecha_matricula__gte=hace_60_dias)
+        elif estado_filtro.lower() == 'certificados':
+            filtered_qs = filtered_qs.filter(estado_formacion='Certificado')
+
+    if q_busqueda:
+        filtered_qs = filtered_qs.filter(
+            Q(aprendiz__first_name__icontains=q_busqueda) |
+            Q(aprendiz__last_name__icontains=q_busqueda) |
+            Q(aprendiz__username__icontains=q_busqueda) |
+            Q(aprendiz__perfil__numero_documento__icontains=q_busqueda)
+        )
+
+    # Métricas del universo filtrado (estudiantes únicos, sin duplicar aprendiz_id)
+    total_general = filtered_qs.values('aprendiz').distinct().count()
+    total_activos = filtered_qs.filter(estado_formacion='En Formacion').values('aprendiz').distinct().count()
+    total_retirados = filtered_qs.filter(estado_formacion__in=['Desertado', 'Retirado', 'Trasladado']).values('aprendiz').distinct().count()
+    total_nuevos = filtered_qs.filter(fecha_matricula__gte=hace_60_dias).values('aprendiz').distinct().count()
+    total_certificados = filtered_qs.filter(estado_formacion='Certificado').values('aprendiz').distinct().count()
+
+    # Tasas porcentuales para las tarjetas métricas
+    pct_activos = round((total_activos / total_general * 100), 1) if total_general > 0 else 0
+    pct_retirados = round((total_retirados / total_general * 100), 1) if total_general > 0 else 0
+    pct_nuevos = round((total_nuevos / total_general * 100), 1) if total_general > 0 else 0
+
+    # Desglose por Grado (1° al 11°)
+    NOMBRES_GRADOS = {
+        '1': 'Grado Primero', '2': 'Grado Segundo', '3': 'Grado Tercero',
+        '4': 'Grado Cuarto', '5': 'Grado Quinto', '6': 'Grado Sexto',
+        '7': 'Grado Séptimo', '8': 'Grado Octavo', '9': 'Grado Noveno',
+        '10': 'Grado Décimo', '11': 'Grado Undécimo'
+    }
+    ICONS_GRADOS = {
+        '1': '🔤', '2': '✏️', '3': '📖', '4': '🎨', '5': '🌍',
+        '6': '🧪', '7': '📐', '8': '💻', '9': '🔬', '10': '⚛️', '11': '🎓'
+    }
+    ETAPAS_GRADOS = {
+        '1': 'Básica Primaria', '2': 'Básica Primaria', '3': 'Básica Primaria',
+        '4': 'Básica Primaria', '5': 'Básica Primaria', '6': 'Básica Secundaria',
+        '7': 'Básica Secundaria', '8': 'Básica Secundaria', '9': 'Básica Secundaria',
+        '10': 'Media Técnica', '11': 'Media Técnica'
+    }
+
+    # Base para los conteos por grado y grupo: respetando año lectivo si se filtró
+    scope_base = base_qs
+    if ano_filtro and ano_filtro.isdigit():
+        scope_base = scope_base.filter(fecha_matricula__year=int(ano_filtro))
+
+    grados_resumen = []
+    chart_grados_labels = []
+    chart_grados_data = []
+    chart_grados_activos = []
+    chart_grados_retirados = []
+
+    for g_num in range(1, 12):
+        g_str = str(g_num)
+        g_qs = scope_base.filter(grado_escolar=g_str)
+        t_grado = g_qs.values('aprendiz').distinct().count()
+        act_grado = g_qs.filter(estado_formacion='En Formacion').values('aprendiz').distinct().count()
+        ret_grado = g_qs.filter(estado_formacion__in=['Desertado', 'Retirado', 'Trasladado']).values('aprendiz').distinct().count()
+        nuev_grado = g_qs.filter(fecha_matricula__gte=hace_60_dias).values('aprendiz').distinct().count()
+        pct_g = round((t_grado / total_general * 100), 1) if total_general > 0 else 0
+        grupos_en_grado = list(g_qs.values_list('seccion', flat=True).distinct().order_by('seccion'))
+
+        grados_resumen.append({
+            'num': g_str,
+            'nombre': NOMBRES_GRADOS.get(g_str, f'Grado {g_str}°'),
+            'icon': ICONS_GRADOS.get(g_str, '📚'),
+            'etapa': ETAPAS_GRADOS.get(g_str, 'Educación Formal'),
+            'total': t_grado,
+            'activos': act_grado,
+            'retirados': ret_grado,
+            'nuevos': nuev_grado,
+            'porcentaje': pct_g,
+            'grupos': grupos_en_grado,
+            'es_activo': (grado_filtro == g_str),
+        })
+
+        chart_grados_labels.append(f"{g_str}°")
+        chart_grados_data.append(t_grado)
+        chart_grados_activos.append(act_grado)
+        chart_grados_retirados.append(ret_grado)
+
+    # Desglose por Grupos Institucionales (A, B, C y D)
+    grupos_resumen = []
+    chart_grupos_labels = []
+    chart_grupos_data = []
+
+    for grp in ['A', 'B', 'C', 'D']:
+        grp_qs = scope_base.filter(seccion=grp)
+        t_grp = grp_qs.values('aprendiz').distinct().count()
+        act_grp = grp_qs.filter(estado_formacion='En Formacion').values('aprendiz').distinct().count()
+        ret_grp = grp_qs.filter(estado_formacion__in=['Desertado', 'Retirado', 'Trasladado']).values('aprendiz').distinct().count()
+        pct_grp = round((t_grp / total_general * 100), 1) if total_general > 0 else 0
+        grados_en_grp = list(grp_qs.values_list('grado_escolar', flat=True).distinct().order_by('grado_escolar'))
+
+        grupos_resumen.append({
+            'letra': grp,
+            'total': t_grp,
+            'activos': act_grp,
+            'retirados': ret_grp,
+            'porcentaje': pct_grp,
+            'grados': grados_en_grp,
+            'es_activo': (grupo_filtro == grp),
+        })
+
+        chart_grupos_labels.append(f"Grupo {grp}")
+        chart_grupos_data.append(t_grp)
+
+    # Distribución por Ciclos Educativos
+    t_primaria = scope_base.filter(grado_escolar__in=['1', '2', '3', '4', '5']).values('aprendiz').distinct().count()
+    t_secundaria = scope_base.filter(grado_escolar__in=['6', '7', '8', '9']).values('aprendiz').distinct().count()
+    t_media = scope_base.filter(grado_escolar__in=['10', '11']).values('aprendiz').distinct().count()
+
+    chart_ciclos_labels = ['Básica Primaria (1° a 5°)', 'Básica Secundaria (6° a 9°)', 'Media Técnica (10° y 11°)']
+    chart_ciclos_data = [t_primaria, t_secundaria, t_media]
+
+    # Datos para gráfico de Estados
+    chart_estados_labels = ['Estudiantes Activos', 'Estudiantes Retirados / Trasladados', 'Matrículas Nuevas']
+    chart_estados_data = [total_activos, total_retirados, total_nuevos]
+
+    # Paginación del listado detallado de estudiantes
+    estudiantes_ordenados = filtered_qs.order_by('grado_escolar', 'seccion', 'aprendiz__last_name', 'aprendiz__first_name')
+    paginator = Paginator(estudiantes_ordenados, 25)
+    page_num = request.GET.get('page', 1)
+    try:
+        estudiantes_pagina = paginator.page(page_num)
+    except (PageNotAnInteger, EmptyPage):
+        estudiantes_pagina = paginator.page(1)
+
+    context = {
+        'total_general': total_general,
+        'total_activos': total_activos,
+        'total_retirados': total_retirados,
+        'total_nuevos': total_nuevos,
+        'total_certificados': total_certificados,
+        'pct_activos': pct_activos,
+        'pct_retirados': pct_retirados,
+        'pct_nuevos': pct_nuevos,
+        'grados_resumen': grados_resumen,
+        'grupos_resumen': grupos_resumen,
+        'anos_disponibles': anos_disponibles,
+        'ano_filtro': ano_filtro,
+        'grado_filtro': grado_filtro,
+        'grupo_filtro': grupo_filtro,
+        'estado_filtro': estado_filtro,
+        'q_busqueda': q_busqueda,
+        'estudiantes_pagina': estudiantes_pagina,
+        't_primaria': t_primaria,
+        't_secundaria': t_secundaria,
+        't_media': t_media,
+        'hoy': hoy,
+        # JSON para los gráficos Chart.js
+        'chart_grados_labels_json': json.dumps(chart_grados_labels),
+        'chart_grados_data_json': json.dumps(chart_grados_data),
+        'chart_grados_activos_json': json.dumps(chart_grados_activos),
+        'chart_grados_retirados_json': json.dumps(chart_grados_retirados),
+        'chart_grupos_labels_json': json.dumps(chart_grupos_labels),
+        'chart_grupos_data_json': json.dumps(chart_grupos_data),
+        'chart_estados_labels_json': json.dumps(chart_estados_labels),
+        'chart_estados_data_json': json.dumps(chart_estados_data),
+        'chart_ciclos_labels_json': json.dumps(chart_ciclos_labels),
+        'chart_ciclos_data_json': json.dumps(chart_ciclos_data),
+    }
+
+    return render(request, 'dashboards/secretaria_estadisticas_poblacion.html', context)
+
+
