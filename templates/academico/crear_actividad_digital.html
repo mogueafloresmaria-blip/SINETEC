@@ -149,8 +149,73 @@
                         <!-- Instrucciones -->
                         <div class="col-12">
                             <label class="form-label small fw-bold text-dark mb-1">Instrucciones y Criterios para el Estudiante *</label>
-                            <textarea name="instrucciones" id="input_instrucciones" rows="5" class="form-control rounded-4 px-3.5 py-2.5" 
+                            <textarea name="instrucciones" id="input_instrucciones" rows="4" class="form-control rounded-4 px-3.5 py-2.5" 
                                       style="border-color: var(--color-acento);" placeholder="Escriba las instrucciones paso a paso que el estudiante debe seguir para resolver y entregar la actividad..." required></textarea>
+                        </div>
+
+                        <!-- Recursos Complementarios -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark mb-1">Recursos, Enlaces o Materiales Complementarios (Opcional)</label>
+                            <textarea name="recursos_complementarios" id="input_recursos_complementarios" rows="2" class="form-control rounded-4 px-3.5 py-2" 
+                                      style="border-color: var(--color-acento);" placeholder="Enlaces web recomendados, bibliografía o recursos adicionales de consulta..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: ACTIVIDAD DIGITAL INTERACTIVA (CUESTIONARIO Y EJERCICIOS EN LÍNEA) -->
+                <div class="card border rounded-4 p-4 bg-white shadow-2xs mb-4" style="border-color: var(--color-acento) !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2" style="border-color: var(--color-acento) !important;">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold small" 
+                                  style="width: 28px; height: 28px; background: #0284c7; font-size: 0.82rem;">3</span>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Contenido Interactivo Digital (En Plataforma)</h5>
+                                <small class="text-muted">Cuestionarios, ejercicios y actividades que el estudiante desarrolla directamente en EDUNOVA</small>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" id="check_es_interactiva" name="es_interactiva" value="1" onchange="toggleContenidoInteractivo(this.checked);" style="cursor: pointer; width: 44px; height: 22px;">
+                            <label class="form-check-label fw-bold text-dark small ms-1" for="check_es_interactiva" style="cursor: pointer;">
+                                Habilitar Actividad Interactiva
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor del Constructor de Preguntas Interactivas -->
+                    <div id="box_constructor_interactivo" style="display: none;">
+                        <div class="alert alert-info border-0 rounded-3 p-3 mb-3 d-flex align-items-center gap-2 text-dark small" style="background: #EBF8F7; border-left: 4px solid #007F7B !important;">
+                            <i class="bi bi-info-circle-fill text-primary fs-5" style="color: #007F7B !important;"></i>
+                            <div>
+                                <strong>Interactividad EDUNOVA:</strong> Agrega preguntas de selección múltiple, verdadero o falso, respuesta corta y ejercicios prácticos. El sistema registrará cuándo el estudiante abre la actividad, el tiempo y sus respuestas.
+                            </div>
+                        </div>
+
+                        <!-- Lista de preguntas creadas dinámicamente -->
+                        <div id="contenedor_preguntas_lista" class="d-flex flex-column gap-3 mb-3">
+                            <!-- Las preguntas se renderizan vía JS -->
+                        </div>
+
+                        <input type="hidden" name="preguntas_json" id="input_preguntas_json" value="[]">
+
+                        <!-- Botones de Acción para Añadir Preguntas -->
+                        <div class="p-3 rounded-4 border bg-light d-flex flex-wrap align-items-center justify-content-between gap-2" style="border-color: var(--color-acento) !important;">
+                            <div class="small text-muted">
+                                <i class="bi bi-list-check me-1"></i> <span id="contador_preguntas_txt">0 preguntas configuradas</span> · Total Puntos: <strong id="total_puntos_txt" class="text-primary">0.0</strong> / 5.0
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-white border rounded-pill px-3 py-1.5 fw-bold shadow-2xs text-dark" onclick="agregarPregunta('opcion_multiple');">
+                                    <i class="bi bi-ui-radios text-primary me-1"></i> + Selección Múltiple
+                                </button>
+                                <button type="button" class="btn btn-sm btn-white border rounded-pill px-3 py-1.5 fw-bold shadow-2xs text-dark" onclick="agregarPregunta('verdadero_falso');">
+                                    <i class="bi bi-check2-circle text-success me-1"></i> + Verdadero / Falso
+                                </button>
+                                <button type="button" class="btn btn-sm btn-white border rounded-pill px-3 py-1.5 fw-bold shadow-2xs text-dark" onclick="agregarPregunta('respuesta_corta');">
+                                    <i class="bi bi-fonts text-info me-1"></i> + Respuesta Corta
+                                </button>
+                                <button type="button" class="btn btn-sm btn-white border rounded-pill px-3 py-1.5 fw-bold shadow-2xs text-dark" onclick="agregarPregunta('ejercicio');">
+                                    <i class="bi bi-pencil-square text-warning me-1"></i> + Ejercicio / Práctica
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -382,5 +447,254 @@ function filtrarEstudiantesTexto() {
         }
     }
 }
+
+/* =========================================================================
+   CONSTRUCTOR DE ACTIVIDADES DIGITALES INTERACTIVAS
+   Soporte para Selección Múltiple, V/F, Respuesta Corta y Ejercicios
+   ========================================================================= */
+let preguntasInteractivas = [];
+let contadorIdPregunta = 1;
+
+function toggleContenidoInteractivo(activo) {
+    const box = document.getElementById('box_constructor_interactivo');
+    if (box) {
+        box.style.display = activo ? 'block' : 'none';
+    }
+    if (activo && preguntasInteractivas.length === 0) {
+        // Añadir una pregunta inicial por defecto
+        agregarPregunta('opcion_multiple');
+    }
+}
+
+function agregarPregunta(tipo) {
+    const id = contadorIdPregunta++;
+    let nuevaP = {
+        id: id,
+        tipo: tipo,
+        enunciado: '',
+        puntos: 1.0,
+        explicacion: '',
+        opciones: ['Opción A', 'Opción B', 'Opción C', 'Opción D'],
+        respuesta_correcta: 'Opción A',
+        respuestas_aceptadas: ''
+    };
+    if (tipo === 'verdadero_falso') {
+        nuevaP.opciones = ['Verdadero', 'Falso'];
+        nuevaP.respuesta_correcta = 'Verdadero';
+    } else if (tipo === 'respuesta_corta') {
+        nuevaP.opciones = [];
+        nuevaP.respuestas_aceptadas = '';
+        nuevaP.respuesta_correcta = '';
+    } else if (tipo === 'ejercicio') {
+        nuevaP.opciones = [];
+        nuevaP.respuesta_correcta = '';
+        nuevaP.puntos = 2.0;
+    }
+    preguntasInteractivas.push(nuevaP);
+    renderizarPreguntasUI();
+}
+
+function eliminarPregunta(id) {
+    preguntasInteractivas = preguntasInteractivas.filter(p => p.id !== id);
+    renderizarPreguntasUI();
+}
+
+function renderizarPreguntasUI() {
+    const contenedor = document.getElementById('contenedor_preguntas_lista');
+    if (!contenedor) return;
+
+    if (preguntasInteractivas.length === 0) {
+        contenedor.innerHTML = `
+            <div class="text-center py-4 border rounded-3 bg-white text-muted small">
+                <i class="bi bi-patch-question fs-3 d-block mb-1 text-secondary"></i>
+                No hay preguntas agregadas aún. Selecciona un tipo de pregunta en los botones inferiores.
+            </div>
+        `;
+        actualizarTotalesPreguntas();
+        return;
+    }
+
+    let html = '';
+    preguntasInteractivas.forEach((p, idx) => {
+        let badgeTipo = '';
+        let contenidoEspecifico = '';
+
+        if (p.tipo === 'opcion_multiple') {
+            badgeTipo = '<span class="badge bg-primary rounded-pill px-2.5 py-1">Selección Múltiple</span>';
+            contenidoEspecifico = `
+                <div class="mt-2.5 space-y-2">
+                    <label class="form-label small fw-bold text-dark mb-1">Opciones y Respuesta Correcta:</label>
+                    <div class="row g-2">
+                        ${p.opciones.map((opc, oIdx) => `
+                            <div class="col-md-6">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text bg-light">
+                                        <input class="form-check-input mt-0" type="radio" name="correcta_${p.id}" 
+                                               value="${oIdx}" ${p.respuesta_correcta === opc ? 'checked' : ''} 
+                                               onchange="actualizarRespuestaCorrecta(${p.id}, this.value)" title="Marcar como respuesta correcta">
+                                    </div>
+                                    <input type="text" class="form-control" value="${opc}" placeholder="Opción ${oIdx+1}" 
+                                           onchange="actualizarTextoOpcion(${p.id}, ${oIdx}, this.value)">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <small class="text-muted d-block mt-1"><i class="bi bi-check-circle text-success me-1"></i>Selecciona el botón circular de la opción que sea correcta.</small>
+                </div>
+            `;
+        } else if (p.tipo === 'verdadero_falso') {
+            badgeTipo = '<span class="badge bg-success rounded-pill px-2.5 py-1">Verdadero / Falso</span>';
+            contenidoEspecifico = `
+                <div class="mt-2.5">
+                    <label class="form-label small fw-bold text-dark mb-1">Respuesta Correcta:</label>
+                    <div class="d-flex gap-3">
+                        <label class="d-flex align-items-center gap-1.5 p-2 rounded-3 border bg-white cursor-pointer">
+                            <input type="radio" name="vf_${p.id}" value="Verdadero" ${p.respuesta_correcta === 'Verdadero' ? 'checked' : ''} onchange="actualizarRespuestaCorrectaVF(${p.id}, 'Verdadero')">
+                            <span class="small fw-bold text-success">Verdadero</span>
+                        </label>
+                        <label class="d-flex align-items-center gap-1.5 p-2 rounded-3 border bg-white cursor-pointer">
+                            <input type="radio" name="vf_${p.id}" value="Falso" ${p.respuesta_correcta === 'Falso' ? 'checked' : ''} onchange="actualizarRespuestaCorrectaVF(${p.id}, 'Falso')">
+                            <span class="small fw-bold text-danger">Falso</span>
+                        </label>
+                    </div>
+                </div>
+            `;
+        } else if (p.tipo === 'respuesta_corta') {
+            badgeTipo = '<span class="badge bg-info text-white rounded-pill px-2.5 py-1">Respuesta Corta</span>';
+            contenidoEspecifico = `
+                <div class="mt-2.5">
+                    <label class="form-label small fw-bold text-dark mb-1">Respuesta(s) de texto aceptadas como correctas (separadas por comas) *</label>
+                    <input type="text" class="form-control form-control-sm rounded-3" 
+                           value="${p.respuestas_aceptadas || ''}" 
+                           placeholder="Ej: Bogotá, Bogota, Bogotá D.C." 
+                           onchange="actualizarRespuestasAceptadas(${p.id}, this.value)">
+                    <small class="text-muted d-block mt-1">El sistema auto-calificará si el estudiante escribe cualquiera de estas opciones (sin importar mayúsculas/minúsculas).</small>
+                </div>
+            `;
+        } else if (p.tipo === 'ejercicio') {
+            badgeTipo = '<span class="badge bg-warning text-dark rounded-pill px-2.5 py-1">Ejercicio / Desarrollo Práctico</span>';
+            contenidoEspecifico = `
+                <div class="mt-2.5">
+                    <label class="form-label small fw-bold text-dark mb-1">Criterio de Evaluación / Rúbrica de Corrección *</label>
+                    <textarea class="form-control form-control-sm rounded-3" rows="2" 
+                              placeholder="Describe la solución esperada o procedimiento para que califiques la entrega..." 
+                              onchange="actualizarExplicacion(${p.id}, this.value)">${p.explicacion || ''}</textarea>
+                    <small class="text-muted d-block mt-1">El estudiante responderá con desarrollo abierto o procedimiento y tú podrás calificarlo cualitativa y cuantitativamente.</small>
+                </div>
+            `;
+        }
+
+        html += `
+            <div class="card border rounded-3 p-3 bg-white shadow-2xs position-relative" id="card_pregunta_${p.id}">
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold text-dark small">#${idx + 1}</span>
+                        ${badgeTipo}
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-1">
+                            <label class="small text-muted mb-0">Puntos:</label>
+                            <input type="number" step="0.5" min="0.1" max="5.0" class="form-control form-control-sm text-center fw-bold" 
+                                   style="width: 65px;" value="${p.puntos}" onchange="actualizarPuntos(${p.id}, this.value)">
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-circle p-1" onclick="eliminarPregunta(${p.id})" title="Eliminar pregunta">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label small fw-bold text-dark mb-1">Enunciado / Pregunta *</label>
+                    <textarea class="form-control form-control-sm rounded-3" rows="2" 
+                              placeholder="Escribe la pregunta o instrucción del ejercicio..." 
+                              onchange="actualizarEnunciado(${p.id}, this.value)">${p.enunciado || ''}</textarea>
+                </div>
+
+                ${contenidoEspecifico}
+            </div>
+        `;
+    });
+
+    contenedor.innerHTML = html;
+    actualizarTotalesPreguntas();
+}
+
+function actualizarEnunciado(id, val) {
+    const p = preguntasInteractivas.find(x => x.id === id);
+    if (p) p.enunciado = val;
+}
+function actualizarPuntos(id, val) {
+    const p = preguntasInteractivas.find(x => x.id === id);
+    if (p) p.puntos = parseFloat(val) || 1.0;
+    actualizarTotalesPreguntas();
+}
+function actualizarExplicacion(id, val) {
+    const p = preguntasInteractivas.find(x => x.id === id);
+    if (p) p.explicacion = val;
+}
+function actualizarTextoOpcion(id, idxOpcion, val) {
+    const p = preguntasInteractivas.find(x => x.id === id);
+    if (p && p.opciones && p.opciones[idxOpcion] !== undefined) {
+        const vieja = p.opciones[idxOpcion];
+        p.opciones[idxOpcion] = val;
+        if (p.respuesta_correcta === vieja) {
+            p.respuesta_correcta = val;
+        }
+    }
+}
+function actualizarRespuestaCorrecta(id, idxOpcion) {
+    const p = preguntasInteractivas.find(x => x.id === id);
+    if (p && p.opciones && p.opciones[idxOpcion]) {
+        p.respuesta_correcta = p.opciones[idxOpcion];
+    }
+}
+function actualizarRespuestaCorrectaVF(id, val) {
+    const p = preguntasInteractivas.find(x => x.id === id);
+    if (p) p.respuesta_correcta = val;
+}
+function actualizarRespuestasAceptadas(id, val) {
+    const p = preguntasInteractivas.find(x => x.id === id);
+    if (p) {
+        p.respuestas_aceptadas = val;
+        p.respuesta_correcta = val.split(',')[0].trim();
+    }
+}
+
+function actualizarTotalesPreguntas() {
+    const count = preguntasInteractivas.length;
+    let sumPuntos = 0;
+    preguntasInteractivas.forEach(p => sumPuntos += (parseFloat(p.puntos) || 0));
+    sumPuntos = Math.round(sumPuntos * 10) / 10;
+
+    const elCount = document.getElementById('contador_preguntas_txt');
+    const elPuntos = document.getElementById('total_puntos_txt');
+    if (elCount) elCount.innerText = `${count} pregunta${count === 1 ? '' : 's'} configurada${count === 1 ? '' : 's'}`;
+    if (elPuntos) elPuntos.innerText = sumPuntos.toFixed(1);
+
+    // Guardar en input serializado
+    const inputJson = document.getElementById('input_preguntas_json');
+    if (inputJson) {
+        inputJson.value = JSON.stringify(preguntasInteractivas);
+    }
+}
+
+// Hook al submit del formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formCrearActividad');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const checkInteractiva = document.getElementById('check_es_interactiva');
+            if (checkInteractiva && checkInteractiva.checked) {
+                actualizarTotalesPreguntas();
+                if (preguntasInteractivas.length === 0) {
+                    alert('Has habilitado la actividad interactiva pero no has agregado preguntas. Agrega al menos una pregunta o deshabilita la opción.');
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+    }
+});
+
 </script>
 {% endblock %}

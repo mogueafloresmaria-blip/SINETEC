@@ -202,102 +202,71 @@ def custom_logout_view(request):
 @csrf_exempt
 def recuperar_contrasena(request):
     """
-    Portal oficial de recuperación de credenciales EduNova.
-    Envía enlace seguro de recuperación por token al correo electrónico registrado
-    y genera acceso directo para entornos de evaluación y soporte institucional.
+    Portal oficial y seguro de recuperación de credenciales EduNova (Cumplimiento OWASP):
+    - Requiere correo electrónico.
+    - No revela la existencia o inexistencia de cuentas en el sistema (Anti-enumeración).
+    - Genera token criptográfico de un solo uso con caducidad (24 horas).
+    - Envía enlace seguro únicamente al correo registrado.
+    - No permite restablecimiento directo sin validación previa del token recibido por correo.
     """
     if request.user.is_authenticated:
         return redirect('dashboard')
 
     mensaje_exito = None
     mensaje_error = None
-    reset_directo_url = None
 
     if request.method == 'POST':
-        correo_ingresado = (request.POST.get('email') or request.POST.get('identificador') or '').strip()
-        nueva_clave = request.POST.get('nueva_contrasena', '').strip()
-        confirmar_clave = request.POST.get('confirmar_contrasena', '').strip()
-        usuario_id = request.POST.get('usuario_id', '').strip()
-
-        # Soporte para cambio directo autenticado por ID solo si no hay proceso de token pendiente
-        if nueva_clave and usuario_id:
-            if nueva_clave != confirmar_clave:
-                mensaje_error = "Las contraseñas no coinciden. Por favor verifica e intenta nuevamente."
-            elif len(nueva_clave) < 4:
-                mensaje_error = "La nueva contraseña debe tener como mínimo 4 caracteres."
-            else:
-                user_obj = User.objects.filter(pk=usuario_id).first()
-                if user_obj and (settings.DEBUG and getattr(user_obj, 'username', '') in ['docente', 'est1']):
-                    user_obj.set_password(nueva_clave)
-                    user_obj.save()
-                    messages.success(request, f"¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.")
-                    return redirect('login_short')
+        correo_ingresado = (request.POST.get('email') or request.POST.get('identificador') or '').strip().lower()
 
         if correo_ingresado:
-            # Buscar primero por correo electrónico exacto (case-insensitive)
+            # Buscar cuenta exclusivamente por correo electrónico registrado
             u = User.objects.filter(email__iexact=correo_ingresado).first()
-            if not u:
-                # Soporte para búsqueda alternativa por nombre de usuario o documento
-                id_limpio = correo_ingresado.replace('.', '').replace('-', '').replace(' ', '')
-                u = User.objects.filter(
-                    Q(username__iexact=correo_ingresado) |
-                    Q(username__iexact=id_limpio) |
-                    Q(perfil__numero_documento=correo_ingresado) |
-                    Q(perfil__numero_documento=id_limpio)
-                ).first()
 
-            if u:
-                if not u.email:
-                    mensaje_error = "La cuenta localizada no tiene un correo electrónico registrado en el sistema. Por favor comunícate con la Secretaría Académica institucional para actualizar tus datos de contacto."
-                else:
-                    uid = urlsafe_base64_encode(force_bytes(u.pk))
-                    token = default_token_generator.make_token(u)
-                    reset_path = reverse('confirmar_recuperacion', kwargs={'uidb64': uid, 'token': token})
-                    reset_url = request.build_absolute_uri(reset_path)
-                    reset_directo_url = reset_path
+            # Mensaje genérico de seguridad (Anti-enumeración OWASP):
+            # Nunca confirma ni desmiente si la cuenta o correo existe en el sistema.
+            mensaje_exito = (
+                "Si el correo electrónico ingresado coincide con una cuenta activa en la plataforma, "
+                "hemos enviado un enlace seguro para restablecer tu contraseña. "
+                "Por favor revisa tu bandeja de entrada o carpeta de spam."
+            )
 
-                    # Envío real mediante SMTP
-                    asunto = "Recuperación de Contraseña - EduNova"
-                    cuerpo_mensaje = (
-                        f"Hola {u.get_full_name() or u.username},\n\n"
-                        f"Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en la plataforma EduNova.\n\n"
-                        f"Para crear tu nueva contraseña, ingresa al siguiente enlace seguro:\n"
-                        f"{reset_url}\n\n"
-                        f"Este enlace es personal y tiene una validez de 24 horas.\n"
-                        f"Si no realizaste esta solicitud, puedes ignorar este mensaje de forma segura.\n\n"
-                        f"Atentamente,\n"
-                        f"Equipo de Seguridad y Soporte EduNova"
+            if u and u.email and u.is_active:
+                uid = urlsafe_base64_encode(force_bytes(u.pk))
+                token = default_token_generator.make_token(u)
+                reset_path = reverse('confirmar_recuperacion', kwargs={'uidb64': uid, 'token': token})
+                reset_url = request.build_absolute_uri(reset_path)
+
+                # Envío real mediante SMTP institucional
+                asunto = "Recuperación de Contraseña - EduNova"
+                cuerpo_mensaje = (
+                    f"Hola {u.get_full_name() or u.username},\n\n"
+                    f"Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en la plataforma EduNova.\n\n"
+                    f"Para crear tu nueva contraseña, ingresa al siguiente enlace seguro desde tu celular o computador:\n"
+                    f"{reset_url}\n\n"
+                    f"Este enlace es personal, confidencial, de un solo uso y vence en 24 horas.\n"
+                    f"Si no realizaste esta solicitud, puedes ignorar este mensaje de forma segura.\n\n"
+                    f"Atentamente,\n"
+                    f"Equipo de Seguridad y Soporte Institucional EduNova"
+                )
+
+                try:
+                    send_mail(
+                        asunto,
+                        cuerpo_mensaje,
+                        getattr(settings, 'DEFAULT_FROM_EMAIL', 'EDUNOVA <notificaciones@edunova.edu.co>'),
+                        [u.email],
+                        fail_silently=False
                     )
-
-                    try:
-                        send_mail(
-                            asunto,
-                            cuerpo_mensaje,
-                            getattr(settings, 'DEFAULT_FROM_EMAIL', 'EDUNOVA <notificaciones@edunova.edu.co>'),
-                            [u.email],
-                            fail_silently=False
-                        )
-                    except Exception as err:
-                        import logging
-                        logging.getLogger(__name__).warning("Error enviando correo SMTP: %s", err)
-
-                    # Enmascarar el correo para privacidad
-                    partes = u.email.split('@')
-                    user_part = partes[0]
-                    domain_part = partes[1] if len(partes) > 1 else ''
-                    enmascarado = f"{user_part[:2]}***@{domain_part}" if len(user_part) >= 2 else f"{user_part}***@{domain_part}"
-                    mensaje_exito = f"Hemos enviado el enlace de recuperación a tu correo electrónico registrado ({enmascarado}). Por favor revisa tu bandeja de entrada o spam para restablecer tu contraseña."
-            else:
-                mensaje_error = f"No se encontró ninguna cuenta registrada con el correo electrónico \"{correo_ingresado}\". Por favor verifica la dirección o comunícate con la Secretaría Académica."
-        elif not nueva_clave:
+                except Exception as err:
+                    import logging
+                    logging.getLogger(__name__).warning("Error enviando correo SMTP: %s", err)
+        else:
             mensaje_error = "Por favor ingresa tu correo electrónico registrado."
 
     return render(request, 'usuarios/recuperar_contrasena.html', {
         'mensaje_exito': mensaje_exito,
         'mensaje_error': mensaje_error,
-        'reset_directo_url': reset_directo_url,
         'correo_previo': correo_ingresado if mensaje_error else '',
-        'identificador_previo': correo_ingresado if mensaje_error else '',
     })
 
 
@@ -2225,6 +2194,27 @@ def mensajeria(request):
                 adjunto_pdf=adjunto_pdf
             )
             # Notificación y auditoría
+            try:
+                from seguimiento.servicios_notificacion import notificar_usuarios_masivo
+                dest_users_qs = User.objects.filter(is_active=True).exclude(id=request.user.id)
+                if destinatario_tipo in ['Estudiantes', 'Aprendices']:
+                    dest_users_qs = dest_users_qs.filter(perfil__rol__nombre__icontains='Estudiante')
+                elif destinatario_tipo in ['Docentes', 'Profesores', 'Instructores']:
+                    dest_users_qs = dest_users_qs.filter(perfil__rol__nombre__icontains='Docente')
+                elif destinatario_tipo in ['Familias', 'Acudientes']:
+                    dest_users_qs = dest_users_qs.filter(perfil__rol__nombre__icontains='Familia')
+                
+                notificar_usuarios_masivo(
+                    usuarios=list(dest_users_qs[:100]),
+                    titulo=f"Comunicado Oficial: {asunto}",
+                    mensaje=f"Comunicado emitido por {request.user.get_full_name() or request.user.username}:\n\n{contenido[:350]}",
+                    enlace="/comunicaciones/",
+                    tipo='warning' if urgente else 'info',
+                    enviar_email=True
+                )
+            except Exception:
+                pass
+
             RegistroAuditoria.objects.create(
                 usuario=request.user,
                 accion=f"Emitió comunicado escolar: {asunto[:50]}",
@@ -5208,6 +5198,15 @@ def instructor_dashboard(request):
             archivo_a = request.FILES.get('archivo')
             c_obj = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first() or cargas.first()
             if titulo_a and c_obj:
+                # Detectar tipo de material automáticamente según extensión
+                tipo_mat = 'DOCUMENTO'
+                if archivo_a:
+                    ext = archivo_a.name.lower().split('.')[-1]
+                    if ext == 'pdf': tipo_mat = 'PDF'
+                    elif ext in ['doc', 'docx']: tipo_mat = 'WORD'
+                    elif ext in ['ppt', 'pptx']: tipo_mat = 'POWERPOINT'
+                    elif ext in ['png', 'jpg', 'jpeg', 'webp']: tipo_mat = 'IMAGEN'
+
                 GuiaClase.objects.create(
                     carga_academica=c_obj,
                     profesor=request.user,
@@ -5217,14 +5216,38 @@ def instructor_dashboard(request):
                     archivo=archivo_a,
                     estado='ACTIVO'
                 )
-                if archivo_a:
-                    MaterialClase.objects.create(
-                        carga_academica=c_obj,
-                        titulo=titulo_a,
-                        descripcion=instrucciones_a,
-                        archivo=archivo_a
-                    )
-                messages.success(request, f'Material de apoyo "{titulo_a}" publicado exitosamente para Grado {c_obj.grado}°{c_obj.seccion}.')
+                MaterialClase.objects.create(
+                    carga_academica=c_obj,
+                    profesor=request.user,
+                    titulo=titulo_a,
+                    descripcion=instrucciones_a,
+                    tipo_material=tipo_mat,
+                    archivo=archivo_a,
+                    recursos_complementarios=instrucciones_a
+                )
+
+                # Notificación automática interna y por correo electrónico SMTP
+                from seguimiento.servicios_notificacion import notificar_usuarios_masivo
+                g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
+                sec_val = str(c_obj.seccion or '').strip()
+                if sec_val:
+                    mats = Matricula.objects.filter(grado_escolar=g_num, seccion__iexact=sec_val, estado_formacion='En Formacion').select_related('aprendiz')
+                else:
+                    mats = Matricula.objects.filter(grado_escolar=g_num, estado_formacion='En Formacion').select_related('aprendiz')
+                target_users = [m.aprendiz for m in mats if m.aprendiz]
+
+                nombre_mat = c_obj.programa.denominacion if c_obj.programa else 'la asignatura'
+                notificar_usuarios_masivo(
+                    usuarios=target_users,
+                    titulo=f"Nuevo Material de Apoyo: {titulo_a}",
+                    mensaje=f"El docente {request.user.get_full_name() or request.user.username} ha publicado el material de apoyo '{titulo_a}' para {nombre_mat} (Grado {c_obj.grado}°{c_obj.seccion}). Puedes consultarlo y descargarlo desde tu panel de estudiante.",
+                    enlace="/estudiante/?subpanel=temas",
+                    tipo='info',
+                    enviar_email=True,
+                    notificar_acudientes=True
+                )
+
+                messages.success(request, f'Material de apoyo "{titulo_a}" publicado y notificado exitosamente a los estudiantes del Grado {c_obj.grado}°{c_obj.seccion}.')
             else:
                 messages.error(request, 'El título y la asignatura son obligatorios para publicar material de apoyo.')
             return redirect(f"{reverse('instructor_dashboard')}?subpanel=documentos&tab=apoyo")
@@ -5335,16 +5358,19 @@ def instructor_dashboard(request):
                     if estado_creacion != 'Borrador':
                         nom_mat = c_obj.programa.denominacion if c_obj.programa else 'Matemáticas'
                         link_notif = reverse('entregar_tarea_clase', kwargs={'pk': tarea.id})
+                        from seguimiento.servicios_notificacion import notificar_usuarios_masivo
                         if estudiante_target_id:
                             target_u = User.objects.filter(id=estudiante_target_id).first()
                             if target_u:
                                 EntregaTarea.objects.get_or_create(tarea=tarea, estudiante=target_u, defaults={'estado': 'PENDIENTE'})
-                                Notificacion.objects.create(
-                                    usuario=target_u,
+                                notificar_usuarios_masivo(
+                                    usuarios=[target_u],
                                     titulo=f"Nueva Actividad: {titulo[:120]}",
                                     mensaje=f"El docente {request.user.get_full_name() or request.user.username} te asignó la actividad '{titulo}' para {nom_mat}.",
                                     enlace=link_notif,
-                                    tipo='info'
+                                    tipo='info',
+                                    enviar_email=True,
+                                    notificar_acudientes=True
                                 )
                         else:
                             g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
@@ -5353,18 +5379,19 @@ def instructor_dashboard(request):
                                 mats = Matricula.objects.filter(grado_escolar=g_num, seccion__iexact=sec_val, estado_formacion='En Formacion').select_related('aprendiz')
                             else:
                                 mats = Matricula.objects.filter(grado_escolar=g_num, estado_formacion='En Formacion').select_related('aprendiz')
-                            for m in mats:
-                                if m.aprendiz:
-                                    EntregaTarea.objects.get_or_create(tarea=tarea, estudiante=m.aprendiz, defaults={'estado': 'PENDIENTE'})
-                                    Notificacion.objects.create(
-                                        usuario=m.aprendiz,
-                                        titulo=f"Nueva Actividad: {titulo[:120]}",
-                                        mensaje=f"El docente {request.user.get_full_name() or request.user.username} publicó una actividad para {nom_mat} ({c_obj.grado}°{c_obj.seccion}).",
-                                        enlace=link_notif,
-                                        tipo='info'
-                                    )
-                                    from django.core.cache import cache
-                                    cache.delete(f'edunova_notif_u_{m.aprendiz.pk}')
+                            target_list = [m.aprendiz for m in mats if m.aprendiz]
+                            for u in target_list:
+                                EntregaTarea.objects.get_or_create(tarea=tarea, estudiante=u, defaults={'estado': 'PENDIENTE'})
+                            
+                            notificar_usuarios_masivo(
+                                usuarios=target_list,
+                                titulo=f"Nueva Actividad: {titulo[:120]}",
+                                mensaje=f"El docente {request.user.get_full_name() or request.user.username} publicó una actividad para {nom_mat} ({c_obj.grado}°{c_obj.seccion}).",
+                                enlace=link_notif,
+                                tipo='info',
+                                enviar_email=True,
+                                notificar_acudientes=True
+                            )
                     creadas_count += 1
 
             if creadas_count > 0:
@@ -5638,15 +5665,17 @@ def instructor_dashboard(request):
                         }
                     )
 
-            # Notificación al estudiante con su nota
+            # Notificación al estudiante con su nota y correo electrónico automático
             tipo_notif = 'success' if estado_calif == 'CALIFICADA' else 'warning'
-            msg_notif = f"Tu entrega fue calificada con {entrega.calificacion}/{tarea_obj.puntaje_maximo}." if estado_calif == 'CALIFICADA' else "Tu entrega fue devuelta para correcciones."
-            Notificacion.objects.create(
+            msg_notif = f"Tu entrega en '{tarea_obj.titulo}' fue calificada con {entrega.calificacion}/{tarea_obj.puntaje_maximo}." if estado_calif == 'CALIFICADA' else "Tu entrega fue devuelta para correcciones."
+            from seguimiento.servicios_notificacion import enviar_notificacion_automatica
+            enviar_notificacion_automatica(
                 usuario=estudiante,
-                titulo=f"{'Calificación' if estado_calif == 'CALIFICADA' else 'Devolución'}: {tarea_obj.titulo[:100]}",
-                mensaje=f"{msg_notif} {retro_val}",
+                titulo=f"{'Calificación Asignada' if estado_calif == 'CALIFICADA' else 'Devolución de Actividad'}: {tarea_obj.titulo[:80]}",
+                mensaje=f"{msg_notif}\n\nRetroalimentación del docente: {retro_val or 'Sin observaciones adicionales.'}",
                 enlace="/estudiante/?subpanel=actividades",
-                tipo=tipo_notif
+                tipo=tipo_notif,
+                enviar_email=True
             )
             messages.success(request, f'Entrega de {estudiante.get_full_name()} {"calificada exitosamente" if estado_calif == "CALIFICADA" else "devuelta para corrección"}.')
             return redirect(f"{reverse('temas_actividades')}?tarea_id={tarea_obj.id}")
@@ -5961,12 +5990,14 @@ def instructor_dashboard(request):
                             )
                         if m.aprendiz:
                             asig_nom = c_obj.programa.denominacion if (c_obj and c_obj.programa) else 'Asignatura'
-                            Notificacion.objects.create(
+                            from seguimiento.servicios_notificacion import enviar_notificacion_automatica
+                            enviar_notificacion_automatica(
                                 usuario=m.aprendiz,
                                 titulo=f"Calificación Registrada: {asig_nom} ({periodo_n})",
-                                mensaje=f"Tu docente {request.user.get_full_name() or request.user.username} ha registrado tu calificación de {nota_num}/5.0 en {asig_nom} ({periodo_n}).",
+                                mensaje=f"Tu docente {request.user.get_full_name() or request.user.username} ha registrado tu calificación de {nota_num}/5.0 (Desempeño {desemp_v}) en {asig_nom} ({periodo_n}). Observación: {obs_v or 'Registro oficial en planilla.'}",
                                 enlace="/estudiante/?subpanel=calificaciones",
-                                tipo='success' if nota_num >= 3.0 else 'warning'
+                                tipo='success' if nota_num >= 3.0 else 'warning',
+                                enviar_email=True
                             )
                         guardadas_n += 1
                 messages.success(request, f"Planilla de calificaciones del {periodo_n} guardada correctamente ({guardadas_n} alumnos calificados).")
@@ -6156,14 +6187,16 @@ def instructor_dashboard(request):
                             asunto=f"{prefijo} {asunto_c}",
                             mensaje=mensaje_c
                         )
-                        Notificacion.objects.create(
+                        from seguimiento.servicios_notificacion import enviar_notificacion_automatica
+                        enviar_notificacion_automatica(
                             usuario=est_u,
-                            titulo=f"{prefijo} Prof. {request.user.get_full_name() or request.user.username}",
-                            mensaje=asunto_c,
-                            enlace="/aprendiz/",
-                            tipo='info'
+                            titulo=f"{prefijo} Prof. {request.user.get_full_name() or request.user.username}: {asunto_c[:80]}",
+                            mensaje=mensaje_c,
+                            enlace="/estudiante/?subpanel=comunicaciones",
+                            tipo='info',
+                            enviar_email=True
                         )
-                        messages.success(request, f'{"Correo electrónico" if es_correo else "Mensaje"} enviado exitosamente a {est_u.get_full_name()}.')
+                        messages.success(request, f'{"Correo electrónico" if es_correo else "Mensaje"} enviado y notificado exitosamente a {est_u.get_full_name()}.')
                 else:
                     c_obj = CargaAcademica.objects.filter(id=carga_id, profesor=request.user).first() or cargas.first()
                     if c_obj:
@@ -6177,14 +6210,17 @@ def instructor_dashboard(request):
                             asunto=f"{prefijo} [{nom_materia} - Grado {c_obj.grado}°{c_obj.seccion}] {asunto_c}",
                             mensaje=mensaje_c
                         )
-                        for m in mats:
-                            Notificacion.objects.create(
-                                usuario=m.aprendiz,
-                                titulo=f"{prefijo} {asunto_c[:100]}",
-                                mensaje=mensaje_c[:250],
-                                enlace="/aprendiz/",
-                                tipo='info'
-                            )
+                        from seguimiento.servicios_notificacion import notificar_usuarios_masivo
+                        target_list = [m.aprendiz for m in mats if m.aprendiz]
+                        notificar_usuarios_masivo(
+                            usuarios=target_list,
+                            titulo=f"{prefijo} {asunto_c[:100]}",
+                            mensaje=f"[{nom_materia} - Grado {c_obj.grado}°{c_obj.seccion}]\n\n{mensaje_c}",
+                            enlace="/estudiante/?subpanel=comunicaciones",
+                            tipo='info',
+                            enviar_email=True,
+                            notificar_acudientes=True
+                        )
                         messages.success(request, f'{"Correo institucional" if es_correo else "Comunicado"} enviado y notificado a los {mats.count()} estudiantes del Grado {c_obj.grado}°{c_obj.seccion}.')
             return redirect(f"{reverse('instructor_dashboard')}?subpanel=comunicaciones")
 
@@ -6204,12 +6240,14 @@ def instructor_dashboard(request):
                     asunto=f"{prefijo} Prof. {request.user.get_full_name() or request.user.username}",
                     mensaje=mensaje_texto
                 )
-                Notificacion.objects.create(
+                from seguimiento.servicios_notificacion import enviar_notificacion_automatica
+                enviar_notificacion_automatica(
                     usuario=dest_user,
-                    titulo=f"Nuevo mensaje de Prof. {request.user.get_full_name() or request.user.username}",
-                    mensaje=mensaje_texto[:200],
-                    enlace="/aprendiz/" if dest_tipo == 'estudiante' else "/familia/",
-                    tipo='info'
+                    titulo=f"Mensaje de Prof. {request.user.get_full_name() or request.user.username}",
+                    mensaje=mensaje_texto,
+                    enlace="/estudiante/?subpanel=comunicaciones" if dest_tipo == 'estudiante' else "/familia/",
+                    tipo='info',
+                    enviar_email=True
                 )
                 messages.success(request, f"Mensaje enviado exitosamente a {dest_user.get_full_name() or dest_user.username}.")
                 if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -6454,13 +6492,60 @@ def instructor_dashboard(request):
                 full_desc = f"[{tipo_rec}] {desc_g}" if tipo_rec else desc_g
                 if enlace_g:
                     full_desc += f"\nEnlace de consulta: {enlace_g}"
+                
+                # Detectar tipo de material
+                tipo_mat = 'DOCUMENTO'
+                if archivo_g:
+                    ext = archivo_g.name.lower().split('.')[-1]
+                    if ext == 'pdf': tipo_mat = 'PDF'
+                    elif ext in ['doc', 'docx']: tipo_mat = 'WORD'
+                    elif ext in ['ppt', 'pptx']: tipo_mat = 'POWERPOINT'
+                    elif ext in ['png', 'jpg', 'jpeg', 'webp']: tipo_mat = 'IMAGEN'
+                elif enlace_g:
+                    tipo_mat = 'ENLACE'
+
                 GuiaClase.objects.create(
                     carga_academica=c_obj,
+                    profesor=request.user,
+                    tipo_documento='MATERIAL_APOYO',
                     titulo=titulo_g,
                     instrucciones=full_desc or 'Recurso pedagógico orientador para estudiantes.',
-                    archivo=archivo_g
+                    archivo=archivo_g,
+                    estado='ACTIVO'
                 )
-                messages.success(request, f'Recurso pedagógico "{titulo_g}" agregado exitosamente a tu biblioteca.')
+                MaterialClase.objects.create(
+                    carga_academica=c_obj,
+                    profesor=request.user,
+                    titulo=titulo_g,
+                    descripcion=full_desc,
+                    tipo_material=tipo_mat,
+                    archivo=archivo_g,
+                    enlace=enlace_g,
+                    recursos_complementarios=desc_g
+                )
+
+                # Notificación automática a estudiantes y acudientes
+                from seguimiento.servicios_notificacion import notificar_usuarios_masivo
+                g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit())
+                sec_val = str(c_obj.seccion or '').strip()
+                if sec_val:
+                    mats = Matricula.objects.filter(grado_escolar=g_num, seccion__iexact=sec_val, estado_formacion='En Formacion').select_related('aprendiz')
+                else:
+                    mats = Matricula.objects.filter(grado_escolar=g_num, estado_formacion='En Formacion').select_related('aprendiz')
+                target_users = [m.aprendiz for m in mats if m.aprendiz]
+
+                nombre_mat = c_obj.programa.denominacion if c_obj.programa else 'la asignatura'
+                notificar_usuarios_masivo(
+                    usuarios=target_users,
+                    titulo=f"Nuevo Recurso / Material de Apoyo: {titulo_g}",
+                    mensaje=f"El docente {request.user.get_full_name() or request.user.username} publicó '{titulo_g}' en {nombre_mat} (Grado {c_obj.grado}°{c_obj.seccion}). Puedes consultarlo en tu portal de estudiante.",
+                    enlace="/estudiante/?subpanel=temas",
+                    tipo='info',
+                    enviar_email=True,
+                    notificar_acudientes=True
+                )
+
+                messages.success(request, f'Recurso pedagógico "{titulo_g}" agregado y notificado exitosamente a tu grupo escolar.')
             else:
                 messages.error(request, 'El título y la asignatura son obligatorios para registrar un recurso.')
             return redirect(f"{reverse('instructor_dashboard')}?subpanel=recursos")
@@ -8163,12 +8248,14 @@ def aprendiz_dashboard(request, subpanel_directo=None):
                     mensaje=mensaje_texto
                 )
                 nom_est = request.user.get_full_name() or request.user.username
-                Notificacion.objects.create(
+                from seguimiento.servicios_notificacion import enviar_notificacion_automatica
+                enviar_notificacion_automatica(
                     usuario=docente,
-                    titulo=f"Mensaje de {nom_est}",
-                    mensaje=mensaje_texto[:200],
+                    titulo=f"Nuevo Mensaje de Estudiante: {nom_est}",
+                    mensaje=f"Asunto: {asunto}\n\nMensaje:\n{mensaje_texto}",
                     enlace=f"/instructor/?subpanel=comunicaciones&chat_user={request.user.id}&chat_tipo=estudiante",
-                    tipo='info'
+                    tipo='info',
+                    enviar_email=True
                 )
                 messages.success(request, f'Mensaje enviado exitosamente al profesor {docente.get_full_name() or docente.username}.')
             return redirect('/estudiante/?subpanel=comunicaciones')
@@ -12600,10 +12687,22 @@ def entregar_tarea_clase(request, pk):
     from django.utils import timezone
     from django.urls import reverse
     from academico.models import TareaClase, EntregaTarea
-    from seguimiento.models import Notificacion
+    from seguimiento.servicios_notificacion import enviar_notificacion_automatica
+
     tarea = get_object_or_404(TareaClase, pk=pk)
-    mi_entrega = EntregaTarea.objects.filter(tarea=tarea, estudiante=request.user).first()
+    mi_entrega, _ = EntregaTarea.objects.get_or_create(
+        tarea=tarea,
+        estudiante=request.user,
+        defaults={'estado': 'PENDIENTE'}
+    )
     
+    # Evidencia técnica: registrar la fecha exacta de apertura/visualización
+    if not mi_entrega.fecha_visualizacion:
+        mi_entrega.fecha_visualizacion = timezone.now()
+        if mi_entrega.estado == 'PENDIENTE':
+            mi_entrega.estado = 'EN_CURSO'
+        mi_entrega.save(update_fields=['fecha_visualizacion', 'estado'])
+
     es_vencida = False
     if tarea.fecha_limite and timezone.now() > tarea.fecha_limite:
         es_vencida = True
@@ -12613,36 +12712,128 @@ def entregar_tarea_clase(request, pk):
             messages.error(request, 'La fecha y hora límite de entrega para esta actividad ha vencido. La entrega se encuentra cerrada.')
             return redirect('entregar_tarea_clase', pk=pk)
 
+        # 1. Caso de Actividad Digital Interactiva (Cuestionario / Ejercicios en línea)
+        if tarea.es_interactiva and tarea.preguntas_config:
+            preguntas = tarea.preguntas_config or []
+            detalles_evaluacion = []
+            puntos_totales_obtenidos = 0.0
+            tiene_ejercicios_manuales = False
+
+            for p in preguntas:
+                p_id = str(p.get('id'))
+                tipo_p = p.get('tipo', 'opcion_multiple')
+                puntos_max = float(p.get('puntos') or 1.0)
+                resp_est = request.POST.get(f'respuesta_q_{p_id}', '').strip()
+
+                es_correcta = False
+                puntos_p = 0.0
+
+                if tipo_p in ['opcion_multiple', 'verdadero_falso']:
+                    resp_corr = str(p.get('respuesta_correcta', '')).strip()
+                    es_correcta = (resp_est.lower() == resp_corr.lower())
+                    if es_correcta:
+                        puntos_p = puntos_max
+                elif tipo_p == 'respuesta_corta':
+                    aceptadas = [a.strip().lower() for a in str(p.get('respuestas_aceptadas', '')).split(',') if a.strip()]
+                    if not aceptadas and p.get('respuesta_correcta'):
+                        aceptadas = [str(p.get('respuesta_correcta')).strip().lower()]
+                    es_correcta = (resp_est.lower() in aceptadas)
+                    if es_correcta:
+                        puntos_p = puntos_max
+                elif tipo_p == 'ejercicio':
+                    tiene_ejercicios_manuales = True
+                    es_correcta = None  # Evaluación por el docente
+                    puntos_p = 0.0
+
+                puntos_totales_obtenidos += puntos_p
+                detalles_evaluacion.append({
+                    'id': p.get('id'),
+                    'tipo': tipo_p,
+                    'enunciado': p.get('enunciado'),
+                    'respuesta_estudiante': resp_est,
+                    'respuesta_correcta': p.get('respuesta_correcta'),
+                    'es_correcta': es_correcta,
+                    'puntos_asignados': puntos_p,
+                    'puntos_maximos': puntos_max,
+                    'explicacion': p.get('explicacion', '')
+                })
+
+            # Normalizar calificación final (escala 0.0 a 5.0)
+            calif_final = min(5.0, round(puntos_totales_obtenidos, 2))
+            mi_entrega.respuestas_interactivas = {
+                'preguntas': detalles_evaluacion,
+                'puntaje_autocalificado': round(puntos_totales_obtenidos, 2),
+                'requiere_revision': tiene_ejercicios_manuales
+            }
+            mi_entrega.puntaje_obtenido = calif_final
+            mi_entrega.calificacion = calif_final
+            mi_entrega.fecha_completado = timezone.now()
+            mi_entrega.estado = 'ENTREGADA'
+            mi_entrega.intentos_realizados = (mi_entrega.intentos_realizados or 0) + 1
+            mi_entrega.respuesta = f"Actividad interactiva completada ({len(detalles_evaluacion)} preguntas respondidas)."
+            mi_entrega.save()
+
+            # Sincronización oficial con módulo CalificacionEscolar si aplica
+            if tarea.es_calificada and tarea.carga_academica:
+                try:
+                    from academico.models import CalificacionEscolar, Matricula
+                    mat_obj = Matricula.objects.filter(aprendiz=request.user).first()
+                    if mat_obj:
+                        CalificacionEscolar.objects.update_or_create(
+                            matricula=mat_obj,
+                            carga_academica=tarea.carga_academica,
+                            periodo=tarea.periodo or 'Periodo 1',
+                            defaults={
+                                'nota': float(calif_final),
+                                'profesor': tarea.carga_academica.profesor,
+                                'observaciones': f"Evaluación interactiva '{tarea.titulo[:60]}' (Auto-calificada: {calif_final}/5.0)"
+                            }
+                        )
+                except Exception:
+                    pass
+
+            # Notificar al profesor de la entrega interactiva
+            if tarea.carga_academica and tarea.carga_academica.profesor:
+                enviar_notificacion_automatica(
+                    usuario=tarea.carga_academica.profesor,
+                    titulo=f"Actividad Interactiva: {request.user.get_full_name() or request.user.username}",
+                    mensaje=f"El estudiante completó la actividad interactiva '{tarea.titulo}' ({tarea.carga_academica.grado}°{tarea.carga_academica.seccion}). Puntaje obtenido: {calif_final}/5.0.",
+                    enlace=reverse('revisar_entregas_tarea', kwargs={'tarea_id': tarea.id}),
+                    tipo='success',
+                    enviar_email=True
+                )
+
+            messages.success(request, f'¡Actividad interactiva completada y enviada exitosamente! Tu puntaje obtenido es: {calif_final}/5.0.')
+            return redirect(f"{reverse('aprendiz_dashboard')}?subpanel=actividades")
+
+        # 2. Caso Tradicional (Desarrollo libre en texto y/o archivo adjunto)
         archivo = request.FILES.get('archivo')
-        defaults = {
-            'respuesta': request.POST.get('respuesta', ''),
-            'estado': 'ENTREGADA'
-        }
+        mi_entrega.respuesta = request.POST.get('respuesta', '')
         if archivo:
-            defaults['archivo'] = archivo
-            
-        entrega, _ = EntregaTarea.objects.update_or_create(
-            tarea=tarea,
-            estudiante=request.user,
-            defaults=defaults
-        )
+            mi_entrega.archivo = archivo
+        mi_entrega.fecha_completado = timezone.now()
+        mi_entrega.estado = 'ENTREGADA'
+        mi_entrega.save()
 
         # Notificar al profesor
         if tarea.carga_academica and tarea.carga_academica.profesor:
-            Notificacion.objects.create(
+            enviar_notificacion_automatica(
                 usuario=tarea.carga_academica.profesor,
                 titulo=f"Nueva Entrega: {request.user.get_full_name() or request.user.username}",
                 mensaje=f"El estudiante entregó la actividad '{tarea.titulo}' ({tarea.carga_academica.grado}°{tarea.carga_academica.seccion}).",
-                enlace=f"{reverse('instructor_dashboard')}?subpanel=actividades",
-                tipo='info'
+                enlace=reverse('revisar_entregas_tarea', kwargs={'tarea_id': tarea.id}),
+                tipo='info',
+                enviar_email=True
             )
 
         messages.success(request, f'¡Tu entrega para "{tarea.titulo}" fue enviada exitosamente al profesor!')
         return redirect(f"{reverse('aprendiz_dashboard')}?subpanel=actividades")
+
     return render(request, 'usuarios/entregar_tarea.html', {
         'tarea': tarea,
         'mi_entrega': mi_entrega,
-        'es_vencida': es_vencida
+        'es_vencida': es_vencida,
+        'preguntas_config': tarea.preguntas_config if tarea.es_interactiva else None
     })
 
 @login_required
@@ -12651,7 +12842,7 @@ def revisar_entregas_tarea(request, tarea_id):
     from django.shortcuts import get_object_or_404, redirect
     from django.contrib import messages
     from academico.models import TareaClase, EntregaTarea, Matricula
-    from seguimiento.models import Notificacion
+    from seguimiento.servicios_notificacion import enviar_notificacion_automatica
     tarea = get_object_or_404(TareaClase, pk=tarea_id)
     
     if request.method == 'POST':
@@ -12686,20 +12877,22 @@ def revisar_entregas_tarea(request, tarea_id):
         except Exception:
             pass
 
-        # Notificar al estudiante
-        Notificacion.objects.create(
+        # Notificar al estudiante y a su acudiente con correo SMTP
+        msg_calif = f"Tu entrega en '{tarea.titulo}' fue calificada con {entrega.calificacion}/5.0.\nRetroalimentación del docente: {retro or 'Buen trabajo.'}"
+        enviar_notificacion_automatica(
             usuario=entrega.estudiante,
-            titulo=f"Tarea Calificada: {tarea.titulo}",
-            mensaje=f"Tu entrega fue calificada con {entrega.calificacion}/5.0. {retro}",
-            enlace="/aprendiz/",
-            tipo='success'
+            titulo=f"Calificación Asignada: {tarea.titulo}",
+            mensaje=msg_calif,
+            enlace="/estudiante/?subpanel=actividades",
+            tipo='success',
+            enviar_email=True
         )
 
-        messages.success(request, f'Calificación guardada para {entrega.estudiante.get_full_name()}')
+        messages.success(request, f'Calificación guardada y notificada a {entrega.estudiante.get_full_name()}')
         return redirect('revisar_entregas_tarea', tarea_id=tarea.id)
         
     entregas = tarea.entregas.select_related('estudiante').order_by('-fecha_entrega')
-    entregados_ids = list(entregas.values_list('estudiante_id', flat=True))
+    entregados_ids = list(entregas.filter(estado__in=['ENTREGADA', 'ENTREGADA_TARDE', 'CALIFICADA']).values_list('estudiante_id', flat=True))
     
     grado_num = ''.join(c for c in str(tarea.carga_academica.grado) if c.isdigit())
     matriculados = Matricula.objects.filter(
@@ -12708,14 +12901,33 @@ def revisar_entregas_tarea(request, tarea_id):
         estado_formacion='En Formacion'
     ).select_related('aprendiz', 'aprendiz__perfil').order_by('aprendiz__last_name', 'aprendiz__first_name')
     
-    estudiantes_pendientes = [m for m in matriculados if m.aprendiz_id not in entregados_ids]
+    # Mapeo de entregas por estudiante para trazabilidad de quién abrió la actividad
+    entregas_dict = {e.estudiante_id: e for e in entregas}
+    estudiantes_pendientes = []
+    total_abiertas_sin_entregar = 0
+    for m in matriculados:
+        if m.aprendiz_id not in entregados_ids:
+            ent = entregas_dict.get(m.aprendiz_id)
+            abrio = bool(ent and ent.fecha_visualizacion)
+            if abrio:
+                total_abiertas_sin_entregar += 1
+            estudiantes_pendientes.append({
+                'matricula': m,
+                'aprendiz': m.aprendiz,
+                'ha_abierto': abrio,
+                'fecha_visualizacion': ent.fecha_visualizacion if ent else None,
+                'estado': ent.estado if ent else 'PENDIENTE'
+            })
     
     return render(request, 'academico/revisar_entregas_tarea.html', {
         'tarea': tarea,
         'entregas': entregas,
+        'entregas_pendientes_calificar': [e for e in entregas if e.estado in ['ENTREGADA', 'ENTREGADA_TARDE']],
+        'entregas_calificadas': [e for e in entregas if e.estado == 'CALIFICADA'],
         'estudiantes_pendientes': estudiantes_pendientes,
         'total_matriculados': matriculados.count(),
         'total_entregados': len(entregados_ids),
+        'total_abiertas_sin_entregar': total_abiertas_sin_entregar,
     })
 
 @login_required
@@ -12871,7 +13083,7 @@ def confirmar_recuperacion(request, uidb64, token):
 
         user.set_password(nueva_clave)
         user.save()
-        messages.success(request, '¡Contraseña restablecida exitosamente! Ya puedes iniciar sesión con tu nueva clave.')
+        messages.success(request, 'Tu contraseña ha sido actualizada correctamente. Ya puedes iniciar sesión.')
         return redirect('login_short')
 
     if token_invalido:

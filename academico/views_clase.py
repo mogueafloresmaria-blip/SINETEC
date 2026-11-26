@@ -314,30 +314,48 @@ def crear_actividad_digital(request):
         if not c_obj:
             c_obj = cargas.first()
 
+        import json
+        es_interactiva = request.POST.get('es_interactiva') in ['1', 'true', 'True', 'on']
+        recursos_comp = request.POST.get('recursos_complementarios', '').strip()
+        preguntas_json = request.POST.get('preguntas_json', '').strip()
+        preguntas_config = None
+        if preguntas_json:
+            try:
+                preguntas_config = json.loads(preguntas_json)
+                if preguntas_config:
+                    es_interactiva = True
+            except Exception:
+                preguntas_config = None
+
         if c_obj:
             tarea = TareaClase.objects.create(
                 carga_academica=c_obj,
                 titulo=titulo,
                 instrucciones=instrucciones,
-                tipo_actividad=evidencia if evidencia else 'Tarea',
+                tipo_actividad=evidencia if evidencia else ('Evaluación Interactiva' if es_interactiva else 'Tarea'),
                 resultado_aprendizaje=rap,
                 fecha_limite=dt_obj,
                 puntaje_maximo=float(puntaje_maximo or 5.0),
                 porcentaje=float(porcentaje or 20.0),
                 archivo=archivo or (guia.archivo if guia and guia.archivo else None),
-                estado='Publicada'
+                estado='Publicada',
+                es_interactiva=es_interactiva,
+                preguntas_config=preguntas_config,
+                destinatario_tipo=destinatario_tipo,
+                recursos_complementarios=recursos_comp
             )
 
             # Notificar y crear entregas pendientes para los estudiantes del grado y curso correspondiente
-            from seguimiento.models import Notificacion
             from django.urls import reverse
-            from usuarios.models import FamiliaAcudiente
+            from seguimiento.servicios_notificacion import notificar_usuarios_masivo
             
             g_num = ''.join(ch for ch in str(c_obj.grado) if ch.isdigit()) or str(c_obj.grado).strip()
             sec_val = str(c_obj.seccion or '').strip()
 
             if destinatario_tipo == 'individual' and estudiante_id:
                 target_users = list(User.objects.filter(id=estudiante_id))
+                if target_users:
+                    tarea.estudiantes_especificos.set(target_users)
             else:
                 mats = [
                     m for m in matriculas_qs 
@@ -354,35 +372,28 @@ def crear_actividad_digital(request):
                     estudiante=u,
                     defaults={'estado': 'PENDIENTE'}
                 )
-                Notificacion.objects.create(
-                    usuario=u,
-                    titulo=f"Nueva Actividad: {tarea.titulo}",
-                    mensaje=f"Tienes una nueva actividad en {c_obj.programa.denominacion if c_obj.programa else 'Clase'} (Fecha límite: {dt_obj.strftime('%d/%m/%Y %H:%M') if dt_obj else 'Sin límite'}).",
-                    enlace=reverse('entregar_tarea_clase', kwargs={'pk': tarea.id}),
-                    tipo='info'
-                )
 
-            # Notificar también a los acudientes de los estudiantes vinculados
-            try:
-                for u in target_users:
-                    doc_u = getattr(getattr(u, 'perfil', None), 'numero_documento', None) or u.username
-                    familias = FamiliaAcudiente.objects.filter(
-                        Q(estudiantes=u) | Q(documento=doc_u) | Q(email__iexact=u.email)
-                    ).distinct()
-                    for fam in familias:
-                        fam_user = User.objects.filter(Q(username=fam.documento) | Q(email__iexact=fam.email)).first()
-                        if fam_user:
-                            Notificacion.objects.create(
-                                usuario=fam_user,
-                                titulo=f"Nueva Actividad Asignada: {tarea.titulo}",
-                                mensaje=f"Se ha asignado la actividad '{tarea.titulo}' a tu acudido(a) {u.get_full_name() or u.username} en {c_obj.programa.denominacion if c_obj.programa else 'Clase'}.",
-                                enlace=reverse('entregar_tarea_clase', kwargs={'pk': tarea.id}),
-                                tipo='info'
-                            )
-            except Exception:
-                pass
+            # Envío automático de notificaciones internas y correo electrónico SMTP
+            nombre_mat = c_obj.programa.denominacion if c_obj.programa else 'Clase'
+            tipo_desc = "actividad digital interactiva" if es_interactiva else "actividad escolar"
+            msg_notif = (
+                f"El docente {request.user.get_full_name() or request.user.username} ha asignado la {tipo_desc} '{tarea.titulo}' "
+                f"en la asignatura {nombre_mat}.\n"
+                f"Fecha límite de entrega: {dt_obj.strftime('%d/%m/%Y %H:%M') if dt_obj else 'Sin fecha límite establecida'}."
+            )
+            link_act = reverse('entregar_tarea_clase', kwargs={'pk': tarea.id})
+            notificar_usuarios_masivo(
+                usuarios=target_users,
+                titulo=f"Nueva Actividad Asignada: {tarea.titulo}",
+                mensaje=msg_notif,
+                enlace=link_act,
+                tipo='info',
+                enviar_email=True,
+                notificar_acudientes=True
+            )
 
-            messages.success(request, f'¡Actividad "{tarea.titulo}" publicada y enviada a los estudiantes con éxito!')
+            tipo_exito = "Actividad Interactiva con Cuestionario" if es_interactiva else "Actividad pedagógica"
+            messages.success(request, f'¡{tipo_exito} "{tarea.titulo}" publicada y notificada a los estudiantes con éxito!')
             return redirect(f"{reverse('actividades_tareas')}?tarea_id={tarea.id}")
         else:
             messages.error(request, 'No se pudo asociar la actividad a ninguna carga académica docente.')
@@ -537,7 +548,7 @@ def comunicaciones(request):
             ultimo_msg = msg
             total_enviados += 1
 
-            # Notificación institucional en tiempo real
+            # Notificación institucional en tiempo real y correo automático
             perfil_d = getattr(dest_u, 'perfil', None)
             rol_nom_d = perfil_d.rol.nombre if (perfil_d and perfil_d.rol) else ''
             if any(r in rol_nom_d for r in ['Docente', 'Instructor', 'Profesor']):
@@ -549,14 +560,15 @@ def comunicaciones(request):
             else:
                 enlace_dest = "/comunicaciones/"
 
-            Notificacion.objects.create(
+            from seguimiento.servicios_notificacion import enviar_notificacion_automatica
+            enviar_notificacion_automatica(
                 usuario=dest_u,
                 titulo=f"Mensaje de {request.user.get_full_name() or request.user.username}: {asunto[:60]}",
-                mensaje=f"{mensaje[:150]}",
+                mensaje=f"Asunto: {asunto}\n\n{mensaje}",
                 tipo='info',
-                enlace=enlace_dest
+                enlace=enlace_dest,
+                enviar_email=True
             )
-            total_enviados += 1
 
         if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('is_ajax') == '1':
             return JsonResponse({

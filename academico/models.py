@@ -401,6 +401,7 @@ class Matricula(models.Model):
     )
     fecha_matricula = models.DateField(
         auto_now_add=True,
+        db_index=True,
         verbose_name="Fecha de Matrícula"
     )
     # RN-007: Condición de grado escolar (10° u 11°)
@@ -408,13 +409,15 @@ class Matricula(models.Model):
         max_length=5,
         choices=GRADOS_ESCOLARES,
         default='10',
+        db_index=True,
         verbose_name="Grado Escolar en el Colegio"
     )
-    seccion = models.CharField(max_length=4, default='A', verbose_name="Sección Escolar")
+    seccion = models.CharField(max_length=4, default='A', db_index=True, verbose_name="Sección Escolar")
     estado_formacion = models.CharField(
         max_length=25,
         choices=ESTADOS_APRENDIZ,
         default='En Formacion',
+        db_index=True,
         verbose_name="Estado de la Formación"
     )
     acudiente_nombre = models.CharField(
@@ -436,6 +439,10 @@ class Matricula(models.Model):
         # RN-002: Un aprendiz no puede matricularse dos veces en la misma ficha
         unique_together = ('ficha', 'aprendiz')
         ordering = ['ficha', 'aprendiz__last_name']
+        indexes = [
+            models.Index(fields=['grado_escolar', 'seccion'], name='idx_matr_grado_seccion'),
+            models.Index(fields=['estado_formacion', 'fecha_matricula'], name='idx_matr_estado_fecha'),
+        ]
 
     def __str__(self):
         nombre_aprendiz = self.aprendiz.get_full_name() or self.aprendiz.username
@@ -461,15 +468,15 @@ class HorarioFicha(models.Model):
         ProgramaFormacion, on_delete=models.SET_NULL, related_name='horarios',
         null=True, blank=True, verbose_name="Materia / Curso"
     )
-    dia = models.CharField(max_length=1, choices=DIAS)
+    dia = models.CharField(max_length=1, choices=DIAS, db_index=True)
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
     ambiente = models.CharField(max_length=120, blank=True)
     modalidad = models.CharField(max_length=20, choices=MODALIDADES, default='Presencial')
     tema = models.CharField(max_length=180, blank=True)
     nivel = models.CharField(max_length=20, choices=NIVELES_ESCOLARES, blank=True, default='')
-    grado = models.CharField(max_length=40, blank=True, default='')
-    seccion = models.CharField(max_length=4, blank=True, default='A')
+    grado = models.CharField(max_length=40, blank=True, default='', db_index=True)
+    seccion = models.CharField(max_length=4, blank=True, default='A', db_index=True)
     es_recreo = models.BooleanField(default=False)
     activo = models.BooleanField(default=True)
     color_hex = models.CharField(max_length=7, blank=True, default='#E2E8F0', verbose_name="Color del Bloque")
@@ -478,6 +485,9 @@ class HorarioFicha(models.Model):
         verbose_name = "Horario de Ficha"
         verbose_name_plural = "Horarios de Fichas"
         ordering = ['dia', 'hora_inicio']
+        indexes = [
+            models.Index(fields=['grado', 'seccion', 'dia'], name='idx_horario_grado_sec_dia'),
+        ]
 
     def __str__(self):
         materia = self.nombre_materia
@@ -792,16 +802,43 @@ class SemaforoCompetencia(models.Model):
         return '⚪'
 
 class MaterialClase(models.Model):
+    TIPO_MATERIAL_CHOICES = [
+        ('PDF', 'Documento PDF'),
+        ('WORD', 'Documento Word (.doc, .docx)'),
+        ('POWERPOINT', 'Presentación PowerPoint (.ppt, .pptx)'),
+        ('IMAGEN', 'Imagen / Infografía (.png, .jpg, .webp)'),
+        ('ENLACE', 'Enlace Web / Video Educativo'),
+        ('DOCUMENTO', 'Documento General'),
+    ]
     carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='materiales')
+    profesor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='materiales_subidos', verbose_name="Docente que publicó")
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True, null=True)
+    tipo_material = models.CharField(max_length=50, choices=TIPO_MATERIAL_CHOICES, default='DOCUMENTO', verbose_name="Tipo de Material")
     archivo = models.FileField(upload_to='materiales_clase/%Y/%m/', blank=True, null=True)
     enlace = models.URLField(blank=True, null=True)
+    recursos_complementarios = models.TextField(blank=True, null=True, verbose_name="Recursos e Instrucciones Complementarias")
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         verbose_name = "Material de Clase"
         verbose_name_plural = "Materiales de Clase"
+
+    def __str__(self):
+        return f"{self.titulo} - {self.carga_academica}"
+
+
+class VisualizacionMaterial(models.Model):
+    """Registro de evidencia técnica: quién abrió/consultó el material de apoyo."""
+    material = models.ForeignKey(MaterialClase, on_delete=models.CASCADE, related_name='visualizaciones')
+    estudiante = models.ForeignKey(User, on_delete=models.CASCADE, related_name='materiales_vistos')
+    fecha_visualizacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Consulta")
+
+    class Meta:
+        verbose_name = "Visualización de Material"
+        verbose_name_plural = "Visualizaciones de Materiales"
+        unique_together = ('material', 'estudiante')
+
 
 class TareaClase(models.Model):
     carga_academica = models.ForeignKey(CargaAcademica, on_delete=models.CASCADE, related_name='tareas')
@@ -828,6 +865,16 @@ class TareaClase(models.Model):
     enlace_externo = models.URLField(max_length=500, blank=True, null=True, verbose_name="Enlace de Apoyo")
     periodo = models.CharField(max_length=50, default='Periodo 1', verbose_name="Periodo Académico")
 
+    # Campos de interactividad y personalización
+    es_interactiva = models.BooleanField(default=False, verbose_name="¿Es actividad digital interactiva?")
+    preguntas_config = models.JSONField(blank=True, null=True, verbose_name="Configuración de Preguntas Interactivas")
+    destinatario_tipo = models.CharField(max_length=20, default='todos', choices=[
+        ('todos', 'Todo el grupo'),
+        ('individual', 'Estudiantes específicos')
+    ], verbose_name="Tipo de Destinatario")
+    estudiantes_especificos = models.ManyToManyField(User, blank=True, related_name='tareas_asignadas_directamente', verbose_name="Estudiantes Específicos")
+    recursos_complementarios = models.TextField(blank=True, null=True, verbose_name="Recursos Complementarios")
+
     class Meta:
         verbose_name = "Tarea de Clase"
         verbose_name_plural = "Tareas de Clase"
@@ -836,6 +883,7 @@ class TareaClase(models.Model):
 class EntregaTarea(models.Model):
     ESTADOS_ENTREGA = [
         ('PENDIENTE', 'Pendiente'),
+        ('EN_CURSO', 'En Curso / Iniciada'),
         ('ENTREGADA', 'Entregada'),
         ('ENTREGADA_TARDE', 'Entregada fuera de plazo'),
         ('CALIFICADA', 'Calificada'),
@@ -850,6 +898,13 @@ class EntregaTarea(models.Model):
     calificacion = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
     retroalimentacion = models.TextField(blank=True, null=True)
     estado = models.CharField(max_length=20, choices=ESTADOS_ENTREGA, default='PENDIENTE')
+
+    # Evidencia técnica de trazabilidad: recepción, visualización y desarrollo interactivo
+    fecha_visualizacion = models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Apertura / Visualización")
+    fecha_completado = models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Finalización")
+    respuestas_interactivas = models.JSONField(blank=True, null=True, verbose_name="Respuestas a Preguntas Interactivas")
+    puntaje_obtenido = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, verbose_name="Puntaje Obtenido")
+    intentos_realizados = models.PositiveIntegerField(default=0, verbose_name="Intentos Realizados")
 
     class Meta:
         verbose_name = "Entrega de Tarea"

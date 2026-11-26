@@ -47,13 +47,17 @@
             <button class="btn text-white shadow-sm fw-bold rounded-pill px-3.5 py-2 d-inline-flex align-items-center gap-1.5"
                     style="background-color: var(--color-principal); font-size: 0.86rem;" 
                     data-bs-toggle="modal" data-bs-target="#modalCrearTemaDocente">
-                <i class="bi bi-plus-lg"></i> Nuevo Tema
+                <i class="bi bi-plus-lg"></i> Nuevo Tema / Material
             </button>
             <button class="btn btn-outline-secondary bg-white shadow-sm fw-bold rounded-pill px-3.5 py-2 d-inline-flex align-items-center gap-1.5 text-dark"
                     style="font-size: 0.86rem; border-color: var(--color-acento);" 
                     data-bs-toggle="modal" data-bs-target="#modalCrearActividadDocente">
                 <i class="bi bi-journal-plus"></i> Nueva Actividad
             </button>
+            <a href="{% url 'crear_actividad_digital' %}" class="btn text-white shadow-sm fw-bold rounded-pill px-3.5 py-2 d-inline-flex align-items-center gap-1.5"
+               style="background: linear-gradient(135deg, #007F7B 0%, #004D4A 100%); font-size: 0.86rem;">
+                <i class="bi bi-magic"></i> + Actividad Interactiva
+            </a>
         </div>
     </div>
 
@@ -518,8 +522,9 @@
                         </div>
                     </div>
                     <div>
-                        <label class="form-label small fw-bold text-dark">Adjuntar Guía / Material (PDF, DOCX)</label>
-                        <input type="file" class="form-control rounded-3" name="archivo">
+                        <label class="form-label small fw-bold text-dark">Adjuntar Guía / Material de Apoyo (PDF, Word, PPT, Imágenes)</label>
+                        <input type="file" class="form-control rounded-3" name="archivo" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.webp">
+                        <small class="text-muted" style="font-size: 0.74rem;">Formatos permitidos: PDF, Word (.doc, .docx), PowerPoint (.ppt, .pptx), Imágenes (.png, .jpg, .webp).</small>
                     </div>
                 </div>
                 <div class="modal-footer border-top p-3 bg-light">
@@ -543,6 +548,16 @@
                 {% csrf_token %}
                 <input type="hidden" name="action" value="crear_actividad">
                 <div class="modal-body p-4 space-y-3">
+                    <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between gap-2" style="background: #EBF8F7; border-color: #007F7B !important;">
+                        <div>
+                            <strong class="text-dark small d-block"><i class="bi bi-magic me-1" style="color: #007F7B;"></i> ¿Crear Actividad Digital Interactiva?</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Diseña cuestionarios con preguntas de selección múltiple, V/F, respuesta corta y ejercicios en línea.</small>
+                        </div>
+                        <a href="{% url 'crear_actividad_digital' %}" class="btn btn-sm text-white rounded-pill px-3 py-1 fw-bold text-nowrap" style="background: #007F7B; font-size: 0.78rem;">
+                            Abrir Diseñador &rarr;
+                        </a>
+                    </div>
+
                     <div>
                         <label class="form-label small fw-bold text-dark">Título de la Actividad *</label>
                         <input type="text" class="form-control rounded-3" name="titulo" placeholder="Ej: Taller 1: Resolución de Problemas Lineales" required>
@@ -588,8 +603,9 @@
                         <textarea class="form-control rounded-3" name="instrucciones" rows="3" placeholder="Ingresa los requerimientos y criterios de entrega..." required></textarea>
                     </div>
                     <div>
-                        <label class="form-label small fw-bold text-dark">Adjuntar Archivo de Apoyo</label>
-                        <input type="file" class="form-control rounded-3" name="archivo">
+                        <label class="form-label small fw-bold text-dark">Adjuntar Archivo de Apoyo (PDF, Word, PPT, Imágenes)</label>
+                        <input type="file" class="form-control rounded-3" name="archivo" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.webp">
+                        <small class="text-muted" style="font-size: 0.74rem;">Formatos permitidos: PDF, Word (.doc, .docx), PowerPoint (.ppt, .pptx), Imágenes (.png, .jpg, .webp).</small>
                     </div>
                 </div>
                 <div class="modal-footer border-top p-3 bg-light">

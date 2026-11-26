@@ -31,10 +31,14 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="d-flex gap-3 text-center">
+            <div class="d-flex gap-3 text-center flex-wrap">
                 <div class="bg-white bg-opacity-10 px-3 py-2 rounded-3 border border-white border-opacity-25">
                     <h3 class="fw-bold text-white mb-0">{{ total_entregados }}</h3>
                     <small class="text-white-50">Entregaron</small>
+                </div>
+                <div class="bg-white bg-opacity-10 px-3 py-2 rounded-3 border border-white border-opacity-25">
+                    <h3 class="fw-bold text-info mb-0">{{ total_abiertas_sin_entregar }}</h3>
+                    <small class="text-white-50">Abrieron / En curso</small>
                 </div>
                 <div class="bg-white bg-opacity-10 px-3 py-2 rounded-3 border border-white border-opacity-25">
                     <h3 class="fw-bold text-warning mb-0">{{ estudiantes_pendientes|length }}</h3>
@@ -106,12 +110,48 @@
                                         <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
                                             <div>
                                                 <h5 class="fw-bold text-dark mb-0.5">{{ e.estudiante.get_full_name|default:e.estudiante.username }}</h5>
-                                                <small class="text-muted"><i class="bi bi-clock me-1"></i> Entregado: {{ e.fecha_entrega|date:"d M Y, h:i A" }}</small>
+                                                <small class="text-muted d-block mt-0.5">
+                                                    {% if e.fecha_visualizacion %}<span class="text-info me-2"><i class="bi bi-eye-fill me-1"></i>Abrió: {{ e.fecha_visualizacion|date:"d M Y, h:i A" }}</span>{% endif %}
+                                                    <i class="bi bi-clock me-1"></i>Entregado: {{ e.fecha_entrega|date:"d M Y, h:i A" }}
+                                                </small>
                                             </div>
                                             <span class="badge bg-warning bg-opacity-20 text-dark border border-warning px-3 py-1.5 rounded-pill fw-bold">
                                                 <i class="bi bi-hourglass-split me-1 text-warning"></i> Pendiente de Calificar
                                             </span>
                                         </div>
+
+                                        <!-- Respuestas de Actividad Digital Interactiva si existe -->
+                                        {% if e.respuestas_interactivas and e.respuestas_interactivas.preguntas %}
+                                        <div class="mb-3">
+                                            <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-1 fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#respuestasInteractivasPend{{ e.id }}">
+                                                <i class="bi bi-ui-checks-grid text-primary me-1"></i> Ver Respuestas de Actividad Interactiva (Auto-calificado: {{ e.puntaje_obtenido }}/{{ tarea.puntaje_maximo }})
+                                            </button>
+                                            <div class="collapse mt-2" id="respuestasInteractivasPend{{ e.id }}">
+                                                <div class="p-3 rounded-3 bg-white border">
+                                                    {% for item in e.respuestas_interactivas.preguntas %}
+                                                    <div class="mb-2.5 pb-2 border-bottom">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                                                            <strong class="small text-dark">{{ forloop.counter }}. {{ item.enunciado }}</strong>
+                                                            {% if item.es_correcta == True %}
+                                                            <span class="badge bg-success rounded-pill px-2 py-0.5"><i class="bi bi-check-lg me-1"></i>Correcta (+{{ item.puntos_asignados }})</span>
+                                                            {% elif item.es_correcta == False %}
+                                                            <span class="badge bg-danger rounded-pill px-2 py-0.5"><i class="bi bi-x-lg me-1"></i>Incorrecta (0.0)</span>
+                                                            {% else %}
+                                                            <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5"><i class="bi bi-pencil me-1"></i>Revisión Docente</span>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="small text-secondary">
+                                                            <div><strong>Respuesta del estudiante:</strong> <span class="text-dark">{{ item.respuesta_estudiante|default:"(Sin respuesta)" }}</span></div>
+                                                            {% if item.respuesta_correcta %}
+                                                            <div><strong>Respuesta esperada:</strong> <span class="text-success">{{ item.respuesta_correcta }}</span></div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
 
                                         <!-- Respuesta de texto si existe -->
                                         {% if e.respuesta %}
@@ -310,9 +350,15 @@
                                         <small class="text-muted">{{ m.aprendiz.email }}</small>
                                     </td>
                                     <td class="pe-4 py-2.5 text-end">
-                                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 rounded-pill">
-                                            Pendiente
+                                        {% if m.ha_abierto %}
+                                        <span class="badge bg-info bg-opacity-15 text-primary border border-info rounded-pill px-2.5 py-1" title="El estudiante abrió y visualizó la actividad">
+                                            <i class="bi bi-eye-fill me-1"></i> Abrió: {{ m.fecha_visualizacion|date:"d M, h:i A" }}
                                         </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-muted border rounded-pill px-2.5 py-1" title="Asignada y recibida pero no abierta aún">
+                                            <i class="bi bi-envelope me-1"></i> Recibida (Sin abrir)
+                                        </span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}
